@@ -3,6 +3,7 @@ using System.Linq;
 using Dapper;
 using SalesManagementSystem.Data;
 using SalesManagementSystem.Models.ViewModels;
+using SalesManagementSystem.Repositories.Interfaces;
 
 namespace SalesManagementSystem.Repositories
 {
@@ -10,7 +11,7 @@ namespace SalesManagementSystem.Repositories
     /// Repository duy nhất chứa SQL đọc menu động từ ACL_ManHinh + ACL_Action.
     /// Không có logic nghiệp vụ — chỉ query và map dữ liệu.
     /// </summary>
-    public class MenuRepository
+    public class MenuRepository : IMenuRepository
     {
         private readonly DbConnectionFactory _db;
 

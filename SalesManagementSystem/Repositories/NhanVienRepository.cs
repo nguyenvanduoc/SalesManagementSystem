@@ -4,26 +4,27 @@ using Dapper;
 using SalesManagementSystem.Data;
 using SalesManagementSystem.Models.Entities;
 using System;
+using SalesManagementSystem.Repositories.Interfaces;
 
 namespace SalesManagementSystem.Repositories
 {
-    public class EmployeeRepository
+    public class NhanVienRepository : INhanVienRepository
     {
         private readonly DbConnectionFactory _db;
 
-        public EmployeeRepository(DbConnectionFactory db)
+        public NhanVienRepository(DbConnectionFactory db)
         {
             _db = db;
         }
 
-        public IEnumerable<Employee> GetAll()
+        public IEnumerable<NhanVien> GetAll()
         {
             const string sql = "SELECT * FROM NS_NhanVien ORDER BY MaNhanVien";
             using (var conn = _db.CreateConnection())
-                return conn.Query<Employee>(sql);
+                return conn.Query<NhanVien>(sql);
         }
 
-        public IEnumerable<Employee> GetPaged(int page, int pageSize, string keyword, bool? gender, out int totalRecords)
+        public IEnumerable<NhanVien> GetPaged(int page, int pageSize, string keyword, bool? gender, out int totalRecords)
         {
             var conditions = new List<string> { "1 = 1" };
             var parameters = new DynamicParameters();
@@ -55,15 +56,15 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
             {
                 totalRecords = conn.ExecuteScalar<int>(countSql, parameters);
-                return conn.Query<Employee>(sql, parameters);
+                return conn.Query<NhanVien>(sql, parameters);
             }
         }
 
-        public Employee GetById(int id)
+        public NhanVien GetById(int id)
         {
             const string sql = "SELECT * FROM NS_NhanVien WHERE ID = @ID";
             using (var conn = _db.CreateConnection())
-                return conn.QueryFirstOrDefault<Employee>(sql, new { ID = id });
+                return conn.QueryFirstOrDefault<NhanVien>(sql, new { ID = id });
         }
 
         public bool IsDuplicateCode(string code, int id = 0)
@@ -73,7 +74,7 @@ namespace SalesManagementSystem.Repositories
                 return conn.ExecuteScalar<int>(sql, new { MaNhanVien = code, ID = id }) > 0;
         }
 
-        public int Insert(Employee employee)
+        public int Insert(NhanVien employee)
         {
             employee.NgayTao = DateTime.Now;
             const string sql = @"
@@ -84,7 +85,7 @@ namespace SalesManagementSystem.Repositories
                 return conn.ExecuteScalar<int>(sql, employee);
         }
 
-        public void Update(Employee employee)
+        public void Update(NhanVien employee)
         {
             employee.NgayCapNhat = DateTime.Now;
             const string sql = @"

@@ -2,14 +2,15 @@ using System;
 using System.Web.Mvc;
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Repositories;
+using SalesManagementSystem.Repositories.Interfaces;
 
 namespace SalesManagementSystem.Controllers
 {
-    public class EmployeeController : Controller
+    public class NhanVienController : Controller
     {
-        private readonly EmployeeRepository _employeeRepo;
+        private readonly INhanVienRepository _employeeRepo;
 
-        public EmployeeController(EmployeeRepository employeeRepo)
+        public NhanVienController(INhanVienRepository employeeRepo)
         {
             _employeeRepo = employeeRepo;
         }
@@ -27,7 +28,7 @@ namespace SalesManagementSystem.Controllers
 
             if (Request.IsAjaxRequest())
             {
-                return PartialView("_EmployeeList", employees);
+                return PartialView("_NhanVienList", employees);
             }
 
             return View(employees);
@@ -36,13 +37,13 @@ namespace SalesManagementSystem.Controllers
         // GET: Employee/Create
         public ActionResult Create()
         {
-            return PartialView(new Employee());
+            return PartialView(new NhanVien());
         }
 
         // POST: Employee/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Employee employee)
+        public ActionResult Create(NhanVien employee)
         {
             if (ModelState.IsValid)
             {
@@ -74,7 +75,7 @@ namespace SalesManagementSystem.Controllers
         // POST: Employee/Update/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Update(Employee employee)
+        public ActionResult Update(NhanVien employee)
         {
             if (ModelState.IsValid)
             {

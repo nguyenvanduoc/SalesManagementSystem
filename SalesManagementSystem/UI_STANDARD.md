@@ -260,3 +260,21 @@ showToast('error', 'Có lỗi xảy ra trong quá trình xóa dữ liệu.');
   - Trong trang `Create.cshtml` và `Update.cshtml`, phải gỡ bỏ giao diện chung bằng `Layout = null;`.
   - Cấu trúc file phải tuân thủ chuẩn Bootstrap Modal: gồm `<div class="modal-header">`, `<div class="modal-body">`, và `<div class="modal-footer">`.
   - Thay vì dùng thẻ `<a href="...">` để chuyển trang, sử dụng thẻ `<button onclick="openFormModal('url_controller')">` để lấy HTML của form rồi chèn vào `globalFormModal` có sẵn ở file `_Layout.cshtml`. Hệ thống đã tự động lắng nghe và nạp lại form (nếu lỗi) hoặc đóng Modal và nạp lại danh sách (nếu thành công).
+
+## 9. Tiêu chuẩn Kiến trúc mã nguồn Backend (Architecture Standard)
+
+### 9.1 Controllers
+- **Không sử dụng Controller dùng chung** cho nhiều danh mục (Ví dụ: không dùng `DanhMucController` chung cho Chức vụ và Phòng ban).
+- Mỗi bảng/đối tượng (Entity) phải có một Controller quản lý riêng biệt (Ví dụ: `ChucVuController`, `PhongBanController`, `EmployeeController`) để đảm bảo tính Single Responsibility và dễ mở rộng phân quyền sau này.
+
+### 9.2 Tầng Interface & Repository (Dependency Inversion)
+- Hệ thống áp dụng thiết kế theo Interface-based để giảm sự phụ thuộc (Loose Coupling).
+- **Repository**: Chứa toàn bộ logic truy vấn SQL (sử dụng Dapper). Các class Repository (VD: `ChucVuRepository`) **bắt buộc** phải kế thừa từ một Interface tương ứng (VD: `IChucVuRepository`). Các Interface được đặt trong thư mục `Repositories/Interfaces/`.
+- **Controller**: Khi khai báo Dependency Injection qua Constructor, Controller **chỉ được phép nhận Interface** thay vì nhận class trực tiếp.
+  - Đúng: `public ChucVuController(IChucVuRepository repo)`
+  - Sai: `public ChucVuController(ChucVuRepository repo)`
+
+### 9.3 Dependency Injection (DI Container)
+- Sử dụng **Unity Container** để quản lý Dependency Injection.
+- Toàn bộ việc đăng ký mapping giữa Interface và Class thực thi phải được khai báo trong file `App_Start/UnityConfig.cs`.
+- Cú pháp đăng ký chuẩn: `container.RegisterType<IChucVuRepository, ChucVuRepository>(new HierarchicalLifetimeManager());`

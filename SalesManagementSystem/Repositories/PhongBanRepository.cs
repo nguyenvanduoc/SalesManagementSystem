@@ -5,10 +5,11 @@ using System.Linq;
 using Dapper;
 using SalesManagementSystem.Data;
 using SalesManagementSystem.Models.Entities;
+using SalesManagementSystem.Repositories.Interfaces;
 
 namespace SalesManagementSystem.Repositories
 {
-    public class PhongBanRepository
+    public class PhongBanRepository : IPhongBanRepository
     {
         private readonly DbConnectionFactory _db;
 

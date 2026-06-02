@@ -1,15 +1,16 @@
 using System.Web.Mvc;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories;
+using SalesManagementSystem.Repositories.Interfaces;
 
 namespace SalesManagementSystem.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly MenuRepository _menuRepo;
+        private readonly IMenuRepository _menuRepo;
 
-        // Unity inject MenuRepository trực tiếp — không qua interface
-        public HomeController(MenuRepository menuRepo)
+        // Unity inject MenuRepository qua interface
+        public HomeController(IMenuRepository menuRepo)
         {
             _menuRepo = menuRepo;
         }

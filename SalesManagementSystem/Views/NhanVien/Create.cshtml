@@ -1,46 +1,42 @@
-@model SalesManagementSystem.Models.Entities.Employee
+@model SalesManagementSystem.Models.Entities.NhanVien
 
 @{
     Layout = null;
-    ViewBag.Title = "Cập nhật nhân viên";
+    ViewBag.Title = "Thêm mới nhân viên";
 }
 
 <div class="modal-header bg-light">
     <h5 class="modal-title fw-bold" style="color: #0b5b84;">
-        <i class="bi bi-pencil-square me-2"></i> @ViewBag.Title
+        <i class="bi bi-person-plus-fill me-2"></i> @ViewBag.Title
     </h5>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 
-@using (Html.BeginForm("Update", "Employee", FormMethod.Post))
+@using (Html.BeginForm("Create", "NhanVien", FormMethod.Post))
 {
     @Html.AntiForgeryToken()
-    @Html.HiddenFor(m => m.ID)
-    @Html.HiddenFor(m => m.NgayTao)
-    @Html.HiddenFor(m => m.NguoiTao)
-
     <div class="modal-body p-4">
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label text-muted fw-semibold">Mã nhân viên <span class="text-danger">*</span></label>
-                @Html.TextBoxFor(m => m.MaNhanVien, new { @class = "form-control", required = "required", @readonly = "readonly" })
+                @Html.TextBoxFor(m => m.MaNhanVien, new { @class = "form-control", required = "required", placeholder = "VD: NV001" })
                 @Html.ValidationMessageFor(m => m.MaNhanVien, "", new { @class = "text-danger small" })
             </div>
             <div class="col-md-6">
                 <label class="form-label text-muted fw-semibold">Họ đệm <span class="text-danger">*</span></label>
-                @Html.TextBoxFor(m => m.HoDem, new { @class = "form-control", required = "required" })
+                @Html.TextBoxFor(m => m.HoDem, new { @class = "form-control", required = "required", placeholder = "Nguyễn Văn" })
             </div>
             <div class="col-md-6">
                 <label class="form-label text-muted fw-semibold">Tên nhân viên <span class="text-danger">*</span></label>
-                @Html.TextBoxFor(m => m.TenNhanVien, new { @class = "form-control", required = "required" })
+                @Html.TextBoxFor(m => m.TenNhanVien, new { @class = "form-control", required = "required", placeholder = "A" })
             </div>
             <div class="col-md-6">
                 <label class="form-label text-muted fw-semibold">Ngày sinh</label>
-                @Html.TextBoxFor(m => m.NgaySinh, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                @Html.TextBoxFor(m => m.NgaySinh, new { @class = "form-control", type = "date" })
             </div>
             <div class="col-md-6">
                 <label class="form-label text-muted fw-semibold">Giới tính</label>
-                @Html.DropDownListFor(m => m.GioiTinh, new SelectList(new[] { new { Value = "true", Text = "Nam" }, new { Value = "false", Text = "Nữ" } }, "Value", "Text", Model.GioiTinh?.ToString().ToLower()), "Chọn giới tính", new { @class = "form-select" })
+                @Html.DropDownListFor(m => m.GioiTinh, new SelectList(new[] { new { Value = "true", Text = "Nam" }, new { Value = "false", Text = "Nữ" } }, "Value", "Text"), "Chọn giới tính", new { @class = "form-select" })
             </div>
             <div class="col-md-6">
                 <label class="form-label text-muted fw-semibold">Số CMND/CCCD</label>
@@ -48,11 +44,11 @@
             </div>
             <div class="col-md-6">
                 <label class="form-label text-muted fw-semibold">Ngày cấp</label>
-                @Html.TextBoxFor(m => m.NgayCap, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                @Html.TextBoxFor(m => m.NgayCap, new { @class = "form-control", type = "date" })
             </div>
             <div class="col-md-6">
                 <label class="form-label text-muted fw-semibold">Email</label>
-                @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email" })
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email", placeholder = "email@example.com" })
             </div>
             <div class="col-md-6">
                 <label class="form-label text-muted fw-semibold">Số điện thoại</label>
@@ -71,7 +67,7 @@
     <div class="modal-footer bg-light">
         <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Hủy</button>
         <button type="submit" class="btn text-white px-4" style="background-color: #2998e4; border: none;">
-            <i class="bi bi-save me-1"></i> Lưu thay đổi
+            <i class="bi bi-save me-1"></i> Lưu thông tin
         </button>
     </div>
 }

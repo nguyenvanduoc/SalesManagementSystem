@@ -2,14 +2,15 @@ using System;
 using System.Web.Mvc;
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Repositories;
+using SalesManagementSystem.Repositories.Interfaces;
 
 namespace SalesManagementSystem.Controllers
 {
     public class ChucVuController : Controller
     {
-        private readonly ChucVuRepository _chucVuRepo;
+        private readonly IChucVuRepository _chucVuRepo;
 
-        public ChucVuController(ChucVuRepository chucVuRepo)
+        public ChucVuController(IChucVuRepository chucVuRepo)
         {
             _chucVuRepo = chucVuRepo;
         }

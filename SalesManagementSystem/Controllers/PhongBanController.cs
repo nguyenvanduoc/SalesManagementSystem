@@ -2,14 +2,15 @@ using System;
 using System.Web.Mvc;
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Repositories;
+using SalesManagementSystem.Repositories.Interfaces;
 
 namespace SalesManagementSystem.Controllers
 {
     public class PhongBanController : Controller
     {
-        private readonly PhongBanRepository _phongBanRepo;
+        private readonly IPhongBanRepository _phongBanRepo;
 
-        public PhongBanController(PhongBanRepository phongBanRepo)
+        public PhongBanController(IPhongBanRepository phongBanRepo)
         {
             _phongBanRepo = phongBanRepo;
         }

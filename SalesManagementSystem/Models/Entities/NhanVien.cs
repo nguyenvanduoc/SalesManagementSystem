@@ -2,7 +2,7 @@ using System;
 
 namespace SalesManagementSystem.Models.Entities
 {
-    public class Employee
+    public class NhanVien
     {
         public int ID { get; set; }
         public string MaNhanVien { get; set; }

@@ -13,7 +13,7 @@
 | **Framework** | ASP.NET MVC 5 — **.NET Framework 4.8** |
 | **Database** | SQL Server (LocalDB dev / SQL Server Express prod) |
 | **ORM** | **Dapper** (KHÔNG dùng Entity Framework — tuyệt đối) |
-| **DI Container** | **Unity 5.11.1 + Unity.Mvc5 1.4.0** (KHÔNG dùng Interface) |
+| **DI Container** | **Unity 5.11.1 + Unity.Mvc5 1.4.0** (Sử dụng Interface cho Repositories) |
 | **Deploy** | IIS trên Windows PC nội bộ (LAN / Tailscale VPN) |
 
 ---
@@ -24,7 +24,7 @@
 ✅ PHẢI làm                          ❌ KHÔNG được làm
 ─────────────────────────────────    ──────────────────────────────────
 Dùng Dapper cho mọi truy vấn SQL     Dùng Entity Framework / LINQ to DB
-Inject trực tiếp Concrete Class      Tạo Interface (IRepository, IService)
+Sử dụng Interface cho Repository     Inject trực tiếp Concrete Class (cho Repo)
 Giữ Controller cực mỏng (thin)       Đặt logic nghiệp vụ trong Controller
 Mọi SQL nằm trong Repositories/      Viết SQL trong Service hoặc Controller
 Dùng Transaction khi multi-step      Thực hiện nhiều bước mà không Transaction
@@ -68,6 +68,9 @@ SalesManagementSystem/              ← Root của Web Project
 │       └── OrderFormVM.cs
 │
 ├── 📁 Repositories/                ← NƠI DUY NHẤT chứa SQL và Dapper
+│   ├── 📁 Interfaces/              ← Khai báo các Interface cho Repository
+│   │   ├── IProductRepository.cs
+│   │   └── IOrderRepository.cs
 │   ├── ProductRepository.cs
 │   └── OrderRepository.cs
 │
@@ -136,9 +139,11 @@ public class DbConnectionFactory
 
 ```csharp
 // Repositories/XxxRepository.cs
+using SalesManagementSystem.Repositories.Interfaces;
+
 namespace SalesManagementSystem.Repositories
 {
-    public class XxxRepository                         // ← Không có IXxxRepository
+    public class XxxRepository : IXxxRepository      // ← BẮT BUỘC kế thừa Interface
     {
         private readonly DbConnectionFactory _db;
 
@@ -175,14 +180,16 @@ namespace SalesManagementSystem.Repositories
 
 ```csharp
 // Services/XxxService.cs
+using SalesManagementSystem.Repositories.Interfaces;
+
 namespace SalesManagementSystem.Services
 {
-    public class XxxService                            // ← Không có IXxxService
+    public class XxxService                            
     {
-        private readonly XxxRepository _repo;
+        private readonly IXxxRepository _repo;         // ← Inject qua Interface
         private readonly DbConnectionFactory _db;      // ← Chỉ inject nếu cần query phụ
 
-        public XxxService(XxxRepository repo, DbConnectionFactory db)
+        public XxxService(IXxxRepository repo, DbConnectionFactory db)
         {
             _repo = repo;
             _db = db;
@@ -198,20 +205,23 @@ namespace SalesManagementSystem.Services
 
 ```csharp
 // Controllers/XxxController.cs
+using SalesManagementSystem.Repositories.Interfaces;
+
 namespace SalesManagementSystem.Controllers
 {
     public class XxxController : Controller
     {
-        private readonly XxxService _service;          // ← Inject Service, không inject Repo
+        // Hoặc Inject IService/IXxxRepository tùy kiến trúc
+        private readonly IXxxRepository _repo;         // ← Inject Interface, không inject class
 
-        public XxxController(XxxService service)
+        public XxxController(IXxxRepository repo)
         {
-            _service = service;
+            _repo = repo;
         }
 
         public ActionResult Index()
         {
-            var data = _service.GetAll();              // ← Chỉ gọi Service, không logic
+            var data = _repo.GetAll();                 // ← Gọi qua interface
             return View(data);
         }
 
@@ -236,8 +246,8 @@ namespace SalesManagementSystem.Controllers
 container.RegisterType<DbConnectionFactory>(new HierarchicalLifetimeManager());
 
 // Repositories
-container.RegisterType<ProductRepository>(new HierarchicalLifetimeManager());
-container.RegisterType<OrderRepository>(new HierarchicalLifetimeManager());
+container.RegisterType<IProductRepository, ProductRepository>(new HierarchicalLifetimeManager());
+container.RegisterType<IOrderRepository, OrderRepository>(new HierarchicalLifetimeManager());
 // ← Thêm Repository mới vào đây
 
 // Services
@@ -289,12 +299,13 @@ Khi thêm module mới (ví dụ: **Supplier** — Nhà cung cấp):
 [ ] 1. Tạo bảng SQL:      CREATE TABLE Suppliers (...)
 [ ] 2. Tạo Entity:        Models/Entities/Supplier.cs
 [ ] 3. Tạo ViewModel:     Models/ViewModels/SupplierFormVM.cs  (nếu cần)
-[ ] 4. Tạo Repository:    Repositories/SupplierRepository.cs
-[ ] 5. Tạo Service:       Services/SupplierService.cs          (nếu có nghiệp vụ)
-[ ] 6. Đăng ký DI:        App_Start/UnityConfig.cs             ← KHÔNG ĐƯỢC BỎ QUÊN
-[ ] 7. Tạo Controller:    Controllers/SupplierController.cs
-[ ] 8. Tạo Views:         Views/Supplier/Index.cshtml, Create.cshtml, Edit.cshtml
-[ ] 9. Cập nhật .csproj:  Thêm <Compile Include="..."> cho file mới
+[ ] 4. Tạo Interface:     Repositories/Interfaces/ISupplierRepository.cs
+[ ] 5. Tạo Repository:    Repositories/SupplierRepository.cs (kế thừa ISupplierRepository)
+[ ] 6. Tạo Service:       Services/SupplierService.cs          (nếu có nghiệp vụ)
+[ ] 7. Đăng ký DI:        App_Start/UnityConfig.cs             ← KHÔNG ĐƯỢC BỎ QUÊN
+[ ] 8. Tạo Controller:    Controllers/SupplierController.cs
+[ ] 9. Tạo Views:         Views/Supplier/Index.cshtml, Create.cshtml, Edit.cshtml
+[ ] 10. Cập nhật .csproj: Thêm <Compile Include="..."> cho file mới
 ```
 
 ---
@@ -305,10 +316,10 @@ Khi thêm module mới (ví dụ: **Supplier** — Nhà cung cấp):
 [View / HTTP Request]
         │
         ▼
-[Controller]  ←── Unity inject Service
+[Controller]  ←── Unity inject Interface (IXxxRepository hoặc IService)
         │ gọi
         ▼
-[Service]     ←── Unity inject Repository + DbConnectionFactory
+[Service]     ←── Unity inject Interface + DbConnectionFactory
         │ gọi
         ▼
 [Repository]  ←── Unity inject DbConnectionFactory

@@ -1,4 +1,4 @@
-@model IEnumerable<SalesManagementSystem.Models.Entities.Employee>
+@model IEnumerable<SalesManagementSystem.Models.Entities.NhanVien>
 
 @{
     ViewBag.Title = "Danh sách nhân viên";
@@ -7,7 +7,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>@ViewBag.Title</h2>
     <div class="d-flex gap-2">
-        <button type="button" class="btn btn-primary" style="background-color: #3498db; border-color: #3498db;" onclick="openFormModal('@Url.Action("Create", "Employee")')">
+        <button type="button" class="btn btn-primary" style="background-color: #3498db; border-color: #3498db;" onclick="openFormModal('@Url.Action("Create", "NhanVien")')">
             <i class="bi bi-plus-lg fw-bold"></i> Thêm
         </button>
         <button type="button" class="btn btn-danger" style="background-color: #e74c3c; border-color: #e74c3c;" onclick="deleteSelected()">
@@ -45,7 +45,7 @@
 </div>
 
 <div id="table-container">
-    @Html.Partial("_EmployeeList", Model)
+    @Html.Partial("_NhanVienList", Model)
 </div>
 
 @section Scripts {
@@ -121,7 +121,7 @@
                 return;
             }
 
-            var url = '@Url.Action("BatchDelete", "Employee")';
+            var url = '@Url.Action("BatchDelete", "NhanVien")';
             var msg = "Bạn có chắc chắn muốn xóa " + selectedIds.length + " nhân viên đã chọn không?";
             
             // Gọi hàm chuẩn từ _Layout.cshtml
