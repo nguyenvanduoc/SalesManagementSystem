@@ -157,13 +157,10 @@
     <Compile Include="Models\ViewModels\OrderFormVM.cs" />
     <Compile Include="Models\ViewModels\MenuVM.cs" />
     <!-- Repositories -->
-    <Compile Include="Repositories\ProductRepository.cs" />
-    <Compile Include="Repositories\OrderRepository.cs" />
     <Compile Include="Repositories\MenuRepository.cs" />
     <Compile Include="Repositories\EmployeeRepository.cs" />
     <!-- Services -->
     <Compile Include="Services\InventoryService.cs" />
-    <Compile Include="Services\OrderService.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -220,8 +217,6 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Views\Home\About.cshtml" />
-    <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Home\_Menu.cshtml" />
     <Content Include="Views\Employee\Index.cshtml" />
@@ -230,11 +225,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\Entities\" />
-    <Folder Include="Models\ViewModels\" />
-    <Folder Include="Repositories\" />
-    <Folder Include="Services\" />
-    <Folder Include="Data\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />

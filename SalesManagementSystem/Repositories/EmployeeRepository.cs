@@ -23,11 +23,54 @@ namespace SalesManagementSystem.Repositories
                 return conn.Query<Employee>(sql);
         }
 
+        public IEnumerable<Employee> GetPaged(int page, int pageSize, string keyword, bool? gender, out int totalRecords)
+        {
+            var conditions = new List<string> { "1 = 1" };
+            var parameters = new DynamicParameters();
+            
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                conditions.Add("(MaNhanVien LIKE @Keyword OR TenNhanVien LIKE @Keyword OR SoDienThoai LIKE @Keyword)");
+                parameters.Add("Keyword", "%" + keyword.Trim() + "%");
+            }
+            if (gender.HasValue)
+            {
+                conditions.Add("GioiTinh = @Gender");
+                parameters.Add("Gender", gender.Value);
+            }
+            
+            var whereClause = "WHERE " + string.Join(" AND ", conditions);
+            
+            string countSql = $"SELECT COUNT(1) FROM NS_NhanVien {whereClause}";
+            string sql = $@"
+                SELECT * FROM NS_NhanVien 
+                {whereClause}
+                ORDER BY MaNhanVien
+                OFFSET @Offset ROWS 
+                FETCH NEXT @PageSize ROWS ONLY";
+            
+            parameters.Add("Offset", (page - 1) * pageSize);
+            parameters.Add("PageSize", pageSize);
+            
+            using (var conn = _db.CreateConnection())
+            {
+                totalRecords = conn.ExecuteScalar<int>(countSql, parameters);
+                return conn.Query<Employee>(sql, parameters);
+            }
+        }
+
         public Employee GetById(int id)
         {
             const string sql = "SELECT * FROM NS_NhanVien WHERE ID = @ID";
             using (var conn = _db.CreateConnection())
                 return conn.QueryFirstOrDefault<Employee>(sql, new { ID = id });
+        }
+
+        public bool IsDuplicateCode(string code, int id = 0)
+        {
+            const string sql = "SELECT COUNT(1) FROM NS_NhanVien WHERE MaNhanVien = @MaNhanVien AND ID != @ID";
+            using (var conn = _db.CreateConnection())
+                return conn.ExecuteScalar<int>(sql, new { MaNhanVien = code, ID = id }) > 0;
         }
 
         public int Insert(Employee employee)

@@ -17,5 +17,8 @@ namespace SalesManagementSystem.Models.Entities
 
         /// <summary>ID tham chiếu (dự phòng liên kết cha-con nếu cần)</summary>
         public int? IDThamChieu { get; set; }
+
+        /// <summary>Số thứ tự hiển thị</summary>
+        public int? STT { get; set; }
     }
 }

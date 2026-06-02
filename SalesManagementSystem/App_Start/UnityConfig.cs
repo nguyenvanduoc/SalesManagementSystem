@@ -23,14 +23,14 @@ namespace SalesManagementSystem.App_Start
             container.RegisterType<DbConnectionFactory>(new HierarchicalLifetimeManager());
 
             // ── Repositories (nơi duy nhất chứa SQL + Dapper) ────────────────
-            container.RegisterType<ProductRepository>(new HierarchicalLifetimeManager());
-            container.RegisterType<OrderRepository>(new HierarchicalLifetimeManager());
+            //container.RegisterType<ProductRepository>(new HierarchicalLifetimeManager());
+            //container.RegisterType<OrderRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<MenuRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<EmployeeRepository>(new HierarchicalLifetimeManager());
 
             // ── Services (logic nghiệp vụ) ────────────────────────────────────
             container.RegisterType<InventoryService>(new HierarchicalLifetimeManager());
-            container.RegisterType<OrderService>(new HierarchicalLifetimeManager());
+            //container.RegisterType<OrderService>(new HierarchicalLifetimeManager());
 
             DependencyResolver.SetResolver(new UnityDependencyResolver(container));
         }

@@ -45,7 +45,7 @@ namespace SalesManagementSystem.Repositories
                         ORDER BY ID ASC
                     )
                 WHERE m.IsSuDung = 1
-                ORDER BY m.NhomChaManHinh, m.ID";
+                ORDER BY  m.STT,m.NhomChaManHinh, m.ID";
 
             IEnumerable<dynamic> rows;
             using (var conn = _db.CreateConnection())

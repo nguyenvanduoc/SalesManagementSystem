@@ -6,61 +6,126 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>@ViewBag.Title</h2>
-    <a href="@Url.Action("Create", "Employee")" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> Thêm nhân viên
-    </a>
-</div>
-
-<div class="card shadow-sm">
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover table-striped mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Mã NV</th>
-                        <th>Họ đệm</th>
-                        <th>Tên NV</th>
-                        <th>Ngày sinh</th>
-                        <th>Giới tính</th>
-                        <th>SĐT</th>
-                        <th>Email</th>
-                        <th class="text-center" style="width: 150px;">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model != null && Model.Any())
-                    {
-                        foreach (var item in Model)
-                        {
-                            <tr>
-                                <td>@item.MaNhanVien</td>
-                                <td>@item.HoDem</td>
-                                <td>@item.TenNhanVien</td>
-                                <td>@(item.NgaySinh.HasValue ? item.NgaySinh.Value.ToString("dd/MM/yyyy") : "")</td>
-                                <td>@(item.GioiTinh.HasValue ? (item.GioiTinh.Value ? "Nam" : "Nữ") : "")</td>
-                                <td>@item.SoDienThoai</td>
-                                <td>@item.Email</td>
-                                <td class="text-center">
-                                    <a href="@Url.Action("Update", "Employee", new { id = item.ID })" class="btn btn-sm btn-outline-primary" title="Sửa">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <form action="@Url.Action("Delete", "Employee", new { id = item.ID })" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa nhân viên này?');">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="8" class="text-center py-4 text-muted">Chưa có dữ liệu nhân viên.</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-primary" style="background-color: #3498db; border-color: #3498db;" onclick="openFormModal('@Url.Action("Create", "Employee")')">
+            <i class="bi bi-plus-lg fw-bold"></i> Thêm
+        </button>
+        <button type="button" class="btn btn-danger" style="background-color: #e74c3c; border-color: #e74c3c;" onclick="deleteSelected()">
+            <i class="bi bi-trash"></i> Xóa
+        </button>
     </div>
 </div>
+
+<!-- Bộ lọc tìm kiếm theo chuẩn UI -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" action="@Url.Action("Index")" id="searchForm">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-4">
+                    <input type="text" name="keyword" class="form-control" placeholder="Nhập tên, mã hoặc Số điện thoại..." value="@Request.QueryString["keyword"]">
+                </div>
+                <div class="col-md-3">
+                    <select name="gender" class="form-select">
+                        <option value="">-- Tất cả giới tính --</option>
+                        <option value="true" @(Request.QueryString["gender"] == "true" ? "selected" : "")>Nam</option>
+                        <option value="false" @(Request.QueryString["gender"] == "false" ? "selected" : "")>Nữ</option>
+                    </select>
+                </div>
+                <div class="col-md-auto d-flex gap-2">
+                    <button type="submit" class="btn text-white px-3" style="background-color: #2998e4; border: none;">
+                        <i class="bi bi-search"></i> Tìm kiếm
+                    </button>
+                    <button type="button" onclick="resetSearch()" class="btn text-white px-3" style="background-color: #f1c40f; border: none;">
+                        Làm mới
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="table-container">
+    @Html.Partial("_EmployeeList", Model)
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Check/Uncheck all checkboxes
+            $(document).on('change', '#checkAll', function() {
+                $('.row-checkbox').prop('checked', $(this).prop('checked'));
+            });
+
+            // If any row checkbox is unchecked, uncheck the header checkbox
+            $(document).on('change', '.row-checkbox', function() {
+                if ($('.row-checkbox:checked').length === $('.row-checkbox').length && $('.row-checkbox').length > 0) {
+                    $('#checkAll').prop('checked', true);
+                } else {
+                    $('#checkAll').prop('checked', false);
+                }
+            });
+
+            // Gọi AJAX khi submit form tìm kiếm
+            $('#searchForm').submit(function(e) {
+                e.preventDefault();
+                loadData($(this).serialize());
+            });
+
+            // Gọi AJAX khi click phân trang
+            $(document).on('click', '.ajax-link', function(e) {
+                e.preventDefault();
+                var url = $(this).attr('href');
+                // Nối thêm keyword và gender hiện tại vào URL
+                var formData = $('#searchForm').serialize();
+                loadData(url + '&' + formData);
+            });
+
+            // Gọi AJAX khi đổi PageSize
+            $(document).on('change', '#pageSizeSelect', function() {
+                var pageSize = $(this).val();
+                var formData = $('#searchForm').serialize();
+                loadData('@Url.Action("Index")?page=1&pageSize=' + pageSize + '&' + formData);
+            });
+        });
+
+        function loadData(urlOrData) {
+            var requestUrl = typeof urlOrData === 'string' && urlOrData.indexOf('Index') !== -1 
+                             ? urlOrData 
+                             : '@Url.Action("Index")?' + urlOrData;
+            $.ajax({
+                url: requestUrl,
+                type: 'GET',
+                success: function(res) {
+                    $('#table-container').html(res);
+                },
+                error: function() {
+                    showToast('error', 'Có lỗi xảy ra khi tải dữ liệu.');
+                }
+            });
+        }
+
+        function resetSearch() {
+            $('input[name="keyword"]').val('');
+            $('select[name="gender"]').val('');
+            loadData('');
+        }
+
+        function deleteSelected() {
+            var selectedIds = [];
+            $('.row-checkbox:checked').each(function() {
+                selectedIds.push($(this).val());
+            });
+
+            if (selectedIds.length === 0) {
+                showToast('warning', 'Vui lòng chọn ít nhất một nhân viên để thao tác.');
+                return;
+            }
+
+            var url = '@Url.Action("BatchDelete", "Employee")';
+            var msg = "Bạn có chắc chắn muốn xóa " + selectedIds.length + " nhân viên đã chọn không?";
+            
+            // Gọi hàm chuẩn từ _Layout.cshtml
+            confirmBatchDelete(url, selectedIds, msg);
+        }
+    </script>
+}

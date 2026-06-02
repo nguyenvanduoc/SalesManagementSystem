@@ -228,6 +228,94 @@
             body.sidebar-open .sidebar { transform: translateX(0); }
             .main-wrapper { margin-left: 0 !important; }
         }
+
+        /* ─── Table Standard ─────────────────────────────── */
+        .table-custom {
+            border-color: #e9ecef;
+        }
+        .table-custom thead th {
+            color: #212529; /* Màu đen */
+            font-weight: bold; /* Tô đậm */
+            background-color: #ffffff;
+            border-bottom: 2px solid #dee2e6 !important;
+            border-color: #e9ecef;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+        .table-custom tbody tr:nth-of-type(odd) {
+            background-color: #ffffff;
+        }
+        .table-custom tbody tr:nth-of-type(even) {
+            background-color: #dbe6ef;
+        }
+        .table-custom td {
+            vertical-align: middle;
+            border-color: #e9ecef;
+        }
+        .table-custom tbody tr:hover {
+            background-color: #c9d9e8;
+        }
+        
+        .dropdown-toggle-hide-arrow::after {
+            display: none !important;
+        }
+        
+        /* ─── Dropdown Hover & Last Rows Fix ─────────────────────────────── */
+        .dropdown-hover:hover > .dropdown-menu {
+            display: block;
+            margin-top: 0;
+        }
+
+        /* Fix: 4 dòng cuối cùng sẽ hiển thị menu hướng lên trên (Dropup) đè ngược lên grid để không bị che bởi footer */
+        .table-custom tbody tr:nth-last-child(-n+4) .dropdown-menu {
+            top: auto !important;
+            bottom: 100% !important;
+            margin-top: 0 !important;
+            margin-bottom: 0.125rem !important;
+            box-shadow: 0 -0.5rem 1rem rgba(0, 0, 0, 0.15) !important; /* Đổi bóng đổ lên trên cho đẹp */
+        }
+
+        /* ─── Custom Pagination (Light Theme) ─────────────────────────────── */
+        .custom-pagination {
+            background-color: #f1f5f9 !important;
+            border-top: 1px solid #e2e8f0 !important;
+        }
+        .custom-pagination .pagination .page-link {
+            background-color: transparent;
+            border: 1px solid #dce4ec;
+            color: #0b5b84;
+            border-radius: 50% !important;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 2px;
+            padding: 0;
+            font-size: 0.875rem;
+        }
+        .custom-pagination .pagination .page-item.active .page-link {
+            border-color: #b9d2e1;
+            color: #0b5b84;
+            background-color: #c0d6e4;
+        }
+        .custom-pagination .pagination .page-link:hover {
+            background-color: #e2e8f0;
+            color: #0b5b84;
+        }
+        .custom-pagination .pagination .page-item.disabled .page-link {
+            color: #839bb0;
+            background-color: transparent;
+            border-color: transparent;
+        }
+        .custom-pagination .form-select {
+            background-color: #f8fbfd;
+            color: #0b5b84;
+            border-color: #dce4ec;
+        }
+        .custom-pagination .text-info-custom {
+            color: #0b5b84 !important;
+        }
     </style>
 </head>
 <body>
@@ -267,6 +355,50 @@
     </footer>
 </div>
 
+<!-- ═══════════════ GLOBAL FORM MODAL ═══════════════ -->
+<div class="modal fade" id="globalFormModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0" id="globalFormModalContent">
+            <!-- Dữ liệu Partial View sẽ được nạp vào đây -->
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════ GLOBAL DELETE MODAL ═══════════════ -->
+<div class="modal fade" id="globalDeleteModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+        <div class="modal-content shadow-lg" style="background-color: #ffffff; color: #333; border: none; border-top: 5px solid #ffc107; border-radius: 6px;">
+            <div class="modal-body p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-exclamation-triangle-fill text-warning me-3" style="font-size: 1.6rem;"></i>
+                    <h5 class="mb-0" style="font-size: 1.3rem; font-weight: 600; color: #333;">Thông báo!</h5>
+                </div>
+                <p id="globalDeleteMessage" class="mb-4" style="font-size: 1rem; color: #555;">Bạn có chắc chắn muốn xóa không?</p>
+                <div class="d-flex justify-content-end gap-2">
+                    <form id="globalDeleteForm" method="post" class="m-0">
+                        <button type="submit" class="btn" style="background-color: #ffc107; color: #fff; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem;">ĐỒNG Ý</button>
+                    </form>
+                    <button type="button" class="btn" data-bs-dismiss="modal" style="background-color: #e9ecef; color: #333; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem; border: none;">ĐỂ SAU</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- ═══════════════ GLOBAL TOAST NOTIFICATION ═══════════════ -->
+<div class="toast-container position-fixed" style="top: 25px; right: 25px; z-index: 1055;">
+    <div id="globalToast" class="toast align-items-center border-0 shadow-lg text-white" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
+        <div class="d-flex">
+            <div class="toast-body d-flex align-items-center" id="globalToastMessage" style="font-size: 0.95rem;">
+                <span></span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
 <!-- Scripts -->
 <script src="@Url.Content("~/Scripts/jquery-3.7.0.min.js")"></script>
 <script src="@Url.Content("~/Scripts/bootstrap.bundle.min.js")"></script>
@@ -301,6 +433,132 @@
             body.classList.remove('sidebar-open');
         }
     });
+
+    // Hàm gọi Global Delete Modal (Xóa 1 phần tử)
+    function confirmDelete(url) {
+        var form = document.getElementById('globalDeleteForm');
+        form.action = url;
+        
+        // Xóa các input hidden cũ nếu có
+        var existingIds = form.querySelectorAll('input[name="ids"]');
+        existingIds.forEach(function(el) { el.remove(); });
+        
+        // Reset nội dung
+        var msgEl = document.getElementById('globalDeleteMessage');
+        if (msgEl.dataset.originalMsg) {
+            msgEl.innerText = msgEl.dataset.originalMsg;
+        }
+
+        var myModal = new bootstrap.Modal(document.getElementById('globalDeleteModal'));
+        myModal.show();
+    }
+
+    // Hàm gọi Global Delete Modal (Xóa nhiều phần tử)
+    function confirmBatchDelete(url, ids, message) {
+        var form = document.getElementById('globalDeleteForm');
+        form.action = url;
+        
+        // Xóa các input hidden cũ nếu có
+        var existingIds = form.querySelectorAll('input[name="ids"]');
+        existingIds.forEach(function(el) { el.remove(); });
+        
+        // Thêm hidden input cho từng ID
+        ids.forEach(function(id) {
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ids';
+            input.value = id;
+            form.appendChild(input);
+        });
+
+        // Thay đổi thông báo
+        var msgEl = document.getElementById('globalDeleteMessage');
+        if (!msgEl.dataset.originalMsg) {
+            msgEl.dataset.originalMsg = msgEl.innerText;
+        }
+        msgEl.innerText = message || msgEl.dataset.originalMsg;
+
+        var myModal = new bootstrap.Modal(document.getElementById('globalDeleteModal'));
+        myModal.show();
+    }
+
+    // Hàm hiển thị Form Modal qua AJAX
+    function openFormModal(url) {
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(res) {
+                $('#globalFormModalContent').html(res);
+                var formModal = new bootstrap.Modal(document.getElementById('globalFormModal'));
+                formModal.show();
+            },
+            error: function() {
+                showToast('error', 'Không thể tải dữ liệu form.');
+            }
+        });
+    }
+
+    // Bắt sự kiện submit form bên trong globalFormModal
+    $(document).on('submit', '#globalFormModalContent form', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        $.ajax({
+            url: form.attr('action'),
+            type: form.attr('method') || 'POST',
+            data: form.serialize(),
+            success: function(res) {
+                if (res.success) {
+                    $('#globalFormModal').modal('hide');
+                    showToast('success', res.message);
+                    if (typeof loadData === 'function') {
+                        loadData(''); // Reload danh sách nếu có hàm loadData
+                    } else {
+                        location.reload();
+                    }
+                } else {
+                    // Nếu validation lỗi, trả về HTML partial view chứa form
+                    $('#globalFormModalContent').html(res);
+                }
+            },
+            error: function() {
+                showToast('error', 'Có lỗi xảy ra khi lưu dữ liệu.');
+            }
+        });
+    });
+
+    // Hàm hiển thị Toast thông báo chung
+    function showToast(type, message) {
+        var toastEl = document.getElementById('globalToast');
+        var messageEl = document.getElementById('globalToastMessage');
+        
+        // Reset classes
+        toastEl.className = 'toast align-items-center border-0 shadow-lg text-white';
+        
+        var iconHtml = '';
+        var btnClose = toastEl.querySelector('.btn-close');
+        btnClose.className = 'btn-close btn-close-white me-2 m-auto';
+
+        if (type === 'success') {
+            toastEl.classList.add('bg-success');
+            iconHtml = '<i class="bi bi-check-circle-fill me-2 fs-5"></i>';
+        } else if (type === 'error' || type === 'danger') {
+            toastEl.classList.add('bg-danger');
+            iconHtml = '<i class="bi bi-x-circle-fill me-2 fs-5"></i>';
+        } else if (type === 'warning') {
+            toastEl.classList.add('bg-warning', 'text-dark');
+            toastEl.classList.remove('text-white');
+            btnClose.className = 'btn-close me-2 m-auto'; // Nút close đen cho nền vàng
+            iconHtml = '<i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>';
+        } else {
+            toastEl.classList.add('bg-dark');
+            iconHtml = '<i class="bi bi-info-circle-fill me-2 fs-5"></i>';
+        }
+
+        messageEl.innerHTML = iconHtml + '<span>' + message + '</span>';
+        
+        var bsToast = new bootstrap.Toast(toastEl);
+        bsToast.show();
+    }
 </script>
 @RenderSection("scripts", required: false)
 </body>

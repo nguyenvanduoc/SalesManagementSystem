@@ -15,16 +15,28 @@ namespace SalesManagementSystem.Controllers
         }
 
         // GET: Employee
-        public ActionResult Index()
+        public ActionResult Index(int page = 1, int pageSize = 10, string keyword = "", bool? gender = null)
         {
-            var employees = _employeeRepo.GetAll();
+            int totalRecords;
+            var employees = _employeeRepo.GetPaged(page, pageSize, keyword, gender, out totalRecords);
+
+            ViewBag.Total = totalRecords;
+            ViewBag.Page = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalPages = totalRecords > 0 ? (int)Math.Ceiling((double)totalRecords / pageSize) : 1;
+
+            if (Request.IsAjaxRequest())
+            {
+                return PartialView("_EmployeeList", employees);
+            }
+
             return View(employees);
         }
 
         // GET: Employee/Create
         public ActionResult Create()
         {
-            return View(new Employee());
+            return PartialView(new Employee());
         }
 
         // POST: Employee/Create
@@ -34,12 +46,18 @@ namespace SalesManagementSystem.Controllers
         {
             if (ModelState.IsValid)
             {
+                if (_employeeRepo.IsDuplicateCode(employee.MaNhanVien))
+                {
+                    ModelState.AddModelError("MaNhanVien", "Mã nhân viên đã tồn tại trong hệ thống.");
+                    return PartialView(employee);
+                }
+
                 // Optionally set NguoiTao from user session/identity here
                 employee.NguoiTao = 0; // Default save as 0
                 _employeeRepo.Insert(employee);
-                return RedirectToAction("Index");
+                return Json(new { success = true, message = "Thêm mới nhân viên thành công!" });
             }
-            return View(employee);
+            return PartialView(employee);
         }
 
         // GET: Employee/Update/5
@@ -50,7 +68,7 @@ namespace SalesManagementSystem.Controllers
             {
                 return HttpNotFound();
             }
-            return View(employee);
+            return PartialView(employee);
         }
 
         // POST: Employee/Update/5
@@ -60,11 +78,17 @@ namespace SalesManagementSystem.Controllers
         {
             if (ModelState.IsValid)
             {
+                if (_employeeRepo.IsDuplicateCode(employee.MaNhanVien, employee.ID))
+                {
+                    ModelState.AddModelError("MaNhanVien", "Mã nhân viên đã tồn tại trong hệ thống.");
+                    return PartialView(employee);
+                }
+
                 employee.NguoiCapNhat = 0; // Default save as 0
                 _employeeRepo.Update(employee);
-                return RedirectToAction("Index");
+                return Json(new { success = true, message = "Cập nhật nhân viên thành công!" });
             }
-            return View(employee);
+            return PartialView(employee);
         }
 
         // POST: Employee/Delete/5
@@ -72,6 +96,20 @@ namespace SalesManagementSystem.Controllers
         public ActionResult Delete(int id)
         {
             _employeeRepo.Delete(id);
+            return RedirectToAction("Index");
+        }
+
+        // POST: Employee/BatchDelete
+        [HttpPost]
+        public ActionResult BatchDelete(int[] ids)
+        {
+            if (ids != null && ids.Length > 0)
+            {
+                foreach (var id in ids)
+                {
+                    _employeeRepo.Delete(id);
+                }
+            }
             return RedirectToAction("Index");
         }
     }
