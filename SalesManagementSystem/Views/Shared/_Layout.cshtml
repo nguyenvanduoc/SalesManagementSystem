@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title — Quản Lý Bán Hàng</title>
+
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/bootstrap.min.css")" />
+    <!-- Font: dùng system fonts hỗ trợ tiếng Việt, không cần internet -->
+    <!-- Bootstrap Icons (local - không cần internet) -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/bootstrap-icons.min.css")" />
+
+    <style>
+        /* ─── Variables ─────────────────────────────────── */
+        :root {
+            --sidebar-bg:       #1a5276;
+            --sidebar-hover:    #1f618d;
+            --sidebar-active:   #148f77;
+            --sidebar-border:   #2e86c1;
+            --sidebar-text:     #d6eaf8;
+            --sidebar-heading:  #7fb3d3;
+            --sidebar-width:    260px;
+            --topbar-height:    56px;
+            --topbar-bg:        #17202a;
+            --accent:           #1abc9c;
+            --body-bg:          #f0f3f7;
+        }
+
+        /* ─── Reset & Base ───────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, 'Arial Unicode MS', Arial, sans-serif;
+            background: var(--body-bg);
+            color: #2c3e50;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ─── Top Bar ─────────────────────────────────────── */
+        .topbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: var(--topbar-height);
+            background: var(--topbar-bg);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 1050;
+            box-shadow: 0 2px 8px rgba(0,0,0,.35);
+        }
+        .topbar .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            font-size: 1.05rem;
+            font-weight: 700;
+            text-decoration: none;
+            letter-spacing: .3px;
+            width: var(--sidebar-width);
+        }
+        .topbar .brand span.accent { color: var(--accent); }
+        .topbar-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        .topbar-right .btn-toggle {
+            background: none;
+            border: none;
+            color: #adb5bd;
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background .2s;
+        }
+        .topbar-right .btn-toggle:hover { background: rgba(255,255,255,.08); color: #fff; }
+        .topbar-right .user-info {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: #ced4da;
+            font-size: .88rem;
+        }
+        .topbar-right .user-info .avatar {
+            width: 34px; height: 34px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: .9rem;
+        }
+
+        /* ─── Sidebar ─────────────────────────────────────── */
+        .sidebar {
+            position: fixed;
+            top: var(--topbar-height);
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 1040;
+            transition: width .28s ease, transform .28s ease;
+        }
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--sidebar-border); border-radius: 4px; }
+
+        /* Section heading */
+        .sidebar .nav-heading {
+            padding: 18px 18px 6px;
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--sidebar-heading);
+        }
+
+        /* Nav item */
+        .sidebar .nav-item { list-style: none; }
+        .sidebar .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 10px 18px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-size: .875rem;
+            font-weight: 500;
+            border-left: 3px solid transparent;
+            transition: background .18s, border-color .18s, color .18s;
+            white-space: nowrap;
+        }
+        .sidebar .nav-link i {
+            font-size: 1rem;
+            width: 22px;
+            text-align: center;
+            opacity: .85;
+            flex-shrink: 0;
+        }
+        .sidebar .nav-link:hover {
+            background: var(--sidebar-hover);
+            color: #fff;
+            border-left-color: var(--accent);
+        }
+        .sidebar .nav-link.active {
+            background: var(--sidebar-active);
+            color: #fff;
+            border-left-color: #fff;
+            font-weight: 600;
+        }
+        .sidebar .nav-link .badge-count {
+            margin-left: auto;
+            background: var(--accent);
+            color: #fff;
+            font-size: .68rem;
+            padding: 2px 7px;
+            border-radius: 10px;
+        }
+
+        /* Separator */
+        .sidebar hr.nav-divider {
+            border-color: rgba(255,255,255,.1);
+            margin: 6px 14px;
+        }
+
+        /* ─── Main content ───────────────────────────────── */
+        .main-wrapper {
+            margin-top: var(--topbar-height);
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - var(--topbar-height));
+            transition: margin-left .28s ease;
+        }
+        .page-content {
+            padding: 28px 28px 20px;
+            flex: 1;
+        }
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+        }
+        .page-header h1 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #1a2035;
+            margin: 0;
+        }
+        .breadcrumb-wrap {
+            font-size: .8rem;
+            color: #7f8c8d;
+        }
+        .breadcrumb-wrap a { color: var(--accent); text-decoration: none; }
+
+        /* ─── Footer ─────────────────────────────────────── */
+        .main-footer {
+            background: #fff;
+            border-top: 1px solid #e0e6ed;
+            padding: 12px 28px;
+            font-size: .78rem;
+            color: #95a5a6;
+            text-align: center;
+        }
+
+        /* ─── Sidebar collapsed ──────────────────────────── */
+        body.sidebar-collapsed .sidebar { width: 60px; }
+        body.sidebar-collapsed .sidebar .nav-heading,
+        body.sidebar-collapsed .sidebar .nav-link span,
+        body.sidebar-collapsed .sidebar .badge-count { display: none; }
+        body.sidebar-collapsed .sidebar .nav-link { justify-content: center; padding: 12px; }
+        body.sidebar-collapsed .sidebar .nav-link i { width: auto; }
+        body.sidebar-collapsed .main-wrapper { margin-left: 60px; }
+
+        /* ─── Responsive ─────────────────────────────────── */
+        @@media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            body.sidebar-open .sidebar { transform: translateX(0); }
+            .main-wrapper { margin-left: 0 !important; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════ TOP BAR ═══════════════ -->
+<header class="topbar">
+    <a href="@Url.Action("Index","Home")" class="brand">
+        <i class="bi bi-box-seam-fill" style="font-size:1.4rem;color:var(--accent)"></i>
+        <span>Quản Lý <span class="accent">Bán Hàng</span></span>
+    </a>
+
+    <div class="topbar-right">
+        <button class="btn-toggle" id="sidebarToggle" title="Thu/mở menu">
+            <i class="bi bi-list"></i>
+        </button>
+        <div class="user-info">
+            <div class="avatar">A</div>
+            <span>Admin</span>
+        </div>
+    </div>
+</header>
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<nav class="sidebar" id="sidebar">
+
+    @Html.Action("Menu", "Home")
+</nav>
+
+<!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+<div class="main-wrapper" id="mainWrapper">
+    <main class="page-content">
+        @RenderBody()
+    </main>
+
+    <footer class="main-footer">
+        &copy; @DateTime.Now.Year &nbsp;|&nbsp; Hệ thống Quản Lý Bán Hàng &amp; Kho Bãi
+    </footer>
+</div>
+
+<!-- Scripts -->
+<script src="@Url.Content("~/Scripts/jquery-3.7.0.min.js")"></script>
+<script src="@Url.Content("~/Scripts/bootstrap.bundle.min.js")"></script>
+<script>
+    // Sidebar toggle
+    const toggleBtn   = document.getElementById('sidebarToggle');
+    const body        = document.body;
+
+    // Khôi phục trạng thái từ localStorage
+    if (localStorage.getItem('sidebarCollapsed') === '1') {
+        body.classList.add('sidebar-collapsed');
+    }
+
+    toggleBtn.addEventListener('click', function () {
+        // Desktop: thu/mở bằng class collapsed
+        if (window.innerWidth > 768) {
+            body.classList.toggle('sidebar-collapsed');
+            localStorage.setItem('sidebarCollapsed',
+                body.classList.contains('sidebar-collapsed') ? '1' : '0');
+        } else {
+            // Mobile: slide in/out
+            body.classList.toggle('sidebar-open');
+        }
+    });
+
+    // Đóng sidebar khi click ngoài (mobile)
+    document.addEventListener('click', function (e) {
+        if (window.innerWidth <= 768
+            && !document.getElementById('sidebar').contains(e.target)
+            && e.target !== toggleBtn
+            && !toggleBtn.contains(e.target)) {
+            body.classList.remove('sidebar-open');
+        }
+    });
+</script>
+@RenderSection("scripts", required: false)
+</body>
+</html>

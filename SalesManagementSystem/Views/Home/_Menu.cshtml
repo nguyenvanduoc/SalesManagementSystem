@@ -1,0 +1,80 @@
+@model SalesManagementSystem.Models.ViewModels.SidebarVM
+@{
+    // Active controller từ request hiện tại (truyền vào qua SidebarVM)
+    string activeCtrl = Model.ActiveController;
+}
+
+@* ── Dashboard (luôn hiện ở đầu, không phụ thuộc ACL) ── *@
+<p class="nav-heading">Tổng quan</p>
+<ul style="padding:0;margin:0">
+    <li class="nav-item">
+        <a href="@Url.Action("Index", "Home")"
+           class="nav-link @(activeCtrl == "Home" ? "active" : "")">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+        </a>
+    </li>
+</ul>
+
+@* ── Các nhóm menu động từ ACL_ManHinh ── *@
+@foreach (var group in Model.Groups)
+{
+    <hr class="nav-divider" />
+    <p class="nav-heading">@group.TenNhom</p>
+    <ul style="padding:0;margin:0">
+        @foreach (var item in group.Items)
+        {
+            bool isActive = string.Equals(activeCtrl, item.TenController,
+                                System.StringComparison.OrdinalIgnoreCase);
+
+            string href = (string.IsNullOrEmpty(item.TenController))
+                ? "#"
+                : Url.Action(item.TenAction, item.TenController);
+
+            <li class="nav-item">
+                <a href="@href" class="nav-link @(isActive ? "active" : "")">
+                    <i class="bi @GetMenuIcon(item.TenController, item.TenManHinh)"></i>
+                    <span>@item.TenManHinh</span>
+                </a>
+            </li>
+        }
+    </ul>
+}
+
+@* ── Hàm helper chọn icon theo controller/tên màn hình ── *@
+@functions {
+    string GetMenuIcon(string controller, string tenManHinh)
+    {
+        if (string.IsNullOrEmpty(controller))
+            return "bi-circle";
+
+        switch (controller.ToLower())
+        {
+            case "order":        return "bi-cart3";
+            case "product":      return "bi-box2";
+            case "customer":     return "bi-people";
+            case "inventory":    return "bi-boxes";
+            case "stockin":      return "bi-arrow-down-circle";
+            case "stockout":     return "bi-arrow-up-circle";
+            case "transaction":  return "bi-clock-history";
+            case "revenuer":
+            case "revenue":      return "bi-bar-chart-line";
+            case "profitreport": return "bi-graph-up-arrow";
+            case "exportreport": return "bi-file-earmark-bar-graph";
+            case "employee":     return "bi-people-fill";
+            case "role":         return "bi-shield-lock";
+            case "setting":      return "bi-gear";
+            case "export":       return "bi-file-earmark-arrow-up";
+            default:
+                // Fallback: chọn icon dựa vào từ khóa trong tên màn hình
+                string name = tenManHinh?.ToLower() ?? "";
+                if (name.Contains("nhập"))  return "bi-arrow-down-circle";
+                if (name.Contains("xuất"))  return "bi-arrow-up-circle";
+                if (name.Contains("báo cáo") || name.Contains("thống kê")) return "bi-bar-chart-line";
+                if (name.Contains("lịch sử")) return "bi-clock-history";
+                if (name.Contains("lợi nhuận")) return "bi-graph-up-arrow";
+                if (name.Contains("nhân viên")) return "bi-people-fill";
+                return "bi-grid";
+        }
+    }
+}
