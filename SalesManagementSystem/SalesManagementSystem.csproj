@@ -140,10 +140,14 @@
     <Compile Include="App_Start\UnityConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\EmployeeController.cs" />
+    <Compile Include="Controllers\ChucVuController.cs" />
+    <Compile Include="Controllers\PhongBanController.cs" />
     <!-- Data -->
     <Compile Include="Data\DbConnectionFactory.cs" />
     <!-- Models - Entities -->
     <Compile Include="Models\Entities\Category.cs" />
+    <Compile Include="Models\Entities\ChucVu.cs" />
+    <Compile Include="Models\Entities\PhongBan.cs" />
     <Compile Include="Models\Entities\Product.cs" />
     <Compile Include="Models\Entities\Inventory.cs" />
     <Compile Include="Models\Entities\InventoryTransaction.cs" />
@@ -159,6 +163,8 @@
     <!-- Repositories -->
     <Compile Include="Repositories\MenuRepository.cs" />
     <Compile Include="Repositories\EmployeeRepository.cs" />
+    <Compile Include="Repositories\ChucVuRepository.cs" />
+    <Compile Include="Repositories\PhongBanRepository.cs" />
     <!-- Services -->
     <Compile Include="Services\InventoryService.cs" />
     <Compile Include="Global.asax.cs">
@@ -222,6 +228,14 @@
     <Content Include="Views\Employee\Index.cshtml" />
     <Content Include="Views\Employee\Create.cshtml" />
     <Content Include="Views\Employee\Update.cshtml" />
+    <Content Include="Views\ChucVu\GetChucVu.cshtml" />
+    <Content Include="Views\ChucVu\_ChucVuList.cshtml" />
+    <Content Include="Views\ChucVu\CreateChucVu.cshtml" />
+    <Content Include="Views\ChucVu\UpdateChucVu.cshtml" />
+    <Content Include="Views\PhongBan\GetPhongBan.cshtml" />
+    <Content Include="Views\PhongBan\_PhongBanList.cshtml" />
+    <Content Include="Views\PhongBan\CreatePhongBan.cshtml" />
+    <Content Include="Views\PhongBan\UpdatePhongBan.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -27,6 +27,7 @@ namespace SalesManagementSystem.App_Start
             //container.RegisterType<OrderRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<MenuRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<EmployeeRepository>(new HierarchicalLifetimeManager());
+            container.RegisterType<ChucVuRepository>(new HierarchicalLifetimeManager());
 
             // ── Services (logic nghiệp vụ) ────────────────────────────────────
             container.RegisterType<InventoryService>(new HierarchicalLifetimeManager());
