@@ -1,0 +1,133 @@
+@model IEnumerable<SalesManagementSystem.Models.ViewModels.AclLoginVM>
+
+<div class="table-responsive" style="min-height: 350px;">
+    <table class="table table-custom table-bordered table-hover mb-0">
+        <thead class="table-light">
+            <tr>
+                <th class="text-center" style="width: 80px;">Hành động</th>
+                <th class="text-center" style="width: 60px;">ID</th>
+                <th>Tên Đăng Nhập</th>
+                <th>Mật Khẩu</th>
+                <th>Họ Đệm</th>
+                <th>Tên</th>
+                <th class="text-center" style="width: 150px;">Trạng Thái</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="text-center align-middle">
+                            <div class="dropdown dropdown-hover">
+                                <button class="btn btn-sm btn-light border dropdown-toggle-hide-arrow shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 2px 6px;">
+                                    <i class="bi bi-grid-3x3-gap-fill text-dark"></i>
+                                </button>
+                                <ul class="dropdown-menu shadow">
+                                    <li><h6 class="dropdown-header text-uppercase fw-bold text-dark">Thao tác</h6></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <button type="button" class="dropdown-item" onclick="openFormModal('@Url.Action("EditNguoiDung", "NguoiDung", new { id = item.ID })')">
+                                            <i class="bi bi-pencil-square me-2 text-primary"></i> Chỉnh sửa
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="dropdown-item text-danger" onclick="confirmDelete('@Url.Action("DeleteNguoiDung", "NguoiDung", new { id = item.ID })')">
+                                            <i class="bi bi-trash-fill me-2 text-danger"></i> Xóa
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                        <td class="text-center align-middle">@item.ID</td>
+                        <td class="align-middle">@item.TenDangNhap</td>
+                        <td class="align-middle text-truncate" style="max-width: 150px;" title="@item.MatKhau">@item.MatKhau</td>
+                        <td class="align-middle">@item.HoDem</td>
+                        <td class="align-middle">@item.Ten</td>
+                        <td class="text-center align-middle">
+                            @if (item.IsActive)
+                            {
+                                <span class="badge bg-success">Đang hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Đã khóa</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7" class="text-center align-middle py-4 text-muted">Không có dữ liệu</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="card-footer custom-pagination d-flex flex-wrap align-items-center justify-content-between" style="padding: 12px 16px;">
+    <div class="d-flex align-items-center gap-3">
+        @if (ViewBag.TotalPages > 1)
+        {
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item @(ViewBag.Page == 1 ? "disabled" : "")">
+                        <a class="page-link ajax-link" href="#" data-page="1"><i class="bi bi-skip-start-fill"></i></a>
+                    </li>
+                    <li class="page-item @(ViewBag.Page == 1 ? "disabled" : "")">
+                        <a class="page-link ajax-link" href="#" data-page="@(ViewBag.Page - 1)"><i class="bi bi-caret-left-fill"></i></a>
+                    </li>
+                    
+                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == ViewBag.Page ? "active" : "")">
+                            <a class="page-link ajax-link" href="#" data-page="@i">@i</a>
+                        </li>
+                    }
+
+                    <li class="page-item @(ViewBag.Page == ViewBag.TotalPages ? "disabled" : "")">
+                        <a class="page-link ajax-link" href="#" data-page="@(ViewBag.Page + 1)"><i class="bi bi-caret-right-fill"></i></a>
+                    </li>
+                    <li class="page-item @(ViewBag.Page == ViewBag.TotalPages ? "disabled" : "")">
+                        <a class="page-link ajax-link" href="#" data-page="@ViewBag.TotalPages"><i class="bi bi-skip-end-fill"></i></a>
+                    </li>
+                </ul>
+            </nav>
+        }
+        else
+        {
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-skip-start-fill"></i></a></li>
+                    <li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-caret-left-fill"></i></a></li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-caret-right-fill"></i></a></li>
+                    <li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-skip-end-fill"></i></a></li>
+                </ul>
+            </nav>
+        }
+
+        <div class="d-flex align-items-center">
+            <select id="pageSizeSelect" class="form-select form-select-sm" style="width: 70px; cursor: pointer;">
+                <option value="10" @(ViewBag.PageSize == 10 ? "selected" : "")>10</option>
+                <option value="20" @(ViewBag.PageSize == 20 ? "selected" : "")>20</option>
+                <option value="50" @(ViewBag.PageSize == 50 ? "selected" : "")>50</option>
+                <option value="100" @(ViewBag.PageSize == 100 ? "selected" : "")>100</option>
+            </select>
+            <span class="ms-2 text-info-custom" style="font-size: 0.85rem;">mẫu tin/trang</span>
+        </div>
+    </div>
+    <div class="text-info-custom" style="font-size: 0.85rem;">
+        @{
+            int total = ViewBag.Total ?? 0;
+            int pageIndex = ViewBag.Page ?? 1;
+            int pageSize = ViewBag.PageSize ?? 10;
+            int start = total > 0 ? ((pageIndex - 1) * pageSize) + 1 : 0;
+            int end = (pageIndex * pageSize) > total ? total : (pageIndex * pageSize);
+        }
+        @start - @end của @total
+    </div>
+</div>

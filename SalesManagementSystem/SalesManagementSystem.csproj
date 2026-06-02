@@ -142,6 +142,8 @@
     <Compile Include="Controllers\NhanVienController.cs" />
     <Compile Include="Controllers\ChucVuController.cs" />
     <Compile Include="Controllers\PhongBanController.cs" />
+    <Compile Include="Controllers\NguoiDungController.cs" />
+    <Compile Include="Helpers\SecurityHelper.cs" />
     <!-- Data -->
     <Compile Include="Data\DbConnectionFactory.cs" />
     <!-- Models - Entities -->
@@ -156,10 +158,12 @@
     <Compile Include="Models\Entities\AclManHinh.cs" />
     <Compile Include="Models\Entities\AclAction.cs" />
     <Compile Include="Models\Entities\NhanVien.cs" />
+    <Compile Include="Models\Entities\AclLogin.cs" />
     <!-- Models - ViewModels -->
     <Compile Include="Models\ViewModels\RevenueReportVM.cs" />
     <Compile Include="Models\ViewModels\OrderFormVM.cs" />
     <Compile Include="Models\ViewModels\MenuVM.cs" />
+    <Compile Include="Models\ViewModels\AclLoginVM.cs" />
     <!-- Repositories -->
     <Compile Include="Repositories\MenuRepository.cs" />
     <Compile Include="Repositories\NhanVienRepository.cs" />
@@ -168,7 +172,9 @@
 	<Compile Include="Repositories\Interfaces\IPhongBanRepository.cs" />
     <Compile Include="Repositories\Interfaces\INhanVienRepository.cs" />
 	<Compile Include="Repositories\Interfaces\IMenuRepository.cs" />
+	<Compile Include="Repositories\Interfaces\IAclLoginRepository.cs" />
     <Compile Include="Repositories\PhongBanRepository.cs" />
+    <Compile Include="Repositories\AclLoginRepository.cs" />
     <!-- Services -->
     <Compile Include="Services\InventoryService.cs" />
     <Compile Include="Global.asax.cs">
@@ -240,6 +246,10 @@
     <Content Include="Views\PhongBan\_PhongBanList.cshtml" />
     <Content Include="Views\PhongBan\CreatePhongBan.cshtml" />
     <Content Include="Views\PhongBan\UpdatePhongBan.cshtml" />
+    <Content Include="Views\NguoiDung\GetNguoiDung.cshtml" />
+    <Content Include="Views\NguoiDung\_NguoiDungList.cshtml" />
+    <Content Include="Views\NguoiDung\CreateNguoiDung.cshtml" />
+    <Content Include="Views\NguoiDung\EditNguoiDung.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
