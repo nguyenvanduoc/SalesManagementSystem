@@ -1,0 +1,73 @@
+@model SalesManagementSystem.Models.Entities.Employee
+
+@{
+    ViewBag.Title = "Thêm mới nhân viên";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>@ViewBag.Title</h2>
+    <a href="@Url.Action("Index", "Employee")" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        @using (Html.BeginForm("Create", "Employee", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Mã nhân viên</label>
+                    @Html.TextBoxFor(m => m.MaNhanVien, new { @class = "form-control", required = "required" })
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Họ đệm</label>
+                    @Html.TextBoxFor(m => m.HoDem, new { @class = "form-control", required = "required" })
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Tên nhân viên</label>
+                    @Html.TextBoxFor(m => m.TenNhanVien, new { @class = "form-control", required = "required" })
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Ngày sinh</label>
+                    @Html.TextBoxFor(m => m.NgaySinh, new { @class = "form-control", type = "date" })
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Giới tính</label>
+                    @Html.DropDownListFor(m => m.GioiTinh, new SelectList(new[] { new { Value = "true", Text = "Nam" }, new { Value = "false", Text = "Nữ" } }, "Value", "Text"), "Chọn giới tính", new { @class = "form-select" })
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Số CMND/CCCD</label>
+                    @Html.TextBoxFor(m => m.SoCMND, new { @class = "form-control" })
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Ngày cấp</label>
+                    @Html.TextBoxFor(m => m.NgayCap, new { @class = "form-control", type = "date" })
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email" })
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Số điện thoại</label>
+                    @Html.TextBoxFor(m => m.SoDienThoai, new { @class = "form-control" })
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Số điện thoại 2</label>
+                    @Html.TextBoxFor(m => m.SoDienThoai2, new { @class = "form-control" })
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">Địa chỉ</label>
+                    @Html.TextAreaFor(m => m.DiaChi, new { @class = "form-control", rows = 3 })
+                </div>
+                <div class="col-12 mt-4 text-end">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-save"></i> Lưu thông tin
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>

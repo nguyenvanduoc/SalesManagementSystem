@@ -1,0 +1,66 @@
+@model IEnumerable<SalesManagementSystem.Models.Entities.Employee>
+
+@{
+    ViewBag.Title = "Danh sách nhân viên";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>@ViewBag.Title</h2>
+    <a href="@Url.Action("Create", "Employee")" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Thêm nhân viên
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã NV</th>
+                        <th>Họ đệm</th>
+                        <th>Tên NV</th>
+                        <th>Ngày sinh</th>
+                        <th>Giới tính</th>
+                        <th>SĐT</th>
+                        <th>Email</th>
+                        <th class="text-center" style="width: 150px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.MaNhanVien</td>
+                                <td>@item.HoDem</td>
+                                <td>@item.TenNhanVien</td>
+                                <td>@(item.NgaySinh.HasValue ? item.NgaySinh.Value.ToString("dd/MM/yyyy") : "")</td>
+                                <td>@(item.GioiTinh.HasValue ? (item.GioiTinh.Value ? "Nam" : "Nữ") : "")</td>
+                                <td>@item.SoDienThoai</td>
+                                <td>@item.Email</td>
+                                <td class="text-center">
+                                    <a href="@Url.Action("Update", "Employee", new { id = item.ID })" class="btn btn-sm btn-outline-primary" title="Sửa">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form action="@Url.Action("Delete", "Employee", new { id = item.ID })" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa nhân viên này?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">Chưa có dữ liệu nhân viên.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

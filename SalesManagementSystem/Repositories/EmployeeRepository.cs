@@ -1,0 +1,66 @@
+using System.Collections.Generic;
+using System.Linq;
+using Dapper;
+using SalesManagementSystem.Data;
+using SalesManagementSystem.Models.Entities;
+using System;
+
+namespace SalesManagementSystem.Repositories
+{
+    public class EmployeeRepository
+    {
+        private readonly DbConnectionFactory _db;
+
+        public EmployeeRepository(DbConnectionFactory db)
+        {
+            _db = db;
+        }
+
+        public IEnumerable<Employee> GetAll()
+        {
+            const string sql = "SELECT * FROM NS_NhanVien ORDER BY MaNhanVien";
+            using (var conn = _db.CreateConnection())
+                return conn.Query<Employee>(sql);
+        }
+
+        public Employee GetById(int id)
+        {
+            const string sql = "SELECT * FROM NS_NhanVien WHERE ID = @ID";
+            using (var conn = _db.CreateConnection())
+                return conn.QueryFirstOrDefault<Employee>(sql, new { ID = id });
+        }
+
+        public int Insert(Employee employee)
+        {
+            employee.NgayTao = DateTime.Now;
+            const string sql = @"
+                INSERT INTO NS_NhanVien (MaNhanVien, TenNhanVien, HoDem, NgaySinh, GioiTinh, SoCMND, NgayCap, DiaChi, Email, SoDienThoai, SoDienThoai2, NgayTao, NguoiTao, NgayCapNhat, NguoiCapNhat)
+                VALUES (@MaNhanVien, @TenNhanVien, @HoDem, @NgaySinh, @GioiTinh, @SoCMND, @NgayCap, @DiaChi, @Email, @SoDienThoai, @SoDienThoai2, @NgayTao, @NguoiTao, @NgayCapNhat, @NguoiCapNhat);
+                SELECT CAST(SCOPE_IDENTITY() AS INT)";
+            using (var conn = _db.CreateConnection())
+                return conn.ExecuteScalar<int>(sql, employee);
+        }
+
+        public void Update(Employee employee)
+        {
+            employee.NgayCapNhat = DateTime.Now;
+            const string sql = @"
+                UPDATE NS_NhanVien
+                SET MaNhanVien = @MaNhanVien, TenNhanVien = @TenNhanVien, HoDem = @HoDem,
+                    NgaySinh = @NgaySinh, GioiTinh = @GioiTinh, SoCMND = @SoCMND,
+                    NgayCap = @NgayCap, DiaChi = @DiaChi, Email = @Email,
+                    SoDienThoai = @SoDienThoai, SoDienThoai2 = @SoDienThoai2,
+                    NgayCapNhat = @NgayCapNhat, NguoiCapNhat = @NguoiCapNhat
+                WHERE ID = @ID";
+            using (var conn = _db.CreateConnection())
+                conn.Execute(sql, employee);
+        }
+
+        public void Delete(int id)
+        {
+            const string sql = "DELETE FROM NS_NhanVien WHERE ID = @ID";
+            using (var conn = _db.CreateConnection())
+                conn.Execute(sql, new { ID = id });
+        }
+    }
+}
