@@ -148,14 +148,29 @@
                     return;
                 }
 
+                var isInherit = $('#checkInherit').is(':checked');
                 var checkedIds = [];
-                $('.action-checkbox:checked').each(function() {
-                    checkedIds.push($(this).val());
-                });
+                
+                // Chỉ lấy checkbox nếu không kế thừa
+                if (!isInherit) {
+                    $('.action-checkbox:checked').each(function() {
+                        checkedIds.push($(this).val());
+                    });
+                }
 
-                $.post('@Url.Action("Save", "PhanQuyen")', { idLogin: selectedUserId, checkedActionIds: checkedIds }, function(res) {
+                $.post('@Url.Action("Save", "PhanQuyen")', { idLogin: selectedUserId, checkedActionIds: checkedIds, isInherit: isInherit }, function(res) {
                     if (res.success) {
                         showToast('success', res.message);
+                        
+                        // Load lại grid để hiển thị các checkbox mới được cấp quyền
+                        var userName = $('.tree-node.active .node-label').text();
+                        $('#matrixContainer').html('<div class="d-flex flex-column align-items-center justify-content-center h-100"><div class="spinner-border text-primary" role="status"></div><p class="mt-3 text-muted">Đang cập nhật lại lưới quyền...</p></div>');
+                        
+                        $.get('@Url.Action("GetGrid", "PhanQuyen")', { idLogin: selectedUserId }, function(htmlRes) {
+                            var headerHTML = '<h5 class="fw-bold mb-4" style="color: #0b5b84;">Thiết lập quyền cho: ' + userName + '</h5>';
+                            $('#matrixContainer').html(headerHTML + htmlRes);
+                        });
+                        
                     } else {
                         showToast('error', res.message);
                     }

@@ -31,10 +31,20 @@ namespace SalesManagementSystem.Controllers
         }
 
         [HttpPost]
-        public ActionResult Save(int idLogin, List<int> checkedActionIds)
+        public ActionResult Save(int idLogin, List<int> checkedActionIds, bool isInherit = false)
         {
             var userSession = (UserLogin)Session[CommonConstants.USER_SESSION];
             int currentUser = userSession != null ? userSession.UserID : 0;
+
+            if (isInherit)
+            {
+                var parentActionIds = _phanQuyenRepo.GetParentActionIds(idLogin);
+                if (parentActionIds == null)
+                {
+                    return Json(new { success = false, message = "Nhân sự này không có cấp trên để kế thừa quyền!" });
+                }
+                checkedActionIds = parentActionIds;
+            }
 
             // Nếu không có checked nào, nhận về null từ ajax, thì khởi tạo lại danh sách rỗng để thực thi Delete all
             if (checkedActionIds == null)

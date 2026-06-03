@@ -182,5 +182,18 @@ namespace SalesManagementSystem.Repositories
                 }
             }
         }
+
+        public List<int> GetParentActionIds(int idLogin)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                var parentId = conn.QueryFirstOrDefault<int?>("SELECT IDThamChieu FROM ACL_Login WHERE ID = @ID", new { ID = idLogin });
+                if (parentId == null)
+                {
+                    return null;
+                }
+                return conn.Query<int>("SELECT IDAction FROM ACL_PhanQuyen WHERE IDLogin = @ParentID AND IsChoPhep = 1", new { ParentID = parentId }).ToList();
+            }
+        }
     }
 }

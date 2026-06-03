@@ -19,7 +19,7 @@
       "RelativeMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|solutionrelative:salesmanagementsystem\\app_start\\unityconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|c:\\users\\duoc0\\onedrive\\desktop\\web_qlbh\\quanlybanhang\\salesmanagementsystem\\salesmanagementsystem\\models\\entities\\aclphanquyen.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\salesmanagementsystem\\models\\entities\\aclphanquyen.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|solutionrelative:salesmanagementsystem\\models\\entities\\aclphanquyen.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -218,8 +218,7 @@
               "RelativeToolTip": "SalesManagementSystem\\Controllers\\PhanQuyenController.cs",
               "ViewState": "AgIAABIAAAAAAAAAAAA5wCwAAAAsAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-03T08:59:46.38Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-03T08:59:46.38Z"
             },
             {
               "$type": "Document",
@@ -229,7 +228,7 @@
               "RelativeDocumentMoniker": "SalesManagementSystem\\Repositories\\AclPhanQuyenRepository.cs",
               "ToolTip": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Repositories\\AclPhanQuyenRepository.cs",
               "RelativeToolTip": "SalesManagementSystem\\Repositories\\AclPhanQuyenRepository.cs",
-              "ViewState": "AgIAAHEAAAAAAAAAAAAnwIQAAAAdAAAAAAAAAA==",
+              "ViewState": "AgIAAIwAAAAAAAAAAAAnwJ8AAAAvAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-06-03T09:07:00.29Z",
               "EditorCaption": ""
@@ -244,8 +243,7 @@
               "RelativeToolTip": "SalesManagementSystem\\App_Start\\UnityConfig.cs",
               "ViewState": "AgIAABAAAAAAAAAAAAArwCgAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-02T15:13:01.213Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-02T15:13:01.213Z"
             },
             {
               "$type": "Document",
@@ -281,8 +279,7 @@
               "RelativeToolTip": "SalesManagementSystem\\Controllers\\BaseController.cs",
               "ViewState": "AgIAAAQAAAAAAAAAAAAhwA0AAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-03T02:52:57.156Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-03T02:52:57.156Z"
             },
             {
               "$type": "Document",
@@ -294,8 +291,7 @@
               "RelativeToolTip": "SalesManagementSystem\\Models\\Entities\\AclPhanQuyen.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-03T08:59:49.58Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-03T08:59:49.58Z"
             },
             {
               "$type": "Document",

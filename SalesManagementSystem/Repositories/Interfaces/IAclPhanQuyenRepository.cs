@@ -8,5 +8,6 @@ namespace SalesManagementSystem.Repositories.Interfaces
         IEnumerable<PhanQuyenTreeVM> GetTreeLogin();
         IEnumerable<PhanQuyenMatrixVM> GetMatrixQuyen(int idLogin);
         bool SaveQuyen(int idLogin, List<int> checkedActionIds, int currentUser);
+        List<int> GetParentActionIds(int idLogin);
     }
 }
