@@ -3,10 +3,11 @@ using System.Web.Mvc;
 using SalesManagementSystem.Helpers;
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Repositories.Interfaces;
+using SalesManagementSystem.Models.ViewModels;
 
 namespace SalesManagementSystem.Controllers
 {
-    public class NguoiDungController : Controller
+    public class NguoiDungController : BaseController
     {
         private readonly IAclLoginRepository _aclLoginRepo;
 
@@ -143,6 +144,47 @@ namespace SalesManagementSystem.Controllers
         {
             _aclLoginRepo.Delete(id);
             return RedirectToAction("GetNguoiDung");
+        }
+
+        // GET: NguoiDung/ChangePassword
+        public ActionResult ChangePassword()
+        {
+            return PartialView(new ChangePasswordVM());
+        }
+
+        // POST: NguoiDung/ChangePassword
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ChangePassword(ChangePasswordVM model)
+        {
+            if (ModelState.IsValid)
+            {
+                var session = (UserLogin)Session[CommonConstants.USER_SESSION];
+                if (session == null)
+                {
+                    return Json(new { success = false, message = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." });
+                }
+
+                var user = _aclLoginRepo.GetById(session.UserID);
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy thông tin tài khoản." });
+                }
+
+                string hashedOldPassword = SecurityHelper.GetMd5Hash(model.OldPassword);
+                if (user.MatKhau != hashedOldPassword)
+                {
+                    ModelState.AddModelError("OldPassword", "Mật khẩu cũ không chính xác.");
+                    return PartialView(model);
+                }
+
+                user.MatKhau = SecurityHelper.GetMd5Hash(model.NewPassword);
+                _aclLoginRepo.Update(user);
+
+                return Json(new { success = true, message = "Đổi mật khẩu thành công!" });
+            }
+
+            return PartialView(model);
         }
     }
 }

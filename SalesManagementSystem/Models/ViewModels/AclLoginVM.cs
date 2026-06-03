@@ -5,8 +5,8 @@ namespace SalesManagementSystem.Models.ViewModels
 {
     public class AclLoginVM : AclLogin
     {
-        public string HoDem { get; set; }
-        public string Ten { get; set; }
+        public new string HoDem { get; set; }
+        public new string Ten { get; set; }
         
         public string HoTenNhanVien 
         {

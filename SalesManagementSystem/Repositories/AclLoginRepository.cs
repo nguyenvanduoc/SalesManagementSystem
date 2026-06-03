@@ -119,5 +119,12 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
                 return conn.QueryFirstOrDefault<NhanVien>(sql, new { ID = id });
         }
+
+        public AclLogin Login(string userName, string passWord)
+        {
+            const string sql = "SELECT * FROM ACL_Login WHERE TenDangNhap = @userName AND MatKhau = @passWord AND IsActive = 1 AND NgayXoa IS NULL";
+            using (var conn = _db.CreateConnection())
+                return conn.QueryFirstOrDefault<AclLogin>(sql, new { userName, passWord });
+        }
     }
 }

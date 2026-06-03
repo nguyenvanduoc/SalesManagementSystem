@@ -6,7 +6,7 @@ using SalesManagementSystem.Repositories.Interfaces;
 
 namespace SalesManagementSystem.Controllers
 {
-    public class NhanVienController : Controller
+    public class NhanVienController : BaseController
     {
         private readonly INhanVienRepository _employeeRepo;
 

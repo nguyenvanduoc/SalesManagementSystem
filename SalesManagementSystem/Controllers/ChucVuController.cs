@@ -6,7 +6,7 @@ using SalesManagementSystem.Repositories.Interfaces;
 
 namespace SalesManagementSystem.Controllers
 {
-    public class ChucVuController : Controller
+    public class ChucVuController : BaseController
     {
         private readonly IChucVuRepository _chucVuRepo;
 

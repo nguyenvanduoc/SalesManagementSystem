@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Web;
 using System.Web.Mvc;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories;
@@ -5,7 +7,7 @@ using SalesManagementSystem.Repositories.Interfaces;
 
 namespace SalesManagementSystem.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         private readonly IMenuRepository _menuRepo;
 
@@ -49,6 +51,22 @@ namespace SalesManagementSystem.Controllers
             };
 
             return PartialView("_Menu", vm);
+        }
+
+        public ActionResult ClearCache()
+        {
+            var enumerator = HttpRuntime.Cache.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                HttpRuntime.Cache.Remove(enumerator.Key.ToString());
+            }
+
+            if (Request.UrlReferrer != null)
+            {
+                return Redirect(Request.UrlReferrer.ToString());
+            }
+
+            return RedirectToAction("Index");
         }
     }
 }

@@ -1,0 +1,210 @@
+@model SalesManagementSystem.Models.ViewModels.LoginModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập hệ thống - Quản lý bán hàng</title>
+    <!-- Bootstrap CSS -->
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .bg-img {
+            /* The image used */
+            background-image: url('/Content/IMG/bg-login.png');
+
+            /* Full height */
+            height: 100%; 
+
+            /* Center and scale the image nicely */
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Add a background blur effect */
+        .bg-img::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: inherit;
+            filter: blur(8px);
+            z-index: 1;
+        }
+
+        .login-container {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            max-width: 1000px;
+            width: 90%;
+            transform: translate(180px, -150px); /* Dịch sang trái 80px và lên cao 90px */
+        }
+        
+        .dashboard-img {
+            flex: 1;
+            display: none;
+        }
+        
+        @@media (min-width: 768px) {
+            .dashboard-img {
+                display: block;
+                max-width: 50%;
+            }
+        }
+
+        .dashboard-img img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 40px 30px;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-title {
+            color: #0b457e;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+        
+        .sys-title {
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+            position: absolute;
+            top: -50px;
+            width: 100%;
+            text-align: center;
+            left: 0;
+            text-transform: uppercase;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-control {
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 12px 15px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            border-radius: 4px;
+            padding: 12px 15px;
+            font-size: 16px;
+            font-weight: 500;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #0069d9;
+            border-color: #0062cc;
+        }
+        
+        .text-danger {
+            font-size: 13px;
+            margin-top: 5px;
+            display: block;
+        }
+        
+        .validation-summary-errors {
+            color: #dc3545;
+            font-size: 13px;
+            margin-bottom: 15px;
+            text-align: left;
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .logo-system {
+            max-width: 150px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-img">
+    <div class="login-container">
+        
+        <div class="dashboard-img">
+            <h2 class="sys-title">HỆ THỐNG QUẢN TRỊ</h2>
+            <img src="/Content/IMG/logo-login.png" alt="Dashboard Illustration" />
+        </div>
+
+        <div class="login-card">
+            <img src="/Content/IMG/logo-login.png" alt="Logo" class="logo-system" />
+            <div class="login-title">ĐĂNG NHẬP HỆ THỐNG</div>
+            
+            @using (Html.BeginForm("Index", "Login", FormMethod.Post, new { autocomplete = "off" }))
+            {
+                @Html.AntiForgeryToken()
+                
+                @Html.ValidationSummary(true, "", new { @class = "validation-summary-errors" })
+
+                <div class="form-group">
+                    @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", placeholder = "Nhập tên đăng nhập", autofocus = "autofocus", autocomplete = "off" })
+                    @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "text-danger" })
+                </div>
+                <div class="form-group">
+                    @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Nhập mật khẩu", autocomplete = "new-password" })
+                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Đăng nhập</button>
+            }
+            
+            <div style="font-size: 10px; color: #999; margin-top: 20px; text-align: right;">
+                ver: 1.0.0.0
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- jQuery and Bootstrap JS -->
+<script src="~/Scripts/jquery-3.7.0.min.js"></script>
+<script src="~/Scripts/bootstrap.min.js"></script>
+</body>
+</html>

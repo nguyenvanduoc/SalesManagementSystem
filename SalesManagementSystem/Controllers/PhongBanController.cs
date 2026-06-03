@@ -6,7 +6,7 @@ using SalesManagementSystem.Repositories.Interfaces;
 
 namespace SalesManagementSystem.Controllers
 {
-    public class PhongBanController : Controller
+    public class PhongBanController : BaseController
     {
         private readonly IPhongBanRepository _phongBanRepo;
 
