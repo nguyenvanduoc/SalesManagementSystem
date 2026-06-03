@@ -58,7 +58,8 @@ namespace SalesManagementSystem.Controllers
                     return PartialView("CreateChucVu", chucVu);
                 }
 
-                chucVu.NguoiTao = 0; // Default save as 0
+                var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+                chucVu.NguoiTao = session?.UserID ?? 0;
                 _chucVuRepo.Insert(chucVu);
                 return Json(new { success = true, message = "Thêm mới chức vụ thành công!" });
             }
@@ -89,7 +90,8 @@ namespace SalesManagementSystem.Controllers
                     return PartialView("UpdateChucVu", chucVu);
                 }
 
-                chucVu.NguoiCapNhat = 0; // Default save as 0
+                var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+                chucVu.NguoiCapNhat = session?.UserID ?? 0;
                 _chucVuRepo.Update(chucVu);
                 return Json(new { success = true, message = "Cập nhật chức vụ thành công!" });
             }

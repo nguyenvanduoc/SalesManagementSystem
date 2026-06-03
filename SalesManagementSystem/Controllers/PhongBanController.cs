@@ -58,7 +58,8 @@ namespace SalesManagementSystem.Controllers
                     return PartialView("CreatePhongBan", phongBan);
                 }
 
-                phongBan.NguoiTao = 0; // Default save as 0
+                var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+                phongBan.NguoiTao = session?.UserID ?? 0;
                 _phongBanRepo.Insert(phongBan);
                 return Json(new { success = true, message = "Thêm mới phòng ban thành công!" });
             }
@@ -89,7 +90,8 @@ namespace SalesManagementSystem.Controllers
                     return PartialView("UpdatePhongBan", phongBan);
                 }
 
-                phongBan.NguoiCapNhat = 0; // Default save as 0
+                var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+                phongBan.NguoiCapNhat = session?.UserID ?? 0;
                 _phongBanRepo.Update(phongBan);
                 return Json(new { success = true, message = "Cập nhật phòng ban thành công!" });
             }

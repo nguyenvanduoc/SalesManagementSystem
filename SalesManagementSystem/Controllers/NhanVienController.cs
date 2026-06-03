@@ -54,7 +54,8 @@ namespace SalesManagementSystem.Controllers
                 }
 
                 // Optionally set NguoiTao from user session/identity here
-                employee.NguoiTao = 0; // Default save as 0
+                var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+                employee.NguoiTao = session?.UserID ?? 0;
                 _employeeRepo.Insert(employee);
                 return Json(new { success = true, message = "Thêm mới nhân viên thành công!" });
             }
@@ -85,7 +86,8 @@ namespace SalesManagementSystem.Controllers
                     return PartialView(employee);
                 }
 
-                employee.NguoiCapNhat = 0; // Default save as 0
+                var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+                employee.NguoiCapNhat = session?.UserID ?? 0;
                 _employeeRepo.Update(employee);
                 return Json(new { success = true, message = "Cập nhật nhân viên thành công!" });
             }

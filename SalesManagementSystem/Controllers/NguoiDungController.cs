@@ -58,6 +58,7 @@ namespace SalesManagementSystem.Controllers
                         // Bỏ qua nếu mã nhân viên đã được dùng làm tên đăng nhập
                         if (!_aclLoginRepo.IsDuplicateUsername(tenDangNhap))
                         {
+                            var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
                             var login = new AclLogin
                             {
                                 IDNhanVien = emp.ID,
@@ -66,7 +67,7 @@ namespace SalesManagementSystem.Controllers
                                 HoDem = emp.HoDem,
                                 Ten = emp.TenNhanVien,
                                 IsActive = IsActive,
-                                NguoiTao = 0 // Thay bằng UserId nếu có
+                                NguoiTao = session?.UserID ?? 0
                             };
                             _aclLoginRepo.Insert(login);
                         }
@@ -128,6 +129,8 @@ namespace SalesManagementSystem.Controllers
                         existing.Ten = emp.TenNhanVien;
                     }
                     
+                    var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+                    existing.NguoiCapNhat = session?.UserID ?? 0;
                     _aclLoginRepo.Update(existing);
                     return Json(new { success = true, message = "Cập nhật tài khoản thành công!" });
                 }
