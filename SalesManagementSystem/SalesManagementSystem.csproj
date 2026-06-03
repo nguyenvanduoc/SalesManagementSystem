@@ -143,6 +143,12 @@
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\NhanVienController.cs" />
     <Compile Include="Controllers\ChucVuController.cs" />
+    <Compile Include="Controllers\PhanQuyenController.cs" />
+    <Compile Include="Models\Entities\AclPhanQuyen.cs" />
+    <Compile Include="Models\ViewModels\PhanQuyenTreeVM.cs" />
+    <Compile Include="Models\ViewModels\PhanQuyenMatrixVM.cs" />
+    <Compile Include="Repositories\Interfaces\IAclPhanQuyenRepository.cs" />
+    <Compile Include="Repositories\AclPhanQuyenRepository.cs" />
     <Compile Include="Controllers\PhongBanController.cs" />
     <Compile Include="Controllers\NguoiDungController.cs" />
     <Compile Include="Helpers\SecurityHelper.cs" />
@@ -258,8 +264,13 @@
     <Content Include="Views\PhongBan\UpdatePhongBan.cshtml" />
     <Content Include="Views\NguoiDung\GetNguoiDung.cshtml" />
     <Content Include="Views\NguoiDung\_NguoiDungList.cshtml" />
-    <Content Include="Views\NguoiDung\CreateNguoiDung.cshtml" />
+    <Content Include="Views\NguoiDung\GetNguoiDung.cshtml" />
     <Content Include="Views\NguoiDung\EditNguoiDung.cshtml" />
+    <Content Include="Views\PhanQuyen\Index.cshtml" />
+    <Content Include="Views\PhanQuyen\_MatrixGrid.cshtml" />
+    <Content Include="Views\PhanQuyen\_TreeRecursive.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />
     <Content Include="Views\NhanVien\_NhanVienList.cshtml" />
   </ItemGroup>

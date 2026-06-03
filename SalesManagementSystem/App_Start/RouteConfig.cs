@@ -50,6 +50,11 @@ namespace SalesManagementSystem
             routes.MapRoute(name: "NguoiDung_Delete", url: "nguoi-dung/xoa", defaults: new { controller = "NguoiDung", action = "DeleteNguoiDung" });
             routes.MapRoute(name: "NguoiDung_ChangePassword", url: "nguoi-dung/doi-mat-khau", defaults: new { controller = "NguoiDung", action = "ChangePassword" });
 
+            // Phân quyền
+            routes.MapRoute(name: "PhanQuyen_Index", url: "phan-quyen", defaults: new { controller = "PhanQuyen", action = "Index" });
+            routes.MapRoute(name: "PhanQuyen_GetGrid", url: "phan-quyen/lay-luoi-quyen", defaults: new { controller = "PhanQuyen", action = "GetGrid" });
+            routes.MapRoute(name: "PhanQuyen_Save", url: "phan-quyen/luu", defaults: new { controller = "", action = "Save" });
+
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",

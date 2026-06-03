@@ -133,7 +133,7 @@ Hệ thống sẽ tự động gọi Popup Xóa chuẩn và thực thi phương 
 - Sử dụng class `.table-custom table-bordered` đã được định nghĩa toàn cục trong `_Layout.cshtml`.
 - Dòng chẵn (even) sẽ có nền màu xanh nhạt (`#dbe6ef`), dòng lẻ (odd) nền trắng.
 - Khi rê chuột (hover) vào một dòng, nền dòng sẽ chuyển sang màu xanh đậm hơn (`#c9d9e8`).
-- **Tiêu đề cột (Header)**: Chữ màu đen (`#212529`) và được tô đậm (`font-weight: bold`), viền dưới dày 2px. **Tiêu đề (title) của các cột luôn luôn canh trái**.
+- **Tiêu đề cột (Header)**: Luôn có nền màu xám nhạt (`background-color: #f4f6f9;`), chữ màu đen (`#212529`) và được tô đậm (`font-weight: bold`), viền dưới dày 2px. **Tiêu đề (title) của các cột luôn luôn canh trái**.
 - Các ô dữ liệu tự động canh giữa theo chiều dọc (`vertical-align: middle`), đường lưới mờ (`#e9ecef`).
 - Sử dụng class `table-responsive` bao bọc bên ngoài table với `min-height: 350px` để chống vỡ khung và hiển thị tốt dropdown.
 - **Canh lề dữ liệu (Alignment)**:
@@ -282,3 +282,9 @@ showToast('error', 'Có lỗi xảy ra trong quá trình xóa dữ liệu.');
 - Sử dụng **Unity Container** để quản lý Dependency Injection.
 - Toàn bộ việc đăng ký mapping giữa Interface và Class thực thi phải được khai báo trong file `App_Start/UnityConfig.cs`.
 - Cú pháp đăng ký chuẩn: `container.RegisterType<IChucVuRepository, ChucVuRepository>(new HierarchicalLifetimeManager());`
+
+## 10. Tiêu chuẩn cấu hình Router (Routing Standard)
+- Tất cả các chức năng mới (Controller mới) **bắt buộc** phải được định nghĩa URL tường minh (explicit routing) trong file `App_Start/RouteConfig.cs`, khai báo trước route `Default` mặc định.
+- URL (đường dẫn web) nên được định dạng theo kiểu tiếng Việt không dấu, chữ thường và phân cách bằng dấu gạch ngang `-` (Kebab-case) để tối ưu và hiển thị chuyên nghiệp.
+- **Ví dụ đúng:** `/phan-quyen`, `/phong-ban/them-moi`, `/phan-quyen/luu`.
+- **Ví dụ sai (không nên dùng):** `/PhanQuyen/Index`, `/PhongBan/CreatePhongBan`.

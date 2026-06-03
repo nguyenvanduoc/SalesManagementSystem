@@ -15,7 +15,10 @@ namespace SalesManagementSystem.Models.Entities
         /// <summary>Tên controller MVC, VD: "Product", "Order", "Inventory"</summary>
         public string TenController { get; set; }
 
-        /// <summary>Mô tả chức năng, VD: "Xem danh sách sản phẩm"</summary>
+        /// <summary>Mã tổ chức năng, VD: "Xem danh sách sản phẩm"</summary>
         public string GhiChu { get; set; }
+
+        /// <summary>1=Xem, 2=Thêm, 3=Sửa, 4=Xóa, 5=Tùy chọn</summary>
+        public int LoaiPhanQuyen { get; set; }
     }
 }

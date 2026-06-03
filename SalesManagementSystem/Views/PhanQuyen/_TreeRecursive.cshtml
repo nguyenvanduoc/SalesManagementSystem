@@ -1,0 +1,31 @@
+@model IEnumerable<SalesManagementSystem.Models.ViewModels.PhanQuyenTreeVM>
+
+@if (Model != null && Model.Any())
+{
+    <ul class="tree-list list-unstyled ps-0 mb-0" style="padding-left: 0.5rem !important;">
+        @foreach (var node in Model)
+        {
+            <li>
+                <div class="tree-node d-flex align-items-center rounded" data-id="@node.ID" style="cursor: pointer; padding: 3px 6px; margin-bottom: 1px;">
+                    @if (node.Children != null && node.Children.Any())
+                    {
+                        <i class="bi bi-caret-right-fill toggle-icon me-2 text-muted" style="font-size: 0.8rem; transition: transform 0.2s;"></i>
+                        <i class="bi bi-folder-fill me-2 text-warning"></i>
+                    }
+                    else
+                    {
+                        <i class="bi bi-person-fill me-2 text-secondary ms-4"></i>
+                    }
+                    <span class="node-label">@node.TenNhanVien</span>
+                </div>
+                
+                @if (node.Children != null && node.Children.Any())
+                {
+                    <div class="tree-children" style="display: none;">
+                        @Html.Partial("_TreeRecursive", node.Children)
+                    </div>
+                }
+            </li>
+        }
+    </ul>
+}

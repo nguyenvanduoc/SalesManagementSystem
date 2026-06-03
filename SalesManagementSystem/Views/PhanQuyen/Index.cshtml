@@ -1,0 +1,192 @@
+@model IEnumerable<SalesManagementSystem.Models.ViewModels.PhanQuyenTreeVM>
+
+@{
+    ViewBag.Title = "Phân quyền người dùng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .split-layout {
+        display: flex;
+        height: calc(100vh - 140px);
+        background: #fff;
+        border-radius: 6px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    .tree-pane {
+        width: 380px;
+        flex-shrink: 0;
+        border-right: 1px solid #dee2e6;
+        padding: 15px;
+        overflow-y: auto;
+        background: #f8f9fa;
+    }
+    .grid-pane {
+        flex-grow: 1;
+        padding: 20px;
+        overflow-y: auto;
+        background: #fff;
+    }
+    .tree-node:hover {
+        background: #e9ecef;
+    }
+    .tree-node.active {
+        background: #cce5ff;
+        font-weight: 600;
+        color: #004085;
+    }
+    .form-check-input {
+        cursor: pointer;
+    }
+    /* Giao diện nút tree như hình ảnh */
+    .tree-children {
+        border-left: 1px dashed #ced4da;
+        margin-left: 12px;
+        padding-left: 0px;
+    }
+</style>
+
+<div class="phan-quyen-container" style="font-family: Arial, Helvetica, sans-serif;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">@ViewBag.Title</h4>
+        <div class="d-flex gap-2">
+            <button type="button" id="btnSaveQuyen" class="btn text-white px-3" style="background-color: #2998e4; border: none;">
+                <i class="bi bi-save me-1"></i> Lưu phân quyền
+            </button>
+        </div>
+    </div>
+
+    <div class="split-layout">
+    <div class="tree-pane">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control form-control-sm" placeholder="Nhập từ khóa..." id="searchTree">
+            <button class="btn btn-primary btn-sm" style="background-color: #2998e4; border:none;" type="button"><i class="bi bi-search"></i> Tìm kiếm</button>
+        </div>
+        <div id="treeContainer">
+            @if (Model != null && Model.Any())
+            {
+                // Thêm một root giả như hình (Admin)
+                <ul class="tree-list list-unstyled mb-0">
+                    <li>
+                        <div class="tree-node d-flex align-items-center rounded" style="padding: 6px 8px; margin-bottom: 2px;">
+                            <i class="bi bi-caret-down-fill toggle-icon me-2 text-muted" style="font-size: 0.8rem;"></i>
+                            <i class="bi bi-person-workspace me-2 text-primary"></i>
+                            <span class="fw-bold">Danh sách nhân sự</span>
+                        </div>
+                        <div class="tree-children">
+                            @Html.Partial("_TreeRecursive", Model)
+                        </div>
+                    </li>
+                </ul>
+            }
+            else
+            {
+                <p class="text-muted">Không có dữ liệu nhân viên.</p>
+            }
+        </div>
+    </div>
+    
+    <div class="grid-pane" id="matrixContainer">
+        <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
+            <i class="bi bi-diagram-3" style="font-size: 4rem; color: #ced4da;"></i>
+            <h5 class="mt-3">Chưa chọn nhân sự</h5>
+            <p>Vui lòng chọn một nhân viên ở danh sách bên trái để thiết lập quyền hạn.</p>
+        </div>
+    </div>
+</div>
+</div>
+
+@section Scripts {
+    <script>
+        var selectedUserId = null;
+
+        $(document).ready(function() {
+            // Tree toggle logic
+            $(document).on('click', '.toggle-icon, .bi-folder-fill', function(e) {
+                e.stopPropagation();
+                var node = $(this).closest('li');
+                var children = node.find('> .tree-children');
+                var icon = node.find('> .tree-node .toggle-icon');
+                
+                children.slideToggle(200);
+                if (icon.hasClass('bi-caret-down-fill')) {
+                    icon.removeClass('bi-caret-down-fill').addClass('bi-caret-right-fill');
+                } else {
+                    icon.removeClass('bi-caret-right-fill').addClass('bi-caret-down-fill');
+                }
+            });
+
+            // Tree node click logic
+            $(document).on('click', '.tree-node', function() {
+                // Chỉ xử lý nếu node có data-id (nhân viên thật)
+                var id = $(this).data('id');
+                if (!id) return;
+
+                $('.tree-node').removeClass('active');
+                $(this).addClass('active');
+                
+                selectedUserId = id;
+                var userName = $(this).find('.node-label').text();
+                
+                // Show loading
+                $('#matrixContainer').html('<div class="d-flex flex-column align-items-center justify-content-center h-100"><div class="spinner-border text-primary" role="status"></div><p class="mt-3 text-muted">Đang tải phân quyền cho: <b>' + userName + '</b>...</p></div>');
+                
+                // Load grid
+                $.get('@Url.Action("GetGrid", "PhanQuyen")', { idLogin: selectedUserId }, function(res) {
+                    // Prepend user name to the loaded grid
+                    var headerHTML = '<h5 class="fw-bold mb-4" style="color: #0b5b84;">Thiết lập quyền cho: ' + userName + '</h5>';
+                    $('#matrixContainer').html(headerHTML + res);
+                }).fail(function() {
+                    $('#matrixContainer').html('<div class="alert alert-danger">Đã có lỗi xảy ra khi tải dữ liệu phân quyền!</div>');
+                });
+            });
+
+            // Save button
+            $('#btnSaveQuyen').click(function() {
+                if (!selectedUserId) {
+                    showToast('warning', 'Vui lòng chọn một nhân viên từ danh sách bên trái để lưu!');
+                    return;
+                }
+
+                var checkedIds = [];
+                $('.action-checkbox:checked').each(function() {
+                    checkedIds.push($(this).val());
+                });
+
+                $.post('@Url.Action("Save", "PhanQuyen")', { idLogin: selectedUserId, checkedActionIds: checkedIds }, function(res) {
+                    if (res.success) {
+                        showToast('success', res.message);
+                    } else {
+                        showToast('error', res.message);
+                    }
+                }).fail(function() {
+                    showToast('error', 'Lỗi hệ thống khi lưu phân quyền.');
+                });
+            });
+            
+            // Search tree logic
+            $('#searchTree').on('keyup', function() {
+                var val = $(this).val().toLowerCase();
+                
+                if (val === '') {
+                    $('.tree-node').show();
+                    return;
+                }
+
+                $('.tree-node').each(function() {
+                    var text = $(this).text().toLowerCase();
+                    if (text.indexOf(val) > -1) {
+                        $(this).show();
+                        // Expand parents
+                        $(this).parents('.tree-children').show();
+                        $(this).parents('li').find('> .tree-node .toggle-icon').removeClass('bi-caret-right-fill').addClass('bi-caret-down-fill');
+                    } else {
+                        if ($(this).data('id')) { // Only hide leaf nodes or nodes not matching
+                            $(this).hide();
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}
