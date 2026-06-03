@@ -113,7 +113,9 @@
         .sidebar::-webkit-scrollbar { width: 4px; }
         .sidebar::-webkit-scrollbar-thumb { background: var(--sidebar-border); border-radius: 4px; }
 
-        /* Section heading */
+        /* Loại bỏ class nav-global-toggle cũ vì nút đã lên Topbar */
+
+        /* Section heading (Tổng quan) */
         .sidebar .nav-heading {
             padding: 18px 18px 6px;
             font-size: .68rem;
@@ -121,48 +123,128 @@
             letter-spacing: 1.2px;
             text-transform: uppercase;
             color: var(--sidebar-heading);
+            margin: 0;
         }
 
-        /* Nav item */
+        /* Nav item thường (Dashboard) */
         .sidebar .nav-item { list-style: none; }
-        .sidebar .nav-link {
+        .sidebar > ul > .nav-item > .nav-link {
             display: flex;
             align-items: center;
             gap: 11px;
-            padding: 10px 18px;
+            padding: 12px 18px;
             color: var(--sidebar-text);
             text-decoration: none;
-            font-size: .875rem;
-            font-weight: 500;
-            border-left: 3px solid transparent;
-            transition: background .18s, border-color .18s, color .18s;
-            white-space: nowrap;
+            font-size: 1.05rem; /* Tăng font size */
+            font-weight: 600;
+            transition: background .2s, color .2s;
         }
-        .sidebar .nav-link i {
-            font-size: 1rem;
+        .sidebar > ul > .nav-item > .nav-link i {
+            font-size: 1.15rem;
             width: 22px;
             text-align: center;
-            opacity: .85;
             flex-shrink: 0;
         }
-        .sidebar .nav-link:hover {
+        .sidebar > ul > .nav-item > .nav-link:hover {
             background: var(--sidebar-hover);
             color: #fff;
-            border-left-color: var(--accent);
         }
-        .sidebar .nav-link.active {
+        .sidebar > ul > .nav-item > .nav-link.active {
             background: var(--sidebar-active);
             color: #fff;
-            border-left-color: #fff;
-            font-weight: 600;
         }
-        .sidebar .nav-link .badge-count {
-            margin-left: auto;
-            background: var(--accent);
+
+        /* Nav group (Accordion) */
+        .sidebar .nav-group-toggle {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 14px 18px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-size: 1.05rem; /* Tăng font size */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .2s, color .2s;
+        }
+        .sidebar .nav-group-toggle:hover {
+            background: var(--sidebar-hover);
             color: #fff;
-            font-size: .68rem;
-            padding: 2px 7px;
-            border-radius: 10px;
+        }
+        .sidebar .nav-group-toggle .chevron {
+            margin-left: auto;
+            transition: transform .3s ease;
+            font-size: 0.8rem;
+        }
+        .sidebar .nav-group-toggle[aria-expanded="true"] .chevron {
+            transform: rotate(180deg);
+        }
+
+        /* Tree lines for child items */
+        .sidebar .nav-group-collapse ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            /* Vertical line */
+            border-left: 1px solid rgba(255, 255, 255, 0.5);
+            margin-left: 26px; /* align with the icon above */
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+
+        .sidebar .nav-group-collapse li {
+            position: relative;
+        }
+
+        /* Horizontal dash */
+        .sidebar .nav-group-collapse li::before {
+            content: "";
+            position: absolute;
+            top: 19px; /* middle of the link */
+            left: 0;
+            width: 12px;
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Dấu chấm trắng cho item active */
+        .sidebar .nav-group-collapse .nav-link.active::before {
+            content: "";
+            position: absolute;
+            top: 19px; 
+            left: -3px; /* Đặt đè lên đường kẻ dọc */
+            width: 7px;
+            height: 7px;
+            background-color: #fff;
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        .sidebar .nav-group-collapse .nav-link {
+            padding: 8px 15px 8px 20px; /* Thu nhỏ khoảng cách */
+            border-left: none;
+            font-size: 0.95rem; /* Tăng chữ to lên */
+            font-weight: 500; 
+            white-space: normal;
+            color: var(--sidebar-text); /* Mặc định menu sáng */
+            text-decoration: none;
+            display: block;
+            transition: color .2s, background .2s;
+            position: relative;
+        }
+        .sidebar .nav-group-collapse .nav-link.text-faded {
+            color: rgba(255, 255, 255, 0.45); /* Chỉ mờ khi cùng nhóm với item active */
+        }
+        .sidebar .nav-group-collapse .nav-link:hover {
+            background: transparent;
+            color: #fff;
+        }
+        .sidebar .nav-group-collapse .nav-link.active {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border-radius: 0 4px 4px 0;
+            border-left: none;
+            font-weight: 600;
         }
 
         /* Separator */
@@ -215,11 +297,20 @@
 
         /* ─── Sidebar collapsed ──────────────────────────── */
         body.sidebar-collapsed .sidebar { width: 60px; }
-        body.sidebar-collapsed .sidebar .nav-heading,
+        body.sidebar-collapsed .sidebar .nav-group-toggle span,
+        body.sidebar-collapsed .sidebar .nav-group-toggle .chevron,
+        body.sidebar-collapsed .sidebar .nav-group-collapse,
         body.sidebar-collapsed .sidebar .nav-link span,
         body.sidebar-collapsed .sidebar .badge-count { display: none; }
-        body.sidebar-collapsed .sidebar .nav-link { justify-content: center; padding: 12px; }
-        body.sidebar-collapsed .sidebar .nav-link i { width: auto; }
+        
+        body.sidebar-collapsed .sidebar .nav-link,
+        body.sidebar-collapsed .sidebar .nav-group-toggle { 
+            justify-content: center; 
+            padding: 12px; 
+            border: none;
+        }
+        body.sidebar-collapsed .sidebar .nav-link i,
+        body.sidebar-collapsed .sidebar .nav-group-toggle i { width: auto; font-size: 1.2rem; margin: 0; }
         body.sidebar-collapsed .main-wrapper { margin-left: 60px; }
 
         /* ─── Responsive ─────────────────────────────────── */
@@ -328,9 +419,6 @@
     </a>
 
     <div class="topbar-right">
-        <button class="btn-toggle" id="sidebarToggle" title="Thu/mở menu">
-            <i class="bi bi-list"></i>
-        </button>
         @{
             var userSession = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
             string hoTen = userSession != null ? (userSession.HoDem + " " + userSession.Ten).Trim() : "Admin";
@@ -338,9 +426,8 @@
         }
         <div class="user-info dropdown">
             <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle dropdown-toggle-hide-arrow" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false" style="color: inherit; gap: 9px;">
-                <div class="avatar">@firstChar</div>
-                <span>@hoTen</span>
-                <i class="bi bi-chevron-down ms-1" style="font-size: 0.8rem;"></i>
+                <span class="d-none d-sm-block">@hoTen</span>
+                <i class="bi bi-caret-down-fill ms-1 me-3" style="font-size: 0.8rem;"></i>
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="dropdownUser" style="margin-top: 15px; border-radius: 8px; font-size: 0.9rem;">
                 <li>
@@ -366,7 +453,14 @@
 
 <!-- ═══════════════ SIDEBAR ═══════════════ -->
 <nav class="sidebar" id="sidebar">
-
+    <div class="d-flex justify-content-end align-items-center" style="padding: 10px 18px 0;">
+        <button class="btn-toggle text-white border-0 bg-transparent ms-3" id="expandAllToggle" onclick="toggleAllAccordions()" title="Mở/Đóng tất cả menu" style="font-size: 1.2rem; padding: 0; outline: none; margin-right: 15px;">
+            <i class="bi bi-caret-down-fill" id="expandAllIcon" style="opacity: 0.85;"></i>
+        </button>
+        <button class="btn-toggle text-white border-0 bg-transparent" id="sidebarToggle" title="Thu/mở menu" style="font-size: 1.8rem; padding: 0; outline: none;">
+            <i class="bi bi-list" style="opacity: 0.85;"></i>
+        </button>
+    </div>
     @Html.Action("Menu", "Home")
 </nav>
 
@@ -438,17 +532,93 @@
         body.classList.add('sidebar-collapsed');
     }
 
+    // Bật/tắt Sidebar (Desktop/Mobile)
     toggleBtn.addEventListener('click', function () {
-        // Desktop: thu/mở bằng class collapsed
         if (window.innerWidth > 768) {
             body.classList.toggle('sidebar-collapsed');
-            localStorage.setItem('sidebarCollapsed',
-                body.classList.contains('sidebar-collapsed') ? '1' : '0');
+            localStorage.setItem('sidebarCollapsed', body.classList.contains('sidebar-collapsed') ? '1' : '0');
         } else {
-            // Mobile: slide in/out
             body.classList.toggle('sidebar-open');
         }
     });
+
+    // Lưu trữ và phục hồi trạng thái mở của Menu Accordion
+    document.addEventListener("DOMContentLoaded", function () {
+        var openMenus = JSON.parse(localStorage.getItem('openMenus') || '[]');
+        
+        // Phục hồi trạng thái (những nhóm có id nằm trong openMenus sẽ được mở ra)
+        openMenus.forEach(function (id) {
+            var group = document.getElementById(id);
+            if (group && !group.classList.contains('show')) {
+                group.classList.add('show');
+                var toggle = document.querySelector('[href="#' + id + '"]');
+                if (toggle) {
+                    toggle.classList.remove('collapsed');
+                    toggle.setAttribute('aria-expanded', 'true');
+                }
+            }
+        });
+
+        // Lắng nghe sự kiện Bootstrap collapse để lưu trạng thái
+        var groups = document.querySelectorAll('.nav-group-collapse');
+        groups.forEach(function (group) {
+            group.addEventListener('shown.bs.collapse', function (e) {
+                if (e.target === this) {
+                    var arr = JSON.parse(localStorage.getItem('openMenus') || '[]');
+                    if (!arr.includes(this.id)) arr.push(this.id);
+                    localStorage.setItem('openMenus', JSON.stringify(arr));
+                }
+            });
+            group.addEventListener('hidden.bs.collapse', function (e) {
+                if (e.target === this) {
+                    var arr = JSON.parse(localStorage.getItem('openMenus') || '[]');
+                    arr = arr.filter(id => id !== this.id);
+                    localStorage.setItem('openMenus', JSON.stringify(arr));
+                }
+            });
+        });
+    });
+
+    // Expand / Collapse tất cả Accordions
+    function toggleAllAccordions() {
+        var groups = document.querySelectorAll('.nav-group-collapse');
+        var toggles = document.querySelectorAll('.nav-group-toggle');
+        var icon = document.getElementById('expandAllIcon');
+        
+        // Kiểm tra xem có đang mở cái nào không
+        var isAnyOpen = false;
+        groups.forEach(function(g) { if (g.classList.contains('show')) isAnyOpen = true; });
+
+        var arr = []; // Cập nhật localStorage
+        if (isAnyOpen) {
+            // Đóng tất cả
+            toggles.forEach(function(t) { 
+                t.classList.add('collapsed'); 
+                t.setAttribute('aria-expanded', 'false'); 
+            });
+            groups.forEach(function(g) { 
+                var bsCollapse = bootstrap.Collapse.getInstance(g);
+                if (bsCollapse) bsCollapse.hide();
+                else g.classList.remove('show');
+            });
+            localStorage.setItem('openMenus', JSON.stringify([]));
+            if(icon) { icon.classList.remove('bi-caret-up-fill'); icon.classList.add('bi-caret-down-fill'); }
+        } else {
+            // Mở tất cả
+            toggles.forEach(function(t) { 
+                t.classList.remove('collapsed'); 
+                t.setAttribute('aria-expanded', 'true'); 
+            });
+            groups.forEach(function(g) { 
+                arr.push(g.id);
+                var bsCollapse = bootstrap.Collapse.getInstance(g);
+                if (bsCollapse) bsCollapse.show();
+                else g.classList.add('show');
+            });
+            localStorage.setItem('openMenus', JSON.stringify(arr));
+            if(icon) { icon.classList.remove('bi-caret-down-fill'); icon.classList.add('bi-caret-up-fill'); }
+        }
+    }
 
     // Đóng sidebar khi click ngoài (mobile)
     document.addEventListener('click', function (e) {

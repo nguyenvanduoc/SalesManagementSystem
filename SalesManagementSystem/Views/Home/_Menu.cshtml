@@ -5,7 +5,7 @@
 }
 
 @* ── Dashboard (luôn hiện ở đầu, không phụ thuộc ACL) ── *@
-<p class="nav-heading">Tổng quan</p>
+<p class="nav-heading" style="margin-top: -15px;">Tổng quan</p>
 <ul style="padding:0;margin:0">
     <li class="nav-item">
         <a href="@Url.Action("Index", "Home")"
@@ -17,32 +17,56 @@
 </ul>
 
 @* ── Các nhóm menu động từ ACL_ManHinh ── *@
+@{ int groupIndex = 0; }
 @foreach (var group in Model.Groups)
 {
-    <hr class="nav-divider" />
-    <p class="nav-heading">@group.TenNhom</p>
-    <ul style="padding:0;margin:0">
-        @foreach (var item in group.Items)
-        {
-            bool isActive = string.Equals(activeCtrl, item.TenController,
-                                System.StringComparison.OrdinalIgnoreCase);
+    groupIndex++;
+    string collapseId = "collapseGroup" + groupIndex;
+    
+    // Kiểm tra xem nhóm này có item nào đang active hay không để tự động xổ xuống
+    bool isGroupActive = group.Items.Any(i => string.Equals(activeCtrl, i.TenController, StringComparison.OrdinalIgnoreCase));
 
-            string href = (string.IsNullOrEmpty(item.TenController))
-                ? "#"
-                : Url.Action(item.TenAction, item.TenController);
+    <div class="nav-group">
+        <a class="nav-group-toggle @(isGroupActive ? "" : "collapsed")" data-bs-toggle="collapse" href="#@collapseId" role="button" aria-expanded="@(isGroupActive ? "true" : "false")">
+            <i class="bi @GetGroupIcon(group.TenNhom)"></i>
+            <span>@group.TenNhom</span>
+            <i class="bi bi-chevron-down chevron"></i>
+        </a>
+        <div class="collapse @(isGroupActive ? "show" : "") nav-group-collapse" id="@collapseId">
+            <ul>
+                @foreach (var item in group.Items)
+                {
+                    bool isActive = string.Equals(activeCtrl, item.TenController, System.StringComparison.OrdinalIgnoreCase);
+                    string href = (string.IsNullOrEmpty(item.TenController)) ? "#" : Url.Action(item.TenAction, item.TenController);
+                    string fadedClass = (isGroupActive && !isActive) ? "text-faded" : "";
 
-            <li class="nav-item">
-                <a href="@href" class="nav-link @(isActive ? "active" : "")">
-                    <i class="bi @GetMenuIcon(item.TenController, item.TenManHinh)"></i>
-                    <span>@item.TenManHinh</span>
-                </a>
-            </li>
-        }
-    </ul>
+                    <li class="nav-item">
+                        <a href="@href" class="nav-link @(isActive ? "active" : "") @fadedClass">
+                            <span>@item.TenManHinh</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
 }
 
 @* ── Hàm helper chọn icon theo controller/tên màn hình ── *@
 @functions {
+    string GetGroupIcon(string tenNhom)
+    {
+        if (string.IsNullOrEmpty(tenNhom)) return "bi-folder2-open";
+        string name = tenNhom.ToLower();
+        if (name.Contains("bán hàng")) return "bi-cart3";
+        if (name.Contains("danh mục")) return "bi-grid";
+        if (name.Contains("hệ thống")) return "bi-gear";
+        if (name.Contains("kho bãi") || name.Contains("kho")) return "bi-boxes";
+        if (name.Contains("tổng quan")) return "bi-speedometer2";
+        if (name.Contains("nhân sự") || name.Contains("nhân viên")) return "bi-people-fill";
+        if (name.Contains("báo cáo") || name.Contains("thống kê")) return "bi-bar-chart-line";
+        return "bi-folder2-open";
+    }
+
     string GetMenuIcon(string controller, string tenManHinh)
     {
         if (string.IsNullOrEmpty(controller))

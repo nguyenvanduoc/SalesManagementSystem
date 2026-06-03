@@ -6,7 +6,10 @@ Tài liệu này ghi lại các tiêu chuẩn thiết kế giao diện cho dự 
 
 Tất cả các trang danh sách (Index) cần tuân thủ cấu trúc sau:
 
-1. **Header**: Tiêu đề trang và nút thêm mới nằm cùng một hàng.
+1. **Header (Tiêu đề trang)**: 
+   - Nút thêm mới và Tiêu đề trang nằm cùng một hàng.
+   - Tiêu đề bắt buộc phải tuân theo cấu trúc HTML sau: không có icon, chữ in hoa, in đậm, kích thước 1.25rem, và màu xanh đậm (`#0b5b84`).
+   - HTML mẫu: `<h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">@ViewBag.Title</h4>`
 2. **Khung tìm kiếm/lọc (Filter)**: Luôn luôn có một form chứa các điều kiện lọc ở phía trên bảng dữ liệu. Nó giúp người dùng dễ dàng tìm kiếm và thu hẹp dữ liệu hiển thị.
 3. **Bảng dữ liệu (Table)**: Nằm bên dưới khung lọc, sử dụng thẻ bảng tiêu chuẩn với màu sắc nhẹ nhàng (ví dụ: `table-light` cho thead).
 
@@ -104,7 +107,8 @@ Hệ thống không sử dụng hộp thoại `confirm()` mặc định của tr
 ## 4. Modal (Popup):
 - Giao diện sáng (Light mode) sạch sẽ.
 - Cạnh trên (top-border) có đường viền màu vàng dày để nhấn mạnh cảnh báo.
-- Tiêu đề: **Thông báo!** (chữ xám đen) cùng icon cảnh báo màu vàng.
+- Tiêu đề Modal (Cảnh báo/Thông báo chung): **Thông báo!** (chữ xám đen) cùng icon cảnh báo màu vàng.
+- Tiêu đề Modal Form (Thêm mới/Cập nhật): Bắt buộc in hoa, in đậm, màu xanh đậm (`#0b5b84`), không sử dụng icon. Ví dụ: `<h5 class="modal-title fw-bold text-uppercase" style="color: #0b5b84;">@ViewBag.Title</h5>`
 - Nút bấm:
   - **ĐỒNG Ý**: Nền vàng, chữ trắng đậm (bên trái).
   - **ĐỂ SAU**: Nền xám nhạt, chữ đen đậm (bên phải).
