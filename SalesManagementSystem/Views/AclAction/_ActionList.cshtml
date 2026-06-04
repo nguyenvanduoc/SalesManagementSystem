@@ -1,0 +1,145 @@
+@model IEnumerable<SalesManagementSystem.Models.Entities.AclAction>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive" style="min-height: 350px;">
+            <table class="table table-custom table-bordered table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width: 40px;"><input type="checkbox" class="form-check-input" id="checkAll"></th>
+                        <th class="text-center" style="width: 50px;"></th>
+                        <th>Màn hình</th>
+                        <th>Controller</th>
+                        <th>Action</th>
+                        <th>Loại quyền</th>
+                        <th>Ghi chú</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="text-center align-middle">
+                                    <input type="checkbox" class="form-check-input row-checkbox" value="@item.ID">
+                                </td>
+                                <td class="text-center align-middle">
+                                    <div class="dropdown dropdown-hover">
+                                        <button class="btn btn-sm btn-light border dropdown-toggle-hide-arrow shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 2px 6px;">
+                                            <i class="bi bi-grid-3x3-gap-fill text-dark"></i>
+                                        </button>
+                                        <ul class="dropdown-menu shadow">
+                                            <li><h6 class="dropdown-header text-uppercase fw-bold text-dark">Thao tác</h6></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("AclAction", SalesManagementSystem.Helpers.LoaiPhanQuyen.CapNhat))
+                                            {
+                                                <li>
+                                                    <button type="button" class="dropdown-item" onclick="openFormModal('@Url.Action("UpdateAction", "AclAction", new { id = item.ID })')">
+                                                        <i class="bi bi-pencil-square me-2 text-primary"></i> Chỉnh sửa
+                                                    </button>
+                                                </li>
+                                            }
+                                            @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("AclAction", SalesManagementSystem.Helpers.LoaiPhanQuyen.Xoa))
+                                            {
+                                                <li>
+                                                    <button type="button" class="dropdown-item text-danger" onclick="confirmDelete('@Url.Action("DeleteAction", "AclAction", new { id = item.ID })', 'Bạn có chắc chắn muốn xóa action này không?')">
+                                                        <i class="bi bi-trash-fill me-2 text-danger"></i> Xóa
+                                                    </button>
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </td>
+                                <td class="align-middle fw-medium">@item.TenManHinh</td>
+                                <td class="align-middle">@item.TenController</td>
+                                <td class="align-middle">@item.TenAction</td>
+                                <td class="align-middle">
+                                    @{
+                                        var loaiQuyen = (SalesManagementSystem.Helpers.LoaiPhanQuyen)item.LoaiPhanQuyen;
+                                        var badgeClass = SalesManagementSystem.Helpers.PermissionHelper.GetLoaiPhanQuyenColorClass(loaiQuyen);
+                                        var displayName = SalesManagementSystem.Helpers.PermissionHelper.GetLoaiPhanQuyenDisplayName(loaiQuyen);
+                                    }
+                                    <span class="badge @badgeClass">@displayName</span>
+                                </td>
+                                <td class="align-middle text-muted">@item.GhiChu</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                Chưa có dữ liệu Action.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="card-footer custom-pagination d-flex flex-wrap align-items-center justify-content-between" style="padding: 12px 16px;">
+        <div class="d-flex align-items-center gap-3">
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm mb-0">
+                    @{
+                        int currentPage = ViewBag.Page ?? 1;
+                        int totalPages = ViewBag.TotalPages ?? 1;
+                        int pageSize = ViewBag.PageSize ?? 10;
+                        int total = ViewBag.Total ?? 0;
+                        
+                        var prevDisabled = currentPage <= 1 ? "disabled" : "";
+                        var nextDisabled = currentPage >= totalPages ? "disabled" : "";
+                    }
+                    <li class="page-item @prevDisabled">
+                        <a class="page-link ajax-link" href="@Url.Action("GetAction", new { page = 1, pageSize = pageSize })"><i class="bi bi-skip-start-fill"></i></a>
+                    </li>
+                    <li class="page-item @prevDisabled">
+                        <a class="page-link ajax-link" href="@Url.Action("GetAction", new { page = currentPage - 1, pageSize = pageSize })"><i class="bi bi-caret-left-fill"></i></a>
+                    </li>
+                    
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        if (i == 1 || i == totalPages || Math.Abs(i - currentPage) <= 2)
+                        {
+                            var activeClass = i == currentPage ? "active" : "";
+                            <li class="page-item @activeClass">
+                                <a class="page-link ajax-link" href="@Url.Action("GetAction", new { page = i, pageSize = pageSize })">@i</a>
+                            </li>
+                        }
+                        else if (i == currentPage - 3 || i == currentPage + 3)
+                        {
+                            <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
+                        }
+                    }
+
+                    <li class="page-item @nextDisabled">
+                        <a class="page-link ajax-link" href="@Url.Action("GetAction", new { page = currentPage + 1, pageSize = pageSize })"><i class="bi bi-caret-right-fill"></i></a>
+                    </li>
+                    <li class="page-item @nextDisabled">
+                        <a class="page-link ajax-link" href="@Url.Action("GetAction", new { page = totalPages, pageSize = pageSize })"><i class="bi bi-skip-end-fill"></i></a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="d-flex align-items-center">
+                <select class="form-select form-select-sm" id="pageSizeSelect" style="width: 70px; cursor: pointer;">
+                    <option value="5" @(pageSize == 5 ? "selected" : "")>5</option>
+                    <option value="10" @(pageSize == 10 ? "selected" : "")>10</option>
+                    <option value="20" @(pageSize == 20 ? "selected" : "")>20</option>
+                    <option value="50" @(pageSize == 50 ? "selected" : "")>50</option>
+                </select>
+                <span class="ms-2 text-info-custom" style="font-size: 0.85rem;">mẫu tin/trang</span>
+            </div>
+        </div>
+        <div class="text-info-custom" style="font-size: 0.85rem;">
+            @{
+                int start = total > 0 ? (currentPage - 1) * pageSize + 1 : 0;
+                int end = Math.Min(currentPage * pageSize, total);
+            }
+            @start - @end của @total
+        </div>
+    </div>
+</div>

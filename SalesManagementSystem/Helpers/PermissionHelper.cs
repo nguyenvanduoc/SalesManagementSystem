@@ -62,5 +62,31 @@ namespace SalesManagementSystem.Helpers
                 return result.HasValue;
             }
         }
+
+        public static string GetLoaiPhanQuyenDisplayName(LoaiPhanQuyen loai)
+        {
+            switch(loai)
+            {
+                case LoaiPhanQuyen.Xem: return "Xem";
+                case LoaiPhanQuyen.Them: return "Thêm";
+                case LoaiPhanQuyen.CapNhat: return "Cập nhật";
+                case LoaiPhanQuyen.Xoa: return "Xóa";
+                case LoaiPhanQuyen.TuyChon: return "Tùy chọn";
+                default: return loai.ToString();
+            }
+        }
+
+        public static string GetLoaiPhanQuyenColorClass(LoaiPhanQuyen loai)
+        {
+            switch(loai)
+            {
+                case LoaiPhanQuyen.Xem: return "bg-info text-dark";
+                case LoaiPhanQuyen.Them: return "bg-success";
+                case LoaiPhanQuyen.CapNhat: return "bg-warning text-dark";
+                case LoaiPhanQuyen.Xoa: return "bg-danger";
+                case LoaiPhanQuyen.TuyChon: return "bg-secondary";
+                default: return "bg-primary";
+            }
+        }
     }
 }

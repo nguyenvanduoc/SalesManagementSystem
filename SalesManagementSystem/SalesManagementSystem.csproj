@@ -152,6 +152,12 @@
     <Compile Include="Models\ViewModels\PhanQuyenMatrixVM.cs" />
     <Compile Include="Repositories\Interfaces\IAclPhanQuyenRepository.cs" />
     <Compile Include="Repositories\AclPhanQuyenRepository.cs" />
+    <Compile Include="Repositories\Interfaces\IAclManHinhRepository.cs" />
+    <Compile Include="Repositories\AclManHinhRepository.cs" />
+    <Compile Include="Controllers\AclManHinhController.cs" />
+    <Compile Include="Repositories\Interfaces\IAclActionRepository.cs" />
+    <Compile Include="Repositories\AclActionRepository.cs" />
+    <Compile Include="Controllers\AclActionController.cs" />
     <Compile Include="Controllers\PhongBanController.cs" />
     <Compile Include="Controllers\NguoiDungController.cs" />
     <Compile Include="Helpers\SecurityHelper.cs" />
@@ -344,6 +350,14 @@
     <Content Include="Views\ChucVu\_ChucVuList.cshtml" />
     <Content Include="Views\ChucVu\CreateChucVu.cshtml" />
     <Content Include="Views\ChucVu\UpdateChucVu.cshtml" />
+    <Content Include="Views\AclManHinh\GetManHinh.cshtml" />
+    <Content Include="Views\AclManHinh\_ManHinhList.cshtml" />
+    <Content Include="Views\AclManHinh\CreateManHinh.cshtml" />
+    <Content Include="Views\AclManHinh\UpdateManHinh.cshtml" />
+    <Content Include="Views\AclAction\GetAction.cshtml" />
+    <Content Include="Views\AclAction\_ActionList.cshtml" />
+    <Content Include="Views\AclAction\CreateAction.cshtml" />
+    <Content Include="Views\AclAction\UpdateAction.cshtml" />
     <Content Include="Views\PhongBan\GetPhongBan.cshtml" />
     <Content Include="Views\PhongBan\_PhongBanList.cshtml" />
     <Content Include="Views\PhongBan\CreatePhongBan.cshtml" />

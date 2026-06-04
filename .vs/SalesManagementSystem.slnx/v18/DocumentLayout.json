@@ -3,7 +3,11 @@
   "WorkspaceRootPath": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|c:\\users\\duoc0\\onedrive\\desktop\\web_qlbh\\quanlybanhang\\salesmanagementsystem\\salesmanagementsystem\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|c:\\users\\duoc0\\onedrive\\desktop\\web_qlbh\\quanlybanhang\\salesmanagementsystem\\salesmanagementsystem\\app_start\\unityconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|solutionrelative:salesmanagementsystem\\app_start\\unityconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\salesmanagementsystem\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|solutionrelative:salesmanagementsystem\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -49,10 +53,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\salesmanagementsystem\\views\\chucvu\\_chucvulist.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|solutionrelative:salesmanagementsystem\\views\\chucvu\\_chucvulist.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\salesmanagementsystem\\app_start\\unityconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|solutionrelative:salesmanagementsystem\\app_start\\unityconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\salesmanagementsystem\\controllers\\basecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -174,11 +174,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 6,
+          "SelectedChildIndex": 9,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\PhanQuyen\\Index.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\PhanQuyen\\Index.cshtml",
@@ -191,31 +191,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "AuthorizeTypes.cs",
-              "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Helpers\\AuthorizeTypes.cs",
-              "RelativeDocumentMoniker": "SalesManagementSystem\\Helpers\\AuthorizeTypes.cs",
-              "ToolTip": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Helpers\\AuthorizeTypes.cs",
-              "RelativeToolTip": "SalesManagementSystem\\Helpers\\AuthorizeTypes.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAdAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-03T14:59:48.132Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "ChucVuController.cs",
-              "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\ChucVuController.cs",
-              "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\ChucVuController.cs",
-              "ToolTip": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\ChucVuController.cs",
-              "RelativeToolTip": "SalesManagementSystem\\Controllers\\ChucVuController.cs",
-              "ViewState": "AgIAACYAAAAAAAAAAIAwwDcAAAARAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-02T15:13:01.038Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "AclPhanQuyenRepository.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Repositories\\AclPhanQuyenRepository.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Repositories\\AclPhanQuyenRepository.cs",
@@ -227,7 +203,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "NguoiDungController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\NguoiDungController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\NguoiDungController.cs",
@@ -239,7 +215,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "LoginController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\LoginController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\LoginController.cs",
@@ -251,20 +227,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "HomeController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\HomeController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\HomeController.cs",
               "ToolTip": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\HomeController.cs",
               "RelativeToolTip": "SalesManagementSystem\\Controllers\\HomeController.cs",
-              "ViewState": "AgIAACMAAAAAAAAAAAAIwDIAAAAOAAAAAAAAAA==",
+              "ViewState": "AgIAACMAAAAAAAAAAAAIwDcAAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-02T15:13:01.214Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-02T15:13:01.214Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "PhanQuyenController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\PhanQuyenController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\PhanQuyenController.cs",
@@ -276,7 +251,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 12,
               "Title": "_ChucVuList.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\ChucVu\\_ChucVuList.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\ChucVu\\_ChucVuList.cshtml",
@@ -288,7 +263,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "_Menu.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\Home\\_Menu.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\Home\\_Menu.cshtml",
@@ -312,6 +287,43 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "UnityConfig.cs",
+              "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\App_Start\\UnityConfig.cs",
+              "RelativeDocumentMoniker": "SalesManagementSystem\\App_Start\\UnityConfig.cs",
+              "ToolTip": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\App_Start\\UnityConfig.cs",
+              "RelativeToolTip": "SalesManagementSystem\\App_Start\\UnityConfig.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAwwBEAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-02T15:13:01.213Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "ChucVuController.cs",
+              "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\ChucVuController.cs",
+              "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\ChucVuController.cs",
+              "ToolTip": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\ChucVuController.cs",
+              "RelativeToolTip": "SalesManagementSystem\\Controllers\\ChucVuController.cs",
+              "ViewState": "AgIAACYAAAAAAAAAAIAwwDcAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-02T15:13:01.038Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "AuthorizeTypes.cs",
+              "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Helpers\\AuthorizeTypes.cs",
+              "RelativeDocumentMoniker": "SalesManagementSystem\\Helpers\\AuthorizeTypes.cs",
+              "ToolTip": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Helpers\\AuthorizeTypes.cs",
+              "RelativeToolTip": "SalesManagementSystem\\Helpers\\AuthorizeTypes.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-03T14:59:48.132Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 16,
               "Title": "_NhanVienList.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\NhanVien\\_NhanVienList.cshtml",
@@ -324,7 +336,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "CustomAuthorizeAttribute.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Helpers\\CustomAuthorizeAttribute.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Helpers\\CustomAuthorizeAttribute.cs",
@@ -336,7 +348,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "CommonConstants.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Helpers\\CommonConstants.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Helpers\\CommonConstants.cs",
@@ -345,18 +357,6 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAA5AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-06-03T15:00:29.084Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "UnityConfig.cs",
-              "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\App_Start\\UnityConfig.cs",
-              "RelativeDocumentMoniker": "SalesManagementSystem\\App_Start\\UnityConfig.cs",
-              "ToolTip": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\App_Start\\UnityConfig.cs",
-              "RelativeToolTip": "SalesManagementSystem\\App_Start\\UnityConfig.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACgAAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-02T15:13:01.213Z"
             },
             {
               "$type": "Document",
