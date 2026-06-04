@@ -1,4 +1,5 @@
 using System.Web.Mvc;
+using SalesManagementSystem.Models.ViewModels;
 using System;
 using SalesManagementSystem.Repositories.Interfaces;
 using SalesManagementSystem.Helpers;
@@ -20,19 +21,25 @@ namespace SalesManagementSystem.Controllers
             int totalRecords;
             var logs = _nhatKyRepo.GetPaged(page, pageSize, keyword, out totalRecords);
 
-            ViewBag.Total = totalRecords;
-            ViewBag.Page = page;
-            ViewBag.PageSize = pageSize;
-            ViewBag.TotalPages = totalRecords > 0 ? (int)Math.Ceiling((double)totalRecords / pageSize) : 1;
+            var model = new PagedListViewModel<NKTongHopViewModel>
+            {
+                Items = logs,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalRecords = totalRecords,
+                Keyword = keyword,
+                ActionName = "Index"
+            };
+
             ViewBag.Keyword = keyword;
             ViewBag.Title = "Nhật ký hệ thống";
 
             if (Request.IsAjaxRequest())
             {
-                return PartialView("_NhatKyList", logs);
+                return PartialView("_NhatKyList", model);
             }
 
-            return View(logs);
+            return View(model);
         }
 
         [CustomAuthorize(AuthorizeTypes.AuthorizedUsers)]

@@ -22,7 +22,7 @@ namespace SalesManagementSystem.Helpers
                 return;
             }
 
-            var session = HttpContext.Current.Session[CommonConstants.USER_SESSION] as UserLogin;
+            var session = HttpContext.Current.Session[CommonConstants.USER_SESSION] as UserLoginViewModel;
 
             if (session == null)
             {

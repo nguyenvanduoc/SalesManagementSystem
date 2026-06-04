@@ -1,4 +1,4 @@
-@model IEnumerable<SalesManagementSystem.Models.Entities.PhongBan>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.Entities.PhongBan>
 
 @{
     ViewBag.Title = "Quản lý Phòng Ban";
@@ -71,8 +71,15 @@
 
             $(document).on('click', '.ajax-link', function(e) {
                 e.preventDefault();
+                if ($(this).parent().hasClass('disabled') || $(this).parent().hasClass('active')) return;
                 var url = $(this).attr('href');
-                loadData(url.split('?')[1]);
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(result) {
+                        $('#table-container').html(result);
+                    }
+                });
             });
 
             $(document).on('change', '#pageSizeSelect', function() {

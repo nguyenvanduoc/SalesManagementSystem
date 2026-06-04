@@ -18,7 +18,7 @@ namespace SalesManagementSystem.Repositories
             _connectionFactory = connectionFactory;
         }
 
-        public IEnumerable<NKTongHopVM> GetPaged(int page, int pageSize, string keyword, out int totalRecords)
+        public IEnumerable<NKTongHopViewModel> GetPaged(int page, int pageSize, string keyword, out int totalRecords)
         {
             using (var conn = _connectionFactory.CreateConnection())
             {
@@ -45,13 +45,13 @@ namespace SalesManagementSystem.Repositories
                 using (var multi = conn.QueryMultiple(sql, p))
                 {
                     totalRecords = multi.Read<int>().Single();
-                    var result = multi.Read<NKTongHopVM>().ToList();
+                    var result = multi.Read<NKTongHopViewModel>().ToList();
                     return result;
                 }
             }
         }
 
-        public NKTongHopVM GetById(int id)
+        public NKTongHopViewModel GetById(int id)
         {
             using (var conn = _connectionFactory.CreateConnection())
             {
@@ -60,7 +60,7 @@ namespace SalesManagementSystem.Repositories
                     FROM NK_TongHop nk
                     LEFT JOIN Acl_Login al ON nk.IDLogin = al.ID
                     WHERE nk.ID = @Id";
-                return conn.QueryFirstOrDefault<NKTongHopVM>(sql, new { Id = id });
+                return conn.QueryFirstOrDefault<NKTongHopViewModel>(sql, new { Id = id });
             }
         }
     }

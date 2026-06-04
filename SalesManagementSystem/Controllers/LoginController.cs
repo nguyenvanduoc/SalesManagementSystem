@@ -22,7 +22,7 @@ namespace SalesManagementSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Index(LoginModel model)
+        public ActionResult Index(LoginViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -31,12 +31,14 @@ namespace SalesManagementSystem.Controllers
 
                 if (result != null)
                 {
-                    var userSession = new UserLogin
+                    var userSession = new UserLoginViewModel
                     {
                         UserName = result.TenDangNhap,
                         UserID = result.ID,
                         HoDem = result.HoDem,
-                        Ten = result.Ten
+                        Ten = result.Ten,
+                        IDNhanVien = result.IDNhanVien
+                        
                     };
 
                     Session.Add(CommonConstants.USER_SESSION, userSession);

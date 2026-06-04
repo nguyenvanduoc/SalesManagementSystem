@@ -3,6 +3,7 @@ using System.Web.Mvc;
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Repositories.Interfaces;
 using SalesManagementSystem.Helpers;
+using SalesManagementSystem.Models.ViewModels;
 
 namespace SalesManagementSystem.Controllers
 {
@@ -23,20 +24,26 @@ namespace SalesManagementSystem.Controllers
         public ActionResult GetManHinh(int page = 1, int pageSize = 10, string keyword = "")
         {
             int totalRecords;
-            var manHinhs = _manHinhRepo.GetPaged(page, pageSize, keyword, out totalRecords);
+            var list = _manHinhRepo.GetPaged(page, pageSize, keyword, out totalRecords);
 
-            ViewBag.Total = totalRecords;
-            ViewBag.Page = page;
-            ViewBag.PageSize = pageSize;
-            ViewBag.TotalPages = totalRecords > 0 ? (int)Math.Ceiling((double)totalRecords / pageSize) : 1;
+            var model = new PagedListViewModel<AclManHinh>
+            {
+                Items = list,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalRecords = totalRecords,
+                Keyword = keyword,
+                ActionName = "GetManHinh"
+            };
+
             ViewBag.Keyword = keyword;
 
             if (Request.IsAjaxRequest())
             {
-                return PartialView("_ManHinhList", manHinhs);
+                return PartialView("_ManHinhList", model);
             }
 
-            return View("GetManHinh", manHinhs);
+            return View("GetManHinh", model);
         }
 
         // GET: AclManHinh/CreateManHinh
@@ -109,7 +116,7 @@ namespace SalesManagementSystem.Controllers
                     if (oldObj != null) AuditLog.AddDelete("AclManHinh", item.ToString(), oldObj);
                 }
             }
-            return RedirectToAction("GetManHinh");
+            return Json(new { success = true, message = "Xóa dữ liệu thành công" });
         }
     }
 }

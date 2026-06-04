@@ -149,8 +149,8 @@
     <Compile Include="Helpers\CustomAuthorizeAttribute.cs" />
     <Compile Include="Helpers\PermissionHelper.cs" />
     <Compile Include="Models\Entities\AclPhanQuyen.cs" />
-    <Compile Include="Models\ViewModels\PhanQuyenTreeVM.cs" />
-    <Compile Include="Models\ViewModels\PhanQuyenMatrixVM.cs" />
+    <Compile Include="Models\ViewModels\PhanQuyenTreeViewModel.cs" />
+    <Compile Include="Models\ViewModels\PhanQuyenMatrixViewModel.cs" />
     <Compile Include="Repositories\Interfaces\IAclPhanQuyenRepository.cs" />
     <Compile Include="Repositories\AclPhanQuyenRepository.cs" />
     <Compile Include="Repositories\Interfaces\IAclManHinhRepository.cs" />
@@ -158,7 +158,6 @@
     <Compile Include="Controllers\AclManHinhController.cs" />
     <Compile Include="Repositories\Interfaces\IAclActionRepository.cs" />
     <Compile Include="Repositories\AclActionRepository.cs" />
-    <Compile Include="Controllers\PhanQuyenController.cs" />
     <Compile Include="Controllers\PhongBanController.cs" />
     <Compile Include="Controllers\NhatKyController.cs" />
     <Compile Include="Controllers\NguoiDungController.cs" />
@@ -186,14 +185,15 @@
     <Compile Include="Models\Entities\User.cs" />
     <!-- Models - ViewModels -->
     <Compile Include="Models\ViewModels\RevenueReportVM.cs" />
-    <Compile Include="Models\ViewModels\OrderFormVM.cs" />
-    <Compile Include="Models\ViewModels\MenuVM.cs" />
-    <Compile Include="Models\ViewModels\AclLoginVM.cs" />
-    <Compile Include="Models\ViewModels\ChangePasswordVM.cs" />
-    <Compile Include="Models\ViewModels\LoginModel.cs" />
-    <Compile Include="Models\ViewModels\AuditModels.cs" />
-    <Compile Include="Models\ViewModels\NKTongHopVM.cs" />
-    <Compile Include="Models\ViewModels\UserLogin.cs" />
+    <Compile Include="Models\ViewModels\OrderFormViewModel.cs" />
+    <Compile Include="Models\ViewModels\MenuViewModel.cs" />
+    <Compile Include="Models\ViewModels\AclLoginViewModel.cs" />
+    <Compile Include="Models\ViewModels\ChangePasswordViewModel.cs" />
+    <Compile Include="Models\ViewModels\LoginViewModel.cs" />
+    <Compile Include="Models\ViewModels\AuditViewModel.cs" />
+    <Compile Include="Models\ViewModels\PagedListViewModel.cs" />
+    <Compile Include="Models\ViewModels\NKTongHopViewModel.cs" />
+    <Compile Include="Models\ViewModels\UserLoginViewModel.cs" />
     <!-- Repositories -->
     <Compile Include="Repositories\MenuRepository.cs" />
     <Compile Include="Repositories\NhanVienRepository.cs" />
@@ -381,6 +381,8 @@
     <Content Include="Views\NhatKy\Detail.cshtml" />
     <Content Include="Views\NhatKy\Index.cshtml" />
     <Content Include="Views\NhatKy\_NhatKyList.cshtml" />
+    <Content Include="Views\Shared\_Pagination.cshtml" />
+    <Content Include="Views\Shared\AccessDenied.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />

@@ -11,7 +11,7 @@ namespace SalesManagementSystem.Helpers
     {
         public static bool HasPermission(string controllerName, LoaiPhanQuyen loaiPhanQuyen)
         {
-            var session = HttpContext.Current.Session[CommonConstants.USER_SESSION] as UserLogin;
+            var session = HttpContext.Current.Session[CommonConstants.USER_SESSION] as UserLoginViewModel;
             if (session == null) return false;
 
             using (var conn = new DbConnectionFactory().CreateConnection())
@@ -38,7 +38,7 @@ namespace SalesManagementSystem.Helpers
         
         public static bool HasActionPermission(string controllerName, string actionName)
         {
-            var session = HttpContext.Current.Session[CommonConstants.USER_SESSION] as UserLogin;
+            var session = HttpContext.Current.Session[CommonConstants.USER_SESSION] as UserLoginViewModel;
             if (session == null) return false;
 
             using (var conn = new DbConnectionFactory().CreateConnection())

@@ -32,7 +32,7 @@ namespace SalesManagementSystem.Controllers
 
                 if (isSuccess)
                 {
-                    var session = (UserLogin)Session[CommonConstants.USER_SESSION];
+                    var session = (UserLoginViewModel)Session[CommonConstants.USER_SESSION];
                     int loginId = session?.UserID ?? 0;
 
                     string controller = filterContext.RouteData.Values["controller"]?.ToString();

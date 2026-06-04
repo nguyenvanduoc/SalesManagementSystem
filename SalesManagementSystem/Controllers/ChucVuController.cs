@@ -4,6 +4,7 @@ using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Repositories;
 using SalesManagementSystem.Repositories.Interfaces;
 using SalesManagementSystem.Helpers;
+using SalesManagementSystem.Models.ViewModels;
 
 namespace SalesManagementSystem.Controllers
 {
@@ -26,18 +27,24 @@ namespace SalesManagementSystem.Controllers
             int totalRecords;
             var chucVus = _chucVuRepo.GetPaged(page, pageSize, keyword, out totalRecords);
 
-            ViewBag.Total = totalRecords;
-            ViewBag.Page = page;
-            ViewBag.PageSize = pageSize;
-            ViewBag.TotalPages = totalRecords > 0 ? (int)Math.Ceiling((double)totalRecords / pageSize) : 1;
+            var model = new PagedListViewModel<ChucVu>
+            {
+                Items = chucVus,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalRecords = totalRecords,
+                Keyword = keyword,
+                ActionName = "GetChucVu"
+            };
+
             ViewBag.Keyword = keyword;
 
             if (Request.IsAjaxRequest())
             {
-                return PartialView("_ChucVuList", chucVus);
+                return PartialView("_ChucVuList", model);
             }
 
-            return View("GetChucVu", chucVus);
+            return View("GetChucVu", model);
         }
 
         // GET: DanhMuc/CreateChucVu
@@ -61,8 +68,8 @@ namespace SalesManagementSystem.Controllers
                     return PartialView("CreateChucVu", chucVu);
                 }
 
-                var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
-                chucVu.NguoiTao = session?.UserID ?? 0;
+                var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+                chucVu.NguoiTao = session?.IDNhanVien ?? 0;
                 _chucVuRepo.Insert(chucVu);
 
                 // AUDIT LOG
@@ -101,8 +108,8 @@ namespace SalesManagementSystem.Controllers
 
                 var oldChucVu = _chucVuRepo.GetById(chucVu.ID);
 
-                var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
-                chucVu.NguoiCapNhat = session?.UserID ?? 0;
+                var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+                chucVu.NguoiCapNhat = session?.IDNhanVien ?? 0;
                 _chucVuRepo.Update(chucVu);
 
                 // AUDIT LOG
@@ -135,7 +142,7 @@ namespace SalesManagementSystem.Controllers
                         AuditLog.AddDelete("ChucVu", item.ToString(), oldObj);
                 }
             }
-            return RedirectToAction("GetChucVu");
+            return Json(new { success = true, message = "Xóa dữ liệu thành công" });
         }
     }
 }

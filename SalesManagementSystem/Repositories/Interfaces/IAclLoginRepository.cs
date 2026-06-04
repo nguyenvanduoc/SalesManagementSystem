@@ -6,7 +6,7 @@ namespace SalesManagementSystem.Repositories.Interfaces
 {
     public interface IAclLoginRepository
     {
-        IEnumerable<AclLoginVM> GetPaged(int page, int pageSize, string keyword, out int totalRecords);
+        IEnumerable<AclLoginViewModel> GetPaged(int page, int pageSize, string keyword, out int totalRecords);
         AclLogin GetById(int id);
         bool IsDuplicateUsername(string username, int id = 0);
         int Insert(AclLogin login);
@@ -15,7 +15,7 @@ namespace SalesManagementSystem.Repositories.Interfaces
         IEnumerable<NhanVien> GetEmployeesWithoutAccount();
         NhanVien GetEmployeeById(int id);
         AclLogin GetByEmployeeId(int empId);
-        IEnumerable<AclLoginVM> GetManagers();
+        IEnumerable<AclLoginViewModel> GetManagers();
         AclLogin Login(string userName, string passWord);
     }
 }

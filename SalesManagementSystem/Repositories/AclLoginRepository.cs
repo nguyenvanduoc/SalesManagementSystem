@@ -18,7 +18,7 @@ namespace SalesManagementSystem.Repositories
             _db = db;
         }
 
-        public IEnumerable<AclLoginVM> GetPaged(int page, int pageSize, string keyword, out int totalRecords)
+        public IEnumerable<AclLoginViewModel> GetPaged(int page, int pageSize, string keyword, out int totalRecords)
         {
             var conditions = new List<string> { "L.NgayXoa IS NULL" };
             var parameters = new DynamicParameters();
@@ -52,7 +52,7 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
             {
                 totalRecords = conn.ExecuteScalar<int>(countSql, parameters);
-                return conn.Query<AclLoginVM>(sql, parameters);
+                return conn.Query<AclLoginViewModel>(sql, parameters);
             }
         }
 
@@ -128,7 +128,7 @@ namespace SalesManagementSystem.Repositories
                 return conn.QueryFirstOrDefault<AclLogin>(sql, new { EmpId = empId });
         }
 
-        public IEnumerable<AclLoginVM> GetManagers()
+        public IEnumerable<AclLoginViewModel> GetManagers()
         {
             const string sql = @"
                 SELECT L.*, N.HoDem, N.TenNhanVien as Ten 
@@ -137,7 +137,7 @@ namespace SalesManagementSystem.Repositories
                 WHERE (L.IDThamChieu IS NULL OR L.IDThamChieu = 0) AND L.IsActive = 1 AND L.NgayXoa IS NULL
                 ORDER BY N.TenNhanVien";
             using (var conn = _db.CreateConnection())
-                return conn.Query<AclLoginVM>(sql);
+                return conn.Query<AclLoginViewModel>(sql);
         }
 
         public AclLogin Login(string userName, string passWord)

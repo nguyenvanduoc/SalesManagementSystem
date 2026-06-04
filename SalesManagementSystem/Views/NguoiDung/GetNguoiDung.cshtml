@@ -1,4 +1,4 @@
-@model IEnumerable<SalesManagementSystem.Models.ViewModels.AclLoginVM>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.AclLoginViewModel>
 @{
     ViewBag.Title = "Quản lý Tài khoản";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -82,9 +82,16 @@
         // Xử lý nút bấm phân trang sử dụng AJAX
         $(document).on('click', '.ajax-link', function (e) {
             e.preventDefault();
-            var page = $(this).data('page');
-            if (page) {
-                loadData(page);
+            if ($(this).parent().hasClass('disabled') || $(this).parent().hasClass('active')) return;
+            var url = $(this).attr('href');
+            if (url) {
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function (result) {
+                        $('#table-container').html(result);
+                    }
+                });
             }
         });
     </script>

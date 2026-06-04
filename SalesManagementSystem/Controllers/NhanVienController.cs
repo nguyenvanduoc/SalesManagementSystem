@@ -4,6 +4,7 @@ using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Repositories;
 using SalesManagementSystem.Repositories.Interfaces;
 using SalesManagementSystem.Helpers;
+using SalesManagementSystem.Models.ViewModels;
 
 namespace SalesManagementSystem.Controllers
 {
@@ -20,19 +21,26 @@ namespace SalesManagementSystem.Controllers
         public ActionResult Index(int page = 1, int pageSize = 10, string keyword = "", bool? gender = null)
         {
             int totalRecords;
-            var employees = _employeeRepo.GetPaged(page, pageSize, keyword, gender, out totalRecords);
+            var nhanViens = _employeeRepo.GetPaged(page, pageSize, keyword, gender, out totalRecords);
 
-            ViewBag.Total = totalRecords;
-            ViewBag.Page = page;
-            ViewBag.PageSize = pageSize;
-            ViewBag.TotalPages = totalRecords > 0 ? (int)Math.Ceiling((double)totalRecords / pageSize) : 1;
+            var model = new PagedListViewModel<NhanVien>
+            {
+                Items = nhanViens,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalRecords = totalRecords,
+                Keyword = keyword,
+                ActionName = "Index"
+            };
+
+            ViewBag.Keyword = keyword;
 
             if (Request.IsAjaxRequest())
             {
-                return PartialView("_NhanVienList", employees);
+                return PartialView("_NhanVienList", model);
             }
 
-            return View(employees);
+            return View(model);
         }
 
         // GET: Employee/Create
@@ -56,8 +64,8 @@ namespace SalesManagementSystem.Controllers
                     return PartialView(employee);
                 }
 
-                var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
-                employee.NguoiTao = session?.UserID ?? 0;
+                var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+                employee.NguoiTao = session?.IDNhanVien ?? 0;
                 _employeeRepo.Insert(employee);
 
                 // AUDIT LOG
@@ -97,8 +105,8 @@ namespace SalesManagementSystem.Controllers
                 // FETCH OLD OBJ FOR AUDIT
                 var oldEmployee = _employeeRepo.GetById(employee.ID);
 
-                var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
-                employee.NguoiCapNhat = session?.UserID ?? 0;
+                var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+                employee.NguoiCapNhat = session?.IDNhanVien ?? 0;
                 _employeeRepo.Update(employee);
 
                 // AUDIT LOG
@@ -121,7 +129,7 @@ namespace SalesManagementSystem.Controllers
             if (oldEmployee != null)
                 AuditLog.AddDelete("NhanVien", id.ToString(), oldEmployee);
 
-            return RedirectToAction("Index");
+            return Json(new { success = true, message = "Xóa dữ liệu thành công" });
         }
 
         // POST: Employee/BatchDelete
@@ -139,7 +147,7 @@ namespace SalesManagementSystem.Controllers
                         AuditLog.AddDelete("NhanVien", id.ToString(), oldEmployee);
                 }
             }
-            return RedirectToAction("Index");
+            return Json(new { success = true, message = "Xóa dữ liệu thành công" });
         }
     }
 }

@@ -31,7 +31,7 @@
                 <option value="0" @(Model.IDThamChieu == null || Model.IDThamChieu == 0 ? "selected" : "")>-- Là Cấp Trên (Không Có) --</option>
                 @if (ViewBag.Managers != null)
                 {
-                    foreach (var mgr in (IEnumerable<SalesManagementSystem.Models.ViewModels.AclLoginVM>)ViewBag.Managers)
+                    foreach (var mgr in (IEnumerable<SalesManagementSystem.Models.ViewModels.AclLoginViewModel>)ViewBag.Managers)
                     {
                         if (mgr.ID != Model.ID) // Không được chọn chính mình làm cấp trên
                         {

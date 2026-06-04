@@ -4,6 +4,7 @@ using System.Linq;
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Repositories.Interfaces;
 using SalesManagementSystem.Helpers;
+using SalesManagementSystem.Models.ViewModels;
 
 namespace SalesManagementSystem.Controllers
 {
@@ -26,20 +27,26 @@ namespace SalesManagementSystem.Controllers
         public ActionResult GetAction(int page = 1, int pageSize = 10, string keyword = "")
         {
             int totalRecords;
-            var actions = _actionRepo.GetPaged(page, pageSize, keyword, out totalRecords);
+            var list = _actionRepo.GetPaged(page, pageSize, keyword, out totalRecords);
 
-            ViewBag.Total = totalRecords;
-            ViewBag.Page = page;
-            ViewBag.PageSize = pageSize;
-            ViewBag.TotalPages = totalRecords > 0 ? (int)Math.Ceiling((double)totalRecords / pageSize) : 1;
+            var model = new PagedListViewModel<AclAction>
+            {
+                Items = list,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalRecords = totalRecords,
+                Keyword = keyword,
+                ActionName = "GetAction"
+            };
+
             ViewBag.Keyword = keyword;
 
             if (Request.IsAjaxRequest())
             {
-                return PartialView("_ActionList", actions);
+                return PartialView("_ActionList", model);
             }
 
-            return View("GetAction", actions);
+            return View("GetAction", model);
         }
 
         // GET: AclAction/CreateAction
@@ -116,7 +123,7 @@ namespace SalesManagementSystem.Controllers
                     if (oldObj != null) AuditLog.AddDelete("AclAction", item.ToString(), oldObj);
                 }
             }
-            return RedirectToAction("GetAction");
+            return Json(new { success = true, message = "Xóa dữ liệu thành công" });
         }
     }
 }

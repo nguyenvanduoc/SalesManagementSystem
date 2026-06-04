@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SalesManagementSystem.Models.ViewModels
 {
-    public class ChangePasswordVM
+    public class ChangePasswordViewModel
     {
         [Required(ErrorMessage = "Vui lòng nhập mật khẩu cũ.")]
         [DataType(DataType.Password)]

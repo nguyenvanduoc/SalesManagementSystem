@@ -1,0 +1,67 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListBase
+
+<div class="card-footer custom-pagination d-flex flex-wrap align-items-center justify-content-between" style="padding: 12px 16px;">
+    <div class="d-flex align-items-center gap-3">
+        <nav aria-label="Page navigation">
+            <ul class="pagination pagination-sm mb-0">
+                @{
+                    int currentPage = Model.CurrentPage;
+                    int totalPages = Model.TotalPages;
+                    int pageSize = Model.PageSize;
+                    int total = Model.TotalRecords;
+                    string actionName = string.IsNullOrEmpty(Model.ActionName) ? "Index" : Model.ActionName;
+                    string keyword = Model.Keyword;
+                    
+                    var prevDisabled = currentPage <= 1 ? "disabled" : "";
+                    var nextDisabled = currentPage >= totalPages ? "disabled" : "";
+                }
+                <li class="page-item @prevDisabled">
+                    <a class="page-link ajax-link" href="@Url.Action(actionName, new { page = 1, pageSize = pageSize, keyword = keyword })"><i class="bi bi-skip-start-fill"></i></a>
+                </li>
+                <li class="page-item @prevDisabled">
+                    <a class="page-link ajax-link" href="@Url.Action(actionName, new { page = currentPage - 1, pageSize = pageSize, keyword = keyword })"><i class="bi bi-caret-left-fill"></i></a>
+                </li>
+                
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    if (i == 1 || i == totalPages || Math.Abs(i - currentPage) <= 2)
+                    {
+                        var activeClass = i == currentPage ? "active" : "";
+                        <li class="page-item @activeClass">
+                            <a class="page-link ajax-link" href="@Url.Action(actionName, new { page = i, pageSize = pageSize, keyword = keyword })">@i</a>
+                        </li>
+                    }
+                    else if (i == currentPage - 3 || i == currentPage + 3)
+                    {
+                        <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
+                    }
+                }
+
+                <li class="page-item @nextDisabled">
+                    <a class="page-link ajax-link" href="@Url.Action(actionName, new { page = currentPage + 1, pageSize = pageSize, keyword = keyword })"><i class="bi bi-caret-right-fill"></i></a>
+                </li>
+                <li class="page-item @nextDisabled">
+                    <a class="page-link ajax-link" href="@Url.Action(actionName, new { page = totalPages, pageSize = pageSize, keyword = keyword })"><i class="bi bi-skip-end-fill"></i></a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="d-flex align-items-center">
+            <select class="form-select form-select-sm" id="pageSizeSelect" style="width: 70px; cursor: pointer;">
+                <option value="10" @(pageSize == 10 ? "selected" : "")>10</option>
+                <option value="20" @(pageSize == 20 ? "selected" : "")>20</option>
+                <option value="50" @(pageSize == 50 ? "selected" : "")>50</option>
+                <option value="100" @(pageSize == 100 ? "selected" : "")>100</option>
+                <option value="500" @(pageSize == 500 ? "selected" : "")>500</option>
+            </select>
+            <span class="ms-2 text-info-custom" style="font-size: 0.85rem;">mẫu tin/trang</span>
+        </div>
+    </div>
+    <div class="text-info-custom" style="font-size: 0.85rem;">
+        @{
+            int start = total > 0 ? (currentPage - 1) * pageSize + 1 : 0;
+            int end = Math.Min(currentPage * pageSize, total);
+        }
+        @start - @end của @total
+    </div>
+</div>

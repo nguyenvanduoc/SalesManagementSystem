@@ -140,6 +140,7 @@ Hệ thống sẽ tự động gọi Popup Xóa chuẩn và thực thi phương 
   - **Canh giữa (`text-center`)**: Các cột Mã, Ngày sinh, Giới tính, Số điện thoại.
   - **Canh phải (`text-end`)**: Các cột Số tiền, Số lượng, Đơn giá, Thành tiền (dữ liệu số/tiền tệ).
   - **Canh trái (mặc định)**: Cột Họ đệm, Tên nhân viên và các cột văn bản dài (Địa chỉ, Email, Ghi chú, Nội dung...).
+  - **Cột STT (Số thứ tự)**: Bắt buộc thêm một cột STT ngay sau cột "Hành động" (hoặc là cột đầu tiên nếu không có cột Hành động). Cột STT để trống tiêu đề (header rỗng) và được tự động tăng dựa trên phân trang `(CurrentPage - 1) * PageSize + index`.
 
 ### 3.2 Cột Thao tác (Action Column)
 - **Vị trí**: Đặt ở bên trái, ngay sau cột Checkbox (nếu có) và trước các cột dữ liệu.
@@ -219,6 +220,16 @@ Hệ thống sẽ tự động gọi Popup Xóa chuẩn và thực thi phương 
 
 ## 5. Thông báo Toast (Toast Notifications)
 - Thay vì dùng `alert()` mặc định của trình duyệt gây trải nghiệm không tốt, hệ thống cung cấp chuẩn **Global Toast**.
+
+### 5.1 Sử dụng thông báo Toast sau khi tải lại trang (Server-side)
+Khi thực hiện các thao tác cần tải lại toàn bộ trang (Ví dụ: Xóa dữ liệu xong và gọi lệnh `RedirectToAction()`), bắt buộc truyền thông điệp qua `TempData` để hiển thị trên `_Layout.cshtml`:
+```csharp
+TempData["ToastMessage"] = "Xóa dữ liệu thành công";
+TempData["ToastType"] = "success"; // Các loại: success, error, warning, info
+return RedirectToAction("Index");
+```
+
+### 5.2 Sử dụng thông báo Toast bằng AJAX (Client-side)
 - **Vị trí**: Nằm ở góc trên cùng bên phải (`top: 25px; right: 25px;`), không che khuất thao tác người dùng.
 - **Phân loại**:
   - `success` (Xanh lá): Dùng khi thao tác thành công (Thêm, sửa, xóa...).
@@ -282,6 +293,9 @@ showToast('error', 'Có lỗi xảy ra trong quá trình xóa dữ liệu.');
 - Sử dụng **Unity Container** để quản lý Dependency Injection.
 - Toàn bộ việc đăng ký mapping giữa Interface và Class thực thi phải được khai báo trong file `App_Start/UnityConfig.cs`.
 - Cú pháp đăng ký chuẩn: `container.RegisterType<IChucVuRepository, ChucVuRepository>(new HierarchicalLifetimeManager());`
+
+### 9.4 Quy chuẩn đặt tên (Naming Convention)
+- **ViewModel**: Bắt buộc phải có hậu tố `ViewModel` (hoặc viết tắt là `VM`) ở cuối tên Class để ghi rõ đây là một ViewModel (Ví dụ: `PagedListViewModel` hoặc `PagedListVM`, `UserLoginViewModel`, `EmployeeViewModel`...). Mục đích để phân biệt rõ ràng giữa các Model thực thể (map với Database) và các class tạo ra với mục đích vận chuyển, trộn hoặc format dữ liệu phụ trợ hiển thị trên giao diện.
 
 ## 10. Tiêu chuẩn cấu hình Router (Routing Standard)
 - Tất cả các chức năng mới (Controller mới) **bắt buộc** phải được định nghĩa URL tường minh (explicit routing) trong file `App_Start/RouteConfig.cs`, khai báo trước route `Default` mặc định.

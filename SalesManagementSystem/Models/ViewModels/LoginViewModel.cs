@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SalesManagementSystem.Models.ViewModels
 {
-    public class LoginModel
+    public class LoginViewModel
     {
         [Required(ErrorMessage = "Mời bạn nhập tên đăng nhập")]
         public string UserName { get; set; }

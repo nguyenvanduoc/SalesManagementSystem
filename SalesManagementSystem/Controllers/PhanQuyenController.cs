@@ -34,8 +34,8 @@ namespace SalesManagementSystem.Controllers
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult Save(int idLogin, List<int> checkedActionIds, bool isInherit = false)
         {
-            var userSession = (UserLogin)Session[CommonConstants.USER_SESSION];
-            int currentUser = userSession != null ? userSession.UserID : 0;
+            var userSession = (UserLoginViewModel)Session[CommonConstants.USER_SESSION];
+            int currentUser = userSession != null ? userSession.IDNhanVien : 0;
 
             if (isInherit)
             {

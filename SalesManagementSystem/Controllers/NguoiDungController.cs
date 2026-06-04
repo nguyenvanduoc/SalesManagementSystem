@@ -20,19 +20,27 @@ namespace SalesManagementSystem.Controllers
         public ActionResult GetNguoiDung(int page = 1, int pageSize = 10, string keyword = "")
         {
             int totalRecords;
-            var logins = _aclLoginRepo.GetPaged(page, pageSize, keyword, out totalRecords);
+            var users = _aclLoginRepo.GetPaged(page, pageSize, keyword, out totalRecords);
 
-            ViewBag.Total = totalRecords;
-            ViewBag.Page = page;
-            ViewBag.PageSize = pageSize;
-            ViewBag.TotalPages = totalRecords > 0 ? (int)Math.Ceiling((double)totalRecords / pageSize) : 1;
+            var model = new PagedListViewModel<AclLoginViewModel>
+            {
+                Items = users,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalRecords = totalRecords,
+                Keyword = keyword,
+                ActionName = "GetNguoiDung"
+            };
+
+            ViewBag.Keyword = keyword;
+            ViewBag.Title = "Danh sách người dùng";
 
             if (Request.IsAjaxRequest())
             {
-                return PartialView("_NguoiDungList", logins);
+                return PartialView("_NguoiDungList", model);
             }
 
-            return View(logins);
+            return View("GetNguoiDung", model);
         }
 
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
@@ -68,7 +76,7 @@ namespace SalesManagementSystem.Controllers
                         // Nếu đang khôi phục tài khoản, phải truyền ID của tài khoản cũ vào để bỏ qua check trùng lặp với chính nó
                         if (!_aclLoginRepo.IsDuplicateUsername(tenDangNhap, existingLogin?.ID ?? 0))
                         {
-                            var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+                            var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
                             if (existingLogin != null)
                             {
                                 var oldLogin = _aclLoginRepo.GetById(existingLogin.ID);
@@ -77,7 +85,7 @@ namespace SalesManagementSystem.Controllers
                                 existingLogin.IsActive = IsActive;
                                 existingLogin.IDThamChieu = isManager ? null : IDThamChieu;
                                 existingLogin.NgayCapNhat = DateTime.Now;
-                                existingLogin.NguoiCapNhat = session?.UserID ?? 0;
+                                existingLogin.NguoiCapNhat = session?.IDNhanVien ?? 0;
                                 existingLogin.NgayXoa = null;
                                 existingLogin.NguoiXoa = null;
                                 
@@ -96,7 +104,7 @@ namespace SalesManagementSystem.Controllers
                                     Ten = emp.TenNhanVien,
                                     IsActive = IsActive,
                                     IDThamChieu = isManager ? null : IDThamChieu,
-                                    NguoiTao = session?.UserID ?? 0
+                                    NguoiTao = session?.IDNhanVien ?? 0
                                 };
                                 _aclLoginRepo.Insert(login);
                                 AuditLog.AddInsert("AclLogin", login.ID.ToString(), login);
@@ -170,8 +178,8 @@ namespace SalesManagementSystem.Controllers
                         existing.Ten = emp.TenNhanVien;
                     }
                     
-                    var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
-                    existing.NguoiCapNhat = session?.UserID ?? 0;
+                    var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+                    existing.NguoiCapNhat = session?.IDNhanVien ?? 0;
 
                     var oldExisting = _aclLoginRepo.GetById(existing.ID);
                     _aclLoginRepo.Update(existing);
@@ -193,23 +201,23 @@ namespace SalesManagementSystem.Controllers
             var oldObj = _aclLoginRepo.GetById(id);
             _aclLoginRepo.Delete(id);
             if (oldObj != null) AuditLog.AddDelete("AclLogin", id.ToString(), oldObj);
-            return RedirectToAction("GetNguoiDung");
+            return Json(new { success = true, message = "Xóa dữ liệu thành công" });
         }
 
         // GET: NguoiDung/ChangePassword
         public ActionResult ChangePassword()
         {
-            return PartialView(new ChangePasswordVM());
+            return PartialView(new ChangePasswordViewModel());
         }
 
         // POST: NguoiDung/ChangePassword
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult ChangePassword(ChangePasswordVM model)
+        public ActionResult ChangePassword(ChangePasswordViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var session = (UserLogin)Session[CommonConstants.USER_SESSION];
+                var session = (UserLoginViewModel)Session[CommonConstants.USER_SESSION];
                 if (session == null)
                 {
                     return Json(new { success = false, message = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." });

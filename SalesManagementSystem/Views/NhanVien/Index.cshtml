@@ -1,4 +1,4 @@
-@model IEnumerable<SalesManagementSystem.Models.Entities.NhanVien>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.Entities.NhanVien>
 
 @{
     ViewBag.Title = "Danh sách nhân viên";
@@ -82,9 +82,8 @@
             $(document).on('click', '.ajax-link', function(e) {
                 e.preventDefault();
                 var url = $(this).attr('href');
-                // Nối thêm keyword và gender hiện tại vào URL
-                var formData = $('#searchForm').serialize();
-                loadData(url + '&' + formData);
+                if ($(this).parent().hasClass('disabled') || $(this).parent().hasClass('active')) return;
+                loadData(url);
             });
 
             // Gọi AJAX khi đổi PageSize
@@ -96,7 +95,7 @@
         });
 
         function loadData(urlOrData) {
-            var requestUrl = typeof urlOrData === 'string' && urlOrData.indexOf('Index') !== -1 
+            var requestUrl = typeof urlOrData === 'string' && urlOrData.indexOf('/') !== -1 
                              ? urlOrData 
                              : '@Url.Action("Index")?' + urlOrData;
             $.ajax({

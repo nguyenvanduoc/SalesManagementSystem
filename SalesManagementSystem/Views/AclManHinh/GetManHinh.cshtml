@@ -1,4 +1,4 @@
-@model IEnumerable<SalesManagementSystem.Models.Entities.AclManHinh>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.Entities.AclManHinh>
 
 @{
     ViewBag.Title = "Danh sách màn hình";
@@ -71,9 +71,15 @@
 
             $(document).on('click', '.ajax-link', function(e) {
                 e.preventDefault();
+                if ($(this).parent().hasClass('disabled') || $(this).parent().hasClass('active')) return;
                 var url = $(this).attr('href');
-                var formData = $('#searchForm').serialize();
-                loadData(url + '&' + formData);
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(result) {
+                        $('#table-container').html(result);
+                    }
+                });
             });
 
             $(document).on('change', '#pageSizeSelect', function() {

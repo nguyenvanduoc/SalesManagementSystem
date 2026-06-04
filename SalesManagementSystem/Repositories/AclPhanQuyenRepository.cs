@@ -18,7 +18,7 @@ namespace SalesManagementSystem.Repositories
             _db = db;
         }
 
-        public IEnumerable<PhanQuyenTreeVM> GetTreeLogin()
+        public IEnumerable<PhanQuyenTreeViewModel> GetTreeLogin()
         {
             var sql = @"
                 SELECT 
@@ -33,12 +33,12 @@ namespace SalesManagementSystem.Repositories
 
             using (var conn = _db.CreateConnection())
             {
-                var flatList = conn.Query<PhanQuyenTreeVM>(sql).ToList();
+                var flatList = conn.Query<PhanQuyenTreeViewModel>(sql).ToList();
                 return BuildTree(flatList, null);
             }
         }
 
-        private List<PhanQuyenTreeVM> BuildTree(List<PhanQuyenTreeVM> flatList, int? parentId)
+        private List<PhanQuyenTreeViewModel> BuildTree(List<PhanQuyenTreeViewModel> flatList, int? parentId)
         {
             var nodes = flatList.Where(x => x.IDThamChieu == parentId).ToList();
             foreach (var node in nodes)
@@ -48,7 +48,7 @@ namespace SalesManagementSystem.Repositories
             return nodes;
         }
 
-        public IEnumerable<PhanQuyenMatrixVM> GetMatrixQuyen(int idLogin)
+        public IEnumerable<PhanQuyenMatrixViewModel> GetMatrixQuyen(int idLogin)
         {
             using (var conn = _db.CreateConnection())
             {
@@ -62,13 +62,13 @@ namespace SalesManagementSystem.Repositories
                 var pqSql = "SELECT IDAction FROM ACL_PhanQuyen WHERE IDLogin = @IDLogin AND IsChoPhep = 1";
                 var grantedActions = conn.Query<int>(pqSql, new { IDLogin = idLogin }).ToHashSet();
 
-                var matrix = new List<PhanQuyenMatrixVM>();
+                var matrix = new List<PhanQuyenMatrixViewModel>();
 
                 var groups = screens.GroupBy(s => s.NhomChaManHinh).ToList();
 
                 foreach (var group in groups)
                 {
-                    var matrixGroup = new PhanQuyenMatrixVM
+                    var matrixGroup = new PhanQuyenMatrixViewModel
                     {
                         NhomChaManHinh = string.IsNullOrEmpty(group.Key) ? "KHÁC" : group.Key
                     };

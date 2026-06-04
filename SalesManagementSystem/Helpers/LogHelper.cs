@@ -40,7 +40,7 @@ namespace SalesManagementSystem.Helpers
                 // Lấy thông tin Username từ Session (nếu có)
                 if (context?.Session != null && context.Session[CommonConstants.USER_SESSION] != null)
                 {
-                    var userSession = (UserLogin)context.Session[CommonConstants.USER_SESSION];
+                    var userSession = (UserLoginViewModel)context.Session[CommonConstants.USER_SESSION];
                     username = userSession.UserName;
                 }
 

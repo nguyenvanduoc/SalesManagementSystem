@@ -1,10 +1,11 @@
-@model IEnumerable<SalesManagementSystem.Models.ViewModels.AclLoginVM>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.AclLoginViewModel>
 
 <div class="table-responsive" style="min-height: 350px;">
     <table class="table table-custom table-bordered table-hover mb-0">
         <thead class="table-light">
             <tr>
-                <th class="text-center" style="width: 80px;">Hành động</th>
+                <th class="text-center" style="width: 50px;"></th>
+                <th class="text-center" style="width: 50px;"></th>
                 <th class="text-center" style="width: 60px;">ID</th>
                 <th>Tên Đăng Nhập</th>
                 <th>Mật Khẩu</th>
@@ -15,9 +16,10 @@
             </tr>
         </thead>
         <tbody>
-            @if (Model != null && Model.Any())
+            @if (Model.Items != null && Model.Items.Any())
             {
-                foreach (var item in Model)
+                int stt = (Model.CurrentPage - 1) * Model.PageSize + 1;
+                foreach (var item in Model.Items)
                 {
                     <tr>
                         <td class="text-center align-middle">
@@ -47,6 +49,7 @@
                                 </ul>
                             </div>
                         </td>
+                        <td class="text-center align-middle">@(stt++)</td>
                         <td class="text-center align-middle">@item.ID</td>
                         <td class="align-middle">@item.TenDangNhap</td>
                         <td class="align-middle text-truncate" style="max-width: 150px;" title="@item.MatKhau">@item.MatKhau</td>
@@ -81,66 +84,4 @@
     </table>
 </div>
 
-<div class="card-footer custom-pagination d-flex flex-wrap align-items-center justify-content-between" style="padding: 12px 16px;">
-    <div class="d-flex align-items-center gap-3">
-        @if (ViewBag.TotalPages > 1)
-        {
-            <nav aria-label="Page navigation">
-                <ul class="pagination pagination-sm mb-0">
-                    <li class="page-item @(ViewBag.Page == 1 ? "disabled" : "")">
-                        <a class="page-link ajax-link" href="#" data-page="1"><i class="bi bi-skip-start-fill"></i></a>
-                    </li>
-                    <li class="page-item @(ViewBag.Page == 1 ? "disabled" : "")">
-                        <a class="page-link ajax-link" href="#" data-page="@(ViewBag.Page - 1)"><i class="bi bi-caret-left-fill"></i></a>
-                    </li>
-                    
-                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
-                    {
-                        <li class="page-item @(i == ViewBag.Page ? "active" : "")">
-                            <a class="page-link ajax-link" href="#" data-page="@i">@i</a>
-                        </li>
-                    }
-
-                    <li class="page-item @(ViewBag.Page == ViewBag.TotalPages ? "disabled" : "")">
-                        <a class="page-link ajax-link" href="#" data-page="@(ViewBag.Page + 1)"><i class="bi bi-caret-right-fill"></i></a>
-                    </li>
-                    <li class="page-item @(ViewBag.Page == ViewBag.TotalPages ? "disabled" : "")">
-                        <a class="page-link ajax-link" href="#" data-page="@ViewBag.TotalPages"><i class="bi bi-skip-end-fill"></i></a>
-                    </li>
-                </ul>
-            </nav>
-        }
-        else
-        {
-            <nav aria-label="Page navigation">
-                <ul class="pagination pagination-sm mb-0">
-                    <li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-skip-start-fill"></i></a></li>
-                    <li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-caret-left-fill"></i></a></li>
-                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-caret-right-fill"></i></a></li>
-                    <li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-skip-end-fill"></i></a></li>
-                </ul>
-            </nav>
-        }
-
-        <div class="d-flex align-items-center">
-            <select id="pageSizeSelect" class="form-select form-select-sm" style="width: 70px; cursor: pointer;">
-                <option value="10" @(ViewBag.PageSize == 10 ? "selected" : "")>10</option>
-                <option value="20" @(ViewBag.PageSize == 20 ? "selected" : "")>20</option>
-                <option value="50" @(ViewBag.PageSize == 50 ? "selected" : "")>50</option>
-                <option value="100" @(ViewBag.PageSize == 100 ? "selected" : "")>100</option>
-            </select>
-            <span class="ms-2 text-info-custom" style="font-size: 0.85rem;">mẫu tin/trang</span>
-        </div>
-    </div>
-    <div class="text-info-custom" style="font-size: 0.85rem;">
-        @{
-            int total = ViewBag.Total ?? 0;
-            int pageIndex = ViewBag.Page ?? 1;
-            int pageSize = ViewBag.PageSize ?? 10;
-            int start = total > 0 ? ((pageIndex - 1) * pageSize) + 1 : 0;
-            int end = (pageIndex * pageSize) > total ? total : (pageIndex * pageSize);
-        }
-        @start - @end của @total
-    </div>
-</div>
+@Html.Partial("_Pagination", Model)

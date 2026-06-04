@@ -2,12 +2,12 @@ using System.Collections.Generic;
 
 namespace SalesManagementSystem.Models.ViewModels
 {
-    public class PhanQuyenMatrixVM
+    public class PhanQuyenMatrixViewModel
     {
         public string NhomChaManHinh { get; set; }
         public List<PhanQuyenScreenVM> Screens { get; set; }
 
-        public PhanQuyenMatrixVM()
+        public PhanQuyenMatrixViewModel()
         {
             Screens = new List<PhanQuyenScreenVM>();
         }

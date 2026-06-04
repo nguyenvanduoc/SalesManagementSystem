@@ -420,7 +420,7 @@
 
     <div class="topbar-right">
         @{
-            var userSession = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+            var userSession = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
             string hoTen = userSession != null ? (userSession.HoDem + " " + userSession.Ten).Trim() : "Admin";
             string firstChar = userSession != null && !string.IsNullOrEmpty(userSession.Ten) ? userSession.Ten.Substring(0, 1).ToUpper() : "A";
         }
@@ -770,6 +770,50 @@
         } else if (jqxhr.status >= 500) {
             showToast('error', 'Lỗi hệ thống (' + jqxhr.status + '). Vui lòng thử lại sau.');
         }
+    });
+
+    // Xử lý thông báo Toast từ Controller (TempData) - Giữ lại cho các form truyền thống
+    @if (TempData["ToastMessage"] != null)
+    {
+        var toastType = TempData["ToastType"] ?? "success";
+        <text>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (typeof showToast === 'function') {
+                showToast('@toastType', '@TempData["ToastMessage"]');
+            }
+        });
+        </text>
+    }
+
+    // Bắt sự kiện submit form Delete bằng AJAX để không bị chớp màn hình (giữ nguyên trang)
+    $(document).on('submit', '#globalDeleteForm', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        $.ajax({
+            url: form.attr('action'),
+            type: form.attr('method') || 'POST',
+            data: form.serialize(),
+            success: function(res) {
+                if (res.success === true) {
+                    $('#globalDeleteModal').modal('hide');
+                    showToast('success', res.message);
+                    
+                    var activeLink = $('.pagination .active .page-link').attr('href');
+                    if (activeLink && typeof loadData === 'function') {
+                        loadData(activeLink);
+                    } else if (typeof loadData === 'function') {
+                        loadData('');
+                    } else {
+                        location.reload();
+                    }
+                } else {
+                    showToast('error', res.message || 'Có lỗi xảy ra.');
+                }
+            },
+            error: function() {
+                showToast('error', 'Lỗi hệ thống khi xóa.');
+            }
+        });
     });
 </script>
 @RenderSection("scripts", required: false)

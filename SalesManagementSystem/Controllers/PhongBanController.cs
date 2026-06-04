@@ -4,6 +4,7 @@ using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Repositories;
 using SalesManagementSystem.Repositories.Interfaces;
 using SalesManagementSystem.Helpers;
+using SalesManagementSystem.Models.ViewModels;
 
 namespace SalesManagementSystem.Controllers
 {
@@ -26,18 +27,24 @@ namespace SalesManagementSystem.Controllers
             int totalRecords;
             var phongBans = _phongBanRepo.GetPaged(page, pageSize, keyword, out totalRecords);
 
-            ViewBag.Total = totalRecords;
-            ViewBag.Page = page;
-            ViewBag.PageSize = pageSize;
-            ViewBag.TotalPages = totalRecords > 0 ? (int)Math.Ceiling((double)totalRecords / pageSize) : 1;
+            var model = new PagedListViewModel<PhongBan>
+            {
+                Items = phongBans,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalRecords = totalRecords,
+                Keyword = keyword,
+                ActionName = "GetPhongBan"
+            };
+
             ViewBag.Keyword = keyword;
 
             if (Request.IsAjaxRequest())
             {
-                return PartialView("_PhongBanList", phongBans);
+                return PartialView("_PhongBanList", model);
             }
 
-            return View("GetPhongBan", phongBans);
+            return View("GetPhongBan", model);
         }
 
         // GET: PhongBan/CreatePhongBan
@@ -61,8 +68,8 @@ namespace SalesManagementSystem.Controllers
                     return PartialView("CreatePhongBan", phongBan);
                 }
 
-                var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
-                phongBan.NguoiTao = session?.UserID ?? 0;
+                var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+                phongBan.NguoiTao = session?.IDNhanVien ?? 0;
                 _phongBanRepo.Insert(phongBan);
 
                 // AUDIT LOG
@@ -101,8 +108,8 @@ namespace SalesManagementSystem.Controllers
 
                 var oldPhongBan = _phongBanRepo.GetById(phongBan.ID);
 
-                var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
-                phongBan.NguoiCapNhat = session?.UserID ?? 0;
+                var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+                phongBan.NguoiCapNhat = session?.IDNhanVien ?? 0;
                 _phongBanRepo.Update(phongBan);
 
                 // AUDIT LOG
@@ -135,7 +142,7 @@ namespace SalesManagementSystem.Controllers
                         AuditLog.AddDelete("PhongBan", item.ToString(), oldObj);
                 }
             }
-            return RedirectToAction("GetPhongBan");
+            return Json(new { success = true, message = "Xóa dữ liệu thành công" });
         }
     }
 }
