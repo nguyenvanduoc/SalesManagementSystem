@@ -163,6 +163,7 @@
     <Compile Include="Helpers\SecurityHelper.cs" />
     <Compile Include="Helpers\CommonConstants.cs" />
     <Compile Include="Helpers\Encryptor.cs" />
+    <Compile Include="Helpers\LogHelper.cs" />
     <!-- Data -->
     <Compile Include="Data\DbConnectionFactory.cs" />
     <!-- Models - Entities -->
@@ -174,7 +175,7 @@
     <Compile Include="Models\Entities\InventoryTransaction.cs" />
     <Compile Include="Models\Entities\Order.cs" />
     <Compile Include="Models\Entities\OrderDetail.cs" />
-    <Compile Include="Models\Entities\AclManHinh.cs" />
+    <Compile Include="Models\Entities\AclManHinh.cs" /> 
     <Compile Include="Models\Entities\AclAction.cs" />
     <Compile Include="Models\Entities\NhanVien.cs" />
     <Compile Include="Models\Entities\AclLogin.cs" />

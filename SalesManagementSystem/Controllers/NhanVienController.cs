@@ -46,7 +46,7 @@ namespace SalesManagementSystem.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
-        public ActionResult Create(NhanVien employee)
+        public ActionResult Create([Bind(Exclude = "ID,NgayTao,NguoiTao,NgayCapNhat,NguoiCapNhat")] NhanVien employee)
         {
             if (ModelState.IsValid)
             {
@@ -81,7 +81,7 @@ namespace SalesManagementSystem.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
-        public ActionResult Update(NhanVien employee)
+        public ActionResult Update([Bind(Exclude = "NgayTao,NguoiTao,NgayCapNhat,NguoiCapNhat")] NhanVien employee)
         {
             if (ModelState.IsValid)
             {

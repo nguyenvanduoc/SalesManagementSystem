@@ -21,13 +21,13 @@
 
         <div class="mb-3">
             <label class="form-label fw-bold">Tên Đăng Nhập <span class="text-danger">*</span></label>
-            @Html.TextBoxFor(m => m.TenDangNhap, new { @class = "form-control", required = "required", placeholder = "Nhập tên đăng nhập" })
+            @Html.TextBoxFor(m => m.TenDangNhap, new { @class = "form-control", required = "required", placeholder = "Nhập tên đăng nhập", oninvalid = "this.setCustomValidity('Bạn chưa nhập thông tin Tên đăng nhập')", oninput = "this.setCustomValidity('')" })
             @Html.ValidationMessageFor(m => m.TenDangNhap, "", new { @class = "text-danger small" })
         </div>
         
         <div class="mb-3">
             <label class="form-label fw-bold">Cấp Trên <span class="text-danger">*</span></label>
-            <select name="IDThamChieu" class="form-select" required>
+            <select name="IDThamChieu" class="form-select" required oninvalid="this.setCustomValidity('Bạn chưa nhập thông tin Cấp Trên')" oninput="this.setCustomValidity('')">
                 <option value="0" @(Model.IDThamChieu == null || Model.IDThamChieu == 0 ? "selected" : "")>-- Là Cấp Trên (Không Có) --</option>
                 @if (ViewBag.Managers != null)
                 {

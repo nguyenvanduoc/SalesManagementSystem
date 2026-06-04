@@ -36,7 +36,7 @@
             {
                 <div class="mb-3">
                     <label class="form-label fw-bold">Chọn Cấp Trên <span class="text-danger">*</span></label>
-                    <select name="IDThamChieu" class="form-select" required>
+                    <select name="IDThamChieu" class="form-select" required oninvalid="this.setCustomValidity('Bạn chưa nhập thông tin Cấp Trên')" oninput="this.setCustomValidity('')">
                         <option value="">-- Chọn Cấp Trên --</option>
                         @if (ViewBag.Managers != null)
                         {

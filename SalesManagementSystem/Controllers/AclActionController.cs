@@ -54,15 +54,15 @@ namespace SalesManagementSystem.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
-        public ActionResult CreateAction(AclAction action)
+        public ActionResult CreateAction(AclAction aclAction)
         {
             if (ModelState.IsValid)
             {
-                _actionRepo.Insert(action);
+                _actionRepo.Insert(aclAction);
                 return Json(new { success = true, message = "Thêm mới Action thành công!" });
             }
-            ViewBag.ManHinhList = new SelectList(_manHinhRepo.GetAll().Where(m => m.IsSuDung == 1), "ID", "TenManHinh", action.IDManHinh);
-            return PartialView("CreateAction", action);
+            ViewBag.ManHinhList = new SelectList(_manHinhRepo.GetAll().Where(m => m.IsSuDung == 1), "ID", "TenManHinh", aclAction.IDManHinh);
+            return PartialView("CreateAction", aclAction);
         }
 
         // GET: AclAction/UpdateAction/5
@@ -82,15 +82,15 @@ namespace SalesManagementSystem.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
-        public ActionResult UpdateAction(AclAction action)
+        public ActionResult UpdateAction(AclAction aclAction)
         {
             if (ModelState.IsValid)
             {
-                _actionRepo.Update(action);
+                _actionRepo.Update(aclAction);
                 return Json(new { success = true, message = "Cập nhật Action thành công!" });
             }
-            ViewBag.ManHinhList = new SelectList(_manHinhRepo.GetAll().Where(m => m.IsSuDung == 1), "ID", "TenManHinh", action.IDManHinh);
-            return PartialView("UpdateAction", action);
+            ViewBag.ManHinhList = new SelectList(_manHinhRepo.GetAll().Where(m => m.IsSuDung == 1), "ID", "TenManHinh", aclAction.IDManHinh);
+            return PartialView("UpdateAction", aclAction);
         }
 
         // POST: AclAction/DeleteAction

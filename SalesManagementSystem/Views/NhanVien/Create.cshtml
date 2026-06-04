@@ -14,19 +14,25 @@
 {
     @Html.AntiForgeryToken()
     <div class="modal-body p-4">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger mb-3">
+                @Html.ValidationSummary(false, "")
+            </div>
+        }
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label text-muted fw-semibold">Mã nhân viên <span class="text-danger">*</span></label>
-                @Html.TextBoxFor(m => m.MaNhanVien, new { @class = "form-control", required = "required", placeholder = "VD: NV001" })
+                @Html.TextBoxFor(m => m.MaNhanVien, new { @class = "form-control", required = "required", placeholder = "VD: NV001", oninvalid = "this.setCustomValidity('Bạn chưa nhập thông tin Mã nhân viên')", oninput = "this.setCustomValidity('')" })
                 @Html.ValidationMessageFor(m => m.MaNhanVien, "", new { @class = "text-danger small" })
             </div>
             <div class="col-md-6">
                 <label class="form-label text-muted fw-semibold">Họ đệm <span class="text-danger">*</span></label>
-                @Html.TextBoxFor(m => m.HoDem, new { @class = "form-control", required = "required", placeholder = "Nguyễn Văn" })
+                @Html.TextBoxFor(m => m.HoDem, new { @class = "form-control", required = "required", placeholder = "Nguyễn Văn", oninvalid = "this.setCustomValidity('Bạn chưa nhập thông tin Họ đệm')", oninput = "this.setCustomValidity('')" })
             </div>
             <div class="col-md-6">
                 <label class="form-label text-muted fw-semibold">Tên nhân viên <span class="text-danger">*</span></label>
-                @Html.TextBoxFor(m => m.TenNhanVien, new { @class = "form-control", required = "required", placeholder = "A" })
+                @Html.TextBoxFor(m => m.TenNhanVien, new { @class = "form-control", required = "required", placeholder = "A", oninvalid = "this.setCustomValidity('Bạn chưa nhập thông tin Tên nhân viên')", oninput = "this.setCustomValidity('')" })
             </div>
             <div class="col-md-6">
                 <label class="form-label text-muted fw-semibold">Ngày sinh</label>

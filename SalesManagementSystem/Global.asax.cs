@@ -18,5 +18,14 @@ namespace SalesManagementSystem
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
         }
+
+        protected void Application_Error()
+        {
+            var ex = Server.GetLastError();
+            if (ex != null)
+            {
+                SalesManagementSystem.Helpers.LogHelper.WriteErrorLog(ex, HttpContext.Current);
+            }
+        }
     }
 }

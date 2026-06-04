@@ -17,12 +17,12 @@
         <div class="row g-3">
             <div class="col-md-12">
                 <label class="form-label text-muted fw-semibold">Mã chức vụ <span class="text-danger">*</span></label>
-                @Html.TextBoxFor(m => m.MaChucVu, new { @class = "form-control", required = "required", placeholder = "VD: CV001" })
+                @Html.TextBoxFor(m => m.MaChucVu, new { @class = "form-control", required = "required", placeholder = "VD: CV001", oninvalid = "this.setCustomValidity('Bạn chưa nhập thông tin Mã chức vụ')", oninput = "this.setCustomValidity('')" })
                 @Html.ValidationMessageFor(m => m.MaChucVu, "", new { @class = "text-danger small" })
             </div>
             <div class="col-md-12">
                 <label class="form-label text-muted fw-semibold">Tên chức vụ <span class="text-danger">*</span></label>
-                @Html.TextBoxFor(m => m.TenChucVu, new { @class = "form-control", required = "required", placeholder = "VD: Giám đốc" })
+                @Html.TextBoxFor(m => m.TenChucVu, new { @class = "form-control", required = "required", placeholder = "VD: Giám đốc", oninvalid = "this.setCustomValidity('Bạn chưa nhập thông tin Tên chức vụ')", oninput = "this.setCustomValidity('')" })
             </div>
             <div class="col-md-12">
                 <label class="form-label text-muted fw-semibold">Số thứ tự</label>

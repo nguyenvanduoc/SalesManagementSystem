@@ -19,12 +19,12 @@
         <div class="row g-3">
             <div class="col-md-12">
                 <label class="form-label text-muted fw-semibold">Mã phòng ban <span class="text-danger">*</span></label>
-                @Html.TextBoxFor(m => m.MaPhongBan, new { @class = "form-control", required = "required", placeholder = "VD: PB001" })
+                @Html.TextBoxFor(m => m.MaPhongBan, new { @class = "form-control", required = "required", placeholder = "VD: PB001", oninvalid = "this.setCustomValidity('Bạn chưa nhập thông tin Mã phòng ban')", oninput = "this.setCustomValidity('')" })
                 @Html.ValidationMessageFor(m => m.MaPhongBan, "", new { @class = "text-danger small" })
             </div>
             <div class="col-md-12">
                 <label class="form-label text-muted fw-semibold">Tên phòng ban <span class="text-danger">*</span></label>
-                @Html.TextBoxFor(m => m.TenPhongBan, new { @class = "form-control", required = "required", placeholder = "VD: Phòng Kế Toán" })
+                @Html.TextBoxFor(m => m.TenPhongBan, new { @class = "form-control", required = "required", placeholder = "VD: Phòng Kế Toán", oninvalid = "this.setCustomValidity('Bạn chưa nhập thông tin Tên phòng ban')", oninput = "this.setCustomValidity('')" })
             </div>
             <div class="col-md-12">
                 <label class="form-label text-muted fw-semibold">Số thứ tự</label>
