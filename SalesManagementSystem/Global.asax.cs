@@ -27,5 +27,18 @@ namespace SalesManagementSystem
                 SalesManagementSystem.Helpers.LogHelper.WriteErrorLog(ex, HttpContext.Current);
             }
         }
+
+        protected void Session_End(object sender, System.EventArgs e)
+        {
+            var userSession = Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION] as SalesManagementSystem.Models.ViewModels.UserLoginViewModel;
+            if (userSession != null)
+            {
+                var sessionRepo = System.Web.Mvc.DependencyResolver.Current.GetService(typeof(SalesManagementSystem.Repositories.Interfaces.IAclLoginSessionRepository)) as SalesManagementSystem.Repositories.Interfaces.IAclLoginSessionRepository;
+                if (sessionRepo != null)
+                {
+                    sessionRepo.LogLogout(userSession.UserID);
+                }
+            }
+        }
     }
 }

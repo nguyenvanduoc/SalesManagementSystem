@@ -8,10 +8,12 @@ namespace SalesManagementSystem.Controllers
     public class LoginController : Controller
     {
         private readonly IAclLoginRepository _loginRepo;
+        private readonly IAclLoginSessionRepository _sessionRepo;
 
-        public LoginController(IAclLoginRepository loginRepo)
+        public LoginController(IAclLoginRepository loginRepo, IAclLoginSessionRepository sessionRepo)
         {
             _loginRepo = loginRepo;
+            _sessionRepo = sessionRepo;
         }
 
         [HttpGet]
@@ -42,6 +44,19 @@ namespace SalesManagementSystem.Controllers
                     };
 
                     Session.Add(CommonConstants.USER_SESSION, userSession);
+
+                    // LOG LOGIN SESSION
+                    int sessionId = _sessionRepo.LogLogin(new SalesManagementSystem.Models.Entities.AclLoginSession
+                    {
+                        IDLogin = result.ID,
+                        HoTen = result.HoDem + " " + result.Ten,
+                        HostName = Request.UserHostName,
+                        HostAddress = Request.UserHostAddress,
+                        TrinhDuyet = Request.Browser != null ? Request.Browser.Browser + " " + Request.Browser.Version : "Unknown",
+                        IP = Request.ServerVariables["REMOTE_ADDR"] ?? Request.UserHostAddress
+                    });
+                    Session["LoginSessionID"] = sessionId;
+
                     return RedirectToAction("Index", "Home");
                 }
                 else
@@ -55,6 +70,11 @@ namespace SalesManagementSystem.Controllers
 
         public ActionResult Logout()
         {
+            var userSession = Session[CommonConstants.USER_SESSION] as UserLoginViewModel;
+            if (userSession != null)
+            {
+                _sessionRepo.LogLogout(userSession.UserID);
+            }
             Session.Remove(CommonConstants.USER_SESSION);
             return RedirectToAction("Index", "Login");
         }

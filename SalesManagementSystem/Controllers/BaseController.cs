@@ -12,6 +12,29 @@ namespace SalesManagementSystem.Controllers
 
         protected override void OnActionExecuting(ActionExecutingContext filterContext)
         {
+            var sessionId = Session["LoginSessionID"];
+            if (sessionId != null)
+            {
+                var sessionRepo = System.Web.Mvc.DependencyResolver.Current.GetService(typeof(SalesManagementSystem.Repositories.Interfaces.IAclLoginSessionRepository)) as SalesManagementSystem.Repositories.Interfaces.IAclLoginSessionRepository;
+                if (sessionRepo != null)
+                {
+                    bool isActive = sessionRepo.IsSessionActive((int)sessionId);
+                    if (!isActive)
+                    {
+                        Session.Clear();
+                        if (filterContext.HttpContext.Request.IsAjaxRequest())
+                        {
+                            filterContext.Result = new JsonResult { Data = new { success = false, message = "Phiên làm việc của bạn đã bị ngắt bởi quản trị viên." }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                        }
+                        else
+                        {
+                            filterContext.Result = new RedirectResult("/Login/Index");
+                        }
+                        return;
+                    }
+                }
+            }
+
             AuditLog = new AuditHelper();
             base.OnActionExecuting(filterContext);
         }
