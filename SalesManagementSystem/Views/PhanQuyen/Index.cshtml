@@ -46,13 +46,17 @@
     }
 </style>
 
+@using SalesManagementSystem.Helpers
 <div class="phan-quyen-container" style="font-family: Arial, Helvetica, sans-serif;">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">@ViewBag.Title</h4>
         <div class="d-flex gap-2">
-            <button type="button" id="btnSaveQuyen" class="btn text-white px-3" style="background-color: #2998e4; border: none;">
-                <i class="bi bi-save me-1"></i> Lưu phân quyền
-            </button>
+            @if (PermissionHelper.HasPermission("PhanQuyen", LoaiPhanQuyen.Them))
+            {
+                <button type="button" id="btnSaveQuyen" class="btn text-white px-3" style="background-color: #2998e4; border: none;">
+                    <i class="bi bi-save me-1"></i> Lưu phân quyền
+                </button>
+            }
         </div>
     </div>
 
@@ -181,24 +185,37 @@
             
             // Search tree logic
             $('#searchTree').on('keyup', function() {
-                var val = $(this).val().toLowerCase();
+                var val = $(this).val().toLowerCase().trim();
                 
                 if (val === '') {
                     $('.tree-node').show();
+                    // Bỏ highlight cũ
+                    $('.tree-node .node-label').css('background-color', '');
                     return;
                 }
 
-                $('.tree-node').each(function() {
+                // Ẩn tất cả các node có data-id
+                $('.tree-node[data-id]').hide();
+                $('.tree-node .node-label').css('background-color', '');
+
+                // Tìm và hiển thị các node khớp, đồng thời hiển thị cả cha của chúng
+                $('.tree-node[data-id]').each(function() {
                     var text = $(this).text().toLowerCase();
                     if (text.indexOf(val) > -1) {
+                        // Hiển thị node này
                         $(this).show();
-                        // Expand parents
+                        
+                        // Highlight text để dễ nhìn
+                        $(this).find('.node-label').css('background-color', '#ffff99');
+                        
+                        // Hiển thị các khối tree-children chứa node này
                         $(this).parents('.tree-children').show();
-                        $(this).parents('li').find('> .tree-node .toggle-icon').removeClass('bi-caret-right-fill').addClass('bi-caret-down-fill');
-                    } else {
-                        if ($(this).data('id')) { // Only hide leaf nodes or nodes not matching
-                            $(this).hide();
-                        }
+                        
+                        // Hiển thị tất cả tree-node cha (để người dùng thấy được cấp bậc)
+                        $(this).parents('li').each(function() {
+                            $(this).find('> .tree-node').show();
+                            $(this).find('> .tree-node .toggle-icon').removeClass('bi-caret-right-fill').addClass('bi-caret-down-fill');
+                        });
                     }
                 });
             });

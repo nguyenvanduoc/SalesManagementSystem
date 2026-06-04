@@ -14,6 +14,8 @@ namespace SalesManagementSystem.Repositories.Interfaces
         void Delete(int id);
         IEnumerable<NhanVien> GetEmployeesWithoutAccount();
         NhanVien GetEmployeeById(int id);
+        AclLogin GetByEmployeeId(int empId);
+        IEnumerable<AclLoginVM> GetManagers();
         AclLogin Login(string userName, string passWord);
     }
 }

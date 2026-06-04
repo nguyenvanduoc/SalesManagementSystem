@@ -4,15 +4,22 @@
     ViewBag.Title = "Danh sách nhân viên";
 }
 
+@using SalesManagementSystem.Helpers
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">@ViewBag.Title</h4>
     <div class="d-flex gap-2">
-        <button type="button" class="btn btn-primary" style="background-color: #3498db; border-color: #3498db;" onclick="openFormModal('@Url.Action("Create", "NhanVien")')">
-            <i class="bi bi-plus-lg fw-bold"></i> Thêm
-        </button>
-        <button type="button" class="btn btn-danger" style="background-color: #e74c3c; border-color: #e74c3c;" onclick="deleteSelected()">
-            <i class="bi bi-trash"></i> Xóa
-        </button>
+        @if (PermissionHelper.HasPermission("NhanVien", LoaiPhanQuyen.Them))
+        {
+            <button type="button" class="btn btn-primary" style="background-color: #3498db; border-color: #3498db;" onclick="openFormModal('@Url.Action("Create", "NhanVien")')">
+                <i class="bi bi-plus-lg fw-bold"></i> Thêm
+            </button>
+        }
+        @if (PermissionHelper.HasPermission("NhanVien", LoaiPhanQuyen.Xoa))
+        {
+            <button type="button" class="btn btn-danger" style="background-color: #e74c3c; border-color: #e74c3c;" onclick="deleteSelected()">
+                <i class="bi bi-trash"></i> Xóa
+            </button>
+        }
     </div>
 </div>
 

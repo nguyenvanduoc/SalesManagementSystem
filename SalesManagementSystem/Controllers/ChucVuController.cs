@@ -3,6 +3,7 @@ using System.Web.Mvc;
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Repositories;
 using SalesManagementSystem.Repositories.Interfaces;
+using SalesManagementSystem.Helpers;
 
 namespace SalesManagementSystem.Controllers
 {
@@ -40,6 +41,7 @@ namespace SalesManagementSystem.Controllers
         }
 
         // GET: DanhMuc/CreateChucVu
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult CreateChucVu()
         {
             return PartialView("CreateChucVu", new ChucVu());
@@ -48,6 +50,7 @@ namespace SalesManagementSystem.Controllers
         // POST: DanhMuc/CreateChucVu
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult CreateChucVu(ChucVu chucVu)
         {
             if (ModelState.IsValid)
@@ -67,6 +70,7 @@ namespace SalesManagementSystem.Controllers
         }
 
         // GET: DanhMuc/UpdateChucVu/5
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult UpdateChucVu(int id)
         {
             var chucVu = _chucVuRepo.GetById(id);
@@ -80,6 +84,7 @@ namespace SalesManagementSystem.Controllers
         // POST: DanhMuc/UpdateChucVu/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult UpdateChucVu(ChucVu chucVu)
         {
             if (ModelState.IsValid)
@@ -100,6 +105,7 @@ namespace SalesManagementSystem.Controllers
 
         // POST: DanhMuc/DeleteChucVu
         [HttpPost]
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult DeleteChucVu(int? id, int[] ids)
         {
             if (id.HasValue)

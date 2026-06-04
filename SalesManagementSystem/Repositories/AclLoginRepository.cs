@@ -74,8 +74,8 @@ namespace SalesManagementSystem.Repositories
         {
             login.NgayTao = DateTime.Now;
             const string sql = @"
-                INSERT INTO ACL_Login (IDNhanVien, TenDangNhap, MatKhau, HoDem, Ten, IsActive, NgayTao, NguoiTao)
-                VALUES (@IDNhanVien, @TenDangNhap, @MatKhau, @HoDem, @Ten, @IsActive, @NgayTao, @NguoiTao);
+                INSERT INTO ACL_Login (IDNhanVien, TenDangNhap, MatKhau, HoDem, Ten, IsActive, IDThamChieu, NgayTao, NguoiTao)
+                VALUES (@IDNhanVien, @TenDangNhap, @MatKhau, @HoDem, @Ten, @IsActive, @IDThamChieu, @NgayTao, @NguoiTao);
                 SELECT CAST(SCOPE_IDENTITY() AS INT)";
             using (var conn = _db.CreateConnection())
                 return conn.ExecuteScalar<int>(sql, login);
@@ -87,8 +87,9 @@ namespace SalesManagementSystem.Repositories
             const string sql = @"
                 UPDATE ACL_Login
                 SET IDNhanVien = @IDNhanVien, TenDangNhap = @TenDangNhap, MatKhau = @MatKhau, 
-                    HoDem = @HoDem, Ten = @Ten, IsActive = @IsActive, 
-                    NgayCapNhat = @NgayCapNhat, NguoiCapNhat = @NguoiCapNhat
+                    HoDem = @HoDem, Ten = @Ten, IsActive = @IsActive, IDThamChieu = @IDThamChieu,
+                    NgayCapNhat = @NgayCapNhat, NguoiCapNhat = @NguoiCapNhat,
+                    NgayXoa = @NgayXoa, NguoiXoa = @NguoiXoa
                 WHERE ID = @ID";
             using (var conn = _db.CreateConnection())
                 conn.Execute(sql, login);
@@ -106,7 +107,7 @@ namespace SalesManagementSystem.Repositories
             const string sql = @"
                 SELECT N.* 
                 FROM NS_NhanVien N
-                LEFT JOIN ACL_Login L ON N.ID = L.IDNhanVien
+                LEFT JOIN ACL_Login L ON N.ID = L.IDNhanVien AND L.NgayXoa IS NULL
                 WHERE L.ID IS NULL
                 ORDER BY N.TenNhanVien";
             using (var conn = _db.CreateConnection())
@@ -118,6 +119,25 @@ namespace SalesManagementSystem.Repositories
             const string sql = "SELECT * FROM NS_NhanVien WHERE ID = @ID";
             using (var conn = _db.CreateConnection())
                 return conn.QueryFirstOrDefault<NhanVien>(sql, new { ID = id });
+        }
+
+        public AclLogin GetByEmployeeId(int empId)
+        {
+            const string sql = "SELECT * FROM ACL_Login WHERE IDNhanVien = @EmpId";
+            using (var conn = _db.CreateConnection())
+                return conn.QueryFirstOrDefault<AclLogin>(sql, new { EmpId = empId });
+        }
+
+        public IEnumerable<AclLoginVM> GetManagers()
+        {
+            const string sql = @"
+                SELECT L.*, N.HoDem, N.TenNhanVien as Ten 
+                FROM ACL_Login L
+                LEFT JOIN NS_NhanVien N ON L.IDNhanVien = N.ID
+                WHERE (L.IDThamChieu IS NULL OR L.IDThamChieu = 0) AND L.IsActive = 1 AND L.NgayXoa IS NULL
+                ORDER BY N.TenNhanVien";
+            using (var conn = _db.CreateConnection())
+                return conn.Query<AclLoginVM>(sql);
         }
 
         public AclLogin Login(string userName, string passWord)

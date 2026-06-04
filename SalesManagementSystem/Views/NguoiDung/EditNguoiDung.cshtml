@@ -26,6 +26,23 @@
         </div>
         
         <div class="mb-3">
+            <label class="form-label fw-bold">Cấp Trên <span class="text-danger">*</span></label>
+            <select name="IDThamChieu" class="form-select" required>
+                <option value="0" @(Model.IDThamChieu == null || Model.IDThamChieu == 0 ? "selected" : "")>-- Là Cấp Trên (Không Có) --</option>
+                @if (ViewBag.Managers != null)
+                {
+                    foreach (var mgr in (IEnumerable<SalesManagementSystem.Models.ViewModels.AclLoginVM>)ViewBag.Managers)
+                    {
+                        if (mgr.ID != Model.ID) // Không được chọn chính mình làm cấp trên
+                        {
+                            <option value="@mgr.ID" @(Model.IDThamChieu == mgr.ID ? "selected" : "")>@mgr.HoTenNhanVien - @mgr.TenDangNhap</option>
+                        }
+                    }
+                }
+            </select>
+        </div>
+        
+        <div class="mb-3">
             <label class="form-label fw-bold">Mật Khẩu (Để trống nếu không muốn đổi)</label>
             <input type="password" name="MatKhau" class="form-control" placeholder="Nhập mật khẩu mới..." autocomplete="new-password" />
         </div>
@@ -50,6 +67,7 @@
 <script>
     function submitEditForm(e) {
         e.preventDefault();
+        e.stopPropagation();
         
         // Xóa thông báo lỗi cũ
         $('.text-danger.validation-error').remove();

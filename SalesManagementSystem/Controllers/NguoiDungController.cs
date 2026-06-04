@@ -35,17 +35,25 @@ namespace SalesManagementSystem.Controllers
             return View(logins);
         }
 
-        public ActionResult CreateNguoiDung()
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
+        public ActionResult CreateNguoiDung(bool isManager = false)
         {
             var employees = _aclLoginRepo.GetEmployeesWithoutAccount();
             ViewBag.Employees = employees;
+            ViewBag.IsManager = isManager;
+            ViewBag.Title = isManager ? "Thêm Cấp Trên" : "Thêm Mới Tài Khoản";
+            if (!isManager)
+            {
+                ViewBag.Managers = _aclLoginRepo.GetManagers();
+            }
             return PartialView();
         }
 
         // POST: NguoiDung/CreateNguoiDung
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult CreateNguoiDung(int[] EmployeeIds, bool IsActive = true)
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
+        public ActionResult CreateNguoiDung(int[] EmployeeIds, bool IsActive = true, bool isManager = false, int? IDThamChieu = null)
         {
             if (EmployeeIds != null && EmployeeIds.Length > 0)
             {
@@ -55,21 +63,42 @@ namespace SalesManagementSystem.Controllers
                     if (emp != null)
                     {
                         var tenDangNhap = emp.MaNhanVien;
-                        // Bỏ qua nếu mã nhân viên đã được dùng làm tên đăng nhập
-                        if (!_aclLoginRepo.IsDuplicateUsername(tenDangNhap))
+                        var existingLogin = _aclLoginRepo.GetByEmployeeId(emp.ID);
+                        
+                        // Nếu đang khôi phục tài khoản, phải truyền ID của tài khoản cũ vào để bỏ qua check trùng lặp với chính nó
+                        if (!_aclLoginRepo.IsDuplicateUsername(tenDangNhap, existingLogin?.ID ?? 0))
                         {
                             var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
-                            var login = new AclLogin
+                            if (existingLogin != null)
                             {
-                                IDNhanVien = emp.ID,
-                                TenDangNhap = tenDangNhap,
-                                MatKhau = SecurityHelper.GetMd5Hash("1234"),
-                                HoDem = emp.HoDem,
-                                Ten = emp.TenNhanVien,
-                                IsActive = IsActive,
-                                NguoiTao = session?.UserID ?? 0
-                            };
-                            _aclLoginRepo.Insert(login);
+                                // Tài khoản đã từng bị xóa mềm -> Khôi phục
+                                existingLogin.TenDangNhap = tenDangNhap;
+                                existingLogin.MatKhau = SecurityHelper.GetMd5Hash("1111");
+                                existingLogin.IsActive = IsActive;
+                                existingLogin.IDThamChieu = isManager ? null : IDThamChieu;
+                                existingLogin.NgayCapNhat = DateTime.Now;
+                                existingLogin.NguoiCapNhat = session?.UserID ?? 0;
+                                existingLogin.NgayXoa = null;
+                                existingLogin.NguoiXoa = null;
+                                
+                                _aclLoginRepo.Update(existingLogin);
+                            }
+                            else
+                            {
+                                // Thêm mới hoàn toàn
+                                var login = new AclLogin
+                                {
+                                    IDNhanVien = emp.ID,
+                                    TenDangNhap = tenDangNhap,
+                                    MatKhau = SecurityHelper.GetMd5Hash("1111"),
+                                    HoDem = emp.HoDem,
+                                    Ten = emp.TenNhanVien,
+                                    IsActive = IsActive,
+                                    IDThamChieu = isManager ? null : IDThamChieu,
+                                    NguoiTao = session?.UserID ?? 0
+                                };
+                                _aclLoginRepo.Insert(login);
+                            }
                         }
                     }
                 }
@@ -79,10 +108,16 @@ namespace SalesManagementSystem.Controllers
             ModelState.AddModelError("", "Vui lòng chọn ít nhất một nhân viên.");
             var employeesReload = _aclLoginRepo.GetEmployeesWithoutAccount();
             ViewBag.Employees = employeesReload;
+            ViewBag.IsManager = isManager;
+            if (!isManager)
+            {
+                ViewBag.Managers = _aclLoginRepo.GetManagers();
+            }
             return PartialView();
         }
 
         // GET: NguoiDung/EditNguoiDung/5
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult EditNguoiDung(int id)
         {
             var login = _aclLoginRepo.GetById(id);
@@ -90,6 +125,7 @@ namespace SalesManagementSystem.Controllers
             
             var emp = _aclLoginRepo.GetEmployeeById(login.IDNhanVien);
             ViewBag.TenNhanVien = emp != null ? $"{emp.HoDem} {emp.TenNhanVien}" : "";
+            ViewBag.Managers = _aclLoginRepo.GetManagers();
             
             // Xóa mật khẩu khi hiển thị
             login.MatKhau = ""; 
@@ -99,6 +135,7 @@ namespace SalesManagementSystem.Controllers
         // POST: NguoiDung/EditNguoiDung
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult EditNguoiDung(AclLogin login)
         {
             if (ModelState.IsValid)
@@ -108,6 +145,7 @@ namespace SalesManagementSystem.Controllers
                     ModelState.AddModelError("TenDangNhap", "Tên đăng nhập đã tồn tại trong hệ thống.");
                     var emp = _aclLoginRepo.GetEmployeeById(login.IDNhanVien);
                     ViewBag.TenNhanVien = emp != null ? emp.TenNhanVien : "";
+                    ViewBag.Managers = _aclLoginRepo.GetManagers();
                     return PartialView(login);
                 }
 
@@ -121,6 +159,7 @@ namespace SalesManagementSystem.Controllers
                     {
                         existing.MatKhau = SecurityHelper.GetMd5Hash(login.MatKhau);
                     }
+                    existing.IDThamChieu = login.IDThamChieu;
                     
                     var emp = _aclLoginRepo.GetEmployeeById(existing.IDNhanVien);
                     if (emp != null)
@@ -143,6 +182,7 @@ namespace SalesManagementSystem.Controllers
 
         // POST: NguoiDung/DeleteNguoiDung/5
         [HttpPost]
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult DeleteNguoiDung(int id)
         {
             _aclLoginRepo.Delete(id);

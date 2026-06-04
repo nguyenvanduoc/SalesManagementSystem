@@ -15,7 +15,7 @@ namespace SalesManagementSystem.Controllers
         {
             _phanQuyenRepo = phanQuyenRepo;
         }
-
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult Index()
         {
             ViewBag.Title = "Phân quyền người dùng";
@@ -31,6 +31,7 @@ namespace SalesManagementSystem.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult Save(int idLogin, List<int> checkedActionIds, bool isInherit = false)
         {
             var userSession = (UserLogin)Session[CommonConstants.USER_SESSION];

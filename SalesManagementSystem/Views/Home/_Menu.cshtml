@@ -1,4 +1,5 @@
 @model SalesManagementSystem.Models.ViewModels.SidebarVM
+@using SalesManagementSystem.Helpers
 @{
     // Active controller từ request hiện tại (truyền vào qua SidebarVM)
     string activeCtrl = Model.ActiveController;
@@ -17,14 +18,18 @@
 </ul>
 
 @* ── Các nhóm menu động từ ACL_ManHinh ── *@
-@{ int groupIndex = 0; }
-@foreach (var group in Model.Groups)
+@{ 
+    int groupIndex = 0; 
+    var validGroups = Model.Groups.Where(g => g.Items.Any(i => PermissionHelper.HasPermission(i.TenController, LoaiPhanQuyen.Xem))).ToList();
+}
+@foreach (var group in validGroups)
 {
+    var validItems = group.Items.Where(i => PermissionHelper.HasPermission(i.TenController, LoaiPhanQuyen.Xem)).ToList();
     groupIndex++;
     string collapseId = "collapseGroup" + groupIndex;
     
     // Kiểm tra xem nhóm này có item nào đang active hay không để tự động xổ xuống
-    bool isGroupActive = group.Items.Any(i => string.Equals(activeCtrl, i.TenController, StringComparison.OrdinalIgnoreCase));
+    bool isGroupActive = validItems.Any(i => string.Equals(activeCtrl, i.TenController, StringComparison.OrdinalIgnoreCase));
 
     <div class="nav-group">
         <a class="nav-group-toggle @(isGroupActive ? "" : "collapsed")" data-bs-toggle="collapse" href="#@collapseId" role="button" aria-expanded="@(isGroupActive ? "true" : "false")">
@@ -34,7 +39,7 @@
         </a>
         <div class="collapse @(isGroupActive ? "show" : "") nav-group-collapse" id="@collapseId">
             <ul>
-                @foreach (var item in group.Items)
+                @foreach (var item in validItems)
                 {
                     bool isActive = string.Equals(activeCtrl, item.TenController, System.StringComparison.OrdinalIgnoreCase);
                     string href = (string.IsNullOrEmpty(item.TenController)) ? "#" : Url.Action(item.TenAction, item.TenController);

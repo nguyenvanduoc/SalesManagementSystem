@@ -288,3 +288,14 @@ showToast('error', 'Có lỗi xảy ra trong quá trình xóa dữ liệu.');
 - URL (đường dẫn web) nên được định dạng theo kiểu tiếng Việt không dấu, chữ thường và phân cách bằng dấu gạch ngang `-` (Kebab-case) để tối ưu và hiển thị chuyên nghiệp.
 - **Ví dụ đúng:** `/phan-quyen`, `/phong-ban/them-moi`, `/phan-quyen/luu`.
 - **Ví dụ sai (không nên dùng):** `/PhanQuyen/Index`, `/PhongBan/CreatePhongBan`.
+
+## 11. Tiêu chuẩn Phân quyền Hệ thống (Authorization Standard)
+- Toàn bộ các hành động trong hệ thống đều phải được kiểm soát phân quyền dựa trên Enum `AuthorizeTypes` (trong thư mục Helpers).
+  - `AuthorizeTypes.Everyone`: Dành cho các chức năng công khai (Đăng nhập, Quên mật khẩu).
+  - `AuthorizeTypes.AuthorizedUsers`: Dành cho xuất báo cáo cơ bản. Chỉ yêu cầu đã đăng nhập.
+  - `AuthorizeTypes.MustHavePermission`: Bắt buộc đối với các Action thao tác thay đổi dữ liệu (Xem, Thêm, Sửa, Xóa, Lưu...). Hệ thống sẽ tự động kiểm tra CSDL để chặn truy cập trái phép.
+- **Tiêu chuẩn Giao diện Phân quyền:**
+  - Không truyền các con số "cứng" (như 1, 2, 3, 4) vào hàm kiểm tra phân quyền. 
+  - Thay vào đó, **bắt buộc phải sử dụng Enum** `LoaiPhanQuyen` (Xem, Them, CapNhat, Xoa, TuyChon) để code dễ bảo trì.
+  - **Ví dụ:** Dùng `@if (PermissionHelper.HasPermission("ChucVu", LoaiPhanQuyen.Them))` để ẩn/hiện nút "Thêm mới" trên View.
+- Nút Thêm mới, Sửa, Xóa phải ẩn hoàn toàn nếu nhân viên không có quyền tương ứng. Không hiển thị các nút này dưới dạng mờ (disabled) để tránh gây rối mắt và lộ diện tính năng.

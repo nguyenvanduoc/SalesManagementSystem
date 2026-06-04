@@ -3,6 +3,7 @@ using System.Web.Mvc;
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Repositories;
 using SalesManagementSystem.Repositories.Interfaces;
+using SalesManagementSystem.Helpers;
 
 namespace SalesManagementSystem.Controllers
 {
@@ -40,6 +41,7 @@ namespace SalesManagementSystem.Controllers
         }
 
         // GET: PhongBan/CreatePhongBan
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult CreatePhongBan()
         {
             return PartialView("CreatePhongBan", new PhongBan());
@@ -48,6 +50,7 @@ namespace SalesManagementSystem.Controllers
         // POST: PhongBan/CreatePhongBan
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult CreatePhongBan(PhongBan phongBan)
         {
             if (ModelState.IsValid)
@@ -67,6 +70,7 @@ namespace SalesManagementSystem.Controllers
         }
 
         // GET: PhongBan/UpdatePhongBan/5
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult UpdatePhongBan(int id)
         {
             var phongBan = _phongBanRepo.GetById(id);
@@ -80,6 +84,7 @@ namespace SalesManagementSystem.Controllers
         // POST: PhongBan/UpdatePhongBan/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult UpdatePhongBan(PhongBan phongBan)
         {
             if (ModelState.IsValid)
@@ -100,6 +105,7 @@ namespace SalesManagementSystem.Controllers
 
         // POST: PhongBan/DeletePhongBan
         [HttpPost]
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult DeletePhongBan(int? id, int[] ids)
         {
             if (id.HasValue)

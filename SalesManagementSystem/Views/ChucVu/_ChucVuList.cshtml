@@ -32,16 +32,22 @@
                                         <ul class="dropdown-menu shadow">
                                             <li><h6 class="dropdown-header text-uppercase fw-bold text-dark">Thao tác</h6></li>
                                             <li><hr class="dropdown-divider"></li>
-                                            <li>
-                                                <button type="button" class="dropdown-item" onclick="openFormModal('@Url.Action("UpdateChucVu", "ChucVu", new { id = item.ID })')">
-                                                    <i class="bi bi-pencil-square me-2 text-primary"></i> Chỉnh sửa
-                                                </button>
-                                            </li>
-                                            <li>
-                                                <button type="button" class="dropdown-item text-danger" onclick="confirmDelete('@Url.Action("DeleteChucVu", "ChucVu", new { id = item.ID })', 'Bạn có chắc chắn muốn xóa chức vụ này không?')">
-                                                    <i class="bi bi-trash-fill me-2 text-danger"></i> Xóa
-                                                </button>
-                                            </li>
+                                            @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("ChucVu", SalesManagementSystem.Helpers.LoaiPhanQuyen.CapNhat))
+                                            {
+                                                <li>
+                                                    <button type="button" class="dropdown-item" onclick="openFormModal('@Url.Action("UpdateChucVu", "ChucVu", new { id = item.ID })')">
+                                                        <i class="bi bi-pencil-square me-2 text-primary"></i> Chỉnh sửa
+                                                    </button>
+                                                </li>
+                                            }
+                                            @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("ChucVu", SalesManagementSystem.Helpers.LoaiPhanQuyen.Xoa))
+                                            {
+                                                <li>
+                                                    <button type="button" class="dropdown-item text-danger" onclick="confirmDelete('@Url.Action("DeleteChucVu", "ChucVu", new { id = item.ID })', 'Bạn có chắc chắn muốn xóa chức vụ này không?')">
+                                                        <i class="bi bi-trash-fill me-2 text-danger"></i> Xóa
+                                                    </button>
+                                                </li>
+                                            }
                                         </ul>
                                     </div>
                                 </td>

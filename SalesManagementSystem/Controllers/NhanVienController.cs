@@ -3,6 +3,7 @@ using System.Web.Mvc;
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Repositories;
 using SalesManagementSystem.Repositories.Interfaces;
+using SalesManagementSystem.Helpers;
 
 namespace SalesManagementSystem.Controllers
 {
@@ -35,6 +36,7 @@ namespace SalesManagementSystem.Controllers
         }
 
         // GET: Employee/Create
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult Create()
         {
             return PartialView(new NhanVien());
@@ -43,6 +45,7 @@ namespace SalesManagementSystem.Controllers
         // POST: Employee/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult Create(NhanVien employee)
         {
             if (ModelState.IsValid)
@@ -63,6 +66,7 @@ namespace SalesManagementSystem.Controllers
         }
 
         // GET: Employee/Update/5
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult Update(int id)
         {
             var employee = _employeeRepo.GetById(id);
@@ -76,6 +80,7 @@ namespace SalesManagementSystem.Controllers
         // POST: Employee/Update/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult Update(NhanVien employee)
         {
             if (ModelState.IsValid)
@@ -96,6 +101,7 @@ namespace SalesManagementSystem.Controllers
 
         // POST: Employee/Delete/5
         [HttpPost]
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult Delete(int id)
         {
             _employeeRepo.Delete(id);
@@ -104,6 +110,7 @@ namespace SalesManagementSystem.Controllers
 
         // POST: Employee/BatchDelete
         [HttpPost]
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult BatchDelete(int[] ids)
         {
             if (ids != null && ids.Length > 0)

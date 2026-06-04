@@ -11,6 +11,7 @@
 <form id="createForm" onsubmit="submitForm(event)">
     <div class="modal-body p-0">
         @Html.AntiForgeryToken()
+        <input type="hidden" name="isManager" value="@(ViewBag.IsManager == true ? "true" : "false")" />
         
         <div class="p-3 pb-0">
             <div class="alert alert-danger d-none" id="errorSummary"></div>
@@ -19,7 +20,7 @@
                 <i class="bi bi-info-circle-fill me-2"></i>
                 <div>
                     Tên đăng nhập sẽ được đặt <strong>giống với Mã Nhân Viên</strong>.<br/>
-                    Mật khẩu mặc định sẽ được đặt là <strong>1234</strong> (mã hóa MD5).
+                    Mật khẩu mặc định sẽ được đặt là <strong>1111</strong>
                 </div>
             </div>
             
@@ -30,6 +31,23 @@
                     <label class="form-check-label fw-bold" for="IsActive">Kích hoạt tài khoản</label>
                 </div>
             </div>
+
+            @if (ViewBag.IsManager != true)
+            {
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Chọn Cấp Trên <span class="text-danger">*</span></label>
+                    <select name="IDThamChieu" class="form-select" required>
+                        <option value="">-- Chọn Cấp Trên --</option>
+                        @if (ViewBag.Managers != null)
+                        {
+                            foreach (var mgr in (IEnumerable<SalesManagementSystem.Models.ViewModels.AclLoginVM>)ViewBag.Managers)
+                            {
+                                <option value="@mgr.ID">@mgr.HoTenNhanVien - @mgr.TenDangNhap</option>
+                            }
+                        }
+                    </select>
+                </div>
+            }
             
             <label class="form-label fw-bold">Chọn Nhân Viên <span class="text-danger">*</span></label>
         </div>
@@ -107,6 +125,7 @@
 
     function submitForm(e) {
         e.preventDefault();
+        e.stopPropagation();
         
         // Validate checked items
         var checkedCount = $('.emp-checkbox:checked').length;

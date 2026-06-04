@@ -110,7 +110,7 @@
         // Checkbox cascades
         $('#checkAllMatrix').change(function() {
             var isChecked = $(this).prop('checked');
-            $('#matrixContainer .form-check-input').prop('checked', isChecked);
+            $('#matrixContainer .form-check-input:not(#checkInherit)').prop('checked', isChecked);
         });
 
         $('.group-checkbox').change(function() {
