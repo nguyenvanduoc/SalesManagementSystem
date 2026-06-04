@@ -24,10 +24,10 @@ namespace SalesManagementSystem.Repositories
                 SELECT 
                     l.ID, 
                     l.IDThamChieu, 
-                    ISNULL(nv.MaNhanVien, '') + ' - ' + ISNULL(l.HoDem, '') + ' ' + ISNULL(l.Ten, '') as TenNhanVien,
+                    ISNULL(nv.MaNhanSu, '') + ' - ' + ISNULL(l.HoDem, '') + ' ' + ISNULL(l.Ten, '') as Ten,
                     l.TenDangNhap
                 FROM ACL_Login l
-                LEFT JOIN NS_NhanVien nv ON l.IDNhanVien = nv.ID
+                LEFT JOIN NS_NhanSu nv ON l.IDNhanSu = nv.ID
                 WHERE l.IsActive = 1
             ";
 

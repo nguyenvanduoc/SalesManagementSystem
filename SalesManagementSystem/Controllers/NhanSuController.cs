@@ -8,11 +8,11 @@ using SalesManagementSystem.Models.ViewModels;
 
 namespace SalesManagementSystem.Controllers
 {
-    public class NhanVienController : BaseController
+    public class NhanSuController : BaseController
     {
-        private readonly INhanVienRepository _employeeRepo;
+        private readonly INhanSuRepository _employeeRepo;
 
-        public NhanVienController(INhanVienRepository employeeRepo)
+        public NhanSuController(INhanSuRepository employeeRepo)
         {
             _employeeRepo = employeeRepo;
         }
@@ -21,11 +21,11 @@ namespace SalesManagementSystem.Controllers
         public ActionResult Index(int page = 1, int pageSize = 10, string keyword = "", bool? gender = null)
         {
             int totalRecords;
-            var nhanViens = _employeeRepo.GetPaged(page, pageSize, keyword, gender, out totalRecords);
+            var NhanSus = _employeeRepo.GetPaged(page, pageSize, keyword, gender, out totalRecords);
 
-            var model = new PagedListViewModel<NhanVien>
+            var model = new PagedListViewModel<NhanSu>
             {
-                Items = nhanViens,
+                Items = NhanSus,
                 CurrentPage = page,
                 PageSize = pageSize,
                 TotalRecords = totalRecords,
@@ -37,7 +37,7 @@ namespace SalesManagementSystem.Controllers
 
             if (Request.IsAjaxRequest())
             {
-                return PartialView("_NhanVienList", model);
+                return PartialView("_NhanSuList", model);
             }
 
             return View(model);
@@ -47,31 +47,31 @@ namespace SalesManagementSystem.Controllers
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult Create()
         {
-            return PartialView(new NhanVien());
+            return PartialView(new NhanSu());
         }
 
         // POST: Employee/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
-        public ActionResult Create([Bind(Exclude = "ID,NgayTao,NguoiTao,NgayCapNhat,NguoiCapNhat")] NhanVien employee)
+        public ActionResult Create([Bind(Exclude = "ID,NgayTao,NguoiTao,NgayCapNhat,NguoiCapNhat")] NhanSu employee)
         {
             if (ModelState.IsValid)
             {
-                if (_employeeRepo.IsDuplicateCode(employee.MaNhanVien))
+                if (_employeeRepo.IsDuplicateCode(employee.MaNhanSu))
                 {
-                    ModelState.AddModelError("MaNhanVien", "Mã nhân viên đã tồn tại trong hệ thống.");
+                    ModelState.AddModelError("MaNhanSu", "Mã nhân sự đã tồn tại trong hệ thống.");
                     return PartialView(employee);
                 }
 
                 var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
-                employee.NguoiTao = session?.IDNhanVien ?? 0;
+                employee.NguoiTao = session?.IDNhanSu ?? 0;
                 _employeeRepo.Insert(employee);
 
                 // AUDIT LOG
-                AuditLog.AddInsert("NS_NhanVien", employee.ID.ToString(), employee);
+                AuditLog.AddInsert("NS_NhanSu", employee.ID.ToString(), employee);
 
-                return Json(new { success = true, message = "Thêm mới nhân viên thành công!" });
+                return Json(new { success = true, message = "Thêm mới nhân sự thành công!" });
             }
             return PartialView(employee);
         }
@@ -92,13 +92,13 @@ namespace SalesManagementSystem.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
-        public ActionResult Update([Bind(Exclude = "NgayTao,NguoiTao,NgayCapNhat,NguoiCapNhat")] NhanVien employee)
+        public ActionResult Update([Bind(Exclude = "NgayTao,NguoiTao,NgayCapNhat,NguoiCapNhat")] NhanSu employee)
         {
             if (ModelState.IsValid)
             {
-                if (_employeeRepo.IsDuplicateCode(employee.MaNhanVien, employee.ID))
+                if (_employeeRepo.IsDuplicateCode(employee.MaNhanSu, employee.ID))
                 {
-                    ModelState.AddModelError("MaNhanVien", "Mã nhân viên đã tồn tại trong hệ thống.");
+                    ModelState.AddModelError("MaNhanSu", "Mã nhân sự đã tồn tại trong hệ thống.");
                     return PartialView(employee);
                 }
 
@@ -106,13 +106,13 @@ namespace SalesManagementSystem.Controllers
                 var oldEmployee = _employeeRepo.GetById(employee.ID);
 
                 var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
-                employee.NguoiCapNhat = session?.IDNhanVien ?? 0;
+                employee.NguoiCapNhat = session?.IDNhanSu ?? 0;
                 _employeeRepo.Update(employee);
 
                 // AUDIT LOG
-                AuditLog.AddUpdate("NS_NhanVien", employee.ID.ToString(), oldEmployee, employee);
+                AuditLog.AddUpdate("NS_NhanSu", employee.ID.ToString(), oldEmployee, employee);
 
-                return Json(new { success = true, message = "Cập nhật nhân viên thành công!" });
+                return Json(new { success = true, message = "Cập nhật nhân sự thành công!" });
             }
             return PartialView(employee);
         }
@@ -124,7 +124,7 @@ namespace SalesManagementSystem.Controllers
         {
             var oldEmployee = _employeeRepo.GetById(id);
             if (oldEmployee != null)
-                AuditLog.AddDelete("NS_NhanVien", id.ToString(), oldEmployee);
+                AuditLog.AddDelete("NS_NhanSu", id.ToString(), oldEmployee);
             
             ForceSaveAudit();
             _employeeRepo.Delete(id);
@@ -143,7 +143,7 @@ namespace SalesManagementSystem.Controllers
                 {
                     var oldEmployee = _employeeRepo.GetById(id);
                     if (oldEmployee != null)
-                        AuditLog.AddDelete("NS_NhanVien", id.ToString(), oldEmployee);
+                        AuditLog.AddDelete("NS_NhanSu", id.ToString(), oldEmployee);
                     
                     ForceSaveAudit();
                     _employeeRepo.Delete(id);

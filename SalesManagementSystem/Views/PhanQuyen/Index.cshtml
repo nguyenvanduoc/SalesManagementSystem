@@ -85,7 +85,7 @@
             }
             else
             {
-                <p class="text-muted">Không có dữ liệu nhân viên.</p>
+                <p class="text-muted">Không có dữ liệu nhân sự.</p>
             }
         </div>
     </div>
@@ -94,7 +94,7 @@
         <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
             <i class="bi bi-diagram-3" style="font-size: 4rem; color: #ced4da;"></i>
             <h5 class="mt-3">Chưa chọn nhân sự</h5>
-            <p>Vui lòng chọn một nhân viên ở danh sách bên trái để thiết lập quyền hạn.</p>
+            <p>Vui lòng chọn một nhân sự ở danh sách bên trái để thiết lập quyền hạn.</p>
         </div>
     </div>
 </div>
@@ -122,7 +122,7 @@
 
             // Tree node click logic
             $(document).on('click', '.tree-node', function() {
-                // Chỉ xử lý nếu node có data-id (nhân viên thật)
+                // Chỉ xử lý nếu node có data-id (nhân sự thật)
                 var id = $(this).data('id');
                 if (!id) return;
 
@@ -148,7 +148,7 @@
             // Save button
             $('#btnSaveQuyen').click(function() {
                 if (!selectedUserId) {
-                    showToast('warning', 'Vui lòng chọn một nhân viên từ danh sách bên trái để lưu!');
+                    showToast('warning', 'Vui lòng chọn một nhân sự từ danh sách bên trái để lưu!');
                     return;
                 }
 

@@ -1,6 +1,6 @@
 @{
     Layout = null;
-    var employees = ViewBag.Employees as IEnumerable<SalesManagementSystem.Models.Entities.NhanVien>;
+    var employees = ViewBag.Employees as IEnumerable<SalesManagementSystem.Models.Entities.NhanSu>;
 }
 
 <div class="modal-header bg-light">
@@ -42,7 +42,7 @@
                         {
                             foreach (var mgr in (IEnumerable<SalesManagementSystem.Models.ViewModels.AclLoginVM>)ViewBag.Managers)
                             {
-                                <option value="@mgr.ID">@mgr.HoTenNhanVien - @mgr.TenDangNhap</option>
+                                <option value="@mgr.ID">@mgr.HoTenNhanSu - @mgr.TenDangNhap</option>
                             }
                         }
                     </select>
@@ -74,9 +74,9 @@
                                 <td class="text-center align-middle">
                                     <input type="checkbox" name="EmployeeIds" value="@emp.ID" class="form-check-input emp-checkbox" />
                                 </td>
-                                <td class="text-center align-middle">@emp.MaNhanVien</td>
+                                <td class="text-center align-middle">@emp.MaNhanSu</td>
                                 <td class="align-middle">@emp.HoDem</td>
-                                <td class="align-middle">@emp.TenNhanVien</td>
+                                <td class="align-middle">@emp.TenNhanSu</td>
                                 <td class="align-middle">@emp.Email</td>
                             </tr>
                         }

@@ -8,30 +8,30 @@ using SalesManagementSystem.Repositories.Interfaces;
 
 namespace SalesManagementSystem.Repositories
 {
-    public class NhanVienRepository : INhanVienRepository
+    public class NhanSuRepository : INhanSuRepository
     {
         private readonly DbConnectionFactory _db;
 
-        public NhanVienRepository(DbConnectionFactory db)
+        public NhanSuRepository(DbConnectionFactory db)
         {
             _db = db;
         }
 
-        public IEnumerable<NhanVien> GetAll()
+        public IEnumerable<NhanSu> GetAll()
         {
-            const string sql = "SELECT * FROM NS_NhanVien ORDER BY NgayTao DESC";
+            const string sql = "SELECT * FROM NS_NhanSu ORDER BY NgayTao DESC";
             using (var conn = _db.CreateConnection())
-                return conn.Query<NhanVien>(sql);
+                return conn.Query<NhanSu>(sql);
         }
 
-        public IEnumerable<NhanVien> GetPaged(int page, int pageSize, string keyword, bool? gender, out int totalRecords)
+        public IEnumerable<NhanSu> GetPaged(int page, int pageSize, string keyword, bool? gender, out int totalRecords)
         {
             var conditions = new List<string> { "1 = 1" };
             var parameters = new DynamicParameters();
             
             if (!string.IsNullOrEmpty(keyword))
             {
-                conditions.Add("(MaNhanVien LIKE @Keyword OR TenNhanVien LIKE @Keyword OR SoDienThoai LIKE @Keyword)");
+                conditions.Add("(MaNhanSu LIKE @Keyword OR Ten LIKE @Keyword OR SoDienThoai LIKE @Keyword)");
                 parameters.Add("Keyword", "%" + keyword.Trim() + "%");
             }
             if (gender.HasValue)
@@ -42,9 +42,9 @@ namespace SalesManagementSystem.Repositories
             
             var whereClause = "WHERE " + string.Join(" AND ", conditions);
             
-            string countSql = $"SELECT COUNT(1) FROM NS_NhanVien {whereClause}";
+            string countSql = $"SELECT COUNT(1) FROM NS_NhanSu {whereClause}";
             string sql = $@"
-                SELECT * FROM NS_NhanVien 
+                SELECT * FROM NS_NhanSu 
                 {whereClause}
                 ORDER BY NgayTao DESC
                 OFFSET @Offset ROWS 
@@ -56,41 +56,41 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
             {
                 totalRecords = conn.ExecuteScalar<int>(countSql, parameters);
-                return conn.Query<NhanVien>(sql, parameters);
+                return conn.Query<NhanSu>(sql, parameters);
             }
         }
 
-        public NhanVien GetById(int id)
+        public NhanSu GetById(int id)
         {
-            const string sql = "SELECT * FROM NS_NhanVien WHERE ID = @ID";
+            const string sql = "SELECT * FROM NS_NhanSu WHERE ID = @ID";
             using (var conn = _db.CreateConnection())
-                return conn.QueryFirstOrDefault<NhanVien>(sql, new { ID = id });
+                return conn.QueryFirstOrDefault<NhanSu>(sql, new { ID = id });
         }
 
         public bool IsDuplicateCode(string code, int id = 0)
         {
-            const string sql = "SELECT COUNT(1) FROM NS_NhanVien WHERE MaNhanVien = @MaNhanVien AND ID != @ID";
+            const string sql = "SELECT COUNT(1) FROM NS_NhanSu WHERE MaNhanSu = @MaNhanSu AND ID != @ID";
             using (var conn = _db.CreateConnection())
-                return conn.ExecuteScalar<int>(sql, new { MaNhanVien = code, ID = id }) > 0;
+                return conn.ExecuteScalar<int>(sql, new { MaNhanSu = code, ID = id }) > 0;
         }
 
-        public int Insert(NhanVien employee)
+        public int Insert(NhanSu employee)
         {
             employee.NgayTao = DateTime.Now;
             const string sql = @"
-                INSERT INTO NS_NhanVien (MaNhanVien, TenNhanVien, HoDem, NgaySinh, GioiTinh, SoCMND, NgayCap, DiaChi, Email, SoDienThoai, SoDienThoai2, NgayTao, NguoiTao, NgayCapNhat, NguoiCapNhat)
-                VALUES (@MaNhanVien, @TenNhanVien, @HoDem, @NgaySinh, @GioiTinh, @SoCMND, @NgayCap, @DiaChi, @Email, @SoDienThoai, @SoDienThoai2, @NgayTao, @NguoiTao, @NgayCapNhat, @NguoiCapNhat);
+                INSERT INTO NS_NhanSu (MaNhanSu, Ten, HoDem, NgaySinh, GioiTinh, SoCMND, NgayCap, DiaChi, Email, SoDienThoai, SoDienThoai2, NgayTao, NguoiTao, NgayCapNhat, NguoiCapNhat)
+                VALUES (@MaNhanSu, @Ten, @HoDem, @NgaySinh, @GioiTinh, @SoCMND, @NgayCap, @DiaChi, @Email, @SoDienThoai, @SoDienThoai2, @NgayTao, @NguoiTao, @NgayCapNhat, @NguoiCapNhat);
                 SELECT CAST(SCOPE_IDENTITY() AS INT)";
             using (var conn = _db.CreateConnection())
                 return conn.ExecuteScalar<int>(sql, employee);
         }
 
-        public void Update(NhanVien employee)
+        public void Update(NhanSu employee)
         {
             employee.NgayCapNhat = DateTime.Now;
             const string sql = @"
-                UPDATE NS_NhanVien
-                SET MaNhanVien = @MaNhanVien, TenNhanVien = @TenNhanVien, HoDem = @HoDem,
+                UPDATE NS_NhanSu
+                SET MaNhanSu = @MaNhanSu, Ten = @Ten, HoDem = @HoDem,
                     NgaySinh = @NgaySinh, GioiTinh = @GioiTinh, SoCMND = @SoCMND,
                     NgayCap = @NgayCap, DiaChi = @DiaChi, Email = @Email,
                     SoDienThoai = @SoDienThoai, SoDienThoai2 = @SoDienThoai2,
@@ -102,7 +102,7 @@ namespace SalesManagementSystem.Repositories
 
         public void Delete(int id)
         {
-            const string sql = "DELETE FROM NS_NhanVien WHERE ID = @ID";
+            const string sql = "DELETE FROM NS_NhanSu WHERE ID = @ID";
             using (var conn = _db.CreateConnection())
                 conn.Execute(sql, new { ID = id });
         }

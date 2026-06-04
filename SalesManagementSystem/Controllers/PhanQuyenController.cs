@@ -35,7 +35,7 @@ namespace SalesManagementSystem.Controllers
         public ActionResult Save(int idLogin, List<int> checkedActionIds, bool isInherit = false)
         {
             var userSession = (UserLoginViewModel)Session[CommonConstants.USER_SESSION];
-            int currentUser = userSession != null ? userSession.IDNhanVien : 0;
+            int currentUser = userSession != null ? userSession.IDNhanSu : 0;
 
             if (isInherit)
             {

@@ -25,7 +25,7 @@ namespace SalesManagementSystem.Repositories
             
             if (!string.IsNullOrEmpty(keyword))
             {
-                conditions.Add("(L.TenDangNhap LIKE @Keyword OR N.TenNhanVien LIKE @Keyword)");
+                conditions.Add("(L.TenDangNhap LIKE @Keyword OR N.Ten LIKE @Keyword)");
                 parameters.Add("Keyword", "%" + keyword.Trim() + "%");
             }
             
@@ -34,13 +34,13 @@ namespace SalesManagementSystem.Repositories
             string countSql = $@"
                 SELECT COUNT(1) 
                 FROM ACL_Login L
-                LEFT JOIN NS_NhanVien N ON L.IDNhanVien = N.ID
+                LEFT JOIN NS_NhanSu N ON L.IDNhanSu = N.ID
                 {whereClause}";
                 
             string sql = $@"
-                SELECT L.*, N.HoDem, N.TenNhanVien as Ten 
+                SELECT L.*, N.HoDem, N.Ten as Ten 
                 FROM ACL_Login L
-                LEFT JOIN NS_NhanVien N ON L.IDNhanVien = N.ID
+                LEFT JOIN NS_NhanSu N ON L.IDNhanSu = N.ID
                 {whereClause}
                 ORDER BY L.ID DESC
                 OFFSET @Offset ROWS 
@@ -74,8 +74,8 @@ namespace SalesManagementSystem.Repositories
         {
             login.NgayTao = DateTime.Now;
             const string sql = @"
-                INSERT INTO ACL_Login (IDNhanVien, TenDangNhap, MatKhau, HoDem, Ten, IsActive, IDThamChieu, NgayTao, NguoiTao)
-                VALUES (@IDNhanVien, @TenDangNhap, @MatKhau, @HoDem, @Ten, @IsActive, @IDThamChieu, @NgayTao, @NguoiTao);
+                INSERT INTO ACL_Login (IDNhanSu, TenDangNhap, MatKhau, HoDem, Ten, IsActive, IDThamChieu, NgayTao, NguoiTao)
+                VALUES (@IDNhanSu, @TenDangNhap, @MatKhau, @HoDem, @Ten, @IsActive, @IDThamChieu, @NgayTao, @NguoiTao);
                 SELECT CAST(SCOPE_IDENTITY() AS INT)";
             using (var conn = _db.CreateConnection())
                 return conn.ExecuteScalar<int>(sql, login);
@@ -86,7 +86,7 @@ namespace SalesManagementSystem.Repositories
             login.NgayCapNhat = DateTime.Now;
             const string sql = @"
                 UPDATE ACL_Login
-                SET IDNhanVien = @IDNhanVien, TenDangNhap = @TenDangNhap, MatKhau = @MatKhau, 
+                SET IDNhanSu = @IDNhanSu, TenDangNhap = @TenDangNhap, MatKhau = @MatKhau, 
                     HoDem = @HoDem, Ten = @Ten, IsActive = @IsActive, IDThamChieu = @IDThamChieu,
                     NgayCapNhat = @NgayCapNhat, NguoiCapNhat = @NguoiCapNhat,
                     NgayXoa = @NgayXoa, NguoiXoa = @NguoiXoa
@@ -102,28 +102,28 @@ namespace SalesManagementSystem.Repositories
                 conn.Execute(sql, new { ID = id, NgayXoa = DateTime.Now });
         }
 
-        public IEnumerable<NhanVien> GetEmployeesWithoutAccount()
+        public IEnumerable<NhanSu> GetEmployeesWithoutAccount()
         {
             const string sql = @"
                 SELECT N.* 
-                FROM NS_NhanVien N
-                LEFT JOIN ACL_Login L ON N.ID = L.IDNhanVien AND L.NgayXoa IS NULL
+                FROM NS_NhanSu N
+                LEFT JOIN ACL_Login L ON N.ID = L.IDNhanSu AND L.NgayXoa IS NULL
                 WHERE L.ID IS NULL
-                ORDER BY N.TenNhanVien";
+                ORDER BY N.Ten";
             using (var conn = _db.CreateConnection())
-                return conn.Query<NhanVien>(sql);
+                return conn.Query<NhanSu>(sql);
         }
 
-        public NhanVien GetEmployeeById(int id)
+        public NhanSu GetEmployeeById(int id)
         {
-            const string sql = "SELECT * FROM NS_NhanVien WHERE ID = @ID";
+            const string sql = "SELECT * FROM NS_NhanSu WHERE ID = @ID";
             using (var conn = _db.CreateConnection())
-                return conn.QueryFirstOrDefault<NhanVien>(sql, new { ID = id });
+                return conn.QueryFirstOrDefault<NhanSu>(sql, new { ID = id });
         }
 
         public AclLogin GetByEmployeeId(int empId)
         {
-            const string sql = "SELECT * FROM ACL_Login WHERE IDNhanVien = @EmpId";
+            const string sql = "SELECT * FROM ACL_Login WHERE IDNhanSu = @EmpId";
             using (var conn = _db.CreateConnection())
                 return conn.QueryFirstOrDefault<AclLogin>(sql, new { EmpId = empId });
         }
@@ -131,11 +131,11 @@ namespace SalesManagementSystem.Repositories
         public IEnumerable<AclLoginViewModel> GetManagers()
         {
             const string sql = @"
-                SELECT L.*, N.HoDem, N.TenNhanVien as Ten 
+                SELECT L.*, N.HoDem, N.Ten as Ten 
                 FROM ACL_Login L
-                LEFT JOIN NS_NhanVien N ON L.IDNhanVien = N.ID
+                LEFT JOIN NS_NhanSu N ON L.IDNhanSu = N.ID
                 WHERE (L.IDThamChieu IS NULL OR L.IDThamChieu = 0) AND L.IsActive = 1 AND L.NgayXoa IS NULL
-                ORDER BY N.TenNhanVien";
+                ORDER BY N.Ten";
             using (var conn = _db.CreateConnection())
                 return conn.Query<AclLoginViewModel>(sql);
         }

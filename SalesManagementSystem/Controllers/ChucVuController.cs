@@ -69,7 +69,7 @@ namespace SalesManagementSystem.Controllers
                 }
 
                 var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
-                chucVu.NguoiTao = session?.IDNhanVien ?? 0;
+                chucVu.NguoiTao = session?.IDNhanSu ?? 0;
                 _chucVuRepo.Insert(chucVu);
 
                 // AUDIT LOG
@@ -109,7 +109,7 @@ namespace SalesManagementSystem.Controllers
                 var oldChucVu = _chucVuRepo.GetById(chucVu.ID);
 
                 var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
-                chucVu.NguoiCapNhat = session?.IDNhanVien ?? 0;
+                chucVu.NguoiCapNhat = session?.IDNhanSu ?? 0;
                 _chucVuRepo.Update(chucVu);
 
                 // AUDIT LOG

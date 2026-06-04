@@ -26,7 +26,7 @@ namespace SalesManagementSystem.App_Start
             //container.RegisterType<ProductRepository>(new HierarchicalLifetimeManager());
             //container.RegisterType<OrderRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IMenuRepository, MenuRepository>(new HierarchicalLifetimeManager());
-            container.RegisterType<SalesManagementSystem.Repositories.Interfaces.INhanVienRepository, NhanVienRepository>(new HierarchicalLifetimeManager());
+            container.RegisterType<SalesManagementSystem.Repositories.Interfaces.INhanSuRepository, NhanSuRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IChucVuRepository, ChucVuRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IPhongBanRepository, PhongBanRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IAclLoginRepository, AclLoginRepository>(new HierarchicalLifetimeManager());

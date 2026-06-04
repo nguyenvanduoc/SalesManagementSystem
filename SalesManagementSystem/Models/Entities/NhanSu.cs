@@ -2,11 +2,11 @@ using System;
 
 namespace SalesManagementSystem.Models.Entities
 {
-    public class NhanVien
+    public class NhanSu
     {
         public int ID { get; set; }
-        public string MaNhanVien { get; set; }
-        public string TenNhanVien { get; set; }
+        public string MaNhanSu { get; set; }
+        public string Ten { get; set; }
         public string HoDem { get; set; }
         public DateTime? NgaySinh { get; set; }
         public bool? GioiTinh { get; set; }

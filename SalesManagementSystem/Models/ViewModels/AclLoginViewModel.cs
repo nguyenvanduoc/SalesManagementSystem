@@ -8,7 +8,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public new string HoDem { get; set; }
         public new string Ten { get; set; }
         
-        public string HoTenNhanVien 
+        public string HoTen 
         {
             get
             {

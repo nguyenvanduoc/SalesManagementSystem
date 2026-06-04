@@ -69,7 +69,7 @@ namespace SalesManagementSystem.Controllers
                 }
 
                 var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
-                phongBan.NguoiTao = session?.IDNhanVien ?? 0;
+                phongBan.NguoiTao = session?.IDNhanSu ?? 0;
                 _phongBanRepo.Insert(phongBan);
 
                 // AUDIT LOG
@@ -109,7 +109,7 @@ namespace SalesManagementSystem.Controllers
                 var oldPhongBan = _phongBanRepo.GetById(phongBan.ID);
 
                 var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
-                phongBan.NguoiCapNhat = session?.IDNhanVien ?? 0;
+                phongBan.NguoiCapNhat = session?.IDNhanSu ?? 0;
                 _phongBanRepo.Update(phongBan);
 
                 // AUDIT LOG

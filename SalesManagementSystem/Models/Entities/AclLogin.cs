@@ -7,8 +7,8 @@ namespace SalesManagementSystem.Models.Entities
     {
         public int ID { get; set; }
         
-        [Required(ErrorMessage = "Vui lòng chọn nhân viên")]
-        public int IDNhanVien { get; set; }
+        [Required(ErrorMessage = "Vui lòng chọn nhân sự")]
+        public int IDNhanSu { get; set; }
         
         [Required(ErrorMessage = "Vui lòng nhập tên đăng nhập")]
         public string TenDangNhap { get; set; }

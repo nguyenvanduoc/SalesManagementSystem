@@ -9,6 +9,6 @@ namespace SalesManagementSystem.Models.ViewModels
         public string UserName { get; set; }
         public string HoDem { get; set; }
         public string Ten { get; set; }
-        public int IDNhanVien { get; set; }
+        public int IDNhanSu { get; set; }
     }
 }

@@ -12,8 +12,8 @@ namespace SalesManagementSystem.Repositories.Interfaces
         int Insert(AclLogin login);
         void Update(AclLogin login);
         void Delete(int id);
-        IEnumerable<NhanVien> GetEmployeesWithoutAccount();
-        NhanVien GetEmployeeById(int id);
+        IEnumerable<NhanSu> GetEmployeesWithoutAccount();
+        NhanSu GetEmployeeById(int id);
         AclLogin GetByEmployeeId(int empId);
         IEnumerable<AclLoginViewModel> GetManagers();
         AclLogin Login(string userName, string passWord);

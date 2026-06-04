@@ -36,12 +36,12 @@ namespace SalesManagementSystem
             routes.MapRoute(name: "ChucVu_Update", url: "chuc-vu/cap-nhat", defaults: new { controller = "ChucVu", action = "UpdateChucVu" });
             routes.MapRoute(name: "ChucVu_Delete", url: "chuc-vu/xoa", defaults: new { controller = "ChucVu", action = "DeleteChucVu" });
 
-            // Nhân viên
-            routes.MapRoute(name: "NhanVien_List", url: "nhan-vien", defaults: new { controller = "NhanVien", action = "Index" });
-            routes.MapRoute(name: "NhanVien_Create", url: "nhan-vien/them-moi", defaults: new { controller = "NhanVien", action = "Create" });
-            routes.MapRoute(name: "NhanVien_Update", url: "nhan-vien/cap-nhat", defaults: new { controller = "NhanVien", action = "Update" });
-            routes.MapRoute(name: "NhanVien_Delete", url: "nhan-vien/xoa", defaults: new { controller = "NhanVien", action = "Delete" });
-            routes.MapRoute(name: "NhanVien_BatchDelete", url: "nhan-vien/xoa-nhieu", defaults: new { controller = "NhanVien", action = "BatchDelete" });
+            // nhân sự
+            routes.MapRoute(name: "NhanSu_List", url: "nhan-vien", defaults: new { controller = "NhanSu", action = "Index" });
+            routes.MapRoute(name: "NhanSu_Create", url: "nhan-vien/them-moi", defaults: new { controller = "NhanSu", action = "Create" });
+            routes.MapRoute(name: "NhanSu_Update", url: "nhan-vien/cap-nhat", defaults: new { controller = "NhanSu", action = "Update" });
+            routes.MapRoute(name: "NhanSu_Delete", url: "nhan-vien/xoa", defaults: new { controller = "NhanSu", action = "Delete" });
+            routes.MapRoute(name: "NhanSu_BatchDelete", url: "nhan-vien/xoa-nhieu", defaults: new { controller = "NhanSu", action = "BatchDelete" });
 
             // Người dùng
             routes.MapRoute(name: "NguoiDung_List", url: "nguoi-dung", defaults: new { controller = "NguoiDung", action = "GetNguoiDung" });

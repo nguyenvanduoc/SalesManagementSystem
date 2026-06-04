@@ -7,9 +7,9 @@
     {
         switch (col)
         {
-            case "TenNhanVien": return "Tên nhân viên";
+            case "Ten": return "Tên nhân sự";
             case "HoDem": return "Họ đệm";
-            case "Ten": return "Tên";
+            case "MaNhanSu": return "Mã nhân sự";
             case "NgaySinh": return "Ngày sinh";
             case "GioiTinh": return "Giới tính";
             case "SoDienThoai": return "Số ĐT";
@@ -106,7 +106,7 @@
                                 </td>
                                 <td class="text-center align-middle">@(stt++)</td>
                                 <td class="align-middle fw-bold">@item.TenDangNhap</td>
-                                <td class="align-middle text-muted">@item.TenNhanVien</td>
+                                <td class="align-middle text-muted">@item.Ten</td>
                                 <td class="align-middle fw-medium text-primary">@item.TenManHinh</td>
                                 <td class="align-middle text-center">
                                     @if (item.LoaiThaoTac == 1)

@@ -37,7 +37,7 @@ namespace SalesManagementSystem.Controllers
                         UserID = result.ID,
                         HoDem = result.HoDem,
                         Ten = result.Ten,
-                        IDNhanVien = result.IDNhanVien
+                        IDNhanSu = result.IDNhanSu
                         
                     };
 
