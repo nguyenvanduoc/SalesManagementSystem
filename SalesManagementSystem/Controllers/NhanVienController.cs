@@ -56,10 +56,13 @@ namespace SalesManagementSystem.Controllers
                     return PartialView(employee);
                 }
 
-                // Optionally set NguoiTao from user session/identity here
                 var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
                 employee.NguoiTao = session?.UserID ?? 0;
                 _employeeRepo.Insert(employee);
+
+                // AUDIT LOG
+                AuditLog.AddInsert("NhanVien", employee.ID.ToString(), employee);
+
                 return Json(new { success = true, message = "Thêm mới nhân viên thành công!" });
             }
             return PartialView(employee);
@@ -91,9 +94,16 @@ namespace SalesManagementSystem.Controllers
                     return PartialView(employee);
                 }
 
+                // FETCH OLD OBJ FOR AUDIT
+                var oldEmployee = _employeeRepo.GetById(employee.ID);
+
                 var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
                 employee.NguoiCapNhat = session?.UserID ?? 0;
                 _employeeRepo.Update(employee);
+
+                // AUDIT LOG
+                AuditLog.AddUpdate("NhanVien", employee.ID.ToString(), oldEmployee, employee);
+
                 return Json(new { success = true, message = "Cập nhật nhân viên thành công!" });
             }
             return PartialView(employee);
@@ -104,7 +114,13 @@ namespace SalesManagementSystem.Controllers
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult Delete(int id)
         {
+            var oldEmployee = _employeeRepo.GetById(id);
+
             _employeeRepo.Delete(id);
+
+            if (oldEmployee != null)
+                AuditLog.AddDelete("NhanVien", id.ToString(), oldEmployee);
+
             return RedirectToAction("Index");
         }
 
@@ -117,7 +133,10 @@ namespace SalesManagementSystem.Controllers
             {
                 foreach (var id in ids)
                 {
+                    var oldEmployee = _employeeRepo.GetById(id);
                     _employeeRepo.Delete(id);
+                    if (oldEmployee != null)
+                        AuditLog.AddDelete("NhanVien", id.ToString(), oldEmployee);
                 }
             }
             return RedirectToAction("Index");

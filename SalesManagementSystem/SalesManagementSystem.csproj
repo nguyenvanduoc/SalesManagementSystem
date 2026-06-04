@@ -138,6 +138,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\UnityConfig.cs" />
+    <Compile Include="Controllers\AclActionController.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
@@ -157,13 +158,15 @@
     <Compile Include="Controllers\AclManHinhController.cs" />
     <Compile Include="Repositories\Interfaces\IAclActionRepository.cs" />
     <Compile Include="Repositories\AclActionRepository.cs" />
-    <Compile Include="Controllers\AclActionController.cs" />
+    <Compile Include="Controllers\PhanQuyenController.cs" />
     <Compile Include="Controllers\PhongBanController.cs" />
+    <Compile Include="Controllers\NhatKyController.cs" />
     <Compile Include="Controllers\NguoiDungController.cs" />
     <Compile Include="Helpers\SecurityHelper.cs" />
     <Compile Include="Helpers\CommonConstants.cs" />
     <Compile Include="Helpers\Encryptor.cs" />
     <Compile Include="Helpers\LogHelper.cs" />
+    <Compile Include="Helpers\AuditHelper.cs" />
     <!-- Data -->
     <Compile Include="Data\DbConnectionFactory.cs" />
     <!-- Models - Entities -->
@@ -175,8 +178,9 @@
     <Compile Include="Models\Entities\InventoryTransaction.cs" />
     <Compile Include="Models\Entities\Order.cs" />
     <Compile Include="Models\Entities\OrderDetail.cs" />
-    <Compile Include="Models\Entities\AclManHinh.cs" /> 
+    <Compile Include="Models\Entities\AclManHinh.cs" />
     <Compile Include="Models\Entities\AclAction.cs" />
+    <Compile Include="Models\Entities\NKTongHop.cs" />
     <Compile Include="Models\Entities\NhanVien.cs" />
     <Compile Include="Models\Entities\AclLogin.cs" />
     <Compile Include="Models\Entities\User.cs" />
@@ -187,18 +191,22 @@
     <Compile Include="Models\ViewModels\AclLoginVM.cs" />
     <Compile Include="Models\ViewModels\ChangePasswordVM.cs" />
     <Compile Include="Models\ViewModels\LoginModel.cs" />
+    <Compile Include="Models\ViewModels\AuditModels.cs" />
+    <Compile Include="Models\ViewModels\NKTongHopVM.cs" />
     <Compile Include="Models\ViewModels\UserLogin.cs" />
     <!-- Repositories -->
     <Compile Include="Repositories\MenuRepository.cs" />
     <Compile Include="Repositories\NhanVienRepository.cs" />
+    <Compile Include="Repositories\PhongBanRepository.cs" />
     <Compile Include="Repositories\ChucVuRepository.cs" />
+    <Compile Include="Repositories\NKTongHopRepository.cs" />
+    <Compile Include="Repositories\AclLoginRepository.cs" />
     <Compile Include="Repositories\Interfaces\IChucVuRepository.cs" />
     <Compile Include="Repositories\Interfaces\IPhongBanRepository.cs" />
     <Compile Include="Repositories\Interfaces\INhanVienRepository.cs" />
-    <Compile Include="Repositories\Interfaces\IMenuRepository.cs" />
     <Compile Include="Repositories\Interfaces\IAclLoginRepository.cs" />
-    <Compile Include="Repositories\PhongBanRepository.cs" />
-    <Compile Include="Repositories\AclLoginRepository.cs" />
+    <Compile Include="Repositories\Interfaces\INKTongHopRepository.cs" />
+    <Compile Include="Repositories\Interfaces\IMenuRepository.cs" />
     <!-- Services -->
     <Compile Include="Services\InventoryService.cs" />
     <Compile Include="Global.asax.cs">
@@ -370,6 +378,9 @@
     <Content Include="Views\PhanQuyen\Index.cshtml" />
     <Content Include="Views\PhanQuyen\_MatrixGrid.cshtml" />
     <Content Include="Views\PhanQuyen\_TreeRecursive.cshtml" />
+    <Content Include="Views\NhatKy\Detail.cshtml" />
+    <Content Include="Views\NhatKy\Index.cshtml" />
+    <Content Include="Views\NhatKy\_NhatKyList.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />

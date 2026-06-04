@@ -28,6 +28,8 @@ namespace SalesManagementSystem.Helpers
             {
                 if (filterContext.HttpContext.Request.IsAjaxRequest())
                 {
+                    filterContext.HttpContext.Response.StatusCode = 401;
+                    filterContext.HttpContext.Response.TrySkipIisCustomErrors = true;
                     filterContext.Result = new JsonResult
                     {
                         Data = new { success = false, message = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." },
@@ -52,6 +54,8 @@ namespace SalesManagementSystem.Helpers
                 {
                     if (filterContext.HttpContext.Request.IsAjaxRequest())
                     {
+                        filterContext.HttpContext.Response.StatusCode = 403;
+                        filterContext.HttpContext.Response.TrySkipIisCustomErrors = true;
                         filterContext.Result = new JsonResult
                         {
                             Data = new { success = false, message = "Bạn không có quyền thực hiện chức năng này." },
@@ -60,9 +64,9 @@ namespace SalesManagementSystem.Helpers
                     }
                     else
                     {
-                        filterContext.Result = new ContentResult
+                        filterContext.Result = new ViewResult
                         {
-                            Content = "<h3>Access Denied</h3><p>Bạn không có quyền thực hiện chức năng này.</p>"
+                            ViewName = "AccessDenied"
                         };
                     }
                     return;

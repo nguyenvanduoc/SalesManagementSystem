@@ -703,7 +703,7 @@
             type: form.attr('method') || 'POST',
             data: form.serialize(),
             success: function(res) {
-                if (res.success) {
+                if (res.success === true) {
                     $('#globalFormModal').modal('hide');
                     showToast('success', res.message);
                     if (typeof loadData === 'function') {
@@ -711,6 +711,8 @@
                     } else {
                         location.reload();
                     }
+                } else if (res.success === false) {
+                    showToast('error', res.message);
                 } else {
                     // Nếu validation lỗi, trả về HTML partial view chứa form
                     $('#globalFormModalContent').html(res);
@@ -755,6 +757,20 @@
         var bsToast = new bootstrap.Toast(toastEl);
         bsToast.show();
     }
+
+    // Global Ajax Error Handler
+    $(document).ajaxError(function(event, jqxhr, settings, thrownError) {
+        if (jqxhr.status === 403) {
+            showToast('error', 'Từ chối truy cập: Bạn không có quyền thực hiện chức năng này.');
+        } else if (jqxhr.status === 401) {
+            showToast('error', 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+            setTimeout(function() { window.location.href = '@Url.Action("Index", "Login")'; }, 1500);
+        } else if (jqxhr.status === 404) {
+            showToast('error', 'Không tìm thấy dữ liệu hoặc màn hình.');
+        } else if (jqxhr.status >= 500) {
+            showToast('error', 'Lỗi hệ thống (' + jqxhr.status + '). Vui lòng thử lại sau.');
+        }
+    });
 </script>
 @RenderSection("scripts", required: false)
 </body>

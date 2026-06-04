@@ -71,7 +71,7 @@ namespace SalesManagementSystem.Controllers
                             var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
                             if (existingLogin != null)
                             {
-                                // Tài khoản đã từng bị xóa mềm -> Khôi phục
+                                var oldLogin = _aclLoginRepo.GetById(existingLogin.ID);
                                 existingLogin.TenDangNhap = tenDangNhap;
                                 existingLogin.MatKhau = SecurityHelper.GetMd5Hash("1111");
                                 existingLogin.IsActive = IsActive;
@@ -82,6 +82,7 @@ namespace SalesManagementSystem.Controllers
                                 existingLogin.NguoiXoa = null;
                                 
                                 _aclLoginRepo.Update(existingLogin);
+                                AuditLog.AddUpdate("AclLogin", existingLogin.ID.ToString(), oldLogin, existingLogin);
                             }
                             else
                             {
@@ -98,6 +99,7 @@ namespace SalesManagementSystem.Controllers
                                     NguoiTao = session?.UserID ?? 0
                                 };
                                 _aclLoginRepo.Insert(login);
+                                AuditLog.AddInsert("AclLogin", login.ID.ToString(), login);
                             }
                         }
                     }
@@ -170,7 +172,10 @@ namespace SalesManagementSystem.Controllers
                     
                     var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
                     existing.NguoiCapNhat = session?.UserID ?? 0;
+
+                    var oldExisting = _aclLoginRepo.GetById(existing.ID);
                     _aclLoginRepo.Update(existing);
+                    AuditLog.AddUpdate("AclLogin", existing.ID.ToString(), oldExisting, existing);
                     return Json(new { success = true, message = "Cập nhật tài khoản thành công!" });
                 }
             }
@@ -185,7 +190,9 @@ namespace SalesManagementSystem.Controllers
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult DeleteNguoiDung(int id)
         {
+            var oldObj = _aclLoginRepo.GetById(id);
             _aclLoginRepo.Delete(id);
+            if (oldObj != null) AuditLog.AddDelete("AclLogin", id.ToString(), oldObj);
             return RedirectToAction("GetNguoiDung");
         }
 
@@ -222,7 +229,10 @@ namespace SalesManagementSystem.Controllers
                 }
 
                 user.MatKhau = SecurityHelper.GetMd5Hash(model.NewPassword);
+                
+                var oldUser = _aclLoginRepo.GetById(user.ID);
                 _aclLoginRepo.Update(user);
+                AuditLog.AddUpdate("AclLogin", user.ID.ToString(), oldUser, user);
 
                 return Json(new { success = true, message = "Đổi mật khẩu thành công!" });
             }

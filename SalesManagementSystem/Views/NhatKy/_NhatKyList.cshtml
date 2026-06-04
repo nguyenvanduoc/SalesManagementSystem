@@ -1,0 +1,229 @@
+@model IEnumerable<SalesManagementSystem.Models.ViewModels.NKTongHopVM>
+@using Newtonsoft.Json
+@using SalesManagementSystem.Models.ViewModels
+
+@functions {
+    public string TranslateColumn(string col)
+    {
+        switch (col)
+        {
+            case "TenNhanVien": return "Tên nhân viên";
+            case "HoDem": return "Họ đệm";
+            case "Ten": return "Tên";
+            case "NgaySinh": return "Ngày sinh";
+            case "GioiTinh": return "Giới tính";
+            case "SoDienThoai": return "Số ĐT";
+            case "Email": return "Email";
+            case "DiaChi": return "Địa chỉ";
+            case "ChungMinhThu": return "CMND/CCCD";
+            case "NgayCap": return "Ngày cấp";
+            case "NoiCap": return "Nơi cấp";
+            case "TenDangNhap": return "Tên đăng nhập";
+            case "MatKhau": return "Mật khẩu";
+            case "IDPhongBan": return "ID Phòng ban";
+            case "IDChucVu": return "ID Chức vụ";
+            case "TrangThai": return "Trạng thái";
+            case "IsSuDung": return "Sử dụng";
+            case "TenPhongBan": return "Tên phòng ban";
+            case "TenChucVu": return "Tên chức vụ";
+            case "GhiChu": return "Ghi chú";
+            case "STT": return "Số thứ tự";
+            case "IDManHinh": return "ID Màn hình";
+            case "TenManHinh": return "Tên màn hình";
+            case "NhomChaManHinh": return "Nhóm màn hình";
+            case "TenController": return "Controller";
+            case "TenAction": return "Action";
+            case "LoaiPhanQuyen": return "Loại quyền";
+            default: return col;
+        }
+    }
+
+    public string FormatValue(string col, object val)
+    {
+        if (val == null) return "";
+        string s = val.ToString();
+        if (string.IsNullOrEmpty(s)) return "";
+        
+        if (col == "GioiTinh")
+        {
+            if (s.Equals("True", StringComparison.OrdinalIgnoreCase) || s == "1") return "Nam";
+            if (s.Equals("False", StringComparison.OrdinalIgnoreCase) || s == "0") return "Nữ";
+        }
+        if (col == "TrangThai" || col == "IsSuDung")
+        {
+            if (s.Equals("True", StringComparison.OrdinalIgnoreCase) || s == "1") return "Có / Hoạt động";
+            if (s.Equals("False", StringComparison.OrdinalIgnoreCase) || s == "0") return "Không / Khóa";
+        }
+        if (col == "MatKhau") return "********";
+
+        if (DateTime.TryParse(s, out DateTime dt))
+        {
+            return dt.TimeOfDay.TotalSeconds == 0 ? dt.ToString("dd/MM/yyyy") : dt.ToString("dd/MM/yyyy HH:mm");
+        }
+        return s;
+    }
+}
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive" style="min-height: 350px;">
+            <table class="table table-custom table-bordered table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width: 50px;"></th>
+                        <th>Tài khoản</th>
+                        <th>Họ tên</th>
+                        <th>Màn hình</th>
+                        <th>Dữ liệu cũ</th>
+                        <th>Dữ liệu mới</th>
+                        <th>Thời gian</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="text-center align-middle">
+                                    <div class="dropdown dropdown-hover">
+                                        <button class="btn btn-sm btn-light border dropdown-toggle-hide-arrow shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 2px 6px;">
+                                            <i class="bi bi-grid-3x3-gap-fill text-dark"></i>
+                                        </button>
+                                        <ul class="dropdown-menu shadow">
+                                            <li><h6 class="dropdown-header text-uppercase fw-bold text-dark">Thao tác</h6></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <button type="button" class="dropdown-item" onclick="openFormModal('@Url.Action("Detail", "NhatKy", new { id = item.ID })')">
+                                                    <i class="bi bi-eye-fill me-2 text-primary"></i> Xem chi tiết JSON
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                                <td class="align-middle fw-bold">@item.TenDangNhap</td>
+                                <td class="align-middle text-muted">@item.TenNhanVien</td>
+                                <td class="align-middle fw-medium text-primary">@item.TenManHinh</td>
+                                @{
+                                    string oldDataHtml = "";
+                                    string newDataHtml = "";
+                                    try
+                                    {
+                                        if (!string.IsNullOrEmpty(item.NoiDung))
+                                        {
+                                            var root = JsonConvert.DeserializeObject<AuditLogRoot>(item.NoiDung);
+                                            if (root != null && root.Tables != null)
+                                            {
+                                                foreach (var table in root.Tables)
+                                                {
+                                                    foreach (var change in table.Changes)
+                                                    {
+                                                        if (change.OldValue != null && change.OldValue.ToString() != "")
+                                                        {
+                                                            string colName = TranslateColumn(change.Column);
+                                                            string valFormated = FormatValue(change.Column, change.OldValue);
+                                                            oldDataHtml += $"<div class='mb-1 text-truncate' title='{valFormated}'>{colName}: <strong class='text-danger'>{valFormated}</strong></div>";
+                                                        }
+                                                        if (change.NewValue != null && change.NewValue.ToString() != "")
+                                                        {
+                                                            string colName = TranslateColumn(change.Column);
+                                                            string valFormated = FormatValue(change.Column, change.NewValue);
+                                                            newDataHtml += $"<div class='mb-1 text-truncate' title='{valFormated}'>{colName}: <strong class='text-success'>{valFormated}</strong></div>";
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    catch
+                                    {
+                                        oldDataHtml = "<span class='text-danger small'>Lỗi parse JSON</span>";
+                                    }
+                                }
+                                <td class="align-middle" style="max-width: 200px;">
+                                    <div style="max-height: 80px; overflow-y: auto; font-size: 0.85rem;">@Html.Raw(oldDataHtml)</div>
+                                </td>
+                                <td class="align-middle" style="max-width: 200px;">
+                                    <div style="max-height: 80px; overflow-y: auto; font-size: 0.85rem;">@Html.Raw(newDataHtml)</div>
+                                </td>
+                                <td class="align-middle">@(item.NgayThucThi?.ToString("dd/MM/yyyy HH:mm:ss"))</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                Chưa có dữ liệu nhật ký.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="card-footer custom-pagination d-flex flex-wrap align-items-center justify-content-between" style="padding: 12px 16px;">
+        <div class="d-flex align-items-center gap-3">
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm mb-0">
+                    @{
+                        int currentPage = ViewBag.Page ?? 1;
+                        int totalPages = ViewBag.TotalPages ?? 1;
+                        int pageSize = ViewBag.PageSize ?? 20;
+                        int total = ViewBag.Total ?? 0;
+                        
+                        var prevDisabled = currentPage <= 1 ? "disabled" : "";
+                        var nextDisabled = currentPage >= totalPages ? "disabled" : "";
+                    }
+                    <li class="page-item @prevDisabled">
+                        <a class="page-link ajax-link" href="@Url.Action("Index", new { page = 1, pageSize = pageSize })"><i class="bi bi-skip-start-fill"></i></a>
+                    </li>
+                    <li class="page-item @prevDisabled">
+                        <a class="page-link ajax-link" href="@Url.Action("Index", new { page = currentPage - 1, pageSize = pageSize })"><i class="bi bi-caret-left-fill"></i></a>
+                    </li>
+                    
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        if (i == 1 || i == totalPages || Math.Abs(i - currentPage) <= 2)
+                        {
+                            var activeClass = i == currentPage ? "active" : "";
+                            <li class="page-item @activeClass">
+                                <a class="page-link ajax-link" href="@Url.Action("Index", new { page = i, pageSize = pageSize })">@i</a>
+                            </li>
+                        }
+                        else if (i == currentPage - 3 || i == currentPage + 3)
+                        {
+                            <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
+                        }
+                    }
+
+                    <li class="page-item @nextDisabled">
+                        <a class="page-link ajax-link" href="@Url.Action("Index", new { page = currentPage + 1, pageSize = pageSize })"><i class="bi bi-caret-right-fill"></i></a>
+                    </li>
+                    <li class="page-item @nextDisabled">
+                        <a class="page-link ajax-link" href="@Url.Action("Index", new { page = totalPages, pageSize = pageSize })"><i class="bi bi-skip-end-fill"></i></a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="d-flex align-items-center">
+                <select class="form-select form-select-sm" id="pageSizeSelect" style="width: 70px; cursor: pointer;">
+                    <option value="10" @(pageSize == 10 ? "selected" : "")>10</option>
+                    <option value="20" @(pageSize == 20 ? "selected" : "")>20</option>
+                    <option value="50" @(pageSize == 50 ? "selected" : "")>50</option>
+                    <option value="100" @(pageSize == 100 ? "selected" : "")>100</option>
+                </select>
+                <span class="ms-2 text-info-custom" style="font-size: 0.85rem;">mẫu tin/trang</span>
+            </div>
+        </div>
+        <div class="text-info-custom" style="font-size: 0.85rem;">
+            @{
+                int start = total > 0 ? (currentPage - 1) * pageSize + 1 : 0;
+                int end = Math.Min(currentPage * pageSize, total);
+            }
+            @start - @end của @total
+        </div>
+    </div>
+</div>

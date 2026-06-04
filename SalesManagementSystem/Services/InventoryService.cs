@@ -18,17 +18,6 @@ namespace SalesManagementSystem.Services
             _db = db;
         }
 
-        public IEnumerable<Inventory> GetStockList()
-        {
-            const string sql = @"
-                SELECT i.*, p.Name AS ProductName, p.Sku, p.Unit
-                FROM Inventory i
-                INNER JOIN Products p ON p.Id = i.ProductId
-                ORDER BY p.Name";
-            using (var conn = _db.CreateConnection())
-                return conn.Query<Inventory>(sql);
-        }
-
         public int GetStockQuantity(int productId)
         {
             const string sql = "SELECT ISNULL(Quantity, 0) FROM Inventory WHERE ProductId = @Id";

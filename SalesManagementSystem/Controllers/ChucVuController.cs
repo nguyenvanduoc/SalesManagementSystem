@@ -64,6 +64,10 @@ namespace SalesManagementSystem.Controllers
                 var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
                 chucVu.NguoiTao = session?.UserID ?? 0;
                 _chucVuRepo.Insert(chucVu);
+
+                // AUDIT LOG
+                AuditLog.AddInsert("ChucVu", chucVu.ID.ToString(), chucVu);
+
                 return Json(new { success = true, message = "Thêm mới chức vụ thành công!" });
             }
             return PartialView("CreateChucVu", chucVu);
@@ -95,9 +99,15 @@ namespace SalesManagementSystem.Controllers
                     return PartialView("UpdateChucVu", chucVu);
                 }
 
+                var oldChucVu = _chucVuRepo.GetById(chucVu.ID);
+
                 var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
                 chucVu.NguoiCapNhat = session?.UserID ?? 0;
                 _chucVuRepo.Update(chucVu);
+
+                // AUDIT LOG
+                AuditLog.AddUpdate("ChucVu", chucVu.ID.ToString(), oldChucVu, chucVu);
+
                 return Json(new { success = true, message = "Cập nhật chức vụ thành công!" });
             }
             return PartialView("UpdateChucVu", chucVu);
@@ -110,13 +120,19 @@ namespace SalesManagementSystem.Controllers
         {
             if (id.HasValue)
             {
+                var oldObj = _chucVuRepo.GetById(id.Value);
                 _chucVuRepo.Delete(id.Value);
+                if (oldObj != null)
+                    AuditLog.AddDelete("ChucVu", id.Value.ToString(), oldObj);
             }
             else if (ids != null && ids.Length > 0)
             {
                 foreach (var item in ids)
                 {
+                    var oldObj = _chucVuRepo.GetById(item);
                     _chucVuRepo.Delete(item);
+                    if (oldObj != null)
+                        AuditLog.AddDelete("ChucVu", item.ToString(), oldObj);
                 }
             }
             return RedirectToAction("GetChucVu");

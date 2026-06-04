@@ -8,6 +8,5 @@ namespace SalesManagementSystem.Models.ViewModels
     {
         public Order Order { get; set; } = new Order();
         public List<OrderDetail> Details { get; set; } = new List<OrderDetail>();
-        public List<Product> AvailableProducts { get; set; } = new List<Product>();
     }
 }

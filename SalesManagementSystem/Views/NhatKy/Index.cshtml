@@ -1,0 +1,78 @@
+@model IEnumerable<SalesManagementSystem.Models.ViewModels.NKTongHopVM>
+
+@{
+    ViewBag.Title = "Nhật ký hệ thống";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">@ViewBag.Title</h4>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" action="@Url.Action("Index")" id="searchForm">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-5">
+                    <input type="text" name="keyword" class="form-control" placeholder="Nhập màn hình, thao tác, hoặc tên tài khoản..." value="@ViewBag.Keyword">
+                </div>
+                <div class="col-md-auto d-flex gap-2">
+                    <button type="submit" class="btn text-white px-3" style="background-color: #2998e4; border: none;">
+                        <i class="bi bi-search"></i> Tìm kiếm
+                    </button>
+                    <button type="button" onclick="resetSearch()" class="btn text-white px-3" style="background-color: #f1c40f; border: none;">
+                        Làm mới
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="table-container">
+    @Html.Partial("_NhatKyList", Model)
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#searchForm').submit(function(e) {
+                e.preventDefault();
+                loadData($(this).serialize());
+            });
+
+            $(document).on('click', '.ajax-link', function(e) {
+                e.preventDefault();
+                var url = $(this).attr('href');
+                var formData = $('#searchForm').serialize();
+                loadData(url + '&' + formData);
+            });
+
+            $(document).on('change', '#pageSizeSelect', function() {
+                var pageSize = $(this).val();
+                var formData = $('#searchForm').serialize();
+                loadData('@Url.Action("Index")?page=1&pageSize=' + pageSize + '&' + formData);
+            });
+        });
+
+        function loadData(urlOrData) {
+            var requestUrl = typeof urlOrData === 'string' && urlOrData.indexOf('Index') !== -1 
+                             ? urlOrData 
+                             : '@Url.Action("Index")?' + urlOrData;
+            $.ajax({
+                url: requestUrl,
+                type: 'GET',
+                success: function(res) {
+                    $('#table-container').html(res);
+                },
+                error: function() {
+                    showToast('error', 'Có lỗi xảy ra khi tải dữ liệu.');
+                }
+            });
+        }
+
+        function resetSearch() {
+            $('input[name="keyword"]').val('');
+            loadData('');
+        }
+    </script>
+}

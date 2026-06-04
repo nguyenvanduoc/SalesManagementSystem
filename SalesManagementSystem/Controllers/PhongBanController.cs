@@ -64,6 +64,10 @@ namespace SalesManagementSystem.Controllers
                 var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
                 phongBan.NguoiTao = session?.UserID ?? 0;
                 _phongBanRepo.Insert(phongBan);
+
+                // AUDIT LOG
+                AuditLog.AddInsert("PhongBan", phongBan.ID.ToString(), phongBan);
+
                 return Json(new { success = true, message = "Thêm mới phòng ban thành công!" });
             }
             return PartialView("CreatePhongBan", phongBan);
@@ -95,9 +99,15 @@ namespace SalesManagementSystem.Controllers
                     return PartialView("UpdatePhongBan", phongBan);
                 }
 
+                var oldPhongBan = _phongBanRepo.GetById(phongBan.ID);
+
                 var session = (SalesManagementSystem.Models.ViewModels.UserLogin)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
                 phongBan.NguoiCapNhat = session?.UserID ?? 0;
                 _phongBanRepo.Update(phongBan);
+
+                // AUDIT LOG
+                AuditLog.AddUpdate("PhongBan", phongBan.ID.ToString(), oldPhongBan, phongBan);
+
                 return Json(new { success = true, message = "Cập nhật phòng ban thành công!" });
             }
             return PartialView("UpdatePhongBan", phongBan);
@@ -110,13 +120,19 @@ namespace SalesManagementSystem.Controllers
         {
             if (id.HasValue)
             {
+                var oldObj = _phongBanRepo.GetById(id.Value);
                 _phongBanRepo.Delete(id.Value);
+                if (oldObj != null)
+                    AuditLog.AddDelete("PhongBan", id.Value.ToString(), oldObj);
             }
             else if (ids != null && ids.Length > 0)
             {
                 foreach (var item in ids)
                 {
+                    var oldObj = _phongBanRepo.GetById(item);
                     _phongBanRepo.Delete(item);
+                    if (oldObj != null)
+                        AuditLog.AddDelete("PhongBan", item.ToString(), oldObj);
                 }
             }
             return RedirectToAction("GetPhongBan");
