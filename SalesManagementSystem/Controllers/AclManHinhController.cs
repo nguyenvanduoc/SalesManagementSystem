@@ -62,7 +62,7 @@ namespace SalesManagementSystem.Controllers
             if (ModelState.IsValid)
             {
                 _manHinhRepo.Insert(manHinh);
-                AuditLog.AddInsert("AclManHinh", manHinh.ID.ToString(), manHinh);
+                AuditLog.AddInsert("ACL_ManHinh", manHinh.ID.ToString(), manHinh);
                 return Json(new { success = true, message = "Thêm mới màn hình thành công!" });
             }
             return PartialView("CreateManHinh", manHinh);
@@ -90,7 +90,7 @@ namespace SalesManagementSystem.Controllers
             {
                 var oldManHinh = _manHinhRepo.GetById(manHinh.ID);
                 _manHinhRepo.Update(manHinh);
-                AuditLog.AddUpdate("AclManHinh", manHinh.ID.ToString(), oldManHinh, manHinh);
+                AuditLog.AddUpdate("ACL_ManHinh", manHinh.ID.ToString(), oldManHinh, manHinh);
                 return Json(new { success = true, message = "Cập nhật màn hình thành công!" });
             }
             return PartialView("UpdateManHinh", manHinh);
@@ -104,16 +104,18 @@ namespace SalesManagementSystem.Controllers
             if (id.HasValue)
             {
                 var oldObj = _manHinhRepo.GetById(id.Value);
+                if (oldObj != null) AuditLog.AddDelete("ACL_ManHinh", id.Value.ToString(), oldObj);
+                ForceSaveAudit();
                 _manHinhRepo.Delete(id.Value);
-                if (oldObj != null) AuditLog.AddDelete("AclManHinh", id.Value.ToString(), oldObj);
             }
             else if (ids != null && ids.Length > 0)
             {
                 foreach (var item in ids)
                 {
                     var oldObj = _manHinhRepo.GetById(item);
+                    if (oldObj != null) AuditLog.AddDelete("ACL_ManHinh", item.ToString(), oldObj);
+                    ForceSaveAudit();
                     _manHinhRepo.Delete(item);
-                    if (oldObj != null) AuditLog.AddDelete("AclManHinh", item.ToString(), oldObj);
                 }
             }
             return Json(new { success = true, message = "Xóa dữ liệu thành công" });

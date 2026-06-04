@@ -19,7 +19,7 @@ namespace SalesManagementSystem.Repositories
 
         public IEnumerable<NhanVien> GetAll()
         {
-            const string sql = "SELECT * FROM NS_NhanVien ORDER BY MaNhanVien";
+            const string sql = "SELECT * FROM NS_NhanVien ORDER BY NgayTao DESC";
             using (var conn = _db.CreateConnection())
                 return conn.Query<NhanVien>(sql);
         }
@@ -46,7 +46,7 @@ namespace SalesManagementSystem.Repositories
             string sql = $@"
                 SELECT * FROM NS_NhanVien 
                 {whereClause}
-                ORDER BY MaNhanVien
+                ORDER BY NgayTao DESC
                 OFFSET @Offset ROWS 
                 FETCH NEXT @PageSize ROWS ONLY";
             

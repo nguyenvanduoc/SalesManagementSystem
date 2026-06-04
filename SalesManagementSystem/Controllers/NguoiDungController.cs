@@ -90,7 +90,7 @@ namespace SalesManagementSystem.Controllers
                                 existingLogin.NguoiXoa = null;
                                 
                                 _aclLoginRepo.Update(existingLogin);
-                                AuditLog.AddUpdate("AclLogin", existingLogin.ID.ToString(), oldLogin, existingLogin);
+                                AuditLog.AddUpdate("ACL_Login", existingLogin.ID.ToString(), oldLogin, existingLogin);
                             }
                             else
                             {
@@ -107,7 +107,7 @@ namespace SalesManagementSystem.Controllers
                                     NguoiTao = session?.IDNhanVien ?? 0
                                 };
                                 _aclLoginRepo.Insert(login);
-                                AuditLog.AddInsert("AclLogin", login.ID.ToString(), login);
+                                AuditLog.AddInsert("ACL_Login", login.ID.ToString(), login);
                             }
                         }
                     }
@@ -183,7 +183,7 @@ namespace SalesManagementSystem.Controllers
 
                     var oldExisting = _aclLoginRepo.GetById(existing.ID);
                     _aclLoginRepo.Update(existing);
-                    AuditLog.AddUpdate("AclLogin", existing.ID.ToString(), oldExisting, existing);
+                    AuditLog.AddUpdate("ACL_Login", existing.ID.ToString(), oldExisting, existing);
                     return Json(new { success = true, message = "Cập nhật tài khoản thành công!" });
                 }
             }
@@ -199,8 +199,9 @@ namespace SalesManagementSystem.Controllers
         public ActionResult DeleteNguoiDung(int id)
         {
             var oldObj = _aclLoginRepo.GetById(id);
+            if (oldObj != null) AuditLog.AddDelete("ACL_Login", id.ToString(), oldObj);
+            ForceSaveAudit();
             _aclLoginRepo.Delete(id);
-            if (oldObj != null) AuditLog.AddDelete("AclLogin", id.ToString(), oldObj);
             return Json(new { success = true, message = "Xóa dữ liệu thành công" });
         }
 
@@ -240,7 +241,7 @@ namespace SalesManagementSystem.Controllers
                 
                 var oldUser = _aclLoginRepo.GetById(user.ID);
                 _aclLoginRepo.Update(user);
-                AuditLog.AddUpdate("AclLogin", user.ID.ToString(), oldUser, user);
+                AuditLog.AddUpdate("ACL_Login", user.ID.ToString(), oldUser, user);
 
                 return Json(new { success = true, message = "Đổi mật khẩu thành công!" });
             }

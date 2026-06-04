@@ -32,7 +32,7 @@ namespace SalesManagementSystem.Repositories
                     LEFT JOIN Acl_Login al ON nk.IDLogin = al.ID
                     WHERE (@Keyword = '' OR nk.TenManHinh LIKE N'%' + @Keyword + '%' OR al.TenDangNhap LIKE N'%' + @Keyword + '%');
 
-                    SELECT nk.ID, nk.IDLogin, nk.TenController, nk.TenAction, nk.NgayThucThi, nk.NoiDung,
+                    SELECT nk.ID, nk.IDLogin, nk.TenController, nk.TenAction, nk.NgayThucThi, nk.NoiDung, nk.LoaiThaoTac, nk.IDBangDuLieu, nk.TenBangDuLieu,
                            ISNULL((SELECT TOP 1 am.TenManHinh FROM ACL_Action aa JOIN ACL_ManHinh am ON aa.IDManHinh = am.ID WHERE aa.TenController = nk.TenController), nk.TenManHinh) as TenManHinh,
                            al.TenDangNhap, al.HoDem + ' ' + al.Ten as TenNhanVien
                     FROM NK_TongHop nk

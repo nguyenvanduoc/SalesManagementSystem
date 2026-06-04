@@ -73,7 +73,7 @@ namespace SalesManagementSystem.Controllers
                 _phongBanRepo.Insert(phongBan);
 
                 // AUDIT LOG
-                AuditLog.AddInsert("PhongBan", phongBan.ID.ToString(), phongBan);
+                AuditLog.AddInsert("DM_PhongBan", phongBan.ID.ToString(), phongBan);
 
                 return Json(new { success = true, message = "Thêm mới phòng ban thành công!" });
             }
@@ -113,7 +113,7 @@ namespace SalesManagementSystem.Controllers
                 _phongBanRepo.Update(phongBan);
 
                 // AUDIT LOG
-                AuditLog.AddUpdate("PhongBan", phongBan.ID.ToString(), oldPhongBan, phongBan);
+                AuditLog.AddUpdate("DM_PhongBan", phongBan.ID.ToString(), oldPhongBan, phongBan);
 
                 return Json(new { success = true, message = "Cập nhật phòng ban thành công!" });
             }
@@ -128,18 +128,22 @@ namespace SalesManagementSystem.Controllers
             if (id.HasValue)
             {
                 var oldObj = _phongBanRepo.GetById(id.Value);
-                _phongBanRepo.Delete(id.Value);
                 if (oldObj != null)
-                    AuditLog.AddDelete("PhongBan", id.Value.ToString(), oldObj);
+                    AuditLog.AddDelete("DM_PhongBan", id.Value.ToString(), oldObj);
+                
+                ForceSaveAudit();
+                _phongBanRepo.Delete(id.Value);
             }
             else if (ids != null && ids.Length > 0)
             {
                 foreach (var item in ids)
                 {
                     var oldObj = _phongBanRepo.GetById(item);
-                    _phongBanRepo.Delete(item);
                     if (oldObj != null)
-                        AuditLog.AddDelete("PhongBan", item.ToString(), oldObj);
+                        AuditLog.AddDelete("DM_PhongBan", item.ToString(), oldObj);
+                    
+                    ForceSaveAudit();
+                    _phongBanRepo.Delete(item);
                 }
             }
             return Json(new { success = true, message = "Xóa dữ liệu thành công" });

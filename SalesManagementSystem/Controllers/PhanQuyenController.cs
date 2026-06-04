@@ -57,7 +57,7 @@ namespace SalesManagementSystem.Controllers
 
             if (result)
             {
-                AuditLog.AddUpdate("AclPhanQuyen", idLogin.ToString(), new { Roles = "Old Roles (Many)" }, new { Roles = string.Join(",", checkedActionIds) });
+                AuditLog.AddUpdate("ACL_PhanQuyen", idLogin.ToString(), new { Roles = "Old Roles (Many)" }, new { Roles = string.Join(",", checkedActionIds) });
                 return Json(new { success = true, message = "Lưu phân quyền thành công!" });
             }
             return Json(new { success = false, message = "Có lỗi xảy ra khi lưu phân quyền." });

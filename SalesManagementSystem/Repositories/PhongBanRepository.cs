@@ -38,7 +38,7 @@ namespace SalesManagementSystem.Repositories
                     SELECT * 
                     FROM DM_PhongBan
                     WHERE (@Keyword = '' OR LOWER(TenPhongBan) LIKE '%' + @Keyword + '%' OR LOWER(MaPhongBan) LIKE '%' + @Keyword + '%')
-                    ORDER BY STT ASC, TenPhongBan ASC
+                    ORDER BY NgayTao DESC
                     OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
 
                 return conn.Query<PhongBan>(sql, parameters);

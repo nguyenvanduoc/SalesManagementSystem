@@ -137,11 +137,9 @@ namespace SalesManagementSystem.Helpers
         {
             if (!HasChanges()) return;
 
-            string jsonContent = JsonConvert.SerializeObject(_logData, Formatting.None);
-
             string sql = @"
-                INSERT INTO NK_TongHop (ID, IDLogin, TenManHinh, TenController, TenAction, NgayThucThi, NoiDung)
-                SELECT ISNULL(MAX(ID), 0) + 1, @IDLogin, @TenManHinh, @TenController, @TenAction, @NgayThucThi, @NoiDung
+                INSERT INTO NK_TongHop (ID, IDLogin, TenManHinh, TenController, TenAction, NgayThucThi, NoiDung, IDBangDuLieu, TenBangDuLieu, LoaiThaoTac)
+                SELECT ISNULL(MAX(ID), 0) + 1, @IDLogin, @TenManHinh, @TenController, @TenAction, @NgayThucThi, @NoiDung, @IDBangDuLieu, @TenBangDuLieu, @LoaiThaoTac
                 FROM NK_TongHop";
 
             var dbFactory = System.Web.Mvc.DependencyResolver.Current.GetService(typeof(DbConnectionFactory)) as DbConnectionFactory;
@@ -149,17 +147,33 @@ namespace SalesManagementSystem.Helpers
             {
                 using (var conn = dbFactory.CreateConnection())
                 {
-                    conn.Execute(sql, new
+                    foreach (var table in _logData.Tables)
                     {
-                        IDLogin = idLogin,
-                        TenManHinh = tenManHinh ?? tenController,
-                        TenController = tenController,
-                        TenAction = tenAction,
-                        NgayThucThi = DateTime.Now,
-                        NoiDung = jsonContent
-                    });
+                        int loaiThaoTac = 0;
+                        if (table.Action == "Insert") loaiThaoTac = 1;
+                        else if (table.Action == "Update") loaiThaoTac = 2;
+                        else if (table.Action == "Delete") loaiThaoTac = 3;
+
+                        string jsonContent = JsonConvert.SerializeObject(table, Formatting.None);
+
+                        conn.Execute(sql, new
+                        {
+                            IDLogin = idLogin,
+                            TenManHinh = tenManHinh ?? tenController,
+                            TenController = tenController,
+                            TenAction = tenAction,
+                            NgayThucThi = DateTime.Now,
+                            NoiDung = jsonContent,
+                            IDBangDuLieu = table.PrimaryKey,
+                            TenBangDuLieu = table.TableName,
+                            LoaiThaoTac = loaiThaoTac
+                        });
+                    }
                 }
             }
+            
+            // Xóa cache sau khi lưu để không bị lưu đúp nếu gọi lại SaveAudit
+            _logData.Tables.Clear();
         }
     }
 }

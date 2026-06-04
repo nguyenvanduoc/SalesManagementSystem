@@ -73,7 +73,7 @@ namespace SalesManagementSystem.Controllers
                 _chucVuRepo.Insert(chucVu);
 
                 // AUDIT LOG
-                AuditLog.AddInsert("ChucVu", chucVu.ID.ToString(), chucVu);
+                AuditLog.AddInsert("DM_ChucVu", chucVu.ID.ToString(), chucVu);
 
                 return Json(new { success = true, message = "Thêm mới chức vụ thành công!" });
             }
@@ -113,7 +113,7 @@ namespace SalesManagementSystem.Controllers
                 _chucVuRepo.Update(chucVu);
 
                 // AUDIT LOG
-                AuditLog.AddUpdate("ChucVu", chucVu.ID.ToString(), oldChucVu, chucVu);
+                AuditLog.AddUpdate("DM_ChucVu", chucVu.ID.ToString(), oldChucVu, chucVu);
 
                 return Json(new { success = true, message = "Cập nhật chức vụ thành công!" });
             }
@@ -128,18 +128,22 @@ namespace SalesManagementSystem.Controllers
             if (id.HasValue)
             {
                 var oldObj = _chucVuRepo.GetById(id.Value);
-                _chucVuRepo.Delete(id.Value);
                 if (oldObj != null)
-                    AuditLog.AddDelete("ChucVu", id.Value.ToString(), oldObj);
+                    AuditLog.AddDelete("DM_ChucVu", id.Value.ToString(), oldObj);
+                
+                ForceSaveAudit();
+                _chucVuRepo.Delete(id.Value);
             }
             else if (ids != null && ids.Length > 0)
             {
                 foreach (var item in ids)
                 {
                     var oldObj = _chucVuRepo.GetById(item);
-                    _chucVuRepo.Delete(item);
                     if (oldObj != null)
-                        AuditLog.AddDelete("ChucVu", item.ToString(), oldObj);
+                        AuditLog.AddDelete("DM_ChucVu", item.ToString(), oldObj);
+                    
+                    ForceSaveAudit();
+                    _chucVuRepo.Delete(item);
                 }
             }
             return Json(new { success = true, message = "Xóa dữ liệu thành công" });

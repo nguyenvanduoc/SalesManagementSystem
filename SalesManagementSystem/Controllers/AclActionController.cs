@@ -66,7 +66,7 @@ namespace SalesManagementSystem.Controllers
             if (ModelState.IsValid)
             {
                 _actionRepo.Insert(aclAction);
-                AuditLog.AddInsert("AclAction", aclAction.ID.ToString(), aclAction);
+                AuditLog.AddInsert("ACL_Action", aclAction.ID.ToString(), aclAction);
                 return Json(new { success = true, message = "Thêm mới Action thành công!" });
             }
             ViewBag.ManHinhList = new SelectList(_manHinhRepo.GetAll().Where(m => m.IsSuDung == 1), "ID", "TenManHinh", aclAction.IDManHinh);
@@ -96,7 +96,7 @@ namespace SalesManagementSystem.Controllers
             {
                 var oldAction = _actionRepo.GetById(aclAction.ID);
                 _actionRepo.Update(aclAction);
-                AuditLog.AddUpdate("AclAction", aclAction.ID.ToString(), oldAction, aclAction);
+                AuditLog.AddUpdate("ACL_Action", aclAction.ID.ToString(), oldAction, aclAction);
                 return Json(new { success = true, message = "Cập nhật Action thành công!" });
             }
             ViewBag.ManHinhList = new SelectList(_manHinhRepo.GetAll().Where(m => m.IsSuDung == 1), "ID", "TenManHinh", aclAction.IDManHinh);
@@ -111,16 +111,18 @@ namespace SalesManagementSystem.Controllers
             if (id.HasValue)
             {
                 var oldObj = _actionRepo.GetById(id.Value);
+                if (oldObj != null) AuditLog.AddDelete("ACL_Action", id.Value.ToString(), oldObj);
+                ForceSaveAudit();
                 _actionRepo.Delete(id.Value);
-                if (oldObj != null) AuditLog.AddDelete("AclAction", id.Value.ToString(), oldObj);
             }
             else if (ids != null && ids.Length > 0)
             {
                 foreach (var item in ids)
                 {
                     var oldObj = _actionRepo.GetById(item);
+                    if (oldObj != null) AuditLog.AddDelete("ACL_Action", item.ToString(), oldObj);
+                    ForceSaveAudit();
                     _actionRepo.Delete(item);
-                    if (oldObj != null) AuditLog.AddDelete("AclAction", item.ToString(), oldObj);
                 }
             }
             return Json(new { success = true, message = "Xóa dữ liệu thành công" });

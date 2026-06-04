@@ -11,5 +11,8 @@ namespace SalesManagementSystem.Models.Entities
         public string TenAction { get; set; }
         public DateTime? NgayThucThi { get; set; }
         public string NoiDung { get; set; }
+        public string IDBangDuLieu { get; set; }
+        public string TenBangDuLieu { get; set; }
+        public int LoaiThaoTac { get; set; }
     }
 }

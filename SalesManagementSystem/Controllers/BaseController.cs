@@ -52,5 +52,26 @@ namespace SalesManagementSystem.Controllers
 
             base.OnActionExecuted(filterContext);
         }
+
+        protected void ForceSaveAudit()
+        {
+            if (AuditLog != null && AuditLog.HasChanges())
+            {
+                var session = (UserLoginViewModel)Session[CommonConstants.USER_SESSION];
+                int loginId = session?.UserID ?? 0;
+                string controller = RouteData.Values["controller"]?.ToString();
+                string action = RouteData.Values["action"]?.ToString();
+                string manHinh = ViewBag.Title as string;
+
+                try
+                {
+                    AuditLog.SaveAudit(loginId, manHinh, controller, action);
+                }
+                catch (System.Exception ex)
+                {
+                    LogHelper.WriteErrorLog(ex, System.Web.HttpContext.Current);
+                }
+            }
+        }
     }
 }

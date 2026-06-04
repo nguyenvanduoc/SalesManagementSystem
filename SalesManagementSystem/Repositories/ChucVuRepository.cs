@@ -34,7 +34,7 @@ namespace SalesManagementSystem.Repositories
             string sql = $@"
                 SELECT * FROM DM_ChucVu 
                 {whereClause}
-                ORDER BY STT, MaChucVu
+                ORDER BY NgayTao DESC
                 OFFSET @Offset ROWS 
                 FETCH NEXT @PageSize ROWS ONLY";
             
@@ -50,7 +50,7 @@ namespace SalesManagementSystem.Repositories
 
         public IEnumerable<ChucVu> GetAll()
         {
-            const string sql = "SELECT * FROM DM_ChucVu ORDER BY STT, MaChucVu";
+            const string sql = "SELECT * FROM DM_ChucVu ORDER BY NgayTao DESC";
             using (var conn = _db.CreateConnection())
                 return conn.Query<ChucVu>(sql);
         }

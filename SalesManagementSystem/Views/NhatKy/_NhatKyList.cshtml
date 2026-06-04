@@ -75,6 +75,7 @@
                         <th>Tài khoản</th>
                         <th>Họ tên</th>
                         <th>Màn hình</th>
+                        <th class="text-center">Chức năng</th>
                         <th>Dữ liệu cũ</th>
                         <th>Dữ liệu mới</th>
                         <th>Thời gian</th>
@@ -97,7 +98,7 @@
                                             <li><hr class="dropdown-divider"></li>
                                             <li>
                                                 <button type="button" class="dropdown-item" onclick="openFormModal('@Url.Action("Detail", "NhatKy", new { id = item.ID })')">
-                                                    <i class="bi bi-eye-fill me-2 text-primary"></i> Xem chi tiết JSON
+                                                    <i class="bi bi-eye-fill me-2 text-primary"></i> Xem chi tiết
                                                 </button>
                                             </li>
                                         </ul>
@@ -107,6 +108,24 @@
                                 <td class="align-middle fw-bold">@item.TenDangNhap</td>
                                 <td class="align-middle text-muted">@item.TenNhanVien</td>
                                 <td class="align-middle fw-medium text-primary">@item.TenManHinh</td>
+                                <td class="align-middle text-center">
+                                    @if (item.LoaiThaoTac == 1)
+                                    {
+                                        <span class="badge bg-success">Thêm mới</span>
+                                    }
+                                    else if (item.LoaiThaoTac == 2)
+                                    {
+                                        <span class="badge bg-warning text-dark">Cập nhật</span>
+                                    }
+                                    else if (item.LoaiThaoTac == 3)
+                                    {
+                                        <span class="badge bg-danger">Xóa</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">@item.TenAction</span>
+                                    }
+                                </td>
                                 @{
                                     string oldDataHtml = "";
                                     string newDataHtml = "";
@@ -114,25 +133,34 @@
                                     {
                                         if (!string.IsNullOrEmpty(item.NoiDung))
                                         {
-                                            var root = JsonConvert.DeserializeObject<AuditLogRoot>(item.NoiDung);
-                                            if (root != null && root.Tables != null)
+                                            var jToken = Newtonsoft.Json.Linq.JToken.Parse(item.NoiDung);
+                                            List<AuditLogTable> tables = new List<AuditLogTable>();
+                                            if (jToken is Newtonsoft.Json.Linq.JObject jObj && jObj["Tables"] != null)
                                             {
-                                                foreach (var table in root.Tables)
+                                                var root = JsonConvert.DeserializeObject<AuditLogRoot>(item.NoiDung);
+                                                if (root?.Tables != null) { tables.AddRange(root.Tables); }
+                                            }
+                                            else
+                                            {
+                                                var table = JsonConvert.DeserializeObject<AuditLogTable>(item.NoiDung);
+                                                if (table != null) { tables.Add(table); }
+                                            }
+
+                                            foreach (var table in tables)
+                                            {
+                                                foreach (var change in table.Changes)
                                                 {
-                                                    foreach (var change in table.Changes)
+                                                    if (change.OldValue != null && change.OldValue.ToString() != "")
                                                     {
-                                                        if (change.OldValue != null && change.OldValue.ToString() != "")
-                                                        {
-                                                            string colName = TranslateColumn(change.Column);
-                                                            string valFormated = FormatValue(change.Column, change.OldValue);
-                                                            oldDataHtml += $"<div class='mb-1 text-truncate' title='{valFormated}'>{colName}: <strong class='text-danger'>{valFormated}</strong></div>";
-                                                        }
-                                                        if (change.NewValue != null && change.NewValue.ToString() != "")
-                                                        {
-                                                            string colName = TranslateColumn(change.Column);
-                                                            string valFormated = FormatValue(change.Column, change.NewValue);
-                                                            newDataHtml += $"<div class='mb-1 text-truncate' title='{valFormated}'>{colName}: <strong class='text-success'>{valFormated}</strong></div>";
-                                                        }
+                                                        string colName = TranslateColumn(change.Column);
+                                                        string valFormated = FormatValue(change.Column, change.OldValue);
+                                                        oldDataHtml += $"<div class='mb-1 text-truncate' title='{valFormated}'>{colName}: <strong class='text-danger'>{valFormated}</strong></div>";
+                                                    }
+                                                    if (change.NewValue != null && change.NewValue.ToString() != "")
+                                                    {
+                                                        string colName = TranslateColumn(change.Column);
+                                                        string valFormated = FormatValue(change.Column, change.NewValue);
+                                                        newDataHtml += $"<div class='mb-1 text-truncate' title='{valFormated}'>{colName}: <strong class='text-success'>{valFormated}</strong></div>";
                                                     }
                                                 }
                                             }
@@ -156,7 +184,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="7" class="text-center py-4 text-muted">
+                            <td colspan="8" class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox fs-2 d-block mb-2"></i>
                                 Chưa có dữ liệu nhật ký.
                             </td>

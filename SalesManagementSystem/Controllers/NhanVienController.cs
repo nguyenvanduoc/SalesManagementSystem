@@ -69,7 +69,7 @@ namespace SalesManagementSystem.Controllers
                 _employeeRepo.Insert(employee);
 
                 // AUDIT LOG
-                AuditLog.AddInsert("NhanVien", employee.ID.ToString(), employee);
+                AuditLog.AddInsert("NS_NhanVien", employee.ID.ToString(), employee);
 
                 return Json(new { success = true, message = "Thêm mới nhân viên thành công!" });
             }
@@ -110,7 +110,7 @@ namespace SalesManagementSystem.Controllers
                 _employeeRepo.Update(employee);
 
                 // AUDIT LOG
-                AuditLog.AddUpdate("NhanVien", employee.ID.ToString(), oldEmployee, employee);
+                AuditLog.AddUpdate("NS_NhanVien", employee.ID.ToString(), oldEmployee, employee);
 
                 return Json(new { success = true, message = "Cập nhật nhân viên thành công!" });
             }
@@ -123,11 +123,11 @@ namespace SalesManagementSystem.Controllers
         public ActionResult Delete(int id)
         {
             var oldEmployee = _employeeRepo.GetById(id);
-
-            _employeeRepo.Delete(id);
-
             if (oldEmployee != null)
-                AuditLog.AddDelete("NhanVien", id.ToString(), oldEmployee);
+                AuditLog.AddDelete("NS_NhanVien", id.ToString(), oldEmployee);
+            
+            ForceSaveAudit();
+            _employeeRepo.Delete(id);
 
             return Json(new { success = true, message = "Xóa dữ liệu thành công" });
         }
@@ -142,9 +142,11 @@ namespace SalesManagementSystem.Controllers
                 foreach (var id in ids)
                 {
                     var oldEmployee = _employeeRepo.GetById(id);
-                    _employeeRepo.Delete(id);
                     if (oldEmployee != null)
-                        AuditLog.AddDelete("NhanVien", id.ToString(), oldEmployee);
+                        AuditLog.AddDelete("NS_NhanVien", id.ToString(), oldEmployee);
+                    
+                    ForceSaveAudit();
+                    _employeeRepo.Delete(id);
                 }
             }
             return Json(new { success = true, message = "Xóa dữ liệu thành công" });
