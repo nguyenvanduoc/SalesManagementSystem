@@ -41,7 +41,7 @@ namespace SalesManagementSystem.Controllers
             {
                 return File(emp.HinhAnh, "image/jpeg");
             }
-            return File("~/Content/images/default-avatar.svg", "image/svg+xml");
+            return File("~/Content/IMG/default-avatar.svg", "image/svg+xml");
         }
 
         // GET: Employee
