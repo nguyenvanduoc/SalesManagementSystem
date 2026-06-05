@@ -244,7 +244,7 @@ namespace SalesManagementSystem.Controllers
 
                 // 3. Xuất file bằng Service chung
                 string fileExtension;
-                var fileBytes = _excelExportService.Export("NS01", exportData, out fileExtension, variables);
+                var fileBytes = _excelExportService.Export(BieuMauConstants.DS_NHAN_SU, exportData, out fileExtension, variables);
 
                 string contentType = fileExtension == "xls" 
                     ? "application/vnd.ms-excel" 
@@ -293,7 +293,7 @@ namespace SalesManagementSystem.Controllers
                 var groupedData = System.Linq.Enumerable.GroupBy(exportData, x => x.TenChucVu);
 
                 string fileExtension;
-                var fileBytes = _excelExportService.ExportGrouped("NS02", groupedData, out fileExtension, variables);
+                var fileBytes = _excelExportService.ExportGrouped(BieuMauConstants.DS_NHAN_SU_THEO_CHUC_VU, groupedData, out fileExtension, variables);
 
                 string contentType = fileExtension == "xls" 
                     ? "application/vnd.ms-excel" 
@@ -342,7 +342,7 @@ namespace SalesManagementSystem.Controllers
             };
 
             // Gọi service xuất file Word. Tạm thời isPdf = false vì thư viện OpenSource ko xuất trực tiếp được PDF
-            var result = _wordExportService.ExportWord("QD_NHANSU", exportData, tables, isPdf: false);
+            var result = _wordExportService.ExportWord(BieuMauConstants.QUYET_DINH_NHAN_SU, exportData, tables, isPdf: false);
 
             if (result.Success)
             {

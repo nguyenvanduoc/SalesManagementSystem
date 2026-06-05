@@ -256,6 +256,7 @@
     <Compile Include="Models\ViewModels\ExportResult.cs" />
     <Compile Include="Services\Interfaces\IWordExportService.cs" />
     <Compile Include="Services\WordExportService.cs" />
+    <Compile Include="Helpers\BieuMauConstants.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\Antlr3.Runtime.dll" />
