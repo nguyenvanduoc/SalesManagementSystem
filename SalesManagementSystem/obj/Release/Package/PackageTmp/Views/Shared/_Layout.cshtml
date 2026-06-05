@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title — Quản Lý Bán Hàng</title>
+
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/bootstrap.min.css")" />
+    <!-- Font: dùng system fonts hỗ trợ tiếng Việt, không cần internet -->
+    <!-- Bootstrap Icons (local - không cần internet) -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/bootstrap-icons.min.css")" />
+
+    <style>
+        /* ─── Variables ─────────────────────────────────── */
+        :root {
+            --sidebar-bg:       #1a5276;
+            --sidebar-hover:    #1f618d;
+            --sidebar-active:   #148f77;
+            --sidebar-border:   #2e86c1;
+            --sidebar-text:     #d6eaf8;
+            --sidebar-heading:  #7fb3d3;
+            --sidebar-width:    260px;
+            --topbar-height:    56px;
+            --topbar-bg:        #17202a;
+            --accent:           #1abc9c;
+            --body-bg:          #f0f3f7;
+        }
+
+        /* ─── Reset & Base ───────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, 'Arial Unicode MS', Arial, sans-serif;
+            background: var(--body-bg);
+            color: #2c3e50;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ─── Top Bar ─────────────────────────────────────── */
+        .topbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: var(--topbar-height);
+            background: var(--topbar-bg);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 1050;
+            box-shadow: 0 2px 8px rgba(0,0,0,.35);
+        }
+        .topbar .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            font-size: 1.05rem;
+            font-weight: 700;
+            text-decoration: none;
+            letter-spacing: .3px;
+            width: var(--sidebar-width);
+        }
+        .topbar .brand span.accent { color: var(--accent); }
+        .topbar-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        .topbar-right .btn-toggle {
+            background: none;
+            border: none;
+            color: #adb5bd;
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background .2s;
+        }
+        .topbar-right .btn-toggle:hover { background: rgba(255,255,255,.08); color: #fff; }
+        .topbar-right .user-info {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: #ced4da;
+            font-size: .88rem;
+        }
+        .topbar-right .user-info .avatar {
+            width: 34px; height: 34px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: .9rem;
+        }
+
+        /* ─── Sidebar ─────────────────────────────────────── */
+        .sidebar {
+            position: fixed;
+            top: var(--topbar-height);
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 1040;
+            transition: width .28s ease, transform .28s ease;
+        }
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--sidebar-border); border-radius: 4px; }
+
+        /* Loại bỏ class nav-global-toggle cũ vì nút đã lên Topbar */
+
+        /* Section heading (Tổng quan) */
+        .sidebar .nav-heading {
+            padding: 18px 18px 6px;
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--sidebar-heading);
+            margin: 0;
+        }
+
+        /* Nav item thường (Dashboard) */
+        .sidebar .nav-item { list-style: none; }
+        .sidebar > ul > .nav-item > .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 12px 18px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-size: 1.05rem; /* Tăng font size */
+            font-weight: 600;
+            transition: background .2s, color .2s;
+        }
+        .sidebar > ul > .nav-item > .nav-link i {
+            font-size: 1.15rem;
+            width: 22px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .sidebar > ul > .nav-item > .nav-link:hover {
+            background: var(--sidebar-hover);
+            color: #fff;
+        }
+        .sidebar > ul > .nav-item > .nav-link.active {
+            background: var(--sidebar-active);
+            color: #fff;
+        }
+
+        /* Nav group (Accordion) */
+        .sidebar .nav-group-toggle {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 14px 18px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-size: 1.05rem; /* Tăng font size */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .2s, color .2s;
+        }
+        .sidebar .nav-group-toggle:hover {
+            background: var(--sidebar-hover);
+            color: #fff;
+        }
+        .sidebar .nav-group-toggle .chevron {
+            margin-left: auto;
+            transition: transform .3s ease;
+            font-size: 0.8rem;
+        }
+        .sidebar .nav-group-toggle[aria-expanded="true"] .chevron {
+            transform: rotate(180deg);
+        }
+
+        /* Tree lines for child items */
+        .sidebar .nav-group-collapse ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            /* Vertical line */
+            border-left: 1px solid rgba(255, 255, 255, 0.5);
+            margin-left: 26px; /* align with the icon above */
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+
+        .sidebar .nav-group-collapse li {
+            position: relative;
+        }
+
+        /* Horizontal dash */
+        .sidebar .nav-group-collapse li::before {
+            content: "";
+            position: absolute;
+            top: 19px; /* middle of the link */
+            left: 0;
+            width: 12px;
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Dấu chấm trắng cho item active */
+        .sidebar .nav-group-collapse .nav-link.active::before {
+            content: "";
+            position: absolute;
+            top: 19px; 
+            left: -3px; /* Đặt đè lên đường kẻ dọc */
+            width: 7px;
+            height: 7px;
+            background-color: #fff;
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        .sidebar .nav-group-collapse .nav-link {
+            padding: 8px 15px 8px 20px; /* Thu nhỏ khoảng cách */
+            border-left: none;
+            font-size: 0.95rem; /* Tăng chữ to lên */
+            font-weight: 500; 
+            white-space: normal;
+            color: var(--sidebar-text); /* Mặc định menu sáng */
+            text-decoration: none;
+            display: block;
+            transition: color .2s, background .2s;
+            position: relative;
+        }
+        .sidebar .nav-group-collapse .nav-link.text-faded {
+            color: rgba(255, 255, 255, 0.45); /* Chỉ mờ khi cùng nhóm với item active */
+        }
+        .sidebar .nav-group-collapse .nav-link:hover {
+            background: transparent;
+            color: #fff;
+        }
+        .sidebar .nav-group-collapse .nav-link.active {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border-radius: 0 4px 4px 0;
+            border-left: none;
+            font-weight: 600;
+        }
+
+        /* Separator */
+        .sidebar hr.nav-divider {
+            border-color: rgba(255,255,255,.1);
+            margin: 6px 14px;
+        }
+
+        /* ─── Main content ───────────────────────────────── */
+        .main-wrapper {
+            margin-top: var(--topbar-height);
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - var(--topbar-height));
+            transition: margin-left .28s ease;
+        }
+        .page-content {
+            padding: 28px 28px 20px;
+            flex: 1;
+        }
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+        }
+        .page-header h1 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #1a2035;
+            margin: 0;
+        }
+        .breadcrumb-wrap {
+            font-size: .8rem;
+            color: #7f8c8d;
+        }
+        .breadcrumb-wrap a { color: var(--accent); text-decoration: none; }
+
+        /* ─── Footer ─────────────────────────────────────── */
+        .main-footer {
+            background: #fff;
+            border-top: 1px solid #e0e6ed;
+            padding: 12px 28px;
+            font-size: .78rem;
+            color: #95a5a6;
+            text-align: center;
+        }
+
+        /* ─── Sidebar collapsed ──────────────────────────── */
+        body.sidebar-collapsed .sidebar { width: 60px; }
+        body.sidebar-collapsed .sidebar .nav-group-toggle span,
+        body.sidebar-collapsed .sidebar .nav-group-toggle .chevron,
+        body.sidebar-collapsed .sidebar .nav-group-collapse,
+        body.sidebar-collapsed .sidebar .nav-link span,
+        body.sidebar-collapsed .sidebar .badge-count { display: none; }
+        
+        body.sidebar-collapsed .sidebar .nav-link,
+        body.sidebar-collapsed .sidebar .nav-group-toggle { 
+            justify-content: center; 
+            padding: 12px; 
+            border: none;
+        }
+        body.sidebar-collapsed .sidebar .nav-link i,
+        body.sidebar-collapsed .sidebar .nav-group-toggle i { width: auto; font-size: 1.2rem; margin: 0; }
+        body.sidebar-collapsed .main-wrapper { margin-left: 60px; }
+
+        /* ─── Responsive ─────────────────────────────────── */
+        @@media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            body.sidebar-open .sidebar { transform: translateX(0); }
+            .main-wrapper { margin-left: 0 !important; }
+        }
+
+        /* ─── Table Standard ─────────────────────────────── */
+        .table-custom {
+            border-color: #e9ecef;
+        }
+        .table-custom thead th {
+            color: #212529; /* Màu đen */
+            font-weight: bold; /* Tô đậm */
+            background-color: #f4f6f9; /* Màu xám nhạt chuẩn */
+            border-bottom: 2px solid #dee2e6 !important;
+            border-color: #e9ecef;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+        .table-custom tbody tr:nth-of-type(odd) {
+            background-color: #ffffff;
+        }
+        .table-custom tbody tr:nth-of-type(even) {
+            background-color: #dbe6ef;
+        }
+        .table-custom td {
+            vertical-align: middle;
+            border-color: #e9ecef;
+        }
+        .table-custom tbody tr:hover {
+            background-color: #c9d9e8;
+        }
+        
+        .dropdown-toggle-hide-arrow::after {
+            display: none !important;
+        }
+        
+        /* ─── Dropdown Hover & Last Rows Fix ─────────────────────────────── */
+        .dropdown-hover:hover > .dropdown-menu {
+            display: block;
+            margin-top: 0;
+        }
+
+        /* Tăng vùng an toàn (safe area) khi hover để tránh mất menu khi trượt chuột ra ngoài một chút */
+        .dropdown-hover > .dropdown-menu::before {
+            content: "";
+            position: absolute;
+            top: -20px;
+            bottom: -20px;
+            left: -20px;
+            right: -20px;
+            background: transparent;
+            z-index: -1;
+        }
+
+        /* Fix: 4 dòng cuối cùng sẽ hiển thị menu hướng lên trên (Dropup) đè ngược lên grid để không bị che bởi footer.
+           Tuy nhiên, nếu là 3 dòng đầu tiên thì KHÔNG dropup để tránh bị cắt bởi mép trên của bảng. */
+        .table-custom tbody tr:nth-last-child(-n+4):not(:nth-child(-n+3)) .dropdown-menu {
+            top: auto !important;
+            bottom: 100% !important;
+            margin-top: 0 !important;
+            margin-bottom: 0.125rem !important;
+            box-shadow: 0 -0.5rem 1rem rgba(0, 0, 0, 0.15) !important; /* Đổi bóng đổ lên trên cho đẹp */
+        }
+
+        /* ─── Custom Pagination (Light Theme) ─────────────────────────────── */
+        .custom-pagination {
+            background-color: #f1f5f9 !important;
+            border-top: 1px solid #e2e8f0 !important;
+        }
+        .custom-pagination .pagination .page-link {
+            background-color: transparent;
+            border: 1px solid #dce4ec;
+            color: #0b5b84;
+            border-radius: 50% !important;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 2px;
+            padding: 0;
+            font-size: 0.875rem;
+        }
+        .custom-pagination .pagination .page-item.active .page-link {
+            border-color: #b9d2e1;
+            color: #0b5b84;
+            background-color: #c0d6e4;
+        }
+        .custom-pagination .pagination .page-link:hover {
+            background-color: #e2e8f0;
+            color: #0b5b84;
+        }
+        .custom-pagination .pagination .page-item.disabled .page-link {
+            color: #839bb0;
+            background-color: transparent;
+            border-color: transparent;
+        }
+        .custom-pagination .form-select {
+            background-color: #f8fbfd;
+            color: #0b5b84;
+            border-color: #dce4ec;
+        }
+        .custom-pagination .text-info-custom {
+            color: #0b5b84 !important;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════ TOP BAR ═══════════════ -->
+<header class="topbar">
+    <a href="@Url.Action("Index","Home")" class="brand">
+        <i class="bi bi-box-seam-fill" style="font-size:1.4rem;color:var(--accent)"></i>
+        <span>Quản Lý <span class="accent">Bán Hàng</span></span>
+    </a>
+
+    <div class="topbar-right">
+        @{
+            var userSession = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+            string hoTen = userSession != null ? (userSession.HoDem + " " + userSession.Ten).Trim() : "Admin";
+            string firstChar = userSession != null && !string.IsNullOrEmpty(userSession.Ten) ? userSession.Ten.Substring(0, 1).ToUpper() : "A";
+        }
+        <div class="user-info dropdown">
+            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle dropdown-toggle-hide-arrow" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false" style="color: inherit; gap: 9px;">
+                <span class="d-none d-sm-block">@hoTen</span>
+                <i class="bi bi-caret-down-fill ms-1 me-3" style="font-size: 0.8rem;"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="dropdownUser" style="margin-top: 15px; border-radius: 8px; font-size: 0.9rem;">
+                <li>
+                    <a class="dropdown-item d-flex align-items-center py-2" href="@Url.Action("ClearCache", "Home")">
+                        <i class="bi bi-arrow-repeat me-3 text-muted"></i> Xóa cache
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center py-2" href="#" onclick="openFormModal('@Url.Action("ChangePassword", "NguoiDung")')">
+                        <i class="bi bi-key me-3 text-muted"></i> Đổi mật khẩu
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center py-2" href="@Url.Action("Logout", "Login")">
+                        <i class="bi bi-box-arrow-right me-3 text-muted"></i> Đăng xuất
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</header>
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<nav class="sidebar" id="sidebar">
+    <div class="d-flex justify-content-end align-items-center" style="padding: 10px 18px 0;">
+        <button class="btn-toggle text-white border-0 bg-transparent ms-3" id="expandAllToggle" onclick="toggleAllAccordions()" title="Mở/Đóng tất cả menu" style="font-size: 1.2rem; padding: 0; outline: none; margin-right: 15px;">
+            <i class="bi bi-caret-down-fill" id="expandAllIcon" style="opacity: 0.85;"></i>
+        </button>
+        <button class="btn-toggle text-white border-0 bg-transparent" id="sidebarToggle" title="Thu/mở menu" style="font-size: 1.8rem; padding: 0; outline: none;">
+            <i class="bi bi-list" style="opacity: 0.85;"></i>
+        </button>
+    </div>
+    @Html.Action("Menu", "Home")
+</nav>
+
+<!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+<div class="main-wrapper" id="mainWrapper">
+    <main class="page-content">
+        @RenderBody()
+    </main>
+
+    <footer class="main-footer">
+        &copy; @DateTime.Now.Year &nbsp;|&nbsp; Hệ thống Quản Lý Bán Hàng &amp; Kho Bãi
+    </footer>
+</div>
+
+<!-- ═══════════════ GLOBAL FORM MODAL ═══════════════ -->
+<div class="modal fade" id="globalFormModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0" id="globalFormModalContent">
+            <!-- Dữ liệu Partial View sẽ được nạp vào đây -->
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════ GLOBAL DELETE MODAL ═══════════════ -->
+<div class="modal fade" id="globalDeleteModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+        <div class="modal-content shadow-lg" style="background-color: #ffffff; color: #333; border: none; border-top: 5px solid #ffc107; border-radius: 6px;">
+            <div class="modal-body p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-exclamation-triangle-fill text-warning me-3" style="font-size: 1.6rem;"></i>
+                    <h5 class="mb-0" style="font-size: 1.3rem; font-weight: 600; color: #333;">Thông báo!</h5>
+                </div>
+                <p id="globalDeleteMessage" class="mb-4" style="font-size: 1rem; color: #555;">Bạn có chắc chắn muốn xóa không?</p>
+                <div class="d-flex justify-content-end gap-2">
+                    <form id="globalDeleteForm" method="post" class="m-0">
+                        <button type="submit" class="btn" style="background-color: #ffc107; color: #fff; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem;">ĐỒNG Ý</button>
+                    </form>
+                    <button type="button" class="btn" data-bs-dismiss="modal" style="background-color: #e9ecef; color: #333; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem; border: none;">ĐỂ SAU</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- ═══════════════ GLOBAL TOAST NOTIFICATION ═══════════════ -->
+<div class="toast-container position-fixed" style="top: 25px; right: 25px; z-index: 1055;">
+    <div id="globalToast" class="toast align-items-center border-0 shadow-lg text-white" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
+        <div class="d-flex">
+            <div class="toast-body d-flex align-items-center" id="globalToastMessage" style="font-size: 0.95rem;">
+                <span></span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="@Url.Content("~/Scripts/jquery-3.7.0.min.js")"></script>
+<script src="@Url.Content("~/Scripts/bootstrap.bundle.min.js")"></script>
+<script>
+    // Sidebar toggle
+    const toggleBtn   = document.getElementById('sidebarToggle');
+    const body        = document.body;
+
+    // Khôi phục trạng thái từ localStorage
+    if (localStorage.getItem('sidebarCollapsed') === '1') {
+        body.classList.add('sidebar-collapsed');
+    }
+
+    // Bật/tắt Sidebar (Desktop/Mobile)
+    toggleBtn.addEventListener('click', function () {
+        if (window.innerWidth > 768) {
+            body.classList.toggle('sidebar-collapsed');
+            localStorage.setItem('sidebarCollapsed', body.classList.contains('sidebar-collapsed') ? '1' : '0');
+        } else {
+            body.classList.toggle('sidebar-open');
+        }
+    });
+
+    // Lưu trữ và phục hồi trạng thái mở của Menu Accordion
+    document.addEventListener("DOMContentLoaded", function () {
+        var openMenus = JSON.parse(localStorage.getItem('openMenus') || '[]');
+        
+        // Phục hồi trạng thái (những nhóm có id nằm trong openMenus sẽ được mở ra)
+        openMenus.forEach(function (id) {
+            var group = document.getElementById(id);
+            if (group && !group.classList.contains('show')) {
+                group.classList.add('show');
+                var toggle = document.querySelector('[href="#' + id + '"]');
+                if (toggle) {
+                    toggle.classList.remove('collapsed');
+                    toggle.setAttribute('aria-expanded', 'true');
+                }
+            }
+        });
+
+        // Lắng nghe sự kiện Bootstrap collapse để lưu trạng thái
+        var groups = document.querySelectorAll('.nav-group-collapse');
+        groups.forEach(function (group) {
+            group.addEventListener('shown.bs.collapse', function (e) {
+                if (e.target === this) {
+                    var arr = JSON.parse(localStorage.getItem('openMenus') || '[]');
+                    if (!arr.includes(this.id)) arr.push(this.id);
+                    localStorage.setItem('openMenus', JSON.stringify(arr));
+                }
+            });
+            group.addEventListener('hidden.bs.collapse', function (e) {
+                if (e.target === this) {
+                    var arr = JSON.parse(localStorage.getItem('openMenus') || '[]');
+                    arr = arr.filter(id => id !== this.id);
+                    localStorage.setItem('openMenus', JSON.stringify(arr));
+                }
+            });
+        });
+    });
+
+    // Expand / Collapse tất cả Accordions
+    function toggleAllAccordions() {
+        var groups = document.querySelectorAll('.nav-group-collapse');
+        var toggles = document.querySelectorAll('.nav-group-toggle');
+        var icon = document.getElementById('expandAllIcon');
+        
+        // Kiểm tra xem có đang mở cái nào không
+        var isAnyOpen = false;
+        groups.forEach(function(g) { if (g.classList.contains('show')) isAnyOpen = true; });
+
+        var arr = []; // Cập nhật localStorage
+        if (isAnyOpen) {
+            // Đóng tất cả
+            toggles.forEach(function(t) { 
+                t.classList.add('collapsed'); 
+                t.setAttribute('aria-expanded', 'false'); 
+            });
+            groups.forEach(function(g) { 
+                var bsCollapse = bootstrap.Collapse.getInstance(g);
+                if (bsCollapse) bsCollapse.hide();
+                else g.classList.remove('show');
+            });
+            localStorage.setItem('openMenus', JSON.stringify([]));
+            if(icon) { icon.classList.remove('bi-caret-up-fill'); icon.classList.add('bi-caret-down-fill'); }
+        } else {
+            // Mở tất cả
+            toggles.forEach(function(t) { 
+                t.classList.remove('collapsed'); 
+                t.setAttribute('aria-expanded', 'true'); 
+            });
+            groups.forEach(function(g) { 
+                arr.push(g.id);
+                var bsCollapse = bootstrap.Collapse.getInstance(g);
+                if (bsCollapse) bsCollapse.show();
+                else g.classList.add('show');
+            });
+            localStorage.setItem('openMenus', JSON.stringify(arr));
+            if(icon) { icon.classList.remove('bi-caret-down-fill'); icon.classList.add('bi-caret-up-fill'); }
+        }
+    }
+
+    // Đóng sidebar khi click ngoài (mobile)
+    document.addEventListener('click', function (e) {
+        if (window.innerWidth <= 768
+            && !document.getElementById('sidebar').contains(e.target)
+            && e.target !== toggleBtn
+            && !toggleBtn.contains(e.target)) {
+            body.classList.remove('sidebar-open');
+        }
+    });
+
+    // Hàm gọi Global Delete Modal (Xóa 1 phần tử)
+    function confirmDelete(url, customMessage) {
+        var form = document.getElementById('globalDeleteForm');
+        form.action = url;
+        
+        // Xóa các input hidden cũ nếu có
+        var existingIds = form.querySelectorAll('input[name="ids"]');
+        existingIds.forEach(function(el) { el.remove(); });
+        
+        // Reset nội dung
+        var msgEl = document.getElementById('globalDeleteMessage');
+        if (!msgEl.dataset.originalMsg) {
+            msgEl.dataset.originalMsg = msgEl.innerText;
+        }
+        msgEl.innerText = customMessage || msgEl.dataset.originalMsg;
+
+        var myModal = new bootstrap.Modal(document.getElementById('globalDeleteModal'));
+        myModal.show();
+    }
+
+    // Hàm gọi Global Delete Modal (Xóa nhiều phần tử)
+    function confirmBatchDelete(url, ids, message) {
+        var form = document.getElementById('globalDeleteForm');
+        form.action = url;
+        
+        // Xóa các input hidden cũ nếu có
+        var existingIds = form.querySelectorAll('input[name="ids"]');
+        existingIds.forEach(function(el) { el.remove(); });
+        
+        // Thêm hidden input cho từng ID
+        ids.forEach(function(id) {
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ids';
+            input.value = id;
+            form.appendChild(input);
+        });
+
+        // Thay đổi thông báo
+        var msgEl = document.getElementById('globalDeleteMessage');
+        if (!msgEl.dataset.originalMsg) {
+            msgEl.dataset.originalMsg = msgEl.innerText;
+        }
+        msgEl.innerText = message || msgEl.dataset.originalMsg;
+
+        var myModal = new bootstrap.Modal(document.getElementById('globalDeleteModal'));
+        myModal.show();
+    }
+
+    // Hàm hiển thị Form Modal qua AJAX
+    function openFormModal(url) {
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(res) {
+                $('#globalFormModalContent').html(res);
+                var formModal = new bootstrap.Modal(document.getElementById('globalFormModal'));
+                formModal.show();
+            },
+            error: function() {
+                showToast('error', 'Không thể tải dữ liệu form.');
+            }
+        });
+    }
+
+    // Bắt sự kiện submit form bên trong globalFormModal
+    $(document).on('submit', '#globalFormModalContent form', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        $.ajax({
+            url: form.attr('action'),
+            type: form.attr('method') || 'POST',
+            data: form.serialize(),
+            success: function(res) {
+                if (res.success === true) {
+                    $('#globalFormModal').modal('hide');
+                    showToast('success', res.message);
+                    if (typeof loadData === 'function') {
+                        loadData(''); // Reload danh sách nếu có hàm loadData
+                    } else {
+                        location.reload();
+                    }
+                } else if (res.success === false) {
+                    showToast('error', res.message);
+                } else {
+                    // Nếu validation lỗi, trả về HTML partial view chứa form
+                    $('#globalFormModalContent').html(res);
+                }
+            },
+            error: function() {
+                showToast('error', 'Có lỗi xảy ra khi lưu dữ liệu.');
+            }
+        });
+    });
+
+    // Hàm hiển thị Toast thông báo chung
+    function showToast(type, message) {
+        var toastEl = document.getElementById('globalToast');
+        var messageEl = document.getElementById('globalToastMessage');
+        
+        // Reset classes
+        toastEl.className = 'toast align-items-center border-0 shadow-lg text-white';
+        
+        var iconHtml = '';
+        var btnClose = toastEl.querySelector('.btn-close');
+        btnClose.className = 'btn-close btn-close-white me-2 m-auto';
+
+        if (type === 'success') {
+            toastEl.classList.add('bg-success');
+            iconHtml = '<i class="bi bi-check-circle-fill me-2 fs-5"></i>';
+        } else if (type === 'error' || type === 'danger') {
+            toastEl.classList.add('bg-danger');
+            iconHtml = '<i class="bi bi-x-circle-fill me-2 fs-5"></i>';
+        } else if (type === 'warning') {
+            toastEl.classList.add('bg-warning', 'text-dark');
+            toastEl.classList.remove('text-white');
+            btnClose.className = 'btn-close me-2 m-auto'; // Nút close đen cho nền vàng
+            iconHtml = '<i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>';
+        } else {
+            toastEl.classList.add('bg-dark');
+            iconHtml = '<i class="bi bi-info-circle-fill me-2 fs-5"></i>';
+        }
+
+        messageEl.innerHTML = iconHtml + '<span>' + message + '</span>';
+        
+        var bsToast = new bootstrap.Toast(toastEl);
+        bsToast.show();
+    }
+
+    // Global Ajax Error Handler
+    $(document).ajaxError(function(event, jqxhr, settings, thrownError) {
+        if (jqxhr.status === 403) {
+            showToast('error', 'Từ chối truy cập: Bạn không có quyền thực hiện chức năng này.');
+        } else if (jqxhr.status === 401) {
+            showToast('error', 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+            setTimeout(function() { window.location.href = '@Url.Action("Index", "Login")'; }, 1500);
+        } else if (jqxhr.status === 404) {
+            showToast('error', 'Không tìm thấy dữ liệu hoặc màn hình.');
+        } else if (jqxhr.status >= 500) {
+            showToast('error', 'Lỗi hệ thống (' + jqxhr.status + '). Vui lòng thử lại sau.');
+        }
+    });
+
+    // Xử lý thông báo Toast từ Controller (TempData) - Giữ lại cho các form truyền thống
+    @if (TempData["ToastMessage"] != null)
+    {
+        var toastType = TempData["ToastType"] ?? "success";
+        <text>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (typeof showToast === 'function') {
+                showToast('@toastType', '@TempData["ToastMessage"]');
+            }
+        });
+        </text>
+    }
+
+    // Bắt sự kiện submit form Delete bằng AJAX để không bị chớp màn hình (giữ nguyên trang)
+    $(document).on('submit', '#globalDeleteForm', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        $.ajax({
+            url: form.attr('action'),
+            type: form.attr('method') || 'POST',
+            data: form.serialize(),
+            success: function(res) {
+                if (res.success === true) {
+                    $('#globalDeleteModal').modal('hide');
+                    showToast('success', res.message);
+                    
+                    var activeLink = $('.pagination .active .page-link').attr('href');
+                    if (activeLink && typeof loadData === 'function') {
+                        loadData(activeLink);
+                    } else if (typeof loadData === 'function') {
+                        loadData('');
+                    } else {
+                        location.reload();
+                    }
+                } else {
+                    showToast('error', res.message || 'Có lỗi xảy ra.');
+                }
+            },
+            error: function() {
+                showToast('error', 'Lỗi hệ thống khi xóa.');
+            }
+        });
+    });
+</script>
+@RenderSection("scripts", required: false)
+</body>
+</html>

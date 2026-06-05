@@ -1,0 +1,158 @@
+@model SalesManagementSystem.Models.ViewModels.NKTongHopViewModel
+
+<div class="modal-header bg-primary text-white">
+    <h5 class="modal-title"><i class="bi bi-file-earmark-code"></i> Chi tiết Lịch sử thao tác</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <span class="text-muted d-block small">Tài khoản</span>
+            <strong>@Model.TenDangNhap - @Model.Ten</strong>
+        </div>
+        <div class="col-md-6 text-end">
+            <span class="text-muted d-block small">Thời gian</span>
+            <strong>@(Model.NgayThucThi?.ToString("dd/MM/yyyy HH:mm:ss"))</strong>
+        </div>
+    </div>
+    <div class="mb-3 bg-light border p-2 rounded">
+        <strong>Thao tác:</strong> <code>@Model.TenAction</code> trên controller <code>@Model.TenController</code> (Màn hình: @Model.TenManHinh)
+    </div>
+    <hr/>
+    <h6 class="fw-bold mb-2">Chi tiết thay đổi</h6>
+@{
+    System.Collections.Generic.List<SalesManagementSystem.Models.ViewModels.AuditLogTable> tables = new System.Collections.Generic.List<SalesManagementSystem.Models.ViewModels.AuditLogTable>();
+    try
+    {
+        if (!string.IsNullOrEmpty(Model.NoiDung))
+        {
+            var jToken = Newtonsoft.Json.Linq.JToken.Parse(Model.NoiDung);
+            if (jToken is Newtonsoft.Json.Linq.JObject jObj && jObj["Tables"] != null)
+            {
+                var root = Newtonsoft.Json.JsonConvert.DeserializeObject<SalesManagementSystem.Models.ViewModels.AuditLogRoot>(Model.NoiDung);
+                if (root?.Tables != null) { tables.AddRange(root.Tables); }
+            }
+            else
+            {
+                var table = Newtonsoft.Json.JsonConvert.DeserializeObject<SalesManagementSystem.Models.ViewModels.AuditLogTable>(Model.NoiDung);
+                if (table != null) { tables.Add(table); }
+            }
+        }
+    }
+    catch {}
+
+    if (tables.Any())
+    {
+        foreach (var table in tables)
+        {
+            string th = table.Action == "Insert" ? "Thêm mới" : (table.Action == "Update" ? "Cập nhật" : "Xóa");
+            <div class="mb-3">
+                <h6 class="text-primary"><i class="bi bi-table"></i> Bảng: @table.TableName (ID: @table.PrimaryKey) - @th</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm mt-2">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Trường dữ liệu</th>
+                                <th>Dữ liệu cũ</th>
+                                <th>Dữ liệu mới</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var change in table.Changes)
+                            {
+                                <tr>
+                                    <td class="fw-medium">@TranslateColumn(change.Column)</td>
+                                    <td class="text-danger">@FormatValue(change.Column, change.OldValue)</td>
+                                    <td class="text-success">@FormatValue(change.Column, change.NewValue)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <pre class="bg-dark text-light p-3 rounded" style="max-height: 400px; overflow-y: auto; font-family: Consolas, monospace; font-size: 14px; white-space: pre-wrap; word-wrap: break-word;">
+@{
+            try
+            {
+                var parsedJson = Newtonsoft.Json.JsonConvert.DeserializeObject(Model.NoiDung);
+                var formattedJson = Newtonsoft.Json.JsonConvert.SerializeObject(parsedJson, Newtonsoft.Json.Formatting.Indented);
+                @formattedJson
+            }
+            catch
+            {
+                @Model.NoiDung
+            }
+}
+        </pre>
+    }
+}
+</div>
+
+@functions {
+    public string TranslateColumn(string col)
+    {
+        switch (col)
+        {
+            case "Ten": return "Tên nhân sự";
+            case "HoDem": return "Họ đệm";
+            case "MaNhanSu": return "Mã nhân sự";
+            case "NgaySinh": return "Ngày sinh";
+            case "GioiTinh": return "Giới tính";
+            case "SoDienThoai": return "Số ĐT";
+            case "Email": return "Email";
+            case "DiaChi": return "Địa chỉ";
+            case "ChungMinhThu": return "CMND/CCCD";
+            case "NgayCap": return "Ngày cấp";
+            case "NoiCap": return "Nơi cấp";
+            case "TenDangNhap": return "Tên đăng nhập";
+            case "MatKhau": return "Mật khẩu";
+            case "IDPhongBan": return "ID Phòng ban";
+            case "IDChucVu": return "ID Chức vụ";
+            case "TrangThai": return "Trạng thái";
+            case "IsSuDung": return "Sử dụng";
+            case "TenPhongBan": return "Tên phòng ban";
+            case "TenChucVu": return "Tên chức vụ";
+            case "GhiChu": return "Ghi chú";
+            case "STT": return "Số thứ tự";
+            case "IDManHinh": return "ID Màn hình";
+            case "TenManHinh": return "Tên màn hình";
+            case "NhomChaManHinh": return "Nhóm màn hình";
+            case "TenController": return "Controller";
+            case "TenAction": return "Action";
+            case "LoaiPhanQuyen": return "Loại quyền";
+            default: return col;
+        }
+    }
+
+    public string FormatValue(string col, object val)
+    {
+        if (val == null) return "";
+        string s = val.ToString();
+        if (string.IsNullOrEmpty(s)) return "";
+        
+        if (col == "GioiTinh")
+        {
+            if (s.Equals("True", System.StringComparison.OrdinalIgnoreCase) || s == "1") return "Nam";
+            if (s.Equals("False", System.StringComparison.OrdinalIgnoreCase) || s == "0") return "Nữ";
+        }
+        if (col == "TrangThai" || col == "IsSuDung")
+        {
+            if (s.Equals("True", System.StringComparison.OrdinalIgnoreCase) || s == "1") return "Có / Hoạt động";
+            if (s.Equals("False", System.StringComparison.OrdinalIgnoreCase) || s == "0") return "Không / Khóa";
+        }
+        if (col == "MatKhau") return "********";
+
+        if (System.DateTime.TryParse(s, out System.DateTime dt))
+        {
+            return dt.TimeOfDay.TotalSeconds == 0 ? dt.ToString("dd/MM/yyyy") : dt.ToString("dd/MM/yyyy HH:mm");
+        }
+        return s;
+    }
+}
+<div class="modal-footer bg-light">
+    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Đóng</button>
+</div>

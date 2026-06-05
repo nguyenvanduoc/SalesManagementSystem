@@ -1,0 +1,46 @@
+@model SalesManagementSystem.Models.Entities.AclManHinh
+
+@{
+    Layout = null;
+    ViewBag.Title = "Cập nhật màn hình";
+}
+
+<div class="modal-header bg-light">
+    <h5 class="modal-title fw-bold text-uppercase" style="color: #0b5b84;">@ViewBag.Title</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+@using (Html.BeginForm("UpdateManHinh", "AclManHinh", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.ID)
+    <div class="modal-body p-4">
+        <div class="row g-3">
+            <div class="col-md-12">
+                <label class="form-label text-muted fw-semibold">Tên màn hình <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.TenManHinh, new { @class = "form-control", required = "required", placeholder = "VD: Đơn hàng", oninvalid = "this.setCustomValidity('Bạn chưa nhập thông tin Tên màn hình')", oninput = "this.setCustomValidity('')" })
+            </div>
+            <div class="col-md-12">
+                <label class="form-label text-muted fw-semibold">Nhóm cha màn hình</label>
+                @Html.TextBoxFor(m => m.NhomChaManHinh, new { @class = "form-control", placeholder = "VD: BÁN HÀNG" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Sử dụng</label>
+                <div class="form-check form-switch mt-1">
+                    <input type="checkbox" class="form-check-input" id="chkIsSuDung" @(Model.IsSuDung == 1 ? "checked" : "") onchange="document.getElementById('hiddenIsSuDung').value = this.checked ? 1 : 0;" style="width: 2.5em; height: 1.25em;">
+                    @Html.HiddenFor(m => m.IsSuDung, new { id = "hiddenIsSuDung" })
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Số thứ tự</label>
+                @Html.TextBoxFor(m => m.STT, new { @class = "form-control", type = "number", placeholder = "VD: 1" })
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Hủy</button>
+        <button type="submit" class="btn text-white px-4" style="background-color: #2998e4; border: none;">
+            <i class="bi bi-save me-1"></i> Lưu thông tin
+        </button>
+    </div>
+}

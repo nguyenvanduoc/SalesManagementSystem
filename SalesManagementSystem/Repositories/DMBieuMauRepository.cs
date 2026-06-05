@@ -60,6 +60,14 @@ namespace SalesManagementSystem.Repositories
             }
         }
 
+        public DM_BieuMau GetByMa(string maBieuMau)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                return conn.QueryFirstOrDefault<DM_BieuMau>("SELECT * FROM DM_BieuMau WHERE MaBieuMau = @MaBieuMau", new { MaBieuMau = maBieuMau });
+            }
+        }
+
         public bool CheckDuplicateCode(string maBieuMau, int currentId = 0)
         {
             using (var conn = _db.CreateConnection())

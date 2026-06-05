@@ -1,0 +1,177 @@
+@{
+    Layout = null;
+    var employees = ViewBag.Employees as IEnumerable<SalesManagementSystem.Models.Entities.NhanSu>;
+}
+
+<div class="modal-header bg-light">
+    <h5 class="modal-title fw-bold text-uppercase" style="color: #0b5b84;" id="modalTitle">@ViewBag.Title</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<form id="createForm" onsubmit="submitForm(event)">
+    <div class="modal-body p-0">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="isManager" value="@(ViewBag.IsManager == true ? "true" : "false")" />
+        
+        <div class="p-3 pb-0">
+            <div class="alert alert-danger d-none" id="errorSummary"></div>
+
+            <div class="alert alert-info d-flex align-items-center mb-3" role="alert">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                <div>
+                    Tên đăng nhập sẽ được đặt <strong>giống với Mã nhân sự</strong>.<br/>
+                    Mật khẩu mặc định sẽ được đặt là <strong>1111</strong>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="IsActive" name="IsActive" value="true" checked="checked">
+                    <input type="hidden" name="IsActive" value="false">
+                    <label class="form-check-label fw-bold" for="IsActive">Kích hoạt tài khoản</label>
+                </div>
+            </div>
+
+            @if (ViewBag.IsManager != true)
+            {
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Chọn Cấp Trên <span class="text-danger">*</span></label>
+                    <select name="IDThamChieu" class="form-select" required oninvalid="this.setCustomValidity('Bạn chưa nhập thông tin Cấp Trên')" oninput="this.setCustomValidity('')">
+                        <option value="">-- Chọn Cấp Trên --</option>
+                        @if (ViewBag.Managers != null)
+                        {
+                            foreach (var mgr in (IEnumerable<SalesManagementSystem.Models.ViewModels.AclLoginViewModel>)ViewBag.Managers)
+                            {
+                                <option value="@mgr.ID">@mgr.HoTen - @mgr.TenDangNhap</option>
+                            }
+                        }
+                    </select>
+                </div>
+            }
+            
+            <label class="form-label fw-bold">Chọn Nhân Viên <span class="text-danger">*</span></label>
+        </div>
+
+        <div class="table-responsive" style="max-height: 350px; border-top: 1px solid #dee2e6;">
+            <table class="table table-custom table-bordered table-hover mb-0">
+                <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                    <tr>
+                        <th class="text-center" style="width: 50px;">
+                            <input type="checkbox" id="checkAll" class="form-check-input" />
+                        </th>
+                        <th class="text-center" style="width: 80px;">Mã nhân sự</th>
+                        <th>Họ Đệm</th>
+                        <th>Tên</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (employees != null && employees.Any())
+                    {
+                        foreach (var emp in employees)
+                        {
+                            <tr>
+                                <td class="text-center align-middle">
+                                    <input type="checkbox" name="EmployeeIds" value="@emp.ID" class="form-check-input emp-checkbox" />
+                                </td>
+                                <td class="text-center align-middle">@emp.MaNhanSu</td>
+                                <td class="align-middle">@emp.HoDem</td>
+                                <td class="align-middle">@emp.Ten</td>
+                                <td class="align-middle">@emp.Email</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center align-middle py-4 text-muted">Không có nhân viên nào chưa có tài khoản.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="modal-footer bg-light mt-0 border-top-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle me-1"></i> Hủy
+        </button>
+        <button type="submit" class="btn btn-primary" id="btnSave" style="background-color: #0b5b84; border: none;">
+            <i class="bi bi-save me-1"></i> Lưu
+        </button>
+    </div>
+</form>
+
+<script>
+    $(document).ready(function () {
+        // Show validation errors from controller if any
+        var errorMsg = '@Html.ValidationSummary(true, "")';
+        if (errorMsg && errorMsg.trim() !== '') {
+            $('#errorSummary').html(errorMsg).removeClass('d-none');
+        }
+
+        // Check All toggle logic
+        $('#checkAll').change(function() {
+            var isChecked = $(this).prop('checked');
+            $('.emp-checkbox').prop('checked', isChecked);
+        });
+
+        // Individual checkbox change logic
+        $('.emp-checkbox').change(function() {
+            var totalCount = $('.emp-checkbox').length;
+            var checkedCount = $('.emp-checkbox:checked').length;
+            $('#checkAll').prop('checked', totalCount > 0 && totalCount === checkedCount);
+        });
+    });
+
+    function submitForm(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Validate checked items
+        var checkedCount = $('.emp-checkbox:checked').length;
+        if (checkedCount === 0) {
+            if (typeof showToast === "function") {
+                showToast('warning', 'Vui lòng chọn ít nhất một nhân viên.');
+            } else {
+                alert('Vui lòng chọn ít nhất một nhân viên.');
+            }
+            return false;
+        }
+
+        // Xóa thông báo lỗi cũ
+        $('#errorSummary').addClass('d-none').html('');
+        
+        var form = $('#createForm');
+        var btn = $('#btnSave');
+        var originalHtml = btn.html();
+        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Đang xử lý...');
+
+        $.ajax({
+            url: '@Url.Action("CreateNguoiDung", "NguoiDung")',
+            type: 'POST',
+            data: form.serialize(),
+            success: function (result) {
+                if (result.success) {
+                    $('#globalFormModal').modal('hide');
+                    if (typeof showToast === "function") {
+                        showToast('success', result.message || 'Thêm mới thành công!');
+                    }
+                    if (typeof loadData === "function") {
+                        loadData(1);
+                    }
+                } else {
+                    // Cập nhật lại HTML của modal body nếu validate lỗi
+                    $('#globalFormModal .modal-content').html(result);
+                }
+            },
+            error: function () {
+                if (typeof showToast === "function") {
+                    showToast('error', 'Có lỗi xảy ra trong quá trình xử lý!');
+                } else {
+                    alert('Có lỗi xảy ra trong quá trình xử lý!');
+                }
+                btn.prop('disabled', false).html(originalHtml);
+            }
+        });
+    }
+</script>

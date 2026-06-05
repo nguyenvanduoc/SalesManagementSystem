@@ -1,0 +1,77 @@
+@model SalesManagementSystem.Models.Entities.NhanSu
+
+@{
+    Layout = null;
+    ViewBag.Title = "Thêm mới nhân sự";
+}
+
+<div class="modal-header bg-light">
+    <h5 class="modal-title fw-bold text-uppercase" style="color: #0b5b84;">@ViewBag.Title</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+@using (Html.BeginForm("Create", "NhanSu", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    <div class="modal-body p-4">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger mb-3">
+                @Html.ValidationSummary(false, "")
+            </div>
+        }
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Mã nhân sự <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.MaNhanSu, new { @class = "form-control", required = "required", placeholder = "VD: NV001", oninvalid = "this.setCustomValidity('Bạn chưa nhập thông tin Mã nhân sự')", oninput = "this.setCustomValidity('')" })
+                @Html.ValidationMessageFor(m => m.MaNhanSu, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Họ đệm <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.HoDem, new { @class = "form-control", required = "required", placeholder = "Nguyễn Văn", oninvalid = "this.setCustomValidity('Bạn chưa nhập thông tin Họ đệm')", oninput = "this.setCustomValidity('')" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Tên nhân sự <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.Ten, new { @class = "form-control", required = "required", placeholder = "A", oninvalid = "this.setCustomValidity('Bạn chưa nhập thông tin Tên nhân sự')", oninput = "this.setCustomValidity('')" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Ngày sinh</label>
+                @Html.TextBoxFor(m => m.NgaySinh, new { @class = "form-control", type = "date" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Giới tính</label>
+                @Html.DropDownListFor(m => m.GioiTinh, new SelectList(new[] { new { Value = "true", Text = "Nam" }, new { Value = "false", Text = "Nữ" } }, "Value", "Text"), "Chọn giới tính", new { @class = "form-select" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Số CMND/CCCD</label>
+                @Html.TextBoxFor(m => m.SoCMND, new { @class = "form-control" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Ngày cấp</label>
+                @Html.TextBoxFor(m => m.NgayCap, new { @class = "form-control", type = "date" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Email</label>
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email", placeholder = "email@example.com" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Số điện thoại</label>
+                @Html.TextBoxFor(m => m.SoDienThoai, new { @class = "form-control" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Số điện thoại 2</label>
+                @Html.TextBoxFor(m => m.SoDienThoai2, new { @class = "form-control" })
+            </div>
+            <div class="col-md-12">
+                <label class="form-label text-muted fw-semibold">Địa chỉ</label>
+                @Html.TextAreaFor(m => m.DiaChi, new { @class = "form-control", rows = 2 })
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Hủy</button>
+        <button type="submit" class="btn text-white px-4" style="background-color: #2998e4; border: none;">
+            <i class="bi bi-save me-1"></i> Lưu thông tin
+        </button>
+    </div>
+}

@@ -11,10 +11,12 @@ namespace SalesManagementSystem.Controllers
     public class NhanSuController : BaseController
     {
         private readonly INhanSuRepository _employeeRepo;
+        private readonly SalesManagementSystem.Services.Interfaces.IExcelExportService _excelExportService;
 
-        public NhanSuController(INhanSuRepository employeeRepo)
+        public NhanSuController(INhanSuRepository employeeRepo, SalesManagementSystem.Services.Interfaces.IExcelExportService excelExportService)
         {
             _employeeRepo = employeeRepo;
+            _excelExportService = excelExportService;
         }
 
         // GET: Employee
@@ -150,6 +152,55 @@ namespace SalesManagementSystem.Controllers
                 }
             }
             return Json(new { success = true, message = "Xóa dữ liệu thành công" });
+        }
+        // GET: Employee/ExportExcel
+        public ActionResult ExportExcel()
+        {
+            try
+            {
+                // 1. Lấy dữ liệu (không phân trang hoặc lấy tất cả tuỳ nghiệp vụ)
+                int total;
+                var data = _employeeRepo.GetPaged(1, 10000, "", null, out total);
+
+                var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+                string nguoiLapBieu = session != null ? (session.HoDem + " " + session.Ten).Trim() : "";
+                if (string.IsNullOrEmpty(nguoiLapBieu)) nguoiLapBieu = session?.UserName ?? "";
+
+                // 2. Chuẩn bị biến đơn
+                var variables = new System.Collections.Generic.Dictionary<string, object>
+                {
+                    { "Ngay", DateTime.Now.ToString("dd") },
+                    { "Thang", DateTime.Now.ToString("MM") },
+                    { "Nam", DateTime.Now.ToString("yyyy") },
+                    { "NguoiLapBieu", nguoiLapBieu }
+                };
+
+                // Chuẩn bị dữ liệu danh sách khớp với các cột trong mẫu Excel (HoTen, P_NgaySinh, P_SoDienThoai)
+                var exportData = System.Linq.Enumerable.Select(data, x => new {
+                    MaNhanSu = x.MaNhanSu,
+                    HoTen = (x.HoDem + " " + x.Ten).Trim(),
+                    P_NgaySinh = x.NgaySinh,
+                    P_SoDienThoai = x.SoDienThoai,
+                    Email = x.Email
+                });
+
+                // 3. Xuất file bằng Service chung
+                string fileExtension;
+                var fileBytes = _excelExportService.Export("NS01", exportData, out fileExtension, variables);
+
+                string contentType = fileExtension == "xls" 
+                    ? "application/vnd.ms-excel" 
+                    : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                return File(fileBytes, contentType, $"DanhSachNhanSu_{DateTime.Now:yyyyMMddHHmmss}.{fileExtension}");
+            }
+            catch (Exception ex)
+            {
+                // Xử lý lỗi nếu không tìm thấy mẫu hoặc lỗi xuất file
+                TempData["ToastMessage"] = "Lỗi xuất Excel: " + ex.Message;
+                TempData["ToastType"] = "error";
+                return RedirectToAction("Index");
+            }
         }
     }
 }

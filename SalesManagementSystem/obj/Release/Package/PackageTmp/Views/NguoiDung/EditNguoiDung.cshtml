@@ -1,0 +1,108 @@
+@model SalesManagementSystem.Models.Entities.AclLogin
+@{
+    Layout = null;
+}
+
+<div class="modal-header bg-light">
+    <h5 class="modal-title fw-bold text-uppercase" style="color: #0b5b84;" id="modalTitle">@ViewBag.Title</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<form id="editForm" onsubmit="submitEditForm(event)">
+    <div class="modal-body">
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.ID)
+        @Html.HiddenFor(m => m.IDNhanSu)
+        
+        <div class="mb-3">
+            <label class="form-label fw-bold">nhân sự</label>
+            <input type="text" class="form-control" value="@ViewBag.Ten" readonly disabled />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Tên Đăng Nhập <span class="text-danger">*</span></label>
+            @Html.TextBoxFor(m => m.TenDangNhap, new { @class = "form-control", required = "required", placeholder = "Nhập tên đăng nhập", oninvalid = "this.setCustomValidity('Bạn chưa nhập thông tin Tên đăng nhập')", oninput = "this.setCustomValidity('')" })
+            @Html.ValidationMessageFor(m => m.TenDangNhap, "", new { @class = "text-danger small" })
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label fw-bold">Cấp Trên <span class="text-danger">*</span></label>
+            <select name="IDThamChieu" class="form-select" required oninvalid="this.setCustomValidity('Bạn chưa nhập thông tin Cấp Trên')" oninput="this.setCustomValidity('')">
+                <option value="0" @(Model.IDThamChieu == null || Model.IDThamChieu == 0 ? "selected" : "")>-- Là Cấp Trên (Không Có) --</option>
+                @if (ViewBag.Managers != null)
+                {
+                    foreach (var mgr in (IEnumerable<SalesManagementSystem.Models.ViewModels.AclLoginViewModel>)ViewBag.Managers)
+                    {
+                        if (mgr.ID != Model.ID) // Không được chọn chính mình làm cấp trên
+                        {
+                            <option value="@mgr.ID" @(Model.IDThamChieu == mgr.ID ? "selected" : "")>@mgr.HoTen - @mgr.TenDangNhap</option>
+                        }
+                    }
+                }
+            </select>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label fw-bold">Mật Khẩu (Để trống nếu không muốn đổi)</label>
+            <input type="password" name="MatKhau" class="form-control" placeholder="Nhập mật khẩu mới..." autocomplete="new-password" />
+        </div>
+
+        <div class="mb-3">
+            <div class="form-check form-switch">
+                @Html.CheckBoxFor(m => m.IsActive, new { @class = "form-check-input", id = "IsActiveEdit" })
+                <label class="form-check-label" for="IsActiveEdit">Kích hoạt tài khoản</label>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle me-1"></i> Hủy
+        </button>
+        <button type="submit" class="btn btn-primary" id="btnSaveEdit" style="background-color: #0b5b84; border: none;">
+            <i class="bi bi-save me-1"></i> Lưu
+        </button>
+    </div>
+</form>
+
+<script>
+    function submitEditForm(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Xóa thông báo lỗi cũ
+        $('.text-danger.validation-error').remove();
+        
+        var form = $('#editForm');
+        var btn = $('#btnSaveEdit');
+        var originalHtml = btn.html();
+        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Đang xử lý...');
+
+        $.ajax({
+            url: '@Url.Action("EditNguoiDung", "NguoiDung")',
+            type: 'POST',
+            data: form.serialize(),
+            success: function (result) {
+                if (result.success) {
+                    $('#globalFormModal').modal('hide');
+                    if (typeof showToast === "function") {
+                        showToast('success', result.message || 'Cập nhật thành công!');
+                    }
+                    if (typeof loadData === "function") {
+                        loadData(1); // load current page if possible, but 1 is safe
+                    }
+                } else {
+                    // Cập nhật lại HTML của modal body nếu validate lỗi
+                    $('#globalFormModal .modal-content').html(result);
+                }
+            },
+            error: function () {
+                if (typeof showToast === "function") {
+                    showToast('error', 'Có lỗi xảy ra trong quá trình xử lý!');
+                } else {
+                    alert('Có lỗi xảy ra trong quá trình xử lý!');
+                }
+                btn.prop('disabled', false).html(originalHtml);
+            }
+        });
+    }
+</script>

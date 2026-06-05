@@ -1,0 +1,64 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.AclLoginSessionViewModel>
+
+<div class="table-responsive">
+    <table class="table table-custom table-bordered table-hover align-middle">
+        <thead>
+            <tr>
+                <th class="text-center" width="50">STT</th>
+                <th>Tài khoản</th>
+                <th>Họ tên</th>
+                <th class="text-center">Thời gian Login</th>
+                <th class="text-center">Thời gian Logout</th>
+                <th class="text-center">Thời lượng</th>
+                <th>Địa chỉ IP</th>
+                <th>Trình duyệt</th>
+                <th class="text-center">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Items != null && Model.Items.Any())
+            {
+                int stt = (Model.CurrentPage - 1) * Model.PageSize + 1;
+                foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td class="text-center">@stt</td>
+                        <td><span class="fw-bold">@item.TenDangNhap</span></td>
+                        <td>@item.HoTen</td>
+                        <td class="text-center text-success">@item.ThoiGianLogin.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                        <td class="text-center text-danger">@(item.ThoiGianLogout.HasValue ? item.ThoiGianLogout.Value.ToString("dd/MM/yyyy HH:mm:ss") : "-")</td>
+                        <td class="text-center">
+                            @if (!item.ThoiGianLogout.HasValue)
+                            {
+                                <span class="badge bg-success">Đang trực tuyến</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">@item.ThoiLuong</span>
+                            }
+                        </td>
+                        <td>@item.IP</td>
+                        <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="@item.TrinhDuyet">@item.TrinhDuyet</td>
+                        <td class="text-center">
+                            @if (item.IsDangHoatDong)
+                            {
+                                <button type="button" class="btn btn-sm btn-danger btn-kick" data-id="@item.ID" title="Kích người dùng này">
+                                    <i class="fas fa-sign-out-alt"></i> Kích
+                                </button>
+                            }
+                        </td>
+                    </tr>
+                    stt++;
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="9" class="text-center py-4">Không có dữ liệu lịch sử đăng nhập.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@Html.Partial("_Pagination", Model)

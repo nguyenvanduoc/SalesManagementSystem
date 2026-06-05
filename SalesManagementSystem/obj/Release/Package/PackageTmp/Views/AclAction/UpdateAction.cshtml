@@ -1,0 +1,64 @@
+@model SalesManagementSystem.Models.Entities.AclAction
+
+@{
+    Layout = null;
+    ViewBag.Title = "Cập nhật Hành động";
+}
+
+<div class="modal-header bg-light">
+    <h5 class="modal-title fw-bold text-uppercase" style="color: #0b5b84;">@ViewBag.Title</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+@using (Html.BeginForm("UpdateAction", "AclAction", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.ID)
+    <div class="modal-body p-4">
+        <div class="row g-3">
+            <div class="col-md-12">
+                <label class="form-label text-muted fw-semibold">Màn hình <span class="text-danger">*</span></label>
+                @Html.DropDownListFor(m => m.IDManHinh, (SelectList)ViewBag.ManHinhList, "-- Chọn màn hình --", new { @class = "form-select", required = "required", oninvalid = "this.setCustomValidity('Bạn chưa nhập thông tin Màn hình')", oninput = "this.setCustomValidity('')" })
+                @Html.ValidationMessageFor(m => m.IDManHinh, "", new { @class = "text-danger small" })
+            </div>
+            
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Controller <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.TenController, new { @class = "form-control", required = "required", placeholder = "VD: ChucVu", oninvalid = "this.setCustomValidity('Bạn chưa nhập thông tin Controller')", oninput = "this.setCustomValidity('')" })
+                @Html.ValidationMessageFor(m => m.TenController, "", new { @class = "text-danger small" })
+            </div>
+            
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Action <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.TenAction, new { @class = "form-control", required = "required", placeholder = "VD: GetChucVu", oninvalid = "this.setCustomValidity('Bạn chưa nhập thông tin Action')", oninput = "this.setCustomValidity('')" })
+                @Html.ValidationMessageFor(m => m.TenAction, "", new { @class = "text-danger small" })
+            </div>
+            
+            <div class="col-md-12">
+                <label class="form-label text-muted fw-semibold">Loại phân quyền <span class="text-danger">*</span></label>
+                @{
+                    var loaiPhanQuyenList = System.Enum.GetValues(typeof(SalesManagementSystem.Helpers.LoaiPhanQuyen))
+                                                .Cast<SalesManagementSystem.Helpers.LoaiPhanQuyen>()
+                                                .Select(e => new SelectListItem
+                                                {
+                                                    Value = ((int)e).ToString(),
+                                                    Text = SalesManagementSystem.Helpers.PermissionHelper.GetLoaiPhanQuyenDisplayName(e)
+                                                });
+                }
+                @Html.DropDownListFor(m => m.LoaiPhanQuyen, loaiPhanQuyenList, "-- Chọn loại quyền --", new { @class = "form-select", required = "required", oninvalid = "this.setCustomValidity('Bạn chưa nhập thông tin Loại phân quyền')", oninput = "this.setCustomValidity('')" })
+                @Html.ValidationMessageFor(m => m.LoaiPhanQuyen, "", new { @class = "text-danger small" })
+            </div>
+
+            <div class="col-md-12">
+                <label class="form-label text-muted fw-semibold">Ghi chú</label>
+                @Html.TextAreaFor(m => m.GhiChu, new { @class = "form-control", rows = 2, placeholder = "VD: Danh sách chức vụ" })
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Hủy</button>
+        <button type="submit" class="btn text-white px-4" style="background-color: #2998e4; border: none;">
+            <i class="bi bi-save me-1"></i> Lưu thông tin
+        </button>
+    </div>
+}

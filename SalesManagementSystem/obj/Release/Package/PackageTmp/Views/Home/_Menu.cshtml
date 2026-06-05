@@ -1,0 +1,110 @@
+@model SalesManagementSystem.Models.ViewModels.SidebarVM
+@using SalesManagementSystem.Helpers
+@{
+    // Active controller từ request hiện tại (truyền vào qua SidebarVM)
+    string activeCtrl = Model.ActiveController;
+}
+
+@* ── Dashboard (luôn hiện ở đầu, không phụ thuộc ACL) ── *@
+<p class="nav-heading" style="margin-top: -15px;">Tổng quan</p>
+<ul style="padding:0;margin:0">
+    <li class="nav-item">
+        <a href="@Url.Action("Index", "Home")"
+           class="nav-link @(activeCtrl == "Home" ? "active" : "")">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+        </a>
+    </li>
+</ul>
+
+@* ── Các nhóm menu động từ ACL_ManHinh ── *@
+@{ 
+    int groupIndex = 0; 
+    var validGroups = Model.Groups.Where(g => g.Items.Any(i => PermissionHelper.HasPermission(i.TenController, LoaiPhanQuyen.Xem))).ToList();
+}
+@foreach (var group in validGroups)
+{
+    var validItems = group.Items.Where(i => PermissionHelper.HasPermission(i.TenController, LoaiPhanQuyen.Xem)).ToList();
+    groupIndex++;
+    string collapseId = "collapseGroup" + groupIndex;
+    
+    // Kiểm tra xem nhóm này có item nào đang active hay không để tự động xổ xuống
+    bool isGroupActive = validItems.Any(i => string.Equals(activeCtrl, i.TenController, StringComparison.OrdinalIgnoreCase));
+
+    <div class="nav-group">
+        <a class="nav-group-toggle @(isGroupActive ? "" : "collapsed")" data-bs-toggle="collapse" href="#@collapseId" role="button" aria-expanded="@(isGroupActive ? "true" : "false")">
+            <i class="bi @GetGroupIcon(group.TenNhom)"></i>
+            <span>@group.TenNhom</span>
+            <i class="bi bi-chevron-down chevron"></i>
+        </a>
+        <div class="collapse @(isGroupActive ? "show" : "") nav-group-collapse" id="@collapseId">
+            <ul>
+                @foreach (var item in validItems)
+                {
+                    bool isActive = string.Equals(activeCtrl, item.TenController, System.StringComparison.OrdinalIgnoreCase);
+                    string href = (string.IsNullOrEmpty(item.TenController)) ? "#" : Url.Action(item.TenAction, item.TenController);
+                    string fadedClass = (isGroupActive && !isActive) ? "text-faded" : "";
+
+                    <li class="nav-item">
+                        <a href="@href" class="nav-link @(isActive ? "active" : "") @fadedClass">
+                            <span>@item.TenManHinh</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+}
+
+@* ── Hàm helper chọn icon theo controller/tên màn hình ── *@
+@functions {
+    string GetGroupIcon(string tenNhom)
+    {
+        if (string.IsNullOrEmpty(tenNhom)) return "bi-folder2-open";
+        string name = tenNhom.ToLower();
+        if (name.Contains("bán hàng")) return "bi-cart3";
+        if (name.Contains("danh mục")) return "bi-grid";
+        if (name.Contains("hệ thống")) return "bi-gear";
+        if (name.Contains("kho bãi") || name.Contains("kho")) return "bi-boxes";
+        if (name.Contains("tổng quan")) return "bi-speedometer2";
+        if (name.Contains("nhân sự") || name.Contains("nhân sự")) return "bi-people-fill";
+        if (name.Contains("báo cáo") || name.Contains("thống kê")) return "bi-bar-chart-line";
+        return "bi-folder2-open";
+    }
+
+    string GetMenuIcon(string controller, string tenManHinh)
+    {
+        if (string.IsNullOrEmpty(controller))
+            return "bi-circle";
+
+        switch (controller.ToLower())
+        {
+            case "order":        return "bi-cart3";
+            case "product":      return "bi-box2";
+            case "customer":     return "bi-people";
+            case "inventory":    return "bi-boxes";
+            case "stockin":      return "bi-arrow-down-circle";
+            case "stockout":     return "bi-arrow-up-circle";
+            case "transaction":  return "bi-clock-history";
+            case "revenuer":
+            case "revenue":      return "bi-bar-chart-line";
+            case "profitreport": return "bi-graph-up-arrow";
+            case "exportreport": return "bi-file-earmark-bar-graph";
+            case "employee":     return "bi-people-fill";
+            case "role":         return "bi-shield-lock";
+            case "setting":      return "bi-gear";
+            case "export":       return "bi-file-earmark-arrow-up";
+            case "nguoidung":    return "bi-person-badge";
+            default:
+                // Fallback: chọn icon dựa vào từ khóa trong tên màn hình
+                string name = tenManHinh?.ToLower() ?? "";
+                if (name.Contains("nhập"))  return "bi-arrow-down-circle";
+                if (name.Contains("xuất"))  return "bi-arrow-up-circle";
+                if (name.Contains("báo cáo") || name.Contains("thống kê")) return "bi-bar-chart-line";
+                if (name.Contains("lịch sử")) return "bi-clock-history";
+                if (name.Contains("lợi nhuận")) return "bi-graph-up-arrow";
+                if (name.Contains("nhân sự")) return "bi-people-fill";
+                return "bi-grid";
+        }
+    }
+}
