@@ -11,7 +11,8 @@ namespace SalesManagementSystem.Repositories.Interfaces
         bool IsDuplicateUsername(string username, int id = 0);
         int Insert(AclLogin login);
         void Update(AclLogin login);
-        void Delete(int id);
+        void Delete(int id, int userId);
+        void TransferManager(int newManagerId, int updateBy);
         IEnumerable<NhanSu> GetEmployeesWithoutAccount();
         NhanSu GetEmployeeById(int id);
         AclLogin GetByEmployeeId(int empId);

@@ -631,7 +631,7 @@
     });
 
     // Hàm gọi Global Delete Modal (Xóa 1 phần tử)
-    function confirmDelete(url) {
+    function confirmDelete(url, customMessage) {
         var form = document.getElementById('globalDeleteForm');
         form.action = url;
         
@@ -641,9 +641,10 @@
         
         // Reset nội dung
         var msgEl = document.getElementById('globalDeleteMessage');
-        if (msgEl.dataset.originalMsg) {
-            msgEl.innerText = msgEl.dataset.originalMsg;
+        if (!msgEl.dataset.originalMsg) {
+            msgEl.dataset.originalMsg = msgEl.innerText;
         }
+        msgEl.innerText = customMessage || msgEl.dataset.originalMsg;
 
         var myModal = new bootstrap.Modal(document.getElementById('globalDeleteModal'));
         myModal.show();

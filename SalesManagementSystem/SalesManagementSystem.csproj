@@ -391,6 +391,7 @@
     <Content Include="Views\LoginSession\Index.cshtml" />
     <Content Include="Views\LoginSession\_LoginSessionList.cshtml" />
     <Content Include="UI_STANDARD.md" />
+    <Content Include="Views\NguoiDung\CreateNguoiDung.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />

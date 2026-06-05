@@ -28,7 +28,7 @@ namespace SalesManagementSystem.Repositories
                     l.TenDangNhap
                 FROM ACL_Login l
                 LEFT JOIN NS_NhanSu nv ON l.IDNhanSu = nv.ID
-                WHERE l.IsActive = 1
+                WHERE l.IsActive = 1 AND l.NgayXoa IS NULL
             ";
 
             using (var conn = _db.CreateConnection())

@@ -199,10 +199,36 @@ namespace SalesManagementSystem.Controllers
         public ActionResult DeleteNguoiDung(int id)
         {
             var oldObj = _aclLoginRepo.GetById(id);
-            if (oldObj != null) AuditLog.AddDelete("ACL_Login", id.ToString(), oldObj);
+            var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+            int userId = session?.IDNhanSu ?? 0;
+
+            if (oldObj != null) 
+            {
+                AuditLog.AddDelete("ACL_Login", id.ToString(), oldObj);
+            }
             ForceSaveAudit();
-            _aclLoginRepo.Delete(id);
+
+            _aclLoginRepo.Delete(id, userId);
+            
             return Json(new { success = true, message = "Xóa dữ liệu thành công" });
+        }
+
+        [HttpPost]
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
+        public ActionResult TransferManager(int id)
+        {
+            var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+            int userId = session?.IDNhanSu ?? 0;
+
+            try
+            {
+                _aclLoginRepo.TransferManager(id, userId);
+                return Json(new { success = true, message = "Chuyển quyền cấp trên thành công" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
         }
 
         // GET: NguoiDung/ChangePassword

@@ -58,6 +58,23 @@
             });
         }
 
+        // Lắng nghe thay đổi kích thước trang (pageSize)
+        $(document).on('change', '#pageSizeSelect', function() {
+            var keyword = $('input[name="keyword"]').val();
+            var pageSize = $(this).val();
+            loadGridData('@Url.Action("Index", "LoginSession")?page=1&pageSize=' + pageSize + '&keyword=' + encodeURIComponent(keyword));
+        });
+
+        // Xử lý nút bấm phân trang sử dụng AJAX
+        $(document).on('click', '.ajax-link', function (e) {
+            e.preventDefault();
+            if ($(this).parent().hasClass('disabled') || $(this).parent().hasClass('active')) return;
+            var url = $(this).attr('href');
+            if (url) {
+                loadGridData(url);
+            }
+        });
+
         // Hàm Làm mới
         function resetSearch() {
             $('input[name="keyword"]').val('');

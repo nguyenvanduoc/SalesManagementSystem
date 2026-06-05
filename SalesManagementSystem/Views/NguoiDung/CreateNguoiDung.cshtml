@@ -19,7 +19,7 @@
             <div class="alert alert-info d-flex align-items-center mb-3" role="alert">
                 <i class="bi bi-info-circle-fill me-2"></i>
                 <div>
-                    Tên đăng nhập sẽ được đặt <strong>giống với Mã Nhân Viên</strong>.<br/>
+                    Tên đăng nhập sẽ được đặt <strong>giống với Mã nhân sự</strong>.<br/>
                     Mật khẩu mặc định sẽ được đặt là <strong>1111</strong>
                 </div>
             </div>
@@ -40,9 +40,9 @@
                         <option value="">-- Chọn Cấp Trên --</option>
                         @if (ViewBag.Managers != null)
                         {
-                            foreach (var mgr in (IEnumerable<SalesManagementSystem.Models.ViewModels.AclLoginVM>)ViewBag.Managers)
+                            foreach (var mgr in (IEnumerable<SalesManagementSystem.Models.ViewModels.AclLoginViewModel>)ViewBag.Managers)
                             {
-                                <option value="@mgr.ID">@mgr.HoTenNhanSu - @mgr.TenDangNhap</option>
+                                <option value="@mgr.ID">@mgr.HoTen - @mgr.TenDangNhap</option>
                             }
                         }
                     </select>
@@ -59,7 +59,7 @@
                         <th class="text-center" style="width: 50px;">
                             <input type="checkbox" id="checkAll" class="form-check-input" />
                         </th>
-                        <th class="text-center" style="width: 80px;">Mã NV</th>
+                        <th class="text-center" style="width: 80px;">Mã nhân sự</th>
                         <th>Họ Đệm</th>
                         <th>Tên</th>
                         <th>Email</th>
@@ -76,7 +76,7 @@
                                 </td>
                                 <td class="text-center align-middle">@emp.MaNhanSu</td>
                                 <td class="align-middle">@emp.HoDem</td>
-                                <td class="align-middle">@emp.TenNhanSu</td>
+                                <td class="align-middle">@emp.Ten</td>
                                 <td class="align-middle">@emp.Email</td>
                             </tr>
                         }

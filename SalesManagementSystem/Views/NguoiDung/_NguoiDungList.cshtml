@@ -30,6 +30,14 @@
                                 <ul class="dropdown-menu shadow">
                                     <li><h6 class="dropdown-header text-uppercase fw-bold text-dark">Thao tác</h6></li>
                                     <li><hr class="dropdown-divider"></li>
+                                    @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("NguoiDung", SalesManagementSystem.Helpers.LoaiPhanQuyen.Them) && item.IDThamChieu != null && item.IDThamChieu > 0)
+                                    {
+                                        <li>
+                                            <button type="button" class="dropdown-item" onclick="confirmDelete('@Url.Action("TransferManager", "NguoiDung", new { id = item.ID })', 'Bạn có chắc chắn muốn chuyển nhân sự này lên làm cấp trên? Nhân sự này sẽ thay thế cấp trên hiện tại, các nhân sự cùng nhóm sẽ được cập nhật cấp trên mới này.')">
+                                                <i class="bi bi-person-up me-2 text-success"></i> Chuyển quyền cấp trên
+                                            </button>
+                                        </li>
+                                    }
                                     @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("NguoiDung", SalesManagementSystem.Helpers.LoaiPhanQuyen.CapNhat))
                                     {
                                         <li>
@@ -41,7 +49,7 @@
                                     @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("NguoiDung", SalesManagementSystem.Helpers.LoaiPhanQuyen.Xoa))
                                     {
                                         <li>
-                                            <button type="button" class="dropdown-item text-danger" onclick="confirmDelete('@Url.Action("DeleteNguoiDung", "NguoiDung", new { id = item.ID })')">
+                                            <button type="button" class="dropdown-item" onclick="confirmDelete('@Url.Action("DeleteNguoiDung", "NguoiDung", new { id = item.ID })'@(item.IDThamChieu == null || item.IDThamChieu == 0 ? ", 'Bạn đang xóa cấp trên, dữ liệu cấp dưới sẽ bị xóa hết!'" : ""))">
                                                 <i class="bi bi-trash-fill me-2 text-danger"></i> Xóa
                                             </button>
                                         </li>
