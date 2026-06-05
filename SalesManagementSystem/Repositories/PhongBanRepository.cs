@@ -18,6 +18,15 @@ namespace SalesManagementSystem.Repositories
             _db = db;
         }
 
+        public IEnumerable<PhongBan> GetAll()
+        {
+            const string sql = "SELECT * FROM DM_PhongBan ORDER BY TenPhongBan";
+            using (var conn = _db.CreateConnection())
+            {
+                return conn.Query<PhongBan>(sql);
+            }
+        }
+
         public IEnumerable<PhongBan> GetPaged(int page, int pageSize, string keyword, out int totalRecords)
         {
             using (var conn = _db.CreateConnection())

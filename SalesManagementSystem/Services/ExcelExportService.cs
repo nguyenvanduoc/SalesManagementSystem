@@ -322,5 +322,300 @@ namespace SalesManagementSystem.Services
                 cell.SetCellValue(originalText.Replace(placeholder, formattedValue));
             }
         }
+
+        public byte[] ExportGrouped<TKey, TItem>(string maBieuMau, IEnumerable<IGrouping<TKey, TItem>> groupedData, out string fileExtension, Dictionary<string, object> variables = null)
+        {
+            fileExtension = "xlsx"; // default
+            var bieuMau = _bieuMauRepo.GetByMa(maBieuMau);
+            if (bieuMau == null || bieuMau.NoiDung == null || bieuMau.NoiDung.Length == 0)
+            {
+                throw new Exception($"Không tìm thấy biểu mẫu '{maBieuMau}' hoặc biểu mẫu chưa có file đính kèm.");
+            }
+
+            if (!string.IsNullOrEmpty(bieuMau.DuoiFile))
+            {
+                fileExtension = bieuMau.DuoiFile.ToLower();
+            }
+            else if (!string.IsNullOrEmpty(bieuMau.TenFile))
+            {
+                fileExtension = Path.GetExtension(bieuMau.TenFile).Replace(".", "").ToLower();
+            }
+
+            using (var stream = new MemoryStream(bieuMau.NoiDung))
+            {
+                IWorkbook workbook;
+                try
+                {
+                    workbook = WorkbookFactory.Create(stream);
+                }
+                catch (Exception)
+                {
+                    throw new Exception("File Excel biểu mẫu không hợp lệ. Vui lòng đảm bảo bạn đang upload file Excel đúng định dạng (.xls hoặc .xlsx).");
+                }
+
+                if (workbook.NumberOfSheets == 0) throw new Exception("File Excel biểu mẫu không có Sheet nào.");
+                
+                var worksheet = workbook.GetSheetAt(0);
+
+                if (variables != null && variables.Count > 0)
+                {
+                    ReplaceSingleVariables(worksheet, variables);
+                }
+
+                if (groupedData != null)
+                {
+                    FillGroupedData(worksheet, maBieuMau, groupedData);
+                }
+
+                using (var outputStream = new MemoryStream())
+                {
+                    workbook.Write(outputStream);
+                    return outputStream.ToArray();
+                }
+            }
+        }
+
+        private void FillGroupedData<TKey, TItem>(ISheet worksheet, string maBieuMau, IEnumerable<IGrouping<TKey, TItem>> groupedData)
+        {
+            var groups = groupedData.ToList();
+            var type = typeof(TItem);
+            var properties = type.GetProperties();
+
+            int groupTemplateRowIndex = -1;
+            int itemTemplateRowIndex = -1;
+            int tmpTemplateRowIndex = -1;
+            string groupPrefix = "%P_Group";
+            string itemPrefix = $"%{maBieuMau}.";
+            string tmpMarker = "[TMP]";
+
+            for (int rowIdx = worksheet.FirstRowNum; rowIdx <= worksheet.LastRowNum; rowIdx++)
+            {
+                var row = worksheet.GetRow(rowIdx);
+                if (row == null) continue;
+
+                for (int colIdx = row.FirstCellNum; colIdx < row.LastCellNum; colIdx++)
+                {
+                    var cell = row.GetCell(colIdx);
+                    if (cell != null && cell.CellType == CellType.String)
+                    {
+                        var cellText = cell.StringCellValue;
+                        if (!string.IsNullOrEmpty(cellText))
+                        {
+                            if (cellText.Contains(groupPrefix)) groupTemplateRowIndex = rowIdx;
+                            else if (cellText.Contains(itemPrefix)) itemTemplateRowIndex = rowIdx;
+                            else if (cellText.Contains(tmpMarker)) tmpTemplateRowIndex = rowIdx;
+                        }
+                    }
+                }
+            }
+
+            if (groupTemplateRowIndex == -1 || itemTemplateRowIndex == -1) return;
+
+            bool hasTmp = tmpTemplateRowIndex != -1;
+            int startTemplateRow = groupTemplateRowIndex;
+            int endTemplateRow = hasTmp ? Math.Max(itemTemplateRowIndex, tmpTemplateRowIndex) : itemTemplateRowIndex;
+            int templateBlockSize = endTemplateRow - startTemplateRow + 1;
+
+            if (groups.Count == 0)
+            {
+                for (int i = endTemplateRow; i >= startTemplateRow; i--)
+                {
+                    worksheet.RemoveRow(worksheet.GetRow(i));
+                }
+                return;
+            }
+
+            // Create enough blocks for all groups at the bottom
+            int totalNewBlockRows = groups.Count * templateBlockSize;
+            int insertIndex = endTemplateRow + 1;
+
+            if (insertIndex <= worksheet.LastRowNum)
+            {
+                worksheet.ShiftRows(insertIndex, worksheet.LastRowNum, totalNewBlockRows);
+            }
+
+            int currentRowIdx = insertIndex;
+
+            // Copy blocks and update formulas
+            for (int g = 0; g < groups.Count; g++)
+            {
+                int offset = currentRowIdx - startTemplateRow;
+
+                for (int i = 0; i < templateBlockSize; i++)
+                {
+                    var sourceRow = worksheet.GetRow(startTemplateRow + i);
+                    var newRow = worksheet.CreateRow(currentRowIdx + i);
+                    if (sourceRow != null)
+                    {
+                        CopyRow(sourceRow, newRow);
+
+                        // Update formulas
+                        for (int col = newRow.FirstCellNum; col < newRow.LastCellNum; col++)
+                        {
+                            var cell = newRow.GetCell(col);
+                            if (cell != null && cell.CellType == CellType.Formula)
+                            {
+                                string oldFormula = cell.CellFormula;
+                                cell.SetCellFormula(UpdateFormulaReferences(oldFormula, offset, startTemplateRow + 1, endTemplateRow + 1));
+                            }
+                        }
+                    }
+                }
+                currentRowIdx += templateBlockSize;
+            }
+
+            // Populate data and expand item rows
+            currentRowIdx = insertIndex;
+            List<int> tmpRowsToDelete = new List<int>();
+
+            for (int g = 0; g < groups.Count; g++)
+            {
+                var group = groups[g];
+                var items = group.ToList();
+
+                var groupRow = worksheet.GetRow(currentRowIdx + (groupTemplateRowIndex - startTemplateRow));
+                var itemRow = worksheet.GetRow(currentRowIdx + (itemTemplateRowIndex - startTemplateRow));
+                var tmpRow = hasTmp ? worksheet.GetRow(currentRowIdx + (tmpTemplateRowIndex - startTemplateRow)) : null;
+
+                // Set group name
+                if (groupRow != null)
+                {
+                    for (int col = groupRow.FirstCellNum; col < groupRow.LastCellNum; col++)
+                    {
+                        var cell = groupRow.GetCell(col);
+                        if (cell != null && cell.CellType == CellType.String)
+                        {
+                            var text = cell.StringCellValue;
+                            if (text.Contains(groupPrefix))
+                                cell.SetCellValue(text.Replace(groupPrefix, group.Key?.ToString() ?? ""));
+                        }
+                    }
+                }
+
+                // If tmpRow exists, clear its marker
+                if (tmpRow != null)
+                {
+                    for (int col = tmpRow.FirstCellNum; col < tmpRow.LastCellNum; col++)
+                    {
+                        var cell = tmpRow.GetCell(col);
+                        if (cell != null && cell.CellType == CellType.String && cell.StringCellValue.Contains(tmpMarker))
+                        {
+                            cell.SetCellValue(cell.StringCellValue.Replace(tmpMarker, ""));
+                        }
+                    }
+                }
+
+                // Insert needed item rows (if more than 1 item)
+                int itemsToAdd = items.Count - 1;
+                int itemRowIdx = currentRowIdx + (itemTemplateRowIndex - startTemplateRow);
+
+                if (itemsToAdd > 0)
+                {
+                    worksheet.ShiftRows(itemRowIdx + 1, worksheet.LastRowNum, itemsToAdd);
+                    
+                    for (int i = 1; i <= itemsToAdd; i++)
+                    {
+                        var newItemRow = worksheet.CreateRow(itemRowIdx + i);
+                        CopyRow(itemRow, newItemRow);
+                    }
+                }
+
+                // Populate items
+                for (int i = 0; i < items.Count; i++)
+                {
+                    var item = items[i];
+                    var rowToFill = worksheet.GetRow(itemRowIdx + i);
+                    if (rowToFill == null) continue;
+
+                    for (int col = rowToFill.FirstCellNum; col < rowToFill.LastCellNum; col++)
+                    {
+                        var cell = rowToFill.GetCell(col);
+                        if (cell == null || cell.CellType != CellType.String) continue;
+
+                        var text = cell.StringCellValue;
+                        if (string.IsNullOrEmpty(text) || !text.Contains(itemPrefix)) continue;
+
+                        if (text.Contains($"{itemPrefix}STT") || text.Contains($"{itemPrefix}P_STT"))
+                        {
+                            cell.SetCellValue(i + 1);
+                            continue;
+                        }
+
+                        bool replaced = false;
+                        foreach (var prop in properties)
+                        {
+                            var propPlaceholder = $"{itemPrefix}{prop.Name}";
+                            if (text.Contains(propPlaceholder))
+                            {
+                                var value = prop.GetValue(item);
+                                ApplyFormatter(cell, value, text, propPlaceholder);
+                                replaced = true;
+                                break;
+                            }
+                        }
+
+                        if (!replaced)
+                        {
+                            if (text.Trim() == itemPrefix) cell.SetBlank();
+                            else cell.SetCellValue(text.Replace(text, ""));
+                        }
+                    }
+                }
+
+                if (hasTmp)
+                {
+                    int currentTmpRowIdx = currentRowIdx + (tmpTemplateRowIndex - startTemplateRow) + itemsToAdd;
+                    tmpRowsToDelete.Add(currentTmpRowIdx - templateBlockSize);
+                }
+
+                // Move current row index to next block
+                // Original block size + expanded rows
+                currentRowIdx += templateBlockSize + itemsToAdd;
+            }
+
+            // Remove original template rows
+            for (int i = endTemplateRow; i >= startTemplateRow; i--)
+            {
+                worksheet.RemoveRow(worksheet.GetRow(i));
+            }
+
+            // Shift everything up to remove template gap
+            if (endTemplateRow + 1 <= worksheet.LastRowNum)
+            {
+                worksheet.ShiftRows(endTemplateRow + 1, worksheet.LastRowNum, -templateBlockSize);
+            }
+
+            // Remove TMP rows
+            if (hasTmp && tmpRowsToDelete.Count > 0)
+            {
+                tmpRowsToDelete.Reverse();
+                foreach (var idx in tmpRowsToDelete)
+                {
+                    worksheet.RemoveRow(worksheet.GetRow(idx));
+                    if (idx < worksheet.LastRowNum)
+                    {
+                        worksheet.ShiftRows(idx + 1, worksheet.LastRowNum, -1);
+                    }
+                }
+            }
+        }
+
+        private string UpdateFormulaReferences(string formula, int offset, int templateStartRow, int templateEndRow)
+        {
+            if (string.IsNullOrEmpty(formula)) return formula;
+
+            return System.Text.RegularExpressions.Regex.Replace(formula, @"([A-Z]+)(\d+)", match =>
+            {
+                string col = match.Groups[1].Value;
+                if (int.TryParse(match.Groups[2].Value, out int row))
+                {
+                    if (row >= templateStartRow && row <= templateEndRow)
+                    {
+                        return col + (row + offset).ToString();
+                    }
+                }
+                return match.Value;
+            });
+        }
     }
 }

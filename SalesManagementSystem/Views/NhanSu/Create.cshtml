@@ -10,7 +10,7 @@
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 
-@using (Html.BeginForm("Create", "NhanSu", FormMethod.Post))
+@using (Html.BeginForm("Create", "NhanSu", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
     @Html.AntiForgeryToken()
     <div class="modal-body p-4">
@@ -21,6 +21,20 @@
             </div>
         }
         <div class="row g-3">
+            <div class="col-12 text-start mb-3">
+                <div class="position-relative d-inline-block">
+                    <img id="avatarPreview" src="/Content/images/default-avatar.svg" 
+                         alt="Avatar" class="rounded-circle border" 
+                         style="width: 120px; height: 120px; object-fit: cover;" 
+                         onerror="this.src='/Content/images/default-avatar.svg'; this.onerror=null;" />
+                    
+                    <label for="avatarUpload" class="position-absolute bg-white rounded-circle shadow-sm d-flex justify-content-center align-items-center" 
+                           style="width: 32px; height: 32px; bottom: 0; right: 0; cursor: pointer; border: 1px solid #ddd;">
+                        <i class="bi bi-pencil-fill text-secondary" style="font-size: 14px;"></i>
+                    </label>
+                    <input type="file" id="avatarUpload" name="avatarFile" accept="image/*" class="d-none" onchange="previewAvatar(this)" />
+                </div>
+            </div>
             <div class="col-md-6">
                 <label class="form-label text-muted fw-semibold">Mã nhân sự <span class="text-danger">*</span></label>
                 @Html.TextBoxFor(m => m.MaNhanSu, new { @class = "form-control", required = "required", placeholder = "VD: NV001", oninvalid = "this.setCustomValidity('Bạn chưa nhập thông tin Mã nhân sự')", oninput = "this.setCustomValidity('')" })
@@ -62,6 +76,14 @@
                 <label class="form-label text-muted fw-semibold">Số điện thoại 2</label>
                 @Html.TextBoxFor(m => m.SoDienThoai2, new { @class = "form-control" })
             </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Phòng ban</label>
+                @Html.DropDownListFor(m => m.IDPhongBan, ViewBag.PhongBans as SelectList, "Chọn phòng ban", new { @class = "form-select" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Chức vụ</label>
+                @Html.DropDownListFor(m => m.IDChucVu, ViewBag.ChucVus as SelectList, "Chọn chức vụ", new { @class = "form-select" })
+            </div>
             <div class="col-md-12">
                 <label class="form-label text-muted fw-semibold">Địa chỉ</label>
                 @Html.TextAreaFor(m => m.DiaChi, new { @class = "form-control", rows = 2 })
@@ -75,3 +97,15 @@
         </button>
     </div>
 }
+
+<script>
+    function previewAvatar(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('avatarPreview').src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>

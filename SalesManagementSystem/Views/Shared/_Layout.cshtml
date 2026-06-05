@@ -712,10 +712,14 @@
     $(document).on('submit', '#globalFormModalContent form', function(e) {
         e.preventDefault();
         var form = $(this);
+        var formData = new FormData(this);
+        
         $.ajax({
             url: form.attr('action'),
             type: form.attr('method') || 'POST',
-            data: form.serialize(),
+            data: formData,
+            processData: false,
+            contentType: false,
             success: function(res) {
                 if (res.success === true) {
                     $('#globalFormModal').modal('hide');

@@ -15,7 +15,10 @@
             </button>
         }
         <a href="@Url.Action("ExportExcel", "NhanSu")" class="btn btn-success" style="background-color: #2ecc71; border-color: #2ecc71;">
-            <i class="bi bi-file-earmark-excel fw-bold"></i> Xuất Excel
+            <i class="bi bi-file-earmark-excel fw-bold"></i> Xuất Excel (NS01)
+        </a>
+        <a href="@Url.Action("ExportExcelNS02", "NhanSu")" class="btn btn-success" style="background-color: #27ae60; border-color: #27ae60;">
+            <i class="bi bi-file-earmark-excel fw-bold"></i> Xuất Excel nhóm theo Chức vụ (NS02)
         </a>
         @if (PermissionHelper.HasPermission("NhanSu", LoaiPhanQuyen.Xoa))
         {

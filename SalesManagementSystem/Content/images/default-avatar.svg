@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <rect width="256" height="256" fill="#f4f6f8" />
+  <g fill="#424242">
+    <!-- Shirt -->
+    <path d="M 128 160 C 80 160 36 190 24 248 L 232 248 C 220 190 176 160 128 160 Z" />
+    
+    <!-- Head -->
+    <path fill="#ffffff" stroke="#424242" stroke-width="8" d="M 128 160 C 96 160 76 132 76 92 C 76 52 100 32 128 32 C 156 32 180 52 180 92 C 180 132 160 160 128 160 Z" />
+    
+    <!-- Hair -->
+    <path d="M 128 28 C 90 28 72 56 74 88 C 76 60 90 48 128 48 C 160 48 174 60 182 84 C 186 52 170 28 128 28 Z" />
+    
+    <!-- Collar V-neck -->
+    <path fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" d="M 80 184 L 128 216 L 176 184" />
+    <path fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" d="M 96 228 L 128 216 L 160 228" />
+  </g>
+</svg>

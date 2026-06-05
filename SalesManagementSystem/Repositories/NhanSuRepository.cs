@@ -24,6 +24,17 @@ namespace SalesManagementSystem.Repositories
                 return conn.Query<NhanSu>(sql);
         }
 
+        public IEnumerable<NhanSu> GetAllWithChucVu()
+        {
+            const string sql = @"
+                SELECT n.*, c.TenChucVu 
+                FROM NS_NhanSu n
+                LEFT JOIN DM_ChucVu c ON n.IDChucVu = c.ID
+                ORDER BY c.STT ASC, n.NgayTao DESC";
+            using (var conn = _db.CreateConnection())
+                return conn.Query<NhanSu>(sql);
+        }
+
         public IEnumerable<NhanSu> GetPaged(int page, int pageSize, string keyword, bool? gender, out int totalRecords)
         {
             var conditions = new List<string> { "1 = 1" };
@@ -78,8 +89,8 @@ namespace SalesManagementSystem.Repositories
         {
             employee.NgayTao = DateTime.Now;
             const string sql = @"
-                INSERT INTO NS_NhanSu (MaNhanSu, Ten, HoDem, NgaySinh, GioiTinh, SoCMND, NgayCap, DiaChi, Email, SoDienThoai, SoDienThoai2, NgayTao, NguoiTao, NgayCapNhat, NguoiCapNhat)
-                VALUES (@MaNhanSu, @Ten, @HoDem, @NgaySinh, @GioiTinh, @SoCMND, @NgayCap, @DiaChi, @Email, @SoDienThoai, @SoDienThoai2, @NgayTao, @NguoiTao, @NgayCapNhat, @NguoiCapNhat);
+                INSERT INTO NS_NhanSu (MaNhanSu, Ten, HoDem, NgaySinh, GioiTinh, SoCMND, NgayCap, DiaChi, Email, SoDienThoai, SoDienThoai2, NgayTao, NguoiTao, NgayCapNhat, NguoiCapNhat, IDChucVu, IDPhongBan, LuongCoBan, HinhAnh)
+                VALUES (@MaNhanSu, @Ten, @HoDem, @NgaySinh, @GioiTinh, @SoCMND, @NgayCap, @DiaChi, @Email, @SoDienThoai, @SoDienThoai2, @NgayTao, @NguoiTao, @NgayCapNhat, @NguoiCapNhat, @IDChucVu, @IDPhongBan, @LuongCoBan, @HinhAnh);
                 SELECT CAST(SCOPE_IDENTITY() AS INT)";
             using (var conn = _db.CreateConnection())
                 return conn.ExecuteScalar<int>(sql, employee);
@@ -94,7 +105,9 @@ namespace SalesManagementSystem.Repositories
                     NgaySinh = @NgaySinh, GioiTinh = @GioiTinh, SoCMND = @SoCMND,
                     NgayCap = @NgayCap, DiaChi = @DiaChi, Email = @Email,
                     SoDienThoai = @SoDienThoai, SoDienThoai2 = @SoDienThoai2,
-                    NgayCapNhat = @NgayCapNhat, NguoiCapNhat = @NguoiCapNhat
+                    NgayCapNhat = @NgayCapNhat, NguoiCapNhat = @NguoiCapNhat,
+                    IDChucVu = @IDChucVu, IDPhongBan = @IDPhongBan, LuongCoBan = @LuongCoBan,
+                    HinhAnh = @HinhAnh
                 WHERE ID = @ID";
             using (var conn = _db.CreateConnection())
                 conn.Execute(sql, employee);

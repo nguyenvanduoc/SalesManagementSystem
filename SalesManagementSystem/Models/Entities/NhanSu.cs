@@ -20,5 +20,11 @@ namespace SalesManagementSystem.Models.Entities
         public int NguoiTao { get; set; }
         public DateTime? NgayCapNhat { get; set; }
         public int NguoiCapNhat { get; set; }
+        public int? IDChucVu { get; set; }
+        public string TenChucVu { get; set; }
+        public int? IDPhongBan { get; set; }
+        public string TenPhongBan { get; set; }
+        public decimal? LuongCoBan { get; set; }
+        public byte[] HinhAnh { get; set; }
     }
 }

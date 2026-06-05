@@ -12,11 +12,36 @@ namespace SalesManagementSystem.Controllers
     {
         private readonly INhanSuRepository _employeeRepo;
         private readonly SalesManagementSystem.Services.Interfaces.IExcelExportService _excelExportService;
+        private readonly SalesManagementSystem.Repositories.Interfaces.IChucVuRepository _chucVuRepo;
+        private readonly SalesManagementSystem.Repositories.Interfaces.IPhongBanRepository _phongBanRepo;
 
-        public NhanSuController(INhanSuRepository employeeRepo, SalesManagementSystem.Services.Interfaces.IExcelExportService excelExportService)
+        public NhanSuController(INhanSuRepository employeeRepo, 
+            SalesManagementSystem.Services.Interfaces.IExcelExportService excelExportService,
+            SalesManagementSystem.Repositories.Interfaces.IChucVuRepository chucVuRepo,
+            SalesManagementSystem.Repositories.Interfaces.IPhongBanRepository phongBanRepo)
         {
             _employeeRepo = employeeRepo;
             _excelExportService = excelExportService;
+            _chucVuRepo = chucVuRepo;
+            _phongBanRepo = phongBanRepo;
+        }
+
+        private void SetViewBags()
+        {
+            ViewBag.ChucVus = new System.Web.Mvc.SelectList(_chucVuRepo.GetAll(), "ID", "TenChucVu");
+            ViewBag.PhongBans = new System.Web.Mvc.SelectList(_phongBanRepo.GetAll(), "ID", "TenPhongBan");
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult GetAvatar(int id)
+        {
+            var emp = _employeeRepo.GetById(id);
+            if (emp != null && emp.HinhAnh != null && emp.HinhAnh.Length > 0)
+            {
+                return File(emp.HinhAnh, "image/jpeg");
+            }
+            return File("~/Content/images/default-avatar.svg", "image/svg+xml");
         }
 
         // GET: Employee
@@ -49,6 +74,7 @@ namespace SalesManagementSystem.Controllers
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult Create()
         {
+            SetViewBags();
             return PartialView(new NhanSu());
         }
 
@@ -56,18 +82,29 @@ namespace SalesManagementSystem.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
-        public ActionResult Create([Bind(Exclude = "ID,NgayTao,NguoiTao,NgayCapNhat,NguoiCapNhat")] NhanSu employee)
+        public ActionResult Create([Bind(Exclude = "ID,NgayTao,NguoiTao,NgayCapNhat,NguoiCapNhat")] NhanSu employee, System.Web.HttpPostedFileBase avatarFile)
         {
             if (ModelState.IsValid)
             {
                 if (_employeeRepo.IsDuplicateCode(employee.MaNhanSu))
                 {
                     ModelState.AddModelError("MaNhanSu", "Mã nhân sự đã tồn tại trong hệ thống.");
+                    SetViewBags();
                     return PartialView(employee);
                 }
 
                 var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
                 employee.NguoiTao = session?.IDNhanSu ?? 0;
+
+                if (avatarFile != null && avatarFile.ContentLength > 0)
+                {
+                    using (var ms = new System.IO.MemoryStream())
+                    {
+                        avatarFile.InputStream.CopyTo(ms);
+                        employee.HinhAnh = ms.ToArray();
+                    }
+                }
+
                 _employeeRepo.Insert(employee);
 
                 // AUDIT LOG
@@ -75,6 +112,7 @@ namespace SalesManagementSystem.Controllers
 
                 return Json(new { success = true, message = "Thêm mới nhân sự thành công!" });
             }
+            SetViewBags();
             return PartialView(employee);
         }
 
@@ -87,6 +125,7 @@ namespace SalesManagementSystem.Controllers
             {
                 return HttpNotFound();
             }
+            SetViewBags();
             return PartialView(employee);
         }
 
@@ -94,18 +133,32 @@ namespace SalesManagementSystem.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
-        public ActionResult Update([Bind(Exclude = "NgayTao,NguoiTao,NgayCapNhat,NguoiCapNhat")] NhanSu employee)
+        public ActionResult Update([Bind(Exclude = "NgayTao,NguoiTao,NgayCapNhat,NguoiCapNhat")] NhanSu employee, System.Web.HttpPostedFileBase avatarFile)
         {
             if (ModelState.IsValid)
             {
                 if (_employeeRepo.IsDuplicateCode(employee.MaNhanSu, employee.ID))
                 {
                     ModelState.AddModelError("MaNhanSu", "Mã nhân sự đã tồn tại trong hệ thống.");
+                    SetViewBags();
                     return PartialView(employee);
                 }
 
                 // FETCH OLD OBJ FOR AUDIT
                 var oldEmployee = _employeeRepo.GetById(employee.ID);
+
+                if (avatarFile != null && avatarFile.ContentLength > 0)
+                {
+                    using (var ms = new System.IO.MemoryStream())
+                    {
+                        avatarFile.InputStream.CopyTo(ms);
+                        employee.HinhAnh = ms.ToArray();
+                    }
+                }
+                else
+                {
+                    employee.HinhAnh = oldEmployee.HinhAnh;
+                }
 
                 var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
                 employee.NguoiCapNhat = session?.IDNhanSu ?? 0;
@@ -116,6 +169,7 @@ namespace SalesManagementSystem.Controllers
 
                 return Json(new { success = true, message = "Cập nhật nhân sự thành công!" });
             }
+            SetViewBags();
             return PartialView(employee);
         }
 
@@ -199,6 +253,54 @@ namespace SalesManagementSystem.Controllers
                 // Xử lý lỗi nếu không tìm thấy mẫu hoặc lỗi xuất file
                 TempData["ToastMessage"] = "Lỗi xuất Excel: " + ex.Message;
                 TempData["ToastType"] = "error";
+                return RedirectToAction("Index");
+            }
+        }
+
+        [HttpGet]
+        public ActionResult ExportExcelNS02()
+        {
+            try
+            {
+                var data = _employeeRepo.GetAllWithChucVu();
+
+                var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+                string nguoiLapBieu = session != null ? (session.HoDem + " " + session.Ten).Trim() : "";
+                if (string.IsNullOrEmpty(nguoiLapBieu)) nguoiLapBieu = session?.UserName ?? "";
+
+                var variables = new System.Collections.Generic.Dictionary<string, object>
+                {
+                    { "Ngay", DateTime.Now.ToString("dd") },
+                    { "Thang", DateTime.Now.ToString("MM") },
+                    { "Nam", DateTime.Now.ToString("yyyy") },
+                    { "NguoiLapBieu", nguoiLapBieu }
+                };
+
+                var exportData = System.Linq.Enumerable.Select(data, x => new {
+                    TenChucVu = string.IsNullOrEmpty(x.TenChucVu) ? "Chưa có chức vụ" : x.TenChucVu,
+                    MaNhanSu = x.MaNhanSu,
+                    HoTen = (x.HoDem + " " + x.Ten).Trim(),
+                    P_NgaySinh = x.NgaySinh,
+                    P_SoDienThoai = x.SoDienThoai,
+                    Email = x.Email,
+                    LuongCoBan = x.LuongCoBan
+                });
+
+                var groupedData = System.Linq.Enumerable.GroupBy(exportData, x => x.TenChucVu);
+
+                string fileExtension;
+                var fileBytes = _excelExportService.ExportGrouped("NS02", groupedData, out fileExtension, variables);
+
+                string contentType = fileExtension == "xls" 
+                    ? "application/vnd.ms-excel" 
+                    : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                return File(fileBytes, contentType, $"DanhSachNhanSuTheoChucVu_{DateTime.Now:yyyyMMddHHmmss}.{fileExtension}");
+            }
+            catch (Exception ex)
+            {
+                TempData["ToastType"] = "error";
+                TempData["ToastMessage"] = "Lỗi xuất file: " + ex.Message;
                 return RedirectToAction("Index");
             }
         }
