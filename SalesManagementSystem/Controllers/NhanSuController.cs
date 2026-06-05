@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Web.Mvc;
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Repositories;
@@ -14,16 +15,19 @@ namespace SalesManagementSystem.Controllers
         private readonly SalesManagementSystem.Services.Interfaces.IExcelExportService _excelExportService;
         private readonly SalesManagementSystem.Repositories.Interfaces.IChucVuRepository _chucVuRepo;
         private readonly SalesManagementSystem.Repositories.Interfaces.IPhongBanRepository _phongBanRepo;
+        private readonly SalesManagementSystem.Services.Interfaces.IWordExportService _wordExportService;
 
         public NhanSuController(INhanSuRepository employeeRepo, 
             SalesManagementSystem.Services.Interfaces.IExcelExportService excelExportService,
             SalesManagementSystem.Repositories.Interfaces.IChucVuRepository chucVuRepo,
-            SalesManagementSystem.Repositories.Interfaces.IPhongBanRepository phongBanRepo)
+            SalesManagementSystem.Repositories.Interfaces.IPhongBanRepository phongBanRepo,
+            SalesManagementSystem.Services.Interfaces.IWordExportService wordExportService)
         {
             _employeeRepo = employeeRepo;
             _excelExportService = excelExportService;
             _chucVuRepo = chucVuRepo;
             _phongBanRepo = phongBanRepo;
+            _wordExportService = wordExportService;
         }
 
         private void SetViewBags()
@@ -303,6 +307,50 @@ namespace SalesManagementSystem.Controllers
                 TempData["ToastMessage"] = "Lỗi xuất file: " + ex.Message;
                 return RedirectToAction("Index");
             }
+        }
+
+        [HttpGet]
+        public ActionResult ExportQuyetDinhNhanSu(int id)
+        {
+            var emp = _employeeRepo.GetById(id);
+            if (emp == null) return HttpNotFound();
+
+            // Lấy thêm thông tin phòng ban, chức vụ nếu cần (tùy theo schema)
+            // Giả lập biến dữ liệu cho mẫu Quyết Định
+            var exportData = new
+            {
+                HoTen = emp.HoDem + " " + emp.Ten,
+                NgaySinh = emp.NgaySinh?.ToString("dd/MM/yyyy") ?? "",
+                GioiTinh = (emp.GioiTinh == true) ? "Nam" : "Nữ",
+                SoCMND = emp.SoCMND ?? "",
+                NgayCap = emp.NgayCap?.ToString("dd/MM/yyyy") ?? "",
+                DiaChi = emp.DiaChi ?? "",
+                SoDienThoai = emp.SoDienThoai ?? "",
+                // Thêm các biến khác tùy vào mẫu word @TenChucVu, @TenPhongBan...
+            };
+
+            // Giả lập danh sách để lặp bảng trong Word #DanhSachPhuCap
+            var tables = new Dictionary<string, object>
+            {
+                {
+                    "DanhSachPhuCap", new List<object>
+                    {
+                        new { STT = 1, TenPhuCap = "Phụ cấp ăn trưa", SoTien = 500000 },
+                        new { STT = 2, TenPhuCap = "Phụ cấp xăng xe", SoTien = 300000 }
+                    }
+                }
+            };
+
+            // Gọi service xuất file Word. Tạm thời isPdf = false vì thư viện OpenSource ko xuất trực tiếp được PDF
+            var result = _wordExportService.ExportWord("QD_NHANSU", exportData, tables, isPdf: false);
+
+            if (result.Success)
+            {
+                return File(result.FileBytes, result.ContentType, result.FileName);
+            }
+
+            TempData["ErrorMessage"] = result.Message;
+            return RedirectToAction("Index");
         }
     }
 }

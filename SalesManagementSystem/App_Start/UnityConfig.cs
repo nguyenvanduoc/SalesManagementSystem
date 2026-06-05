@@ -40,6 +40,7 @@ namespace SalesManagementSystem.App_Start
             // ── Services (logic nghiệp vụ) ────────────────────────────────────
             container.RegisterType<InventoryService>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Services.Interfaces.IExcelExportService, ExcelExportService>(new HierarchicalLifetimeManager());
+            container.RegisterType<SalesManagementSystem.Services.Interfaces.IWordExportService, WordExportService>(new HierarchicalLifetimeManager());
             //container.RegisterType<OrderService>(new HierarchicalLifetimeManager());
 
             DependencyResolver.SetResolver(new UnityDependencyResolver(container));

@@ -735,3 +735,41 @@
    at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
 --------------------------------------------------
 
+--------------------------------------------------
+[Thời gian]       : 05/06/2026 22:48:59
+[Username]        : admin
+[Controller]      : NhanSu
+[Action]          : Index
+[URL]             : https://localhost:44326/nhan-vien
+[Message]         : An error occurred when trying to create a controller of type 'SalesManagementSystem.Controllers.NhanSuController'. Make sure that the controller has a parameterless public constructor.
+[InnerException]  : Resolution failed with error: No public constructor is available for type SalesManagementSystem.Services.Interfaces.IWordExportService.
+
+For more detailed information run Unity in debug mode: new UnityContainer(ModeFlags.Diagnostic)
+[StackTrace]      : 
+   at System.Web.Mvc.DefaultControllerFactory.DefaultControllerActivator.Create(RequestContext requestContext, Type controllerType)
+   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController& controller, IControllerFactory& factory)
+   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+
+--------------------------------------------------
+[Thời gian]       : 05/06/2026 22:50:08
+[Username]        : admin
+[Controller]      : NhanSu
+[Action]          : Index
+[URL]             : https://localhost:44326/nhan-vien
+[Message]         : An error occurred when trying to create a controller of type 'SalesManagementSystem.Controllers.NhanSuController'. Make sure that the controller has a parameterless public constructor.
+[InnerException]  : Resolution failed with error: No public constructor is available for type SalesManagementSystem.Services.Interfaces.IWordExportService.
+
+For more detailed information run Unity in debug mode: new UnityContainer(ModeFlags.Diagnostic)
+[StackTrace]      : 
+   at System.Web.Mvc.DefaultControllerFactory.DefaultControllerActivator.Create(RequestContext requestContext, Type controllerType)
+   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController& controller, IControllerFactory& factory)
+   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+
