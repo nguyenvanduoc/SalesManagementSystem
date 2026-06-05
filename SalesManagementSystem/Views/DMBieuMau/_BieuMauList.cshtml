@@ -1,0 +1,80 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DMBieuMauViewModel>
+
+<div class="table-responsive" style="min-height: 350px;">
+    <table class="table table-custom table-bordered table-hover align-middle mb-0">
+        <thead>
+            <tr>
+                <th class="text-center" width="60">STT</th>
+                <th class="text-center" width="60">Thao tác</th>
+                <th>Mã biểu mẫu</th>
+                <th>Tên biểu mẫu</th>
+                <th class="text-center">Loại biểu mẫu</th>
+                <th class="text-center">Ngày tạo</th>
+                <th>Người tạo</th>
+                <th class="text-center" width="100">Tải biểu mẫu</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Items != null && Model.Items.Any())
+            {
+                int stt = (Model.CurrentPage - 1) * Model.PageSize + 1;
+                foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td class="text-center">@(stt++)</td>
+                        <td class="text-center align-middle">
+                            <div class="d-flex justify-content-center align-items-center">
+                                @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("DMBieuMau", SalesManagementSystem.Helpers.LoaiPhanQuyen.CapNhat) || SalesManagementSystem.Helpers.PermissionHelper.HasPermission("DMBieuMau", SalesManagementSystem.Helpers.LoaiPhanQuyen.Xoa))
+                                {
+                                    <div class="dropdown dropdown-hover">
+                                        <button class="btn btn-sm btn-light border dropdown-toggle-hide-arrow shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 2px 6px;">
+                                            <i class="bi bi-grid-3x3-gap-fill text-dark"></i>
+                                        </button>
+                                        <ul class="dropdown-menu shadow">
+                                            <li><h6 class="dropdown-header text-uppercase fw-bold text-dark">Thao tác</h6></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("DMBieuMau", SalesManagementSystem.Helpers.LoaiPhanQuyen.CapNhat))
+                                            {
+                                                <li>
+                                                    <button type="button" class="dropdown-item" onclick="openFormModal('@Url.Action("CreateEdit", "DMBieuMau", new { id = item.ID })')">
+                                                        <i class="bi bi-pencil-square me-2 text-primary"></i> Chỉnh sửa
+                                                    </button>
+                                                </li>
+                                            }
+                                            @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("DMBieuMau", SalesManagementSystem.Helpers.LoaiPhanQuyen.Xoa))
+                                            {
+                                                <li>
+                                                    <button type="button" class="dropdown-item" onclick="confirmDelete('@Url.Action("Delete", "DMBieuMau", new { id = item.ID })', 'Bạn có chắc chắn muốn xóa biểu mẫu này không?')">
+                                                        <i class="bi bi-trash-fill me-2 text-danger"></i> Xóa
+                                                    </button>
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                }
+                            </div>
+                        </td>
+                        <td><span class="fw-bold">@item.MaBieuMau</span></td>
+                        <td>@item.TenBieuMau</td>
+                        <td class="text-center"><span class="badge bg-secondary">@item.DuoiFile</span></td>
+                        <td class="text-center">@(item.NgayTao.HasValue ? item.NgayTao.Value.ToString("dd/MM/yyyy HH:mm") : "")</td>
+                        <td>@item.TenNguoiTao</td>
+                        <td class="text-center">
+                            <a href="@Url.Action("Download", "DMBieuMau", new { id = item.ID })" class="btn btn-sm btn-outline-success shadow-sm" title="Tải biểu mẫu">
+                                <i class="bi bi-download"></i> Tải về
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="8" class="text-center py-4">Không có dữ liệu biểu mẫu.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@Html.Partial("_Pagination", Model)

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -161,6 +161,7 @@
     <Compile Include="Controllers\PhongBanController.cs" />
     <Compile Include="Controllers\NhatKyController.cs" />
     <Compile Include="Controllers\NguoiDungController.cs" />
+    <Compile Include="Controllers\DMBieuMauController.cs" />
     <Compile Include="Helpers\SecurityHelper.cs" />
     <Compile Include="Helpers\CommonConstants.cs" />
     <Compile Include="Helpers\Encryptor.cs" />
@@ -183,6 +184,7 @@
     <Compile Include="Models\Entities\NhanSu.cs" />
     <Compile Include="Models\Entities\AclLogin.cs" />
     <Compile Include="Models\Entities\User.cs" />
+    <Compile Include="Models\Entities\DM_BieuMau.cs" />
     <!-- Models - ViewModels -->
     <Compile Include="Models\ViewModels\RevenueReportVM.cs" />
     <Compile Include="Models\ViewModels\OrderFormViewModel.cs" />
@@ -194,6 +196,8 @@
     <Compile Include="Models\ViewModels\PagedListViewModel.cs" />
     <Compile Include="Models\ViewModels\NKTongHopViewModel.cs" />
     <Compile Include="Models\ViewModels\UserLoginViewModel.cs" />
+    <Compile Include="Models\ViewModels\DMBieuMauViewModel.cs" />
+    <Compile Include="Models\ViewModels\DMBieuMauCreateEditViewModel.cs" />
     <!-- Repositories -->
     <Compile Include="Repositories\MenuRepository.cs" />
     <Compile Include="Repositories\NhanSuRepository.cs" />
@@ -207,6 +211,8 @@
     <Compile Include="Repositories\Interfaces\IAclLoginRepository.cs" />
     <Compile Include="Repositories\Interfaces\INKTongHopRepository.cs" />
     <Compile Include="Repositories\Interfaces\IMenuRepository.cs" />
+    <Compile Include="Repositories\Interfaces\IDMBieuMauRepository.cs" />
+    <Compile Include="Repositories\DMBieuMauRepository.cs" />
     <!-- Services -->
     <Compile Include="Services\InventoryService.cs" />
     <Compile Include="Global.asax.cs">
@@ -333,6 +339,8 @@
     <Content Include="bin\roslyn\vbc.rsp" />
     <Content Include="bin\roslyn\VBCSCompiler.exe.config" />
     <Content Include="bin\SalesManagementSystem.dll.config" />
+    <Content Include="Logs\2026-06-04.log" />
+    <Content Include="Logs\2026-06-05.log" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -392,6 +400,10 @@
     <Content Include="Views\LoginSession\_LoginSessionList.cshtml" />
     <Content Include="UI_STANDARD.md" />
     <Content Include="Views\NguoiDung\CreateNguoiDung.cshtml" />
+    <Content Include="Views\DMBieuMau\Index.cshtml" />
+    <Content Include="Views\DMBieuMau\_BieuMauList.cshtml" />
+    <Content Include="Views\DMBieuMau\CreateEdit.cshtml" />
+    <Content Include="Views\NguoiDung\ChangePassword.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />

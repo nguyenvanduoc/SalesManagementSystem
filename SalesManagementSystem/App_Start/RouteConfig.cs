@@ -55,6 +55,12 @@ namespace SalesManagementSystem
             routes.MapRoute(name: "PhanQuyen_GetGrid", url: "phan-quyen/lay-luoi-quyen", defaults: new { controller = "PhanQuyen", action = "GetGrid" });
             routes.MapRoute(name: "PhanQuyen_Save", url: "phan-quyen/luu", defaults: new { controller = "", action = "Save" });
 
+            // Biểu mẫu
+            routes.MapRoute(name: "DMBieuMau_Index", url: "danh-muc-bieu-mau", defaults: new { controller = "DMBieuMau", action = "Index" });
+            routes.MapRoute(name: "DMBieuMau_CreateEdit", url: "danh-muc-bieu-mau/cap-nhat", defaults: new { controller = "DMBieuMau", action = "CreateEdit" });
+            routes.MapRoute(name: "DMBieuMau_Delete", url: "danh-muc-bieu-mau/xoa", defaults: new { controller = "DMBieuMau", action = "Delete" });
+            routes.MapRoute(name: "DMBieuMau_Download", url: "danh-muc-bieu-mau/tai-ve", defaults: new { controller = "DMBieuMau", action = "Download" });
+
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",

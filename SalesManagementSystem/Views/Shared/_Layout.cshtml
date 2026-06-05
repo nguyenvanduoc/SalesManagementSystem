@@ -357,8 +357,21 @@
             margin-top: 0;
         }
 
-        /* Fix: 4 dòng cuối cùng sẽ hiển thị menu hướng lên trên (Dropup) đè ngược lên grid để không bị che bởi footer */
-        .table-custom tbody tr:nth-last-child(-n+4) .dropdown-menu {
+        /* Tăng vùng an toàn (safe area) khi hover để tránh mất menu khi trượt chuột ra ngoài một chút */
+        .dropdown-hover > .dropdown-menu::before {
+            content: "";
+            position: absolute;
+            top: -20px;
+            bottom: -20px;
+            left: -20px;
+            right: -20px;
+            background: transparent;
+            z-index: -1;
+        }
+
+        /* Fix: 4 dòng cuối cùng sẽ hiển thị menu hướng lên trên (Dropup) đè ngược lên grid để không bị che bởi footer.
+           Tuy nhiên, nếu là 3 dòng đầu tiên thì KHÔNG dropup để tránh bị cắt bởi mép trên của bảng. */
+        .table-custom tbody tr:nth-last-child(-n+4):not(:nth-child(-n+3)) .dropdown-menu {
             top: auto !important;
             bottom: 100% !important;
             margin-top: 0 !important;
