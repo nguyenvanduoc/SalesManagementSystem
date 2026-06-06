@@ -1,0 +1,148 @@
+/* Tab Manager Styles - Matching the precise requested UI */
+.tabs-container {
+    background-color: #e9ecef; /* Light gray background for the entire tab strip */
+    padding-top: 8px;
+    padding-left: 20px;
+    padding-right: 20px;
+    border-bottom: 1px solid #dce4ec;
+    margin: -28px -28px 15px -28px; /* Offset the page-content padding */
+    display: flex;
+    align-items: flex-end;
+}
+
+#mainTabHeader {
+    border-bottom: none;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin; /* Firefox */
+    width: 100%;
+    position: relative;
+    z-index: 1060; /* Above Bootstrap modal backdrop */
+}
+
+#mainTabHeader::-webkit-scrollbar {
+    height: 4px;
+}
+
+#mainTabHeader::-webkit-scrollbar-track {
+    background: transparent; 
+}
+
+#mainTabHeader::-webkit-scrollbar-thumb {
+    background: #ccc; 
+    border-radius: 4px;
+}
+
+#mainTabHeader .nav-item {
+    margin-bottom: 0;
+    white-space: nowrap;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Vertical Separator between inactive tabs */
+#mainTabHeader .nav-item:not(:last-child)::after {
+    content: "";
+    height: 14px;
+    width: 1px;
+    background-color: #adb5bd;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#mainTabHeader .nav-link {
+    background-color: transparent;
+    border: none;
+    color: #495057;
+    border-radius: 8px 8px 0 0;
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    font-size: 14.5px;
+    font-weight: 500;
+    min-width: 120px;
+    max-width: 220px;
+    transition: all 0.2s ease;
+}
+
+#mainTabHeader .nav-link:hover {
+    color: #0b5b84;
+}
+
+#mainTabHeader .nav-link.active {
+    background-color: #fff;
+    color: #0b5b84;
+    font-weight: 600;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.03);
+}
+
+/* Remove separator if this tab or the next tab is active */
+#mainTabHeader .nav-item:has(.nav-link.active)::after,
+#mainTabHeader .nav-item:has(.nav-link.active) + .nav-item::after {
+    display: none;
+}
+
+#mainTabHeader .nav-link .tab-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: 12px;
+    flex-grow: 1;
+}
+
+/* Close button style */
+#mainTabHeader .nav-link .close-tab-btn {
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 300;
+    line-height: 1;
+    color: #888;
+    padding: 0;
+    margin-left: auto;
+    transition: color 0.2s;
+}
+
+#mainTabHeader .nav-link .close-tab-btn:hover {
+    color: #dc3545;
+}
+
+/* Adjust Dashboard Icon */
+#mainTabHeader .nav-link .bi-house-door,
+#mainTabHeader .nav-link .bi-speedometer2 {
+    font-size: 16px;
+    margin-right: 6px;
+}
+#mainTabHeader .nav-link i.ms-1 {
+    margin-left: 0 !important;
+    margin-right: 6px !important;
+    order: -1; /* Put icon before text */
+}
+
+.tab-content {
+    min-height: calc(100vh - 140px);
+    position: relative;
+    background: #fff;
+    padding: 20px;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+/* Loading overlay */
+.tab-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    border-radius: 4px;
+}

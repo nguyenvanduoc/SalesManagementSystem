@@ -264,8 +264,25 @@
             transition: margin-left .28s ease;
         }
         .page-content {
-            padding: 28px 28px 20px;
+            padding: 8px 12px;
             flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        #mainTabContent {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            border-radius: 0 6px 6px 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        #mainTabContent > .tab-pane {
+            flex: 1;
+            position: relative;
+            padding: 12px;
+            /* Đảm bảo flex child có min-height để không trào grid */
+            min-height: 0; 
         }
         .page-header {
             display: flex;
@@ -285,15 +302,7 @@
         }
         .breadcrumb-wrap a { color: var(--accent); text-decoration: none; }
 
-        /* ─── Footer ─────────────────────────────────────── */
-        .main-footer {
-            background: #fff;
-            border-top: 1px solid #e0e6ed;
-            padding: 12px 28px;
-            font-size: .78rem;
-            color: #95a5a6;
-            text-align: center;
-        }
+        /* ─── Footer (Removed to maximize workspace) ─── */
 
         /* ─── Sidebar collapsed ──────────────────────────── */
         body.sidebar-collapsed .sidebar { width: 60px; }
@@ -420,6 +429,136 @@
         .custom-pagination .text-info-custom {
             color: #0b5b84 !important;
         }
+        /* ─── TAB MENU REDESIGN ─────────────────────────────── */
+        .tabs-wrapper {
+            display: flex;
+            align-items: flex-end;
+            background-color: #e9ecef; /* Nền xám nhạt */
+            border-bottom: 1px solid #dce4ec;
+            position: relative;
+        }
+
+        .tab-scroll-btn {
+            background: transparent;
+            border: none;
+            color: #6c757d;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            outline: none;
+            z-index: 2;
+        }
+        .tab-scroll-btn:hover {
+            color: #0b5b84;
+            background: rgba(0,0,0,0.05);
+        }
+
+        .tabs-container {
+            flex: 1;
+            padding: 8px 0 0 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -ms-overflow-style: none;  /* IE/Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        
+        .tabs-container::-webkit-scrollbar { 
+            display: none; /* Chrome, Safari, Opera */
+        }
+
+        .tabs-container .nav-tabs {
+            border-bottom: none;
+            flex-wrap: nowrap;
+            display: inline-flex;
+            margin-bottom: 0;
+            width: max-content;
+        }
+
+        .tabs-container .nav-item {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Dấu phân cách | */
+        .tabs-container .nav-item + .nav-item::before {
+            content: "|";
+            color: #adb5bd; /* Xám nhạt */
+            margin: 0 6px;
+            font-size: 13px;
+            font-weight: 300;
+        }
+
+        .tabs-container .nav-link {
+            border: none !important;
+            background-color: transparent !important;
+            color: #555555 !important;
+            font-size: 13.5px;
+            padding: 6px 14px;
+            border-radius: 8px 8px 0 0 !important;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+            max-width: 250px;
+        }
+        
+        .tabs-container .nav-link .tab-title {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tabs-container .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.4) !important;
+            color: #333333 !important;
+        }
+
+        .tabs-container .nav-link.active {
+            background-color: #ffffff !important;
+            color: #111111 !important;
+            font-weight: 600;
+            box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.05);
+            z-index: 1;
+        }
+
+        /* Ẩn dấu | trước hoặc sau tab active */
+        .tabs-container .nav-item:has(> .nav-link.active)::before,
+        .tabs-container .nav-item:has(> .nav-link.active) + .nav-item::before {
+            opacity: 0;
+        }
+
+        /* Nút đóng tab (x) */
+        .tabs-container .close-tab-btn {
+            margin-left: 2px;
+            color: #999;
+            font-size: 16px;
+            line-height: 1;
+            cursor: pointer;
+            transition: color 0.2s;
+            padding: 0 2px;
+        }
+        .tabs-container .close-tab-btn:hover {
+            color: #dc3545 !important;
+        }
+
+        /* ─── TAB/CONTENT LOCAL LOADING OVERLAY ───────────────── */
+        .tab-loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7); /* Chỉ mờ vùng content */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
@@ -479,13 +618,34 @@
 
 <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
 <div class="main-wrapper" id="mainWrapper">
-    <main class="page-content">
-        @RenderBody()
+    <main class="page-content" style="padding-top: 0;">
+        <!-- TAB HEADER -->
+        <div class="tabs-wrapper">
+            <button class="tab-scroll-btn" id="btnScrollLeftTab" type="button" title="Cuộn trái">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="tabs-container" id="tabsContainerScroll">
+                <ul class="nav nav-tabs" id="mainTabHeader" role="tablist">
+                    <!-- Default tab for manual page load -->
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="default-tab" data-bs-toggle="tab" data-bs-target="#default-tab-pane" type="button" role="tab" aria-controls="default-tab-pane" aria-selected="true">
+                            <span class="tab-title">@(ViewBag.Title ?? "Trang chủ")</span> <i class="bi bi-house-door ms-1"></i>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <button class="tab-scroll-btn" id="btnScrollRightTab" type="button" title="Cuộn phải">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+        
+        <!-- TAB CONTENT -->
+        <div class="tab-content" id="mainTabContent">
+            <div class="tab-pane fade show active" id="default-tab-pane" role="tabpanel" aria-labelledby="default-tab" tabindex="0">
+                @RenderBody()
+            </div>
+        </div>
     </main>
-
-    <footer class="main-footer">
-        &copy; @DateTime.Now.Year &nbsp;|&nbsp; Hệ thống Quản Lý Bán Hàng &amp; Kho Bãi
-    </footer>
 </div>
 
 <!-- ═══════════════ GLOBAL FORM MODAL ═══════════════ -->
@@ -724,8 +884,12 @@
                 if (res.success === true) {
                     $('#globalFormModal').modal('hide');
                     showToast('success', res.message);
-                    if (typeof loadData === 'function') {
-                        loadData(''); // Reload danh sách nếu có hàm loadData
+                    // Dùng TabManager.reloadActiveTabGrid() thay cho loadData() toàn cục
+                    // để tránh bị overwrite khi nhiều tab đang mở cùng lúc
+                    if (typeof TabManager !== 'undefined') {
+                        TabManager.reloadActiveTabGrid(false);
+                    } else if (typeof loadData === 'function') {
+                        loadData('');
                     } else {
                         location.reload();
                     }
@@ -815,10 +979,9 @@
                 if (res.success === true) {
                     $('#globalDeleteModal').modal('hide');
                     showToast('success', res.message);
-                    
-                    var activeLink = $('.pagination .active .page-link').attr('href');
-                    if (activeLink && typeof loadData === 'function') {
-                        loadData(activeLink);
+                    // Dùng TabManager.reloadActiveTabGrid() thay cho loadData() toàn cục
+                    if (typeof TabManager !== 'undefined') {
+                        TabManager.reloadActiveTabGrid(false);
                     } else if (typeof loadData === 'function') {
                         loadData('');
                     } else {
@@ -834,6 +997,7 @@
         });
     });
 </script>
+<script src="~/Scripts/tab-manager.js?v=@DateTime.Now.Ticks"></script>
 @RenderSection("scripts", required: false)
 </body>
 </html>

@@ -1,6 +1,6 @@
 @model SalesManagementSystem.Models.ViewModels.PagedListBase
 
-<div class="card-footer custom-pagination d-flex flex-wrap align-items-center justify-content-between" style="padding: 12px 16px;">
+<div class="card-footer custom-pagination d-flex flex-wrap align-items-center justify-content-between" style="padding: 12px 16px;" data-action="@Url.Action(string.IsNullOrEmpty(Model.ActionName) ? "Index" : Model.ActionName)">
     <div class="d-flex align-items-center gap-3">
         <nav aria-label="Page navigation">
             <ul class="pagination pagination-sm mb-0">
@@ -47,7 +47,7 @@
         </nav>
         
         <div class="d-flex align-items-center">
-            <select class="form-select form-select-sm" id="pageSizeSelect" style="width: 70px; cursor: pointer;">
+            <select class="form-select form-select-sm page-size-select" style="width: 70px; cursor: pointer;">
                 <option value="10" @(pageSize == 10 ? "selected" : "")>10</option>
                 <option value="20" @(pageSize == 20 ? "selected" : "")>20</option>
                 <option value="50" @(pageSize == 50 ? "selected" : "")>50</option>

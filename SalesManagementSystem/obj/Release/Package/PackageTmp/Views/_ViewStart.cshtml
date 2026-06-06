@@ -1,3 +1,4 @@
-﻿@{
-    Layout = "~/Views/Shared/_Layout.cshtml";
+@{
+    bool isSpa = Request.Headers["X-SPA-Load"] == "true" || Request.IsAjaxRequest();
+    Layout = isSpa ? "~/Views/Shared/_SpaLayout.cshtml" : "~/Views/Shared/_Layout.cshtml";
 }

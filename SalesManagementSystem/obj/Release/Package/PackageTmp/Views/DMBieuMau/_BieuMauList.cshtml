@@ -60,7 +60,7 @@
                         <td class="text-center">@(item.NgayTao.HasValue ? item.NgayTao.Value.ToString("dd/MM/yyyy HH:mm") : "")</td>
                         <td>@item.TenNguoiTao</td>
                         <td class="text-center">
-                            <a href="@Url.Action("Download", "DMBieuMau", new { id = item.ID })" class="btn btn-sm btn-outline-success shadow-sm" title="Tải biểu mẫu">
+                            <a href="@Url.Action("Download", "DMBieuMau", new { id = item.ID })" class="btn btn-sm btn-outline-success shadow-sm no-ajax" title="Tải biểu mẫu">
                                 <i class="bi bi-download"></i> Tải về
                             </a>
                         </td>

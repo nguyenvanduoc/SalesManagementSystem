@@ -2,7 +2,6 @@
 
 @{
     ViewBag.Title = "Danh mục biểu mẫu";
-    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -63,20 +62,5 @@
                 }
             });
         }
-
-        $(document).on('change', '#pageSizeSelect', function() {
-            var keyword = $('input[name="keyword"]').val();
-            var pageSize = $(this).val();
-            loadGridData('@Url.Action("Index", "DMBieuMau")?page=1&pageSize=' + pageSize + '&keyword=' + encodeURIComponent(keyword));
-        });
-
-        $(document).on('click', '.ajax-link', function (e) {
-            e.preventDefault();
-            if ($(this).parent().hasClass('disabled') || $(this).parent().hasClass('active')) return;
-            var url = $(this).attr('href');
-            if (url) {
-                loadGridData(url);
-            }
-        });
     </script>
 }

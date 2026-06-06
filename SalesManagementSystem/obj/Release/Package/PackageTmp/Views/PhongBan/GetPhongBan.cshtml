@@ -68,25 +68,6 @@
                 e.preventDefault();
                 loadData($(this).serialize());
             });
-
-            $(document).on('click', '.ajax-link', function(e) {
-                e.preventDefault();
-                if ($(this).parent().hasClass('disabled') || $(this).parent().hasClass('active')) return;
-                var url = $(this).attr('href');
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function(result) {
-                        $('#table-container').html(result);
-                    }
-                });
-            });
-
-            $(document).on('change', '#pageSizeSelect', function() {
-                var pageSize = $(this).val();
-                var currentKeyword = $('input[name="keyword"]').val();
-                loadData('page=1&pageSize=' + pageSize + '&keyword=' + encodeURIComponent(currentKeyword));
-            });
         });
 
         function loadData(data) {

@@ -1,4 +1,4 @@
-@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.NKTongHopViewModel>
+﻿@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.NKTongHopViewModel>
 
 @{
     ViewBag.Title = "Nhật ký hệ thống";
@@ -38,19 +38,6 @@
             $('#searchForm').submit(function(e) {
                 e.preventDefault();
                 loadData($(this).serialize());
-            });
-
-            $(document).on('click', '.ajax-link', function(e) {
-                e.preventDefault();
-                var url = $(this).attr('href');
-                if ($(this).parent().hasClass('disabled') || $(this).parent().hasClass('active')) return;
-                loadData(url);
-            });
-
-            $(document).on('change', '#pageSizeSelect', function() {
-                var pageSize = $(this).val();
-                var formData = $('#searchForm').serialize();
-                loadData('@Url.Action("Index")?page=1&pageSize=' + pageSize + '&' + formData);
             });
         });
 
