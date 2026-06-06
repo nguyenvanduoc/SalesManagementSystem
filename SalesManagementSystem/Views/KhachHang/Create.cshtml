@@ -1,0 +1,73 @@
+@model SalesManagementSystem.Models.Entities.NS_KhachHang
+
+@{
+    Layout = null;
+    ViewBag.Title = "Thêm mới khách hàng";
+}
+
+<div class="modal-header bg-light">
+    <h5 class="modal-title fw-bold text-uppercase" style="color: #0b5b84;">@ViewBag.Title</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+@using (Html.BeginForm("Create", "KhachHang", FormMethod.Post, new { id = "frmCreateKhachHang" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="modal-body p-4">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger mb-3">
+                @Html.ValidationSummary(false, "")
+            </div>
+        }
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Mã khách hàng <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.MaKhachHang, new { @class = "form-control", required = "required", placeholder = "VD: KH001" })
+                @Html.ValidationMessageFor(m => m.MaKhachHang, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Mã số thuế</label>
+                @Html.TextBoxFor(m => m.MaSoThue, new { @class = "form-control" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Họ đệm <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.HoDem, new { @class = "form-control", required = "required", placeholder = "Nguyễn Văn" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Tên <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.Ten, new { @class = "form-control", required = "required", placeholder = "A" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Nhóm khách hàng</label>
+                @Html.DropDownListFor(m => m.IDNhomKhachHang, ViewBag.NhomKhachHangs as SelectList, "Chọn nhóm khách hàng", new { @class = "form-select" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Nhân viên phụ trách</label>
+                @Html.DropDownListFor(m => m.IDNhanVien, ViewBag.NhanViens as SelectList, "Chọn nhân viên", new { @class = "form-select" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Tỉnh thành</label>
+                @Html.DropDownListFor(m => m.IDTinhThanh, ViewBag.TinhThanhs as SelectList, "Chọn tỉnh thành", new { @class = "form-select" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Số điện thoại</label>
+                @Html.TextBoxFor(m => m.SoDienThoai, new { @class = "form-control" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Email</label>
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email" })
+            </div>
+            <div class="col-md-12">
+                <label class="form-label text-muted fw-semibold">Địa chỉ</label>
+                @Html.TextAreaFor(m => m.DiaChi, new { @class = "form-control", rows = 2 })
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Hủy</button>
+        <button type="submit" class="btn text-white px-4" style="background-color: #2998e4; border: none;">
+            <i class="bi bi-save me-1"></i> Lưu thông tin
+        </button>
+    </div>
+}

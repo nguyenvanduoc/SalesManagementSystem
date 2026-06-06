@@ -36,6 +36,7 @@ namespace SalesManagementSystem.App_Start
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.INKTongHopRepository, NKTongHopRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IAclLoginSessionRepository, AclLoginSessionRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IDMBieuMauRepository, DMBieuMauRepository>(new HierarchicalLifetimeManager());
+            container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IKhachHangRepository, KhachHangRepository>(new HierarchicalLifetimeManager());
 
             // ── Services (logic nghiệp vụ) ────────────────────────────────────
             container.RegisterType<InventoryService>(new HierarchicalLifetimeManager());

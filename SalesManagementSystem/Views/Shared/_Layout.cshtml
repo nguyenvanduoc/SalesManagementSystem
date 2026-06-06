@@ -669,6 +669,7 @@
                 <p id="globalDeleteMessage" class="mb-4" style="font-size: 1rem; color: #555;">Bạn có chắc chắn muốn xóa không?</p>
                 <div class="d-flex justify-content-end gap-2">
                     <form id="globalDeleteForm" method="post" class="m-0">
+                        @Html.AntiForgeryToken()
                         <button type="submit" class="btn" style="background-color: #ffc107; color: #fff; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem;">ĐỒNG Ý</button>
                     </form>
                     <button type="button" class="btn" data-bs-dismiss="modal" style="background-color: #e9ecef; color: #333; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem; border: none;">ĐỂ SAU</button>

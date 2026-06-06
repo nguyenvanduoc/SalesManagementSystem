@@ -517,4 +517,15 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
   </Target>
+  <ItemGroup>
+    <Compile Include="Controllers\KhachHangController.cs" />
+    <Compile Include="Models\Entities\NS_KhachHang.cs" />
+    <Compile Include="Models\ViewModels\KhachHangViewModel.cs" />
+    <Compile Include="Repositories\Interfaces\IKhachHangRepository.cs" />
+    <Compile Include="Repositories\KhachHangRepository.cs" />
+    <Content Include="Views\KhachHang\Index.cshtml" />
+    <Content Include="Views\KhachHang\_KhachHangList.cshtml" />
+    <Content Include="Views\KhachHang\Create.cshtml" />
+    <Content Include="Views\KhachHang\Edit.cshtml" />
+  </ItemGroup>
 </Project>
