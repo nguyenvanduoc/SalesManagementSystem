@@ -13,8 +13,7 @@ namespace SalesManagementSystem.Data
 
         public DbConnectionFactory()
         {
-            _connectionString = ConfigurationManager
-                .ConnectionStrings["DefaultConnection"].ConnectionString;
+            _connectionString = SalesManagementSystem.Helpers.Security.ConfigManager.GetConnectionString("DefaultConnection");
         }
 
         /// <summary>Tạo và trả về SqlConnection mới (chưa mở).</summary>
