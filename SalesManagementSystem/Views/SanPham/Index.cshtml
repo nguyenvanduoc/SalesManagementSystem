@@ -1,0 +1,117 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DmSanPhamViewModel>
+
+@{
+    ViewBag.Title = "Danh mục sản phẩm";
+}
+
+@using SalesManagementSystem.Helpers
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">@ViewBag.Title</h4>
+    <div class="d-flex gap-2">
+        @if (PermissionHelper.HasPermission("SanPham", LoaiPhanQuyen.Them))
+        {
+            <button type="button" class="btn btn-primary" style="background-color: #3498db; border-color: #3498db;" onclick="openFormModal('@Url.Action("Create", "SanPham")')">
+                <i class="bi bi-plus-lg fw-bold"></i> Thêm
+            </button>
+        }
+        <a href="@Url.Action("ExportExcel", "SanPham")" class="btn btn-success no-ajax" style="background-color: #2ecc71; border-color: #2ecc71;">
+            <i class="bi bi-file-earmark-excel fw-bold"></i> Xuất Excel (SP01)
+        </a>
+        @if (PermissionHelper.HasPermission("SanPham", LoaiPhanQuyen.Xoa))
+        {
+            <button type="button" class="btn btn-danger" style="background-color: #e74c3c; border-color: #e74c3c;" onclick="deleteSelected()">
+                <i class="bi bi-trash"></i> Xóa
+            </button>
+        }
+    </div>
+</div>
+
+<!-- Bộ lọc tìm kiếm theo chuẩn UI -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" action="@Url.Action("GetList")" id="searchForm">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-6">
+                    <input type="text" name="keyword" class="form-control" placeholder="Nhập tên hoặc mã sản phẩm..." value="@Request.QueryString["keyword"]">
+                </div>
+                <div class="col-md-auto d-flex gap-2">
+                    <button type="submit" class="btn text-white px-3" style="background-color: #2998e4; border: none;">
+                        <i class="bi bi-search"></i> Tìm kiếm
+                    </button>
+                    <button type="button" onclick="resetSearch()" class="btn text-white px-3" style="background-color: #f1c40f; border: none;">
+                        Làm mới
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="table-container">
+    @Html.Partial("_SanPhamList", Model)
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Check/Uncheck all checkboxes
+            $(document).on('change', '#checkAll', function() {
+                $('.row-checkbox').prop('checked', $(this).prop('checked'));
+            });
+
+            // If any row checkbox is unchecked, uncheck the header checkbox
+            $(document).on('change', '.row-checkbox', function() {
+                if ($('.row-checkbox:checked').length === $('.row-checkbox').length && $('.row-checkbox').length > 0) {
+                    $('#checkAll').prop('checked', true);
+                } else {
+                    $('#checkAll').prop('checked', false);
+                }
+            });
+
+            // Gọi AJAX khi submit form tìm kiếm
+            $('#searchForm').submit(function(e) {
+                e.preventDefault();
+                loadData($(this).serialize());
+            });
+        });
+
+        function loadData(urlOrData) {
+            var requestUrl = typeof urlOrData === 'string' && urlOrData.indexOf('/') !== -1 
+                             ? urlOrData 
+                             : '@Url.Action("GetList")?' + urlOrData;
+            $.ajax({
+                url: requestUrl,
+                type: 'GET',
+                success: function(res) {
+                    $('#table-container').html(res);
+                },
+                error: function() {
+                    showToast('error', 'Có lỗi xảy ra khi tải dữ liệu.');
+                }
+            });
+        }
+
+        function resetSearch() {
+            $('input[name="keyword"]').val('');
+            loadData('');
+        }
+
+        function deleteSelected() {
+            var selectedIds = [];
+            $('.row-checkbox:checked').each(function() {
+                selectedIds.push($(this).val());
+            });
+
+            if (selectedIds.length === 0) {
+                showToast('warning', 'Vui lòng chọn ít nhất một bản ghi để thao tác.');
+                return;
+            }
+
+            var url = '@Url.Action("Delete", "SanPham")';
+            var msg = "Bạn có chắc chắn muốn xóa " + selectedIds.length + " sản phẩm đã chọn không?";
+            
+            // Gọi hàm chuẩn từ _Layout.cshtml
+            confirmBatchDelete(url, selectedIds, msg);
+        }
+    </script>
+}

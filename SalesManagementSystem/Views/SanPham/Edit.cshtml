@@ -1,0 +1,48 @@
+@model SalesManagementSystem.Models.ViewModels.DmSanPhamCreateEditViewModel
+
+@{
+    Layout = null;
+    ViewBag.Title = "Cập nhật sản phẩm";
+}
+
+<div class="modal-header bg-light">
+    <h5 class="modal-title fw-bold text-uppercase" style="color: #0b5b84;">@ViewBag.Title</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+@using (Html.BeginForm("Edit", "SanPham", FormMethod.Post, new { id = "globalForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.ID)
+
+    <div class="modal-body p-4">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger mb-3">
+                @Html.ValidationSummary(false, "")
+            </div>
+        }
+        <div class="row g-3">
+            <div class="col-md-12">
+                <label class="form-label text-muted fw-semibold">Mã sản phẩm <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.MaSanPham, new { @class = "form-control", placeholder = "Nhập mã sản phẩm" })
+                @Html.ValidationMessageFor(m => m.MaSanPham, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-md-12">
+                <label class="form-label text-muted fw-semibold">Tên sản phẩm <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.TenSanPham, new { @class = "form-control", placeholder = "Nhập tên sản phẩm" })
+                @Html.ValidationMessageFor(m => m.TenSanPham, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-md-12">
+                <label class="form-label text-muted fw-semibold">Thứ tự</label>
+                @Html.TextBoxFor(m => m.STT, new { @class = "form-control", type = "number", placeholder = "Thứ tự sắp xếp" })
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Hủy</button>
+        <button type="submit" class="btn text-white px-4" style="background-color: #2998e4; border: none;">
+            <i class="bi bi-save me-1"></i> Lưu thông tin
+        </button>
+    </div>
+}

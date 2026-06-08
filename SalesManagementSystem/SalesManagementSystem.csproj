@@ -176,6 +176,8 @@
     <Compile Include="Helpers\CustomAuthorizeAttribute.cs" />
     <Compile Include="Helpers\PermissionHelper.cs" />
     <Compile Include="Models\Entities\AclPhanQuyen.cs" />
+    <Compile Include="Models\ViewModels\DmSanPhamViewModel.cs" />
+    <Compile Include="Models\ViewModels\DmSanPhamCreateEditViewModel.cs" />
     <Compile Include="Models\ViewModels\PhanQuyenTreeViewModel.cs" />
     <Compile Include="Models\ViewModels\PhanQuyenMatrixViewModel.cs" />
     <Compile Include="Repositories\Interfaces\IAclPhanQuyenRepository.cs" />
@@ -202,6 +204,7 @@
     <Compile Include="Models\Entities\Category.cs" />
     <Compile Include="Models\Entities\ChucVu.cs" />
     <Compile Include="Models\Entities\PhongBan.cs" />
+    <Compile Include="Models\Entities\DM_SanPham.cs" />
     <Compile Include="Models\Entities\Product.cs" />
     <Compile Include="Models\Entities\Inventory.cs" />
     <Compile Include="Models\Entities\InventoryTransaction.cs" />
@@ -230,6 +233,7 @@
     <Compile Include="Models\ViewModels\DMBieuMauCreateEditViewModel.cs" />
     <!-- Repositories -->
     <Compile Include="Repositories\MenuRepository.cs" />
+    <Compile Include="Repositories\DmSanPhamRepository.cs" />
     <Compile Include="Repositories\NhanSuRepository.cs" />
     <Compile Include="Repositories\PhongBanRepository.cs" />
     <Compile Include="Repositories\ChucVuRepository.cs" />
@@ -237,6 +241,7 @@
     <Compile Include="Repositories\AclLoginRepository.cs" />
     <Compile Include="Repositories\Interfaces\IChucVuRepository.cs" />
     <Compile Include="Repositories\Interfaces\IPhongBanRepository.cs" />
+    <Compile Include="Repositories\Interfaces\IDmSanPhamRepository.cs" />
     <Compile Include="Repositories\Interfaces\INhanSuRepository.cs" />
     <Compile Include="Repositories\Interfaces\IAclLoginRepository.cs" />
     <Compile Include="Repositories\Interfaces\INKTongHopRepository.cs" />
@@ -255,6 +260,7 @@
     <Compile Include="Models\ViewModels\AclLoginSessionViewModel.cs" />
     <Compile Include="Repositories\Interfaces\IAclLoginSessionRepository.cs" />
     <Compile Include="Repositories\AclLoginSessionRepository.cs" />
+    <Compile Include="Controllers\SanPhamController.cs" />
     <Compile Include="Controllers\LoginSessionController.cs" />
     <Compile Include="Models\ViewModels\ExportResult.cs" />
     <Compile Include="Services\Interfaces\IWordExportService.cs" />
