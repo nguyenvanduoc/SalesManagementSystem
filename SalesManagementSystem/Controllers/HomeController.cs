@@ -68,5 +68,19 @@ namespace SalesManagementSystem.Controllers
 
             return RedirectToAction("Index");
         }
+
+        [HttpGet]
+        public JsonResult SearchMenu(string q)
+        {
+            try
+            {
+                var results = _menuRepo.SearchMenu(q);
+                return Json(results, JsonRequestBehavior.AllowGet);
+            }
+            catch (System.Exception ex)
+            {
+                return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
     }
 }

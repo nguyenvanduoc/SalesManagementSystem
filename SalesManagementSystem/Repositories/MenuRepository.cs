@@ -4,6 +4,8 @@ using Dapper;
 using SalesManagementSystem.Data;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories.Interfaces;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace SalesManagementSystem.Repositories
 {
@@ -69,6 +71,83 @@ namespace SalesManagementSystem.Repositories
                 .ToList();
 
             return groups;
+        }
+
+        public List<MenuSearchResultVM> SearchMenu(string keyword)
+        {
+            const string sql = @"
+                SELECT
+                    m.ID            AS IDManHinh,
+                    m.TenManHinh,
+                    m.NhomChaManHinh,
+                    ISNULL(a.TenController, '')  AS TenController,
+                    ISNULL(a.TenAction, 'Index') AS TenAction
+                FROM ACL_ManHinh m
+                LEFT JOIN ACL_Action a
+                    ON a.ID = (
+                        SELECT TOP 1 ID
+                        FROM ACL_Action
+                        WHERE IDManHinh = m.ID
+                        ORDER BY ID ASC
+                    )
+                WHERE m.IsSuDung = 1
+                ORDER BY m.NhomChaManHinh, m.STT";
+
+            IEnumerable<dynamic> rows;
+            using (var conn = _db.CreateConnection())
+                rows = conn.Query(sql).ToList();
+
+            string normalizedKeyword = RemoveDiacritics(keyword ?? "").ToLower();
+
+            var results = new List<MenuSearchResultVM>();
+
+            foreach (var r in rows)
+            {
+                string tenManHinh = r.TenManHinh;
+                string nhomCha = r.NhomChaManHinh;
+                string controller = r.TenController;
+                string action = r.TenAction;
+
+                string normalizedTen = RemoveDiacritics(tenManHinh ?? "").ToLower();
+                string normalizedNhom = RemoveDiacritics(nhomCha ?? "").ToLower();
+
+                if (normalizedTen.Contains(normalizedKeyword) || normalizedNhom.Contains(normalizedKeyword))
+                {
+                    results.Add(new MenuSearchResultVM
+                    {
+                        IDManHinh = (int)r.IDManHinh,
+                        TenManHinh = tenManHinh,
+                        Breadcrumb = $"{nhomCha} > {tenManHinh}",
+                        DuongDan = string.IsNullOrEmpty(controller) ? "#" : $"/{controller}/{action}",
+                        TenController = controller
+                    });
+                }
+            }
+
+            return results;
+        }
+
+        private string RemoveDiacritics(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return text;
+            
+            // Normalize Unicode
+            text = text.Normalize(NormalizationForm.FormD);
+            var sb = new StringBuilder();
+
+            foreach (var c in text)
+            {
+                if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark)
+                {
+                    sb.Append(c);
+                }
+            }
+
+            // Remove D with stroke (Đ/đ)
+            string result = sb.ToString().Normalize(NormalizationForm.FormC);
+            result = result.Replace("Đ", "D").Replace("đ", "d");
+            
+            return result;
         }
     }
 }

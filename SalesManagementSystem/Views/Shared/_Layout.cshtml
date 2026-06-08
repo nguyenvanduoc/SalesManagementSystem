@@ -11,6 +11,8 @@
     <!-- Font: dùng system fonts hỗ trợ tiếng Việt, không cần internet -->
     <!-- Bootstrap Icons (local - không cần internet) -->
     <link rel="stylesheet" href="@Url.Content("~/Content/bootstrap-icons.min.css")" />
+    <!-- Global Search CSS -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/css/global-search.css")" />
 
     <style>
         /* ─── Variables ─────────────────────────────────── */
@@ -693,6 +695,27 @@
     </div>
 </div>
 
+<!-- ═══════════════ GLOBAL SEARCH MODAL (Ctrl+Q) ═══════════════ -->
+<div class="global-search-overlay" id="globalSearchOverlay">
+    <div class="global-search-modal" id="globalSearchModal">
+        <div class="global-search-header">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" id="globalSearchInput" class="global-search-input" placeholder="Tìm màn hình..." autocomplete="off">
+            <button type="button" class="btn-close-search" id="btnCloseSearch" title="Đóng (Esc)"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="global-search-body">
+            <ul class="global-search-results" id="globalSearchResults">
+                <!-- Results will be rendered here -->
+            </ul>
+        </div>
+        <div class="global-search-footer">
+            <span class="key-hint"><kbd>↑</kbd> <kbd>↓</kbd> Lựa chọn menu</span>
+            <span class="key-hint"><kbd>Enter</kbd> Mở màn hình</span>
+            <span class="key-hint"><kbd>Esc</kbd> Đóng cửa sổ</span>
+        </div>
+    </div>
+</div>
+
 <!-- Scripts -->
 <script src="@Url.Content("~/Scripts/jquery-3.7.0.min.js")"></script>
 <script src="@Url.Content("~/Scripts/bootstrap.bundle.min.js")"></script>
@@ -999,6 +1022,7 @@
     });
 </script>
 <script src="~/Scripts/tab-manager.js?v=@DateTime.Now.Ticks"></script>
+<script src="~/Scripts/global-search.js?v=@DateTime.Now.Ticks"></script>
 @RenderSection("scripts", required: false)
 </body>
 </html>
