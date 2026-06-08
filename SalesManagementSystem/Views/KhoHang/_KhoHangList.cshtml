@@ -1,4 +1,4 @@
-@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DmSanPhamViewModel>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DmKhoHangViewModel>
 
 <div class="card shadow-sm">
     <div class="card-body p-0">
@@ -9,9 +9,8 @@
                         <th class="text-center" style="width: 40px;"><input type="checkbox" class="form-check-input" id="checkAll"></th>
                         <th class="text-center" style="width: 50px;"></th>
                         <th class="text-center" style="width: 50px;"></th>
-                        <th>Mã sản phẩm</th>
-                        <th>Tên sản phẩm</th>
-                        <th class="text-center">Đơn vị tính</th>
+                        <th>Mã kho hàng</th>
+                        <th>Tên kho hàng</th>
                         <th class="text-center">Người tạo</th>
                         <th class="text-center">Ngày tạo</th>
                     </tr>
@@ -19,6 +18,7 @@
                 <tbody>
                     @if (Model.Items != null && Model.Items.Any())
                     {
+                        int stt = (Model.CurrentPage - 1) * Model.PageSize + 1;
                         foreach (var item in Model.Items)
                         {
                             <tr>
@@ -33,18 +33,18 @@
                                         <ul class="dropdown-menu shadow">
                                             <li><h6 class="dropdown-header text-uppercase fw-bold text-dark">Thao tác</h6></li>
                                             <li><hr class="dropdown-divider"></li>
-                                            @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("SanPham", SalesManagementSystem.Helpers.LoaiPhanQuyen.CapNhat))
+                                            @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("KhoHang", SalesManagementSystem.Helpers.LoaiPhanQuyen.CapNhat))
                                             {
                                                 <li>
-                                                    <button type="button" class="dropdown-item" onclick="openFormModal('@Url.Action("Edit", "SanPham", new { id = item.ID })')">
+                                                    <button type="button" class="dropdown-item" onclick="openFormModal('@Url.Action("Edit", "KhoHang", new { id = item.ID })')">
                                                         <i class="bi bi-pencil-square me-2 text-primary"></i> Chỉnh sửa
                                                     </button>
                                                 </li>
                                             }
-                                            @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("SanPham", SalesManagementSystem.Helpers.LoaiPhanQuyen.Xoa))
+                                            @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("KhoHang", SalesManagementSystem.Helpers.LoaiPhanQuyen.Xoa))
                                             {
                                                 <li>
-                                                    <button type="button" class="dropdown-item text-danger" onclick="confirmDelete('@Url.Action("Delete", "SanPham", new { id = item.ID })', 'Bạn có chắc chắn muốn xóa sản phẩm này không?')">
+                                                    <button type="button" class="dropdown-item text-danger" onclick="confirmDelete('@Url.Action("Delete", "KhoHang", new { id = item.ID })', 'Bạn có chắc chắn muốn xóa kho hàng này không?')">
                                                         <i class="bi bi-trash-fill me-2 text-danger"></i> Xóa
                                                     </button>
                                                 </li>
@@ -52,10 +52,9 @@
                                         </ul>
                                     </div>
                                 </td>
-                                <td class="text-center align-middle">@item.STT</td>
-                                <td class="align-middle">@item.MaSanPham</td>
-                                <td class="align-middle">@item.TenSanPham</td>
-                                <td class="text-center align-middle">@item.DVT</td>
+                                <td class="text-center align-middle">@(stt++)</td>
+                                <td class="align-middle">@item.MaKhoHang</td>
+                                <td class="align-middle">@item.TenKhoHang</td>
                                 <td class="text-center align-middle">@item.TenNguoiTao</td>
                                 <td class="text-center align-middle">@(item.NgayTao.HasValue ? item.NgayTao.Value.ToString("dd/MM/yyyy HH:mm") : "")</td>
                             </tr>
@@ -64,9 +63,9 @@
                     else
                     {
                         <tr>
-                            <td colspan="8" class="text-center py-4 text-muted">
+                            <td colspan="7" class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox fs-2 d-block mb-2"></i>
-                                Chưa có dữ liệu sản phẩm.
+                                Chưa có dữ liệu kho hàng.
                             </td>
                         </tr>
                     }

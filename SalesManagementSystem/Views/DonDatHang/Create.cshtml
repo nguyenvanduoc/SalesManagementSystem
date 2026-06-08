@@ -1,0 +1,207 @@
+@model SalesManagementSystem.Models.ViewModels.DonDatHangCreateEditViewModel
+
+@{
+    ViewBag.Title = "Tạo đơn đặt hàng";
+    string chiTietsJson = ViewBag.ChiTietsJson as string ?? "[]";
+}
+
+<style>
+    .don-header-card { background:#fff; border:1px solid #dce4ec; border-radius:6px; padding:16px; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+    .don-section-title { font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:#7f8c8d; margin-bottom:10px; }
+    .tong-tien-box { background:linear-gradient(135deg,#1a5276,#2980b9); border-radius:8px; padding:16px 20px; color:#fff; text-align:right; }
+    .tong-tien-box .label { font-size:.8rem; opacity:.85; margin-bottom:4px; }
+    .tong-tien-box .amount { font-size:1.8rem; font-weight:800; letter-spacing:.5px; }
+    .grid-detail thead th { background:#f4f6f9; font-size:.8rem; font-weight:700; color:#2c3e50; vertical-align:middle; white-space:nowrap; }
+    .grid-detail tbody td { vertical-align:middle; padding:5px 6px; }
+    .grid-detail input.form-control, .grid-detail select.form-select { font-size:.85rem; padding:3px 7px; height:30px; }
+    .btn-add-row { background:#2ecc71; color:#fff; border:none; border-radius:4px; padding:5px 14px; font-size:.85rem; }
+    .btn-add-row:hover { background:#27ae60; color:#fff; }
+    .readonly-cell { background:#f8f9fa; font-size:.85rem; color:#495057; }
+    .field-error { border-color:#dc3545 !important; }
+    .form-toolbar { background:#f8f9fa; border:1px solid #dce4ec; border-radius:6px; padding:10px 16px; margin-bottom:12px; display:flex; gap:8px; align-items:center; }
+</style>
+
+<!-- Toolbar -->
+<div class="form-toolbar">
+    <a href="@Url.Action("Index","DonDatHang")" class="btn btn-secondary btn-sm no-ajax">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+    <button type="button" id="btnSaveDon" class="btn btn-sm text-white"
+            style="background-color:#2998e4;border:none;">
+        <i class="bi bi-save me-1"></i> Lưu đơn hàng
+    </button>
+    <span class="text-muted small ms-auto">
+        <i class="bi bi-info-circle me-1"></i>@ViewBag.Title
+    </span>
+</div>
+
+<form id="frmDonDatHang" method="post" action="@Url.Action("Create","DonDatHang")" autocomplete="off">
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.ID)
+    <input type="hidden" id="hdChiTietsJson" name="chiTietsJson" value="" />
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger py-2 mb-3">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            @Html.ValidationSummary(false, "", new { @class = "mb-0" })
+        </div>
+    }
+
+    <div class="row g-3">
+        <!-- Cột trái -->
+        <div class="col-md-9">
+
+            <!-- Card: Khách hàng -->
+            <div class="don-header-card">
+                <div class="don-section-title"><i class="bi bi-person-fill me-1"></i>Thông tin khách hàng</div>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label class="form-label text-muted fw-semibold small">
+                            Khách hàng <span class="text-danger">*</span>
+                        </label>
+                        <select id="selKhachHang" style="width:100%;"></select>
+                        @Html.HiddenFor(m => m.IDKhachHang, new { id = "hdIDKhachHang" })
+                        @Html.ValidationMessageFor(m => m.IDKhachHang, "", new { @class = "text-danger small" })
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Mã khách hàng</label>
+                        <input type="text" id="txtMaKH" class="form-control readonly-cell"
+                               value="@Model.MaKhachHang" readonly />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Mã số thuế</label>
+                        <input type="text" id="txtMaSoThue" class="form-control readonly-cell"
+                               value="@Model.MaSoThue" readonly />
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label text-muted fw-semibold small">Địa chỉ</label>
+                        <input type="text" id="txtDiaChi" class="form-control readonly-cell"
+                               value="@Model.DiaChi" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted fw-semibold small">Số điện thoại</label>
+                        <input type="text" id="txtSDT" class="form-control readonly-cell"
+                               value="@Model.SoDienThoai" readonly />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Thông tin đơn hàng -->
+            <div class="don-header-card">
+                <div class="don-section-title"><i class="bi bi-file-earmark-text me-1"></i>Thông tin đơn hàng</div>
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <label class="form-label text-muted fw-semibold small">
+                            Số đơn hàng <span class="text-danger">*</span>
+                        </label>
+                        @Html.TextBoxFor(m => m.SoDonHang, new { @class = "form-control", placeholder = "Nhập số đơn hàng" })
+                        @Html.ValidationMessageFor(m => m.SoDonHang, "", new { @class = "text-danger small" })
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted fw-semibold small">Ngày tạo đơn</label>
+                        @Html.TextBoxFor(m => m.NgayTaoDon, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted fw-semibold small">Hạn giao hàng</label>
+                        @Html.TextBoxFor(m => m.ThoiHanGiaoHang, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted fw-semibold small">
+                            Nhân viên phụ trách <span class="text-danger">*</span>
+                        </label>
+                        @Html.DropDownListFor(m => m.IDNhanVien, Model.NhanVienList,
+                            "-- Chọn nhân viên --",
+                            new { @class = "form-select", id = "selNhanVien" })
+                        @Html.ValidationMessageFor(m => m.IDNhanVien, "", new { @class = "text-danger small" })
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Trạng thái</label>
+                        @Html.DropDownListFor(m => m.TrangThaiDon, Model.TrangThaiList,
+                            new { @class = "form-select" })
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label text-muted fw-semibold small">Ghi chú</label>
+                        @Html.TextAreaFor(m => m.GhiChu, new { @class = "form-control", rows = 2, placeholder = "Ghi chú cho đơn hàng..." })
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Grid chi tiết sản phẩm -->
+            <div class="don-header-card">
+                <div class="d-flex align-items-center mb-2 gap-2">
+                    <div class="don-section-title mb-0"><i class="bi bi-table me-1"></i>Chi tiết sản phẩm</div>
+                    <button type="button" class="btn-add-row ms-auto" onclick="DonDatHang.addRow()">
+                        <i class="bi bi-plus-lg me-1"></i> Thêm dòng
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered grid-detail mb-0" id="tblChiTiet">
+                        <thead>
+                            <tr>
+                                <th style="width:35px;" class="text-center">#</th>
+                                <th style="min-width:200px;">Sản phẩm</th>
+                                <th style="width:100px;">Mã SP</th>
+                                <th style="min-width:160px;">Tên sản phẩm</th>
+                                <th style="width:65px;" class="text-center">ĐVT</th>
+                                <th style="width:70px;" class="text-center">Thuế GTGT (%)</th>
+                                <th style="width:110px;" class="text-end">Đơn giá</th>
+                                <th style="width:120px;" class="text-end">Thành tiền</th>
+                                <th style="width:80px;" class="text-center">Hàng KM</th>
+                                <th style="min-width:120px;">Ghi chú</th>
+                                <th style="width:38px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyChiTiet">
+                            <!-- Rows generated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="validChiTiet" class="text-danger small mt-1" style="display:none;">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    Vui lòng thêm ít nhất một sản phẩm.
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột phải: Tổng tiền nổi bật -->
+        <div class="col-md-3">
+            <div class="tong-tien-box">
+                <div class="label">Tổng tiền thanh toán</div>
+                <div class="amount" id="dispTongTien">0</div>
+                <div class="label mt-1" style="font-size:.7rem;">VNĐ</div>
+            </div>
+            <div class="mt-2 p-3 bg-white border rounded">
+                <div class="d-flex justify-content-between small text-muted mb-1">
+                    <span>Số dòng sản phẩm:</span>
+                    <span id="dispSoDong" class="fw-bold text-dark">0</span>
+                </div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between small">
+                    <span class="text-muted">Tổng tiền:</span>
+                    <span id="dispTongTien2" class="fw-bold" style="color:#1a5276;">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="@Url.Content("~/Scripts/don-dat-hang.js")"></script>
+<script>
+    $(document).ready(function () {
+        DonDatHang.init({
+            searchKhUrl:  '@Url.Action("SearchKhachHang","DonDatHang")',
+            searchSpUrl:  '@Url.Action("SearchSanPham","DonDatHang")',
+            chiTietsJson: []
+        });
+
+        $('#btnSaveDon').on('click', function () {
+            if (!DonDatHang.validateAndSerialize()) return;
+            $('#frmDonDatHang').submit();
+        });
+    });
+</script>
+}

@@ -14,6 +14,9 @@ namespace SalesManagementSystem.Models.ViewModels
         [StringLength(100, ErrorMessage = "Mã sản phẩm không được vượt quá 100 ký tự")]
         public string MaSanPham { get; set; }
 
+        [StringLength(100, ErrorMessage = "Đơn vị tính không được vượt quá 100 ký tự")]
+        public string DVT { get; set; }
+
         public int? STT { get; set; }
     }
 }

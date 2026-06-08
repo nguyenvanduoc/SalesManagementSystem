@@ -1,8 +1,8 @@
-@model SalesManagementSystem.Models.ViewModels.DmSanPhamCreateEditViewModel
+@model SalesManagementSystem.Models.ViewModels.DmKhoHangCreateEditViewModel
 
 @{
     Layout = null;
-    ViewBag.Title = "Thêm mới sản phẩm";
+    ViewBag.Title = "Thêm mới kho hàng";
 }
 
 <div class="modal-header bg-light">
@@ -10,7 +10,7 @@
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 
-@using (Html.BeginForm("Create", "SanPham", FormMethod.Post, new { id = "globalForm" }))
+@using (Html.BeginForm("Create", "KhoHang", FormMethod.Post, new { id = "globalForm" }))
 {
     @Html.AntiForgeryToken()
     @Html.HiddenFor(m => m.ID)
@@ -24,19 +24,14 @@
         }
         <div class="row g-3">
             <div class="col-md-12">
-                <label class="form-label text-muted fw-semibold">Mã sản phẩm <span class="text-danger">*</span></label>
-                @Html.TextBoxFor(m => m.MaSanPham, new { @class = "form-control", placeholder = "Nhập mã sản phẩm" })
-                @Html.ValidationMessageFor(m => m.MaSanPham, "", new { @class = "text-danger small" })
+                <label class="form-label text-muted fw-semibold">Mã kho hàng <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.MaKhoHang, new { @class = "form-control", placeholder = "Nhập mã kho hàng" })
+                @Html.ValidationMessageFor(m => m.MaKhoHang, "", new { @class = "text-danger small" })
             </div>
             <div class="col-md-12">
-                <label class="form-label text-muted fw-semibold">Tên sản phẩm <span class="text-danger">*</span></label>
-                @Html.TextBoxFor(m => m.TenSanPham, new { @class = "form-control", placeholder = "Nhập tên sản phẩm" })
-                @Html.ValidationMessageFor(m => m.TenSanPham, "", new { @class = "text-danger small" })
-            </div>
-            <div class="col-md-12">
-                <label class="form-label text-muted fw-semibold">Đơn vị tính</label>
-                @Html.TextBoxFor(m => m.DVT, new { @class = "form-control", placeholder = "VD: Cái, Hộp, Kg, Lít..." })
-                @Html.ValidationMessageFor(m => m.DVT, "", new { @class = "text-danger small" })
+                <label class="form-label text-muted fw-semibold">Tên kho hàng <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.TenKhoHang, new { @class = "form-control", placeholder = "Nhập tên kho hàng" })
+                @Html.ValidationMessageFor(m => m.TenKhoHang, "", new { @class = "text-danger small" })
             </div>
             <div class="col-md-12">
                 <label class="form-label text-muted fw-semibold">Thứ tự</label>

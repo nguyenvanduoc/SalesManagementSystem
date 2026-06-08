@@ -178,6 +178,8 @@
     <Compile Include="Models\Entities\AclPhanQuyen.cs" />
     <Compile Include="Models\ViewModels\DmSanPhamViewModel.cs" />
     <Compile Include="Models\ViewModels\DmSanPhamCreateEditViewModel.cs" />
+    <Compile Include="Models\ViewModels\DmKhoHangViewModel.cs" />
+    <Compile Include="Models\ViewModels\DmKhoHangCreateEditViewModel.cs" />
     <Compile Include="Models\ViewModels\PhanQuyenTreeViewModel.cs" />
     <Compile Include="Models\ViewModels\PhanQuyenMatrixViewModel.cs" />
     <Compile Include="Repositories\Interfaces\IAclPhanQuyenRepository.cs" />
@@ -205,6 +207,7 @@
     <Compile Include="Models\Entities\ChucVu.cs" />
     <Compile Include="Models\Entities\PhongBan.cs" />
     <Compile Include="Models\Entities\DM_SanPham.cs" />
+    <Compile Include="Models\Entities\DM_KhoHang.cs" />
     <Compile Include="Models\Entities\Product.cs" />
     <Compile Include="Models\Entities\Inventory.cs" />
     <Compile Include="Models\Entities\InventoryTransaction.cs" />
@@ -234,6 +237,7 @@
     <!-- Repositories -->
     <Compile Include="Repositories\MenuRepository.cs" />
     <Compile Include="Repositories\DmSanPhamRepository.cs" />
+    <Compile Include="Repositories\DmKhoHangRepository.cs" />
     <Compile Include="Repositories\NhanSuRepository.cs" />
     <Compile Include="Repositories\PhongBanRepository.cs" />
     <Compile Include="Repositories\ChucVuRepository.cs" />
@@ -242,6 +246,7 @@
     <Compile Include="Repositories\Interfaces\IChucVuRepository.cs" />
     <Compile Include="Repositories\Interfaces\IPhongBanRepository.cs" />
     <Compile Include="Repositories\Interfaces\IDmSanPhamRepository.cs" />
+    <Compile Include="Repositories\Interfaces\IDmKhoHangRepository.cs" />
     <Compile Include="Repositories\Interfaces\INhanSuRepository.cs" />
     <Compile Include="Repositories\Interfaces\IAclLoginRepository.cs" />
     <Compile Include="Repositories\Interfaces\INKTongHopRepository.cs" />
@@ -261,6 +266,7 @@
     <Compile Include="Repositories\Interfaces\IAclLoginSessionRepository.cs" />
     <Compile Include="Repositories\AclLoginSessionRepository.cs" />
     <Compile Include="Controllers\SanPhamController.cs" />
+    <Compile Include="Controllers\KhoHangController.cs" />
     <Compile Include="Controllers\LoginSessionController.cs" />
     <Compile Include="Models\ViewModels\ExportResult.cs" />
     <Compile Include="Services\Interfaces\IWordExportService.cs" />
@@ -534,5 +540,28 @@
     <Content Include="Views\KhachHang\_KhachHangList.cshtml" />
     <Content Include="Views\KhachHang\Create.cshtml" />
     <Content Include="Views\KhachHang\Edit.cshtml" />
+    <Content Include="Views\SanPham\Index.cshtml" />
+    <Content Include="Views\SanPham\_SanPhamList.cshtml" />
+    <Content Include="Views\SanPham\Create.cshtml" />
+    <Content Include="Views\SanPham\Edit.cshtml" />
+    <Content Include="Views\KhoHang\Index.cshtml" />
+    <Content Include="Views\KhoHang\_KhoHangList.cshtml" />
+    <Content Include="Views\KhoHang\Create.cshtml" />
+    <Content Include="Views\KhoHang\Edit.cshtml" />
+    <Compile Include="Models\Enums\TrangThaiDonHang.cs" />
+    <Compile Include="Models\Entities\NS_DonDatHang.cs" />
+    <Compile Include="Models\Entities\NS_DonDatHangChiTiet.cs" />
+    <Compile Include="Models\ViewModels\DonDatHangViewModel.cs" />
+    <Compile Include="Models\ViewModels\DonDatHangChiTietViewModel.cs" />
+    <Compile Include="Models\ViewModels\DonDatHangCreateEditViewModel.cs" />
+    <Compile Include="Repositories\Interfaces\IDonDatHangRepository.cs" />
+    <Compile Include="Repositories\DonDatHangRepository.cs" />
+    <Compile Include="Controllers\DonDatHangController.cs" />
+    <Content Include="Views\DonDatHang\Index.cshtml" />
+    <Content Include="Views\DonDatHang\_DonDatHangList.cshtml" />
+    <Content Include="Views\DonDatHang\Create.cshtml" />
+    <Content Include="Views\DonDatHang\Edit.cshtml" />
+    <Content Include="Scripts\don-dat-hang.js" />
+    <Content Include="App_Data\create_don_dat_hang.sql" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,125 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DonDatHangViewModel>
+
+@{
+    ViewBag.Title = "Danh sách đơn đặt hàng";
+}
+
+@using SalesManagementSystem.Helpers
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">
+        <i class="bi bi-cart3 me-2"></i>@ViewBag.Title
+    </h4>
+    <div class="d-flex gap-2">
+        @if (PermissionHelper.HasPermission("DonDatHang", LoaiPhanQuyen.Them))
+        {
+            <a href="@Url.Action("Create","DonDatHang")" class="btn btn-primary no-ajax"
+               style="background-color:#3498db;border-color:#3498db;">
+                <i class="bi bi-plus-lg fw-bold"></i> Thêm đơn
+            </a>
+        }
+        @if (PermissionHelper.HasPermission("DonDatHang", LoaiPhanQuyen.Xoa))
+        {
+            <button type="button" class="btn btn-danger"
+                    style="background-color:#e74c3c;border-color:#e74c3c;"
+                    onclick="deleteSelected()">
+                <i class="bi bi-trash"></i> Xóa
+            </button>
+        }
+    </div>
+</div>
+
+<!-- Bộ lọc -->
+<div class="card shadow-sm mb-3">
+    <div class="card-body py-2">
+        <form id="searchForm" action="@Url.Action("GetList","DonDatHang")" method="get">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label text-muted small mb-1">Từ ngày</label>
+                    <input type="date" name="tuNgay" class="form-control form-control-sm"
+                           value="@ViewBag.TuNgay" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small mb-1">Đến ngày</label>
+                    <input type="date" name="denNgay" class="form-control form-control-sm"
+                           value="@ViewBag.DenNgay" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small mb-1">Nhân viên</label>
+                    @Html.DropDownList("idNhanVien",
+                        (SelectList)ViewBag.NhanViens,
+                        "-- Tất cả --",
+                        new { @class = "form-select form-select-sm" })
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small mb-1">Trạng thái</label>
+                    @Html.DropDownList("trangThai",
+                        (SelectList)ViewBag.TrangThais,
+                        "-- Tất cả --",
+                        new { @class = "form-select form-select-sm" })
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small mb-1">Số đơn hàng</label>
+                    <input type="text" name="soDonHang" class="form-control form-control-sm"
+                           placeholder="Tìm số đơn..." value="@ViewBag.SoDonHang" />
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-sm text-white px-3"
+                            style="background-color:#2998e4;border:none;">
+                        <i class="bi bi-search"></i> Tìm
+                    </button>
+                    <button type="button" class="btn btn-sm text-white px-3"
+                            style="background-color:#f1c40f;border:none;" onclick="resetSearch()">
+                        Làm mới
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="table-container">
+    @Html.Partial("_DonDatHangList", Model)
+</div>
+
+@section Scripts {
+<script>
+    $(document).ready(function () {
+        $(document).on('change', '#checkAll', function () {
+            $('.row-checkbox').prop('checked', $(this).prop('checked'));
+        });
+        $(document).on('change', '.row-checkbox', function () {
+            var all = $('.row-checkbox').length;
+            var checked = $('.row-checkbox:checked').length;
+            $('#checkAll').prop('checked', all > 0 && all === checked);
+        });
+
+        $('#searchForm').submit(function (e) {
+            e.preventDefault();
+            loadData($(this).serialize());
+        });
+    });
+
+    function loadData(params) {
+        var url = '@Url.Action("GetList","DonDatHang")?' + params;
+        $.ajax({
+            url: url, type: 'GET',
+            success: function (res) { $('#table-container').html(res); },
+            error:   function ()    { showToast('error', 'Lỗi khi tải dữ liệu.'); }
+        });
+    }
+
+    function resetSearch() {
+        $('#searchForm')[0].reset();
+        loadData('');
+    }
+
+    function deleteSelected() {
+        var ids = [];
+        $('.row-checkbox:checked').each(function () { ids.push($(this).val()); });
+        if (ids.length === 0) { showToast('warning', 'Vui lòng chọn ít nhất một đơn hàng.'); return; }
+        confirmBatchDelete('@Url.Action("Delete","DonDatHang")', ids,
+            'Bạn có chắc chắn muốn xóa ' + ids.length + ' đơn hàng đã chọn không?');
+    }
+</script>
+}

@@ -70,8 +70,8 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _dbFactory.CreateConnection())
             {
                 string sql = @"
-                    INSERT INTO DM_SanPham (TenSanPham, MaSanPham, STT, NgayTao, NguoiTao, NgayCapNhat, NguoiCapNhat)
-                    VALUES (@TenSanPham, @MaSanPham, @STT, @NgayTao, @NguoiTao, @NgayCapNhat, @NguoiCapNhat);
+                    INSERT INTO DM_SanPham (TenSanPham, MaSanPham, DVT, STT, NgayTao, NguoiTao, NgayCapNhat, NguoiCapNhat)
+                    VALUES (@TenSanPham, @MaSanPham, @DVT, @STT, @NgayTao, @NguoiTao, @NgayCapNhat, @NguoiCapNhat);
                     SELECT CAST(SCOPE_IDENTITY() as int);
                 ";
                 return conn.QuerySingle<int>(sql, entity);
@@ -86,6 +86,7 @@ namespace SalesManagementSystem.Repositories
                     UPDATE DM_SanPham
                     SET TenSanPham = @TenSanPham,
                         MaSanPham = @MaSanPham,
+                        DVT = @DVT,
                         STT = @STT,
                         NgayCapNhat = @NgayCapNhat,
                         NguoiCapNhat = @NguoiCapNhat

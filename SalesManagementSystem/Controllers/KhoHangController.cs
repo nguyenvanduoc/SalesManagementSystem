@@ -10,23 +10,23 @@ using SalesManagementSystem.Services.Interfaces;
 namespace SalesManagementSystem.Controllers
 {
     [CustomAuthorize(AuthorizeTypes.AuthorizedUsers)]
-    public class SanPhamController : BaseController
+    public class KhoHangController : BaseController
     {
-        private readonly IDmSanPhamRepository _sanPhamRepo;
+        private readonly IDmKhoHangRepository _khoHangRepo;
         private readonly IExcelExportService _excelExportService;
 
-        public SanPhamController(IDmSanPhamRepository sanPhamRepo, IExcelExportService excelExportService)
+        public KhoHangController(IDmKhoHangRepository khoHangRepo, IExcelExportService excelExportService)
         {
-            _sanPhamRepo = sanPhamRepo;
+            _khoHangRepo = khoHangRepo;
             _excelExportService = excelExportService;
         }
 
         public ActionResult Index(int page = 1, int pageSize = 15, string keyword = "")
         {
             int totalRecords;
-            var list = _sanPhamRepo.GetPaged(page, pageSize, keyword, out totalRecords);
+            var list = _khoHangRepo.GetPaged(page, pageSize, keyword, out totalRecords);
 
-            var model = new PagedListViewModel<DmSanPhamViewModel>
+            var model = new PagedListViewModel<DmKhoHangViewModel>
             {
                 Items = list,
                 CurrentPage = page,
@@ -37,23 +37,22 @@ namespace SalesManagementSystem.Controllers
             };
 
             ViewBag.Keyword = keyword;
-            ViewBag.Title = "Danh mục sản phẩm";
+            ViewBag.Title = "Danh mục kho hàng";
 
             if (Request.IsAjaxRequest())
             {
-                return PartialView("_SanPhamList", model);
+                return PartialView("_KhoHangList", model);
             }
 
             return View("Index", model);
         }
 
-        // GET: SanPham/GetList
         public ActionResult GetList(int page = 1, int pageSize = 15, string keyword = "")
         {
             int totalRecords;
-            var list = _sanPhamRepo.GetPaged(page, pageSize, keyword, out totalRecords);
+            var list = _khoHangRepo.GetPaged(page, pageSize, keyword, out totalRecords);
 
-            var model = new PagedListViewModel<DmSanPhamViewModel>
+            var model = new PagedListViewModel<DmKhoHangViewModel>
             {
                 Items = list,
                 CurrentPage = page,
@@ -65,114 +64,111 @@ namespace SalesManagementSystem.Controllers
 
             ViewBag.Keyword = keyword;
 
-            return PartialView("_SanPhamList", model);
+            return PartialView("_KhoHangList", model);
         }
 
-        // GET: SanPham/Create
+        // GET: KhoHang/Create
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult Create()
         {
-            return PartialView(new DmSanPhamCreateEditViewModel());
+            return PartialView(new DmKhoHangCreateEditViewModel());
         }
 
-        // POST: SanPham/Create
+        // POST: KhoHang/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
-        public ActionResult Create(DmSanPhamCreateEditViewModel model)
+        public ActionResult Create(DmKhoHangCreateEditViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var maSanPham = model.MaSanPham?.Trim();
-                var tenSanPham = model.TenSanPham?.Trim();
+                var maKhoHang = model.MaKhoHang?.Trim();
+                var tenKhoHang = model.TenKhoHang?.Trim();
 
-                if (string.IsNullOrEmpty(maSanPham) || string.IsNullOrEmpty(tenSanPham))
+                if (string.IsNullOrEmpty(maKhoHang) || string.IsNullOrEmpty(tenKhoHang))
                 {
-                    ModelState.AddModelError("", "Mã và Tên sản phẩm không được để trống.");
+                    ModelState.AddModelError("", "Mã và Tên kho hàng không được để trống.");
                     return PartialView("Create", model);
                 }
 
-                if (_sanPhamRepo.CheckDuplicateCode(maSanPham, 0))
+                if (_khoHangRepo.CheckDuplicateCode(maKhoHang, 0))
                 {
-                    ModelState.AddModelError("MaSanPham", $"Mã sản phẩm {maSanPham} đã tồn tại trong hệ thống.");
+                    ModelState.AddModelError("MaKhoHang", $"Mã kho hàng {maKhoHang} đã tồn tại trong hệ thống.");
                     return PartialView("Create", model);
                 }
 
                 var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
                 int userId = session?.IDNhanSu ?? 0;
 
-                var sp = new DM_SanPham
+                var kh = new DM_KhoHang
                 {
-                    MaSanPham = maSanPham,
-                    TenSanPham = tenSanPham,
-                    DVT = model.DVT?.Trim(),
+                    MaKhoHang = maKhoHang,
+                    TenKhoHang = tenKhoHang,
                     STT = model.STT,
                     NgayTao = DateTime.Now,
                     NguoiTao = userId
                 };
 
-                _sanPhamRepo.Insert(sp);
+                _khoHangRepo.Insert(kh);
                 return Json(new { success = true, message = "Thêm mới thành công" });
             }
             return PartialView("Create", model);
         }
 
-        // GET: SanPham/Edit/5
+        // GET: KhoHang/Edit/5
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult Edit(int id)
         {
-            var sp = _sanPhamRepo.GetById(id);
-            if (sp == null) return HttpNotFound();
+            var kh = _khoHangRepo.GetById(id);
+            if (kh == null) return HttpNotFound();
 
-            var model = new DmSanPhamCreateEditViewModel
+            var model = new DmKhoHangCreateEditViewModel
             {
-                ID = sp.ID,
-                MaSanPham = sp.MaSanPham,
-                TenSanPham = sp.TenSanPham,
-                DVT = sp.DVT,
-                STT = sp.STT
+                ID = kh.ID,
+                MaKhoHang = kh.MaKhoHang,
+                TenKhoHang = kh.TenKhoHang,
+                STT = kh.STT
             };
             return PartialView(model);
         }
 
-        // POST: SanPham/Edit/5
+        // POST: KhoHang/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
-        public ActionResult Edit(DmSanPhamCreateEditViewModel model)
+        public ActionResult Edit(DmKhoHangCreateEditViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var maSanPham = model.MaSanPham?.Trim();
-                var tenSanPham = model.TenSanPham?.Trim();
+                var maKhoHang = model.MaKhoHang?.Trim();
+                var tenKhoHang = model.TenKhoHang?.Trim();
 
-                if (string.IsNullOrEmpty(maSanPham) || string.IsNullOrEmpty(tenSanPham))
+                if (string.IsNullOrEmpty(maKhoHang) || string.IsNullOrEmpty(tenKhoHang))
                 {
-                    ModelState.AddModelError("", "Mã và Tên sản phẩm không được để trống.");
+                    ModelState.AddModelError("", "Mã và Tên kho hàng không được để trống.");
                     return PartialView("Edit", model);
                 }
 
-                if (_sanPhamRepo.CheckDuplicateCode(maSanPham, model.ID))
+                if (_khoHangRepo.CheckDuplicateCode(maKhoHang, model.ID))
                 {
-                    ModelState.AddModelError("MaSanPham", $"Mã sản phẩm {maSanPham} đã tồn tại trong hệ thống.");
+                    ModelState.AddModelError("MaKhoHang", $"Mã kho hàng {maKhoHang} đã tồn tại trong hệ thống.");
                     return PartialView("Edit", model);
                 }
 
                 var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
                 int userId = session?.IDNhanSu ?? 0;
 
-                var sp = new DM_SanPham
+                var kh = new DM_KhoHang
                 {
                     ID = model.ID,
-                    MaSanPham = maSanPham,
-                    TenSanPham = tenSanPham,
-                    DVT = model.DVT?.Trim(),
+                    MaKhoHang = maKhoHang,
+                    TenKhoHang = tenKhoHang,
                     STT = model.STT,
                     NgayCapNhat = DateTime.Now,
                     NguoiCapNhat = userId
                 };
 
-                _sanPhamRepo.Update(sp);
+                _khoHangRepo.Update(kh);
                 return Json(new { success = true, message = "Cập nhật thành công" });
             }
             return PartialView("Edit", model);
@@ -184,33 +180,33 @@ namespace SalesManagementSystem.Controllers
         {
             if (id.HasValue)
             {
-                var sp = _sanPhamRepo.GetById(id.Value);
-                if (sp != null)
+                var kh = _khoHangRepo.GetById(id.Value);
+                if (kh != null)
                 {
-                    _sanPhamRepo.Delete(id.Value);
+                    _khoHangRepo.Delete(id.Value);
                 }
             }
             else if (ids != null && ids.Length > 0)
             {
                 foreach (var item in ids)
                 {
-                    var sp = _sanPhamRepo.GetById(item);
-                    if (sp != null)
+                    var kh = _khoHangRepo.GetById(item);
+                    if (kh != null)
                     {
-                        _sanPhamRepo.Delete(item);
+                        _khoHangRepo.Delete(item);
                     }
                 }
             }
             return Json(new { success = true, message = "Xóa dữ liệu thành công" });
         }
 
-        // GET: SanPham/ExportExcel
+        // GET: KhoHang/ExportExcel
         public ActionResult ExportExcel()
         {
             try
             {
                 int total;
-                var data = _sanPhamRepo.GetPaged(1, 10000, "", out total);
+                var data = _khoHangRepo.GetPaged(1, 10000, "", out total);
 
                 var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
                 string nguoiLapBieu = session != null ? (session.HoDem + " " + session.Ten).Trim() : "";
@@ -227,20 +223,20 @@ namespace SalesManagementSystem.Controllers
                 int stt = 1;
                 var exportData = data.Select(x => new {
                     STT = stt++,
-                    MaSanPham = x.MaSanPham,
-                    TenSanPham = x.TenSanPham,
+                    MaKhoHang = x.MaKhoHang,
+                    TenKhoHang = x.TenKhoHang,
                     TenNguoiTao = x.TenNguoiTao,
                     NgayTao = x.NgayTao.HasValue ? x.NgayTao.Value.ToString("dd/MM/yyyy HH:mm") : ""
                 });
 
                 string fileExtension;
-                var fileBytes = _excelExportService.Export("SP01", exportData, out fileExtension, variables);
+                var fileBytes = _excelExportService.Export("KH02", exportData, out fileExtension, variables);
 
                 string contentType = fileExtension == "xls" 
                     ? "application/vnd.ms-excel" 
                     : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-                return File(fileBytes, contentType, $"DanhSachSanPham_{DateTime.Now:yyyyMMddHHmmss}.{fileExtension}");
+                return File(fileBytes, contentType, $"DanhSachKhoHang_{DateTime.Now:yyyyMMddHHmmss}.{fileExtension}");
             }
             catch (Exception ex)
             {
