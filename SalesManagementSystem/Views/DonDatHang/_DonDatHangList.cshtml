@@ -14,8 +14,9 @@
                         <th class="text-center" style="width:50px;"></th>
                         <th class="text-center" style="width:45px;">STT</th>
                         <th>Số đơn hàng</th>
-                        <th class="text-center">Ngày tạo</th>
-                        <th>Khách hàng</th>
+                        <th class="text-center">Ngày lên đơn</th>
+                        <th>Mã khách hàng</th>
+                        <th>Tên khách hàng</th>
                         <th>Nhân viên</th>
                         <th class="text-center">Hạn giao</th>
                         <th class="text-center">Trạng thái</th>
@@ -50,7 +51,7 @@
                                                     </a>
                                                 </li>
                                             }
-                                            @if (PermissionHelper.HasPermission("DonDatHang", LoaiPhanQuyen.Xoa))
+                                            @if (PermissionHelper.HasPermission("DonDatHang", LoaiPhanQuyen.Xoa) && item.TrangThaiDon != 3)
                                             {
                                                 <li>
                                                     <button type="button" class="dropdown-item text-danger"
@@ -59,31 +60,40 @@
                                                     </button>
                                                 </li>
                                             }
+                                            @if (item.TrangThaiDon != 3 && item.TrangThaiDon != 4)
+                                            {
+                                                <li>
+                                                    <button type="button" class="dropdown-item text-secondary"
+                                                            onclick="confirmCancel('@Url.Action("CancelOrder", "DonDatHang", new { id = item.ID })')">
+                                                        <i class="bi bi-x-circle-fill me-2 text-secondary"></i> Hủy đơn
+                                                    </button>
+                                                </li>
+                                            }
                                         </ul>
                                     </div>
                                 </td>
                                 <td class="text-center align-middle">@(stt++)</td>
-                                <td class="align-middle fw-semibold">@item.SoDonHang</td>
+                                <td class="align-middle">@item.SoDonHang</td>
                                 <td class="text-center align-middle">
                                     @(item.NgayTaoDon.HasValue ? item.NgayTaoDon.Value.ToString("dd/MM/yyyy") : "")
                                 </td>
-                                <td class="align-middle">
-                                    <div class="fw-semibold">@item.TenKhachHang</div>
-                                    <small class="text-muted">@item.MaKhachHang</small>
-                                </td>
+                                <td class="align-middle">@item.MaKhachHang</td>
+                                <td class="align-middle">@item.TenKhachHang</td>
                                 <td class="align-middle">@item.TenNhanVien</td>
                                 <td class="text-center align-middle">
                                     @(item.ThoiHanGiaoHang.HasValue ? item.ThoiHanGiaoHang.Value.ToString("dd/MM/yyyy") : "")
                                 </td>
                                 <td class="text-center align-middle">
                                     @{
-                                        string badgeClass = item.TrangThaiDon == 1 ? "bg-warning text-dark"
-                                                          : item.TrangThaiDon == 2 ? "bg-info text-dark"
-                                                          : "bg-success";
+                                        string badgeClass = item.TrangThaiDon == 1 ? "bg-danger"
+                                                          : item.TrangThaiDon == 2 ? "bg-warning text-dark"
+                                                          : item.TrangThaiDon == 3 ? "bg-success"
+                                                          : item.TrangThaiDon == 4 ? "bg-secondary"
+                                                          : "bg-secondary";
                                     }
                                     <span class="badge @badgeClass">@item.TenTrangThai</span>
                                 </td>
-                                <td class="text-end align-middle fw-bold" style="color:#1a5276;">
+                                <td class="text-end align-middle">
                                     @item.TongTien.ToString("N0")
                                 </td>
                             </tr>
@@ -92,7 +102,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="10" class="text-center py-4 text-muted">
+                            <td colspan="11" class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox fs-2 d-block mb-2"></i>
                                 Chưa có đơn đặt hàng nào.
                             </td>

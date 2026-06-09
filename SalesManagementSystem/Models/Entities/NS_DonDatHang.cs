@@ -12,6 +12,7 @@ namespace SalesManagementSystem.Models.Entities
         public DateTime? ThoiHanGiaoHang { get; set; }
         public int TrangThaiDon { get; set; }
         public decimal TongTien { get; set; }
+        public decimal PhiBocXep { get; set; }
         public string GhiChu { get; set; }
         public DateTime? NgayCapNhat { get; set; }
         public int? NguoiCapNhat { get; set; }

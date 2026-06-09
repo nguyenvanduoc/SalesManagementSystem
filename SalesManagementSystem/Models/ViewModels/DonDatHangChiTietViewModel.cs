@@ -17,6 +17,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public decimal DonGia { get; set; }
         public decimal ThueGTGT { get; set; }
         public decimal ThanhTien { get; set; }
+        public decimal ThanhTienSauThue { get; set; }
 
         public bool IsHangKhuyenMai { get; set; }
         public string GhiChu { get; set; }

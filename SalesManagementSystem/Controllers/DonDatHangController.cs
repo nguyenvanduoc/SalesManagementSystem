@@ -34,7 +34,17 @@ namespace SalesManagementSystem.Controllers
             using (var conn = _db.CreateConnection())
             {
                 var items = conn.Query<DropdownItem>(
-                    "SELECT ID, HoTen AS Name FROM NS_NhanVien ORDER BY HoTen").ToList();
+                    "SELECT ID, ISNULL(MaNhanSu, '') + ' - ' + LTRIM(RTRIM(ISNULL(HoDem, '') + ' ' + ISNULL(Ten, ''))) AS Name FROM NS_NhanSu ORDER BY Ten").ToList();
+                return new SelectList(items, "ID", "Name", selectedId);
+            }
+        }
+
+        private SelectList GetKhachHangList(int? selectedId = null)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                var items = conn.Query<DropdownItem>(
+                    "SELECT ID, ISNULL(MaKhachHang, '') + ' - ' + LTRIM(RTRIM(ISNULL(HoDem, '') + ' ' + ISNULL(Ten, ''))) AS Name FROM NS_KhachHang ORDER BY Ten").ToList();
                 return new SelectList(items, "ID", "Name", selectedId);
             }
         }
@@ -47,7 +57,7 @@ namespace SalesManagementSystem.Controllers
                 new { ID = 2, Name = "Đang đi đường"  },
                 new { ID = 3, Name = "Đã giao"        }
             };
-            return new SelectList(items, "ID", "Name", selectedId ?? 1);
+            return new SelectList(items, "ID", "Name", selectedId);
         }
 
         private UserLoginViewModel GetCurrentUser()
@@ -79,6 +89,7 @@ namespace SalesManagementSystem.Controllers
             ViewBag.TuNgay     = tuNgay;
             ViewBag.DenNgay    = denNgay;
             ViewBag.SoDonHang  = soDonHang;
+            ViewBag.KhachHangs = GetKhachHangList(idKhachHang);
             ViewBag.NhanViens  = GetNhanVienList(idNhanVien);
             ViewBag.TrangThais = GetTrangThaiList(trangThai);
 
@@ -119,7 +130,8 @@ namespace SalesManagementSystem.Controllers
             var model = new DonDatHangCreateEditViewModel
             {
                 NgayTaoDon   = DateTime.Now,
-                TrangThaiDon = (int)TrangThaiDonHang.ChuaGiao
+                TrangThaiDon = (int)TrangThaiDonHang.ChuaGiao,
+                SoDonHang    = _repo.GenerateSoDonHang()
             };
             model.NhanVienList  = GetNhanVienList();
             model.TrangThaiList = GetTrangThaiList();
@@ -141,7 +153,10 @@ namespace SalesManagementSystem.Controllers
                 ModelState.AddModelError("IDKhachHang", "Vui lòng chọn khách hàng");
 
             if (string.IsNullOrWhiteSpace(model.SoDonHang))
-                ModelState.AddModelError("SoDonHang", "Vui lòng nhập số đơn hàng");
+            {
+                model.SoDonHang = "AUTO"; // Sẽ sinh tự động trong Repository
+                if (ModelState.ContainsKey("SoDonHang")) ModelState["SoDonHang"].Errors.Clear();
+            }
             else if (_repo.CheckDuplicateSoDon(model.SoDonHang.Trim()))
                 ModelState.AddModelError("SoDonHang", "Số đơn hàng đã tồn tại trong hệ thống");
 
@@ -159,6 +174,8 @@ namespace SalesManagementSystem.Controllers
                         ModelState.AddModelError("", $"Dòng {i + 1}: Vui lòng chọn sản phẩm");
                     if (chiTiets[i].DonGia < 0)
                         ModelState.AddModelError("", $"Dòng {i + 1}: Đơn giá không được âm");
+                    if (chiTiets[i].SoLuong < 0)
+                        ModelState.AddModelError("", $"Dòng {i + 1}: Số lượng không được âm");
                     if (chiTiets[i].ThueGTGT < 0)
                         ModelState.AddModelError("", $"Dòng {i + 1}: Thuế GTGT không được âm");
                 }
@@ -175,7 +192,8 @@ namespace SalesManagementSystem.Controllers
 
             var session  = GetCurrentUser();
             int userId   = session?.IDNhanSu ?? 0;
-            decimal tong = chiTiets.Sum(x => x.ThanhTien);
+            NormalizeChiTiets(chiTiets);
+            decimal tong = chiTiets.Sum(x => x.ThanhTienSauThue) - model.PhiBocXep;
 
             var header = new NS_DonDatHang
             {
@@ -186,6 +204,7 @@ namespace SalesManagementSystem.Controllers
                 ThoiHanGiaoHang = model.ThoiHanGiaoHang,
                 TrangThaiDon    = model.TrangThaiDon,
                 TongTien        = tong,
+                PhiBocXep       = model.PhiBocXep,
                 GhiChu          = model.GhiChu,
                 NgayTao         = DateTime.Now,
                 NguoiTao        = userId
@@ -194,9 +213,10 @@ namespace SalesManagementSystem.Controllers
             var details = chiTiets.Select(c => new NS_DonDatHangChiTiet
             {
                 IDSanPham       = c.IDSanPham,
-                SoLuong         = c.SoLuong > 0 ? c.SoLuong : 1,
+                SoLuong         = c.SoLuong >= 0 ? c.SoLuong : 1,
                 DonGia          = c.DonGia,
                 ThanhTien       = c.ThanhTien,
+                ThanhTienSauThue= c.ThanhTienSauThue,
                 ThueGTGT        = c.ThueGTGT,
                 IsHangKhuyenMai = c.IsHangKhuyenMai,
                 GhiChu          = c.GhiChu
@@ -254,6 +274,7 @@ namespace SalesManagementSystem.Controllers
                 ThoiHanGiaoHang = don.ThoiHanGiaoHang,
                 TrangThaiDon    = don.TrangThaiDon,
                 TongTien        = don.TongTien,
+                PhiBocXep       = don.PhiBocXep,
                 GhiChu          = don.GhiChu,
                 ChiTiets        = chiTiets
             };
@@ -270,6 +291,11 @@ namespace SalesManagementSystem.Controllers
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult Edit(DonDatHangCreateEditViewModel model, string chiTietsJson)
         {
+            var oldDon = _repo.GetById(model.ID);
+            if (oldDon == null) return HttpNotFound();
+            if (oldDon.TrangThaiDon == 3) return new HttpStatusCodeResult(400, "Đơn hàng đã giao không được chỉnh sửa.");
+            if (oldDon.TrangThaiDon == 4) return new HttpStatusCodeResult(400, "Đơn hàng đã hủy không được chỉnh sửa.");
+
             var chiTiets = ParseChiTiets(chiTietsJson);
 
             if (!model.IDKhachHang.HasValue || model.IDKhachHang == 0)
@@ -293,6 +319,8 @@ namespace SalesManagementSystem.Controllers
                         ModelState.AddModelError("", $"Dòng {i + 1}: Vui lòng chọn sản phẩm");
                     if (chiTiets[i].DonGia < 0)
                         ModelState.AddModelError("", $"Dòng {i + 1}: Đơn giá không được âm");
+                    if (chiTiets[i].SoLuong < 0)
+                        ModelState.AddModelError("", $"Dòng {i + 1}: Số lượng không được âm");
                     if (chiTiets[i].ThueGTGT < 0)
                         ModelState.AddModelError("", $"Dòng {i + 1}: Thuế GTGT không được âm");
                 }
@@ -309,7 +337,8 @@ namespace SalesManagementSystem.Controllers
 
             var session = GetCurrentUser();
             int userId  = session?.IDNhanSu ?? 0;
-            decimal tong = chiTiets.Sum(x => x.ThanhTien);
+            NormalizeChiTiets(chiTiets);
+            decimal tong = chiTiets.Sum(x => x.ThanhTienSauThue) - model.PhiBocXep;
 
             var header = new NS_DonDatHang
             {
@@ -321,6 +350,7 @@ namespace SalesManagementSystem.Controllers
                 ThoiHanGiaoHang = model.ThoiHanGiaoHang,
                 TrangThaiDon    = model.TrangThaiDon,
                 TongTien        = tong,
+                PhiBocXep       = model.PhiBocXep,
                 GhiChu          = model.GhiChu,
                 NgayCapNhat     = DateTime.Now,
                 NguoiCapNhat    = userId
@@ -328,10 +358,12 @@ namespace SalesManagementSystem.Controllers
 
             var details = chiTiets.Select(c => new NS_DonDatHangChiTiet
             {
+                ID              = c.ID,
                 IDSanPham       = c.IDSanPham,
-                SoLuong         = c.SoLuong > 0 ? c.SoLuong : 1,
+                SoLuong         = c.SoLuong >= 0 ? c.SoLuong : 1,
                 DonGia          = c.DonGia,
                 ThanhTien       = c.ThanhTien,
+                ThanhTienSauThue= c.ThanhTienSauThue,
                 ThueGTGT        = c.ThueGTGT,
                 IsHangKhuyenMai = c.IsHangKhuyenMai,
                 GhiChu          = c.GhiChu
@@ -352,14 +384,45 @@ namespace SalesManagementSystem.Controllers
         {
             if (id.HasValue)
             {
+                var don = _repo.GetById(id.Value);
+                if (don != null && don.TrangThaiDon == 3)
+                {
+                    return Json(new { success = false, message = "Không thể xóa đơn đặt hàng đã giao." });
+                }
                 _repo.Delete(id.Value);
             }
             else if (ids != null && ids.Length > 0)
             {
                 foreach (var item in ids)
+                {
+                    var don = _repo.GetById(item);
+                    if (don != null && don.TrangThaiDon == 3)
+                    {
+                        return Json(new { success = false, message = "Một số đơn đặt hàng đã giao, không thể xóa." });
+                    }
+                }
+                foreach (var item in ids)
                     _repo.Delete(item);
             }
             return Json(new { success = true, message = "Xóa đơn đặt hàng thành công" });
+        }
+
+        [HttpPost]
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
+        public ActionResult CancelOrder(int id)
+        {
+            var oldDon = _repo.GetById(id);
+            if (oldDon == null) return Json(new { success = false, message = "Không tìm thấy đơn hàng." });
+            if (oldDon.TrangThaiDon == 3) return Json(new { success = false, message = "Không thể hủy đơn hàng đã giao." });
+            if (oldDon.TrangThaiDon == 4) return Json(new { success = false, message = "Đơn hàng này đã bị hủy trước đó." });
+
+            var session = GetCurrentUser();
+            int userId = session?.IDNhanSu ?? 0;
+
+            bool result = _repo.CancelOrder(id, userId);
+            if (result)
+                return Json(new { success = true, message = "Hủy đơn hàng thành công." });
+            return Json(new { success = false, message = "Lỗi khi hủy đơn hàng." });
         }
 
         // ── AJAX: SearchKhachHang (Select2) ───────────────────────────────────
@@ -444,6 +507,16 @@ namespace SalesManagementSystem.Controllers
                        ?? new List<DonDatHangChiTietViewModel>();
             }
             catch { return new List<DonDatHangChiTietViewModel>(); }
+        }
+
+        private void NormalizeChiTiets(List<DonDatHangChiTietViewModel> chiTiets)
+        {
+            foreach (var ct in chiTiets)
+            {
+                if (ct.SoLuong < 0) ct.SoLuong = 1;
+                ct.ThanhTien = Math.Round(ct.DonGia * ct.SoLuong, 0);
+                ct.ThanhTienSauThue = Math.Round(ct.ThanhTien + (ct.ThanhTien * ct.ThueGTGT / 100), 0);
+            }
         }
     }
 }

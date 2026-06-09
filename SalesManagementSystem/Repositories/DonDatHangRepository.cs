@@ -17,6 +17,15 @@ namespace SalesManagementSystem.Repositories
         public DonDatHangRepository(DbConnectionFactory db)
         {
             _db = db;
+            try
+            {
+                using (var conn = _db.CreateConnection())
+                {
+                    conn.Execute("IF COL_LENGTH('NS_DonDatHangChiTiet', 'ThanhTienSauThue') IS NULL ALTER TABLE NS_DonDatHangChiTiet ADD ThanhTienSauThue DECIMAL(18,2) NULL");
+                    conn.Execute("IF COL_LENGTH('NS_DonDatHang', 'PhiBocXep') IS NULL ALTER TABLE NS_DonDatHang ADD PhiBocXep DECIMAL(18,2) NULL");
+                }
+            }
+            catch { }
         }
 
         // ── GetPaged ────────────────────────────────────────────────────────
@@ -59,6 +68,7 @@ namespace SalesManagementSystem.Repositories
                             WHEN 1 THEN N'Chưa giao'
                             WHEN 2 THEN N'Đang đi đường'
                             WHEN 3 THEN N'Đã giao'
+                            WHEN 4 THEN N'Đã hủy'
                             ELSE N'Không xác định'
                         END AS TenTrangThai,
                         d.TongTien, d.GhiChu,
@@ -103,7 +113,7 @@ namespace SalesManagementSystem.Repositories
                     SELECT
                         ct.ID, ct.IDDonDatHang, ct.IDSanPham,
                         sp.MaSanPham, sp.TenSanPham, sp.DVT,
-                        ct.SoLuong, ct.DonGia, ct.ThueGTGT, ct.ThanhTien,
+                        ct.SoLuong, ct.DonGia, ct.ThueGTGT, ct.ThanhTien, ct.ThanhTienSauThue,
                         ct.IsHangKhuyenMai, ct.GhiChu
                     FROM NS_DonDatHangChiTiet ct
                     LEFT JOIN DM_SanPham sp ON ct.IDSanPham = sp.ID
@@ -136,27 +146,46 @@ namespace SalesManagementSystem.Repositories
                 {
                     try
                     {
+                        if (string.IsNullOrEmpty(header.SoDonHang) || header.SoDonHang == "AUTO")
+                        {
+                            string genSoDonSql = @"
+                                DECLARE @YearSuffix VARCHAR(2) = RIGHT(CAST(YEAR(GETDATE()) AS VARCHAR(4)), 2);
+                                DECLARE @Prefix VARCHAR(4) = 'DH' + @YearSuffix;
+                                DECLARE @MaxSoDon VARCHAR(20) = (
+                                    SELECT TOP 1 SoDonHang 
+                                    FROM NS_DonDatHang WITH (UPDLOCK) 
+                                    WHERE SoDonHang LIKE @Prefix + '%' 
+                                    ORDER BY SoDonHang DESC
+                                );
+                                DECLARE @NextNum INT = 1;
+                                IF @MaxSoDon IS NOT NULL
+                                BEGIN
+                                    SET @NextNum = CAST(SUBSTRING(@MaxSoDon, 5, 6) AS INT) + 1;
+                                END
+                                SELECT @Prefix + RIGHT('000000' + CAST(@NextNum AS VARCHAR(6)), 6);";
+                            
+                            header.SoDonHang = conn.ExecuteScalar<string>(genSoDonSql, null, tran);
+                        }
+
                         string headerSql = @"
                             INSERT INTO NS_DonDatHang
-                                (IDKhachHang, NgayTaoDon, SoDonHang, IDNhanVien,
-                                 ThoiHanGiaoHang, TrangThaiDon, TongTien, GhiChu,
-                                 NgayTao, NguoiTao)
+                                (IDKhachHang, NgayTaoDon, SoDonHang, IDNhanVien, ThoiHanGiaoHang,
+                                 TrangThaiDon, TongTien, PhiBocXep, GhiChu, NgayTao, NguoiTao)
                             VALUES
-                                (@IDKhachHang, @NgayTaoDon, @SoDonHang, @IDNhanVien,
-                                 @ThoiHanGiaoHang, @TrangThaiDon, @TongTien, @GhiChu,
-                                 @NgayTao, @NguoiTao);
-                            SELECT CAST(SCOPE_IDENTITY() AS INT);";
+                                (@IDKhachHang, @NgayTaoDon, @SoDonHang, @IDNhanVien, @ThoiHanGiaoHang,
+                                 @TrangThaiDon, @TongTien, @PhiBocXep, @GhiChu, @NgayTao, @NguoiTao);
+                            SELECT CAST(SCOPE_IDENTITY() as int);";
 
                         int newId = conn.QuerySingle<int>(headerSql, header, tran);
 
                         string detailSql = @"
                             INSERT INTO NS_DonDatHangChiTiet
-                                (IDDonDatHang, IDSanPham, SoLuong, DonGia, ThanhTien,
+                                (IDDonDatHang, IDSanPham, SoLuong, DonGia, ThanhTien, ThanhTienSauThue,
                                  ThueGTGT, IsHangKhuyenMai, GhiChu,
                                  NgayTaoDon, SoDonHang, IDNhanVien, ThoiHanGiaoHang, TrangThaiDon,
                                  NgayTao, NguoiTao)
                             VALUES
-                                (@IDDonDatHang, @IDSanPham, @SoLuong, @DonGia, @ThanhTien,
+                                (@IDDonDatHang, @IDSanPham, @SoLuong, @DonGia, @ThanhTien, @ThanhTienSauThue,
                                  @ThueGTGT, @IsHangKhuyenMai, @GhiChu,
                                  @NgayTaoDon, @SoDonHang, @IDNhanVien, @ThoiHanGiaoHang, @TrangThaiDon,
                                  @NgayTao, @NguoiTao)";
@@ -196,7 +225,7 @@ namespace SalesManagementSystem.Repositories
                 {
                     try
                     {
-                        string headerSql = @"
+                        string updateHeaderSql = @"
                             UPDATE NS_DonDatHang SET
                                 IDKhachHang     = @IDKhachHang,
                                 NgayTaoDon      = @NgayTaoDon,
@@ -205,28 +234,58 @@ namespace SalesManagementSystem.Repositories
                                 ThoiHanGiaoHang = @ThoiHanGiaoHang,
                                 TrangThaiDon    = @TrangThaiDon,
                                 TongTien        = @TongTien,
+                                PhiBocXep       = @PhiBocXep,
                                 GhiChu          = @GhiChu,
                                 NgayCapNhat     = @NgayCapNhat,
                                 NguoiCapNhat    = @NguoiCapNhat
                             WHERE ID = @ID";
 
-                        conn.Execute(headerSql, header, tran);
+                        conn.Execute(updateHeaderSql, header, tran);
 
-                        // Xóa chi tiết cũ, chèn lại
-                        conn.Execute("DELETE FROM NS_DonDatHangChiTiet WHERE IDDonDatHang = @ID",
-                                     new { ID = header.ID }, tran);
+                        // Dong bo chi tiet: xoa dong bi bo, update dong cu, insert dong moi.
+                        var existingIds = conn.Query<int>(
+                            "SELECT ID FROM NS_DonDatHangChiTiet WHERE IDDonDatHang = @ID",
+                            new { ID = header.ID }, tran).ToList();
+                        var postedIds = chiTiets.Where(x => x.ID > 0).Select(x => x.ID).ToList();
+                        var deleteIds = existingIds.Except(postedIds).ToList();
 
-                        string detailSql = @"
+                        if (deleteIds.Any())
+                        {
+                            conn.Execute(
+                                "DELETE FROM NS_DonDatHangChiTiet WHERE IDDonDatHang = @IDDonDatHang AND ID IN @IDs",
+                                new { IDDonDatHang = header.ID, IDs = deleteIds }, tran);
+                        }
+
+                        string insertDetailSql = @"
                             INSERT INTO NS_DonDatHangChiTiet
-                                (IDDonDatHang, IDSanPham, SoLuong, DonGia, ThanhTien,
+                                (IDDonDatHang, IDSanPham, SoLuong, DonGia, ThanhTien, ThanhTienSauThue,
                                  ThueGTGT, IsHangKhuyenMai, GhiChu,
                                  NgayTaoDon, SoDonHang, IDNhanVien, ThoiHanGiaoHang, TrangThaiDon,
                                  NgayTao, NguoiTao)
                             VALUES
-                                (@IDDonDatHang, @IDSanPham, @SoLuong, @DonGia, @ThanhTien,
+                                (@IDDonDatHang, @IDSanPham, @SoLuong, @DonGia, @ThanhTien, @ThanhTienSauThue,
                                  @ThueGTGT, @IsHangKhuyenMai, @GhiChu,
                                  @NgayTaoDon, @SoDonHang, @IDNhanVien, @ThoiHanGiaoHang, @TrangThaiDon,
                                  @NgayTao, @NguoiTao)";
+
+                        string updateDetailSql = @"
+                            UPDATE NS_DonDatHangChiTiet SET
+                                IDSanPham       = @IDSanPham,
+                                SoLuong         = @SoLuong,
+                                DonGia          = @DonGia,
+                                ThanhTien       = @ThanhTien,
+                                ThanhTienSauThue= @ThanhTienSauThue,
+                                ThueGTGT        = @ThueGTGT,
+                                IsHangKhuyenMai = @IsHangKhuyenMai,
+                                GhiChu          = @GhiChu,
+                                NgayTaoDon      = @NgayTaoDon,
+                                SoDonHang       = @SoDonHang,
+                                IDNhanVien      = @IDNhanVien,
+                                ThoiHanGiaoHang = @ThoiHanGiaoHang,
+                                TrangThaiDon    = @TrangThaiDon,
+                                NgayCapNhat     = @NgayCapNhat,
+                                NguoiCapNhat    = @NguoiCapNhat
+                            WHERE ID = @ID AND IDDonDatHang = @IDDonDatHang";
 
                         foreach (var ct in chiTiets)
                         {
@@ -236,9 +295,19 @@ namespace SalesManagementSystem.Repositories
                             ct.IDNhanVien      = header.IDNhanVien;
                             ct.ThoiHanGiaoHang = header.ThoiHanGiaoHang;
                             ct.TrangThaiDon    = header.TrangThaiDon;
-                            ct.NgayTao         = header.NgayTao;
-                            ct.NguoiTao        = header.NguoiTao;
-                            conn.Execute(detailSql, ct, tran);
+                            ct.NgayCapNhat     = header.NgayCapNhat;
+                            ct.NguoiCapNhat    = header.NguoiCapNhat;
+
+                            if (ct.ID > 0 && existingIds.Contains(ct.ID))
+                            {
+                                conn.Execute(updateDetailSql, ct, tran);
+                            }
+                            else
+                            {
+                                ct.NgayTao  = DateTime.Now;
+                                ct.NguoiTao = header.NguoiCapNhat;
+                                conn.Execute(insertDetailSql, ct, tran);
+                            }
                         }
 
                         tran.Commit();
@@ -276,6 +345,41 @@ namespace SalesManagementSystem.Repositories
                         throw;
                     }
                 }
+            }
+        }
+
+        // ── CancelOrder ──────────────────────────────────────────────────────
+        public bool CancelOrder(int id, int userId)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                string sql = "UPDATE NS_DonDatHang SET TrangThaiDon = 4, NgayCapNhat = GETDATE(), NguoiCapNhat = @UserId WHERE ID = @ID AND TrangThaiDon != 3 AND TrangThaiDon != 4";
+                int rows = conn.Execute(sql, new { ID = id, UserId = userId });
+                return rows > 0;
+            }
+        }
+
+        // ── GenerateSoDonHang ────────────────────────────────────────────────
+        public string GenerateSoDonHang()
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                string genSoDonSql = @"
+                    DECLARE @YearSuffix VARCHAR(2) = RIGHT(CAST(YEAR(GETDATE()) AS VARCHAR(4)), 2);
+                    DECLARE @Prefix VARCHAR(4) = 'DH' + @YearSuffix;
+                    DECLARE @MaxSoDon VARCHAR(20) = (
+                        SELECT TOP 1 SoDonHang 
+                        FROM NS_DonDatHang WITH (UPDLOCK) 
+                        WHERE SoDonHang LIKE @Prefix + '%' 
+                        ORDER BY SoDonHang DESC
+                    );
+                    DECLARE @NextNum INT = 1;
+                    IF @MaxSoDon IS NOT NULL
+                    BEGIN
+                        SET @NextNum = CAST(SUBSTRING(@MaxSoDon, 5, 6) AS INT) + 1;
+                    END
+                    SELECT @Prefix + RIGHT('000000' + CAST(@NextNum AS VARCHAR(6)), 6);";
+                return conn.ExecuteScalar<string>(genSoDonSql);
             }
         }
     }

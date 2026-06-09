@@ -24,5 +24,9 @@ namespace SalesManagementSystem.Repositories.Interfaces
         bool Update(NS_DonDatHang header, List<NS_DonDatHangChiTiet> chiTiets);
 
         bool Delete(int id);
+
+        bool CancelOrder(int id, int userId);
+        // Auto-generate SoDonHang
+        string GenerateSoDonHang();
     }
 }

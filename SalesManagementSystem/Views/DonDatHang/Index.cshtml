@@ -45,6 +45,13 @@
                            value="@ViewBag.DenNgay" />
                 </div>
                 <div class="col-md-2">
+                    <label class="form-label text-muted small mb-1">Khách hàng</label>
+                    @Html.DropDownList("idKhachHang",
+                        (SelectList)ViewBag.KhachHangs,
+                        "-- Tất cả --",
+                        new { @class = "form-select form-select-sm" })
+                </div>
+                <div class="col-md-2">
                     <label class="form-label text-muted small mb-1">Nhân viên</label>
                     @Html.DropDownList("idNhanVien",
                         (SelectList)ViewBag.NhanViens,
@@ -63,15 +70,15 @@
                     <input type="text" name="soDonHang" class="form-control form-control-sm"
                            placeholder="Tìm số đơn..." value="@ViewBag.SoDonHang" />
                 </div>
-                <div class="col-md-2 d-flex gap-2">
+                <div class="col-md-auto d-flex gap-2">
                     <button type="submit" class="btn btn-sm text-white px-3"
                             style="background-color:#2998e4;border:none;">
-                        <i class="bi bi-search"></i> Tìm
+                        <i class="bi bi-search"></i> Tìm kiếm
                     </button>
-                    <button type="button" class="btn btn-sm text-white px-3"
-                            style="background-color:#f1c40f;border:none;" onclick="resetSearch()">
+                    <a href="@Url.Action("Index")" class="btn btn-sm text-white px-3"
+                       style="background-color:#f1c40f;border:none;">
                         Làm mới
-                    </button>
+                    </a>
                 </div>
             </div>
         </form>
@@ -120,6 +127,20 @@
         if (ids.length === 0) { showToast('warning', 'Vui lòng chọn ít nhất một đơn hàng.'); return; }
         confirmBatchDelete('@Url.Action("Delete","DonDatHang")', ids,
             'Bạn có chắc chắn muốn xóa ' + ids.length + ' đơn hàng đã chọn không?');
+    }
+
+    function confirmCancel(url) {
+        if (confirm("Bạn có chắc chắn muốn hủy đơn hàng này không?")) {
+            $.post(url, function (res) {
+                if (res.success) {
+                    if (typeof showToast === "function") showToast('success', res.message);
+                    loadData($('#searchForm').serialize());
+                } else {
+                    if (typeof showToast === "function") showToast('error', res.message);
+                    else alert(res.message);
+                }
+            });
+        }
     }
 </script>
 }

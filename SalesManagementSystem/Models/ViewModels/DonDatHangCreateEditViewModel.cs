@@ -38,6 +38,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public string GhiChu { get; set; }
 
         public decimal TongTien { get; set; }
+        public decimal PhiBocXep { get; set; }
 
         // ── Chi tiết sản phẩm ───────────────────────────────────────────
         public List<DonDatHangChiTietViewModel> ChiTiets { get; set; }
