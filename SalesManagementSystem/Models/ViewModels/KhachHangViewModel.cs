@@ -6,9 +6,7 @@ namespace SalesManagementSystem.Models.ViewModels
     {
         public int ID { get; set; }
         public string MaKhachHang { get; set; }
-        public string HoDem { get; set; }
-        public string Ten { get; set; }
-        public string HoTenKhachHang { get; set; }
+        public string TenKhachHang { get; set; }
         public string MaSoThue { get; set; }
         public int? IDNhomKhachHang { get; set; }
         public string DiaChi { get; set; }

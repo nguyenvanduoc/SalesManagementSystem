@@ -86,7 +86,7 @@ namespace SalesManagementSystem.Repositories
                         d.TongTien, d.GhiChu,
                         d.IDKhachHang,
                         k.MaKhachHang,
-                        ISNULL(k.HoDem,'') + ' ' + ISNULL(k.Ten,'') AS TenKhachHang,
+                        k.TenKhachHang,
                         d.IDNhanVien,
                         nv.HoTen AS TenNhanVien,
                         d.NgayTao, d.NguoiTao

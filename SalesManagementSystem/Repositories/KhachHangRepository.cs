@@ -25,13 +25,12 @@ namespace SalesManagementSystem.Repositories
                 SELECT k.*, 
                        nh.TenNhomKhachHang,
                        nv.HoTen as TenNhanVien,
-                       t.TenTinhThanh,
-                       ISNULL(k.HoDem, '') + ' ' + ISNULL(k.Ten, '') as HoTenKhachHang
+                       t.TenTinhThanh
                 FROM NS_KhachHang k
                 LEFT JOIN NS_NhomKhachHang nh ON k.IDNhomKhachHang = nh.ID
                 LEFT JOIN NS_NhanVien nv ON k.IDNhanVien = nv.ID
                 LEFT JOIN DM_TinhThanh t ON k.IDTinhThanh = t.ID
-                ORDER BY k.Ten";
+                ORDER BY k.TenKhachHang";
 
             using (var conn = _db.CreateConnection())
             {
@@ -53,7 +52,7 @@ namespace SalesManagementSystem.Repositories
                     FROM NS_KhachHang
                     WHERE (@Keyword = '' 
                            OR LOWER(MaKhachHang) LIKE '%' + @Keyword + '%'
-                           OR LOWER(ISNULL(HoDem, '') + ' ' + ISNULL(Ten, '')) LIKE '%' + @Keyword + '%'
+                           OR LOWER(TenKhachHang) LIKE '%' + @Keyword + '%'
                            OR LOWER(SoDienThoai) LIKE '%' + @Keyword + '%')";
 
                 totalRecords = conn.ExecuteScalar<int>(countSql, parameters);
@@ -62,15 +61,14 @@ namespace SalesManagementSystem.Repositories
                     SELECT k.*, 
                            nh.TenNhomKhachHang,
                            nv.HoTen as TenNhanVien,
-                           t.TenTinhThanh,
-                           ISNULL(k.HoDem, '') + ' ' + ISNULL(k.Ten, '') as HoTenKhachHang
+                           t.TenTinhThanh
                     FROM NS_KhachHang k
                     LEFT JOIN NS_NhomKhachHang nh ON k.IDNhomKhachHang = nh.ID
                     LEFT JOIN NS_NhanVien nv ON k.IDNhanVien = nv.ID
                     LEFT JOIN DM_TinhThanh t ON k.IDTinhThanh = t.ID
                     WHERE (@Keyword = '' 
                            OR LOWER(k.MaKhachHang) LIKE '%' + @Keyword + '%'
-                           OR LOWER(ISNULL(k.HoDem, '') + ' ' + ISNULL(k.Ten, '')) LIKE '%' + @Keyword + '%'
+                           OR LOWER(k.TenKhachHang) LIKE '%' + @Keyword + '%'
                            OR LOWER(k.SoDienThoai) LIKE '%' + @Keyword + '%')
                     ORDER BY k.NgayTao DESC
                     OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
@@ -101,8 +99,8 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
             {
                 var sql = @"
-                    INSERT INTO NS_KhachHang (MaSoThue, HoDem, Ten, MaKhachHang, IDNhomKhachHang, DiaChi, SoDienThoai, Email, IDNhanVien, IDTinhThanh, NguoiTao, NgayTao)
-                    VALUES (@MaSoThue, @HoDem, @Ten, @MaKhachHang, @IDNhomKhachHang, @DiaChi, @SoDienThoai, @Email, @IDNhanVien, @IDTinhThanh, @NguoiTao, @NgayTao);
+                    INSERT INTO NS_KhachHang (MaSoThue, TenKhachHang, MaKhachHang, IDNhomKhachHang, DiaChi, SoDienThoai, Email, IDNhanVien, IDTinhThanh, NguoiTao, NgayTao)
+                    VALUES (@MaSoThue, @TenKhachHang, @MaKhachHang, @IDNhomKhachHang, @DiaChi, @SoDienThoai, @Email, @IDNhanVien, @IDTinhThanh, @NguoiTao, @NgayTao);
                     SELECT CAST(SCOPE_IDENTITY() as int);";
 
                 entity.NgayTao = DateTime.Now;
@@ -117,8 +115,7 @@ namespace SalesManagementSystem.Repositories
                 var sql = @"
                     UPDATE NS_KhachHang 
                     SET MaSoThue = @MaSoThue, 
-                        HoDem = @HoDem, 
-                        Ten = @Ten, 
+                        TenKhachHang = @TenKhachHang, 
                         MaKhachHang = @MaKhachHang,
                         IDNhomKhachHang = @IDNhomKhachHang,
                         DiaChi = @DiaChi,

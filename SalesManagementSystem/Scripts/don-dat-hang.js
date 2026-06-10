@@ -120,7 +120,7 @@ var DonDatHang = (function () {
             '    <input type="text" class="form-control txt-dongia text-end" inputmode="decimal" value="' + _formatNumber(donGia) + '" />' +
             '  </td>' +
             '  <td>' +
-            '    <input type="number" class="form-control txt-soluong text-end" min="0" step="0.01" value="' + soLuong + '" />' +
+            '    <input type="text" class="form-control txt-soluong text-end" inputmode="numeric" value="' + _formatNumber(Math.round(soLuong)) + '" />' +
             '  </td>' +
             '  <td>' +
             '    <input type="text" class="form-control readonly-cell txt-thanhtien text-end" readonly value="0" />' +
@@ -144,10 +144,20 @@ var DonDatHang = (function () {
 
         _initSanPhamSelect2($row, ct);
 
-        $row.find('.txt-dongia, .txt-soluong, .txt-thue').on('input change', function () {
+        $row.find('.txt-soluong').on('input change', function () {
+            var val = $(this).val();
+            // Remove non-numeric except dots
+            var sanitized = val.replace(/[^0-9.]/g, '');
+            if (val !== sanitized) {
+                $(this).val(sanitized);
+            }
             calcRow($row);
         });
-        $row.find('.txt-dongia').on('blur change', function () {
+
+        $row.find('.txt-dongia, .txt-thue').on('input change', function () {
+            calcRow($row);
+        });
+        $row.find('.txt-dongia, .txt-soluong').on('blur change', function () {
             $(this).val(_formatNumber(_parseMoney($(this).val())));
         });
 

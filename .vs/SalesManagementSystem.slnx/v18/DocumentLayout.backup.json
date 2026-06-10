@@ -3,8 +3,8 @@
   "WorkspaceRootPath": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\NhanSuController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|solutionrelative:SalesManagementSystem\\Controllers\\NhanSuController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|c:\\users\\duoc0\\onedrive\\desktop\\web_qlbh\\quanlybanhang\\salesmanagementsystem\\salesmanagementsystem\\controllers\\nhansucontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|solutionrelative:salesmanagementsystem\\controllers\\nhansucontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\salesmanagementsystem\\controllers\\dondathangcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -352,7 +352,7 @@
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\NhanSuController.cs",
               "ToolTip": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\NhanSuController.cs",
               "RelativeToolTip": "SalesManagementSystem\\Controllers\\NhanSuController.cs",
-              "ViewState": "AgIAALEAAAAAAAAAAAAowMUAAAAyAAAAAAAAAA==",
+              "ViewState": "AgIAALAAAAAAAAAAAAAswDcBAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-06-06T16:01:46.189Z",
               "EditorCaption": ""
@@ -391,8 +391,7 @@
               "RelativeToolTip": "SalesManagementSystem\\Controllers\\DonDatHangController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAArAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-09T02:31:33.256Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-09T02:31:33.256Z"
             },
             {
               "$type": "Document",
@@ -428,7 +427,8 @@
               "RelativeToolTip": "SalesManagementSystem\\Controllers\\NguoiDungController.cs",
               "ViewState": "AgIAAMAAAAAAAAAAAAAwwNkAAAAuAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-06T16:01:46.285Z"
+              "WhenOpened": "2026-06-06T16:01:46.285Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -596,7 +596,8 @@
               "RelativeToolTip": "SalesManagementSystem\\Controllers\\SanPhamController.cs",
               "ViewState": "AgIAANwAAAAAAAAAAAAowJgAAABJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-08T06:33:21.747Z"
+              "WhenOpened": "2026-06-08T06:33:21.747Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -680,7 +681,8 @@
               "RelativeToolTip": "SalesManagementSystem\\Controllers\\ChucVuController.cs",
               "ViewState": "AgIAABMAAAAAAAAAAAAgwCEAAAAkAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-06T16:01:46.244Z"
+              "WhenOpened": "2026-06-06T16:01:46.244Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -692,7 +694,8 @@
               "RelativeToolTip": "SalesManagementSystem\\Controllers\\KhachHangController.cs",
               "ViewState": "AgIAAIoAAAAAAAAAAAAewEMAAABZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-06T16:02:42.209Z"
+              "WhenOpened": "2026-06-06T16:02:42.209Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -1199,7 +1202,8 @@
               "RelativeToolTip": "SalesManagementSystem\\Controllers\\PhongBanController.cs",
               "ViewState": "AgIAAFQAAAAAAAAAAIAwwGcAAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-06T16:01:46.39Z"
+              "WhenOpened": "2026-06-06T16:01:46.39Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",

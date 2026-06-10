@@ -134,7 +134,7 @@ namespace SalesManagementSystem.Controllers
             if (bm != null)
             {
                 _bieuMauRepo.Delete(id);
-                return Json(new { success = true, message = "XÃ³a dá»¯ liá»‡u thÃ nh cÃ´ng" });
+                return Json(new { success = true, message = "Xóa dữ liệu thành công" });
             }
             return Json(new { success = false, message = "KhÃ´ng tÃ¬m tháº¥y biá»ƒu máº«u cáº§n xÃ³a" });
         }

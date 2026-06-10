@@ -31,13 +31,9 @@
                 <label class="form-label text-muted fw-semibold">Mã số thuế</label>
                 @Html.TextBoxFor(m => m.MaSoThue, new { @class = "form-control" })
             </div>
-            <div class="col-md-6">
-                <label class="form-label text-muted fw-semibold">Họ đệm <span class="text-danger">*</span></label>
-                @Html.TextBoxFor(m => m.HoDem, new { @class = "form-control", required = "required", placeholder = "Nguyễn Văn" })
-            </div>
-            <div class="col-md-6">
-                <label class="form-label text-muted fw-semibold">Tên <span class="text-danger">*</span></label>
-                @Html.TextBoxFor(m => m.Ten, new { @class = "form-control", required = "required", placeholder = "A" })
+            <div class="col-md-12">
+                <label class="form-label text-muted fw-semibold">Tên khách hàng <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.TenKhachHang, new { @class = "form-control", required = "required", placeholder = "Tên khách hàng" })
             </div>
             <div class="col-md-6">
                 <label class="form-label text-muted fw-semibold">Nhóm khách hàng</label>

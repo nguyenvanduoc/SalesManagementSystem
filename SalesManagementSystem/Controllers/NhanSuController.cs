@@ -171,7 +171,7 @@ namespace SalesManagementSystem.Controllers
                 // AUDIT LOG
                 AuditLog.AddUpdate("NS_NhanSu", employee.ID.ToString(), oldEmployee, employee);
 
-                return Json(new { success = true, message = "Cáº­p nháº­t nhÃ¢n sá»± thÃ nh cÃ´ng!" });
+                return Json(new { success = true, message = "Cập nhật dữ liệu thành công" });
             }
             SetViewBags();
             return PartialView(employee);
@@ -189,7 +189,7 @@ namespace SalesManagementSystem.Controllers
             ForceSaveAudit();
             _employeeRepo.Delete(id);
 
-            return Json(new { success = true, message = "XÃ³a dá»¯ liá»‡u thÃ nh cÃ´ng" });
+            return Json(new { success = true, message = "Xóa dữ liệu thành công" });
         }
 
         // POST: Employee/BatchDelete
@@ -209,7 +209,7 @@ namespace SalesManagementSystem.Controllers
                     _employeeRepo.Delete(id);
                 }
             }
-            return Json(new { success = true, message = "XÃ³a dá»¯ liá»‡u thÃ nh cÃ´ng" });
+            return Json(new { success = true, message = "Xóa dữ liệu thành công" });
         }
         // GET: Employee/ExportExcel
         public ActionResult ExportExcel()
@@ -254,7 +254,7 @@ namespace SalesManagementSystem.Controllers
             }
             catch (Exception ex)
             {
-                // Xá»­ lÃ½ lá»—i náº¿u khÃ´ng tÃ¬m tháº¥y máº«u hoáº·c lá»—i xuáº¥t file
+                // Xá»­ lÃ½ lá»—i náº¿u khÃ´ng tÃ¬m tháº¥y máº«u hoáº·c Lỗi xuất excel
                 TempData["ToastMessage"] = "Lá»—i xuáº¥t Excel: " + ex.Message;
                 TempData["ToastType"] = "error";
                 return RedirectToAction("Index");
@@ -304,7 +304,7 @@ namespace SalesManagementSystem.Controllers
             catch (Exception ex)
             {
                 TempData["ToastType"] = "error";
-                TempData["ToastMessage"] = "Lá»—i xuáº¥t file: " + ex.Message;
+                TempData["ToastMessage"] = "Lỗi xuất excel: " + ex.Message;
                 return RedirectToAction("Index");
             }
         }

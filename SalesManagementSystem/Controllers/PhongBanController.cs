@@ -146,7 +146,7 @@ namespace SalesManagementSystem.Controllers
                     _phongBanRepo.Delete(item);
                 }
             }
-            return Json(new { success = true, message = "XÃ³a dá»¯ liá»‡u thÃ nh cÃ´ng" });
+            return Json(new { success = true, message = "Xóa dữ liệu thành công" });
         }
     }
 }

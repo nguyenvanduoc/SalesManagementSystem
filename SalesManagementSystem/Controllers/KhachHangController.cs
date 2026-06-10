@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Web.Mvc;
 using Dapper;
@@ -188,7 +188,7 @@ namespace SalesManagementSystem.Controllers
                     _khachHangRepo.Delete(item);
                 }
             }
-            return Json(new { success = true, message = "XÃ³a dá»¯ liá»‡u thÃ nh cÃ´ng" });
+            return Json(new { success = true, message = "Xóa dữ liệu thành công" });
         }
 
         // GET: KhachHang/ExportExcel
@@ -218,7 +218,7 @@ namespace SalesManagementSystem.Controllers
                 var exportData = data.Select(x => new {
                     STT = stt++,
                     MaKhachHang = x.MaKhachHang,
-                    HoTenKhachHang = x.HoTenKhachHang,
+                    HoTenKhachHang = x.TenKhachHang,
                     MaSoThue = x.MaSoThue,
                     TenNhomKhachHang = x.TenNhomKhachHang,
                     SoDienThoai = x.SoDienThoai,

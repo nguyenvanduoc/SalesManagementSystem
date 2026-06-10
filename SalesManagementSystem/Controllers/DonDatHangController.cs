@@ -49,7 +49,7 @@ namespace SalesManagementSystem.Controllers
             using (var conn = _db.CreateConnection())
             {
                 var items = conn.Query<DropdownItem>(
-                    "SELECT ID, ISNULL(MaKhachHang, '') + ' - ' + LTRIM(RTRIM(ISNULL(HoDem, '') + ' ' + ISNULL(Ten, ''))) AS Name FROM NS_KhachHang ORDER BY Ten").ToList();
+                    "SELECT ID, ISNULL(MaKhachHang, '') + ' - ' + LTRIM(RTRIM(TenKhachHang)) AS Name FROM NS_KhachHang ORDER BY TenKhachHang").ToList();
                 return new SelectList(items, "ID", "Name", selectedId);
             }
         }
@@ -251,7 +251,7 @@ namespace SalesManagementSystem.Controllers
                 using (var conn = _db.CreateConnection())
                 {
                     var kh = conn.QueryFirstOrDefault<dynamic>(
-                        "SELECT MaKhachHang, ISNULL(HoDem,'') + ' ' + ISNULL(Ten,'') AS HoTen, MaSoThue, DiaChi, SoDienThoai FROM NS_KhachHang WHERE ID = @ID",
+                        "SELECT MaKhachHang, TenKhachHang AS HoTen, MaSoThue, DiaChi, SoDienThoai FROM NS_KhachHang WHERE ID = @ID",
                         new { ID = don.IDKhachHang });
                     if (kh != null)
                     {
@@ -476,7 +476,7 @@ namespace SalesManagementSystem.Controllers
                             "SELECT * FROM NS_KhachHang WHERE ID = @Id", new { Id = don.IDKhachHang.Value });
                         if (kh != null)
                         {
-                            tenKhachHang = (kh.HoDem + " " + kh.Ten).Trim();
+                            tenKhachHang = (kh.TenKhachHang ?? "").Trim();
                             soDienThoai = kh.SoDienThoai;
                             diaChiGiaoHang = kh.DiaChi;
                         }
@@ -590,7 +590,7 @@ namespace SalesManagementSystem.Controllers
                     SELECT TOP 20
                         ID,
                         MaKhachHang,
-                        ISNULL(HoDem,'') + ' ' + ISNULL(Ten,'') AS HoTen,
+                        TenKhachHang AS HoTen,
                         MaSoThue,
                         SoDienThoai,
                         DiaChi,
@@ -598,7 +598,7 @@ namespace SalesManagementSystem.Controllers
                     FROM NS_KhachHang
                     WHERE @KW = ''
                        OR LOWER(MaKhachHang) LIKE '%' + @KW + '%'
-                       OR LOWER(ISNULL(HoDem,'') + ' ' + ISNULL(Ten,'')) LIKE '%' + @KW + '%'
+                       OR LOWER(TenKhachHang) LIKE '%' + @KW + '%'
                        OR LOWER(SoDienThoai)  LIKE '%' + @KW + '%'
                        OR LOWER(MaSoThue)     LIKE '%' + @KW + '%'
                     ORDER BY Ten";
