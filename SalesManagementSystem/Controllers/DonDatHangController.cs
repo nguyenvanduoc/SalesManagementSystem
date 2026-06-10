@@ -7,7 +7,6 @@ using Newtonsoft.Json;
 using SalesManagementSystem.Data;
 using SalesManagementSystem.Helpers;
 using SalesManagementSystem.Models.Entities;
-using SalesManagementSystem.Models.Enums;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories.Interfaces;
 using NPOI.SS.UserModel;
@@ -57,12 +56,7 @@ namespace SalesManagementSystem.Controllers
 
         private SelectList GetTrangThaiList(int? selectedId = null)
         {
-            var items = new[]
-            {
-                new { ID = 1, Name = "ChÆ°a giao"      },
-                new { ID = 2, Name = "Äang Ä‘i Ä‘Æ°á»ng"  },
-                new { ID = 3, Name = "ÄÃ£ giao"        }
-            };
+            var items = _repo.GetTrangThaiList().Select(x => new DropdownItem { ID = x.ID, Name = x.TenTrangThai }).ToList();
             return new SelectList(items, "ID", "Name", selectedId);
         }
 
@@ -136,7 +130,7 @@ namespace SalesManagementSystem.Controllers
             var model = new DonDatHangCreateEditViewModel
             {
                 NgayTaoDon   = DateTime.Now,
-                TrangThaiDon = (int)TrangThaiDonHang.ChuaGiao,
+                TrangThaiDon = 1,
                 SoDonHang    = _repo.GenerateSoDonHang()
             };
             model.NhanVienList  = GetNhanVienList();
@@ -238,7 +232,7 @@ namespace SalesManagementSystem.Controllers
         // â”€â”€ Edit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
-        public ActionResult Edit(int id)
+        public ActionResult Edit(int id, bool isView = false)
         {
             var don = _repo.GetById(id);
             if (don == null) return HttpNotFound();
@@ -287,8 +281,9 @@ namespace SalesManagementSystem.Controllers
             model.NhanVienList  = GetNhanVienList(don.IDNhanVien);
             model.TrangThaiList = GetTrangThaiList(don.TrangThaiDon);
 
-            ViewBag.Title        = "Chá»‰nh sá»­a Ä‘Æ¡n Ä‘áº·t hÃ ng";
+            ViewBag.Title        = isView ? "Chi tiết đơn đặt hàng" : "Chỉnh sửa đơn đặt hàng";
             ViewBag.ChiTietsJson = JsonConvert.SerializeObject(chiTiets);
+            ViewBag.IsView       = isView;
             return View("Edit", model);
         }
 
@@ -415,20 +410,25 @@ namespace SalesManagementSystem.Controllers
 
         [HttpPost]
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
-        public ActionResult CancelOrder(int id)
+        public ActionResult UpdateStatus(int id, int trangThaiMoi)
         {
             var oldDon = _repo.GetById(id);
             if (oldDon == null) return Json(new { success = false, message = "KhÃ´ng tÃ¬m tháº¥y Ä‘Æ¡n hÃ ng." });
-            if (oldDon.TrangThaiDon == 3) return Json(new { success = false, message = "KhÃ´ng thá»ƒ há»§y Ä‘Æ¡n hÃ ng Ä‘Ã£ giao." });
+            if (oldDon.TrangThaiDon == 3) return Json(new { success = false, message = "KhÃ´ng thá»ƒ chuyá»ƒn tráº¡ng thÃ¡i Ä‘Æ¡n hÃ ng Ä‘Ã£ giao." });
             if (oldDon.TrangThaiDon == 4) return Json(new { success = false, message = "ÄÆ¡n hÃ ng nÃ y Ä‘Ã£ bá»‹ há»§y trÆ°á»›c Ä‘Ã³." });
 
             var session = GetCurrentUser();
             int userId = session?.IDNhanSu ?? 0;
 
-            bool result = _repo.CancelOrder(id, userId);
+            bool result = _repo.UpdateStatus(id, trangThaiMoi, userId);
             if (result)
-                return Json(new { success = true, message = "Há»§y Ä‘Æ¡n hÃ ng thÃ nh cÃ´ng." });
-            return Json(new { success = false, message = "Lá»—i khi há»§y Ä‘Æ¡n hÃ ng." });
+            {
+                var newDon = _repo.GetById(id);
+                AuditLog.AddUpdate("NS_DonDatHang", id.ToString(), oldDon, newDon);
+                AuditLog.SaveAudit(userId, "ÄÆ¡n Ä‘áº·t hÃ ng", "DonDatHangController", "UpdateStatus");
+                return Json(new { success = true, message = "Chuyá»ƒn tráº¡ng thÃ¡i Ä‘Æ¡n hÃ ng thÃ nh cÃ´ng." });
+            }
+            return Json(new { success = false, message = "Lá»—i khi chuyá»ƒn tráº¡ng thÃ¡i Ä‘Æ¡n hÃ ng." });
         }
 
         // â”€â”€ Export Excel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

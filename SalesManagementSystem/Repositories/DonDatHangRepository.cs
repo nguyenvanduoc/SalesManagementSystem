@@ -23,6 +23,24 @@ namespace SalesManagementSystem.Repositories
                 {
                     conn.Execute("IF COL_LENGTH('NS_DonDatHangChiTiet', 'ThanhTienSauThue') IS NULL ALTER TABLE NS_DonDatHangChiTiet ADD ThanhTienSauThue DECIMAL(18,2) NULL");
                     conn.Execute("IF COL_LENGTH('NS_DonDatHang', 'PhiBocXep') IS NULL ALTER TABLE NS_DonDatHang ADD PhiBocXep DECIMAL(18,2) NULL");
+                    
+                    string initTrangThaiSql = @"
+                        IF OBJECT_ID('DM_TrangThaiDonHang') IS NULL
+                        BEGIN
+                            CREATE TABLE DM_TrangThaiDonHang (
+                                ID INT PRIMARY KEY,
+                                TenTrangThai NVARCHAR(100) NOT NULL,
+                                ThuTuHienThi INT NOT NULL,
+                                KichHoat BIT NOT NULL DEFAULT 1
+                            );
+                            INSERT INTO DM_TrangThaiDonHang (ID, TenTrangThai, ThuTuHienThi, KichHoat) VALUES
+                            (1, N'Chưa giao', 1, 1),
+                            (2, N'Đang đi đường', 2, 1),
+                            (3, N'Đã giao', 3, 1),
+                            (4, N'Đã hủy', 4, 1);
+                        END
+                    ";
+                    conn.Execute(initTrangThaiSql);
                 }
             }
             catch { }
@@ -64,13 +82,7 @@ namespace SalesManagementSystem.Repositories
                     SELECT
                         d.ID, d.SoDonHang, d.NgayTaoDon, d.ThoiHanGiaoHang,
                         d.TrangThaiDon,
-                        CASE d.TrangThaiDon
-                            WHEN 1 THEN N'Chưa giao'
-                            WHEN 2 THEN N'Đang đi đường'
-                            WHEN 3 THEN N'Đã giao'
-                            WHEN 4 THEN N'Đã hủy'
-                            ELSE N'Không xác định'
-                        END AS TenTrangThai,
+                        ISNULL(tt.TenTrangThai, N'Không xác định') AS TenTrangThai,
                         d.TongTien, d.GhiChu,
                         d.IDKhachHang,
                         k.MaKhachHang,
@@ -81,6 +93,7 @@ namespace SalesManagementSystem.Repositories
                     FROM NS_DonDatHang d
                     LEFT JOIN NS_KhachHang k  ON d.IDKhachHang = k.ID
                     LEFT JOIN NS_NhanVien  nv ON d.IDNhanVien  = nv.ID
+                    LEFT JOIN DM_TrangThaiDonHang tt ON d.TrangThaiDon = tt.ID
                     WHERE (@TuNgay      IS NULL OR d.NgayTaoDon  >= @TuNgay)
                       AND (@DenNgay     IS NULL OR d.NgayTaoDon  <= @DenNgay)
                       AND (@IDKhachHang IS NULL OR d.IDKhachHang  = @IDKhachHang)
@@ -348,14 +361,28 @@ namespace SalesManagementSystem.Repositories
             }
         }
 
-        // ── CancelOrder ──────────────────────────────────────────────────────
-        public bool CancelOrder(int id, int userId)
+        // ── GetTrangThaiList ──────────────────────────────────────────────────
+        public IEnumerable<DM_TrangThaiDonHang> GetTrangThaiList()
         {
             using (var conn = _db.CreateConnection())
             {
-                string sql = "UPDATE NS_DonDatHang SET TrangThaiDon = 4, NgayCapNhat = GETDATE(), NguoiCapNhat = @UserId WHERE ID = @ID AND TrangThaiDon != 3 AND TrangThaiDon != 4";
-                int rows = conn.Execute(sql, new { ID = id, UserId = userId });
-                return rows > 0;
+                return conn.Query<DM_TrangThaiDonHang>("SELECT * FROM DM_TrangThaiDonHang WHERE KichHoat = 1 ORDER BY ThuTuHienThi");
+            }
+        }
+
+        // ── UpdateStatus ──────────────────────────────────────────────────────
+        public bool UpdateStatus(int id, int newStatus, int userId)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                string sql = "UPDATE NS_DonDatHang SET TrangThaiDon = @NewStatus, NgayCapNhat = GETDATE(), NguoiCapNhat = @UserId WHERE ID = @ID AND TrangThaiDon != 3 AND TrangThaiDon != 4";
+                int rows = conn.Execute(sql, new { ID = id, NewStatus = newStatus, UserId = userId });
+                if (rows > 0)
+                {
+                    conn.Execute("UPDATE NS_DonDatHangChiTiet SET TrangThaiDon = @NewStatus, NgayCapNhat = GETDATE(), NguoiCapNhat = @UserId WHERE IDDonDatHang = @ID", new { ID = id, NewStatus = newStatus, UserId = userId });
+                    return true;
+                }
+                return false;
             }
         }
 

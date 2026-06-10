@@ -92,6 +92,34 @@
     @Html.Partial("_DonDatHangList", Model)
 </div>
 
+<!-- Modal Chuyển trạng thái -->
+<div class="modal fade" id="statusModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-primary">Chuyển trạng thái đơn hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="statusOrderId" />
+                <div class="mb-3">
+                    <label class="form-label">Chọn trạng thái mới:</label>
+                    <select id="statusNewStatus" class="form-select">
+                        @foreach (var item in (SelectList)ViewBag.TrangThais)
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" onclick="submitStatusChange()">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
 <script>
     $(document).ready(function () {
@@ -132,8 +160,32 @@
             'Bạn có chắc chắn muốn xóa ' + ids.length + ' đơn hàng đã chọn không?');
     }
 
-    function confirmCancel(url) {
-        confirmDelete(url, "Bạn có chắc chắn muốn hủy đơn hàng này không?");
+    function openStatusModal(id, currentStatus) {
+        $('#statusOrderId').val(id);
+        $('#statusNewStatus').val(currentStatus);
+        $('#statusModal').modal('show');
+    }
+
+    function submitStatusChange() {
+        var id = $('#statusOrderId').val();
+        var newStatus = $('#statusNewStatus').val();
+        $.ajax({
+            url: '@Url.Action("UpdateStatus", "DonDatHang")',
+            type: 'POST',
+            data: { id: id, trangThaiMoi: newStatus },
+            success: function (res) {
+                if (res.success) {
+                    showToast('success', res.message);
+                    $('#statusModal').modal('hide');
+                    loadData($('#searchForm').serialize());
+                } else {
+                    showToast('error', res.message);
+                }
+            },
+            error: function () {
+                showToast('error', 'Lỗi khi cập nhật trạng thái.');
+            }
+        });
     }
 
     function exportExcelList() {

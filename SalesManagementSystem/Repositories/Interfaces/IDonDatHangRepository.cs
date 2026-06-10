@@ -25,7 +25,8 @@ namespace SalesManagementSystem.Repositories.Interfaces
 
         bool Delete(int id);
 
-        bool CancelOrder(int id, int userId);
+        bool UpdateStatus(int id, int newStatus, int userId);
+        IEnumerable<DM_TrangThaiDonHang> GetTrangThaiList();
         // Auto-generate SoDonHang
         string GenerateSoDonHang();
     }

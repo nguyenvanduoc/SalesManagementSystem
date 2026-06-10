@@ -29,7 +29,7 @@
     <a href="@Url.Action("Index","DonDatHang")" class="btn btn-secondary btn-sm no-ajax">
         <i class="bi bi-arrow-left"></i> Quay lại
     </a>
-    @if (Model.TrangThaiDon != 3 && Model.TrangThaiDon != 4) {
+    @if (Model.TrangThaiDon != 3 && Model.TrangThaiDon != 4 && ViewBag.IsView != true) {
     <button type="button" id="btnSaveDon" class="btn btn-sm text-white"
             style="background-color:#2998e4;border:none;">
         <i class="bi bi-save me-1"></i> Lưu thay đổi
@@ -214,7 +214,7 @@
             $('#frmDonDatHang').submit();
         });
 
-        @if (Model.TrangThaiDon == 3 || Model.TrangThaiDon == 4)
+        @if (Model.TrangThaiDon == 3 || Model.TrangThaiDon == 4 || ViewBag.IsView == true)
         {
             <text>
             $('input, select, textarea').prop('disabled', true);

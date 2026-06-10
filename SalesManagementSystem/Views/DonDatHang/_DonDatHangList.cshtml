@@ -46,8 +46,14 @@
                                             {
                                                 <li>
                                                     <a class="dropdown-item no-ajax"
+                                                       href="@Url.Action("Edit","DonDatHang", new { id = item.ID, isView = true })">
+                                                        <i class="bi bi-eye me-2 text-info"></i> Xem chi tiết
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item no-ajax"
                                                        href="@Url.Action("Edit","DonDatHang", new { id = item.ID })">
-                                                        <i class="bi bi-eye me-2 text-info"></i> Xem / Sửa
+                                                        <i class="bi bi-pencil me-2 text-warning"></i> Sửa
                                                     </a>
                                                 </li>
                                                 <li>
@@ -70,8 +76,8 @@
                                             {
                                                 <li>
                                                     <button type="button" class="dropdown-item text-secondary"
-                                                            onclick="confirmCancel('@Url.Action("CancelOrder", "DonDatHang", new { id = item.ID })')">
-                                                        <i class="bi bi-x-circle-fill me-2 text-secondary"></i> Hủy đơn
+                                                            onclick="openStatusModal(@item.ID, @item.TrangThaiDon)">
+                                                        <i class="bi bi-arrow-left-right me-2 text-secondary"></i> Chuyển trạng thái
                                                     </button>
                                                 </li>
                                             }

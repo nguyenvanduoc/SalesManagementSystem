@@ -547,7 +547,7 @@
     <Content Include="Views\KhoHang\_KhoHangList.cshtml" />
     <Content Include="Views\KhoHang\Create.cshtml" />
     <Content Include="Views\KhoHang\Edit.cshtml" />
-    <Compile Include="Models\Enums\TrangThaiDonHang.cs" />
+    <Compile Include="Models\Entities\DM_TrangThaiDonHang.cs" />
     <Compile Include="Models\Entities\NS_DonDatHang.cs" />
     <Compile Include="Models\Entities\NS_DonDatHangChiTiet.cs" />
     <Compile Include="Models\ViewModels\DonDatHangViewModel.cs" />
