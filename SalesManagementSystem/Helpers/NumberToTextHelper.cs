@@ -1,10 +1,7 @@
+using System;
+
 namespace SalesManagementSystem.Helpers
 {
-    public static class CommonConstants
-    {
-        public static string USER_SESSION = "USER_SESSION";
-    }
-
     public static class NumberToTextHelper
     {
         public static string DocTienBangChu(decimal total)
@@ -12,7 +9,7 @@ namespace SalesManagementSystem.Helpers
             try
             {
                 string rs = "";
-                total = System.Math.Round(total, 0);
+                total = Math.Round(total, 0);
                 if (total == 0) return "Không đồng";
                 string[] ch = { "không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín" };
                 string[] rch = { "lẻ", "mốt", "", "", "", "lăm" };
@@ -23,7 +20,7 @@ namespace SalesManagementSystem.Helpers
                 int len = n.Length;
                 for (int i = 0; i < len; i++)
                 {
-                    n[len - 1 - i] = System.Convert.ToInt32(nstr.Substring(i, 1));
+                    n[len - 1 - i] = Convert.ToInt32(nstr.Substring(i, 1));
                 }
 
                 for (int i = len - 1; i >= 0; i--)
@@ -88,7 +85,7 @@ namespace SalesManagementSystem.Helpers
                 {
                     rs = rs.Substring(0, 1).ToUpper() + rs.Substring(1);
                 }
-                return rs + " đồng chẵn.";
+                return rs + " đồng";
             }
             catch
             {

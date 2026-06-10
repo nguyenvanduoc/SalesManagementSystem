@@ -11,6 +11,7 @@ namespace SalesManagementSystem.Helpers
         public const string PHIEU_LUONG = "PL_NHANSU";
         public const string DS_NHAN_SU = "NS01";
         public const string DS_NHAN_SU_THEO_CHUC_VU = "NS02";
+        public const string DS_CHI_TIET_DON_HANG = "DH01";
 
         // Thêm các mã biểu mẫu khác ở đây (Ví dụ nhóm Hàng Hoá, Kho, ...)
     }

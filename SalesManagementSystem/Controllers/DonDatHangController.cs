@@ -10,6 +10,10 @@ using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Models.Enums;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories.Interfaces;
+using NPOI.SS.UserModel;
+using NPOI.XSSF.UserModel;
+using NPOI.SS.Util;
+using System.IO;
 
 namespace SalesManagementSystem.Controllers
 {
@@ -18,11 +22,13 @@ namespace SalesManagementSystem.Controllers
     {
         private readonly IDonDatHangRepository _repo;
         private readonly DbConnectionFactory   _db;
+        private readonly SalesManagementSystem.Services.Interfaces.IExcelExportService _excelExportService;
 
-        public DonDatHangController(IDonDatHangRepository repo, DbConnectionFactory db)
+        public DonDatHangController(IDonDatHangRepository repo, DbConnectionFactory db, SalesManagementSystem.Services.Interfaces.IExcelExportService excelExportService)
         {
             _repo = repo;
             _db   = db;
+            _excelExportService = excelExportService;
         }
 
         // ── Helpers ──────────────────────────────────────────────────────────
@@ -425,7 +431,98 @@ namespace SalesManagementSystem.Controllers
             return Json(new { success = false, message = "Lỗi khi hủy đơn hàng." });
         }
 
-        // ── AJAX: SearchKhachHang (Select2) ───────────────────────────────────
+        // ── Export Excel ──────────────────────────────────────────────────────
+
+        public ActionResult ExportExcel(int id)
+        {
+            try
+            {
+                var don = _repo.GetById(id);
+                if (don == null) return HttpNotFound();
+                
+                var chiTiets = _repo.GetChiTietByDonId(id);
+
+                var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+                string nguoiLapBieu = session != null ? (session.HoDem + " " + session.Ten).Trim() : "";
+                if (string.IsNullOrEmpty(nguoiLapBieu)) nguoiLapBieu = session?.UserName ?? "";
+
+                decimal totalSoLuong = 0;
+                decimal totalThanhTien = 0;
+                foreach (var ct in chiTiets)
+                {
+                    totalSoLuong += ct.SoLuong;
+                    totalThanhTien += ct.ThanhTienSauThue;
+                }
+                decimal donGiaBocXep = don.PhiBocXep;
+                string tenKhachHang = "";
+                string soDienThoai = "";
+                string diaChiGiaoHang = "";
+
+                if (don.IDKhachHang.HasValue)
+                {
+                    using (var conn = _db.CreateConnection())
+                    {
+                        var kh = conn.QueryFirstOrDefault<SalesManagementSystem.Models.Entities.NS_KhachHang>(
+                            "SELECT * FROM NS_KhachHang WHERE ID = @Id", new { Id = don.IDKhachHang.Value });
+                        if (kh != null)
+                        {
+                            tenKhachHang = (kh.HoDem + " " + kh.Ten).Trim();
+                            soDienThoai = kh.SoDienThoai;
+                            diaChiGiaoHang = kh.DiaChi;
+                        }
+                    }
+                }
+
+                var variables = new System.Collections.Generic.Dictionary<string, object>
+                {
+                    { "Ngay", DateTime.Now.ToString("dd") },
+                    { "Thang", DateTime.Now.ToString("MM") },
+                    { "Nam", DateTime.Now.ToString("yyyy") },
+                    { "NguoiLapBieu", nguoiLapBieu },
+                    { "SoDonHang", don.SoDonHang },
+                    { "NgayTaoDon", don.NgayTaoDon?.ToString("dd/MM/yyyy") },
+                    { "TenKhachHang", tenKhachHang },
+                    { "DiaChiGiaoHang", diaChiGiaoHang },
+                    { "SoDienThoai", soDienThoai },
+                    { "TongSoLuong", totalSoLuong },
+                    { "TongThanhTien", totalThanhTien },
+                    { "PhiBocXep", don.PhiBocXep },
+                    { "DonGiaBocXep", donGiaBocXep > 0 ? donGiaBocXep.ToString("N0"): "" },
+                    { "TongTienThanhToan", totalThanhTien - don.PhiBocXep },
+                    { "ThoiGianGiaoHang", don.ThoiHanGiaoHang?.ToString("dd/MM/yyyy") },
+                    { "SoTienBangChu", SalesManagementSystem.Helpers.NumberToTextHelper.DocTienBangChu(totalThanhTien - don.PhiBocXep) }
+                };
+
+                // The prefix will be %DH01. since we use maBieuMau = "DH01"
+                var exportData = chiTiets.Select((x, index) => new {
+                    STT = index + 1,
+                    TenSanPham = x.TenSanPham,
+                    DVT = x.DVT,
+                    QuyCach = "",
+                    DonGia = x.DonGia,
+                    SoLuong = x.SoLuong,
+                    TongSLNhan = x.SoLuong,
+                    ThanhTien = x.ThanhTien,
+                    GhiChu = x.GhiChu
+                });
+
+                string fileExtension;
+                // Assuming "DH01" is the template code for DonDatHang
+                var fileBytes = _excelExportService.Export(BieuMauConstants.DS_CHI_TIET_DON_HANG, exportData, out fileExtension, variables);
+
+                string contentType = fileExtension == "xls" 
+                    ? "application/vnd.ms-excel" 
+                    : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                return File(fileBytes, contentType, $"DonDatHang_{don.SoDonHang}_{DateTime.Now:yyyyMMddHHmmss}.{fileExtension}");
+            }
+            catch (Exception ex)
+            {
+                TempData["ToastMessage"] = "Lỗi xuất Excel: " + ex.Message;
+                TempData["ToastType"] = "error";
+                return RedirectToAction("Index");
+            }
+        }
 
         public ActionResult SearchKhachHang(string q)
         {
@@ -466,8 +563,6 @@ namespace SalesManagementSystem.Controllers
             }
         }
 
-        // ── AJAX: SearchSanPham (Select2) ─────────────────────────────────────
-
         public ActionResult SearchSanPham(string q)
         {
             using (var conn = _db.CreateConnection())
@@ -494,8 +589,6 @@ namespace SalesManagementSystem.Controllers
                 return Json(new { results = result }, JsonRequestBehavior.AllowGet);
             }
         }
-
-        // ── Private Helper ────────────────────────────────────────────────────
 
         private List<DonDatHangChiTietViewModel> ParseChiTiets(string json)
         {

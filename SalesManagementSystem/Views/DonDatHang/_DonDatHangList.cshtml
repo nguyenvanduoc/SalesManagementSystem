@@ -50,6 +50,12 @@
                                                         <i class="bi bi-eye me-2 text-info"></i> Xem / Sửa
                                                     </a>
                                                 </li>
+                                                <li>
+                                                    <a class="dropdown-item no-ajax" target="_blank"
+                                                       href="@Url.Action("ExportExcel","DonDatHang", new { id = item.ID })">
+                                                        <i class="bi bi-file-earmark-excel me-2 text-success"></i> Xuất Excel
+                                                    </a>
+                                                </li>
                                             }
                                             @if (PermissionHelper.HasPermission("DonDatHang", LoaiPhanQuyen.Xoa) && item.TrangThaiDon != 3)
                                             {

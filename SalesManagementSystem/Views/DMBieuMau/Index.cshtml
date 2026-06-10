@@ -40,27 +40,4 @@
 </div>
 
 @section Scripts {
-    <script>
-        $(document).ready(function () {
-            $('#searchForm').on('submit', function (e) {
-                e.preventDefault();
-                var url = $(this).attr('action');
-                var data = $(this).serialize();
-                loadGridData(url + '?' + data);
-            });
-        });
-
-        function loadGridData(url) {
-            $.ajax({
-                url: url,
-                type: 'GET',
-                success: function (result) {
-                    $('#gridData').html(result);
-                },
-                error: function () {
-                    alert('Đã xảy ra lỗi khi tải dữ liệu!');
-                }
-            });
-        }
-    </script>
 }

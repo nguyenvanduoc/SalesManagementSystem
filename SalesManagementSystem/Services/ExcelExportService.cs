@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using NPOI.SS.UserModel;
+using NPOI.SS.Util;
 using SalesManagementSystem.Repositories.Interfaces;
 
 namespace SalesManagementSystem.Services
@@ -19,52 +21,30 @@ namespace SalesManagementSystem.Services
 
         public byte[] Export<T>(string maBieuMau, IEnumerable<T> data, out string fileExtension, Dictionary<string, object> variables = null)
         {
-            fileExtension = "xlsx"; // default
+            fileExtension = "xlsx";
             var bieuMau = _bieuMauRepo.GetByMa(maBieuMau);
             if (bieuMau == null || bieuMau.NoiDung == null || bieuMau.NoiDung.Length == 0)
-            {
                 throw new Exception($"Không tìm thấy biểu mẫu '{maBieuMau}' hoặc biểu mẫu chưa có file đính kèm.");
-            }
 
             if (!string.IsNullOrEmpty(bieuMau.DuoiFile))
-            {
                 fileExtension = bieuMau.DuoiFile.ToLower();
-            }
             else if (!string.IsNullOrEmpty(bieuMau.TenFile))
-            {
                 fileExtension = Path.GetExtension(bieuMau.TenFile).Replace(".", "").ToLower();
-            }
 
             using (var stream = new MemoryStream(bieuMau.NoiDung))
             {
-                IWorkbook workbook;
-                try
-                {
-                    workbook = WorkbookFactory.Create(stream);
-                }
-                catch (Exception)
-                {
-                    throw new Exception("File Excel biểu mẫu không hợp lệ. Vui lòng đảm bảo bạn đang upload file Excel đúng định dạng (.xls hoặc .xlsx).");
-                }
-
+                IWorkbook workbook = WorkbookFactory.Create(stream);
                 if (workbook.NumberOfSheets == 0) throw new Exception("File Excel biểu mẫu không có Sheet nào.");
                 
                 var worksheet = workbook.GetSheetAt(0);
 
-                // 1. Thay thế biến đơn
                 if (variables != null && variables.Count > 0)
-                {
                     ReplaceSingleVariables(worksheet, variables);
-                }
 
-                // 2. Điền dữ liệu danh sách
                 if (data != null)
-                {
                     FillListData(worksheet, maBieuMau, data);
-                }
 
-                // Calculate formulas before saving (optional but recommended)
-                // workbook.GetCreationHelper().CreateFormulaEvaluator().EvaluateAll();
+                ValidateAndCleanWorkbook(workbook);
 
                 using (var outputStream = new MemoryStream())
                 {
@@ -74,8 +54,78 @@ namespace SalesManagementSystem.Services
             }
         }
 
+        public byte[] ExportGrouped<TKey, TItem>(string maBieuMau, IEnumerable<IGrouping<TKey, TItem>> groupedData, out string fileExtension, Dictionary<string, object> variables = null)
+        {
+            fileExtension = "xlsx";
+            var bieuMau = _bieuMauRepo.GetByMa(maBieuMau);
+            if (bieuMau == null || bieuMau.NoiDung == null || bieuMau.NoiDung.Length == 0)
+                throw new Exception($"Không tìm thấy biểu mẫu '{maBieuMau}'.");
+
+            using (var stream = new MemoryStream(bieuMau.NoiDung))
+            {
+                IWorkbook workbook = WorkbookFactory.Create(stream);
+                var worksheet = workbook.GetSheetAt(0);
+
+                if (variables != null && variables.Count > 0)
+                    ReplaceSingleVariables(worksheet, variables);
+
+                if (groupedData != null)
+                    FillGroupedData(worksheet, maBieuMau, groupedData);
+
+                ValidateAndCleanWorkbook(workbook);
+
+                using (var outputStream = new MemoryStream())
+                {
+                    workbook.Write(outputStream);
+                    return outputStream.ToArray();
+                }
+            }
+        }
+
+        // 3. Hàm dùng chung để tìm cột theo header
+        public int FindColumnIndexByHeader(ISheet worksheet, string headerText, int maxRow = 100)
+        {
+            string target = NormalizeToPropertyName(headerText);
+            for (int r = 0; r <= Math.Min(worksheet.LastRowNum, maxRow); r++)
+            {
+                var row = worksheet.GetRow(r);
+                if (row == null) continue;
+                for (int c = row.FirstCellNum; c < row.LastCellNum; c++)
+                {
+                    if (c < 0) continue;
+                    var cell = row.GetCell(c);
+                    if (cell != null && cell.CellType == CellType.String)
+                    {
+                        if (NormalizeToPropertyName(cell.StringCellValue) == target)
+                            return c;
+                    }
+                }
+            }
+            return -1;
+        }
+
+        private string NormalizeToPropertyName(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return "";
+            string normalized = input.Normalize(System.Text.NormalizationForm.FormD);
+            var sb = new System.Text.StringBuilder();
+            foreach (var c in normalized)
+            {
+                if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark)
+                    sb.Append(c);
+            }
+            string result = sb.ToString().Normalize(System.Text.NormalizationForm.FormC).ToLower();
+            result = result.Replace("đ", "d");
+            result = Regex.Replace(result, "[^a-z0-9]", "");
+            return result;
+        }
+
         private void ReplaceSingleVariables(ISheet worksheet, Dictionary<string, object> variables)
         {
+            var sortedKeys = variables.Keys.OrderByDescending(k => k.Length).ToList();
+            var dateStyleCache = new Dictionary<short, ICellStyle>();
+
+            // 7. Dò toàn bộ UsedRange
             for (int rowIdx = worksheet.FirstRowNum; rowIdx <= worksheet.LastRowNum; rowIdx++)
             {
                 var row = worksheet.GetRow(rowIdx);
@@ -83,27 +133,50 @@ namespace SalesManagementSystem.Services
 
                 for (int colIdx = row.FirstCellNum; colIdx < row.LastCellNum; colIdx++)
                 {
+                    if (colIdx < 0) continue;
                     var cell = row.GetCell(colIdx);
                     if (cell != null && cell.CellType == CellType.String)
                     {
                         string text = cell.StringCellValue;
-                        if (!string.IsNullOrEmpty(text))
+                        if (string.IsNullOrEmpty(text)) continue;
+
+                        bool isFullMatch = false;
+                        foreach (var key in sortedKeys)
                         {
-                            bool isChanged = false;
-                            foreach (var kv in variables)
+                            string ph1 = $"%{key}";
+                            string ph2 = $"%{key}%";
+
+                            // Replace đúng full match để giữ format
+                            if (text.Trim() == ph1 || text.Trim() == ph2)
                             {
-                                var placeholder = $"%{kv.Key}";
-                                if (text.Contains(placeholder))
+                                ApplyFormatterDirect(cell, variables[key], dateStyleCache);
+                                isFullMatch = true;
+                                break;
+                            }
+                        }
+
+                        if (!isFullMatch)
+                        {
+                            bool changed = false;
+                            foreach (var key in sortedKeys)
+                            {
+                                string ph2 = $"%{key}%";
+                                if (text.Contains(ph2))
                                 {
-                                    text = text.Replace(placeholder, kv.Value?.ToString() ?? "");
-                                    isChanged = true;
+                                    text = text.Replace(ph2, FormatForString(variables[key]));
+                                    changed = true;
+                                }
+                                else 
+                                {
+                                    string pattern1 = $@"%{Regex.Escape(key)}(?![a-zA-Z0-9_])";
+                                    if (Regex.IsMatch(text, pattern1))
+                                    {
+                                        text = Regex.Replace(text, pattern1, FormatForString(variables[key]));
+                                        changed = true;
+                                    }
                                 }
                             }
-
-                            if (isChanged)
-                            {
-                                cell.SetCellValue(text);
-                            }
+                            if (changed) cell.SetCellValue(text);
                         }
                     }
                 }
@@ -113,264 +186,118 @@ namespace SalesManagementSystem.Services
         private void FillListData<T>(ISheet worksheet, string maBieuMau, IEnumerable<T> dataList)
         {
             var data = dataList.ToList();
-            var type = typeof(T);
-            var properties = type.GetProperties();
+            if (data.Count == 0) return;
 
-            int templateRowIndex = -1;
-            string prefix = $"%{maBieuMau}.";
+            var properties = typeof(T).GetProperties();
+            var dateStyleCache = new Dictionary<short, ICellStyle>();
 
-            // Tìm dòng chứa placeholder danh sách (ví dụ: %NS01.)
-            for (int rowIdx = worksheet.FirstRowNum; rowIdx <= worksheet.LastRowNum; rowIdx++)
+            var colMap = new Dictionary<string, int>(); 
+            int headerRowIndex = -1;
+            int firstColIndex = int.MaxValue;
+            int lastColIndex = -1;
+
+            // 2. Xác định cột theo header text động
+            for (int r = 0; r <= worksheet.LastRowNum; r++)
             {
-                var row = worksheet.GetRow(rowIdx);
+                var row = worksheet.GetRow(r);
                 if (row == null) continue;
+                
+                int matchCount = 0;
+                var tempMap = new Dictionary<string, int>();
+                int tempFirst = int.MaxValue;
+                int tempLast = -1;
 
-                for (int colIdx = row.FirstCellNum; colIdx < row.LastCellNum; colIdx++)
+                for (int c = row.FirstCellNum; c < row.LastCellNum; c++)
                 {
-                    var cell = row.GetCell(colIdx);
+                    if (c < 0) continue;
+                    var cell = row.GetCell(c);
                     if (cell != null && cell.CellType == CellType.String)
                     {
-                        var cellText = cell.StringCellValue;
-                        if (!string.IsNullOrEmpty(cellText) && cellText.Contains(prefix))
+                        string cellNorm = NormalizeToPropertyName(cell.StringCellValue);
+                        var prop = properties.FirstOrDefault(p => NormalizeToPropertyName(p.Name) == cellNorm);
+                        if (prop != null)
                         {
-                            templateRowIndex = rowIdx;
-                            break;
+                            tempMap[prop.Name] = c;
+                            matchCount++;
+                            if (c < tempFirst) tempFirst = c;
+                            if (c > tempLast) tempLast = c;
                         }
                     }
                 }
-                if (templateRowIndex != -1) break;
+                
+                if (matchCount >= 2 && matchCount > colMap.Count)
+                {
+                    colMap = tempMap;
+                    headerRowIndex = r;
+                    firstColIndex = tempFirst;
+                    lastColIndex = tempLast;
+                }
             }
 
-            if (templateRowIndex == -1) return; // Không tìm thấy template row
+            if (headerRowIndex == -1) return; 
 
-            if (data.Count == 0)
+            int templateRowIndex = headerRowIndex + 1;
+            var templateRow = worksheet.GetRow(templateRowIndex);
+            if (templateRow == null) return;
+
+            int tmpRowIndex = -1;
+            for (int r = templateRowIndex + 1; r <= worksheet.LastRowNum; r++)
             {
-                // Nếu không có dữ liệu, xóa dòng template
-                var rowToRemove = worksheet.GetRow(templateRowIndex);
-                if (rowToRemove != null)
+                var row = worksheet.GetRow(r);
+                if (row != null)
                 {
-                    worksheet.RemoveRow(rowToRemove);
-                    if (templateRowIndex < worksheet.LastRowNum)
+                    for (int c = row.FirstCellNum; c < row.LastCellNum; c++)
                     {
-                        worksheet.ShiftRows(templateRowIndex + 1, worksheet.LastRowNum, -1);
+                        if (c < 0) continue;
+                        var cell = row.GetCell(c);
+                        if (cell != null && cell.CellType == CellType.String && cell.StringCellValue.Contains("[TMP]"))
+                        {
+                            tmpRowIndex = r;
+                            break;
+                        }
                     }
+                    if (tmpRowIndex != -1) break;
                 }
-                return;
             }
 
-            // Copy template row cho các dòng dữ liệu tiếp theo
-            if (data.Count > 1)
+            if (tmpRowIndex != -1)
             {
-                worksheet.ShiftRows(templateRowIndex + 1, worksheet.LastRowNum, data.Count - 1);
-                var templateRow = worksheet.GetRow(templateRowIndex);
-                for (int i = 1; i < data.Count; i++)
-                {
-                    var newRow = worksheet.CreateRow(templateRowIndex + i);
-                    CopyRow(templateRow, newRow);
-                }
+                worksheet.RemoveRow(worksheet.GetRow(tmpRowIndex));
+                if (tmpRowIndex < worksheet.LastRowNum)
+                    ShiftRowsSafely(worksheet, tmpRowIndex + 1, worksheet.LastRowNum, -1);
             }
 
+            int rowsToInsert = data.Count - 1;
+            if (rowsToInsert > 0)
+            {
+                ShiftRowsSafely(worksheet, templateRowIndex + 1, worksheet.LastRowNum, rowsToInsert);
+            }
+
+            // 4. Gán dữ liệu theo cột động
             for (int i = 0; i < data.Count; i++)
             {
                 var item = data[i];
-                int currentRowIdx = templateRowIndex + i;
-                var currentRow = worksheet.GetRow(currentRowIdx);
-                if (currentRow == null) continue;
-
-                for (int colIdx = currentRow.FirstCellNum; colIdx < currentRow.LastCellNum; colIdx++)
-                {
-                    var cell = currentRow.GetCell(colIdx);
-                    if (cell == null || cell.CellType != CellType.String) continue;
-
-                    var text = cell.StringCellValue;
-
-                    if (string.IsNullOrEmpty(text) || !text.Contains(prefix)) continue;
-
-                    if (text.Contains($"{prefix}STT") || text.Contains($"{prefix}P_STT"))
-                    {
-                        cell.SetCellValue(i + 1);
-                        continue;
-                    }
-
-                    bool replaced = false;
-                    foreach (var prop in properties)
-                    {
-                        var propPlaceholder = $"{prefix}{prop.Name}";
-                        if (text.Contains(propPlaceholder))
-                        {
-                            var value = prop.GetValue(item);
-                            ApplyFormatter(cell, value, text, propPlaceholder);
-                            replaced = true;
-                            break;
-                        }
-                    }
-
-                    if (!replaced)
-                    {
-                        // Clear placeholder nếu không tìm thấy property mapping
-                        if (text.Trim() == prefix)
-                        {
-                            cell.SetBlank();
-                        }
-                        else
-                        {
-                            cell.SetCellValue(text.Replace(text, ""));
-                        }
-                    }
-                }
-            }
-        }
-
-        private void CopyRow(IRow sourceRow, IRow destinationRow)
-        {
-            destinationRow.Height = sourceRow.Height;
-            for (int i = sourceRow.FirstCellNum; i < sourceRow.LastCellNum; i++)
-            {
-                var sourceCell = sourceRow.GetCell(i);
-                if (sourceCell != null)
-                {
-                    var newCell = destinationRow.CreateCell(i);
-                    newCell.CellStyle = sourceCell.CellStyle;
-                    switch (sourceCell.CellType)
-                    {
-                        case CellType.String:
-                            newCell.SetCellValue(sourceCell.StringCellValue);
-                            break;
-                        case CellType.Numeric:
-                            newCell.SetCellValue(sourceCell.NumericCellValue);
-                            break;
-                        case CellType.Boolean:
-                            newCell.SetCellValue(sourceCell.BooleanCellValue);
-                            break;
-                        case CellType.Formula:
-                            newCell.SetCellFormula(sourceCell.CellFormula);
-                            break;
-                        case CellType.Error:
-                            newCell.SetCellErrorValue(sourceCell.ErrorCellValue);
-                            break;
-                        case CellType.Blank:
-                            newCell.SetBlank();
-                            break;
-                    }
-                }
-            }
-        }
-
-        private void ApplyFormatter(ICell cell, object value, string originalText, string placeholder)
-        {
-            if (value == null)
-            {
-                if (originalText == placeholder)
-                {
-                    cell.SetBlank();
-                }
-                else
-                {
-                    cell.SetCellValue(originalText.Replace(placeholder, ""));
-                }
-                return;
-            }
-
-            // Nếu ô chỉ chứa duy nhất placeholder, ta gán value trực tiếp để giữ đúng type (số, ngày)
-            if (originalText.Trim() == placeholder)
-            {
-                if (value is DateTime dt)
-                {
-                    cell.SetCellValue(dt);
-                    var style = cell.Sheet.Workbook.CreateCellStyle();
-                    style.CloneStyleFrom(cell.CellStyle);
-                    style.DataFormat = cell.Sheet.Workbook.CreateDataFormat().GetFormat("dd/MM/yyyy");
-                    cell.CellStyle = style;
-                }
-                else if (value is string str)
-                {
-                    // Tránh mất số 0 ở đầu (ví dụ: "00125")
-                    if (str.StartsWith("0") && str.Length > 1 && str.All(char.IsDigit))
-                    {
-                        cell.SetCellValue(str);
-                    }
-                    else if (double.TryParse(str, out double numVal))
-                    {
-                        cell.SetCellValue(numVal);
-                    }
-                    else
-                    {
-                        cell.SetCellValue(str);
-                    }
-                }
-                else if (value is int i)
-                {
-                    cell.SetCellValue(i);
-                }
-                else if (value is double d)
-                {
-                    cell.SetCellValue(d);
-                }
-                else if (value is decimal dec)
-                {
-                    cell.SetCellValue(Convert.ToDouble(dec));
-                }
-                else
-                {
-                    cell.SetCellValue(value.ToString());
-                }
-            }
-            else
-            {
-                // Nếu ô có chứa chữ khác kết hợp (ví dụ: "Mã NV: %NS01.MaNV")
-                string formattedValue = value is DateTime dt ? dt.ToString("dd/MM/yyyy") : value.ToString();
-                cell.SetCellValue(originalText.Replace(placeholder, formattedValue));
-            }
-        }
-
-        public byte[] ExportGrouped<TKey, TItem>(string maBieuMau, IEnumerable<IGrouping<TKey, TItem>> groupedData, out string fileExtension, Dictionary<string, object> variables = null)
-        {
-            fileExtension = "xlsx"; // default
-            var bieuMau = _bieuMauRepo.GetByMa(maBieuMau);
-            if (bieuMau == null || bieuMau.NoiDung == null || bieuMau.NoiDung.Length == 0)
-            {
-                throw new Exception($"Không tìm thấy biểu mẫu '{maBieuMau}' hoặc biểu mẫu chưa có file đính kèm.");
-            }
-
-            if (!string.IsNullOrEmpty(bieuMau.DuoiFile))
-            {
-                fileExtension = bieuMau.DuoiFile.ToLower();
-            }
-            else if (!string.IsNullOrEmpty(bieuMau.TenFile))
-            {
-                fileExtension = Path.GetExtension(bieuMau.TenFile).Replace(".", "").ToLower();
-            }
-
-            using (var stream = new MemoryStream(bieuMau.NoiDung))
-            {
-                IWorkbook workbook;
-                try
-                {
-                    workbook = WorkbookFactory.Create(stream);
-                }
-                catch (Exception)
-                {
-                    throw new Exception("File Excel biểu mẫu không hợp lệ. Vui lòng đảm bảo bạn đang upload file Excel đúng định dạng (.xls hoặc .xlsx).");
-                }
-
-                if (workbook.NumberOfSheets == 0) throw new Exception("File Excel biểu mẫu không có Sheet nào.");
+                var targetRow = worksheet.GetRow(templateRowIndex + i) ?? worksheet.CreateRow(templateRowIndex + i);
                 
-                var worksheet = workbook.GetSheetAt(0);
-
-                if (variables != null && variables.Count > 0)
+                // 5. Clone style từ template (Row đầu tiên) dựa theo vùng dữ liệu thực tế
+                if (i > 0) 
                 {
-                    ReplaceSingleVariables(worksheet, variables);
+                    CopyRowDataExact(templateRow, targetRow, firstColIndex, lastColIndex);
                 }
+                
+                // Đảm bảo row tự động giãn chiều cao theo nội dung (AutoFit)
+                targetRow.Height = -1;
 
-                if (groupedData != null)
+                foreach (var kvp in colMap)
                 {
-                    FillGroupedData(worksheet, maBieuMau, groupedData);
-                }
+                    string propName = kvp.Key;
+                    int colIdx = kvp.Value;
 
-                using (var outputStream = new MemoryStream())
-                {
-                    workbook.Write(outputStream);
-                    return outputStream.ToArray();
+                    var cell = targetRow.GetCell(colIdx) ?? targetRow.CreateCell(colIdx);
+                    var prop = properties.First(p => p.Name == propName);
+                    var value = prop.GetValue(item);
+
+                    ApplyFormatterDirect(cell, value, dateStyleCache);
                 }
             }
         }
@@ -380,11 +307,12 @@ namespace SalesManagementSystem.Services
             var groups = groupedData.ToList();
             var type = typeof(TItem);
             var properties = type.GetProperties();
+            var dateStyleCache = new Dictionary<short, ICellStyle>();
 
             int groupTemplateRowIndex = -1;
             int itemTemplateRowIndex = -1;
             int tmpTemplateRowIndex = -1;
-            string groupPrefix = "%P_Group";
+            string groupPrefix = "%P_Group%";
             string itemPrefix = $"%{maBieuMau}.";
             string tmpMarker = "[TMP]";
 
@@ -395,13 +323,14 @@ namespace SalesManagementSystem.Services
 
                 for (int colIdx = row.FirstCellNum; colIdx < row.LastCellNum; colIdx++)
                 {
+                    if (colIdx < 0) continue;
                     var cell = row.GetCell(colIdx);
                     if (cell != null && cell.CellType == CellType.String)
                     {
                         var cellText = cell.StringCellValue;
                         if (!string.IsNullOrEmpty(cellText))
                         {
-                            if (cellText.Contains(groupPrefix)) groupTemplateRowIndex = rowIdx;
+                            if (cellText.Contains("%P_Group")) groupTemplateRowIndex = rowIdx;
                             else if (cellText.Contains(itemPrefix)) itemTemplateRowIndex = rowIdx;
                             else if (cellText.Contains(tmpMarker)) tmpTemplateRowIndex = rowIdx;
                         }
@@ -419,52 +348,33 @@ namespace SalesManagementSystem.Services
             if (groups.Count == 0)
             {
                 for (int i = endTemplateRow; i >= startTemplateRow; i--)
-                {
                     worksheet.RemoveRow(worksheet.GetRow(i));
-                }
                 return;
             }
 
-            // Create enough blocks for all groups at the bottom
             int totalNewBlockRows = groups.Count * templateBlockSize;
             int insertIndex = endTemplateRow + 1;
 
             if (insertIndex <= worksheet.LastRowNum)
-            {
-                worksheet.ShiftRows(insertIndex, worksheet.LastRowNum, totalNewBlockRows);
-            }
+                ShiftRowsSafely(worksheet, insertIndex, worksheet.LastRowNum, totalNewBlockRows);
 
             int currentRowIdx = insertIndex;
 
-            // Copy blocks and update formulas
             for (int g = 0; g < groups.Count; g++)
             {
                 int offset = currentRowIdx - startTemplateRow;
-
                 for (int i = 0; i < templateBlockSize; i++)
                 {
                     var sourceRow = worksheet.GetRow(startTemplateRow + i);
                     var newRow = worksheet.CreateRow(currentRowIdx + i);
                     if (sourceRow != null)
                     {
-                        CopyRow(sourceRow, newRow);
-
-                        // Update formulas
-                        for (int col = newRow.FirstCellNum; col < newRow.LastCellNum; col++)
-                        {
-                            var cell = newRow.GetCell(col);
-                            if (cell != null && cell.CellType == CellType.Formula)
-                            {
-                                string oldFormula = cell.CellFormula;
-                                cell.SetCellFormula(UpdateFormulaReferences(oldFormula, offset, startTemplateRow + 1, endTemplateRow + 1));
-                            }
-                        }
+                        CopyRowDataExact(sourceRow, newRow, 0, sourceRow.LastCellNum);
                     }
                 }
                 currentRowIdx += templateBlockSize;
             }
 
-            // Populate data and expand item rows
             currentRowIdx = insertIndex;
             List<int> tmpRowsToDelete = new List<int>();
 
@@ -477,58 +387,56 @@ namespace SalesManagementSystem.Services
                 var itemRow = worksheet.GetRow(currentRowIdx + (itemTemplateRowIndex - startTemplateRow));
                 var tmpRow = hasTmp ? worksheet.GetRow(currentRowIdx + (tmpTemplateRowIndex - startTemplateRow)) : null;
 
-                // Set group name
                 if (groupRow != null)
                 {
                     for (int col = groupRow.FirstCellNum; col < groupRow.LastCellNum; col++)
                     {
+                        if (col < 0) continue;
                         var cell = groupRow.GetCell(col);
                         if (cell != null && cell.CellType == CellType.String)
                         {
                             var text = cell.StringCellValue;
-                            if (text.Contains(groupPrefix))
-                                cell.SetCellValue(text.Replace(groupPrefix, group.Key?.ToString() ?? ""));
+                            if (text.Contains("%P_Group"))
+                                cell.SetCellValue(Regex.Replace(text, @"%P_Group.*?%", group.Key?.ToString() ?? ""));
                         }
                     }
                 }
 
-                // If tmpRow exists, clear its marker
                 if (tmpRow != null)
                 {
                     for (int col = tmpRow.FirstCellNum; col < tmpRow.LastCellNum; col++)
                     {
+                        if (col < 0) continue;
                         var cell = tmpRow.GetCell(col);
                         if (cell != null && cell.CellType == CellType.String && cell.StringCellValue.Contains(tmpMarker))
-                        {
                             cell.SetCellValue(cell.StringCellValue.Replace(tmpMarker, ""));
-                        }
                     }
                 }
 
-                // Insert needed item rows (if more than 1 item)
                 int itemsToAdd = items.Count - 1;
                 int itemRowIdx = currentRowIdx + (itemTemplateRowIndex - startTemplateRow);
 
                 if (itemsToAdd > 0)
                 {
-                    worksheet.ShiftRows(itemRowIdx + 1, worksheet.LastRowNum, itemsToAdd);
-                    
+                    ShiftRowsSafely(worksheet, itemRowIdx + 1, worksheet.LastRowNum, itemsToAdd);
                     for (int i = 1; i <= itemsToAdd; i++)
                     {
                         var newItemRow = worksheet.CreateRow(itemRowIdx + i);
-                        CopyRow(itemRow, newItemRow);
+                        CopyRowDataExact(itemRow, newItemRow, 0, itemRow.LastCellNum);
                     }
                 }
 
-                // Populate items
                 for (int i = 0; i < items.Count; i++)
                 {
                     var item = items[i];
                     var rowToFill = worksheet.GetRow(itemRowIdx + i);
                     if (rowToFill == null) continue;
+                    
+                    rowToFill.Height = -1; // Auto fit
 
                     for (int col = rowToFill.FirstCellNum; col < rowToFill.LastCellNum; col++)
                     {
+                        if (col < 0) continue;
                         var cell = rowToFill.GetCell(col);
                         if (cell == null || cell.CellType != CellType.String) continue;
 
@@ -545,10 +453,10 @@ namespace SalesManagementSystem.Services
                         foreach (var prop in properties)
                         {
                             var propPlaceholder = $"{itemPrefix}{prop.Name}";
-                            if (text.Contains(propPlaceholder))
+                            if (Regex.IsMatch(text, Regex.Escape(propPlaceholder) + @"%?(?![a-zA-Z0-9_])"))
                             {
                                 var value = prop.GetValue(item);
-                                ApplyFormatter(cell, value, text, propPlaceholder);
+                                ApplyFormatterDirect(cell, value, dateStyleCache);
                                 replaced = true;
                                 break;
                             }
@@ -557,7 +465,7 @@ namespace SalesManagementSystem.Services
                         if (!replaced)
                         {
                             if (text.Trim() == itemPrefix) cell.SetBlank();
-                            else cell.SetCellValue(text.Replace(text, ""));
+                            else cell.SetCellValue(Regex.Replace(text, Regex.Escape(itemPrefix) + @"[a-zA-Z0-9_]*", ""));
                         }
                     }
                 }
@@ -568,54 +476,218 @@ namespace SalesManagementSystem.Services
                     tmpRowsToDelete.Add(currentTmpRowIdx - templateBlockSize);
                 }
 
-                // Move current row index to next block
-                // Original block size + expanded rows
                 currentRowIdx += templateBlockSize + itemsToAdd;
             }
 
-            // Remove original template rows
             for (int i = endTemplateRow; i >= startTemplateRow; i--)
-            {
                 worksheet.RemoveRow(worksheet.GetRow(i));
-            }
 
-            // Shift everything up to remove template gap
             if (endTemplateRow + 1 <= worksheet.LastRowNum)
-            {
-                worksheet.ShiftRows(endTemplateRow + 1, worksheet.LastRowNum, -templateBlockSize);
-            }
+                ShiftRowsSafely(worksheet, endTemplateRow + 1, worksheet.LastRowNum, -templateBlockSize);
 
-            // Remove TMP rows
             if (hasTmp && tmpRowsToDelete.Count > 0)
             {
                 tmpRowsToDelete.Reverse();
                 foreach (var idx in tmpRowsToDelete)
                 {
-                    worksheet.RemoveRow(worksheet.GetRow(idx));
-                    if (idx < worksheet.LastRowNum)
+                    var r = worksheet.GetRow(idx);
+                    if (r != null)
                     {
-                        worksheet.ShiftRows(idx + 1, worksheet.LastRowNum, -1);
+                        worksheet.RemoveRow(r);
+                        if (idx < worksheet.LastRowNum)
+                            ShiftRowsSafely(worksheet, idx + 1, worksheet.LastRowNum, -1);
                     }
                 }
             }
         }
 
-        private string UpdateFormulaReferences(string formula, int offset, int templateStartRow, int templateEndRow)
+        private void CopyRowDataExact(IRow sourceRow, IRow targetRow, int firstCol, int lastCol)
+        {
+            if (sourceRow == null || targetRow == null) return;
+            targetRow.Height = sourceRow.Height;
+            if (sourceRow.RowStyle != null) targetRow.RowStyle = sourceRow.RowStyle;
+
+            for (int i = firstCol; i <= lastCol; i++)
+            {
+                var sCell = sourceRow.GetCell(i);
+                if (sCell != null)
+                {
+                    var tCell = targetRow.GetCell(i) ?? targetRow.CreateCell(i);
+                    tCell.CellStyle = sCell.CellStyle;
+
+                    switch (sCell.CellType)
+                    {
+                        case CellType.String: tCell.SetCellValue(sCell.StringCellValue); break;
+                        case CellType.Numeric: tCell.SetCellValue(sCell.NumericCellValue); break;
+                        case CellType.Boolean: tCell.SetCellValue(sCell.BooleanCellValue); break;
+                        case CellType.Formula: 
+                            tCell.SetCellFormula(UpdateFormulaRow(sCell.CellFormula, sourceRow.RowNum, targetRow.RowNum));
+                            break;
+                    }
+                }
+            }
+            CopyMergedRegionsInRow(sourceRow, targetRow, firstCol, lastCol);
+        }
+
+        private void CopyMergedRegionsInRow(IRow sourceRow, IRow destinationRow, int firstCol, int lastCol)
+        {
+            var worksheet = sourceRow.Sheet;
+            var regionsToAdd = new List<CellRangeAddress>();
+            for (int i = 0; i < worksheet.NumMergedRegions; i++)
+            {
+                var region = worksheet.GetMergedRegion(i);
+                if (region.FirstRow == sourceRow.RowNum && region.LastRow == sourceRow.RowNum && region.FirstColumn >= firstCol && region.LastColumn <= lastCol)
+                {
+                    regionsToAdd.Add(new CellRangeAddress(
+                        destinationRow.RowNum, destinationRow.RowNum,
+                        region.FirstColumn, region.LastColumn
+                    ));
+                }
+            }
+            foreach (var r in regionsToAdd) worksheet.AddMergedRegion(r);
+        }
+
+        private string UpdateFormulaRow(string formula, int oldRow, int newRow)
         {
             if (string.IsNullOrEmpty(formula)) return formula;
-
-            return System.Text.RegularExpressions.Regex.Replace(formula, @"([A-Z]+)(\d+)", match =>
+            int offset = newRow - oldRow;
+            return Regex.Replace(formula, @"([A-Z]+)(\d+)", match =>
             {
                 string col = match.Groups[1].Value;
                 if (int.TryParse(match.Groups[2].Value, out int row))
                 {
-                    if (row >= templateStartRow && row <= templateEndRow)
-                    {
-                        return col + (row + offset).ToString();
-                    }
+                    if (row == oldRow + 1) return col + (row + offset).ToString();
                 }
                 return match.Value;
             });
+        }
+
+        private void ShiftRowsSafely(ISheet sheet, int startRow, int endRow, int n)
+        {
+            if (n == 0 || startRow > endRow || startRow < 0) return;
+
+            var regionsToShift = new List<CellRangeAddress>();
+            var regionsToRemove = new List<int>();
+            for (int i = 0; i < sheet.NumMergedRegions; i++)
+            {
+                var region = sheet.GetMergedRegion(i);
+                if (region.FirstRow >= startRow && region.LastRow <= endRow)
+                {
+                    regionsToRemove.Add(i);
+                    regionsToShift.Add(new CellRangeAddress(
+                        region.FirstRow + n, region.LastRow + n,
+                        region.FirstColumn, region.LastColumn));
+                }
+            }
+
+            regionsToRemove.Reverse();
+            foreach (var idx in regionsToRemove) sheet.RemoveMergedRegion(idx);
+
+            if (n > 0)
+            {
+                for (int i = endRow; i >= startRow; i--)
+                {
+                    var sourceRow = sheet.GetRow(i);
+                    if (sourceRow != null)
+                    {
+                        var targetRow = sheet.GetRow(i + n) ?? sheet.CreateRow(i + n);
+                        CopyRowDataExact(sourceRow, targetRow, 0, sourceRow.LastCellNum);
+                        sheet.RemoveRow(sourceRow);
+                    }
+                    else
+                    {
+                        var targetRow = sheet.GetRow(i + n);
+                        if (targetRow != null) sheet.RemoveRow(targetRow);
+                    }
+                }
+            }
+            
+            foreach (var region in regionsToShift) sheet.AddMergedRegion(region);
+        }
+
+        private void ApplyFormatterDirect(ICell cell, object value, Dictionary<short, ICellStyle> dateStyleCache)
+        {
+            if (value == null)
+            {
+                cell.SetBlank();
+                return;
+            }
+
+            if (value is DateTime dt)
+            {
+                cell.SetCellValue(dt);
+                if (cell.CellStyle != null)
+                {
+                    short origIndex = cell.CellStyle.Index;
+                    if (!dateStyleCache.TryGetValue(origIndex, out var newStyle))
+                    {
+                        newStyle = cell.Sheet.Workbook.CreateCellStyle();
+                        newStyle.CloneStyleFrom(cell.CellStyle);
+                        newStyle.DataFormat = cell.Sheet.Workbook.CreateDataFormat().GetFormat("dd/MM/yyyy");
+                        dateStyleCache[origIndex] = newStyle;
+                    }
+                    cell.CellStyle = newStyle;
+                }
+            }
+            else if (value is string str)
+            {
+                if (str.StartsWith("0") && str.Length > 1 && str.All(char.IsDigit)) cell.SetCellValue(str);
+                else if (double.TryParse(str, out double numVal)) cell.SetCellValue(numVal);
+                else cell.SetCellValue(str);
+            }
+            else if (value is int iVal) cell.SetCellValue(iVal);
+            else if (value is double dVal) cell.SetCellValue(dVal);
+            else if (value is decimal decVal) cell.SetCellValue(Convert.ToDouble(decVal));
+            else cell.SetCellValue(value.ToString());
+        }
+
+        private string FormatForString(object val)
+        {
+            if (val == null) return "";
+            if (val is DateTime dt) return dt.ToString("dd/MM/yyyy");
+            if (val is decimal dec) return dec.ToString("N0");
+            if (val is double d) return d.ToString("N0");
+            if (val is int i) return i.ToString("N0");
+            return val.ToString();
+        }
+
+        private void ValidateAndCleanWorkbook(IWorkbook workbook)
+        {
+            for (int s = 0; s < workbook.NumberOfSheets; s++)
+            {
+                var sheet = workbook.GetSheetAt(s);
+                for (int rowIdx = sheet.FirstRowNum; rowIdx <= sheet.LastRowNum; rowIdx++)
+                {
+                    var row = sheet.GetRow(rowIdx);
+                    if (row == null) continue;
+                    
+                    for (int colIdx = row.FirstCellNum; colIdx < row.LastCellNum; colIdx++)
+                    {
+                        if (colIdx < 0) continue;
+                        var cell = row.GetCell(colIdx);
+                        if (cell == null || cell.CellType != CellType.String) continue;
+
+                        string text = cell.StringCellValue;
+                        if (string.IsNullOrEmpty(text)) continue;
+
+                        bool changed = false;
+                        var regexVar = new Regex(@"%[a-zA-Z0-9_\.]+.*?%?");
+                        if (regexVar.IsMatch(text))
+                        {
+                            text = regexVar.Replace(text, "");
+                            changed = true;
+                        }
+                        
+                        if (text.Contains("[TMP]"))
+                        {
+                            text = text.Replace("[TMP]", "");
+                            changed = true;
+                        }
+
+                        if (changed) cell.SetCellValue(text);
+                    }
+                }
+            }
         }
     }
 }
