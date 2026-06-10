@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Web.Mvc;
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Repositories;
@@ -18,7 +18,7 @@ namespace SalesManagementSystem.Controllers
         }
 
         // ==========================================
-        // QUẢN LÝ CHỨC VỤ
+        // QUáº¢N LÃ CHá»¨C Vá»¤
         // ==========================================
 
         // GET: DanhMuc/GetChucVu
@@ -64,7 +64,7 @@ namespace SalesManagementSystem.Controllers
             {
                 if (_chucVuRepo.IsDuplicateCode(chucVu.MaChucVu))
                 {
-                    ModelState.AddModelError("MaChucVu", "Mã chức vụ đã tồn tại trong hệ thống.");
+                    ModelState.AddModelError("MaChucVu", "MÃ£ chá»©c vá»¥ Ä‘Ã£ tá»“n táº¡i trong há»‡ thá»‘ng.");
                     return PartialView("CreateChucVu", chucVu);
                 }
 
@@ -75,7 +75,7 @@ namespace SalesManagementSystem.Controllers
                 // AUDIT LOG
                 AuditLog.AddInsert("DM_ChucVu", chucVu.ID.ToString(), chucVu);
 
-                return Json(new { success = true, message = "Thêm mới chức vụ thành công!" });
+                return Json(new { success = true, message = "ThÃªm má»›i chá»©c vá»¥ thÃ nh cÃ´ng!" });
             }
             return PartialView("CreateChucVu", chucVu);
         }
@@ -102,7 +102,7 @@ namespace SalesManagementSystem.Controllers
             {
                 if (_chucVuRepo.IsDuplicateCode(chucVu.MaChucVu, chucVu.ID))
                 {
-                    ModelState.AddModelError("MaChucVu", "Mã chức vụ đã tồn tại trong hệ thống.");
+                    ModelState.AddModelError("MaChucVu", "MÃ£ chá»©c vá»¥ Ä‘Ã£ tá»“n táº¡i trong há»‡ thá»‘ng.");
                     return PartialView("UpdateChucVu", chucVu);
                 }
 
@@ -115,7 +115,7 @@ namespace SalesManagementSystem.Controllers
                 // AUDIT LOG
                 AuditLog.AddUpdate("DM_ChucVu", chucVu.ID.ToString(), oldChucVu, chucVu);
 
-                return Json(new { success = true, message = "Cập nhật chức vụ thành công!" });
+                return Json(new { success = true, message = "Cáº­p nháº­t chá»©c vá»¥ thÃ nh cÃ´ng!" });
             }
             return PartialView("UpdateChucVu", chucVu);
         }
@@ -146,7 +146,7 @@ namespace SalesManagementSystem.Controllers
                     _chucVuRepo.Delete(item);
                 }
             }
-            return Json(new { success = true, message = "Xóa dữ liệu thành công" });
+            return Json(new { success = true, message = "XÃ³a dá»¯ liá»‡u thÃ nh cÃ´ng" });
         }
     }
 }

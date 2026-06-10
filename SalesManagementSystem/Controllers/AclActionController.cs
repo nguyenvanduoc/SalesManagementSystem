@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Web.Mvc;
 using System.Linq;
 using SalesManagementSystem.Models.Entities;
@@ -20,7 +20,7 @@ namespace SalesManagementSystem.Controllers
         }
 
         // ==========================================
-        // QUẢN LÝ HÀNH ĐỘNG
+        // QUáº¢N LÃ HÃ€NH Äá»˜NG
         // ==========================================
 
         // GET: AclAction/GetAction
@@ -67,7 +67,7 @@ namespace SalesManagementSystem.Controllers
             {
                 _actionRepo.Insert(aclAction);
                 AuditLog.AddInsert("ACL_Action", aclAction.ID.ToString(), aclAction);
-                return Json(new { success = true, message = "Thêm mới Action thành công!" });
+                return Json(new { success = true, message = "ThÃªm má»›i Action thÃ nh cÃ´ng!" });
             }
             ViewBag.ManHinhList = new SelectList(_manHinhRepo.GetAll().Where(m => m.IsSuDung == 1), "ID", "TenManHinh", aclAction.IDManHinh);
             return PartialView("CreateAction", aclAction);
@@ -97,7 +97,7 @@ namespace SalesManagementSystem.Controllers
                 var oldAction = _actionRepo.GetById(aclAction.ID);
                 _actionRepo.Update(aclAction);
                 AuditLog.AddUpdate("ACL_Action", aclAction.ID.ToString(), oldAction, aclAction);
-                return Json(new { success = true, message = "Cập nhật Action thành công!" });
+                return Json(new { success = true, message = "Cáº­p nháº­t Action thÃ nh cÃ´ng!" });
             }
             ViewBag.ManHinhList = new SelectList(_manHinhRepo.GetAll().Where(m => m.IsSuDung == 1), "ID", "TenManHinh", aclAction.IDManHinh);
             return PartialView("UpdateAction", aclAction);
@@ -125,7 +125,7 @@ namespace SalesManagementSystem.Controllers
                     _actionRepo.Delete(item);
                 }
             }
-            return Json(new { success = true, message = "Xóa dữ liệu thành công" });
+            return Json(new { success = true, message = "XÃ³a dá»¯ liá»‡u thÃ nh cÃ´ng" });
         }
     }
 }

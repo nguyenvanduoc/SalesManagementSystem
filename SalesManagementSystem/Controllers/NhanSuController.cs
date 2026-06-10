@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
 using SalesManagementSystem.Models.Entities;
@@ -92,7 +92,7 @@ namespace SalesManagementSystem.Controllers
             {
                 if (_employeeRepo.IsDuplicateCode(employee.MaNhanSu))
                 {
-                    ModelState.AddModelError("MaNhanSu", "Mã nhân sự đã tồn tại trong hệ thống.");
+                    ModelState.AddModelError("MaNhanSu", "MÃ£ nhÃ¢n sá»± Ä‘Ã£ tá»“n táº¡i trong há»‡ thá»‘ng.");
                     SetViewBags();
                     return PartialView(employee);
                 }
@@ -114,7 +114,7 @@ namespace SalesManagementSystem.Controllers
                 // AUDIT LOG
                 AuditLog.AddInsert("NS_NhanSu", employee.ID.ToString(), employee);
 
-                return Json(new { success = true, message = "Thêm mới nhân sự thành công!" });
+                return Json(new { success = true, message = "ThÃªm má»›i nhÃ¢n sá»± thÃ nh cÃ´ng!" });
             }
             SetViewBags();
             return PartialView(employee);
@@ -143,7 +143,7 @@ namespace SalesManagementSystem.Controllers
             {
                 if (_employeeRepo.IsDuplicateCode(employee.MaNhanSu, employee.ID))
                 {
-                    ModelState.AddModelError("MaNhanSu", "Mã nhân sự đã tồn tại trong hệ thống.");
+                    ModelState.AddModelError("MaNhanSu", "MÃ£ nhÃ¢n sá»± Ä‘Ã£ tá»“n táº¡i trong há»‡ thá»‘ng.");
                     SetViewBags();
                     return PartialView(employee);
                 }
@@ -171,7 +171,7 @@ namespace SalesManagementSystem.Controllers
                 // AUDIT LOG
                 AuditLog.AddUpdate("NS_NhanSu", employee.ID.ToString(), oldEmployee, employee);
 
-                return Json(new { success = true, message = "Cập nhật nhân sự thành công!" });
+                return Json(new { success = true, message = "Cáº­p nháº­t nhÃ¢n sá»± thÃ nh cÃ´ng!" });
             }
             SetViewBags();
             return PartialView(employee);
@@ -189,7 +189,7 @@ namespace SalesManagementSystem.Controllers
             ForceSaveAudit();
             _employeeRepo.Delete(id);
 
-            return Json(new { success = true, message = "Xóa dữ liệu thành công" });
+            return Json(new { success = true, message = "XÃ³a dá»¯ liá»‡u thÃ nh cÃ´ng" });
         }
 
         // POST: Employee/BatchDelete
@@ -209,14 +209,14 @@ namespace SalesManagementSystem.Controllers
                     _employeeRepo.Delete(id);
                 }
             }
-            return Json(new { success = true, message = "Xóa dữ liệu thành công" });
+            return Json(new { success = true, message = "XÃ³a dá»¯ liá»‡u thÃ nh cÃ´ng" });
         }
         // GET: Employee/ExportExcel
         public ActionResult ExportExcel()
         {
             try
             {
-                // 1. Lấy dữ liệu (không phân trang hoặc lấy tất cả tuỳ nghiệp vụ)
+                // 1. Láº¥y dá»¯ liá»‡u (khÃ´ng phÃ¢n trang hoáº·c láº¥y táº¥t cáº£ tuá»³ nghiá»‡p vá»¥)
                 int total;
                 var data = _employeeRepo.GetPaged(1, 10000, "", null, out total);
 
@@ -224,7 +224,7 @@ namespace SalesManagementSystem.Controllers
                 string nguoiLapBieu = session != null ? (session.HoDem + " " + session.Ten).Trim() : "";
                 if (string.IsNullOrEmpty(nguoiLapBieu)) nguoiLapBieu = session?.UserName ?? "";
 
-                // 2. Chuẩn bị biến đơn
+                // 2. Chuáº©n bá»‹ biáº¿n Ä‘Æ¡n
                 var variables = new System.Collections.Generic.Dictionary<string, object>
                 {
                     { "Ngay", DateTime.Now.ToString("dd") },
@@ -233,7 +233,7 @@ namespace SalesManagementSystem.Controllers
                     { "NguoiLapBieu", nguoiLapBieu }
                 };
 
-                // Chuẩn bị dữ liệu danh sách khớp với các cột trong mẫu Excel (HoTen, P_NgaySinh, P_SoDienThoai)
+                // Chuáº©n bá»‹ dá»¯ liá»‡u danh sÃ¡ch khá»›p vá»›i cÃ¡c cá»™t trong máº«u Excel (HoTen, P_NgaySinh, P_SoDienThoai)
                 var exportData = System.Linq.Enumerable.Select(data, x => new {
                     MaNhanSu = x.MaNhanSu,
                     HoTen = (x.HoDem + " " + x.Ten).Trim(),
@@ -242,7 +242,7 @@ namespace SalesManagementSystem.Controllers
                     Email = x.Email
                 });
 
-                // 3. Xuất file bằng Service chung
+                // 3. Xuáº¥t file báº±ng Service chung
                 string fileExtension;
                 var fileBytes = _excelExportService.Export(BieuMauConstants.DS_NHAN_SU, exportData, out fileExtension, variables);
 
@@ -254,8 +254,8 @@ namespace SalesManagementSystem.Controllers
             }
             catch (Exception ex)
             {
-                // Xử lý lỗi nếu không tìm thấy mẫu hoặc lỗi xuất file
-                TempData["ToastMessage"] = "Lỗi xuất Excel: " + ex.Message;
+                // Xá»­ lÃ½ lá»—i náº¿u khÃ´ng tÃ¬m tháº¥y máº«u hoáº·c lá»—i xuáº¥t file
+                TempData["ToastMessage"] = "Lá»—i xuáº¥t Excel: " + ex.Message;
                 TempData["ToastType"] = "error";
                 return RedirectToAction("Index");
             }
@@ -281,7 +281,7 @@ namespace SalesManagementSystem.Controllers
                 };
 
                 var exportData = System.Linq.Enumerable.Select(data, x => new {
-                    TenChucVu = string.IsNullOrEmpty(x.TenChucVu) ? "Chưa có chức vụ" : x.TenChucVu,
+                    TenChucVu = string.IsNullOrEmpty(x.TenChucVu) ? "ChÆ°a cÃ³ chá»©c vá»¥" : x.TenChucVu,
                     MaNhanSu = x.MaNhanSu,
                     HoTen = (x.HoDem + " " + x.Ten).Trim(),
                     P_NgaySinh = x.NgaySinh,
@@ -304,7 +304,7 @@ namespace SalesManagementSystem.Controllers
             catch (Exception ex)
             {
                 TempData["ToastType"] = "error";
-                TempData["ToastMessage"] = "Lỗi xuất file: " + ex.Message;
+                TempData["ToastMessage"] = "Lá»—i xuáº¥t file: " + ex.Message;
                 return RedirectToAction("Index");
             }
         }
@@ -315,33 +315,33 @@ namespace SalesManagementSystem.Controllers
             var emp = _employeeRepo.GetById(id);
             if (emp == null) return HttpNotFound();
 
-            // Lấy thêm thông tin phòng ban, chức vụ nếu cần (tùy theo schema)
-            // Giả lập biến dữ liệu cho mẫu Quyết Định
+            // Láº¥y thÃªm thÃ´ng tin phÃ²ng ban, chá»©c vá»¥ náº¿u cáº§n (tÃ¹y theo schema)
+            // Giáº£ láº­p biáº¿n dá»¯ liá»‡u cho máº«u Quyáº¿t Äá»‹nh
             var exportData = new
             {
                 HoTen = emp.HoDem + " " + emp.Ten,
                 NgaySinh = emp.NgaySinh?.ToString("dd/MM/yyyy") ?? "",
-                GioiTinh = (emp.GioiTinh == true) ? "Nam" : "Nữ",
+                GioiTinh = (emp.GioiTinh == true) ? "Nam" : "Ná»¯",
                 SoCMND = emp.SoCMND ?? "",
                 NgayCap = emp.NgayCap?.ToString("dd/MM/yyyy") ?? "",
                 DiaChi = emp.DiaChi ?? "",
                 SoDienThoai = emp.SoDienThoai ?? "",
-                // Thêm các biến khác tùy vào mẫu word @TenChucVu, @TenPhongBan...
+                // ThÃªm cÃ¡c biáº¿n khÃ¡c tÃ¹y vÃ o máº«u word @TenChucVu, @TenPhongBan...
             };
 
-            // Giả lập danh sách để lặp bảng trong Word #DanhSachPhuCap
+            // Giáº£ láº­p danh sÃ¡ch Ä‘á»ƒ láº·p báº£ng trong Word #DanhSachPhuCap
             var tables = new Dictionary<string, object>
             {
                 {
                     "DanhSachPhuCap", new List<object>
                     {
-                        new { STT = 1, TenPhuCap = "Phụ cấp ăn trưa", SoTien = 500000 },
-                        new { STT = 2, TenPhuCap = "Phụ cấp xăng xe", SoTien = 300000 }
+                        new { STT = 1, TenPhuCap = "Phá»¥ cáº¥p Äƒn trÆ°a", SoTien = 500000 },
+                        new { STT = 2, TenPhuCap = "Phá»¥ cáº¥p xÄƒng xe", SoTien = 300000 }
                     }
                 }
             };
 
-            // Gọi service xuất file Word. Tạm thời isPdf = false vì thư viện OpenSource ko xuất trực tiếp được PDF
+            // Gá»i service xuáº¥t file Word. Táº¡m thá»i isPdf = false vÃ¬ thÆ° viá»‡n OpenSource ko xuáº¥t trá»±c tiáº¿p Ä‘Æ°á»£c PDF
             var result = _wordExportService.ExportWord(BieuMauConstants.QUYET_DINH_NHAN_SU, exportData, tables, isPdf: false);
 
             if (result.Success)

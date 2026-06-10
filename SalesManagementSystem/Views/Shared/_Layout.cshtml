@@ -1020,6 +1020,17 @@
             }
         });
     });
+
+    // Sửa lỗi dropdown "Thao tác" bị cắt ngang bởi table-responsive
+    $(document).ready(function() {
+        $('.table-responsive').on('mouseenter', '.dropdown-hover', function() {
+            // Khi hover vào dropdown, cho phép tràn viền
+            $(this).closest('.table-responsive').css('overflow', 'visible');
+        }).on('mouseleave', '.dropdown-hover', function() {
+            // Khi chuột rời đi, trả lại thuộc tính ban đầu
+            $(this).closest('.table-responsive').css('overflow', '');
+        });
+    });
 </script>
 <script src="~/Scripts/tab-manager.js?v=@DateTime.Now.Ticks"></script>
 <script src="~/Scripts/global-search.js?v=@DateTime.Now.Ticks"></script>

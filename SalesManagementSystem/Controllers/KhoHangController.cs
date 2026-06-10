@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Web.Mvc;
 using SalesManagementSystem.Models.Entities;
@@ -21,7 +21,7 @@ namespace SalesManagementSystem.Controllers
             _excelExportService = excelExportService;
         }
 
-        public ActionResult Index(int page = 1, int pageSize = 15, string keyword = "")
+        public ActionResult Index(int page = 1, int pageSize = 10, string keyword = "")
         {
             int totalRecords;
             var list = _khoHangRepo.GetPaged(page, pageSize, keyword, out totalRecords);
@@ -37,7 +37,7 @@ namespace SalesManagementSystem.Controllers
             };
 
             ViewBag.Keyword = keyword;
-            ViewBag.Title = "Danh mục kho hàng";
+            ViewBag.Title = "Danh má»¥c kho hÃ ng";
 
             if (Request.IsAjaxRequest())
             {
@@ -47,7 +47,7 @@ namespace SalesManagementSystem.Controllers
             return View("Index", model);
         }
 
-        public ActionResult GetList(int page = 1, int pageSize = 15, string keyword = "")
+        public ActionResult GetList(int page = 1, int pageSize = 10, string keyword = "")
         {
             int totalRecords;
             var list = _khoHangRepo.GetPaged(page, pageSize, keyword, out totalRecords);
@@ -87,13 +87,13 @@ namespace SalesManagementSystem.Controllers
 
                 if (string.IsNullOrEmpty(maKhoHang) || string.IsNullOrEmpty(tenKhoHang))
                 {
-                    ModelState.AddModelError("", "Mã và Tên kho hàng không được để trống.");
+                    ModelState.AddModelError("", "MÃ£ vÃ  TÃªn kho hÃ ng khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng.");
                     return PartialView("Create", model);
                 }
 
                 if (_khoHangRepo.CheckDuplicateCode(maKhoHang, 0))
                 {
-                    ModelState.AddModelError("MaKhoHang", $"Mã kho hàng {maKhoHang} đã tồn tại trong hệ thống.");
+                    ModelState.AddModelError("MaKhoHang", $"MÃ£ kho hÃ ng {maKhoHang} Ä‘Ã£ tá»“n táº¡i trong há»‡ thá»‘ng.");
                     return PartialView("Create", model);
                 }
 
@@ -110,7 +110,7 @@ namespace SalesManagementSystem.Controllers
                 };
 
                 _khoHangRepo.Insert(kh);
-                return Json(new { success = true, message = "Thêm mới thành công" });
+                return Json(new { success = true, message = "ThÃªm má»›i thÃ nh cÃ´ng" });
             }
             return PartialView("Create", model);
         }
@@ -145,13 +145,13 @@ namespace SalesManagementSystem.Controllers
 
                 if (string.IsNullOrEmpty(maKhoHang) || string.IsNullOrEmpty(tenKhoHang))
                 {
-                    ModelState.AddModelError("", "Mã và Tên kho hàng không được để trống.");
+                    ModelState.AddModelError("", "MÃ£ vÃ  TÃªn kho hÃ ng khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng.");
                     return PartialView("Edit", model);
                 }
 
                 if (_khoHangRepo.CheckDuplicateCode(maKhoHang, model.ID))
                 {
-                    ModelState.AddModelError("MaKhoHang", $"Mã kho hàng {maKhoHang} đã tồn tại trong hệ thống.");
+                    ModelState.AddModelError("MaKhoHang", $"MÃ£ kho hÃ ng {maKhoHang} Ä‘Ã£ tá»“n táº¡i trong há»‡ thá»‘ng.");
                     return PartialView("Edit", model);
                 }
 
@@ -169,7 +169,7 @@ namespace SalesManagementSystem.Controllers
                 };
 
                 _khoHangRepo.Update(kh);
-                return Json(new { success = true, message = "Cập nhật thành công" });
+                return Json(new { success = true, message = "Cáº­p nháº­t thÃ nh cÃ´ng" });
             }
             return PartialView("Edit", model);
         }
@@ -197,7 +197,7 @@ namespace SalesManagementSystem.Controllers
                     }
                 }
             }
-            return Json(new { success = true, message = "Xóa dữ liệu thành công" });
+            return Json(new { success = true, message = "XÃ³a dá»¯ liá»‡u thÃ nh cÃ´ng" });
         }
 
         // GET: KhoHang/ExportExcel
@@ -240,7 +240,7 @@ namespace SalesManagementSystem.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ToastMessage"] = "Lỗi xuất Excel: " + ex.Message;
+                TempData["ToastMessage"] = "Lá»—i xuáº¥t Excel: " + ex.Message;
                 TempData["ToastType"] = "error";
                 return RedirectToAction("Index");
             }

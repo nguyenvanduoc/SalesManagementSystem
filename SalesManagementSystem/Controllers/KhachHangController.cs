@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Web.Mvc;
 using Dapper;
@@ -40,7 +40,7 @@ namespace SalesManagementSystem.Controllers
         }
 
         // ==========================================
-        // QUẢN LÝ KHÁCH HÀNG
+        // QUáº¢N LÃ KHÃCH HÃ€NG
         // ==========================================
 
         // GET: KhachHang/Index
@@ -103,7 +103,7 @@ namespace SalesManagementSystem.Controllers
             {
                 if (!string.IsNullOrEmpty(khachHang.MaKhachHang) && _khachHangRepo.IsDuplicateCode(khachHang.MaKhachHang))
                 {
-                    ModelState.AddModelError("MaKhachHang", "Mã khách hàng đã tồn tại trong hệ thống.");
+                    ModelState.AddModelError("MaKhachHang", "MÃ£ khÃ¡ch hÃ ng Ä‘Ã£ tá»“n táº¡i trong há»‡ thá»‘ng.");
                     PopulateDropdowns();
                     return PartialView("Create", khachHang);
                 }
@@ -114,7 +114,7 @@ namespace SalesManagementSystem.Controllers
 
                 AuditLog.AddInsert("NS_KhachHang", khachHang.ID.ToString(), khachHang);
 
-                return Json(new { success = true, message = "Thêm mới khách hàng thành công!" });
+                return Json(new { success = true, message = "ThÃªm má»›i khÃ¡ch hÃ ng thÃ nh cÃ´ng!" });
             }
             PopulateDropdowns();
             return PartialView("Create", khachHang);
@@ -143,7 +143,7 @@ namespace SalesManagementSystem.Controllers
             {
                 if (!string.IsNullOrEmpty(khachHang.MaKhachHang) && _khachHangRepo.IsDuplicateCode(khachHang.MaKhachHang, khachHang.ID))
                 {
-                    ModelState.AddModelError("MaKhachHang", "Mã khách hàng đã tồn tại trong hệ thống.");
+                    ModelState.AddModelError("MaKhachHang", "MÃ£ khÃ¡ch hÃ ng Ä‘Ã£ tá»“n táº¡i trong há»‡ thá»‘ng.");
                     PopulateDropdowns();
                     return PartialView("Edit", khachHang);
                 }
@@ -156,7 +156,7 @@ namespace SalesManagementSystem.Controllers
 
                 AuditLog.AddUpdate("NS_KhachHang", khachHang.ID.ToString(), oldObj, khachHang);
 
-                return Json(new { success = true, message = "Cập nhật khách hàng thành công!" });
+                return Json(new { success = true, message = "Cáº­p nháº­t khÃ¡ch hÃ ng thÃ nh cÃ´ng!" });
             }
             PopulateDropdowns();
             return PartialView("Edit", khachHang);
@@ -188,7 +188,7 @@ namespace SalesManagementSystem.Controllers
                     _khachHangRepo.Delete(item);
                 }
             }
-            return Json(new { success = true, message = "Xóa dữ liệu thành công" });
+            return Json(new { success = true, message = "XÃ³a dá»¯ liá»‡u thÃ nh cÃ´ng" });
         }
 
         // GET: KhachHang/ExportExcel
@@ -238,7 +238,7 @@ namespace SalesManagementSystem.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ToastMessage"] = "Lỗi xuất Excel: " + ex.Message;
+                TempData["ToastMessage"] = "Lá»—i xuáº¥t Excel: " + ex.Message;
                 TempData["ToastType"] = "error";
                 return RedirectToAction("Index");
             }

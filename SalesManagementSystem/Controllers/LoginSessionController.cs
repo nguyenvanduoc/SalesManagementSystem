@@ -1,4 +1,4 @@
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories.Interfaces;
 using SalesManagementSystem.Helpers;
@@ -15,7 +15,7 @@ namespace SalesManagementSystem.Controllers
         }
 
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
-        public ActionResult Index(int page = 1, int pageSize = 15, string keyword = "")
+        public ActionResult Index(int page = 1, int pageSize = 10, string keyword = "")
         {
             int totalRecords;
             var list = _sessionRepo.GetPaged(page, pageSize, keyword, out totalRecords);
@@ -31,7 +31,7 @@ namespace SalesManagementSystem.Controllers
             };
 
             ViewBag.Keyword = keyword;
-            ViewBag.Title = "Lịch sử đăng nhập";
+            ViewBag.Title = "Lá»‹ch sá»­ Ä‘Äƒng nháº­p";
 
             if (Request.IsAjaxRequest())
             {
@@ -46,7 +46,7 @@ namespace SalesManagementSystem.Controllers
         public ActionResult KickUser(int id)
         {
             _sessionRepo.KickSession(id);
-            return Json(new { success = true, message = "Đã ngắt phiên đăng nhập thành công." });
+            return Json(new { success = true, message = "ÄÃ£ ngáº¯t phiÃªn Ä‘Äƒng nháº­p thÃ nh cÃ´ng." });
         }
     }
 }

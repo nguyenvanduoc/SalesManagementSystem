@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Web.Mvc;
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Repositories;
@@ -18,7 +18,7 @@ namespace SalesManagementSystem.Controllers
         }
 
         // ==========================================
-        // QUẢN LÝ PHÒNG BAN
+        // QUáº¢N LÃ PHÃ’NG BAN
         // ==========================================
 
         // GET: PhongBan/GetPhongBan
@@ -64,7 +64,7 @@ namespace SalesManagementSystem.Controllers
             {
                 if (_phongBanRepo.IsDuplicateCode(phongBan.MaPhongBan))
                 {
-                    ModelState.AddModelError("MaPhongBan", "Mã phòng ban đã tồn tại trong hệ thống.");
+                    ModelState.AddModelError("MaPhongBan", "MÃ£ phÃ²ng ban Ä‘Ã£ tá»“n táº¡i trong há»‡ thá»‘ng.");
                     return PartialView("CreatePhongBan", phongBan);
                 }
 
@@ -75,7 +75,7 @@ namespace SalesManagementSystem.Controllers
                 // AUDIT LOG
                 AuditLog.AddInsert("DM_PhongBan", phongBan.ID.ToString(), phongBan);
 
-                return Json(new { success = true, message = "Thêm mới phòng ban thành công!" });
+                return Json(new { success = true, message = "ThÃªm má»›i phÃ²ng ban thÃ nh cÃ´ng!" });
             }
             return PartialView("CreatePhongBan", phongBan);
         }
@@ -102,7 +102,7 @@ namespace SalesManagementSystem.Controllers
             {
                 if (_phongBanRepo.IsDuplicateCode(phongBan.MaPhongBan, phongBan.ID))
                 {
-                    ModelState.AddModelError("MaPhongBan", "Mã phòng ban đã tồn tại trong hệ thống.");
+                    ModelState.AddModelError("MaPhongBan", "MÃ£ phÃ²ng ban Ä‘Ã£ tá»“n táº¡i trong há»‡ thá»‘ng.");
                     return PartialView("UpdatePhongBan", phongBan);
                 }
 
@@ -115,7 +115,7 @@ namespace SalesManagementSystem.Controllers
                 // AUDIT LOG
                 AuditLog.AddUpdate("DM_PhongBan", phongBan.ID.ToString(), oldPhongBan, phongBan);
 
-                return Json(new { success = true, message = "Cập nhật phòng ban thành công!" });
+                return Json(new { success = true, message = "Cáº­p nháº­t phÃ²ng ban thÃ nh cÃ´ng!" });
             }
             return PartialView("UpdatePhongBan", phongBan);
         }
@@ -146,7 +146,7 @@ namespace SalesManagementSystem.Controllers
                     _phongBanRepo.Delete(item);
                 }
             }
-            return Json(new { success = true, message = "Xóa dữ liệu thành công" });
+            return Json(new { success = true, message = "XÃ³a dá»¯ liá»‡u thÃ nh cÃ´ng" });
         }
     }
 }

@@ -271,6 +271,7 @@ namespace SalesManagementSystem.Services
             if (rowsToInsert > 0)
             {
                 ShiftRowsSafely(worksheet, templateRowIndex + 1, worksheet.LastRowNum, rowsToInsert);
+                ExpandPrintArea(worksheet.Workbook, worksheet, templateRowIndex + 1, rowsToInsert);
             }
 
             // 4. Gán dữ liệu theo cột động
@@ -603,6 +604,27 @@ namespace SalesManagementSystem.Services
             }
             
             foreach (var region in regionsToShift) sheet.AddMergedRegion(region);
+        }
+
+        private void ExpandPrintArea(IWorkbook workbook, ISheet sheet, int startRow, int n)
+        {
+            if (n <= 0) return;
+            int sheetIndex = workbook.GetSheetIndex(sheet);
+            string printArea = workbook.GetPrintArea(sheetIndex);
+            if (!string.IsNullOrEmpty(printArea))
+            {
+                try
+                {
+                    var parts = printArea.Split('!');
+                    string addr = parts[parts.Length - 1];
+                    var range = NPOI.SS.Util.CellRangeAddress.ValueOf(addr);
+                    if (startRow <= range.LastRow)
+                    {
+                        workbook.SetPrintArea(sheetIndex, range.FirstColumn, range.LastColumn, range.FirstRow, range.LastRow + n);
+                    }
+                }
+                catch { } // Ignore if print area cannot be parsed
+            }
         }
 
         private void ApplyFormatterDirect(ICell cell, object value, Dictionary<short, ICellStyle> dateStyleCache)

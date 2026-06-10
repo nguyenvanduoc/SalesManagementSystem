@@ -1,4 +1,4 @@
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using System.Web.Routing;
 using SalesManagementSystem.Helpers;
 using SalesManagementSystem.Models.ViewModels;
@@ -24,7 +24,7 @@ namespace SalesManagementSystem.Controllers
                         Session.Clear();
                         if (filterContext.HttpContext.Request.IsAjaxRequest())
                         {
-                            filterContext.Result = new JsonResult { Data = new { success = false, message = "Phiên làm việc của bạn đã bị ngắt bởi quản trị viên." }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                            filterContext.Result = new JsonResult { Data = new { success = false, message = "PhiÃªn lÃ m viá»‡c cá»§a báº¡n Ä‘Ã£ bá»‹ ngáº¯t bá»Ÿi quáº£n trá»‹ viÃªn." }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
                         }
                         else
                         {

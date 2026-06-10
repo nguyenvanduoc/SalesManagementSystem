@@ -1,4 +1,4 @@
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using SalesManagementSystem.Models.ViewModels;
 using System;
 using SalesManagementSystem.Repositories.Interfaces;
@@ -16,7 +16,7 @@ namespace SalesManagementSystem.Controllers
         }
 
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
-        public ActionResult Index(int page = 1, int pageSize = 20, string keyword = "")
+        public ActionResult Index(int page = 1, int pageSize = 10, string keyword = "")
         {
             int totalRecords;
             var logs = _nhatKyRepo.GetPaged(page, pageSize, keyword, out totalRecords);
@@ -32,7 +32,7 @@ namespace SalesManagementSystem.Controllers
             };
 
             ViewBag.Keyword = keyword;
-            ViewBag.Title = "Nhật ký hệ thống";
+            ViewBag.Title = "Nháº­t kÃ½ há»‡ thá»‘ng";
 
             if (Request.IsAjaxRequest())
             {

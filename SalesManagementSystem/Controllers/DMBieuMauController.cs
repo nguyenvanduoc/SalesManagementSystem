@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Web.Mvc;
 using SalesManagementSystem.Models.Entities;
@@ -18,7 +18,7 @@ namespace SalesManagementSystem.Controllers
             _bieuMauRepo = bieuMauRepo;
         }
 
-        public ActionResult Index(int page = 1, int pageSize = 15, string keyword = "")
+        public ActionResult Index(int page = 1, int pageSize = 10, string keyword = "")
         {
             int totalRecords;
             var list = _bieuMauRepo.GetPaged(page, pageSize, keyword, out totalRecords);
@@ -34,7 +34,7 @@ namespace SalesManagementSystem.Controllers
             };
 
             ViewBag.Keyword = keyword;
-            ViewBag.Title = "Danh mục biểu mẫu";
+            ViewBag.Title = "Danh má»¥c biá»ƒu máº«u";
 
             if (Request.IsAjaxRequest())
             {
@@ -74,13 +74,13 @@ namespace SalesManagementSystem.Controllers
 
                 if (string.IsNullOrEmpty(maBieuMau) || string.IsNullOrEmpty(tenBieuMau))
                 {
-                    ModelState.AddModelError("", "Mã và Tên biểu mẫu không được để trống.");
+                    ModelState.AddModelError("", "MÃ£ vÃ  TÃªn biá»ƒu máº«u khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng.");
                     return PartialView(model);
                 }
 
                 if (_bieuMauRepo.CheckDuplicateCode(maBieuMau, model.ID))
                 {
-                    ModelState.AddModelError("MaBieuMau", $"Mã biểu mẫu {maBieuMau} đã tồn tại trong hệ thống.");
+                    ModelState.AddModelError("MaBieuMau", $"MÃ£ biá»ƒu máº«u {maBieuMau} Ä‘Ã£ tá»“n táº¡i trong há»‡ thá»‘ng.");
                     return PartialView(model);
                 }
 
@@ -105,7 +105,7 @@ namespace SalesManagementSystem.Controllers
                 }
                 else if (model.ID == 0)
                 {
-                    ModelState.AddModelError("UploadedFile", "Vui lòng chọn file biểu mẫu.");
+                    ModelState.AddModelError("UploadedFile", "Vui lÃ²ng chá»n file biá»ƒu máº«u.");
                     return PartialView(model);
                 }
 
@@ -120,7 +120,7 @@ namespace SalesManagementSystem.Controllers
                     _bieuMauRepo.Update(bieuMau);
                 }
 
-                return Json(new { success = true, message = model.ID == 0 ? "Thêm mới thành công" : "Cập nhật thành công" });
+                return Json(new { success = true, message = model.ID == 0 ? "ThÃªm má»›i thÃ nh cÃ´ng" : "Cáº­p nháº­t thÃ nh cÃ´ng" });
             }
 
             return PartialView(model);
@@ -134,9 +134,9 @@ namespace SalesManagementSystem.Controllers
             if (bm != null)
             {
                 _bieuMauRepo.Delete(id);
-                return Json(new { success = true, message = "Xóa dữ liệu thành công" });
+                return Json(new { success = true, message = "XÃ³a dá»¯ liá»‡u thÃ nh cÃ´ng" });
             }
-            return Json(new { success = false, message = "Không tìm thấy biểu mẫu cần xóa" });
+            return Json(new { success = false, message = "KhÃ´ng tÃ¬m tháº¥y biá»ƒu máº«u cáº§n xÃ³a" });
         }
 
         [HttpGet]
@@ -146,7 +146,7 @@ namespace SalesManagementSystem.Controllers
             if (bm == null || bm.NoiDung == null)
             {
                 TempData["ToastType"] = "error";
-                TempData["ToastMessage"] = "Không tìm thấy file.";
+                TempData["ToastMessage"] = "KhÃ´ng tÃ¬m tháº¥y file.";
                 return RedirectToAction("Index");
             }
 

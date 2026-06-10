@@ -1,4 +1,4 @@
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using SalesManagementSystem.Helpers;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories.Interfaces;
@@ -61,7 +61,7 @@ namespace SalesManagementSystem.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError("", "Tên đăng nhập hoặc mật khẩu không đúng.");
+                    ModelState.AddModelError("", "TÃªn Ä‘Äƒng nháº­p hoáº·c máº­t kháº©u khÃ´ng Ä‘Ãºng.");
                 }
             }
 

@@ -18,6 +18,9 @@
                 <i class="bi bi-plus-lg fw-bold"></i> Thêm đơn
             </a>
         }
+        <button type="button" class="btn btn-success no-ajax" onclick="exportExcelList()" style="background-color:#28a745;border-color:#28a745;">
+            <i class="bi bi-file-earmark-excel"></i> Xuất excel
+        </button>
         @if (PermissionHelper.HasPermission("DonDatHang", LoaiPhanQuyen.Xoa))
         {
             <button type="button" class="btn btn-danger"
@@ -130,17 +133,12 @@
     }
 
     function confirmCancel(url) {
-        if (confirm("Bạn có chắc chắn muốn hủy đơn hàng này không?")) {
-            $.post(url, function (res) {
-                if (res.success) {
-                    if (typeof showToast === "function") showToast('success', res.message);
-                    loadData($('#searchForm').serialize());
-                } else {
-                    if (typeof showToast === "function") showToast('error', res.message);
-                    else alert(res.message);
-                }
-            });
-        }
+        confirmDelete(url, "Bạn có chắc chắn muốn hủy đơn hàng này không?");
+    }
+
+    function exportExcelList() {
+        var params = $('#searchForm').serialize();
+        window.location.href = '@Url.Action("ExportExcelList", "DonDatHang")?' + params;
     }
 </script>
 }

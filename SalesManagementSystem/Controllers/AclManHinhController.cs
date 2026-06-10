@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Web.Mvc;
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Repositories.Interfaces;
@@ -17,7 +17,7 @@ namespace SalesManagementSystem.Controllers
         }
 
         // ==========================================
-        // QUẢN LÝ MÀN HÌNH
+        // QUáº¢N LÃ MÃ€N HÃŒNH
         // ==========================================
 
         // GET: AclManHinh/GetManHinh
@@ -63,7 +63,7 @@ namespace SalesManagementSystem.Controllers
             {
                 _manHinhRepo.Insert(manHinh);
                 AuditLog.AddInsert("ACL_ManHinh", manHinh.ID.ToString(), manHinh);
-                return Json(new { success = true, message = "Thêm mới màn hình thành công!" });
+                return Json(new { success = true, message = "ThÃªm má»›i mÃ n hÃ¬nh thÃ nh cÃ´ng!" });
             }
             return PartialView("CreateManHinh", manHinh);
         }
@@ -91,7 +91,7 @@ namespace SalesManagementSystem.Controllers
                 var oldManHinh = _manHinhRepo.GetById(manHinh.ID);
                 _manHinhRepo.Update(manHinh);
                 AuditLog.AddUpdate("ACL_ManHinh", manHinh.ID.ToString(), oldManHinh, manHinh);
-                return Json(new { success = true, message = "Cập nhật màn hình thành công!" });
+                return Json(new { success = true, message = "Cáº­p nháº­t mÃ n hÃ¬nh thÃ nh cÃ´ng!" });
             }
             return PartialView("UpdateManHinh", manHinh);
         }
@@ -118,7 +118,7 @@ namespace SalesManagementSystem.Controllers
                     _manHinhRepo.Delete(item);
                 }
             }
-            return Json(new { success = true, message = "Xóa dữ liệu thành công" });
+            return Json(new { success = true, message = "XÃ³a dá»¯ liá»‡u thÃ nh cÃ´ng" });
         }
     }
 }
