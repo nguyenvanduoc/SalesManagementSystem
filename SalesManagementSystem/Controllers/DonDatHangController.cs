@@ -223,7 +223,12 @@ namespace SalesManagementSystem.Controllers
             }).ToList();
 
             _repo.Insert(header, details);
-            TempData["ToastMessage"] = "Táº¡o Ä‘Æ¡n Ä‘áº·t hÃ ng thÃ nh cÃ´ng!";
+            
+            if (Request.IsAjaxRequest() || Request.Headers["X-SPA-Load"] == "true") {
+                return Json(new { success = true, message = "Tạo đơn đặt hàng thành công!", closeTab = true });
+            }
+
+            TempData["ToastMessage"] = "Tạo đơn đặt hàng thành công!";
             TempData["ToastType"]    = "success";
 
             return RedirectToAction("Index");
@@ -371,7 +376,12 @@ namespace SalesManagementSystem.Controllers
             }).ToList();
 
             _repo.Update(header, details);
-            TempData["ToastMessage"] = "Cáº­p nháº­t Ä‘Æ¡n Ä‘áº·t hÃ ng thÃ nh cÃ´ng!";
+            
+            if (Request.IsAjaxRequest() || Request.Headers["X-SPA-Load"] == "true") {
+                return Json(new { success = true, message = "Cập nhật đơn đặt hàng thành công!", closeTab = true });
+            }
+
+            TempData["ToastMessage"] = "Cập nhật đơn đặt hàng thành công!";
             TempData["ToastType"]    = "success";
 
             return RedirectToAction("Index");

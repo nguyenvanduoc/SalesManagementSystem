@@ -982,10 +982,13 @@
     @if (TempData["ToastMessage"] != null)
     {
         var toastType = TempData["ToastType"] ?? "success";
+        var toastMsg = TempData["ToastMessage"];
+        TempData.Remove("ToastMessage");
+        TempData.Remove("ToastType");
         <text>
         document.addEventListener("DOMContentLoaded", function() {
             if (typeof showToast === 'function') {
-                showToast('@toastType', '@TempData["ToastMessage"]');
+                showToast('@toastType', '@toastMsg');
             }
         });
         </text>

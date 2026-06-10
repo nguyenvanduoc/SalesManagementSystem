@@ -284,7 +284,13 @@ var TabManager = (function () {
                     hideLoadingLocal($pane);
                     delete activeRequests[paneId];
                     if (typeof res === 'object') {
-                        if (res.redirectUrl) {
+                        if (res.message && typeof showToast === 'function') {
+                            showToast(res.success === false ? 'error' : (res.type || 'success'), res.message);
+                        }
+                        if (res.closeTab) {
+                            closeTab('tab-' + key);
+                            setTimeout(function() { reloadActiveTabGrid(false); }, 100);
+                        } else if (res.redirectUrl) {
                             loadTabContent(key, res.redirectUrl);
                         }
                     } else {
