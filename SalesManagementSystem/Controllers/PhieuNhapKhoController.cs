@@ -9,7 +9,7 @@ using SalesManagementSystem.Services.Interfaces;
 
 namespace SalesManagementSystem.Controllers
 {
-    public class PhieuNhapKhoController : Controller
+    public class PhieuNhapKhoController : BaseController
     {
         private readonly IPhieuNhapKhoRepository _repo;
         private readonly IExcelExportService _excelExportService;
@@ -23,10 +23,50 @@ namespace SalesManagementSystem.Controllers
         private UserLoginViewModel GetCurrentUser()
             => (UserLoginViewModel)Session[CommonConstants.USER_SESSION];
 
-        public ActionResult Index()
+        private SelectList GetKhoList(int? selectedId = null)
         {
-            if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.Xem)) return RedirectToAction("AccessDenied", "Error");
-            return View();
+            var items = _repo.GetKhoForDropdown("").Select(x => new { ID = x.ID, Name = x.MaKhoHang + " - " + x.TenKhoHang }).ToList();
+            return new SelectList(items, "ID", "Name", selectedId);
+        }
+
+        private SelectList GetNhaCungCapList(int? selectedId = null)
+        {
+            var items = _repo.GetNhaCungCapForDropdown("").Select(x => new { ID = x.ID, Name = x.MaNhaCungCap + " - " + x.TenNhaCungCap }).ToList();
+            return new SelectList(items, "ID", "Name", selectedId);
+        }
+
+        public ActionResult Index(
+            int page = 1, int pageSize = 20,
+            string tuNgay = "", string denNgay = "",
+            string soChungTu = "", int? idKho = null,
+            int? idNhaCungCap = null, int? trangThai = null,
+            int? idNhanSuNhan = null)
+        {
+            if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.Xem)) return View("AccessDenied");
+
+            int totalRecords;
+            var list = _repo.GetPaged(page, pageSize, tuNgay, denNgay, soChungTu, idKho, idNhaCungCap, trangThai, idNhanSuNhan, out totalRecords);
+
+            var model = new PagedListViewModel<PhieuNhapKhoListViewModel>
+            {
+                Items = list,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalRecords = totalRecords,
+                ActionName = "GetList"
+            };
+
+            ViewBag.TuNgay = tuNgay;
+            ViewBag.DenNgay = denNgay;
+            ViewBag.SoChungTu = soChungTu;
+            ViewBag.Khos = GetKhoList(idKho);
+            ViewBag.NhaCungCaps = GetNhaCungCapList(idNhaCungCap);
+            ViewBag.TrangThai = trangThai;
+
+            if (Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                return PartialView("_PhieuNhapKhoList", model);
+
+            return View("Index", model);
         }
 
         [HttpGet]
@@ -59,7 +99,7 @@ namespace SalesManagementSystem.Controllers
         public ActionResult ExportExcel(string tuNgay = "", string denNgay = "", string soChungTu = "", int? idKho = null, int? idNhaCungCap = null, int? trangThai = null, int? idNhanSuNhan = null)
         {
             if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.Xem)) 
-                return RedirectToAction("AccessDenied", "Error");
+                return View("AccessDenied");
 
             try
             {
@@ -116,7 +156,7 @@ namespace SalesManagementSystem.Controllers
 
         public ActionResult Create()
         {
-            if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.Them)) return RedirectToAction("AccessDenied", "Error");
+            if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.Them)) return View("AccessDenied");
 
             var model = new PhieuNhapKhoViewModel();
             model.SoChungTu = _repo.GenerateSoChungTu();
@@ -126,7 +166,7 @@ namespace SalesManagementSystem.Controllers
 
         public ActionResult Edit(int id, bool isView = false)
         {
-            if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.Xem)) return RedirectToAction("AccessDenied", "Error");
+            if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.Xem)) return View("AccessDenied");
 
             var entity = _repo.GetByID(id);
             if (entity == null) return HttpNotFound();

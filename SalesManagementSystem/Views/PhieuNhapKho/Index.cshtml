@@ -1,3 +1,4 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.PhieuNhapKhoListViewModel>
 @{
     ViewBag.Title = "Quản lý Phiếu nhập kho";
     var uid = Guid.NewGuid().ToString("N");
@@ -24,35 +25,31 @@
                 <div class="row g-2 align-items-end">
                     <div class="col-md-2">
                         <label class="form-label text-muted small mb-1">Từ ngày</label>
-                        <input type="date" name="tuNgay" class="form-control form-control-sm" />
+                        <input type="date" name="tuNgay" class="form-control form-control-sm" value="@ViewBag.TuNgay" />
                     </div>
                     <div class="col-md-2">
                         <label class="form-label text-muted small mb-1">Đến ngày</label>
-                        <input type="date" name="denNgay" class="form-control form-control-sm" />
+                        <input type="date" name="denNgay" class="form-control form-control-sm" value="@ViewBag.DenNgay" />
                     </div>
                     <div class="col-md-2">
                         <label class="form-label text-muted small mb-1">Số chứng từ</label>
-                        <input type="text" name="soChungTu" class="form-control form-control-sm" placeholder="Nhập số phiếu..." />
+                        <input type="text" name="soChungTu" class="form-control form-control-sm" placeholder="Nhập số phiếu..." value="@ViewBag.SoChungTu" />
                     </div>
                     <div class="col-md-2">
                         <label class="form-label text-muted small mb-1">Kho nhập</label>
-                        <select name="idKho" class="form-select form-select-sm ddlKho">
-                            <option value="">-- Tất cả --</option>
-                        </select>
+                        @Html.DropDownList("idKho", (SelectList)ViewBag.Khos, "-- Tất cả --", new { @class = "form-select form-select-sm ddlKho" })
                     </div>
                     <div class="col-md-2">
                         <label class="form-label text-muted small mb-1">Nhà cung cấp</label>
-                        <select name="idNhaCungCap" class="form-select form-select-sm ddlNhaCungCap">
-                            <option value="">-- Tất cả --</option>
-                        </select>
+                        @Html.DropDownList("idNhaCungCap", (SelectList)ViewBag.NhaCungCaps, "-- Tất cả --", new { @class = "form-select form-select-sm ddlNhaCungCap" })
                     </div>
                     <div class="col-md-2">
                         <label class="form-label text-muted small mb-1">Trạng thái</label>
                         <select name="trangThai" class="form-select form-select-sm">
                             <option value="">-- Tất cả --</option>
-                            <option value="1">Đề nghị ghi</option>
-                            <option value="2">Đã ghi</option>
-                            <option value="3">Đã hủy</option>
+                            <option value="1" @(ViewBag.TrangThai == 1 ? "selected" : "")>Đề nghị ghi</option>
+                            <option value="2" @(ViewBag.TrangThai == 2 ? "selected" : "")>Đã ghi</option>
+                            <option value="3" @(ViewBag.TrangThai == 3 ? "selected" : "")>Đã hủy</option>
                         </select>
                     </div>
                     <div class="col-12 d-flex gap-2 mt-3 justify-content-end">
@@ -69,7 +66,7 @@
     </div>
 
     <div id="table-container">
-        <!-- Grid content will be loaded here via AJAX -->
+        @Html.Partial("_PhieuNhapKhoList", Model)
     </div>
 
     <div class="modal fade pnk-huy-modal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
@@ -101,29 +98,24 @@
         var $ddlKho = $container.find('.ddlKho');
         var $ddlNhaCungCap = $container.find('.ddlNhaCungCap');
 
-        function loadDropdowns() {
-            $.get('@Url.Action("SearchKhoHang")', { q: '' }, function (res) {
-                $ddlKho.empty().append('<option value="">-- Tất cả --</option>');
-                if(res && res.length) {
-                    $.each(res, function (i, item) {
-                        $ddlKho.append($('<option>').val(item.id).text(item.text));
-                    });
-                }
-            });
-
-            $.get('@Url.Action("SearchNhaCungCap")', { q: '' }, function (res) {
-                $ddlNhaCungCap.empty().append('<option value="">-- Tất cả --</option>');
-                if(res && res.length) {
-                    $.each(res, function (i, item) {
-                        $ddlNhaCungCap.append($('<option>').val(item.id).text(item.text));
-                    });
-                }
-            });
-        }
-
         $(document).ready(function() {
-            loadDropdowns();
-            $form.trigger('submit');
+            $form.on('submit', function (e) {
+                e.preventDefault();
+                var params = $(this).serialize();
+                var url = '@Url.Action("GetList")?' + params;
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function (res) {
+                        $container.find('#table-container').html(res);
+                    },
+                    error: function () {
+                        if (typeof showToast === 'function') {
+                            showToast('error', 'Lỗi khi tải dữ liệu.');
+                        }
+                    }
+                });
+            });
         });
 
         $container.find('.btn-reset').on('click', function() {

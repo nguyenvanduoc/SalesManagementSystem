@@ -46,7 +46,7 @@
                                             @if (item.TrangThai == 1 && SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuNhapKho", SalesManagementSystem.Helpers.LoaiPhanQuyen.CapNhat))
                                             {
                                                 <li>
-                                                    <a href="javascript:void(0)" onclick="TabManager.openTab('PhieuNhapKho-Edit-@item.ID', 'Sửa PNK: @item.SoChungTu', '@Url.Action("Edit", "PhieuNhapKho", new { id = item.ID })')" class="dropdown-item">
+                                                    <a href="@Url.Action("Edit", "PhieuNhapKho", new { id = item.ID })" class="dropdown-item">
                                                         <i class="bi bi-pencil-square me-2 text-primary"></i> Sửa
                                                     </a>
                                                 </li>
