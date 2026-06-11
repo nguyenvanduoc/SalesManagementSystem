@@ -1,0 +1,268 @@
+@model SalesManagementSystem.Models.ViewModels.PhieuXuatKhoViewModel
+@{
+    ViewBag.Title = Model.ID == 0 ? "Thêm mới Phiếu xuất kho" : "Cập nhật Phiếu xuất kho";
+    var isView = ViewBag.IsView != null ? (bool)ViewBag.IsView : Model.IsReadOnly;
+    string chiTietsJson = Newtonsoft.Json.JsonConvert.SerializeObject(Model.ChiTiets);
+}
+
+<style>
+    .don-header-card { background:#fff; border:1px solid #dce4ec; border-radius:6px; padding:16px; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+    .don-section-title { font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:#7f8c8d; margin-bottom:10px; }
+    .tong-tien-box { background:linear-gradient(135deg,#1a5276,#2980b9); border-radius:8px; padding:16px 20px; color:#fff; text-align:right; }
+    .tong-tien-box .label { font-size:.8rem; opacity:.85; margin-bottom:4px; }
+    .tong-tien-box .amount { font-size:1.8rem; font-weight:800; letter-spacing:.5px; }
+    .grid-detail thead th { background:#f4f6f9; font-size:.8rem; font-weight:700; color:#2c3e50; vertical-align:middle; white-space:nowrap; text-align:center !important; }
+    .grid-detail tbody td { vertical-align:middle; padding:5px 6px; }
+    .grid-detail input.form-control, .grid-detail select.form-select { font-size:.85rem; padding:3px 7px; height:30px; }
+    .btn-add-row { background:#2ecc71; color:#fff; border:none; border-radius:4px; padding:5px 14px; font-size:.85rem; }
+    .btn-add-row:hover { background:#27ae60; color:#fff; }
+    .readonly-cell { background:#f8f9fa; font-size:.85rem; color:#495057; border: 1px solid #ced4da; }
+    .form-toolbar { background:#f8f9fa; border:1px solid #dce4ec; border-radius:6px; padding:10px 16px; margin-bottom:12px; display:flex; gap:8px; align-items:center; }
+    .select2-container--default .select2-selection--single { height: 38px; border: 1px solid #ced4da; border-radius: 0.375rem; }
+    .select2-container--default .select2-selection--single .select2-selection__rendered { font-size: .85rem; color: #495057; line-height: 36px; padding-left: 12px; }
+    .select2-container--default .select2-selection--single .select2-selection__arrow { height: 36px; }
+</style>
+
+<!-- Toolbar -->
+<div class="form-toolbar mt-3">
+    <a href="@Url.Action("Index")" class="btn btn-secondary btn-sm">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+    @if (!isView)
+    {
+        <button type="button" id="btnSavePhieu" class="btn btn-sm text-white" style="background-color:#2998e4;border:none;">
+            <i class="bi bi-save me-1"></i> Lưu phiếu xuất
+        </button>
+    }
+    @if (!isView)
+    {
+        <button type="button" id="btnGhiDuLieu" class="btn btn-sm btn-success" onclick="LuuVaGhiNow(this)" style="@(Model.TrangThai == 1 ? "" : "display:none;")">
+            <i class="bi bi-check-circle me-1"></i> Lưu và xuất kho
+        </button>
+    }
+    <span class="text-muted small ms-auto fw-bold">
+        <i class="bi bi-box-arrow-up me-1"></i> @(isView ? "XEM CHI TIẾT PHIẾU XUẤT KHO" : ViewBag.Title)
+    </span>
+</div>
+
+<form id="frmPhieuXuatKho" autocomplete="off">
+    <input type="hidden" id="ID" value="@Model.ID" />
+    
+    <div class="row g-3">
+        <!-- Cột trái -->
+        <div class="col-md-9">
+
+            <!-- Card: Thông tin đối tác -->
+            <div class="don-header-card">
+                <div class="don-section-title"><i class="bi bi-building me-1"></i>Thông tin nhận & Kho</div>
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <label class="form-label text-muted fw-semibold small">Kho xuất <span class="text-danger">*</span></label>
+                        <select id="IDKho" class="form-control" style="width:100%;" @(isView ? "disabled" : "")></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted fw-semibold small">Nhân sự nhận</label>
+                        <select id="IDNhanSuNhan" class="form-control" style="width:100%;" @(isView ? "disabled" : "")></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted fw-semibold small">Tên người nhận ngoài</label>
+                        <input type="text" id="TenNguoiNhan" class="form-control form-control-sm" value="@Model.TenNguoiNhan" @(isView ? "disabled" : "") />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted fw-semibold small">SĐT người nhận</label>
+                        <input type="text" id="SoDienThoaiNguoiNhan" class="form-control form-control-sm" value="@Model.SoDienThoaiNguoiNhan" @(isView ? "disabled" : "") />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Thông tin chứng từ -->
+            <div class="don-header-card">
+                <div class="don-section-title"><i class="bi bi-file-earmark-text me-1"></i>Thông tin chứng từ</div>
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Số chứng từ <span class="text-danger">*</span></label>
+                        <input type="text" id="SoChungTu" class="form-control form-control-sm readonly-cell fw-bold text-primary" value="@Model.SoChungTu" readonly />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Ngày xuất <span class="text-danger">*</span></label>
+                        <input type="date" id="NgayXuat" class="form-control form-control-sm" value="@Model.NgayXuat.ToString("yyyy-MM-dd")" @(isView ? "disabled" : "") />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted fw-semibold small">Ghi chú</label>
+                        <textarea id="GhiChu" class="form-control form-control-sm" rows="1" @(isView ? "disabled" : "") placeholder="Nhập ghi chú...">@Model.GhiChu</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Grid chi tiết sản phẩm -->
+            <div class="don-header-card mb-0">
+                <div class="d-flex align-items-center mb-2 gap-2">
+                    <div class="don-section-title mb-0"><i class="bi bi-table me-1"></i>Chi tiết hàng hóa</div>
+                    @if (!isView)
+                    {
+                        <button type="button" class="btn-add-row ms-auto" id="btnAddRow">
+                            <i class="bi bi-plus-lg me-1"></i> Thêm mặt hàng
+                        </button>
+                    }
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered grid-detail mb-0" id="tblChiTiet" style="min-width:900px;">
+                        <thead>
+                            <tr>
+                                <th style="width:40px;">STT</th>
+                                <th style="min-width:220px;" class="text-start">Sản phẩm</th>
+                                <th style="width:70px;">ĐVT</th>
+                                <th style="width:90px;">Số lượng</th>
+                                <th style="width:110px;">Đơn giá</th>
+                                <th style="width:120px;">Thành tiền</th>
+                                <th style="width:70px;">Thuế %</th>
+                                <th style="width:110px;">Tiền thuế</th>
+                                <th style="width:120px;">Tổng cộng</th>
+                                <th style="min-width:120px;">Ghi chú</th>
+                                @if (!isView) { <th style="width:40px;"></th> }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột phải: Tổng tiền nổi bật -->
+        <div class="col-md-3">
+            <div class="tong-tien-box">
+                <div class="label">Tổng tiền thanh toán</div>
+                <div class="amount" id="dispTongCong">0</div>
+                <div class="label mt-1" style="font-size:.7rem;">VNĐ</div>
+            </div>
+            
+            <div class="mt-2 p-3 bg-white border rounded">
+                <div class="d-flex justify-content-between small text-muted mb-2">
+                    <span>Trạng thái:</span>
+                    @if (Model.TrangThai == 1) { <span class="badge bg-secondary" id="badgeTrangThai">Đề nghị xuất</span> }
+                    else if (Model.TrangThai == 2) { <span class="badge bg-success" id="badgeTrangThai">Đã xuất</span> }
+                    else if (Model.TrangThai == 3) { <span class="badge bg-danger" id="badgeTrangThai">Đã hủy</span> }
+                    else { <span class="badge bg-secondary" id="badgeTrangThai">Thêm mới</span> }
+                </div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between small text-muted mb-2">
+                    <span>Cộng tiền hàng:</span>
+                    <span id="dispTongTienHang" class="fw-bold text-dark">0</span>
+                </div>
+                <div class="d-flex justify-content-between small text-muted mb-2">
+                    <span>Tiền thuế GTGT:</span>
+                    <span id="dispTongTienThue" class="fw-bold text-dark">0</span>
+                </div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between small">
+                    <span class="text-muted fw-bold">Tổng cộng:</span>
+                    <span id="dispTongCongMini" class="fw-bold" style="color:#1a5276;">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+<script src="@Url.Content("~/Scripts/phieu-xuat-kho.js?v=" + DateTime.Now.Ticks)"></script>
+<script>
+    var isViewMode = @(isView.ToString().ToLower());
+
+    $(document).ready(function () {
+        PhieuXuatKho.init({
+            searchKhoUrl: '@Url.Action("SearchKhoHang")',
+            searchNhanSuUrl: '@Url.Action("SearchNhanSu")',
+            searchSpUrl: '@Url.Action("SearchSanPham")',
+            chiTietsJson: @Html.Raw(chiTietsJson),
+            selectedKhoId: @(Model.IDKho.HasValue ? Model.IDKho.Value.ToString() : "null"),
+            selectedKhoText: '@Html.Raw(Model.TenKho)',
+            selectedNhanSuId: @(Model.IDNhanSuNhan.HasValue ? Model.IDNhanSuNhan.Value.ToString() : "null"),
+            selectedNhanSuText: '@Html.Raw(Model.TenNhanSuNhan)'
+        });
+
+        if (isViewMode) {
+            $('.sel-sanpham, .txt-soluong, .txt-dongia, .txt-thue, .txt-ghichu').prop('disabled', true);
+            $('.btn-remove-row, #btnAddRow, #btnSavePhieu').hide();
+        }
+
+        $('#btnSavePhieu').on('click', function () {
+            var data = PhieuXuatKho.validateAndSerialize();
+            if (!data) return;
+
+            showConfirm("Bạn có chắc chắn muốn lưu phiếu này?", function() {
+                $.ajax({
+                    url: '@Url.Action("Save")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function (res) {
+                        if (res.success) {
+                            showToast('success', res.message);
+                            if (data.ID == 0 && res.id) {
+                                $('#ID').val(res.id);
+                                $('#SoChungTu').val(res.soChungTu);
+                                $('#btnGhiDuLieu').show();
+                                $('#badgeTrangThai').text('Đề nghị xuất');
+                            }
+                        } else {
+                            showToast('error', res.message);
+                        }
+                    },
+                    error: function () { showToast('error', 'Đã xảy ra lỗi hệ thống'); }
+                });
+            });
+        });
+    });
+
+    function LuuVaGhiNow(btn) {
+        var data = PhieuXuatKho.validateAndSerialize();
+        if (!data) return;
+
+        showConfirm('Bạn có chắc chắn muốn lưu và xuất kho phiếu này? Kho sẽ được cập nhật.', function() {
+            $.ajax({
+                url: '@Url.Action("Save")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (saveRes) {
+                    if (saveRes.success) {
+                        var currentId = saveRes.id || data.ID || $('#ID').val() || @Model.ID;
+                        
+                        $('#ID').val(currentId);
+                        if (saveRes.soChungTu) {
+                            $('#SoChungTu').val(saveRes.soChungTu);
+                        }
+
+                        $.post('@Url.Action("GhiSo")', { id: currentId }, function (ghiRes) {
+                            if (ghiRes.success) {
+                                showToast('success', 'Lưu và ghi dữ liệu thành công');
+                                
+                                var $context = btn ? $(btn).closest('.tab-pane') : $(document);
+                                if ($context.length === 0) $context = $(document);
+
+                                $context.find('#badgeTrangThai').removeClass('bg-secondary bg-danger').addClass('bg-success').text('Đã xuất');
+                                $context.find('#btnGhiDuLieu, #btnSavePhieu, .btn-remove-row, #btnAddRow').hide();
+                                
+                                $context.find('.sel-sanpham, .txt-soluong, .txt-dongia, .txt-thue, .txt-ghichu').prop('disabled', true);
+                                $context.find('select, input, textarea').prop('disabled', true);
+                            } else {
+                                showToast('error', 'Lưu thành công nhưng ghi dữ liệu thất bại: ' + ghiRes.message);
+                            }
+                        });
+                    } else {
+                        showToast('error', 'Lưu phiếu xuất thất bại: ' + saveRes.message);
+                    }
+                },
+                error: function () {
+                    showToast('error', 'Đã xảy ra lỗi hệ thống khi lưu phiếu.');
+                }
+            });
+        });
+    }
+</script>
+<style>
+    .readonly-cell { background-color: #e9ecef !important; border: 1px solid #ced4da; }
+</style>
+}
