@@ -5,16 +5,19 @@ using System.Web.Mvc;
 using SalesManagementSystem.Helpers;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories.Interfaces;
+using SalesManagementSystem.Services.Interfaces;
 
 namespace SalesManagementSystem.Controllers
 {
     public class PhieuNhapKhoController : Controller
     {
         private readonly IPhieuNhapKhoRepository _repo;
+        private readonly IExcelExportService _excelExportService;
 
-        public PhieuNhapKhoController(IPhieuNhapKhoRepository repo)
+        public PhieuNhapKhoController(IPhieuNhapKhoRepository repo, IExcelExportService excelExportService)
         {
             _repo = repo;
+            _excelExportService = excelExportService;
         }
 
         private UserLoginViewModel GetCurrentUser()
@@ -49,6 +52,65 @@ namespace SalesManagementSystem.Controllers
             catch(Exception ex)
             {
                 return Content($"<div class='alert alert-danger'>Lỗi Server: {ex.Message} <br/> {ex.StackTrace}</div>");
+            }
+        }
+
+        [HttpGet]
+        public ActionResult ExportExcel(string tuNgay = "", string denNgay = "", string soChungTu = "", int? idKho = null, int? idNhaCungCap = null, int? trangThai = null, int? idNhanSuNhan = null)
+        {
+            if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.Xem)) 
+                return RedirectToAction("AccessDenied", "Error");
+
+            try
+            {
+                var list = _repo.GetPaged(1, 100000, tuNgay, denNgay, soChungTu, idKho, idNhaCungCap, trangThai, idNhanSuNhan, out int totalRecords);
+
+                var session = (UserLoginViewModel)Session[CommonConstants.USER_SESSION];
+                string nguoiLapBieu = session != null ? (session.HoDem + " " + session.Ten).Trim() : "Hệ thống";
+                if (string.IsNullOrEmpty(nguoiLapBieu)) nguoiLapBieu = session?.UserName ?? "Hệ thống";
+
+                var variables = new Dictionary<string, object>
+                {
+                    { "Ngay", DateTime.Now.ToString("dd") },
+                    { "Thang", DateTime.Now.ToString("MM") },
+                    { "Nam", DateTime.Now.ToString("yyyy") },
+                    { "NguoiLapBieu", nguoiLapBieu }
+                };
+
+                int stt = 1;
+                var exportData = list.Select(item => new {
+                    STT = stt++,
+                    SoChungTu = item.SoChungTu,
+                    NgayNhap = item.NgayNhap,
+                    TenKho = item.TenKho,
+                    TenNhaCungCap = item.TenNhaCungCap,
+                    SoHoaDon = item.SoHoaDon,
+                    NgayHoaDon = item.NgayHoaDon,
+                    TenNguoiGiao = item.TenNguoiGiao,
+                    SoDienThoaiNguoiGiao = item.SoDienThoaiNguoiGiao,
+                    TenNhanSuNhan = item.TenNhanSuNhan,
+                    TongTienHang = item.TongTienHang,
+                    TongTienThue = item.TongTienThue,
+                    TongCong = item.TongCong,
+                    TrangThai = item.TrangThai == 1 ? "Đề nghị ghi" : (item.TrangThai == 2 ? "Đã ghi" : (item.TrangThai == 3 ? "Đã hủy" : "")),
+                    NguoiTao = item.NguoiTaoText,
+                    NgayTao = item.NgayTao
+                }).ToList();
+
+                string fileExtension;
+                var fileBytes = _excelExportService.Export("PN01", exportData, out fileExtension, variables);
+
+                string contentType = fileExtension == "xls" 
+                    ? "application/vnd.ms-excel" 
+                    : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                return File(fileBytes, contentType, $"DanhSachPhieuNhapKho_{DateTime.Now:yyyyMMddHHmmss}.{fileExtension}");
+            }
+            catch (Exception ex)
+            {
+                TempData["ToastType"] = "error";
+                TempData["ToastMessage"] = $"Lỗi xuất Excel: {ex.Message}";
+                return RedirectToAction("Index");
             }
         }
 

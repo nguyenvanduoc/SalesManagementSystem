@@ -8,9 +8,14 @@
         <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">
             <i class="bi bi-box-seam me-2"></i>@ViewBag.Title
         </h4>
-        <a href="@Url.Action("Create")" class="btn btn-primary" style="background-color: #3498db; border-color: #3498db;">
-            <i class="bi bi-plus-lg fw-bold me-1"></i> Thêm mới
-        </a>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-success btn-export-excel shadow-sm" style="background-color: #27ae60; border-color: #27ae60;">
+                <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
+            </button>
+            <a href="@Url.Action("Create")" class="btn btn-primary shadow-sm" style="background-color: #3498db; border-color: #3498db;">
+                <i class="bi bi-plus-lg fw-bold me-1"></i> Thêm mới
+            </a>
+        </div>
     </div>
 
     <div class="card shadow-sm mb-3">
@@ -124,6 +129,11 @@
         $container.find('.btn-reset').on('click', function() {
             $form[0].reset();
             $form.trigger('submit');
+        });
+
+        $container.find('.btn-export-excel').on('click', function() {
+            var params = $form.serialize();
+            window.location.href = '@Url.Action("ExportExcel")?' + params;
         });
 
         // Publish functions to global scope but tied to this container (for onclick handlers like ghiSoPhieu)
