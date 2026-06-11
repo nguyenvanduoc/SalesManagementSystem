@@ -15,6 +15,8 @@
                         <th class="text-end">Tiền hàng</th>
                         <th class="text-end">Tiền thuế</th>
                         <th class="text-end">Tổng cộng</th>
+                        <th>Người tạo</th>
+                        <th class="text-center">Ngày tạo</th>
                         <th class="text-center">Trạng thái</th>
                     </tr>
                 </thead>
@@ -83,7 +85,13 @@
                                 <td class="align-middle">@item.TenNhaCungCap</td>
                                 <td class="text-end align-middle fw-bold">@(item.TongTienHang.ToString("N0"))</td>
                                 <td class="text-end align-middle">@(item.TongTienThue.ToString("N0"))</td>
-                                <td class="text-end align-middle fw-bold" style="color: #d35400;">@(item.TongCong.ToString("N0"))</td>
+                                <td class="text-end align-middle">
+                                    <span class="fw-bold" style="color: #e67e22;">@item.TongCong.ToString("N0")</span>
+                                </td>
+                                <td class="align-middle">@item.NguoiTaoText</td>
+                                <td class="text-center align-middle">
+                                    @(item.NgayTao?.ToString("dd/MM/yyyy HH:mm") ?? "")
+                                </td>
                                 <td class="text-center align-middle">
                                     @if (item.TrangThai == 1)
                                     {

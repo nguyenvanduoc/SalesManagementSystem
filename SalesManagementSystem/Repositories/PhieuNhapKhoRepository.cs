@@ -99,7 +99,57 @@ namespace SalesManagementSystem.Repositories
                 conn.Execute("sp_KHO_PhieuNhap_Save", p, commandType: CommandType.StoredProcedure);
 
                 model.SoChungTu = p.Get<string>("@SoChungTuOut");
-                return p.Get<int>("@NewID");
+                int newId = p.Get<int>("@NewID");
+
+                // Tính toán lại và cập nhật TongTienHang, TongTienThue, TongCong vào KHO_PhieuNhap dựa trên KHO_PhieuNhap_ChiTiet
+                int activeId = model.ID > 0 ? model.ID : newId;
+                string updateTotalsSql = @"
+                    UPDATE [dbo].[KHO_PhieuNhap]
+                    SET TongTienHang = ISNULL((SELECT SUM(ThanhTien) FROM [dbo].[KHO_PhieuNhap_ChiTiet] WHERE IDPhieuNhap = @ID), 0),
+                        TongTienThue = ISNULL((SELECT SUM(TienThue) FROM [dbo].[KHO_PhieuNhap_ChiTiet] WHERE IDPhieuNhap = @ID), 0),
+                        TongCong = ISNULL((SELECT SUM(TongSauThue) FROM [dbo].[KHO_PhieuNhap_ChiTiet] WHERE IDPhieuNhap = @ID), 0)
+                    WHERE ID = @ID;
+                ";
+                conn.Execute(updateTotalsSql, new { ID = activeId });
+
+                return newId;
+            }
+        }
+
+        public void UpdateMaster(PhieuNhapKhoViewModel model, int userId)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                string sql = @"
+                    UPDATE [dbo].[KHO_PhieuNhap]
+                    SET NgayNhap = @NgayNhap,
+                        IDKho = @IDKho,
+                        IDNhaCungCap = @IDNhaCungCap,
+                        SoHoaDon = @SoHoaDon,
+                        NgayHoaDon = @NgayHoaDon,
+                        TenNguoiGiao = @TenNguoiGiao,
+                        SoDienThoaiNguoiGiao = @SoDienThoaiNguoiGiao,
+                        IDNhanSuNhan = @IDNhanSuNhan,
+                        GhiChu = @GhiChu,
+                        NguoiCapNhat = @NguoiTao,
+                        NgayCapNhat = GETDATE()
+                    WHERE ID = @ID AND TrangThai = 1; -- Chỉ cho phép sửa khi Nháp
+                ";
+                
+                var p = new DynamicParameters();
+                p.Add("@ID", model.ID);
+                p.Add("@NgayNhap", model.NgayNhap);
+                p.Add("@IDKho", model.IDKho);
+                p.Add("@IDNhaCungCap", model.IDNhaCungCap);
+                p.Add("@SoHoaDon", model.SoHoaDon);
+                p.Add("@NgayHoaDon", model.NgayHoaDon);
+                p.Add("@TenNguoiGiao", model.TenNguoiGiao);
+                p.Add("@SoDienThoaiNguoiGiao", model.SoDienThoaiNguoiGiao);
+                p.Add("@IDNhanSuNhan", model.IDNhanSuNhan);
+                p.Add("@GhiChu", model.GhiChu);
+                p.Add("@NguoiTao", userId);
+
+                conn.Execute(sql, p);
             }
         }
 

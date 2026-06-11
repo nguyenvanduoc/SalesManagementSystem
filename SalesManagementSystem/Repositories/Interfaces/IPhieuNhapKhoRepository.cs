@@ -17,6 +17,7 @@ namespace SalesManagementSystem.Repositories.Interfaces
         KHO_PhieuNhap GetByID(int id);
         List<PhieuNhapKhoChiTietViewModel> GetChiTiet(int idPhieuNhap);
         int Save(PhieuNhapKhoViewModel model, int userId);
+        void UpdateMaster(PhieuNhapKhoViewModel model, int userId);
         void GhiSo(int id, int userId);
         void HuyPhieu(int id, string lyDoHuy, int userId);
         void Delete(int id, int userId);

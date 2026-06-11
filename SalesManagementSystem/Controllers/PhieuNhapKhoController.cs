@@ -97,7 +97,6 @@ namespace SalesManagementSystem.Controllers
             }
 
             model.ChiTiets = _repo.GetChiTiet(id);
-
             ViewBag.IsView = isView;
             return View("Edit", model);
         }
@@ -118,8 +117,16 @@ namespace SalesManagementSystem.Controllers
                 var user = GetCurrentUser();
                 int userId = user?.UserID ?? 0;
 
-                int newId = _repo.Save(model, userId);
-                return Json(new { success = true, id = newId, soChungTu = model.SoChungTu, message = "Lưu nháp thành công" });
+                if (model.ID > 0)
+                {
+                    _repo.Save(model, userId);
+                    return Json(new { success = true, message = "Cập nhật phiếu nhập kho thành công" });
+                }
+                else
+                {
+                    int newId = _repo.Save(model, userId);
+                    return Json(new { success = true, id = newId, soChungTu = model.SoChungTu, message = "Lưu nháp thành công" });
+                }
             }
             catch (Exception ex)
             {

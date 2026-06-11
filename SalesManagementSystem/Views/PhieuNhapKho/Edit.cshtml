@@ -36,8 +36,8 @@
     }
     @if (!isView)
     {
-        <button type="button" id="btnGhiDuLieu" class="btn btn-sm btn-success" onclick="GhiSoNow(this)" style="@(Model.ID > 0 && Model.TrangThai == 1 ? "" : "display:none;")">
-            <i class="bi bi-check-circle me-1"></i> Ghi dữ liệu
+        <button type="button" id="btnGhiDuLieu" class="btn btn-sm btn-success" onclick="LuuVaGhiNow(this)" style="@(Model.TrangThai == 1 ? "" : "display:none;")">
+            <i class="bi bi-check-circle me-1"></i> Lưu và ghi
         </button>
     }
     <span class="text-muted small ms-auto fw-bold">
@@ -233,25 +233,56 @@
         });
     });
 
-    function GhiSoNow(btn) {
-        showConfirm('Bạn có chắc chắn muốn ghi dữ liệu phiếu này? Kho sẽ được cập nhật.', function() {
-            var currentId = $('#ID').val() || @Model.ID;
-            $.post('@Url.Action("GhiSo")', { id: currentId }, function (res) {
-                if (res.success) { 
-                    showToast('success', 'Ghi dữ liệu thành công'); 
-                    
-                    // Update UI to reflect "Đã ghi" state without reloading the page
-                    var $context = btn ? $(btn).closest('.tab-pane') : $(document);
-                    if ($context.length === 0) $context = $(document);
+    function LuuVaGhiNow(btn) {
+        var data = PhieuNhapKho.validateAndSerialize();
+        if (!data) return;
 
-                    $context.find('#badgeTrangThai').removeClass('bg-secondary bg-danger').addClass('bg-success').text('Đã ghi');
-                    $context.find('#btnGhiDuLieu, #btnSavePhieu, .btn-remove-row, #btnAddRow').hide();
-                    
-                    // Disable inputs
-                    $context.find('.sel-sanpham, .txt-soluong, .txt-dongia, .txt-thue, .txt-ghichu').prop('disabled', true);
-                    $context.find('select, input, textarea').prop('disabled', true);
+        showConfirm('Bạn có chắc chắn muốn lưu và ghi dữ liệu phiếu này? Kho sẽ được cập nhật.', function() {
+            // Bước 1: Thực hiện Lưu trước
+            $.ajax({
+                url: '@Url.Action("Save")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (saveRes) {
+                    if (saveRes.success) {
+                        var currentId = saveRes.id || data.ID || $('#ID').val() || @Model.ID;
+                        
+                        // Cập nhật ID trên form
+                        $('#ID').val(currentId);
+                        if (saveRes.soChungTu) {
+                            $('#SoChungTu').val(saveRes.soChungTu);
+                        }
+
+                        // Bước 2: Thực hiện Ghi dữ liệu
+                        $.post('@Url.Action("GhiSo")', { id: currentId }, function (ghiRes) {
+                            if (ghiRes.success) {
+                                showToast('success', 'Lưu và ghi dữ liệu thành công');
+                                
+                                // Cập nhật trạng thái giao diện sang "Đã ghi"
+                                var $context = btn ? $(btn).closest('.tab-pane') : $(document);
+                                if ($context.length === 0) $context = $(document);
+
+                                $context.find('#badgeTrangThai').removeClass('bg-secondary bg-danger').addClass('bg-success').text('Đã ghi');
+                                $context.find('#btnGhiDuLieu, #btnSavePhieu, .btn-remove-row, #btnAddRow').hide();
+                                
+                                // Vô hiệu hóa các ô nhập liệu
+                                $context.find('.sel-sanpham, .txt-soluong, .txt-dongia, .txt-thue, .txt-ghichu').prop('disabled', true);
+                                $context.find('select, input, textarea').prop('disabled', true);
+                                
+                                // Cập nhật URL mà không reload trang
+                                window.history.replaceState({}, '', '@Url.Action("Edit")/' + currentId);
+                            } else {
+                                showToast('error', 'Lưu thành công nhưng ghi dữ liệu thất bại: ' + ghiRes.message);
+                            }
+                        });
+                    } else {
+                        showToast('error', 'Lưu phiếu nhập thất bại: ' + saveRes.message);
+                    }
+                },
+                error: function () {
+                    showToast('error', 'Đã xảy ra lỗi hệ thống khi lưu phiếu.');
                 }
-                else showToast('error', res.message);
             });
         });
     }

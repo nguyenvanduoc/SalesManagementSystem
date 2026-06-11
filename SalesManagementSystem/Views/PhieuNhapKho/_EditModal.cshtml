@@ -1,0 +1,268 @@
+@model SalesManagementSystem.Models.ViewModels.PhieuNhapKhoViewModel
+@{
+    Layout = null;
+    ViewBag.Title = "Cập nhật Phiếu nhập kho";
+    var totalTienHang = Model.ChiTiets?.Sum(x => x.ThanhTien) ?? 0;
+    var totalTienThue = Model.ChiTiets?.Sum(x => x.TienThue) ?? 0;
+    var totalCong = Model.ChiTiets?.Sum(x => x.TongSauThue) ?? 0;
+}
+
+<style>
+    .select2-container--default .select2-selection--single { height: 38px; border: 1px solid #ced4da; border-radius: 0.375rem; }
+    .select2-container--default .select2-selection--single .select2-selection__rendered { font-size: .85rem; color: #495057; line-height: 36px; padding-left: 12px; }
+    .select2-container--default .select2-selection--single .select2-selection__arrow { height: 36px; }
+    .readonly-cell { background-color: #e9ecef !important; border: 1px solid #ced4da; }
+</style>
+
+<div class="modal-header bg-light">
+    <h5 class="modal-title fw-bold text-uppercase" style="color: #0b5b84;">@ViewBag.Title</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+@using (Html.BeginForm("Save", "PhieuNhapKho", FormMethod.Post, new { id = "globalForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.ID)
+    @Html.HiddenFor(m => m.SoChungTu)
+    @Html.HiddenFor(m => m.TrangThai)
+
+    /* Preserve ChiTiets for model binder */
+    if (Model.ChiTiets != null)
+    {
+        for (int i = 0; i < Model.ChiTiets.Count; i++)
+        {
+            @Html.HiddenFor(m => m.ChiTiets[i].ID)
+            @Html.HiddenFor(m => m.ChiTiets[i].IDPhieuNhap)
+            @Html.HiddenFor(m => m.ChiTiets[i].IDSanPham)
+            @Html.HiddenFor(m => m.ChiTiets[i].MaSanPham)
+            @Html.HiddenFor(m => m.ChiTiets[i].TenSanPham)
+            @Html.HiddenFor(m => m.ChiTiets[i].DVT)
+            @Html.HiddenFor(m => m.ChiTiets[i].SoLuong)
+            @Html.HiddenFor(m => m.ChiTiets[i].DonGia)
+            @Html.HiddenFor(m => m.ChiTiets[i].ThanhTien)
+            @Html.HiddenFor(m => m.ChiTiets[i].ThueGTGT)
+            @Html.HiddenFor(m => m.ChiTiets[i].TienThue)
+            @Html.HiddenFor(m => m.ChiTiets[i].TongSauThue)
+            @Html.HiddenFor(m => m.ChiTiets[i].GhiChu)
+        }
+    }
+
+    <div class="modal-body p-4">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger py-2 mb-3">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                @Html.ValidationSummary(false, "", new { @class = "mb-0" })
+            </div>
+        }
+
+        <div class="row g-3">
+            <!-- Cột trái: Thông tin đối tác & Kho -->
+            <div class="col-md-6 border-end pe-md-4">
+                <div class="mb-3 text-secondary fw-bold text-uppercase border-bottom pb-1" style="font-size: 0.75rem;">
+                    <i class="bi bi-building me-1"></i> Thông tin kho & đối tác
+                </div>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label text-muted fw-semibold small">Kho nhập <span class="text-danger">*</span></label>
+                        <select id="IDKho" name="IDKho" class="form-control select2-modal" style="width:100%;"></select>
+                        @Html.ValidationMessageFor(m => m.IDKho, "", new { @class = "text-danger small" })
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label text-muted fw-semibold small">Nhà cung cấp <span class="text-danger">*</span></label>
+                        <select id="IDNhaCungCap" name="IDNhaCungCap" class="form-control select2-modal" style="width:100%;"></select>
+                        @Html.ValidationMessageFor(m => m.IDNhaCungCap, "", new { @class = "text-danger small" })
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label text-muted fw-semibold small">Người nhận <span class="text-danger">*</span></label>
+                        <select id="IDNhanSuNhan" name="IDNhanSuNhan" class="form-control select2-modal" style="width:100%;"></select>
+                        @Html.ValidationMessageFor(m => m.IDNhanSuNhan, "", new { @class = "text-danger small" })
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label text-muted fw-semibold small">Người giao hàng</label>
+                        @Html.TextBoxFor(m => m.TenNguoiGiao, new { @class = "form-control form-control-sm", placeholder = "Nhập tên người giao" })
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label text-muted fw-semibold small">SĐT người giao</label>
+                        @Html.TextBoxFor(m => m.SoDienThoaiNguoiGiao, new { @class = "form-control form-control-sm", placeholder = "Nhập SĐT người giao" })
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Thông tin chứng từ -->
+            <div class="col-md-6 ps-md-4">
+                <div class="mb-3 text-secondary fw-bold text-uppercase border-bottom pb-1" style="font-size: 0.75rem;">
+                    <i class="bi bi-file-earmark-text me-1"></i> Thông tin chứng từ
+                </div>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <label class="form-label text-muted fw-semibold small">Số chứng từ</label>
+                        <input type="text" class="form-control form-control-sm readonly-cell fw-bold text-primary" value="@Model.SoChungTu" readonly />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label text-muted fw-semibold small">Ngày nhập <span class="text-danger">*</span></label>
+                        @Html.TextBoxFor(m => m.NgayNhap, "{0:yyyy-MM-dd}", new { @class = "form-control form-control-sm", type = "date" })
+                        @Html.ValidationMessageFor(m => m.NgayNhap, "", new { @class = "text-danger small" })
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label text-muted fw-semibold small">Số hóa đơn</label>
+                        @Html.TextBoxFor(m => m.SoHoaDon, new { @class = "form-control form-control-sm", placeholder = "Nhập số hóa đơn" })
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label text-muted fw-semibold small">Ngày hóa đơn</label>
+                        @Html.TextBoxFor(m => m.NgayHoaDon, "{0:yyyy-MM-dd}", new { @class = "form-control form-control-sm", type = "date" })
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label text-muted fw-semibold small">Ghi chú</label>
+                        @Html.TextAreaFor(m => m.GhiChu, new { @class = "form-control form-control-sm", rows = 2, placeholder = "Nhập ghi chú cho phiếu..." })
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chi tiết sản phẩm (Read-only) -->
+        <div class="card mt-4 shadow-sm border-0 mb-3">
+            <div class="card-header bg-light py-2">
+                <h6 class="mb-0 fw-bold text-secondary text-uppercase" style="font-size: 0.75rem;">
+                    <i class="bi bi-table me-1"></i> Chi tiết hàng hóa
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                    <table class="table table-bordered table-striped table-hover align-middle mb-0" style="font-size: 0.82rem;">
+                        <thead class="table-light position-sticky top-0">
+                            <tr>
+                                <th class="text-center" style="width: 50px;">STT</th>
+                                <th>Sản phẩm</th>
+                                <th class="text-center" style="width: 70px;">ĐVT</th>
+                                <th class="text-end" style="width: 80px;">Số lượng</th>
+                                <th class="text-end" style="width: 100px;">Đơn giá</th>
+                                <th class="text-end" style="width: 110px;">Thành tiền</th>
+                                <th class="text-center" style="width: 70px;">Thuế %</th>
+                                <th class="text-end" style="width: 100px;">Tiền thuế</th>
+                                <th class="text-end" style="width: 110px;">Tổng cộng</th>
+                                <th>Ghi chú</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.ChiTiets != null && Model.ChiTiets.Any())
+                            {
+                                int stt = 1;
+                                foreach (var ct in Model.ChiTiets)
+                                {
+                                    <tr>
+                                        <td class="text-center">@(stt++)</td>
+                                        <td class="fw-semibold">@ct.MaSanPham - @ct.TenSanPham</td>
+                                        <td class="text-center">@ct.DVT</td>
+                                        <td class="text-end fw-bold">@ct.SoLuong.ToString("N0")</td>
+                                        <td class="text-end">@ct.DonGia.ToString("N0")</td>
+                                        <td class="text-end">@ct.ThanhTien.ToString("N0")</td>
+                                        <td class="text-center">@ct.ThueGTGT%</td>
+                                        <td class="text-end">@ct.TienThue.ToString("N0")</td>
+                                        <td class="text-end fw-bold text-primary">@ct.TongSauThue.ToString("N0")</td>
+                                        <td>@ct.GhiChu</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="10" class="text-center py-3 text-muted">Không có chi tiết hàng hóa</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Khung tổng cộng (Read-only) -->
+        <div class="row g-3 bg-light p-3 rounded border mx-0 mt-2">
+            <div class="col-sm-4 text-center">
+                <span class="text-muted small d-block">Cộng tiền hàng:</span>
+                <span class="fs-5 fw-bold text-dark">@totalTienHang.ToString("N0") <span class="small text-muted">VNĐ</span></span>
+            </div>
+            <div class="col-sm-4 text-center border-start border-end">
+                <span class="text-muted small d-block">Tiền thuế GTGT:</span>
+                <span class="fs-5 fw-bold text-dark">@totalTienThue.ToString("N0") <span class="small text-muted">VNĐ</span></span>
+            </div>
+            <div class="col-sm-4 text-center">
+                <span class="text-muted small d-block">Tổng cộng thanh toán:</span>
+                <span class="fs-5 fw-bold text-danger">@totalCong.ToString("N0") <span class="small text-danger">VNĐ</span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Hủy</button>
+        <button type="submit" class="btn text-white px-4" style="background-color: #2998e4; border: none;">
+            <i class="bi bi-save me-1"></i> Lưu thông tin
+        </button>
+    </div>
+}
+
+<script>
+    $(document).ready(function() {
+        // Khởi tạo Select2 với modal context để không bị kẹt focus
+        var modalEl = $('#globalFormModal');
+        
+        $('#IDKho').select2({
+            dropdownParent: modalEl,
+            placeholder: '-- Chọn kho --',
+            ajax: {
+                url: '@Url.Action("SearchKhoHang", "PhieuNhapKho")',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) { return { q: params.term }; },
+                processResults: function (data) { return { results: data }; },
+                cache: true
+            }
+        });
+        
+        $('#IDNhaCungCap').select2({
+            dropdownParent: modalEl,
+            placeholder: '-- Chọn nhà cung cấp --',
+            ajax: {
+                url: '@Url.Action("SearchNhaCungCap", "PhieuNhapKho")',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) { return { q: params.term }; },
+                processResults: function (data) { return { results: data }; },
+                cache: true
+            }
+        });
+
+        $('#IDNhanSuNhan').select2({
+            dropdownParent: modalEl,
+            placeholder: '-- Chọn người nhận --',
+            ajax: {
+                url: '@Url.Action("SearchNhanSu", "PhieuNhapKho")',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) { return { q: params.term }; },
+                processResults: function (data) { return { results: data }; },
+                cache: true
+            }
+        });
+
+        // Nạp giá trị hiện tại
+        @if (Model.IDKho.HasValue)
+        {
+            <text>
+            $('#IDKho').append(new Option('@Html.Raw(HttpUtility.JavaScriptStringEncode(Model.TenKho))', '@Model.IDKho.Value', true, true)).trigger('change');
+            </text>
+        }
+        @if (Model.IDNhaCungCap.HasValue)
+        {
+            <text>
+            $('#IDNhaCungCap').append(new Option('@Html.Raw(HttpUtility.JavaScriptStringEncode(Model.TenNhaCungCap))', '@Model.IDNhaCungCap.Value', true, true)).trigger('change');
+            </text>
+        }
+        @if (Model.IDNhanSuNhan.HasValue)
+        {
+            <text>
+            $('#IDNhanSuNhan').append(new Option('@Html.Raw(HttpUtility.JavaScriptStringEncode(Model.TenNhanSuNhan))', '@Model.IDNhanSuNhan.Value', true, true)).trigger('change');
+            </text>
+        }
+    });
+</script>
