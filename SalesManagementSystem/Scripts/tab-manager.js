@@ -272,9 +272,10 @@ var TabManager = (function () {
 
             loadTabContent(key, href);
             $('#' + paneId).attr('data-url', href);
-            if (window.history && window.history.replaceState) {
-                window.history.replaceState(null, '', cleanUrlForHistory(href));
-            }
+            // Vô hiệu hóa đổi URL để ẩn địa chỉ chi tiết lộ liễu
+            // if (window.history && window.history.replaceState) {
+            //     window.history.replaceState(null, '', cleanUrlForHistory(href));
+            // }
         });
     }
 
@@ -331,9 +332,10 @@ var TabManager = (function () {
                         } else if (res.redirectUrl) {
                             loadTabContent(key, res.redirectUrl);
                             $('#' + paneId).attr('data-url', res.redirectUrl);
-                            if (window.history && window.history.replaceState) {
-                                window.history.replaceState(null, '', cleanUrlForHistory(res.redirectUrl));
-                            }
+                            // Vô hiệu hóa đổi URL để ẩn địa chỉ chi tiết lộ liễu
+                            // if (window.history && window.history.replaceState) {
+                            //     window.history.replaceState(null, '', cleanUrlForHistory(res.redirectUrl));
+                            // }
                         }
                     } else {
                         $pane.html(res);
@@ -373,15 +375,6 @@ var TabManager = (function () {
         initTabLinkInterceptor();
         initTabFormSubmitInterceptor();
 
-        // Khôi phục trạng thái tabs (nếu có)
-        restoreTabsState();
-
-        // Khởi tạo plugins cho Tab active
-        var activePaneId = $('.tab-pane.active.show').attr('id');
-        if (activePaneId) {
-            reInitPlugins(activePaneId);
-        }
-
         // Đóng toàn bộ Modal khi người dùng chuyển Tab
         $(document).on('show.bs.tab', 'button[data-bs-toggle="tab"]', function (e) {
             $('.modal').modal('hide');
@@ -404,10 +397,10 @@ var TabManager = (function () {
                     }
                 }
                 
-                // Cập nhật URL trình duyệt cho đồng bộ với F5
-                if (url && window.history && window.history.replaceState) {
-                    window.history.replaceState(null, '', cleanUrlForHistory(url));
-                }
+                // Vô hiệu hóa cập nhật URL trình duyệt để ẩn địa chỉ chi tiết lộ liễu
+                // if (url && window.history && window.history.replaceState) {
+                //     window.history.replaceState(null, '', cleanUrlForHistory(url));
+                // }
             }
             saveTabsState();
         });
@@ -433,6 +426,15 @@ var TabManager = (function () {
                 container.scrollBy({ left: 200, behavior: 'smooth' });
             }
         });
+
+        // Khôi phục trạng thái tabs (nếu có) - Cần chạy sau cùng để các sự kiện tab (như shown.bs.tab) đã được đăng ký
+        restoreTabsState();
+
+        // Khởi tạo plugins cho Tab active ban đầu (ví dụ: default-tab)
+        var activePaneId = $('.tab-pane.active.show').attr('id');
+        if (activePaneId) {
+            reInitPlugins(activePaneId);
+        }
     }
 
     // ─── openTab() ──────────────────────────────────────────────────────────

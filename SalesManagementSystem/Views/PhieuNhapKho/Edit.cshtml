@@ -219,7 +219,7 @@
                                 // Update ID if it's a new record
                                 $('#ID').val(res.id);
                                 $('#SoChungTu').val(res.soChungTu);
-                                window.history.replaceState({}, '', '@Url.Action("Edit")/' + res.id);
+                                // window.history.replaceState({}, '', '@Url.Action("Edit")/' + res.id);
                                 $('#btnGhiDuLieu').show();
                                 $('#badgeTrangThai').text('Đề nghị ghi');
                             }
@@ -270,8 +270,8 @@
                                 $context.find('.sel-sanpham, .txt-soluong, .txt-dongia, .txt-thue, .txt-ghichu').prop('disabled', true);
                                 $context.find('select, input, textarea').prop('disabled', true);
                                 
-                                // Cập nhật URL mà không reload trang
-                                window.history.replaceState({}, '', '@Url.Action("Edit")/' + currentId);
+                                // Cập nhật URL mà không reload trang (Đã vô hiệu hóa để ẩn URL lộ liễu)
+                                // window.history.replaceState({}, '', '@Url.Action("Edit")/' + currentId);
                             } else {
                                 showToast('error', 'Lưu thành công nhưng ghi dữ liệu thất bại: ' + ghiRes.message);
                             }
