@@ -15,7 +15,7 @@
       "RelativeMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|solutionrelative:salesmanagementsystem\\global.asax.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|c:\\users\\duoc0\\onedrive\\desktop\\web_qlbh\\quanlybanhang\\salesmanagementsystem\\salesmanagementsystem\\controllers\\phieunhapkhocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\salesmanagementsystem\\controllers\\phieunhapkhocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|solutionrelative:salesmanagementsystem\\controllers\\phieunhapkhocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -384,7 +384,7 @@
               "RelativeDocumentMoniker": "SalesManagementSystem\\Repositories\\DonDatHangRepository.cs",
               "ToolTip": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Repositories\\DonDatHangRepository.cs",
               "RelativeToolTip": "SalesManagementSystem\\Repositories\\DonDatHangRepository.cs",
-              "ViewState": "AgIAAE0AAAAAAAAAAAAmwFoAAAAvAAAAAAAAAA==",
+              "ViewState": "AgIAADgAAAAAAAAAAAAmwFoAAAAvAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-06-11T09:18:23.545Z",
               "EditorCaption": ""
@@ -411,8 +411,7 @@
               "RelativeToolTip": "SalesManagementSystem\\Controllers\\PhieuNhapKhoController.cs",
               "ViewState": "AgIAAHwAAAAAAAAAAAAuwJoAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-10T16:20:23.036Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-10T16:20:23.036Z"
             },
             {
               "$type": "Document",
@@ -424,8 +423,7 @@
               "RelativeToolTip": "SalesManagementSystem\\Controllers\\NhanSuController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAMwAAAAsAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-06T16:01:46.189Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-06T16:01:46.189Z"
             },
             {
               "$type": "Document",
@@ -449,8 +447,7 @@
               "RelativeToolTip": "SalesManagementSystem\\Global.asax.cs",
               "ViewState": "AgIAAAkAAAAAAAAAAAAcwB4AAABFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-04T05:53:52.25Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-04T05:53:52.25Z"
             },
             {
               "$type": "Document",
@@ -462,8 +459,7 @@
               "RelativeToolTip": "SalesManagementSystem\\Views\\Shared\\_Layout.cshtml",
               "ViewState": "AgIAAHMCAAAAAAAAAAAwwG0CAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-06-06T16:01:46.379Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-06T16:01:46.379Z"
             },
             {
               "$type": "Document",
@@ -475,8 +471,7 @@
               "RelativeToolTip": "SalesManagementSystem\\Views\\DonDatHang\\Index.cshtml",
               "ViewState": "AgIAABgAAAAAAAAAAAAwwFsAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-06-10T04:32:47.904Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-10T04:32:47.904Z"
             },
             {
               "$type": "Document",

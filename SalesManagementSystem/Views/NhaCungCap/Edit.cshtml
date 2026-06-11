@@ -1,0 +1,59 @@
+@model SalesManagementSystem.Models.ViewModels.NhaCungCapCreateEditViewModel
+
+@{
+    Layout = null;
+    ViewBag.Title = "Cập nhật nhà cung cấp";
+}
+
+<div class="modal-header bg-light">
+    <h5 class="modal-title fw-bold text-uppercase" style="color: #0b5b84;">@ViewBag.Title</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+@using (Html.BeginForm("Edit", "NhaCungCap", FormMethod.Post, new { id = "globalForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.ID)
+
+    <div class="modal-body p-4">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger mb-3">
+                @Html.ValidationSummary(false, "")
+            </div>
+        }
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Mã nhà cung cấp <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.MaNhaCungCap, new { @class = "form-control form-control-sm", placeholder = "Nhập mã nhà cung cấp" })
+                @Html.ValidationMessageFor(m => m.MaNhaCungCap, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Tên nhà cung cấp <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.TenNhaCungCap, new { @class = "form-control form-control-sm", placeholder = "Nhập tên nhà cung cấp" })
+                @Html.ValidationMessageFor(m => m.TenNhaCungCap, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Điện thoại</label>
+                @Html.TextBoxFor(m => m.DienThoai, new { @class = "form-control form-control-sm", placeholder = "Nhập số điện thoại" })
+                @Html.ValidationMessageFor(m => m.DienThoai, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Email</label>
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control form-control-sm", placeholder = "Nhập email" })
+                @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-md-12">
+                <label class="form-label text-muted fw-semibold">Địa chỉ</label>
+                @Html.TextAreaFor(m => m.DiaChi, new { @class = "form-control form-control-sm", rows = 3, placeholder = "Nhập địa chỉ" })
+                @Html.ValidationMessageFor(m => m.DiaChi, "", new { @class = "text-danger small" })
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Hủy</button>
+        <button type="submit" class="btn text-white px-4" style="background-color: #2998e4; border: none;">
+            <i class="bi bi-save me-1"></i> Lưu thông tin
+        </button>
+    </div>
+}

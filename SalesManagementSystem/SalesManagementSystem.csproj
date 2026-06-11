@@ -580,5 +580,14 @@
     <Content Include="Views\PhieuNhapKho\Create.cshtml" />
     <Content Include="Views\PhieuNhapKho\Edit.cshtml" />
     <Content Include="Scripts\phieu-nhap-kho.js" />
+    <Compile Include="Models\ViewModels\NhaCungCapViewModel.cs" />
+    <Compile Include="Models\ViewModels\NhaCungCapCreateEditViewModel.cs" />
+    <Compile Include="Repositories\Interfaces\INhaCungCapRepository.cs" />
+    <Compile Include="Repositories\NhaCungCapRepository.cs" />
+    <Compile Include="Controllers\NhaCungCapController.cs" />
+    <Content Include="Views\NhaCungCap\Index.cshtml" />
+    <Content Include="Views\NhaCungCap\_NhaCungCapList.cshtml" />
+    <Content Include="Views\NhaCungCap\Create.cshtml" />
+    <Content Include="Views\NhaCungCap\Edit.cshtml" />
   </ItemGroup>
 </Project>

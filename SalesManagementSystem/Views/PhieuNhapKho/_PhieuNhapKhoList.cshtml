@@ -35,6 +35,14 @@
                                         <ul class="dropdown-menu shadow">
                                             <li><h6 class="dropdown-header text-uppercase fw-bold text-dark">Thao tác</h6></li>
                                             <li><hr class="dropdown-divider"></li>
+                                            @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuNhapKho", SalesManagementSystem.Helpers.LoaiPhanQuyen.Xem))
+                                            {
+                                                <li>
+                                                    <a href="@Url.Action("Edit", "PhieuNhapKho", new { id = item.ID, isView = true })" class="dropdown-item">
+                                                        <i class="bi bi-eye me-2 text-info"></i> Xem chi tiết
+                                                    </a>
+                                                </li>
+                                            }
                                             @if (item.TrangThai == 1 && SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuNhapKho", SalesManagementSystem.Helpers.LoaiPhanQuyen.CapNhat))
                                             {
                                                 <li>
@@ -46,14 +54,6 @@
                                                     <button type="button" class="dropdown-item text-success" onclick="ghiSoPhieu(this, @item.ID)">
                                                         <i class="bi bi-check-circle me-2 text-success"></i> Ghi dữ liệu
                                                     </button>
-                                                </li>
-                                            }
-                                            else
-                                            {
-                                                <li>
-                                                    <a href="@Url.Action("Edit", "PhieuNhapKho", new { id = item.ID, isView = true })" class="dropdown-item">
-                                                        <i class="bi bi-eye me-2 text-info"></i> Xem chi tiết
-                                                    </a>
                                                 </li>
                                             }
                                             
