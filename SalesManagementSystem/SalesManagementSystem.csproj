@@ -393,6 +393,7 @@
     <Content Include="Logs\2026-06-04.log" />
     <Content Include="Logs\2026-06-05.log" />
     <Content Include="App_Config\system.dat" />
+    <Content Include="AGENTS.md" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -456,6 +457,9 @@
     <Content Include="Views\DMBieuMau\_BieuMauList.cshtml" />
     <Content Include="Views\DMBieuMau\CreateEdit.cshtml" />
     <Content Include="Views\NguoiDung\ChangePassword.cshtml" />
+    <Content Include="AGENTS.md.md" />
+    <Content Include="ARCHITECTURE_STANDARD.md" />
+    <Content Include="DATABASE_STANDARD.md" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />
@@ -562,5 +566,19 @@
     <Content Include="Views\DonDatHang\Edit.cshtml" />
     <Content Include="Scripts\don-dat-hang.js" />
     <Content Include="App_Data\create_don_dat_hang.sql" />
+    <Compile Include="Models\Entities\DM_NhaCungCap.cs" />
+    <Compile Include="Models\Entities\KHO_PhieuNhap.cs" />
+    <Compile Include="Models\Entities\KHO_PhieuNhap_ChiTiet.cs" />
+    <Compile Include="Models\Entities\KHO_GiaoDichKho.cs" />
+    <Compile Include="Models\ViewModels\PhieuNhapKhoListViewModel.cs" />
+    <Compile Include="Models\ViewModels\PhieuNhapKhoViewModel.cs" />
+    <Compile Include="Models\ViewModels\PhieuNhapKhoChiTietViewModel.cs" />
+    <Compile Include="Repositories\Interfaces\IPhieuNhapKhoRepository.cs" />
+    <Compile Include="Repositories\PhieuNhapKhoRepository.cs" />
+    <Compile Include="Controllers\PhieuNhapKhoController.cs" />
+    <Content Include="Views\PhieuNhapKho\Index.cshtml" />
+    <Content Include="Views\PhieuNhapKho\Create.cshtml" />
+    <Content Include="Views\PhieuNhapKho\Edit.cshtml" />
+    <Content Include="Scripts\phieu-nhap-kho.js" />
   </ItemGroup>
 </Project>

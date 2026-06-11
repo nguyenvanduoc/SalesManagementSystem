@@ -45,13 +45,13 @@
                                             @if (PermissionHelper.HasPermission("DonDatHang", LoaiPhanQuyen.Xem))
                                             {
                                                 <li>
-                                                    <a class="dropdown-item no-ajax"
+                                                    <a class="dropdown-item"
                                                        href="@Url.Action("Edit","DonDatHang", new { id = item.ID, isView = true })">
                                                         <i class="bi bi-eye me-2 text-info"></i> Xem chi tiết
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a class="dropdown-item no-ajax"
+                                                    <a class="dropdown-item"
                                                        href="@Url.Action("Edit","DonDatHang", new { id = item.ID })">
                                                         <i class="bi bi-pencil me-2 text-warning"></i> Cập nhật
                                                     </a>

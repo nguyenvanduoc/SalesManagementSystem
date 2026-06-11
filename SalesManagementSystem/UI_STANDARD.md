@@ -1,315 +1,745 @@
-# Tiêu chuẩn thiết kế giao diện (UI Standard)
+# UI_STANDARD.md
 
-Tài liệu này ghi lại các tiêu chuẩn thiết kế giao diện cho dự án Quản Lý Bán Hàng, đảm bảo tính nhất quán trên toàn hệ thống.
+## Dự án Quản Lý Bán Hàng
 
-## 1. Tiêu chuẩn Form Danh sách (Index)
+> Tài liệu quy chuẩn giao diện bắt buộc áp dụng cho toàn bộ màn hình trong hệ thống.
 
-Tất cả các trang danh sách (Index) cần tuân thủ cấu trúc sau:
+---
 
-1. **Header (Tiêu đề trang)**: 
-   - Nút thêm mới và Tiêu đề trang nằm cùng một hàng.
-   - Tiêu đề bắt buộc phải tuân theo cấu trúc HTML sau: không có icon, chữ in hoa, in đậm, kích thước 1.25rem, và màu xanh đậm (`#0b5b84`).
-   - HTML mẫu: `<h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">@ViewBag.Title</h4>`
-2. **Khung tìm kiếm/lọc (Filter)**: Luôn luôn có một form chứa các điều kiện lọc ở phía trên bảng dữ liệu. Nó giúp người dùng dễ dàng tìm kiếm và thu hẹp dữ liệu hiển thị.
-3. **Bảng dữ liệu (Table)**: Nằm bên dưới khung lọc, sử dụng thẻ bảng tiêu chuẩn với màu sắc nhẹ nhàng (ví dụ: `table-light` cho thead).
+# 1. NGUYÊN TẮC CHUNG
 
-**Mẫu HTML tham khảo cho phần Filter:**
+## 1.1 Mục tiêu
+
+* Đảm bảo toàn bộ giao diện thống nhất.
+* Hạn chế mỗi màn hình một kiểu thiết kế khác nhau.
+* Tăng khả năng bảo trì và mở rộng.
+* Tất cả màn hình mới phải tuân thủ tài liệu này.
+
+## 1.2 Công nghệ
+
+* ASP.NET MVC 4.8
+* Bootstrap 5
+* jQuery
+* AJAX
+* Dapper
+* Unity DI
+
+---
+
+# 2. TIÊU CHUẨN FORM DANH SÁCH (INDEX)
+
+## Bố cục bắt buộc
+
+Thứ tự hiển thị:
+
+1. Header
+2. Khung tìm kiếm
+3. Grid dữ liệu
+4. Pagination
+
+```text
++--------------------------------+
+| [+ Thêm mới]    TIÊU ĐỀ TRANG |
++--------------------------------+
+
++--------------------------------+
+| Bộ lọc tìm kiếm                |
++--------------------------------+
+
++--------------------------------+
+| Grid dữ liệu                   |
++--------------------------------+
+
++--------------------------------+
+| Phân trang                     |
++--------------------------------+
+```
+
+---
+
+## 2.1 Header
+
+### Tiêu đề
+
+Bắt buộc sử dụng:
+
+```html
+<h4 class="mb-0 fw-bold text-uppercase"
+    style="color:#0b5b84;font-size:1.25rem;">
+    @ViewBag.Title
+</h4>
+```
+
+### Quy định
+
+* Không icon.
+* In hoa.
+* In đậm.
+* Màu #0b5b84.
+* Cùng hàng với nút Thêm mới.
+
+---
+
+## 2.2 Nút Thêm mới
+
+Chỉ hiển thị khi có quyền:
+
+```csharp
+PermissionHelper.HasPermission(
+    "Employee",
+    LoaiPhanQuyen.Them
+)
+```
+
+Không được disable.
+
+Không có quyền => Ẩn hoàn toàn.
+
+---
+
+# 3. KHUNG TÌM KIẾM
+
+## Bắt buộc
+
+Mọi màn hình danh sách đều phải có vùng filter.
+
+Cấu trúc:
+
 ```html
 <div class="card shadow-sm mb-4">
     <div class="card-body">
-        <form method="get" action="@Url.Action("Index")">
-            <div class="row g-3 align-items-center">
-                <div class="col-md-4">
-                    <input type="text" name="keyword" class="form-control" placeholder="Nhập từ khóa tìm kiếm..." value="@ViewBag.Keyword">
-                </div>
-                <div class="col-md-3">
-                    <select name="status" class="form-select">
-                        <option value="">-- Tất cả trạng thái --</option>
-                        <option value="1">Đang hoạt động</option>
-                        <option value="0">Ngừng hoạt động</option>
-                    </select>
-                </div>
-                <div class="col-md-auto d-flex gap-2">
-                    <button type="submit" class="btn text-white px-3" style="background-color: #2998e4; border: none;">
-                        <i class="bi bi-search"></i> Tìm kiếm
-                    </button>
-                    <a href="@Url.Action("Index")" class="btn text-white px-3" style="background-color: #f1c40f; border: none;">
-                        Làm mới
-                    </a>
-                </div>
-            </div>
+        <form id="searchForm">
+            ...
         </form>
     </div>
 </div>
 ```
 
-### Tiêu chuẩn Nút bấm trong Form lọc:
-- **Tìm kiếm**: Nền màu xanh dương sáng (VD: `#2998e4`), chữ trắng, có icon tìm kiếm (kính lúp) bên trái chữ.
-- **Làm mới**: Nền màu vàng (VD: `#f1c40f`), chữ trắng, không có icon, dùng để xóa các điều kiện lọc và tải lại trang mặc định.
-- Cả hai nút đặt cạnh nhau (dùng `d-flex gap-2`).
+---
 
-## 2. Tiêu chuẩn Popup Xóa (Delete Confirmation)
+## Nút Tìm kiếm
 
-Hệ thống không sử dụng hộp thoại `confirm()` mặc định của trình duyệt vì tính thẩm mỹ kém. Thay vào đó, sử dụng Global Modal của Bootstrap đã được thiết kế sẵn trong `_Layout.cshtml`.
-
-#### 3.4 Phân trang (Pagination)
-- **Giao diện (CSS)**: Sử dụng class `.custom-pagination` cho vùng footer chứa phân trang. Style này có nền màu xám xanh sáng (`#f1f5f9`), viền trên nhạt (`#e2e8f0`).
-- **Nút bấm**: Nút bấm trang có dạng hình tròn (`border-radius: 50%`), nền trong suốt, màu chữ xanh xám đậm (`#0b5b84`), viền ngoài mảnh màu mờ (`#dce4ec`).
-- **Nút đang chọn (Active)**: Nền xanh lơ (`#c0d6e4`), viền (`#b9d2e1`), chữ giữ màu xanh đậm (`#0b5b84`).
-- **Icon điều hướng**: Dùng các icon filled đặc thay vì mũi tên đơn điệu:
-  - Trang đầu tiên (First): `bi-skip-start-fill`
-  - Trang trước (Prev): `bi-caret-left-fill`
-  - Trang sau (Next): `bi-caret-right-fill`
-  - Trang cuối cùng (Last): `bi-skip-end-fill`
-- **Cấu trúc Footer**: Nằm ở dưới cùng của Grid, chứa điều hướng trang bên trái, dropdown chọn số dòng bên cạnh điều hướng, và tổng số lượng dòng ở bên phải.
-- **Số liệu động**: Text hiển thị số dòng (ví dụ: `1 - 10 của 20`) phải được tính toán động dựa vào biến `Model.Count()` (hoặc tổng record từ DB) chứ không dùng text mặc định (hardcode).
-- **Màu chữ phụ**: Các đoạn text như "mẫu tin/trang" hay tổng số dòng cần dùng màu xanh đậm chuẩn thông qua class `.text-info-custom`.
-
-## 4. Quy chuẩn dữ liệu và Validation (Data Validation)
-
-### 4.1 Kiểm tra trùng mã (Unique Code)
-- **Bắt buộc đối với tất cả các đối tượng có Mã**: Khi Thêm mới (Create) hoặc Cập nhật (Update), bắt buộc phải kiểm tra trùng lặp "Mã" (VD: `MaNhanVien`, `MaKhachHang`, `MaHangHoa`...).
-- **Cơ chế**:
-  - Dưới backend (Repository), viết hàm kiểm tra dạng `IsDuplicateCode(string code, int currentId = 0)`.
-  - Trong Controller, gọi hàm check trước khi Insert/Update. Nếu bị trùng, dùng `ModelState.AddModelError("Ma...", "Mã ... đã tồn tại trong hệ thống.");` và trả lại View.
-  - Trên màn hình View, luôn sử dụng `@Html.ValidationMessageFor(m => m.Ma..., "", new { @class = "text-danger small" })` để hiển thị lỗi màu đỏ cho người dùng dễ nhận diện.
-
-**Ví dụ:**
 ```html
-<div class="card-footer custom-pagination d-flex flex-wrap align-items-center justify-content-between" style="padding: 12px 16px;">
-    <div class="d-flex align-items-center gap-3">
-        <nav aria-label="Page navigation">
-            <ul class="pagination pagination-sm mb-0">
-                <li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-chevron-left"></i></a></li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a></li>
-            </ul>
-        </nav>
-        <div class="d-flex align-items-center">
-            <select class="form-select form-select-sm" style="width: 70px;">
-                <option value="10" selected>10</option>
-                <option value="20">20</option>
-            </select>
-            <span class="ms-2 text-info-custom" style="font-size: 0.85rem;">mẫu tin/trang</span>
-        </div>
-    </div>
-    <div class="text-info-custom" style="font-size: 0.85rem;">
-        @{
-            var total = Model != null ? Model.Count() : 0;
-            var start = total > 0 ? 1 : 0;
-            var end = total > 10 ? 10 : total;
-        }
-        @start - @end của @total
-    </div>
-</div>
-```
-
-## 4. Modal (Popup):
-- Giao diện sáng (Light mode) sạch sẽ.
-- Cạnh trên (top-border) có đường viền màu vàng dày để nhấn mạnh cảnh báo.
-- Tiêu đề Modal (Cảnh báo/Thông báo chung): **Thông báo!** (chữ xám đen) cùng icon cảnh báo màu vàng.
-- Tiêu đề Modal Form (Thêm mới/Cập nhật): Bắt buộc in hoa, in đậm, màu xanh đậm (`#0b5b84`), không sử dụng icon. Ví dụ: `<h5 class="modal-title fw-bold text-uppercase" style="color: #0b5b84;">@ViewBag.Title</h5>`
-- Nút bấm:
-  - **ĐỒNG Ý**: Nền vàng, chữ trắng đậm (bên trái).
-  - **ĐỂ SAU**: Nền xám nhạt, chữ đen đậm (bên phải).
-
-### Cách sử dụng trong code:
-Thay vì dùng:
-```html
-<form action="..." method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa?');">
-```
-Hãy sử dụng hàm JS `confirmDelete(url)` đã được định nghĩa trong `_Layout.cshtml`:
-```html
-<button type="button" class="btn btn-sm btn-outline-danger" title="Xóa" onclick="confirmDelete('@Url.Action("Delete", "ControllerName", new { id = item.ID })')">
-    <i class="bi bi-trash"></i>
+<button class="btn text-white"
+        style="background:#2998e4">
+    <i class="bi bi-search"></i>
+    Tìm kiếm
 </button>
 ```
 
-Hệ thống sẽ tự động gọi Popup Xóa chuẩn và thực thi phương thức `POST` đến `url` nếu người dùng chọn "ĐỒNG Ý".
+### Quy định
 
-## 3. Tiêu chuẩn Bảng dữ liệu (Table Grid) & Cột Thao tác
+* Màu #2998e4
+* Chữ trắng
+* Có icon kính lúp
 
-### 3.1 Giao diện Bảng (Grid)
-- Sử dụng class `.table-custom table-bordered` đã được định nghĩa toàn cục trong `_Layout.cshtml`.
-- Dòng chẵn (even) sẽ có nền màu xanh nhạt (`#dbe6ef`), dòng lẻ (odd) nền trắng.
-- Khi rê chuột (hover) vào một dòng, nền dòng sẽ chuyển sang màu xanh đậm hơn (`#c9d9e8`).
-- **Tiêu đề cột (Header)**: Luôn có nền màu xám nhạt (`background-color: #f4f6f9;`), chữ màu đen (`#212529`) và được tô đậm (`font-weight: bold`), viền dưới dày 2px. **Tiêu đề (title) của các cột luôn luôn canh trái**.
-- Các ô dữ liệu tự động canh giữa theo chiều dọc (`vertical-align: middle`), đường lưới mờ (`#e9ecef`).
-- Sử dụng class `table-responsive` bao bọc bên ngoài table với `min-height: 350px` để chống vỡ khung và hiển thị tốt dropdown.
-- **Canh lề dữ liệu (Alignment)**:
-  - **Canh giữa (`text-center`)**: Các cột Mã, Ngày sinh, Giới tính, Số điện thoại.
-  - **Canh phải (`text-end`)**: Các cột Số tiền, Số lượng, Đơn giá, Thành tiền (dữ liệu số/tiền tệ).
-  - **Canh trái (mặc định)**: Cột Họ đệm, Tên nhân viên và các cột văn bản dài (Địa chỉ, Email, Ghi chú, Nội dung...).
-  - **Cột STT (Số thứ tự)**: Bắt buộc thêm một cột STT ngay sau cột "Hành động" (hoặc là cột đầu tiên nếu không có cột Hành động). Cột STT để trống tiêu đề (header rỗng) và được tự động tăng dựa trên phân trang `(CurrentPage - 1) * PageSize + index`.
+---
 
-### 3.2 Cột Thao tác (Action Column)
-- **Vị trí**: Đặt ở bên trái, ngay sau cột Checkbox (nếu có) và trước các cột dữ liệu.
-- **Hiệu ứng Hover**: Menu tự động hiển thị (Drop-down) khi rê chuột vào mà không cần click. Cần thêm class `.dropdown-hover` vào thẻ bao ngoài cùng của nút.
-- **Xử lý các dòng cuối (Chống bị che khuất)**: Đối với 4 dòng cuối cùng của bảng, menu dropdown sẽ tự động mở ngược hất lên trên (Drop-up, đè ngược lên grid) để không bị cắt hoặc che khuất bởi footer/scroll nhờ CSS `.table-custom tbody tr:nth-last-child(-n+4) .dropdown-menu`. Không cần code thêm logic JS. Bóng đổ (shadow) cũng được lật ngược lên trên cho thẩm mỹ.
-- **Icon chuẩn**: 
-  - Nút hiển thị Menu: Dùng icon dạng hình vuông có chấm (`bi-grid-3x3-gap-fill`) với nền nhạt.
-  - Sửa: Icon `bi-pencil-square`, màu `text-primary`.
-  - Xóa: Icon `bi-trash-fill`, màu `text-danger`.
-- **Dropdown Menu**: 
-  - Có tiêu đề "THAO TÁC" in hoa, in đậm (`dropdown-header text-uppercase fw-bold text-dark`).
-  - Phân cách bởi đường kẻ ngang (`dropdown-divider`).
-  - Các chức năng được liệt kê kèm icon. Ví dụ: Chỉnh sửa (`bi-pencil-square`), Xóa (`bi-trash-fill` màu đỏ).
+## Nút Làm mới
 
-**Mẫu HTML tham khảo (Trích đoạn Row):**
 ```html
-<td class="text-center align-middle">
-    <div class="dropdown dropdown-hover">
-        <button class="btn btn-sm btn-light border dropdown-toggle-hide-arrow shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 2px 6px;">
-            <i class="bi bi-grid-3x3-gap-fill text-dark"></i>
-        </button>
-        <ul class="dropdown-menu shadow">
-            <li><h6 class="dropdown-header text-uppercase fw-bold text-dark">Thao tác</h6></li>
-            <li><hr class="dropdown-divider"></li>
-            <li>
-                <a class="dropdown-item" href="...">
-                    <i class="bi bi-pencil-square me-2 text-primary"></i> Chỉnh sửa
-                </a>
-            </li>
-            <li>
-                <button type="button" class="dropdown-item text-danger" onclick="confirmDelete('...')">
-                    <i class="bi bi-trash-fill me-2 text-danger"></i> Xóa
-                </button>
-            </li>
-        </ul>
-    </div>
-</td>
+<a class="btn text-white"
+   style="background:#f1c40f">
+   Làm mới
+</a>
 ```
 
-### 3.3 Tiêu chuẩn Phân trang (Pagination)
-- **Vị trí**: Luôn đặt ở dưới cùng của bảng dữ liệu, nằm trong thẻ `.card-footer` của component bao bọc bảng.
-- **Cấu trúc**: 
-  - Bên trái: Các nút điều hướng trang (Trang đầu, Trước, 1, 2, 3..., Tiếp, Trang cuối). Dùng component `.pagination` của Bootstrap (với icon `bi-chevron-left/right` và `bi-chevron-double-left/right`).
-  - Ở giữa (cạnh điều hướng): Dropdown chọn số lượng mẫu tin hiển thị trên 1 trang (mặc định các mốc `10`, `20`, `50`, `100`), kèm nhãn "mẫu tin/trang".
-  - Bên phải: Dòng text hiển thị thông tin hiển thị hiện tại (Ví dụ: `1 - 10 của 1720`).
-- **Màu sắc**: Màu xám nhạt tiêu chuẩn của text (`text-muted`), card footer nền trắng.
+### Quy định
 
-**Mẫu HTML tham khảo (Trích đoạn Footer):**
+* Màu vàng
+* Không icon
+
+---
+
+# 4. GRID DỮ LIỆU
+
+## Wrapper
+
 ```html
-<div class="card-footer bg-white border-top d-flex flex-wrap align-items-center justify-content-between" style="padding: 12px 16px;">
-    <div class="d-flex align-items-center gap-3">
-        <nav aria-label="Page navigation">
-            <ul class="pagination pagination-sm mb-0">
-                <li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-chevron-double-left"></i></a></li>
-                <li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-chevron-left"></i></a></li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
-                <li class="page-item"><a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a></li>
-                <li class="page-item"><a class="page-link" href="#"><i class="bi bi-chevron-double-right"></i></a></li>
-            </ul>
-        </nav>
-        
-        <div class="d-flex align-items-center">
-            <select class="form-select form-select-sm" style="width: 70px; cursor: pointer;">
-                <option value="10" selected>10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-            </select>
-            <span class="ms-2 text-muted" style="font-size: 0.85rem;">mẫu tin/trang</span>
-        </div>
-    </div>
- 
-</div>
+<div class="table-responsive"
+     style="min-height:350px;">
 ```
 
-## 5. Thông báo Toast (Toast Notifications)
-- Thay vì dùng `alert()` mặc định của trình duyệt gây trải nghiệm không tốt, hệ thống cung cấp chuẩn **Global Toast**.
+---
 
-### 5.1 Sử dụng thông báo Toast sau khi tải lại trang (Server-side)
-Khi thực hiện các thao tác cần tải lại toàn bộ trang (Ví dụ: Xóa dữ liệu xong và gọi lệnh `RedirectToAction()`), bắt buộc truyền thông điệp qua `TempData` để hiển thị trên `_Layout.cshtml`:
-```csharp
-TempData["ToastMessage"] = "Xóa dữ liệu thành công";
-TempData["ToastType"] = "success"; // Các loại: success, error, warning, info
-return RedirectToAction("Index");
+## Table
+
+```html
+<table class="table-custom table-bordered">
 ```
 
-### 5.2 Sử dụng thông báo Toast bằng AJAX (Client-side)
-- **Vị trí**: Nằm ở góc trên cùng bên phải (`top: 25px; right: 25px;`), không che khuất thao tác người dùng.
-- **Phân loại**:
-  - `success` (Xanh lá): Dùng khi thao tác thành công (Thêm, sửa, xóa...).
-  - `error` (Đỏ): Dùng khi gặp lỗi hệ thống, lưu dữ liệu thất bại.
-  - `warning` (Vàng): Dùng để cảnh báo (Ví dụ: "Vui lòng chọn ít nhất một nhân viên").
-  - `info` (Đen/Xám): Thông tin thông thường.
+---
 
-### Cách sử dụng trong Javascript:
-Hàm `showToast(type, message)` đã được tích hợp sẵn ở `_Layout.cshtml`, có thể gọi trực tiếp từ bất kỳ màn hình nào.
+## Header
+
+### Quy định
+
+* Nền: #f4f6f9
+* Chữ đen
+* In đậm
+* Căn trái
+
+```css
+background:#f4f6f9;
+font-weight:bold;
+text-align:left;
+```
+
+---
+
+## Màu dòng
+
+### Dòng lẻ
+
+```css
+background:#ffffff;
+```
+
+### Dòng chẵn
+
+```css
+background:#dbe6ef;
+```
+
+### Hover
+
+```css
+background:#c9d9e8;
+```
+
+---
+
+## Canh dữ liệu
+
+### Center
+
+* Mã
+* STT
+* Ngày sinh
+* Giới tính
+* Điện thoại
+
+```html
+class="text-center"
+```
+
+### Right
+
+* Số lượng
+* Đơn giá
+* Thành tiền
+* Tiền thuế
+* Tổng tiền
+
+```html
+class="text-end"
+```
+
+### Left
+
+* Tên
+* Địa chỉ
+* Ghi chú
+* Email
+
+---
+
+# 5. CỘT THAO TÁC
+
+## Vị trí
+
+```text
+Checkbox
+↓
+Thao tác
+↓
+STT
+↓
+Dữ liệu
+```
+
+---
+
+## Nút menu
+
+```html
+<i class="bi bi-grid-3x3-gap-fill"></i>
+```
+
+---
+
+## Dropdown
+
+Bắt buộc:
+
+```html
+<div class="dropdown dropdown-hover">
+```
+
+### Hover tự mở
+
+Không click.
+
+### 4 dòng cuối
+
+Tự động DropUp bằng CSS.
+
+Không code JS.
+
+---
+
+## Chức năng chuẩn
+
+### Sửa
+
+```html
+bi-pencil-square
+text-primary
+```
+
+### Xóa
+
+```html
+bi-trash-fill
+text-danger
+```
+
+---
+
+# 6. POPUP XÓA
+
+## Không sử dụng
 
 ```javascript
-// Hiển thị cảnh báo (Warning)
-showToast('warning', 'Vui lòng chọn ít nhất một dữ liệu để thao tác.');
-
-// Hiển thị thành công (Success)
-showToast('success', 'Đã lưu thông tin nhân viên thành công.');
-
-// Hiển thị lỗi (Error)
-showToast('error', 'Có lỗi xảy ra trong quá trình xóa dữ liệu.');
+confirm()
 ```
 
-## 6. Popup Modal (Cửa sổ thông báo / xác nhận)
-- Tất cả các popup cảnh báo, xác nhận (như xác nhận xóa) bắt buộc phải cấu hình không được đóng khi click ra bên ngoài (static backdrop).
-- Thay vì mất đi, khi người dùng click ra ngoài khoảng tối, Modal sẽ nháy nhẹ để báo hiệu người dùng cần phải tương tác bằng cách bấm nút.
-- **Cấu hình HTML (Bootstrap)**: Thêm 2 thuộc tính `data-bs-backdrop="static"` và `data-bs-keyboard="false"` vào thẻ bao ngoài của Modal.
+---
+
+## Bắt buộc
+
+```javascript
+confirmDelete(url)
+```
+
+Ví dụ:
+
 ```html
-<div class="modal fade" id="myModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-   ...
-</div>
+<button onclick="confirmDelete(url)">
 ```
 
-## 7. Tìm kiếm & Phân trang bằng AJAX (AJAX Search & Pagination)
-- Khi thực hiện tìm kiếm hoặc phân trang, **không được load lại toàn bộ trang** (URL trên trình duyệt không thay đổi). Thay vào đó, phải gọi ngầm tới Controller (hiển thị trong tab Network) thông qua AJAX.
-- **Backend (Controller)**: Cần kiểm tra request là dạng AJAX (`Request.IsAjaxRequest()`) thì trả về `PartialView` chứa riêng dữ liệu phần bảng `<table>`. Nếu không thì trả về toàn bộ trang `View`.
-- **Frontend (View)**: Tách phần bảng dữ liệu ra thành 1 Partial View riêng (ví dụ: `_EmployeeList.cshtml`). Sử dụng jQuery AJAX chặn các sự kiện submit của `<form>` tìm kiếm, các nút bấm phân trang (`.ajax-link`), và select số lượng bản ghi/trang (`#pageSizeSelect`) để nạp lại dữ liệu và thay thế `html` của `#table-container`.
+---
 
-## 8. Form Thêm/Sửa bằng Modal (AJAX Form Modal)
-- Toàn bộ các thao tác Thêm mới (Create) và Cập nhật (Update) **phải được hiển thị trong Popup Modal** thay vì chuyển hướng người dùng sang trang mới, nhằm không để lộ đường dẫn nội bộ (URL) và mang lại trải nghiệm liền mạch.
-- **Backend (Controller)**:
-  - Hàm `GET` (trước khi hiển thị form): Chỉ trả về nội dung HTML của form bằng `return PartialView()`.
-  - Hàm `POST` (xử lý lưu dữ liệu): Nếu validate bị lỗi, trả về `return PartialView()` chứa các thông báo lỗi màu đỏ. Nếu lưu thành công, trả về JSON dạng: `return Json(new { success = true, message = "Thành công" });`.
-- **Frontend (View)**:
-  - Trong trang `Create.cshtml` và `Update.cshtml`, phải gỡ bỏ giao diện chung bằng `Layout = null;`.
-  - Cấu trúc file phải tuân thủ chuẩn Bootstrap Modal: gồm `<div class="modal-header">`, `<div class="modal-body">`, và `<div class="modal-footer">`.
-  - Thay vì dùng thẻ `<a href="...">` để chuyển trang, sử dụng thẻ `<button onclick="openFormModal('url_controller')">` để lấy HTML của form rồi chèn vào `globalFormModal` có sẵn ở file `_Layout.cshtml`. Hệ thống đã tự động lắng nghe và nạp lại form (nếu lỗi) hoặc đóng Modal và nạp lại danh sách (nếu thành công).
+# 7. MODAL CHUẨN
 
-## 9. Tiêu chuẩn Kiến trúc mã nguồn Backend (Architecture Standard)
+## Cấu hình
 
-### 9.1 Controllers
-- **Không sử dụng Controller dùng chung** cho nhiều danh mục (Ví dụ: không dùng `DanhMucController` chung cho Chức vụ và Phòng ban).
-- Mỗi bảng/đối tượng (Entity) phải có một Controller quản lý riêng biệt (Ví dụ: `ChucVuController`, `PhongBanController`, `EmployeeController`) để đảm bảo tính Single Responsibility và dễ mở rộng phân quyền sau này.
+```html
+data-bs-backdrop="static"
+data-bs-keyboard="false"
+```
 
-### 9.2 Tầng Interface & Repository (Dependency Inversion)
-- Hệ thống áp dụng thiết kế theo Interface-based để giảm sự phụ thuộc (Loose Coupling).
-- **Repository**: Chứa toàn bộ logic truy vấn SQL (sử dụng Dapper). Các class Repository (VD: `ChucVuRepository`) **bắt buộc** phải kế thừa từ một Interface tương ứng (VD: `IChucVuRepository`). Các Interface được đặt trong thư mục `Repositories/Interfaces/`.
-- **Controller**: Khi khai báo Dependency Injection qua Constructor, Controller **chỉ được phép nhận Interface** thay vì nhận class trực tiếp.
-  - Đúng: `public ChucVuController(IChucVuRepository repo)`
-  - Sai: `public ChucVuController(ChucVuRepository repo)`
+---
 
-### 9.3 Dependency Injection (DI Container)
-- Sử dụng **Unity Container** để quản lý Dependency Injection.
-- Toàn bộ việc đăng ký mapping giữa Interface và Class thực thi phải được khai báo trong file `App_Start/UnityConfig.cs`.
-- Cú pháp đăng ký chuẩn: `container.RegisterType<IChucVuRepository, ChucVuRepository>(new HierarchicalLifetimeManager());`
+## Modal Form
 
-### 9.4 Quy chuẩn đặt tên (Naming Convention)
-- **ViewModel**: Bắt buộc phải có hậu tố `ViewModel` (hoặc viết tắt là `VM`) ở cuối tên Class để ghi rõ đây là một ViewModel (Ví dụ: `PagedListViewModel` hoặc `PagedListVM`, `UserLoginViewModel`, `EmployeeViewModel`...). Mục đích để phân biệt rõ ràng giữa các Model thực thể (map với Database) và các class tạo ra với mục đích vận chuyển, trộn hoặc format dữ liệu phụ trợ hiển thị trên giao diện.
+Tiêu đề:
 
-## 10. Tiêu chuẩn cấu hình Router (Routing Standard)
-- Tất cả các chức năng mới (Controller mới) **bắt buộc** phải được định nghĩa URL tường minh (explicit routing) trong file `App_Start/RouteConfig.cs`, khai báo trước route `Default` mặc định.
-- URL (đường dẫn web) nên được định dạng theo kiểu tiếng Việt không dấu, chữ thường và phân cách bằng dấu gạch ngang `-` (Kebab-case) để tối ưu và hiển thị chuyên nghiệp.
-- **Ví dụ đúng:** `/phan-quyen`, `/phong-ban/them-moi`, `/phan-quyen/luu`.
-- **Ví dụ sai (không nên dùng):** `/PhanQuyen/Index`, `/PhongBan/CreatePhongBan`.
+```html
+<h5 class="modal-title fw-bold text-uppercase"
+    style="color:#0b5b84;">
+    @ViewBag.Title
+</h5>
+```
 
-## 11. Tiêu chuẩn Phân quyền Hệ thống (Authorization Standard)
-- Toàn bộ các hành động trong hệ thống đều phải được kiểm soát phân quyền dựa trên Enum `AuthorizeTypes` (trong thư mục Helpers).
-  - `AuthorizeTypes.Everyone`: Dành cho các chức năng công khai (Đăng nhập, Quên mật khẩu).
-  - `AuthorizeTypes.AuthorizedUsers`: Dành cho xuất báo cáo cơ bản. Chỉ yêu cầu đã đăng nhập.
-  - `AuthorizeTypes.MustHavePermission`: Bắt buộc đối với các Action thao tác thay đổi dữ liệu (Xem, Thêm, Sửa, Xóa, Lưu...). Hệ thống sẽ tự động kiểm tra CSDL để chặn truy cập trái phép.
-- **Tiêu chuẩn Giao diện Phân quyền:**
-  - Không truyền các con số "cứng" (như 1, 2, 3, 4) vào hàm kiểm tra phân quyền. 
-  - Thay vào đó, **bắt buộc phải sử dụng Enum** `LoaiPhanQuyen` (Xem, Them, CapNhat, Xoa, TuyChon) để code dễ bảo trì.
-  - **Ví dụ:** Dùng `@if (PermissionHelper.HasPermission("ChucVu", LoaiPhanQuyen.Them))` để ẩn/hiện nút "Thêm mới" trên View.
-- Nút Thêm mới, Sửa, Xóa phải ẩn hoàn toàn nếu nhân viên không có quyền tương ứng. Không hiển thị các nút này dưới dạng mờ (disabled) để tránh gây rối mắt và lộ diện tính năng.
+### Quy định
+
+* In hoa
+* In đậm
+* Không icon
+
+---
+
+## Nút
+
+### Đồng ý
+
+```text
+Nền vàng
+Chữ trắng
+```
+
+### Để sau
+
+```text
+Nền xám
+Chữ đen
+```
+
+---
+
+# 8. TOAST NOTIFICATION
+
+## Không sử dụng
+
+```javascript
+alert()
+```
+
+---
+
+## Bắt buộc
+
+```javascript
+showToast(type,message)
+```
+
+### Success
+
+```javascript
+showToast('success','Lưu thành công');
+```
+
+### Error
+
+```javascript
+showToast('error','Lỗi hệ thống');
+```
+
+### Warning
+
+```javascript
+showToast('warning','Vui lòng chọn dữ liệu');
+```
+
+### Info
+
+```javascript
+showToast('info','Thông báo');
+```
+
+---
+
+# 9. AJAX STANDARD
+
+## Danh sách
+
+Không reload toàn bộ trang.
+
+Bắt buộc AJAX:
+
+* Tìm kiếm
+* Phân trang
+* Đổi page size
+
+---
+
+## Controller
+
+```csharp
+if(Request.IsAjaxRequest())
+{
+    return PartialView("_List");
+}
+```
+
+---
+
+## View
+
+Tách riêng:
+
+```text
+_EmployeeList.cshtml
+```
+
+---
+
+# 10. FORM THÊM/SỬA
+
+## Không điều hướng sang trang mới
+
+Không dùng:
+
+```html
+<a href="/employee/create">
+```
+
+---
+
+## Bắt buộc Modal
+
+```javascript
+openFormModal(url)
+```
+
+---
+
+## GET
+
+```csharp
+return PartialView();
+```
+
+---
+
+## POST Thành công
+
+```csharp
+return Json(new
+{
+    success = true,
+    message = "Lưu thành công"
+});
+```
+
+---
+
+## POST Lỗi
+
+```csharp
+return PartialView(model);
+```
+
+---
+
+# 11. VALIDATION
+
+## Kiểm tra trùng mã
+
+Áp dụng cho mọi danh mục.
+
+Repository:
+
+```csharp
+bool IsDuplicateCode(
+    string code,
+    int currentId = 0
+);
+```
+
+---
+
+## Controller
+
+```csharp
+ModelState.AddModelError(
+    "MaNhanVien",
+    "Mã đã tồn tại"
+);
+```
+
+---
+
+## View
+
+```html
+@Html.ValidationMessageFor(...)
+```
+
+---
+
+# 12. PAGINATION
+
+## Thành phần
+
+### Trái
+
+* First
+* Prev
+* Page Number
+* Next
+* Last
+
+### Giữa
+
+Page Size:
+
+```text
+10
+20
+50
+100
+```
+
+### Phải
+
+```text
+1 - 10 của 200
+```
+
+Tính động.
+
+Không hardcode.
+
+---
+
+## Icon
+
+### First
+
+```html
+bi-skip-start-fill
+```
+
+### Prev
+
+```html
+bi-caret-left-fill
+```
+
+### Next
+
+```html
+bi-caret-right-fill
+```
+
+### Last
+
+```html
+bi-skip-end-fill
+```
+
+---
+
+# 13. PHÂN QUYỀN GIAO DIỆN
+
+## Không dùng số cứng
+
+Sai:
+
+```csharp
+HasPermission("Employee",1)
+```
+
+Đúng:
+
+```csharp
+HasPermission(
+    "Employee",
+    LoaiPhanQuyen.Xem
+)
+```
+
+---
+
+## Nút phải kiểm tra quyền
+
+* Xem
+* Thêm
+* Cập nhật
+* Xóa
+* Tùy chọn
+
+Không có quyền => Ẩn hoàn toàn.
+
+---
+
+# 14. ROUTING
+
+## Bắt buộc RouteConfig
+
+Khai báo trước route Default.
+
+Ví dụ:
+
+```text
+/nhan-vien
+/nhan-vien/them-moi
+/nhan-vien/cap-nhat
+```
+
+Không dùng:
+
+```text
+/Employee/Create
+/Employee/Index
+```
+
+---
+
+# 15. KIẾN TRÚC BACKEND
+
+## Controller
+
+Mỗi Entity một Controller riêng.
+
+Ví dụ:
+
+```text
+EmployeeController
+PhongBanController
+ChucVuController
+```
+
+---
+
+## Repository
+
+Bắt buộc Interface.
+
+```csharp
+IEmployeeRepository
+EmployeeRepository
+```
+
+---
+
+## Dependency Injection
+
+Unity Container.
+
+```csharp
+container.RegisterType<
+    IEmployeeRepository,
+    EmployeeRepository
+>(
+    new HierarchicalLifetimeManager()
+);
+```
+
+---
+
+# 16. CHECKLIST REVIEW UI
+
+Trước khi hoàn thành màn hình phải kiểm tra:
+
+□ Header đúng chuẩn
+
+□ Có Filter
+
+□ Có AJAX Search
+
+□ Có AJAX Pagination
+
+□ Có Modal Create
+
+□ Có Modal Update
+
+□ Có Modal Delete
+
+□ Có Toast
+
+□ Có phân quyền
+
+□ Có kiểm tra trùng mã
+
+□ Có RouteConfig
+
+□ Có Repository Interface
+
+□ Có DI Unity
+
+□ Có ValidationMessageFor
+
+□ Có Pagination chuẩn
+
+□ Có cột STT
+
+□ Có cột Thao tác
+
+□ Không dùng alert()
+
+□ Không dùng confirm()
+
+□ Không reload trang khi tìm kiếm

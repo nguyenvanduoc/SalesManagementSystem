@@ -1,0 +1,204 @@
+@{
+    ViewBag.Title = "Quản lý Phiếu nhập kho";
+    var uid = Guid.NewGuid().ToString("N");
+}
+
+<div id="pnk-@uid">
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-2">
+        <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">
+            <i class="bi bi-box-seam me-2"></i>@ViewBag.Title
+        </h4>
+        <a href="@Url.Action("Create")" class="btn btn-primary" style="background-color: #3498db; border-color: #3498db;">
+            <i class="bi bi-plus-lg fw-bold me-1"></i> Thêm mới
+        </a>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body py-2">
+            <form id="searchForm" action="@Url.Action("GetList")" method="get">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Từ ngày</label>
+                        <input type="date" name="tuNgay" class="form-control form-control-sm" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Đến ngày</label>
+                        <input type="date" name="denNgay" class="form-control form-control-sm" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Số chứng từ</label>
+                        <input type="text" name="soChungTu" class="form-control form-control-sm" placeholder="Nhập số phiếu..." />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Kho nhập</label>
+                        <select name="idKho" class="form-select form-select-sm ddlKho">
+                            <option value="">-- Tất cả --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Nhà cung cấp</label>
+                        <select name="idNhaCungCap" class="form-select form-select-sm ddlNhaCungCap">
+                            <option value="">-- Tất cả --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Trạng thái</label>
+                        <select name="trangThai" class="form-select form-select-sm">
+                            <option value="">-- Tất cả --</option>
+                            <option value="1">Đề nghị ghi</option>
+                            <option value="2">Đã ghi</option>
+                            <option value="3">Đã hủy</option>
+                        </select>
+                    </div>
+                    <div class="col-12 d-flex gap-2 mt-3 justify-content-end">
+                        <button type="submit" class="btn btn-sm text-white px-3" style="background-color: #2998e4; border: none;">
+                            <i class="bi bi-search"></i> Tìm kiếm
+                        </button>
+                        <button type="button" class="btn btn-sm text-white px-3 btn-reset" style="background-color: #f1c40f; border: none;">
+                            Làm mới
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="table-container">
+        <!-- Grid content will be loaded here via AJAX -->
+    </div>
+
+    <div class="modal fade pnk-huy-modal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border-top: 5px solid #ffc107;">
+                <div class="modal-header">
+                    <h5 class="modal-title text-dark"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i> Thông báo!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" class="pnk-huy-id" />
+                    <p>Bạn đang thực hiện Hủy phiếu nhập kho đã ghi sổ. Vui lòng nhập lý do:</p>
+                    <textarea class="form-control pnk-txt-lydohuy" rows="3" placeholder="Nhập lý do hủy phiếu (Bắt buộc)"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn fw-bold text-white shadow-sm pnk-btn-confirm-huy" style="background-color: #ffc107; min-width: 100px;">ĐỒNG Ý</button>
+                    <button type="button" class="btn fw-bold text-dark shadow-sm" style="background-color: #e2e8f0; min-width: 100px;" data-bs-dismiss="modal">ĐỂ SAU</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    (function() {
+        var $container = $('#pnk-@uid');
+        var $form = $container.find('#searchForm');
+        var $ddlKho = $container.find('.ddlKho');
+        var $ddlNhaCungCap = $container.find('.ddlNhaCungCap');
+
+        function loadDropdowns() {
+            $.get('@Url.Action("SearchKhoHang")', { q: '' }, function (res) {
+                $ddlKho.empty().append('<option value="">-- Tất cả --</option>');
+                if(res && res.length) {
+                    $.each(res, function (i, item) {
+                        $ddlKho.append($('<option>').val(item.id).text(item.text));
+                    });
+                }
+            });
+
+            $.get('@Url.Action("SearchNhaCungCap")', { q: '' }, function (res) {
+                $ddlNhaCungCap.empty().append('<option value="">-- Tất cả --</option>');
+                if(res && res.length) {
+                    $.each(res, function (i, item) {
+                        $ddlNhaCungCap.append($('<option>').val(item.id).text(item.text));
+                    });
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            loadDropdowns();
+            $form.trigger('submit');
+        });
+
+        $container.find('.btn-reset').on('click', function() {
+            $form[0].reset();
+            $form.trigger('submit');
+        });
+
+        // Publish functions to global scope but tied to this container (for onclick handlers like ghiSoPhieu)
+        // A better approach is to use event delegation inside container.
+        window.ghiSoPhieu = function(id) {
+            showConfirm('Bạn có chắc chắn muốn ghi sổ phiếu nhập kho này?', function() {
+                $.post('@Url.Action("GhiSo")', { id: id }, function (res) {
+                    if (res.success) {
+                        if (typeof showToast === 'function') showToast('success', res.message);
+                        $form.trigger('submit');
+                    } else {
+                        if (typeof showToast === 'function') showToast('error', res.message);
+                    }
+                });
+            });
+        };
+        $container.find('.pnk-btn-confirm-huy').on('click', function() {
+            var id = $container.find('.pnk-huy-id').val();
+            var lyDo = $container.find('.pnk-txt-lydohuy').val().trim();
+            if (!lyDo) { 
+                showToast('warning', 'Vui lòng nhập lý do hủy!'); 
+                return; 
+            }
+
+            $.post('@Url.Action("HuyPhieu")', { id: id, lyDoHuy: lyDo }, function (res) {
+                if (res.success) { 
+                    showToast('success', 'Hủy phiếu thành công'); 
+                    $container.find('.pnk-huy-modal').modal('hide');
+                    // Trigger reload in active tab using TabManager
+                    if (typeof TabManager !== 'undefined') TabManager.reloadActiveTabGrid(false);
+                } else {
+                    showToast('error', res.message);
+                }
+            });
+        });
+    })();
+
+    // These functions must be global and stateless to avoid tab closure overwrites.
+    function getPnkContainer(btn) {
+        return $(btn).closest('[id^="pnk-"]');
+    }
+
+    window.ghiSoPhieu = function(btn, id) {
+        var $form = getPnkContainer(btn).find('#searchForm');
+        showConfirm('Bạn có chắc chắn muốn ghi dữ liệu phiếu nhập kho này?', function() {
+            $.post('@Url.Action("GhiSo")', { id: id }, function (res) {
+                if (res.success) {
+                    if (typeof showToast === 'function') showToast('success', res.message);
+                    $form.trigger('submit');
+                } else {
+                    if (typeof showToast === 'function') showToast('error', res.message);
+                }
+            });
+        });
+    };
+
+    window.deleteItem = function(btn, id) {
+        var $form = getPnkContainer(btn).find('#searchForm');
+        showConfirm('Bạn có chắc chắn muốn xóa phiếu nhập nháp này?', function() {
+            $.post('@Url.Action("Delete")', { id: id }, function (res) {
+                if (res.success) { 
+                    showToast('success', 'Xóa thành công'); 
+                    $form.trigger('submit');
+                } else {
+                    showToast('error', res.message);
+                }
+            });
+        });
+    };
+
+    window.moHuyPhieu = function(btn, id) {
+        var $container = getPnkContainer(btn);
+        $container.find('.pnk-huy-id').val(id);
+        $container.find('.pnk-txt-lydohuy').val('');
+        $container.find('.pnk-huy-modal').modal('show');
+    };
+</script>
+}

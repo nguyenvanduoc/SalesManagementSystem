@@ -26,7 +26,7 @@
 
 <!-- Toolbar -->
 <div class="form-toolbar">
-    <a href="@Url.Action("Index","DonDatHang")" class="btn btn-secondary btn-sm no-ajax">
+    <a href="@Url.Action("Index","DonDatHang")" class="btn btn-secondary btn-sm">
         <i class="bi bi-arrow-left"></i> Quay lại
     </a>
     @if (Model.TrangThaiDon != 3 && Model.TrangThaiDon != 4 && ViewBag.IsView != true) {
@@ -196,8 +196,6 @@
 </form>
 
 @section Scripts {
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="@Url.Content("~/Scripts/don-dat-hang.js?v=1.5")"></script>
 <script>
     $(document).ready(function () {

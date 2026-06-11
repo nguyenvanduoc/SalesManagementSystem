@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="@Url.Content("~/Content/bootstrap-icons.min.css")" />
     <!-- Global Search CSS -->
     <link rel="stylesheet" href="@Url.Content("~/Content/css/global-search.css")" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <style>
         /* ─── Variables ─────────────────────────────────── */
@@ -627,13 +628,25 @@
                 <i class="bi bi-chevron-left"></i>
             </button>
             <div class="tabs-container" id="tabsContainerScroll">
+                @{
+                    string currentUrl = Request.Url != null ? Request.Url.AbsolutePath.ToLower() : "";
+                    bool isHome = currentUrl == "/" || currentUrl == "/home/index" || currentUrl == "/home" || string.IsNullOrEmpty(currentUrl);
+                }
                 <ul class="nav nav-tabs" id="mainTabHeader" role="tablist">
                     <!-- Default tab for manual page load -->
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="default-tab" data-bs-toggle="tab" data-bs-target="#default-tab-pane" type="button" role="tab" aria-controls="default-tab-pane" aria-selected="true">
-                            <span class="tab-title">@(ViewBag.Title ?? "Trang chủ")</span> <i class="bi bi-house-door ms-1"></i>
+                        <button class="nav-link @(isHome ? "active" : "")" id="default-tab" data-bs-toggle="tab" data-bs-target="#default-tab-pane" type="button" role="tab" aria-controls="default-tab-pane" aria-selected="@(isHome ? "true" : "false")">
+                            <span class="tab-title">Dashboard</span> <i class="bi bi-house-door ms-1"></i>
                         </button>
                     </li>
+                    @if (!isHome)
+                    {
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="tab-direct-load" data-bs-toggle="tab" data-bs-target="#tab-direct-load-pane" type="button" role="tab" aria-controls="tab-direct-load-pane" aria-selected="true">
+                                <span class="tab-title">@(ViewBag.Title)</span> <span class="close-tab-btn" title="Đóng tab">&times;</span>
+                            </button>
+                        </li>
+                    }
                 </ul>
             </div>
             <button class="tab-scroll-btn" id="btnScrollRightTab" type="button" title="Cuộn phải">
@@ -643,9 +656,18 @@
         
         <!-- TAB CONTENT -->
         <div class="tab-content" id="mainTabContent">
-            <div class="tab-pane fade show active" id="default-tab-pane" role="tabpanel" aria-labelledby="default-tab" tabindex="0">
-                @RenderBody()
+            <div class="tab-pane fade @(isHome ? "show active" : "")" id="default-tab-pane" role="tabpanel" aria-labelledby="default-tab" tabindex="0" data-url="@Url.Action("Index", "Home")">
+                @if (isHome)
+                {
+                    @RenderBody()
+                }
             </div>
+            @if (!isHome)
+            {
+                <div class="tab-pane fade show active" id="tab-direct-load-pane" role="tabpanel" aria-labelledby="tab-direct-load" tabindex="0" data-url="@Request.Url.PathAndQuery">
+                    @RenderBody()
+                </div>
+            }
         </div>
     </main>
 </div>
@@ -683,6 +705,25 @@
 
 
 
+<!-- ═══════════════ GLOBAL CONFIRM MODAL ═══════════════ -->
+<div class="modal fade" id="globalConfirmModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+        <div class="modal-content shadow-lg" style="background-color: #ffffff; color: #333; border: none; border-top: 5px solid #ffc107; border-radius: 6px;">
+            <div class="modal-body p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-exclamation-triangle-fill text-warning me-3" style="font-size: 1.6rem;"></i>
+                    <h5 class="mb-0" style="font-size: 1.3rem; font-weight: 600; color: #333;">Thông báo!</h5>
+                </div>
+                <p id="globalConfirmMessage" class="mb-4" style="font-size: 1rem; color: #555;">Bạn có chắc chắn muốn thực hiện thao tác này?</p>
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="button" id="btnGlobalConfirmYes" class="btn" style="background-color: #ffc107; color: #fff; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem;">ĐỒNG Ý</button>
+                    <button type="button" class="btn" data-bs-dismiss="modal" style="background-color: #e9ecef; color: #333; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem; border: none;">ĐỂ SAU</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- ═══════════════ GLOBAL TOAST NOTIFICATION ═══════════════ -->
 <div class="toast-container position-fixed" style="top: 25px; right: 25px; z-index: 1055;">
     <div id="globalToast" class="toast align-items-center border-0 shadow-lg text-white" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
@@ -719,6 +760,7 @@
 <!-- Scripts -->
 <script src="@Url.Content("~/Scripts/jquery-3.7.0.min.js")"></script>
 <script src="@Url.Content("~/Scripts/bootstrap.bundle.min.js")"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     // Sidebar toggle
     const toggleBtn   = document.getElementById('sidebarToggle');
@@ -873,6 +915,22 @@
         msgEl.innerText = message || msgEl.dataset.originalMsg;
 
         var myModal = new bootstrap.Modal(document.getElementById('globalDeleteModal'));
+        myModal.show();
+    }
+
+    // Hàm gọi Global Confirm Modal (Xác nhận chung)
+    function showConfirm(message, onConfirm) {
+        var msgEl = document.getElementById('globalConfirmMessage');
+        msgEl.innerText = message;
+        
+        var btnYes = document.getElementById('btnGlobalConfirmYes');
+        btnYes.onclick = function() {
+            var myModal = bootstrap.Modal.getInstance(document.getElementById('globalConfirmModal'));
+            if (myModal) myModal.hide();
+            if (typeof onConfirm === 'function') onConfirm();
+        };
+
+        var myModal = new bootstrap.Modal(document.getElementById('globalConfirmModal'));
         myModal.show();
     }
 
