@@ -79,14 +79,14 @@
                                     </div>
                                 </td>
                                 <td class="text-center align-middle">@(stt++)</td>
-                                <td class="align-middle fw-medium">@item.SoChungTu</td>
+                                <td class="align-middle">@item.SoChungTu</td>
                                 <td class="text-center align-middle">@(item.NgayNhap.ToString("dd/MM/yyyy"))</td>
                                 <td class="align-middle">@item.TenKho</td>
                                 <td class="align-middle">@item.TenNhaCungCap</td>
-                                <td class="text-end align-middle fw-bold">@(item.TongTienHang.ToString("N0"))</td>
+                                <td class="text-end align-middle">@(item.TongTienHang.ToString("N0"))</td>
                                 <td class="text-end align-middle">@(item.TongTienThue.ToString("N0"))</td>
                                 <td class="text-end align-middle">
-                                    <span class="fw-bold" style="color: #e67e22;">@item.TongCong.ToString("N0")</span>
+                                    @item.TongCong.ToString("N0")
                                 </td>
                                 <td class="align-middle">@item.NguoiTaoText</td>
                                 <td class="text-center align-middle">
@@ -112,7 +112,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="10" class="text-center py-4 text-muted">
+                            <td colspan="12" class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox fs-2 d-block mb-2"></i>
                                 Không có dữ liệu
                             </td>

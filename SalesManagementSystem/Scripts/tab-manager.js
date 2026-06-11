@@ -30,6 +30,41 @@ var TabManager = (function () {
         return grid.length > 0 ? grid.parent() : null;
     }
 
+    function cleanUrlForHistory(url) {
+        if (!url) return url;
+        var parts = url.split('?');
+        var path = parts[0];
+        var query = parts.length > 1 ? '?' + parts[1] : '';
+        
+        var pathSegments = path.split('/');
+        while (pathSegments.length > 0 && pathSegments[pathSegments.length - 1] === '') {
+            pathSegments.pop();
+        }
+        
+        if (pathSegments.length > 0) {
+            var lastSegment = pathSegments[pathSegments.length - 1];
+            var lastSegmentLower = lastSegment.toLowerCase();
+            if (lastSegmentLower === 'index' || lastSegmentLower.indexOf('get') === 0) {
+                pathSegments.pop();
+            }
+        }
+        
+        path = pathSegments.join('/');
+        if (path === '') {
+            path = '/';
+        }
+        return path + query;
+    }
+
+    function areUrlsEquivalent(url1, url2) {
+        if (!url1 || !url2) return false;
+        var clean1 = cleanUrlForHistory(url1).split('?')[0].toLowerCase();
+        var clean2 = cleanUrlForHistory(url2).split('?')[0].toLowerCase();
+        if (clean1.endsWith('/')) clean1 = clean1.slice(0, -1);
+        if (clean2.endsWith('/')) clean2 = clean2.slice(0, -1);
+        return clean1 === clean2;
+    }
+
     var activeRequests = {};
 
     function showLoadingLocal($container) {
@@ -238,7 +273,7 @@ var TabManager = (function () {
             loadTabContent(key, href);
             $('#' + paneId).attr('data-url', href);
             if (window.history && window.history.replaceState) {
-                window.history.replaceState(null, '', href);
+                window.history.replaceState(null, '', cleanUrlForHistory(href));
             }
         });
     }
@@ -297,7 +332,7 @@ var TabManager = (function () {
                             loadTabContent(key, res.redirectUrl);
                             $('#' + paneId).attr('data-url', res.redirectUrl);
                             if (window.history && window.history.replaceState) {
-                                window.history.replaceState(null, '', res.redirectUrl);
+                                window.history.replaceState(null, '', cleanUrlForHistory(res.redirectUrl));
                             }
                         }
                     } else {
@@ -371,7 +406,7 @@ var TabManager = (function () {
                 
                 // Cập nhật URL trình duyệt cho đồng bộ với F5
                 if (url && window.history && window.history.replaceState) {
-                    window.history.replaceState(null, '', url);
+                    window.history.replaceState(null, '', cleanUrlForHistory(url));
                 }
             }
             saveTabsState();
@@ -664,30 +699,46 @@ var TabManager = (function () {
                 var state = JSON.parse(stateJson);
                 var $directLoadPane = $('#tab-direct-load-pane');
                 var directLoadUrl = $directLoadPane.length ? $directLoadPane.attr('data-url') : null;
+                var directLoadMatched = false;
                 
                 if (state.tabs && state.tabs.length > 0) {
                     state.tabs.forEach(function (t) {
                         if (t.key === 'direct-load') return; // Không lưu lại tab F5 cũ
                         
                         // Nếu url của tab đang restore trùng với URL của tab được nạp trực tiếp qua F5
-                        // Chúng ta sẽ đổi ID của tab trực tiếp đó thành ID của tab đang restore
-                        if (directLoadUrl && t.url && t.url.toLowerCase() === directLoadUrl.toLowerCase()) {
-                            $('#tab-direct-load').attr('id', 'tab-' + t.key)
-                                .attr('data-bs-target', '#tab-' + t.key + '-pane')
-                                .attr('aria-controls', 'tab-' + t.key + '-pane');
+                        // Chúng ta sẽ đổi ID của tab trực tiếp đó thành ID của tab đang restore và di chuyển nó về đúng vị trí
+                        if (directLoadUrl && t.url && areUrlsEquivalent(t.url, directLoadUrl)) {
+                            var $btn = $('#tab-direct-load');
+                            var $pane = $('#tab-direct-load-pane');
                             
-                            $('#tab-direct-load-pane').attr('id', 'tab-' + t.key + '-pane')
-                                .attr('aria-labelledby', 'tab-' + t.key);
+                            if ($btn.length > 0) {
+                                $btn.attr('id', 'tab-' + t.key)
+                                    .attr('data-bs-target', '#tab-' + t.key + '-pane')
+                                    .attr('aria-controls', 'tab-' + t.key + '-pane');
                                 
-                            // Nếu id cũ là activeTabId thì cập nhật
-                            if (state.activeTabId === 'tab-' + t.key) {
-                                state.activeTabId = 'tab-' + t.key;
+                                var $li = $btn.closest('li');
+                                if ($li.length > 0) {
+                                    $('#mainTabHeader').append($li);
+                                }
                             }
+                            
+                            if ($pane.length > 0) {
+                                $pane.attr('id', 'tab-' + t.key + '-pane')
+                                    .attr('aria-labelledby', 'tab-' + t.key);
+                                $('#mainTabContent').append($pane);
+                            }
+                            
+                            state.activeTabId = 'tab-' + t.key;
+                            directLoadMatched = true;
                             return; // Bỏ qua việc tạo mới
                         }
                         
                         openTab(t.key, t.title, t.url, true);
                     });
+                }
+                
+                if (directLoadUrl && !directLoadMatched) {
+                    state.activeTabId = 'tab-direct-load';
                 }
                 
                 // Khôi phục Tab Active
@@ -697,6 +748,9 @@ var TabManager = (function () {
                         setActiveTab(state.activeTabId);
                     }
                 }
+                
+                // Lưu lại trạng thái mới sau khi đã sắp xếp lại
+                saveTabsState();
             } catch (e) {
                 console.error("Lỗi phục hồi tab:", e);
             }

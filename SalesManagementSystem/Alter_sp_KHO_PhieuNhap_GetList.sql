@@ -31,8 +31,8 @@ BEGIN
         p.SoChungTu,
         p.NgayNhap,
         p.IDKho,
-        k.TenKho AS TenKho,
-        k.MaKho AS MaKhoHang,
+        k.TenKhoHang AS TenKho,
+        k.MaKhoHang AS MaKhoHang,
         p.IDNhaCungCap,
         ncc.TenNhaCungCap AS TenNhaCungCap,
         ncc.MaNhaCungCap AS MaNhaCungCap,
@@ -41,19 +41,28 @@ BEGIN
         p.TenNguoiGiao,
         p.SoDienThoaiNguoiGiao,
         p.IDNhanSuNhan,
-        ns.TenNhanSu AS TenNhanSuNhan,
+        ns.Ten AS TenNhanSuNhan,
         p.TrangThai,
         p.TongTienHang,
         p.TongTienThue,
         p.TongCong,
         p.NgayTao,
         p.NguoiTao,
-        u.FullName AS NguoiTaoText
+        COALESCE(
+            NULLIF(LTRIM(RTRIM(ISNULL(nsTaoDirect.HoDem, '') + ' ' + ISNULL(nsTaoDirect.Ten, ''))), ''),
+            NULLIF(LTRIM(RTRIM(ISNULL(nsTaoViaUser.HoDem, '') + ' ' + ISNULL(nsTaoViaUser.Ten, ''))), ''),
+            u.TenDangNhap,
+            ''
+        ) AS NguoiTaoText
     FROM [dbo].[KHO_PhieuNhap] p
-    LEFT JOIN [dbo].[KHO_DanhSach] k ON p.IDKho = k.ID
+    LEFT JOIN [dbo].[DM_KhoHang] k ON p.IDKho = k.ID
     LEFT JOIN [dbo].[DM_NhaCungCap] ncc ON p.IDNhaCungCap = ncc.ID
     LEFT JOIN [dbo].[NS_NhanSu] ns ON p.IDNhanSuNhan = ns.ID
+    -- Lấy thông tin nhân sự trực tiếp nếu p.NguoiTao lưu IDNhanSu
+    LEFT JOIN [dbo].[NS_NhanSu] nsTaoDirect ON p.NguoiTao = nsTaoDirect.ID
+    -- Lấy thông tin nhân sự thông qua bảng login nếu p.NguoiTao lưu UserID
     LEFT JOIN [dbo].[ACL_Login] u ON p.NguoiTao = u.ID
+    LEFT JOIN [dbo].[NS_NhanSu] nsTaoViaUser ON u.IDNhanSu = nsTaoViaUser.ID
     WHERE p.IsDeleted = 0
       AND (@TuNgay IS NULL OR p.NgayNhap >= @TuNgay)
       AND (@DenNgay IS NULL OR p.NgayNhap <= @DenNgay)
@@ -66,3 +75,4 @@ BEGIN
     OFFSET @Offset ROWS
     FETCH NEXT @PageSize ROWS ONLY;
 END;
+GO

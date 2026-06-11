@@ -115,7 +115,7 @@ namespace SalesManagementSystem.Controllers
             try
             {
                 var user = GetCurrentUser();
-                int userId = user?.UserID ?? 0;
+                int userId = user?.IDNhanSu ?? 0;
 
                 if (model.ID > 0)
                 {
@@ -125,7 +125,7 @@ namespace SalesManagementSystem.Controllers
                 else
                 {
                     int newId = _repo.Save(model, userId);
-                    return Json(new { success = true, id = newId, soChungTu = model.SoChungTu, message = "Lưu nháp thành công" });
+                    return Json(new { success = true, id = newId, soChungTu = model.SoChungTu, message = "Đề nghị ghi thành công" });
                 }
             }
             catch (Exception ex)
@@ -142,7 +142,7 @@ namespace SalesManagementSystem.Controllers
             try
             {
                 var user = GetCurrentUser();
-                int userId = user?.UserID ?? 0;
+                int userId = user?.IDNhanSu ?? 0;
 
                 _repo.GhiSo(id, userId);
                 return Json(new { success = true, message = "Ghi sổ thành công" });
@@ -166,7 +166,7 @@ namespace SalesManagementSystem.Controllers
             try
             {
                 var user = GetCurrentUser();
-                int userId = user?.UserID ?? 0;
+                int userId = user?.IDNhanSu ?? 0;
 
                 _repo.HuyPhieu(id, lyDoHuy, userId);
                 return Json(new { success = true, message = "Hủy phiếu thành công" });
@@ -185,7 +185,7 @@ namespace SalesManagementSystem.Controllers
             try
             {
                 var user = GetCurrentUser();
-                int userId = user?.UserID ?? 0;
+                int userId = user?.IDNhanSu ?? 0;
 
                 _repo.Delete(id, userId);
                 return Json(new { success = true, message = "Xóa phiếu thành công" });
