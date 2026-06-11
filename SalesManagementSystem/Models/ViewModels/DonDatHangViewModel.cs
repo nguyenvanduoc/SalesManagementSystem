@@ -26,5 +26,6 @@ namespace SalesManagementSystem.Models.ViewModels
         // Audit
         public DateTime? NgayTao { get; set; }
         public int? NguoiTao { get; set; }
+        public string TenNguoiTao { get; set; }
     }
 }

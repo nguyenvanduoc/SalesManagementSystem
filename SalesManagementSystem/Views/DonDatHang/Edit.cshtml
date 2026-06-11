@@ -148,10 +148,11 @@
                                 <th style="width:35px;" class="text-center">#</th>
                                 <th style="min-width:200px;">Sản phẩm</th>
                                 <th style="width:65px;" class="text-center">ĐVT</th>
-                                <th style="width:70px;" class="text-center">Thuế GTGT</th>
-                                <th style="width:110px;" class="text-end">Đơn giá</th>
                                 <th style="width:95px;" class="text-end">Số lượng</th>
+                                <th style="width:110px;" class="text-end">Đơn giá</th>
                                 <th style="width:120px;" class="text-end">Thành tiền</th>
+                                <th style="width:70px;" class="text-center">Thuế %</th>
+                                <th style="width:110px;" class="text-end">Tiền thuế</th>
                                 <th style="width:120px;" class="text-end">Thành tiền sau thuế</th>
                                 <th style="width:80px;" class="text-center">Hàng KM</th>
                                 <th style="min-width:120px;">Ghi chú</th>
@@ -186,8 +187,17 @@
                     <input type="hidden" id="PhiBocXep" name="PhiBocXep" value="@Model.PhiBocXep" />
                 </div>
                 <hr class="my-2">
+                <div class="d-flex justify-content-between small text-muted mb-2">
+                    <span>Cộng tiền hàng:</span>
+                    <span id="dispTongTienHang" class="fw-bold text-dark">0</span>
+                </div>
+                <div class="d-flex justify-content-between small text-muted mb-2">
+                    <span>Tiền thuế GTGT:</span>
+                    <span id="dispTongTienThue" class="fw-bold text-dark">0</span>
+                </div>
+                <hr class="my-2">
                 <div class="d-flex justify-content-between small">
-                    <span class="text-muted">Tổng tiền:</span>
+                    <span class="text-muted fw-bold">Tổng tiền:</span>
                     <span id="dispTongTien2" class="fw-bold" style="color:#1a5276;">0</span>
                 </div>
             </div>
@@ -196,7 +206,7 @@
 </form>
 
 @section Scripts {
-<script src="@Url.Content("~/Scripts/don-dat-hang.js?v=1.5")"></script>
+<script src="@Url.Content("~/Scripts/don-dat-hang.js?v=2.3")"></script>
 <script>
     $(document).ready(function () {
         DonDatHang.init({

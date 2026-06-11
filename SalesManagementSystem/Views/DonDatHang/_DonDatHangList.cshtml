@@ -18,9 +18,10 @@
                         <th>Mã khách hàng</th>
                         <th>Tên khách hàng</th>
                         <th>Nhân sự phụ trách</th>
+                        <th>Người tạo</th>
                         <th class="text-center">Hạn giao</th>
-                        <th class="text-center">Trạng thái</th>
                         <th class="text-end" style="min-width:120px;">Tổng tiền</th>
+                        <th class="text-center">Trạng thái</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -92,8 +93,12 @@
                                 <td class="align-middle">@item.MaKhachHang</td>
                                 <td class="align-middle">@item.TenKhachHang</td>
                                 <td class="align-middle">@item.TenNhanVien</td>
+                                <td class="align-middle">@item.TenNguoiTao</td>
                                 <td class="text-center align-middle">
                                     @(item.ThoiHanGiaoHang.HasValue ? item.ThoiHanGiaoHang.Value.ToString("dd/MM/yyyy") : "")
+                                </td>
+                                <td class="text-end align-middle">
+                                    @item.TongTien.ToString("N0")
                                 </td>
                                 <td class="text-center align-middle">
                                     @{
@@ -105,16 +110,13 @@
                                     }
                                     <span class="badge @badgeClass">@item.TenTrangThai</span>
                                 </td>
-                                <td class="text-end align-middle">
-                                    @item.TongTien.ToString("N0")
-                                </td>
                             </tr>
                         }
                     }
                     else
                     {
                         <tr>
-                            <td colspan="11" class="text-center py-4 text-muted">
+                            <td colspan="12" class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox fs-2 d-block mb-2"></i>
                                 Chưa có đơn đặt hàng nào.
                             </td>

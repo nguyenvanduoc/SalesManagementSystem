@@ -113,17 +113,20 @@ var DonDatHang = (function () {
             '    <input type="hidden" class="txt-tensp" value="" />' +
             '  </td>' +
             '  <td class="text-center"><input type="text" class="form-control readonly-cell txt-dvt" readonly placeholder="-" style="text-align:center;" /></td>' +
-            '  <td class="text-center">' +
-            '    <input type="number" class="form-control txt-thue" min="0" step="0.01" value="' + thueGTGT + '" />' +
+            '  <td>' +
+            '    <input type="text" class="form-control txt-soluong text-end" inputmode="numeric" value="' + _formatNumber(Math.round(soLuong)) + '" />' +
             '  </td>' +
             '  <td>' +
             '    <input type="text" class="form-control txt-dongia text-end" inputmode="decimal" value="' + _formatNumber(donGia) + '" />' +
             '  </td>' +
             '  <td>' +
-            '    <input type="text" class="form-control txt-soluong text-end" inputmode="numeric" value="' + _formatNumber(Math.round(soLuong)) + '" />' +
+            '    <input type="text" class="form-control readonly-cell txt-thanhtien text-end" readonly value="0" />' +
+            '  </td>' +
+            '  <td class="text-center">' +
+            '    <input type="number" class="form-control txt-thue" min="0" step="0.01" value="' + thueGTGT + '" />' +
             '  </td>' +
             '  <td>' +
-            '    <input type="text" class="form-control readonly-cell txt-thanhtien text-end" readonly value="0" />' +
+            '    <input type="text" class="form-control readonly-cell txt-tien-thue text-end" readonly value="0" />' +
             '  </td>' +
             '  <td>' +
             '    <input type="text" class="form-control readonly-cell txt-tt-sau-thue text-end" readonly value="0" />' +
@@ -239,7 +242,7 @@ var DonDatHang = (function () {
 
     function calcRow($row) {
         var donGia = _parseMoney($row.find('.txt-dongia').val());
-        var soLuong = _toNumber($row.find('.txt-soluong').val(), 1);
+        var soLuong = _parseMoney($row.find('.txt-soluong').val());
         var thue = _toNumber($row.find('.txt-thue').val(), 0);
 
         if (donGia < 0) donGia = 0;
@@ -247,24 +250,30 @@ var DonDatHang = (function () {
         if (thue < 0) thue = 0;
 
         var thanhTien = donGia * soLuong;
-        var ttSauThue = thanhTien + (thanhTien * thue / 100);
+        var tienThue = thanhTien * thue / 100;
+        var ttSauThue = thanhTien + tienThue;
         $row.find('.txt-thanhtien').val(_formatNumber(Math.round(thanhTien)));
+        $row.find('.txt-tien-thue').val(_formatNumber(Math.round(tienThue)));
         $row.find('.txt-tt-sau-thue').val(_formatNumber(Math.round(ttSauThue)));
         calcTotal();
     }
 
     function calcTotal() {
-        var total = 0;
+        var totalTienHang = 0;
+        var totalTienThue = 0;
         $('#tbodyChiTiet tr').each(function () {
-            var value = $(this).find('.txt-tt-sau-thue').val() || '0';
-            total += _parseMoney(value);
+            var valThanhTien = $(this).find('.txt-thanhtien').val() || '0';
+            var valTienThue = $(this).find('.txt-tien-thue').val() || '0';
+            totalTienHang += _parseMoney(valThanhTien);
+            totalTienThue += _parseMoney(valTienThue);
         });
         
         var phiBocXep = _parseMoney($('#PhiBocXepDisplay').val() || '0');
-        total -= phiBocXep;
+        var totalThanhToan = totalTienHang + totalTienThue - phiBocXep;
 
-        var formatted = _formatNumber(Math.round(total));
-        $('#dispTongTien, #dispTongTien2').text(formatted);
+        $('#dispTongTienHang').text(_formatNumber(Math.round(totalTienHang)));
+        $('#dispTongTienThue').text(_formatNumber(Math.round(totalTienThue)));
+        $('#dispTongTien, #dispTongTien2').text(_formatNumber(Math.round(totalThanhToan)));
         $('#dispSoDong').text($('#tbodyChiTiet tr').length);
     }
 
@@ -313,17 +322,20 @@ var DonDatHang = (function () {
         rows.each(function () {
             var $r = $(this);
             var thanhTien = $r.find('.txt-thanhtien').val() || '0';
+            var tienThue = $r.find('.txt-tien-thue').val() || '0';
+            var ttSauThue = $r.find('.txt-tt-sau-thue').val() || '0';
             chiTiets.push({
                 id: parseInt($r.find('.hd-idct').val()) || 0,
                 idSanPham: parseInt($r.find('.hd-idsp').val()) || 0,
                 maSanPham: $r.find('.txt-masp').val(),
                 tenSanPham: $r.find('.txt-tensp').val(),
                 dvt: $r.find('.txt-dvt').val(),
-                soLuong: _toNumber($r.find('.txt-soluong').val(), 1),
+                soLuong: _parseMoney($r.find('.txt-soluong').val()),
                 donGia: _parseMoney($r.find('.txt-dongia').val()),
                 thueGTGT: _toNumber($r.find('.txt-thue').val(), 0),
                 thanhTien: _toNumber(thanhTien.replace(/,/g, '').replace(/\./g, ''), 0),
-                thanhTienSauThue: _toNumber(($r.find('.txt-tt-sau-thue').val() || '0').replace(/,/g, '').replace(/\./g, ''), 0),
+                thanhTienThue: _toNumber(tienThue.replace(/,/g, '').replace(/\./g, ''), 0),
+                thanhTienSauThue: _toNumber(ttSauThue.replace(/,/g, '').replace(/\./g, ''), 0),
                 isHangKhuyenMai: $r.find('.chk-km').is(':checked'),
                 ghiChu: $r.find('.txt-ghichu').val()
             });

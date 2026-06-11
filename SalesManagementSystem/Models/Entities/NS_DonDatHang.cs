@@ -13,6 +13,8 @@ namespace SalesManagementSystem.Models.Entities
         public int TrangThaiDon { get; set; }
         public decimal TongTien { get; set; }
         public decimal PhiBocXep { get; set; }
+        public decimal? ThanhTienHang { get; set; }
+        public decimal? ThanhTienThue { get; set; }
         public string GhiChu { get; set; }
         public DateTime? NgayCapNhat { get; set; }
         public int? NguoiCapNhat { get; set; }

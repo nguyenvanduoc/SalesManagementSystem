@@ -193,7 +193,9 @@ namespace SalesManagementSystem.Controllers
             var session  = GetCurrentUser();
             int userId   = session?.IDNhanSu ?? 0;
             NormalizeChiTiets(chiTiets);
-            decimal tong = chiTiets.Sum(x => x.ThanhTienSauThue) - model.PhiBocXep;
+            decimal thanhTienHang = chiTiets.Sum(x => x.ThanhTien);
+            decimal thanhTienThue = chiTiets.Sum(x => x.ThanhTienThue);
+            decimal tong = thanhTienHang + thanhTienThue - model.PhiBocXep;
 
             var header = new NS_DonDatHang
             {
@@ -205,6 +207,8 @@ namespace SalesManagementSystem.Controllers
                 TrangThaiDon    = model.TrangThaiDon,
                 TongTien        = tong,
                 PhiBocXep       = model.PhiBocXep,
+                ThanhTienHang   = thanhTienHang,
+                ThanhTienThue   = thanhTienThue,
                 GhiChu          = model.GhiChu,
                 NgayTao         = DateTime.Now,
                 NguoiTao        = userId
@@ -216,6 +220,7 @@ namespace SalesManagementSystem.Controllers
                 SoLuong         = c.SoLuong >= 0 ? c.SoLuong : 1,
                 DonGia          = c.DonGia,
                 ThanhTien       = c.ThanhTien,
+                ThanhTienThue   = c.ThanhTienThue,
                 ThanhTienSauThue= c.ThanhTienSauThue,
                 ThueGTGT        = c.ThueGTGT,
                 IsHangKhuyenMai = c.IsHangKhuyenMai,
@@ -280,6 +285,8 @@ namespace SalesManagementSystem.Controllers
                 TrangThaiDon    = don.TrangThaiDon,
                 TongTien        = don.TongTien,
                 PhiBocXep       = don.PhiBocXep,
+                ThanhTienHang   = don.ThanhTienHang ?? 0,
+                ThanhTienThue   = don.ThanhTienThue ?? 0,
                 GhiChu          = don.GhiChu,
                 ChiTiets        = chiTiets
             };
@@ -344,7 +351,9 @@ namespace SalesManagementSystem.Controllers
             var session = GetCurrentUser();
             int userId  = session?.IDNhanSu ?? 0;
             NormalizeChiTiets(chiTiets);
-            decimal tong = chiTiets.Sum(x => x.ThanhTienSauThue) - model.PhiBocXep;
+            decimal thanhTienHang = chiTiets.Sum(x => x.ThanhTien);
+            decimal thanhTienThue = chiTiets.Sum(x => x.ThanhTienThue);
+            decimal tong = thanhTienHang + thanhTienThue - model.PhiBocXep;
 
             var header = new NS_DonDatHang
             {
@@ -357,6 +366,8 @@ namespace SalesManagementSystem.Controllers
                 TrangThaiDon    = model.TrangThaiDon,
                 TongTien        = tong,
                 PhiBocXep       = model.PhiBocXep,
+                ThanhTienHang   = thanhTienHang,
+                ThanhTienThue   = thanhTienThue,
                 GhiChu          = model.GhiChu,
                 NgayCapNhat     = DateTime.Now,
                 NguoiCapNhat    = userId
@@ -369,6 +380,7 @@ namespace SalesManagementSystem.Controllers
                 SoLuong         = c.SoLuong >= 0 ? c.SoLuong : 1,
                 DonGia          = c.DonGia,
                 ThanhTien       = c.ThanhTien,
+                ThanhTienThue   = c.ThanhTienThue,
                 ThanhTienSauThue= c.ThanhTienSauThue,
                 ThueGTGT        = c.ThueGTGT,
                 IsHangKhuyenMai = c.IsHangKhuyenMai,
@@ -665,7 +677,8 @@ namespace SalesManagementSystem.Controllers
             {
                 if (ct.SoLuong < 0) ct.SoLuong = 1;
                 ct.ThanhTien = Math.Round(ct.DonGia * ct.SoLuong, 0);
-                ct.ThanhTienSauThue = Math.Round(ct.ThanhTien + (ct.ThanhTien * ct.ThueGTGT / 100), 0);
+                ct.ThanhTienThue = Math.Round(ct.ThanhTien * ct.ThueGTGT / 100, 0);
+                ct.ThanhTienSauThue = Math.Round(ct.ThanhTien + ct.ThanhTienThue, 0);
             }
         }
     }

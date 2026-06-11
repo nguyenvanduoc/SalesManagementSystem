@@ -118,13 +118,15 @@
                                 <th style="width:35px;" class="text-center">#</th>
                                 <th style="min-width:200px;">Sản phẩm</th>
                                 <th style="width:65px;" class="text-center">ĐVT</th>
-                                <th style="width:70px;" class="text-center">Thuế GTGT</th>
-                                <th style="width:110px;" class="text-end">Đơn giá</th>
                                 <th style="width:95px;" class="text-end">Số lượng</th>
+                                <th style="width:110px;" class="text-end">Đơn giá</th>
                                 <th style="width:120px;" class="text-end">Thành tiền</th>
+                                <th style="width:70px;" class="text-center">Thuế %</th>
+                                <th style="width:110px;" class="text-end">Tiền thuế</th>
                                 <th style="width:120px;" class="text-end">Thành tiền sau thuế</th>
                                 <th style="width:80px;" class="text-center">Hàng KM</th>
                                 <th style="min-width:120px;">Ghi chú</th>
+                                <th style="width:38px;"></th>
                             </tr>
                         </thead>
                         <tbody id="tbodyChiTiet"></tbody>
@@ -184,7 +186,7 @@
 </form>
 
 @section Scripts {
-<script src="@Url.Content("~/Scripts/don-dat-hang.js")"></script>
+<script src="@Url.Content("~/Scripts/don-dat-hang.js?v=2.3")"></script>
 <script>
     $(document).ready(function () {
         DonDatHang.init({
@@ -203,6 +205,7 @@
             $('#tbodyChiTiet tr').each(function() {
                 $(this).find('td:last').hide();
             });
+            $('#frmDonDatHang table thead th:last').hide();
         }, 100);
     });
 </script>
