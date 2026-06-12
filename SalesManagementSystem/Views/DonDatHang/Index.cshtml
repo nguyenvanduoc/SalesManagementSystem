@@ -78,10 +78,10 @@
                             style="background-color:#2998e4;border:none;">
                         <i class="bi bi-search"></i> Tìm kiếm
                     </button>
-                    <a href="@Url.Action("Index")" class="btn btn-sm text-white px-3"
-                       style="background-color:#f1c40f;border:none;">
+                    <button type="button" onclick="resetSearchDonDatHang()" class="btn btn-sm text-white px-3"
+                            style="background-color:#f1c40f;border:none;">
                         Làm mới
-                    </a>
+                    </button>
                 </div>
             </div>
         </form>
@@ -131,25 +131,34 @@
             var checked = $('.row-checkbox:checked').length;
             $('#checkAll').prop('checked', all > 0 && all === checked);
         });
-
-        $('#searchForm').submit(function (e) {
-            e.preventDefault();
-            loadData($(this).serialize());
-        });
     });
 
-    function loadData(params) {
-        var url = '@Url.Action("GetList","DonDatHang")?' + params;
-        $.ajax({
-            url: url, type: 'GET',
-            success: function (res) { $('#table-container').html(res); },
-            error:   function ()    { showToast('error', 'Lỗi khi tải dữ liệu.'); }
-        });
+    function resetSearchDonDatHang() {
+        var $form = $('#searchForm');
+        $form[0].reset();
+        $form.find('select').val('').trigger('change');
+        loadDataDonDatHang('');
     }
 
-    function resetSearch() {
-        $('#searchForm')[0].reset();
-        loadData('');
+    function loadDataDonDatHang(urlOrData) {
+        var requestUrl = typeof urlOrData === 'string' && urlOrData.indexOf('/') !== -1 
+                         ? urlOrData 
+                         : '@Url.Action("GetList","DonDatHang")?' + urlOrData;
+        
+        // Scope specifically to the currently active tab or this view's container
+        var $container = $('.tab-pane.active #table-container');
+        if ($container.length === 0) $container = $('#table-container');
+
+        $.ajax({
+            url: requestUrl,
+            type: 'GET',
+            success: function(res) {
+                $container.html(res);
+            },
+            error: function() {
+                showToast('error', 'Có lỗi xảy ra khi tải dữ liệu.');
+            }
+        });
     }
 
     function deleteSelected() {
@@ -177,7 +186,7 @@
                 if (res.success) {
                     showToast('success', res.message);
                     $('#statusModal').modal('hide');
-                    loadData($('#searchForm').serialize());
+                    loadDataDonDatHang($('#searchForm').serialize());
                 } else {
                     showToast('error', res.message);
                 }

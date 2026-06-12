@@ -200,7 +200,8 @@ namespace SalesManagementSystem.Repositories
         {
             using (var conn = _db.CreateConnection())
             {
-                return conn.Query("sp_DM_KhoHang_GetForDropdown", new { Keyword = keyword }, commandType: CommandType.StoredProcedure);
+                string kw = (keyword ?? "").Trim().ToLower();
+                return conn.Query("SELECT ID, MaKhoHang, TenKhoHang FROM DM_KhoHang WHERE @KW = '' OR LOWER(TenKhoHang) LIKE '%' + @KW + '%' ORDER BY TenKhoHang", new { KW = kw });
             }
         }
 
@@ -208,7 +209,8 @@ namespace SalesManagementSystem.Repositories
         {
             using (var conn = _db.CreateConnection())
             {
-                return conn.Query("sp_DM_NhaCungCap_GetForDropdown", new { Keyword = keyword }, commandType: CommandType.StoredProcedure);
+                string kw = (keyword ?? "").Trim().ToLower();
+                return conn.Query("SELECT ID, MaNhaCungCap, TenNhaCungCap FROM DM_NhaCungCap WHERE @KW = '' OR LOWER(TenNhaCungCap) LIKE '%' + @KW + '%' ORDER BY TenNhaCungCap", new { KW = kw });
             }
         }
 
@@ -216,7 +218,8 @@ namespace SalesManagementSystem.Repositories
         {
             using (var conn = _db.CreateConnection())
             {
-                return conn.Query("sp_NS_NhanSu_GetForDropdown", new { Keyword = keyword }, commandType: CommandType.StoredProcedure);
+                string kw = (keyword ?? "").Trim().ToLower();
+                return conn.Query("SELECT ID, MaNhanSu, LTRIM(RTRIM(ISNULL(HoDem, '') + ' ' + ISNULL(Ten, ''))) AS HoTen FROM NS_NhanSu WHERE @KW = '' OR LOWER(Ten) LIKE '%' + @KW + '%' ORDER BY Ten", new { KW = kw });
             }
         }
 
@@ -224,7 +227,8 @@ namespace SalesManagementSystem.Repositories
         {
             using (var conn = _db.CreateConnection())
             {
-                return conn.Query("sp_DM_SanPham_GetForDropdown", new { Keyword = keyword }, commandType: CommandType.StoredProcedure);
+                string kw = (keyword ?? "").Trim().ToLower();
+                return conn.Query("SELECT ID, MaSanPham, TenSanPham, DVT FROM DM_SanPham WHERE @KW = '' OR LOWER(TenSanPham) LIKE '%' + @KW + '%' ORDER BY TenSanPham", new { KW = kw });
             }
         }
     }

@@ -16,7 +16,7 @@
         }
         @if (PermissionHelper.HasPermission("NhaCungCap", LoaiPhanQuyen.Xoa))
         {
-            <button type="button" class="btn btn-danger" style="background-color: #e74c3c; border-color: #e74c3c;" onclick="deleteSelected()">
+            <button type="button" class="btn btn-danger" style="background-color: #e74c3c; border-color: #e74c3c;" onclick="deleteSelectedNhaCungCap()">
                 <i class="bi bi-trash"></i> Xóa
             </button>
         }
@@ -48,7 +48,7 @@
                     <button type="submit" class="btn btn-sm text-white px-3 w-100" style="background-color: #2998e4; border: none;">
                         <i class="bi bi-search"></i> Tìm kiếm
                     </button>
-                    <button type="button" onclick="resetSearch()" class="btn btn-sm text-white px-3 w-100" style="background-color: #f1c40f; border: none;">
+                    <button type="button" class="btn btn-sm text-white px-3 w-100 btn-reset" style="background-color: #f1c40f; border: none;">
                         Làm mới
                     </button>
                 </div>
@@ -63,67 +63,48 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function() {
+        (function() {
+            var $pane = $('#searchForm').closest('.tab-pane');
+            if ($pane.length === 0) $pane = $('body');
+
             // Check/Uncheck all checkboxes
-            $(document).on('change', '#checkAll', function() {
-                $('.row-checkbox').prop('checked', $(this).prop('checked'));
+            $pane.on('change', '#checkAll', function() {
+                $pane.find('.row-checkbox').prop('checked', $(this).prop('checked'));
             });
 
             // If any row checkbox is unchecked, uncheck the header checkbox
-            $(document).on('change', '.row-checkbox', function() {
-                if ($('.row-checkbox:checked').length === $('.row-checkbox').length && $('.row-checkbox').length > 0) {
-                    $('#checkAll').prop('checked', true);
+            $pane.on('change', '.row-checkbox', function() {
+                if ($pane.find('.row-checkbox:checked').length === $pane.find('.row-checkbox').length && $pane.find('.row-checkbox').length > 0) {
+                    $pane.find('#checkAll').prop('checked', true);
                 } else {
-                    $('#checkAll').prop('checked', false);
+                    $pane.find('#checkAll').prop('checked', false);
                 }
             });
 
-            // Gọi AJAX khi submit form tìm kiếm
-            $('#searchForm').submit(function(e) {
-                e.preventDefault();
-                loadData($(this).serialize());
+            $pane.on('click', '.btn-reset', function() {
+                $pane.find('input[name="ma"]').val('');
+                $pane.find('input[name="ten"]').val('');
+                $pane.find('input[name="dt"]').val('');
+                $pane.find('input[name="email"]').val('');
+                $pane.find('#searchForm').trigger('submit');
             });
-        });
 
-        function loadData(urlOrData) {
-            var requestUrl = typeof urlOrData === 'string' && urlOrData.indexOf('/') !== -1 
-                             ? urlOrData 
-                             : '@Url.Action("GetList")?' + urlOrData;
-            $.ajax({
-                url: requestUrl,
-                type: 'GET',
-                success: function(res) {
-                    $('#table-container').html(res);
-                },
-                error: function() {
-                    showToast('error', 'Có lỗi xảy ra khi tải dữ liệu.');
+            window.deleteSelectedNhaCungCap = function() {
+                var selectedIds = [];
+                $pane.find('.row-checkbox:checked').each(function() {
+                    selectedIds.push($(this).val());
+                });
+
+                if (selectedIds.length === 0) {
+                    showToast('warning', 'Vui lòng chọn ít nhất một bản ghi để thao tác.');
+                    return;
                 }
-            });
-        }
 
-        function resetSearch() {
-            $('input[name="ma"]').val('');
-            $('input[name="ten"]').val('');
-            $('input[name="dt"]').val('');
-            $('input[name="email"]').val('');
-            loadData('');
-        }
-
-        function deleteSelected() {
-            var selectedIds = [];
-            $('.row-checkbox:checked').each(function() {
-                selectedIds.push($(this).val());
-            });
-
-            if (selectedIds.length === 0) {
-                showToast('warning', 'Vui lòng chọn ít nhất một bản ghi để thao tác.');
-                return;
-            }
-
-            var url = '@Url.Action("Delete", "NhaCungCap")';
-            var msg = "Bạn có chắc chắn muốn xóa " + selectedIds.length + " nhà cung cấp đã chọn không?";
-            
-            confirmBatchDelete(url, selectedIds, msg);
-        }
+                var url = '@Url.Action("Delete", "NhaCungCap")';
+                var msg = "Bạn có chắc chắn muốn xóa " + selectedIds.length + " nhà cung cấp đã chọn không?";
+                
+                confirmBatchDelete(url, selectedIds, msg);
+            };
+        })();
     </script>
 }

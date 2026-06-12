@@ -217,7 +217,7 @@
         $('#btnSaveDon').on('click', function () {
             if (!DonDatHang.validateAndSerialize()) return;
             
-            var confirmHtml = '<div class="modal fade" id="confirmSaveModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">' +
+            var confirmHtml = '<div class="modal fade" id="confirmSaveDonModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">' +
                 '<div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">' +
                     '<div class="modal-content shadow-lg" style="background-color: #ffffff; color: #333; border: none; border-top: 5px solid #ffc107; border-radius: 6px;">' +
                         '<div class="modal-body p-4">' +
@@ -227,7 +227,7 @@
                             '</div>' +
                             '<p class="mb-4" style="font-size: 1rem; color: #555;">Bạn có muốn lưu dữ liệu đơn hàng này không?</p>' +
                             '<div class="d-flex justify-content-end gap-2">' +
-                                '<button type="button" class="btn" id="btnConfirmSaveAction" style="background-color: #ffc107; color: #fff; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem;">ĐỒNG Ý</button>' +
+                                '<button type="button" class="btn" id="btnConfirmSaveDonAction" style="background-color: #ffc107; color: #fff; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem;">ĐỒNG Ý</button>' +
                                 '<button type="button" class="btn" data-bs-dismiss="modal" style="background-color: #e9ecef; color: #333; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem; border: none;">ĐỂ SAU</button>' +
                             '</div>' +
                         '</div>' +
@@ -235,16 +235,16 @@
                 '</div>' +
             '</div>';
             
-            if ($('#confirmSaveModal').length === 0) {
+            if ($('#confirmSaveDonModal').length === 0) {
                 $('body').append(confirmHtml);
-                $('#btnConfirmSaveAction').on('click', function() {
-                    $('#confirmSaveModal').modal('hide');
+                $('#btnConfirmSaveDonAction').on('click', function() {
+                    $('#confirmSaveDonModal').modal('hide');
                     setTimeout(function() {
                         $('#frmDonDatHang').submit();
                     }, 150);
                 });
             }
-            var myModal = new bootstrap.Modal(document.getElementById('confirmSaveModal'));
+            var myModal = new bootstrap.Modal(document.getElementById('confirmSaveDonModal'));
             myModal.show();
         });
     });

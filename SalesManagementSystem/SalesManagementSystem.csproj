@@ -277,6 +277,30 @@
     <Compile Include="Repositories\Interfaces\ITonKhoRepository.cs" />
     <Compile Include="Repositories\TonKhoRepository.cs" />
     <Compile Include="Controllers\TonKhoController.cs" />
+    <Compile Include="Repositories\PhieuXuatKhoRepository.cs" />
+    <Compile Include="Repositories\Interfaces\IPhieuXuatKhoRepository.cs" />
+    <Compile Include="Models\Entities\KHO_PhieuXuat.cs" />
+    <Compile Include="Models\Entities\KHO_PhieuXuat_ChiTiet.cs" />
+    <Compile Include="Models\ViewModels\PhieuXuatKhoListViewModel.cs" />
+    <Compile Include="Models\ViewModels\PhieuXuatKhoViewModel.cs" />
+    <Compile Include="Controllers\PhieuXuatKhoController.cs" />
+    <Compile Include="Repositories\ChungTuBanHangRepository.cs" />
+    <Compile Include="Repositories\Interfaces\IChungTuBanHangRepository.cs" />
+    <Compile Include="Repositories\NhatKyChungRepository.cs" />
+    <Compile Include="Repositories\Interfaces\INhatKyChungRepository.cs" />
+    <Compile Include="Repositories\TaiKhoanKeToanRepository.cs" />
+    <Compile Include="Repositories\Interfaces\ITaiKhoanKeToanRepository.cs" />
+    <Compile Include="Models\Entities\BAN_ChungTuBanHang.cs" />
+    <Compile Include="Models\Entities\BAN_ChungTuBanHang_ChiTiet.cs" />
+    <Compile Include="Models\Entities\KT_NhatKyChung.cs" />
+    <Compile Include="Models\Entities\KT_TaiKhoanKeToan.cs" />
+    <Compile Include="Models\ViewModels\ChungTuBanHangViewModel.cs" />
+    <Compile Include="Models\ViewModels\ChungTuBanHangListViewModel.cs" />
+    <Compile Include="Models\ViewModels\DonHangChungTuViewModel.cs" />
+    <Compile Include="Models\ViewModels\ChungTuBanHangChiTietViewModel.cs" />
+    <Compile Include="Models\ViewModels\NhatKyChungListViewModel.cs" />
+    <Compile Include="Controllers\ChungTuBanHangController.cs" />
+    <Compile Include="Controllers\NhatKyChungController.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\Antlr3.Runtime.dll" />
@@ -468,6 +492,14 @@
     <Content Include="Views\TonKho\_TonKhoList.cshtml" />
     <Content Include="Views\TonKho\_TheKhoModal.cshtml" />
     <Content Include="Views\TonKho\Print.cshtml" />
+    <Content Include="Views\PhieuXuatKho\Index.cshtml" />
+    <Content Include="Views\PhieuXuatKho\_ChonDonDatHangModal.cshtml" />
+    <Content Include="Views\PhieuXuatKho\Create.cshtml" />
+    <Content Include="Views\ChungTuBanHang\Index.cshtml" />
+    <Content Include="Views\ChungTuBanHang\Create.cshtml" />
+    <Content Include="Views\ChungTuBanHang\Edit.cshtml" />
+    <Content Include="Scripts\chung-tu-ban-hang.js" />
+    <Content Include="Views\NhatKyChung\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />

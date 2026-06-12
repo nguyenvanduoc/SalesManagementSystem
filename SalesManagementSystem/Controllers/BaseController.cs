@@ -1,4 +1,4 @@
-﻿using System.Web.Mvc;
+using System.Web.Mvc;
 using System.Web.Routing;
 using SalesManagementSystem.Helpers;
 using SalesManagementSystem.Models.ViewModels;
@@ -96,5 +96,8 @@ namespace SalesManagementSystem.Controllers
                 }
             }
         }
+
+        protected UserLoginViewModel GetCurrentUser()
+            => (UserLoginViewModel)Session[CommonConstants.USER_SESSION];
     }
 }

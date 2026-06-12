@@ -1,0 +1,221 @@
+@model SalesManagementSystem.Models.ViewModels.ChungTuBanHangViewModel
+@{
+    ViewBag.Title = ViewBag.IsEdit == true ? "Xem/Chỉnh sửa chứng từ bán hàng" : "Lập chứng từ bán hàng";
+}
+
+<style>
+    .don-header-card { background:#fff; border:1px solid #dce4ec; border-radius:6px; padding:16px; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+    .don-section-title { font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:#7f8c8d; margin-bottom:10px; }
+    .tong-tien-box { background:linear-gradient(135deg,#1a5276,#2980b9); border-radius:8px; padding:16px 20px; color:#fff; text-align:right; }
+    .tong-tien-box .label { font-size:.8rem; opacity:.85; margin-bottom:4px; }
+    .tong-tien-box .amount { font-size:1.8rem; font-weight:800; letter-spacing:.5px; }
+    .grid-detail thead th { background:#f4f6f9; font-size:.8rem; font-weight:700; color:#2c3e50; vertical-align:middle; white-space:nowrap; text-align:left !important; }
+    .grid-detail tbody td { vertical-align:middle; padding:5px 6px; }
+    .grid-detail input.form-control, .grid-detail select.form-select { font-size:.85rem; padding:3px 7px; height:30px; }
+    .readonly-cell { background:#f8f9fa; font-size:.85rem; color:#495057; }
+    .form-toolbar { background:#f8f9fa; border:1px solid #dce4ec; border-radius:6px; padding:10px 16px; margin-bottom:12px; display:flex; gap:8px; align-items:center; }
+</style>
+
+<!-- Toolbar -->
+<div class="form-toolbar">
+    <a href="@Url.Action("Index","ChungTuBanHang")" class="btn btn-secondary btn-sm">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+    
+    @if (Model.TrangThai == 0 || Model.TrangThai == 1)
+    {
+        <button type="button" class="btn btn-sm text-white" style="background-color:#17a2b8;border:none;" onclick="ChungTuBanHang.save(false)">
+            <i class="bi bi-save me-1"></i> Lưu dữ liệu
+        </button>
+        <button type="button" class="btn btn-sm text-white" style="background-color:#28a745;border:none;" onclick="ChungTuBanHang.save(true)">
+            <i class="bi bi-check-circle me-1"></i> Lưu và ghi
+        </button>
+    }
+
+    <span class="text-muted small ms-auto">
+        <i class="bi bi-info-circle me-1"></i>@ViewBag.Title
+    </span>
+</div>
+
+<form id="frmSaveCTBH">
+    @Html.HiddenFor(m => m.IDDonDatHang)
+    @Html.HiddenFor(m => m.IDKhachHang)
+
+    <div class="row g-3">
+        <!-- Cột trái -->
+        <div class="col-md-9">
+
+            <!-- Card: Khách hàng -->
+            <div class="don-header-card">
+                <div class="don-section-title"><i class="bi bi-person-fill me-1"></i>Thông tin khách hàng</div>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label class="form-label text-muted fw-semibold small">Khách hàng</label>
+                        <input type="text" class="form-control readonly-cell" value="@Model.TenKhachHang" readonly />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Mã khách hàng</label>
+                        <input type="text" class="form-control readonly-cell" value="@Model.MaKhachHang" readonly />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Mã số thuế</label>
+                        <input type="text" class="form-control readonly-cell" value="@Model.MaSoThue" readonly />
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label text-muted fw-semibold small">Địa chỉ</label>
+                        <input type="text" class="form-control readonly-cell" value="@Model.DiaChi" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted fw-semibold small">Số điện thoại</label>
+                        <input type="text" class="form-control readonly-cell" value="@Model.SoDienThoai" readonly />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Thông tin đơn đặt hàng -->
+            <div class="don-header-card">
+                <div class="don-section-title"><i class="bi bi-file-earmark-text me-1"></i>Thông tin đơn đặt hàng</div>
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <label class="form-label text-muted fw-semibold small">Số đơn hàng</label>
+                        <input type="text" class="form-control readonly-cell" value="@Model.SoDonHang" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted fw-semibold small">Ngày tạo đơn</label>
+                        @Html.TextBoxFor(m => m.NgayTaoDon, "{0:yyyy-MM-dd}", new { @class = "form-control readonly-cell", type = "date", @readonly = "readonly" })
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted fw-semibold small">Hạn giao hàng</label>
+                        @Html.TextBoxFor(m => m.ThoiHanGiaoHang, "{0:yyyy-MM-dd}", new { @class = "form-control readonly-cell", type = "date", @readonly = "readonly" })
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted fw-semibold small">Nhân viên phụ trách</label>
+                        @Html.DropDownListFor(m => m.IDNhanVien, (SelectList)ViewBag.NhanVienList, "-- Không có --", new { @class = "form-select readonly-cell", disabled = "disabled" })
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted fw-semibold small">Trạng thái đơn</label>
+                        @Html.DropDownListFor(m => m.TrangThaiDon, (SelectList)ViewBag.TrangThaiList, "-- Không có --", new { @class = "form-select readonly-cell", disabled = "disabled" })
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Thông tin chứng từ -->
+            <div class="don-header-card">
+                <div class="don-section-title"><i class="bi bi-info-circle-fill me-1"></i>Thông tin chứng từ bán hàng</div>
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Ngày chứng từ</label>
+                        @Html.TextBoxFor(m => m.NgayChungTu, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted fw-semibold small">Kho xuất</label>
+                        @Html.DropDownListFor(m => m.IDKho, (SelectList)ViewBag.KhoList, "-- Chọn kho --", new { @class = "form-select", id = "IDKho" })
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label text-muted fw-semibold small">Tài khoản thanh toán</label>
+                        <select class="form-select" name="IDTaiKhoanThanhToan" id="IDTaiKhoanThanhToan">
+                            <option value="">-- Chọn tài khoản --</option>
+                            @foreach (var tk in ViewBag.TaiKhoanThanhToanList)
+                            {
+                                <option value="@tk.ID" @(Model.IDTaiKhoanThanhToan == tk.ID ? "selected" : "")>@tk.SoTaiKhoan - @tk.TenTaiKhoan</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Chi tiết sản phẩm -->
+            <div class="don-header-card">
+                <div class="don-section-title mb-2"><i class="bi bi-table me-1"></i>Chi tiết sản phẩm</div>
+                <div class="table-responsive">
+                    <table class="table table-bordered grid-detail mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width:40px;" class="text-center">STT</th>
+                                <th>Sản phẩm</th>
+                                <th style="width:70px;" class="text-center">ĐVT</th>
+                                <th style="width:100px;" class="text-end">Số lượng</th>
+                                <th style="width:120px;" class="text-end">Đơn giá</th>
+                                <th style="width:130px;" class="text-end">Thành tiền</th>
+                                <th style="width:90px;" class="text-center">Thuế GTGT %</th>
+                                <th style="width:120px;" class="text-end">Tiền thuế</th>
+                                <th style="width:130px;" class="text-end">Tổng sau thuế</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for(int i = 0; i < Model.ChiTiets.Count; i++)
+                            {
+                                <tr>
+                                    <td class="text-center">
+                                        @Model.ChiTiets[i].STT
+                                        <input type="hidden" name="ChiTiets[@i].STT" value="@Model.ChiTiets[i].STT" />
+                                        <input type="hidden" name="ChiTiets[@i].IDSanPham" value="@Model.ChiTiets[i].IDSanPham" />
+                                    </td>
+                                    <td>@Model.ChiTiets[i].MaSanPham - @Model.ChiTiets[i].TenSanPham</td>
+                                    <td class="text-center">@Model.ChiTiets[i].DVT</td>
+                                    <td class="text-end">
+                                        @Model.ChiTiets[i].SoLuong.ToString("N0")
+                                        <input type="hidden" name="ChiTiets[@i].SoLuong" value="@Model.ChiTiets[i].SoLuong" />
+                                    </td>
+                                    <td class="text-end">
+                                        @Model.ChiTiets[i].DonGia.ToString("N0")
+                                        <input type="hidden" name="ChiTiets[@i].DonGia" value="@Model.ChiTiets[i].DonGia" />
+                                    </td>
+                                    <td class="text-end">
+                                        @Model.ChiTiets[i].ThanhTien.ToString("N0")
+                                        <input type="hidden" name="ChiTiets[@i].ThanhTien" value="@Model.ChiTiets[i].ThanhTien" />
+                                    </td>
+                                    <td class="text-center">
+                                        @Model.ChiTiets[i].ThueGTGT
+                                        <input type="hidden" name="ChiTiets[@i].ThueGTGT" value="@Model.ChiTiets[i].ThueGTGT" />
+                                    </td>
+                                    <td class="text-end">
+                                        @Model.ChiTiets[i].TienThue.ToString("N0")
+                                        <input type="hidden" name="ChiTiets[@i].TienThue" value="@Model.ChiTiets[i].TienThue" />
+                                    </td>
+                                    <td class="text-end fw-bold">
+                                        @Model.ChiTiets[i].TongSauThue.ToString("N0")
+                                        <input type="hidden" name="ChiTiets[@i].TongSauThue" value="@Model.ChiTiets[i].TongSauThue" />
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Cột phải: Tổng tiền -->
+        <div class="col-md-3">
+            <div class="tong-tien-box">
+                <div class="label">Tổng tiền thanh toán</div>
+                <div class="amount">@Model.TongCong.ToString("N0")</div>
+                <div class="label mt-1" style="font-size:.7rem;">VNĐ</div>
+            </div>
+            
+            <div class="mt-2 p-3 bg-white border rounded">
+                <div class="d-flex justify-content-between small text-muted mb-2">
+                    <span>Cộng tiền hàng:</span>
+                    <span class="fw-bold text-dark">@Model.TongTienHang.ToString("N0")</span>
+                    <input type="hidden" name="TongTienHang" value="@Model.TongTienHang" />
+                </div>
+                <div class="d-flex justify-content-between small text-muted mb-2">
+                    <span>Tiền thuế GTGT:</span>
+                    <span class="fw-bold text-dark">@Model.TongTienThue.ToString("N0")</span>
+                    <input type="hidden" name="TongTienThue" value="@Model.TongTienThue" />
+                </div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between small">
+                    <span class="text-muted fw-bold">Tổng tiền:</span>
+                    <span class="fw-bold" style="color:#1a5276;">@Model.TongCong.ToString("N0")</span>
+                    <input type="hidden" name="TongCong" value="@Model.TongCong" />
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="~/Scripts/chung-tu-ban-hang.js?v=3.0"></script>
+}

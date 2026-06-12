@@ -18,7 +18,7 @@
                     <button type="submit" class="btn text-white px-3" style="background-color: #2998e4; border: none;">
                         <i class="fas fa-search me-1"></i> Tìm kiếm
                     </button>
-                    <button type="button" onclick="resetSearch()" class="btn text-white px-3" style="background-color: #f1c40f; border: none;">
+                    <button type="button" class="btn text-white px-3 btn-reset" style="background-color: #f1c40f; border: none;">
                         Làm mới
                     </button>
                 </div>
@@ -33,57 +33,37 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function () {
-            // Xử lý submit form tìm kiếm qua Ajax
-            $('#searchForm').on('submit', function (e) {
-                e.preventDefault();
-                var url = $(this).attr('action');
-                var data = $(this).serialize();
-                loadGridData(url + '?' + data);
-            });
-        });
+        (function() {
+            var $pane = $('#searchForm').closest('.tab-pane');
+            if ($pane.length === 0) $pane = $('body');
 
-        // Hàm tải dữ liệu grid qua Ajax
-        function loadGridData(url) {
-            $.ajax({
-                url: url,
-                type: 'GET',
-                success: function (result) {
-                    $('#gridData').html(result);
-                },
-                error: function () {
-                    alert('Đã xảy ra lỗi khi tải dữ liệu!');
+            $pane.on('click', '.btn-reset', function() {
+                $pane.find('input[name="keyword"]').val('');
+                $pane.find('#searchForm').trigger('submit');
+            });
+
+            // Xử lý nút Kích
+            $pane.on('click', '.btn-kick', function () {
+                var id = $(this).data('id');
+                if (confirm('Bạn có chắc chắn muốn ngắt phiên đăng nhập của người dùng này? Họ sẽ bị văng ra ngoài ngay lập tức.')) {
+                    $.ajax({
+                        url: '@Url.Action("KickUser", "LoginSession")',
+                        type: 'POST',
+                        data: { id: id },
+                        success: function (res) {
+                            if (res.success) {
+                                showToast('success', res.message);
+                                $pane.find('#searchForm').trigger('submit');
+                            } else {
+                                showToast('error', res.message);
+                            }
+                        },
+                        error: function () {
+                            showToast('error', 'Lỗi hệ thống khi ngắt phiên.');
+                        }
+                    });
                 }
             });
-        }
-
-        // Hàm Làm mới
-        function resetSearch() {
-            $('input[name="keyword"]').val('');
-            $('#searchForm').submit();
-        }
-
-        // Xử lý nút Kích
-        $(document).on('click', '.btn-kick', function () {
-            var id = $(this).data('id');
-            if (confirm('Bạn có chắc chắn muốn ngắt phiên đăng nhập của người dùng này? Họ sẽ bị văng ra ngoài ngay lập tức.')) {
-                $.ajax({
-                    url: '@Url.Action("KickUser", "LoginSession")',
-                    type: 'POST',
-                    data: { id: id },
-                    success: function (res) {
-                        if (res.success) {
-                            showToast('success', res.message);
-                            $('#searchForm').submit();
-                        } else {
-                            showToast('error', res.message);
-                        }
-                    },
-                    error: function () {
-                        showToast('error', 'Lỗi hệ thống khi ngắt phiên.');
-                    }
-                });
-            }
-        });
+        })();
     </script>
 }

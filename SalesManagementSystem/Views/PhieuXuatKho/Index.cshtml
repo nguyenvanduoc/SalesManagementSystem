@@ -1,0 +1,140 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.PhieuXuatKhoListViewModel>
+@{
+    ViewBag.Title = "Phiếu Xuất Kho";
+    var uid = Guid.NewGuid().ToString("N");
+}
+
+<div id="pxk-@uid">
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-2">
+        <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">
+            @ViewBag.Title
+        </h4>
+        @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuXuatKho", SalesManagementSystem.Helpers.LoaiPhanQuyen.Them))
+        {
+            <button type="button" class="btn btn-primary btn-sm" onclick="openDonDatHangModal()" style="background-color: #3498db; border-color: #3498db;">
+                <i class="bi bi-plus-lg fw-bold me-1"></i> Tạo xuất kho từ Đơn hàng
+            </button>
+        }
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body py-2">
+            <form id="searchForm" action="@Url.Action("GetList")" method="get">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Từ ngày</label>
+                        <input type="date" name="tuNgay" class="form-control form-control-sm" value="@ViewBag.TuNgay" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Đến ngày</label>
+                        <input type="date" name="denNgay" class="form-control form-control-sm" value="@ViewBag.DenNgay" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted small mb-1">Số chứng từ</label>
+                        <input type="text" name="soChungTu" class="form-control form-control-sm" placeholder="Nhập số CT..." value="@ViewBag.SoChungTu" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted small mb-1">Kho hàng</label>
+                        @Html.DropDownList("idKho", (SelectList)ViewBag.Khos, "-- Tất cả --", new { @class = "form-select form-select-sm" })
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Trạng thái</label>
+                        <select name="trangThai" class="form-select form-select-sm">
+                            <option value="">-- Tất cả --</option>
+                            <option value="1" @(ViewBag.TrangThai == 1 ? "selected" : "")>Đề nghị ghi</option>
+                            <option value="2" @(ViewBag.TrangThai == 2 ? "selected" : "")>Đã ghi sổ</option>
+                            <option value="3" @(ViewBag.TrangThai == 3 ? "selected" : "")>Đã hủy</option>
+                        </select>
+                    </div>
+                    <div class="col-12 d-flex gap-2 mt-3 justify-content-end">
+                        <button type="submit" class="btn btn-sm text-white px-3" style="background-color: #2998e4; border: none;">
+                            <i class="bi bi-search"></i> Tìm kiếm
+                        </button>
+                        <button type="button" class="btn btn-sm text-white px-3 btn-reset" style="background-color: #f1c40f; border: none;">
+                            Làm mới
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="table-container">
+        @Html.Partial("_PhieuXuatKhoList", Model)
+    </div>
+</div>
+
+<div id="modalContainer"></div>
+
+@section Scripts {
+    <script src="~/Scripts/phieu-xuat-kho.js"></script>
+    <script>
+        (function() {
+            var $container = $('#pxk-@uid');
+            var $form = $container.find('#searchForm');
+
+            $(document).ready(function() {
+                $form.on('submit', function (e) {
+                    e.preventDefault();
+                    var params = $(this).serialize();
+                    var url = '@Url.Action("GetList")?' + params;
+                    $.ajax({
+                        url: url,
+                        type: 'GET',
+                        success: function (res) {
+                            $container.find('#table-container').html(res);
+                        },
+                        error: function () {
+                            if (typeof showToast === 'function') {
+                                showToast('error', 'Lỗi khi tải dữ liệu.');
+                            }
+                        }
+                    });
+                });
+            });
+
+            $container.find('.btn-reset').on('click', function() {
+                $form[0].reset();
+                $form.trigger('submit');
+            });
+        })();
+
+        // Global functions for list buttons
+        function getPxkContainer(btn) {
+            return $(btn).closest('[id^="pxk-"]');
+        }
+
+        window.ghiSoPhieuXuat = function(btn, id) {
+            var $form = getPxkContainer(btn).find('#searchForm');
+            showConfirm('Bạn có chắc chắn muốn ghi sổ phiếu xuất kho này? Tồn kho thực tế sẽ giảm và tự động sinh bút toán kế toán giá vốn.', function() {
+                $.post('/PhieuXuatKho/GhiSo', { id: id }, function (res) {
+                    if (res.success) {
+                        if (typeof showToast === 'function') showToast('success', 'Ghi sổ thành công!');
+                        $form.trigger('submit');
+                    } else {
+                        if (typeof showToast === 'function') showToast('error', res.message);
+                    }
+                });
+            });
+        };
+
+        window.huyPhieuXuat = function(btn, id) {
+            var $form = getPxkContainer(btn).find('#searchForm');
+            var lyDo = prompt("Nhập lý do hủy:");
+            if (lyDo != null) {
+                if (!lyDo.trim()) {
+                    if (typeof showToast === 'function') showToast('warning', 'Vui lòng nhập lý do hủy!');
+                    return;
+                }
+                $.post('/PhieuXuatKho/Huy', { id: id, lyDo: lyDo }, function (res) {
+                    if (res.success) {
+                        if (typeof showToast === 'function') showToast('success', 'Hủy thành công!');
+                        $form.trigger('submit');
+                    } else {
+                        if (typeof showToast === 'function') showToast('error', res.message);
+                    }
+                });
+            }
+        };
+    </script>
+}

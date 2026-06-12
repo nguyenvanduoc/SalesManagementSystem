@@ -45,7 +45,7 @@ namespace SalesManagementSystem.Repositories
                         SELECT TOP 1 ID
                         FROM ACL_Action
                         WHERE IDManHinh = m.ID
-                        ORDER BY ID ASC
+                        ORDER BY LoaiPhanQuyen ASC, ID ASC
                     )
                 WHERE m.IsSuDung = 1
                 ORDER BY  m.STT,m.NhomChaManHinh, m.ID";
@@ -88,7 +88,7 @@ namespace SalesManagementSystem.Repositories
                         SELECT TOP 1 ID
                         FROM ACL_Action
                         WHERE IDManHinh = m.ID
-                        ORDER BY ID ASC
+                        ORDER BY LoaiPhanQuyen ASC, ID ASC
                     )
                 WHERE m.IsSuDung = 1
                 ORDER BY m.NhomChaManHinh, m.STT";

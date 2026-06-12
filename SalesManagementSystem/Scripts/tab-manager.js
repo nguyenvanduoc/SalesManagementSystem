@@ -446,6 +446,15 @@ var TabManager = (function () {
         // Nếu tab đã tồn tại thì chỉ switch, không reload
         if ($('#' + tabId).length > 0) {
             setActiveTab(tabId);
+            // FIX: Nếu URL yêu cầu khác với URL hiện tại của tab, hoặc tab đang hiển thị thông báo lỗi, tiến hành nạp lại nội dung mới
+            var $pane = $('#' + paneId);
+            var currentUrl = $pane.attr('data-url');
+            var isError = $pane.find('.alert-danger').length > 0;
+            if (isError || (url && currentUrl !== url)) {
+                $pane.attr('data-url', url);
+                loadTabContent(tabId, url);
+                saveTabsState();
+            }
             return;
         }
 

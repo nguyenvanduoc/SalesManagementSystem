@@ -20,9 +20,6 @@ namespace SalesManagementSystem.Controllers
             _excelExportService = excelExportService;
         }
 
-        private UserLoginViewModel GetCurrentUser()
-            => (UserLoginViewModel)Session[CommonConstants.USER_SESSION];
-
         private SelectList GetKhoList(int? selectedId = null)
         {
             var items = _repo.GetKhoForDropdown("").Select(x => new { ID = x.ID, Name = x.MaKhoHang + " - " + x.TenKhoHang }).ToList();

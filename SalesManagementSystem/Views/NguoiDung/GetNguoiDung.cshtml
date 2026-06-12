@@ -21,7 +21,7 @@
 
 <div class="card shadow-sm mb-4">
     <div class="card-body">
-        <form id="searchForm" onsubmit="event.preventDefault(); loadData(1);">
+        <form id="searchForm" method="get" action="@Url.Action("GetNguoiDung", "NguoiDung")">
             <div class="row g-3 align-items-center">
                 <div class="col-md-6">
                     <input type="text" id="keyword" name="keyword" class="form-control" placeholder="Tìm kiếm theo Tên đăng nhập hoặc Tên nhân sự..." value="@ViewBag.Keyword">
@@ -30,7 +30,7 @@
                     <button type="submit" class="btn text-white px-3" style="background-color: #2998e4; border: none;">
                         <i class="bi bi-search"></i> Tìm kiếm
                     </button>
-                    <button type="button" class="btn text-white px-3" style="background-color: #f1c40f; border: none;" onclick="resetSearch()">
+                    <button type="button" class="btn text-white px-3 btn-reset" style="background-color: #f1c40f; border: none;">
                         Làm mới
                     </button>
                 </div>
@@ -47,30 +47,36 @@
 
 @section Scripts {
     <script>
-        function loadData(page) {
-            var keyword = $('#keyword').val();
-            var pageSize = $('.page-size-select').length > 0 ? $('.page-size-select').last().val() : 10;
-            
-            $.ajax({
-                url: '@Url.Action("GetNguoiDung", "NguoiDung")',
-                type: 'GET',
-                data: { page: page, pageSize: pageSize, keyword: keyword },
-                success: function (result) {
-                    $('#table-container').html(result);
-                },
-                error: function () {
-                    if (typeof showToast === "function") {
-                        showToast('error', 'Lỗi khi tải dữ liệu.');
-                    } else {
-                        alert('Lỗi khi tải dữ liệu.');
-                    }
-                }
-            });
-        }
+        (function() {
+            var $pane = $('#searchForm').closest('.tab-pane');
+            if ($pane.length === 0) $pane = $('body');
 
-        function resetSearch() {
-            $('#keyword').val('');
-            loadData(1);
-        }
+            $pane.find('#searchForm').on('submit', function(e) {
+                e.preventDefault();
+                var keyword = $pane.find('#keyword').val();
+                var pageSize = $pane.find('.page-size-select').length > 0 ? $pane.find('.page-size-select').last().val() : 10;
+                
+                $.ajax({
+                    url: '@Url.Action("GetNguoiDung", "NguoiDung")',
+                    type: 'GET',
+                    data: { page: 1, pageSize: pageSize, keyword: keyword },
+                    success: function (result) {
+                        $pane.find('#table-container').html(result);
+                    },
+                    error: function () {
+                        if (typeof showToast === "function") {
+                            showToast('error', 'Lỗi khi tải dữ liệu.');
+                        } else {
+                            alert('Lỗi khi tải dữ liệu.');
+                        }
+                    }
+                });
+            });
+
+            $pane.on('click', '.btn-reset', function() {
+                $pane.find('#keyword').val('');
+                $pane.find('#searchForm').trigger('submit');
+            });
+        })();
     </script>
 }

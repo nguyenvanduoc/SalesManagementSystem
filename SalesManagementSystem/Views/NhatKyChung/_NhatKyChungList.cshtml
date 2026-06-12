@@ -1,0 +1,103 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.NhatKyChungListViewModel>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-0">
+        <div class="table-responsive" style="min-height: 350px;">
+            <table class="table table-custom table-bordered table-hover align-middle mb-0">
+                <thead>
+                    <tr style="background:#f4f6f9; font-weight:bold;">
+                        <th class="text-center" style="width: 50px;">STT</th>
+                        <th class="text-center">Ngày CT</th>
+                        <th>Số chứng từ</th>
+                        <th>Loại CT</th>
+                        <th>Diễn giải</th>
+                        <th class="text-center">TK Nợ</th>
+                        <th class="text-center">TK Có</th>
+                        <th class="text-end">Số tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Items != null && Model.Items.Any())
+                    {
+                        int stt = (Model.CurrentPage - 1) * Model.PageSize + 1;
+                        foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td class="text-center align-middle">@(stt++)</td>
+                                <td class="text-center align-middle">@(item.NgayChungTu.ToString("dd/MM/yyyy"))</td>
+                                <td class="align-middle fw-bold">
+                                    @if (item.LoaiChungTu == "BAN")
+                                    {
+                                        <a href="javascript:void(0)" onclick="TabManager.openTab('ChungTuBanHang', 'Chứng từ', '/ChungTuBanHang/Index?soChungTu=@item.SoChungTu')" class="text-decoration-none">
+                                            <i class="bi bi-box-arrow-in-up-right me-1 small"></i>@item.SoChungTu
+                                        </a>
+                                    }
+                                    else if (item.LoaiChungTu == "PX")
+                                    {
+                                        <a href="javascript:void(0)" onclick="TabManager.openTab('PhieuXuatKho', 'Xuất kho', '/PhieuXuatKho/Index?soChungTu=@item.SoChungTu')" class="text-decoration-none">
+                                            <i class="bi bi-box-arrow-in-up-right me-1 small"></i>@item.SoChungTu
+                                        </a>
+                                    }
+                                    else if (item.LoaiChungTu == "PN")
+                                    {
+                                        <a href="javascript:void(0)" onclick="TabManager.openTab('PhieuNhapKho', 'Nhập kho', '/PhieuNhapKho/Index?soChungTu=@item.SoChungTu')" class="text-decoration-none">
+                                            <i class="bi bi-box-arrow-in-up-right me-1 small"></i>@item.SoChungTu
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        @item.SoChungTu
+                                    }
+                                </td>
+                                <td class="align-middle">
+                                    @if (item.LoaiChungTu == "BAN")
+                                    {
+                                        <span class="badge bg-primary">BAN (Bán hàng)</span>
+                                    }
+                                    else if (item.LoaiChungTu == "PX")
+                                    {
+                                        <span class="badge bg-warning text-dark">PX (Xuất kho)</span>
+                                    }
+                                    else if (item.LoaiChungTu == "PN")
+                                    {
+                                        <span class="badge bg-info text-dark">PN (Nhập kho)</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">@item.LoaiChungTu</span>
+                                    }
+                                </td>
+                                <td class="align-middle">@item.DienGiai</td>
+                                <td class="text-center align-middle fw-bold text-success">@item.TaiKhoanNo</td>
+                                <td class="text-center align-middle fw-bold text-danger">@item.TaiKhoanCo</td>
+                                <td class="text-end align-middle fw-bold">@(item.SoTien.ToString("N0"))</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                Không có dữ liệu
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                @if (Model.Items != null && Model.Items.Any() && ViewBag.TotalSum != null)
+                {
+                    <tfoot>
+                        <tr style="background:#f4f6f9; font-weight:bold;">
+                            <td colspan="7" class="text-end align-middle">Tổng cộng:</td>
+                            <td class="text-end align-middle fw-bold text-primary" style="font-size: 1.05rem;">
+                                @(((decimal)ViewBag.TotalSum).ToString("N0"))
+                            </td>
+                        </tr>
+                    </tfoot>
+                }
+            </table>
+        </div>
+    </div>
+    
+    @Html.Partial("_Pagination", Model)
+</div>

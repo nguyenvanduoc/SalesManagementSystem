@@ -1,0 +1,111 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.NhatKyChungListViewModel>
+@{
+    ViewBag.Title = "Nhật Ký Kế Toán";
+    var uid = Guid.NewGuid().ToString("N");
+}
+
+<div id="nkc-@uid">
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-2">
+        <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">
+            Sổ Nhật Ký Chung
+        </h4>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body py-2">
+            <form id="searchForm" action="@Url.Action("GetList")" method="get">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Từ ngày</label>
+                        <input type="date" name="tuNgay" class="form-control form-control-sm" value="@ViewBag.TuNgay" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Đến ngày</label>
+                        <input type="date" name="denNgay" class="form-control form-control-sm" value="@ViewBag.DenNgay" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Số chứng từ</label>
+                        <input type="text" name="soChungTu" class="form-control form-control-sm" placeholder="Số CT..." value="@ViewBag.SoChungTu" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Loại chứng từ</label>
+                        <select name="loaiChungTu" class="form-select form-select-sm">
+                            <option value="">-- Tất cả --</option>
+                            <option value="BAN" @(ViewBag.LoaiChungTu == "BAN" ? "selected" : "")>Chứng từ bán hàng</option>
+                            <option value="PX" @(ViewBag.LoaiChungTu == "PX" ? "selected" : "")>Phiếu xuất kho</option>
+                            <option value="PN" @(ViewBag.LoaiChungTu == "PN" ? "selected" : "")>Phiếu nhập kho</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted small mb-1">Tài khoản Nợ/Có</label>
+                        <select name="taiKhoanNo" class="form-select form-select-sm select2">
+                            <option value="">-- Tất cả tài khoản --</option>
+                            @if (ViewBag.TaiKhoanKeToanList != null)
+                            {
+                                foreach (var tk in ViewBag.TaiKhoanKeToanList)
+                                {
+                                    <option value="@tk.SoTaiKhoan" @(ViewBag.TaiKhoanNo == tk.SoTaiKhoan ? "selected" : "")>@tk.SoTaiKhoan - @tk.TenTaiKhoan</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12 d-flex gap-2 mt-3 justify-content-end">
+                        <button type="submit" class="btn btn-sm text-white px-3" style="background-color: #2998e4; border: none;">
+                            <i class="bi bi-search"></i> Tìm kiếm
+                        </button>
+                        <button type="button" class="btn btn-sm text-white px-3 btn-reset" style="background-color: #f1c40f; border: none;">
+                            Làm mới
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="table-container">
+        @Html.Partial("_NhatKyChungList", Model)
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function() {
+            var $container = $('#nkc-@uid');
+            var $form = $container.find('#searchForm');
+
+            $(document).ready(function() {
+                // Initialize select2 inside tab
+                if ($.fn.select2) {
+                    $container.find('.select2').select2({ width: '100%' });
+                }
+
+                $form.on('submit', function (e) {
+                    e.preventDefault();
+                    var params = $(this).serialize();
+                    // If select2 has an empty option, serialize will include it
+                    var url = '@Url.Action("GetList")?' + params;
+                    $.ajax({
+                        url: url,
+                        type: 'GET',
+                        success: function (res) {
+                            $container.find('#table-container').html(res);
+                        },
+                        error: function () {
+                            if (typeof showToast === 'function') {
+                                showToast('error', 'Lỗi khi tải dữ liệu.');
+                            }
+                        }
+                    });
+                });
+            });
+
+            $container.find('.btn-reset').on('click', function() {
+                $form[0].reset();
+                if ($.fn.select2) {
+                    $container.find('.select2').val('').trigger('change');
+                }
+                $form.trigger('submit');
+            });
+        })();
+    </script>
+}

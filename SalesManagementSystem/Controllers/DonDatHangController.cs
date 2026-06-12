@@ -613,7 +613,7 @@ namespace SalesManagementSystem.Controllers
                        OR LOWER(TenKhachHang) LIKE '%' + @KW + '%'
                        OR LOWER(SoDienThoai)  LIKE '%' + @KW + '%'
                        OR LOWER(MaSoThue)     LIKE '%' + @KW + '%'
-                    ORDER BY Ten";
+                    ORDER BY TenKhachHang";
 
                 var rows = conn.Query(sql, new { KW = kw }).ToList();
                 var result = rows.Select(r => new

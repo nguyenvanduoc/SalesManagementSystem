@@ -1,0 +1,33 @@
+<!-- Modal chọn đơn đặt hàng -->
+<div class="modal fade" id="modalChonDonDatHang" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-cart"></i> Chọn Đơn Đặt Hàng Lập Chứng Từ Bán Hàng</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table id="tableDonDatHangList" class="table table-bordered table-hover dt-responsive nowrap w-100 table-custom">
+                        <thead>
+                            <tr style="background:#f4f6f9; font-weight:bold;">
+                                <th>Số ĐH</th>
+                                <th>Ngày đặt</th>
+                                <th>Khách hàng</th>
+                                <th class="text-end">Tiền hàng</th>
+                                <th class="text-end">Tiền thuế</th>
+                                <th class="text-end">Tổng cộng</th>
+                                <th class="text-center">Trạng thái</th>
+                                <th class="text-center">Còn lập CT</th>
+                                <th class="text-center" style="width: 80px;">Chọn</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data loaded via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
