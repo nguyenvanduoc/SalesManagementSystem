@@ -588,15 +588,6 @@
     <Content Include="Views\PhieuNhapKho\Create.cshtml" />
     <Content Include="Views\PhieuNhapKho\Edit.cshtml" />
     <Content Include="Scripts\phieu-nhap-kho.js" />
-    <Compile Include="Models\ViewModels\PhieuXuatKhoListViewModel.cs" />
-    <Compile Include="Models\ViewModels\PhieuXuatKhoViewModel.cs" />
-    <Compile Include="Models\ViewModels\PhieuXuatKhoChiTietViewModel.cs" />
-    <Compile Include="Repositories\Interfaces\IPhieuXuatKhoRepository.cs" />
-    <Compile Include="Repositories\PhieuXuatKhoRepository.cs" />
-    <Compile Include="Controllers\PhieuXuatKhoController.cs" />
-    <Content Include="Views\PhieuXuatKho\Index.cshtml" />
-    <Content Include="Views\PhieuXuatKho\_PhieuXuatKhoList.cshtml" />
-    <Content Include="Views\PhieuXuatKho\Edit.cshtml" />
     <Content Include="Scripts\phieu-xuat-kho.js" />
     <Compile Include="Models\ViewModels\NhaCungCapViewModel.cs" />
     <Compile Include="Models\ViewModels\NhaCungCapCreateEditViewModel.cs" />
