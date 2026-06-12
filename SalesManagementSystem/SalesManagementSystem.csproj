@@ -273,6 +273,10 @@
     <Compile Include="Services\Interfaces\IWordExportService.cs" />
     <Compile Include="Services\WordExportService.cs" />
     <Compile Include="Helpers\BieuMauConstants.cs" />
+    <Compile Include="Models\ViewModels\TonKhoViewModel.cs" />
+    <Compile Include="Repositories\Interfaces\ITonKhoRepository.cs" />
+    <Compile Include="Repositories\TonKhoRepository.cs" />
+    <Compile Include="Controllers\TonKhoController.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\Antlr3.Runtime.dll" />
@@ -460,6 +464,10 @@
     <Content Include="AGENTS.md.md" />
     <Content Include="ARCHITECTURE_STANDARD.md" />
     <Content Include="DATABASE_STANDARD.md" />
+    <Content Include="Views\TonKho\Index.cshtml" />
+    <Content Include="Views\TonKho\_TonKhoList.cshtml" />
+    <Content Include="Views\TonKho\_TheKhoModal.cshtml" />
+    <Content Include="Views\TonKho\Print.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />

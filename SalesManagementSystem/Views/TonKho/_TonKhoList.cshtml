@@ -1,0 +1,72 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.TonKhoListViewModel>
+
+<table id="tblTonKho" class="table table-bordered table-striped table-hover">
+    <thead>
+        <tr>
+            <th>STT</th>
+            <th>Mã kho</th>
+            <th>Tên kho</th>
+            <th>Mã sản phẩm</th>
+            <th>Tên sản phẩm</th>
+            <th>ĐVT</th>
+            <th class="text-right">Tổng nhập</th>
+            <th class="text-right">Tổng xuất</th>
+            <th class="text-right">Tồn hiện tại</th>
+            <th class="text-right">Đơn giá tồn</th>
+            <th class="text-right">Giá trị tồn</th>
+            <th>Ngày nhập cuối</th>
+            <th>Ngày xuất cuối</th>
+            <th class="text-center">Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Items != null && Model.Items.Any())
+        {
+            int stt = (Model.CurrentPage - 1) * Model.PageSize + 1;
+            foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@(stt++)</td>
+                    <td>@item.MaKho</td>
+                    <td>@item.TenKho</td>
+                    <td>@item.MaSanPham</td>
+                    <td>@item.TenSanPham</td>
+                    <td>@item.DVT</td>
+                    <td class="text-right">@item.TongNhap.ToString("N0")</td>
+                    <td class="text-right">@item.TongXuat.ToString("N0")</td>
+                    <td class="text-right">
+                        @if (item.TonKho < 0)
+                        {
+                            <span class="text-danger font-weight-bold">@item.TonKho.ToString("N0")</span>
+                        }
+                        else if (item.TonKho <= 10)
+                        {
+                            <span class="text-warning font-weight-bold">@item.TonKho.ToString("N0")</span>
+                        }
+                        else
+                        {
+                            <span class="text-success font-weight-bold">@item.TonKho.ToString("N0")</span>
+                        }
+                    </td>
+                    <td class="text-right">@item.DonGiaTon.ToString("N0")</td>
+                    <td class="text-right font-weight-bold text-primary">@item.GiaTriTon.ToString("N0")</td>
+                    <td>@(item.NgayNhapCuoi.HasValue ? item.NgayNhapCuoi.Value.ToString("dd/MM/yyyy HH:mm") : "")</td>
+                    <td>@(item.NgayXuatCuoi.HasValue ? item.NgayXuatCuoi.Value.ToString("dd/MM/yyyy HH:mm") : "")</td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-info btn-sm btn-view-thekho" data-idkho="@item.IDKho" data-idsp="@item.IDSanPham" title="Chi tiết thẻ kho">
+                            <i class="fas fa-list-alt"></i> Xem thẻ kho
+                        </button>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="14" class="text-center">Không có dữ liệu</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@Html.Partial("_Pagination", Model)

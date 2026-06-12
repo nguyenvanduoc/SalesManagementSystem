@@ -225,7 +225,7 @@ var PhieuXuatKho = (function () {
 
         if (!$('#NgayXuat').val()) { errorMsg += 'Ngày xuất không được để trống.\n'; isValid = false; }
         if (!$('#IDKho').val()) { errorMsg += 'Vui lòng chọn Kho.\n'; isValid = false; }
-        
+
         // Trong phiếu xuất kho, có thể chọn IDNhanSuNhan hoặc nhập TenNguoiNhan
         var idNhanSu = $('#IDNhanSuNhan').val();
         var tenNguoiNhan = $('#TenNguoiNhan').val();

@@ -1,0 +1,230 @@
+@{
+    ViewBag.Title = "Tồn kho";
+    var uid = Guid.NewGuid().ToString("N");
+}
+
+<style>
+    .dashboard-card { border-radius: 10px; padding: 15px; color: #fff; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .bg-primary-grad { background: linear-gradient(45deg, #007bff, #0056b3); }
+    .bg-success-grad { background: linear-gradient(45deg, #28a745, #1e7e34); }
+    .bg-info-grad { background: linear-gradient(45deg, #17a2b8, #117a8b); }
+    .bg-danger-grad { background: linear-gradient(45deg, #dc3545, #bd2130); }
+    .bg-warning-grad { background: linear-gradient(45deg, #ffc107, #d39e00); color: #212529 !important; }
+    .dashboard-card h3 { font-size: 24px; margin: 10px 0 0; font-weight: bold; }
+    .dashboard-card p { margin: 0; font-size: 14px; opacity: 0.9; }
+</style>
+
+<div id="tonkho-@uid">
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-2">
+        <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">
+            <i class="fas fa-boxes me-2"></i>@ViewBag.Title
+        </h4>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-info btn-print shadow-sm" style="background-color: #3498db; border-color: #3498db;">
+                <i class="fas fa-print me-1"></i> In báo cáo
+            </button>
+            <button type="button" class="btn btn-success btn-export shadow-sm" style="background-color: #27ae60; border-color: #27ae60;">
+                <i class="fas fa-file-excel me-1"></i> Xuất Excel
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <form id="frmFilter" class="row align-items-end">
+                        <div class="col-md-2 form-group mb-2">
+                            <label class="form-label text-muted mb-1">Từ ngày</label>
+                            <input type="date" class="form-control" name="TuNgay" />
+                        </div>
+                        <div class="col-md-2 form-group mb-2">
+                            <label class="form-label text-muted mb-1">Đến ngày</label>
+                            <input type="date" class="form-control" name="DenNgay" />
+                        </div>
+                        <div class="col-md-3 form-group mb-2">
+                            <label class="form-label text-muted mb-1">Kho hàng</label>
+                            <select class="form-control tk-kho" name="IDKho"></select>
+                        </div>
+                        <div class="col-md-3 form-group mb-2">
+                            <label class="form-label text-muted mb-1">Sản phẩm</label>
+                            <select class="form-control tk-sp" name="IDSanPham"></select>
+                        </div>
+                        <div class="col-md-2 form-group mb-2 d-flex align-items-end">
+                            <div class="custom-control custom-checkbox w-100" style="margin-bottom: 0.5rem;">
+                                <input class="custom-control-input" type="checkbox" id="ChiConTon_@uid" name="ChiConTon" value="true">
+                                <label for="ChiConTon_@uid" class="custom-control-label" style="padding-top: 2px;">Chỉ hiển thị SP còn tồn</label>
+                            </div>
+                        </div>
+                        <div class="col-12 d-flex gap-2 mt-3 mb-3 justify-content-end">
+                            <button type="button" class="btn text-white px-4 btn-search" style="background-color: #2998e4; border: none;">
+                                <i class="fas fa-search"></i> Tìm kiếm
+                            </button>
+                            <button type="button" class="btn text-white px-4 btn-reset" style="background-color: #f1c40f; border: none;">
+                                Làm mới
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="row" id="dashboardContainer">
+                        <div class="col-md-2 col-sm-6">
+                            <div class="dashboard-card bg-primary-grad">
+                                <p>Tổng số sản phẩm</p>
+                                <h3 class="lblTongSP">0</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-6">
+                            <div class="dashboard-card bg-success-grad">
+                                <p>Tổng số lượng tồn</p>
+                                <h3 class="lblTongTon">0</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-12">
+                            <div class="dashboard-card bg-info-grad">
+                                <p>Tổng giá trị tồn</p>
+                                <h3 class="lblTongGiaTri">0</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-6">
+                            <div class="dashboard-card bg-danger-grad">
+                                <p>Sản phẩm âm kho</p>
+                                <h3 class="lblAmKho">0</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-6">
+                            <div class="dashboard-card bg-warning-grad">
+                                <p>Sắp hết hàng</p>
+                                <h3 class="lblSapHet">0</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="gridContainer" class="table-responsive">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalContainer"></div>
+
+    <script>
+        (function() {
+            var $container = $('#tonkho-@uid');
+            var $form = $container.find('#frmFilter');
+
+            function formatNumber(num) {
+                if (num == null || num === '') return '0';
+                return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+            }
+
+            function loadData(urlOverride) {
+                var params = $form.serialize();
+
+                $.get('/TonKho/GetDashboard', params, function (res) {
+                    if (res.success && res.data) {
+                        $container.find('.lblTongSP').text(formatNumber(res.data.TongSoSanPham));
+                        $container.find('.lblTongTon').text(formatNumber(res.data.TongSoLuongTon));
+                        $container.find('.lblTongGiaTri').text(formatNumber(res.data.TongGiaTriTon));
+                        $container.find('.lblAmKho').text(formatNumber(res.data.SoSanPhamAmKho));
+                        $container.find('.lblSapHet').text(formatNumber(res.data.SoSanPhamSapHetHang));
+                    }
+                });
+
+                var url = urlOverride || ('/TonKho/GetList?' + params);
+                $.get(url, function (html) {
+                    $container.find('#gridContainer').html(html);
+                });
+            }
+
+            // Xử lý phân trang
+            $container.on('click', '.ajax-link', function (e) {
+                e.preventDefault();
+                var url = $(this).attr('href');
+                if (url && url !== '#') {
+                    loadData(url);
+                }
+            });
+            
+            $container.on('change', '.page-size-select', function() {
+                var newSize = $(this).val();
+                var params = $form.serialize();
+                loadData('/TonKho/GetList?' + params + '&pageSize=' + newSize + '&page=1');
+            });
+
+            $(document).ready(function () {
+                var $tkKho = $container.find('.tk-kho');
+                var $tkSp = $container.find('.tk-sp');
+
+                $tkKho.select2({
+                    placeholder: 'Chọn kho hàng',
+                    allowClear: true,
+                    dropdownParent: $container,
+                    ajax: {
+                        url: '/TonKho/SearchKhoHang',
+                        dataType: 'json',
+                        delay: 250,
+                        data: function (params) { return { q: params.term }; },
+                        processResults: function (data) { return { results: data }; }
+                    }
+                });
+
+                $tkSp.select2({
+                    placeholder: 'Chọn sản phẩm',
+                    allowClear: true,
+                    dropdownParent: $container,
+                    ajax: {
+                        url: '/TonKho/SearchSanPham',
+                        dataType: 'json',
+                        delay: 250,
+                        data: function (params) { return { q: params.term }; },
+                        processResults: function (data) { return { results: data }; }
+                    }
+                });
+
+                loadData();
+            });
+
+            $container.find('.btn-search').on('click', function() {
+                loadData();
+            });
+
+            $container.find('.btn-reset').on('click', function() {
+                $form[0].reset();
+                $container.find('.tk-kho').val(null).trigger('change');
+                $container.find('.tk-sp').val(null).trigger('change');
+                $container.find('input[type="checkbox"]').prop('checked', false);
+                loadData();
+            });
+
+            $container.find('.btn-export').on('click', function() {
+                var params = $form.serialize();
+                window.location.href = '/TonKho/ExportExcel?' + params;
+            });
+
+            $container.find('.btn-print').on('click', function() {
+                var params = $form.serialize();
+                window.open('/TonKho/Print?' + params, '_blank');
+            });
+
+            $container.on('click', '.btn-view-thekho', function() {
+                var idKho = $(this).data('idkho');
+                var idSanPham = $(this).data('idsp');
+                var tuNgay = $form.find('[name="TuNgay"]').val();
+                var denNgay = $form.find('[name="DenNgay"]').val();
+                $.get('/TonKho/GetTheKho', { idKho: idKho, idSanPham: idSanPham, tuNgay: tuNgay, denNgay: denNgay }, function (html) {
+                    $container.find('#modalContainer').html(html);
+                    $container.find('#theKhoModal').modal('show');
+                    $container.find('#tblTheKho').DataTable({
+                        "language": { "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/Vietnamese.json" },
+                        "paging": false,
+                        "ordering": false,
+                        "info": false,
+                        "scrollY": "400px",
+                        "scrollCollapse": true
+                    });
+                });
+            });
+        })();
+    </script>
+</div>

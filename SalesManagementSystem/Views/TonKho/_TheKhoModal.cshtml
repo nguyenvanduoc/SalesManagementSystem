@@ -1,0 +1,65 @@
+@model IEnumerable<SalesManagementSystem.Models.ViewModels.TheKhoListViewModel>
+
+<div class="modal fade" id="theKhoModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-white"><i class="fas fa-list-alt"></i> Chi tiết thẻ kho</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table id="tblTheKho" class="table table-bordered table-striped table-hover table-sm">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Ngày CT</th>
+                                <th>Số CT</th>
+                                <th>Loại CT</th>
+                                <th>Diễn giải</th>
+                                <th class="text-right">Nhập</th>
+                                <th class="text-right">Xuất</th>
+                                <th class="text-right">Tồn lũy kế</th>
+                                <th class="text-right">Đơn giá</th>
+                                <th class="text-right">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                string loaiCTName = "";
+                                string linkCT = "javascript:void(0);";
+                                if (item.LoaiChungTu == 1) 
+                                { 
+                                    loaiCTName = "Nhập kho"; 
+                                    linkCT = $"/PhieuNhapKho/Edit/{item.ID}?isView=true"; 
+                                }
+                                else if (item.LoaiChungTu == 2) 
+                                { 
+                                    loaiCTName = "Xuất kho"; 
+                                    linkCT = $"/PhieuXuatKho/Edit/{item.ID}?isView=true"; 
+                                }
+
+                                <tr>
+                                    <td>@item.NgayChungTu.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <a href="@linkCT" target="_blank" class="text-primary">@item.SoChungTu</a>
+                                    </td>
+                                    <td>@loaiCTName</td>
+                                    <td>@item.DienGiai</td>
+                                    <td class="text-right text-success">@(item.Nhap > 0 ? item.Nhap.ToString("N0") : "")</td>
+                                    <td class="text-right text-danger">@(item.Xuat > 0 ? item.Xuat.ToString("N0") : "")</td>
+                                    <td class="text-right font-weight-bold">@item.TonLuyKe.ToString("N0")</td>
+                                    <td class="text-right">@item.DonGia.ToString("N0")</td>
+                                    <td class="text-right">@item.ThanhTien.ToString("N0")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
