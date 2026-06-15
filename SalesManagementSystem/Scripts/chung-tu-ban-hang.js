@@ -61,6 +61,21 @@ var ChungTuBanHang = (function () {
     };
 
     var save = function (isGhiSo) {
+        if (window.tonKhoHasError) {
+            if (typeof showToast !== 'undefined') showToast('warning', 'Không thể lưu: Kho xuất không đủ tồn kho cho các sản phẩm đã chọn!');
+            return;
+        }
+
+        var activeTabPane = $('.tab-pane.active');
+        var form = activeTabPane.find('#frmSaveCTBH');
+        if (form.length === 0) form = $('#frmSaveCTBH');
+        
+        var idKho = form.find('input[name="IDKho"]').val();
+        if (!idKho) {
+            if (typeof showToast !== 'undefined') showToast('warning', 'Vui lòng chọn kho xuất!');
+            return;
+        }
+
         var actionText = isGhiSo ? "lưu và ghi" : "lưu dữ liệu";
         var confirmHtml = '<div class="modal fade" id="confirmSaveModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">' +
             '<div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">' +
@@ -89,7 +104,12 @@ var ChungTuBanHang = (function () {
         $('#btnConfirmSaveAction').on('click', function() {
             var btn = $(this);
             btn.prop('disabled', true);
-            var data = $('#frmSaveCTBH').serialize();
+            
+            var activeTabPane = $('.tab-pane.active');
+            var form = activeTabPane.find('#frmSaveCTBH');
+            if (form.length === 0) form = $('#frmSaveCTBH');
+
+            var data = form.serialize();
             data += '&ghiSo=' + (isGhiSo ? 'true' : 'false');
                 
                 $.ajax({
@@ -296,14 +316,109 @@ var ChungTuBanHang = (function () {
         });
     };
 
+    var openModalChonKho = function (tabPane) {
+        // Thu thập sản phẩm trong tab hiện tại
+        var sanPhams = [];
+        tabPane.find('.grid-detail tbody tr').each(function () {
+            var idSp = $(this).find('input[name$=".IDSanPham"]').val();
+            var soLuong = $(this).find('input[name$=".SoLuong"]').val();
+            if (idSp && soLuong) {
+                sanPhams.push({
+                    IDSanPham: parseInt(idSp),
+                    SoLuongCanXuat: parseFloat(soLuong)
+                });
+            }
+        });
+
+        if (sanPhams.length === 0) {
+            if (typeof showToast !== 'undefined') showToast('warning', 'Vui lòng thêm sản phẩm trước khi chọn kho!');
+            return;
+        }
+
+        $.ajax({
+            url: '/ChungTuBanHang/CheckTonKhoAllKho',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ sanPhams: sanPhams }),
+            success: function (res) {
+                if (res.success) {
+                    var tbody = tabPane.find('#tableTonKho tbody');
+                    tbody.empty();
+                    
+                    res.data.forEach(function (kho) {
+                        var rowClass = !kho.IsDuTonAll ? 'table-warning' : '';
+                        var badgeHtml = kho.IsDuTonAll 
+                            ? '<span class="badge bg-success">Đủ tồn kho</span>' 
+                            : '<span class="badge bg-danger">Thiếu tồn kho</span>';
+                            
+                        var detailsHtml = '<ul class="mb-0 ps-3" style="font-size:0.85rem;">';
+                        kho.ChiTiets.forEach(function (ct) {
+                            var color = ct.IsDuTon ? 'text-success' : 'text-danger fw-bold';
+                            detailsHtml += '<li>' + ct.MaSanPham + ' - ' + ct.TenSanPham + ': <span class="' + color + '">Tồn ' + ct.SoLuongTon.toLocaleString('vi-VN') + ' / Cần ' + ct.SoLuongCanXuat.toLocaleString('vi-VN') + '</span></li>';
+                        });
+                        detailsHtml += '</ul>';
+
+                        var btnHtml = '';
+                        if (kho.IsDuTonAll) {
+                            btnHtml = '<button type="button" class="btn btn-sm btn-primary" onclick="ChungTuBanHang.selectKho(' + kho.IDKho + ', \'' + kho.TenKhoHang + '\', this)">Chọn</button>';
+                        } else {
+                            btnHtml = '<button type="button" class="btn btn-sm btn-secondary" disabled title="Kho không đủ tồn">Chọn</button>';
+                        }
+
+                        var tr = '<tr class="' + rowClass + '">' +
+                            '<td class="align-middle fw-bold">' + kho.TenKhoHang + '</td>' +
+                            '<td class="align-middle text-center">' + badgeHtml + '</td>' +
+                            '<td class="align-middle">' + detailsHtml + '</td>' +
+                            '<td class="align-middle text-center">' + btnHtml + '</td>' +
+                            '</tr>';
+                        tbody.append(tr);
+                    });
+
+                    var modalEl = tabPane.find('#modalTonKho')[0];
+                    var modalTonKho = new bootstrap.Modal(modalEl);
+                    modalTonKho.show();
+                } else {
+                    if (typeof showToast !== 'undefined') showToast('error', res.message);
+                    else alert(res.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                if (typeof showToast !== 'undefined') showToast('error', 'Đã xảy ra lỗi kết nối: ' + error);
+                else alert('Đã xảy ra lỗi kết nối: ' + error);
+            }
+        });
+    };
+    
+    var selectKho = function(idKho, tenKho, btn) {
+        var tabPane = $(btn).closest('.tab-pane');
+        tabPane.find('#IDKho').val(idKho);
+        tabPane.find('#TenKhoHang').val(tenKho);
+        window.tonKhoHasError = false; // Khi chọn được kho từ modal có nghĩa là đủ tồn
+        
+        var modalEl = tabPane.find('#modalTonKho')[0];
+        var modalTonKho = bootstrap.Modal.getInstance(modalEl);
+        if (modalTonKho) {
+            modalTonKho.hide();
+        }
+    };
+
+    var initEvents = function() {
+        $(document).off('click', '#btnShowKhoTonKho').on('click', '#btnShowKhoTonKho', function() {
+            var tabPane = $(this).closest('.tab-pane');
+            openModalChonKho(tabPane);
+        });
+    };
+
     return {
         init: function () {
             initDataTable();
+            initEvents();
         },
         loadData: loadData,
         openDonDatHangModal: openDonDatHangModal,
         save: save,
         ghiSo: ghiSo,
-        huy: huy
+        huy: huy,
+        selectKho: selectKho
     };
 })();

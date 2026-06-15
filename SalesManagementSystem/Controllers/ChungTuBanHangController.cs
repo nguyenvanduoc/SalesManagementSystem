@@ -4,6 +4,7 @@ using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using Dapper;
@@ -228,6 +229,15 @@ namespace SalesManagementSystem.Controllers
 
             try
             {
+                // Kiểm tra tồn kho backend
+                var itemsCheck = model.ChiTiets.Select(x => new CheckTonKhoRequestItem { IDSanPham = x.IDSanPham, SoLuongCanXuat = x.SoLuong }).ToList();
+                var checkTon = _repo.CheckTonKhoByKho(model.IDKho, itemsCheck).ToList();
+                var missingItems = checkTon.Where(x => !x.IsDuTon).ToList();
+                if (missingItems.Any())
+                {
+                    var msg = string.Join("; ", missingItems.Select(x => $"Sản phẩm [{x.MaSanPham}] - {x.TenSanPham} vượt số lượng tồn. Tồn hiện tại: {x.SoLuongTon:N0}, số lượng cần xuất: {x.SoLuongCanXuat:N0}."));
+                    return Json(new { success = false, message = msg });
+                }
                 var user = GetCurrentUser();
                 int userId = user?.IDNhanSu ?? 0;
 
@@ -343,6 +353,16 @@ namespace SalesManagementSystem.Controllers
             if (model == null) throw new Exception("Chứng từ không tồn tại.");
             if (model.TrangThai != 1) throw new Exception("Chứng từ đã ghi hoặc đã hủy.");
 
+            // Kiểm tra tồn kho backend trước khi ghi sổ
+            var itemsCheck = model.ChiTiets.Select(x => new CheckTonKhoRequestItem { IDSanPham = x.IDSanPham, SoLuongCanXuat = x.SoLuong }).ToList();
+            var checkTon = _repo.CheckTonKhoByKho(model.IDKho, itemsCheck).ToList();
+            var missingItems = checkTon.Where(x => !x.IsDuTon).ToList();
+            if (missingItems.Any())
+            {
+                var msg = string.Join("; ", missingItems.Select(x => $"Sản phẩm [{x.MaSanPham}] - {x.TenSanPham} vượt số lượng tồn. Tồn hiện tại: {x.SoLuongTon:N0}, số lượng cần xuất: {x.SoLuongCanXuat:N0}."));
+                throw new Exception("Lỗi tồn kho: " + msg);
+            }
+
             // Update Status to 2 (Đã ghi)
             _repo.UpdateStatus(id, 2, userId);
 
@@ -407,6 +427,61 @@ namespace SalesManagementSystem.Controllers
                 _nhatKyRepo.Cancel("BAN", id, userId);
 
                 return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public ActionResult CheckTonKho(int idKho, List<CheckTonKhoRequestItem> sanPhams)
+        {
+            try
+            {
+                if (sanPhams == null || !sanPhams.Any())
+                    return Json(new { success = false, hasError = false, message = "Không có sản phẩm nào để kiểm tra" });
+
+                var result = _repo.CheckTonKhoByKho(idKho, sanPhams).ToList();
+                bool hasError = result.Any(x => !x.IsDuTon);
+
+                return Json(new { success = true, data = result, hasError = hasError });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, hasError = true, message = ex.Message });
+            }
+        }
+        [HttpPost]
+        public ActionResult CheckTonKhoAllKho(List<CheckTonKhoRequestItem> sanPhams)
+        {
+            try
+            {
+                if (sanPhams == null || !sanPhams.Any())
+                    return Json(new { success = false, message = "Không có sản phẩm nào để kiểm tra" });
+
+                var result = _repo.CheckTonKhoAllKho(sanPhams).ToList();
+
+                // Nhóm theo Kho
+                var groupedByKho = result.GroupBy(x => new { x.IDKho, x.TenKhoHang })
+                    .Select(g => new
+                    {
+                        IDKho = g.Key.IDKho,
+                        TenKhoHang = g.Key.TenKhoHang,
+                        IsDuTonAll = g.All(x => x.IsDuTon),
+                        ChiTiets = g.Select(x => new
+                        {
+                            x.IDSanPham,
+                            x.MaSanPham,
+                            x.TenSanPham,
+                            x.SoLuongCanXuat,
+                            x.SoLuongTon,
+                            x.ChenhLech,
+                            x.IsDuTon
+                        }).ToList()
+                    }).ToList();
+
+                return Json(new { success = true, data = groupedByKho });
             }
             catch (Exception ex)
             {

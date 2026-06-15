@@ -109,7 +109,11 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label text-muted fw-semibold small">Kho xuất</label>
-                        @Html.DropDownListFor(m => m.IDKho, (SelectList)ViewBag.KhoList, "-- Chọn kho --", new { @class = "form-select", id = "IDKho" })
+                        <div class="input-group">
+                            <input type="hidden" name="IDKho" id="IDKho" value="@Model.IDKho" />
+                            <input type="text" class="form-control bg-white" id="TenKhoHang" value="@Model.TenKhoHang" readonly placeholder="-- Chọn kho --" />
+                            <button class="btn btn-outline-secondary" type="button" id="btnShowKhoTonKho"><i class="bi bi-search"></i> Chọn kho</button>
+                        </div>
                     </div>
                     <div class="col-md-5">
                         <label class="form-label text-muted fw-semibold small">Tài khoản thanh toán</label>
@@ -216,6 +220,43 @@
     </div>
 </form>
 
+<!-- Modal Kiểm tra tồn kho -->
+<div class="modal fade" id="modalTonKho" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content shadow-lg" style="border: none;">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-uppercase" style="color:#0b5b84;">CHỌN KHO XUẤT (KIỂM TRA TỒN)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="table-responsive" style="max-height: 400px;">
+                    <table class="table table-bordered mb-0" id="tableTonKho">
+                        <thead style="background:#f4f6f9; font-weight:bold; position: sticky; top: 0; z-index: 1;">
+                            <tr>
+                                <th>Tên kho hàng</th>
+                                <th class="text-center" style="width:130px;">Tình trạng</th>
+                                <th>Chi tiết tồn kho (Tồn / Cần xuất)</th>
+                                <th class="text-center" style="width:100px;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Nội dung render qua JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary text-white" style="background:#6c757d; border:none;" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
-    <script src="~/Scripts/chung-tu-ban-hang.js?v=3.0"></script>
+    <script src="~/Scripts/chung-tu-ban-hang.js?v=3.4"></script>
+    <script>
+        $(function () {
+            ChungTuBanHang.init();
+        });
+    </script>
 }

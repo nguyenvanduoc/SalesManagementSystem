@@ -44,6 +44,8 @@
             @Html.HiddenFor(m => m.ChiTiets[i].TienThue)
             @Html.HiddenFor(m => m.ChiTiets[i].TongSauThue)
             @Html.HiddenFor(m => m.ChiTiets[i].GhiChu)
+            @Html.HiddenFor(m => m.ChiTiets[i].NgaySanXuat)
+            @Html.HiddenFor(m => m.ChiTiets[i].HanSuDung)
         }
     }
 
@@ -137,6 +139,8 @@
                                 <th class="text-center" style="width: 70px;">ĐVT</th>
                                 <th class="text-end" style="width: 80px;">Số lượng</th>
                                 <th class="text-end" style="width: 100px;">Đơn giá</th>
+                                <th class="text-center" style="width: 110px;">Ngày SX</th>
+                                <th class="text-center" style="width: 110px;">Hạn SD</th>
                                 <th class="text-end" style="width: 110px;">Thành tiền</th>
                                 <th class="text-center" style="width: 70px;">Thuế %</th>
                                 <th class="text-end" style="width: 100px;">Tiền thuế</th>
@@ -156,6 +160,8 @@
                                         <td class="text-center">@ct.DVT</td>
                                         <td class="text-end fw-bold">@ct.SoLuong.ToString("N0")</td>
                                         <td class="text-end">@ct.DonGia.ToString("N0")</td>
+                                        <td class="text-center">@(ct.NgaySanXuat.HasValue ? ct.NgaySanXuat.Value.ToString("dd/MM/yyyy") : "")</td>
+                                        <td class="text-center">@(ct.HanSuDung.HasValue ? ct.HanSuDung.Value.ToString("dd/MM/yyyy") : "")</td>
                                         <td class="text-end">@ct.ThanhTien.ToString("N0")</td>
                                         <td class="text-center">@ct.ThueGTGT%</td>
                                         <td class="text-end">@ct.TienThue.ToString("N0")</td>
@@ -167,7 +173,7 @@
                             else
                             {
                                 <tr>
-                                    <td colspan="10" class="text-center py-3 text-muted">Không có chi tiết hàng hóa</td>
+                                    <td colspan="12" class="text-center py-3 text-muted">Không có chi tiết hàng hóa</td>
                                 </tr>
                             }
                         </tbody>

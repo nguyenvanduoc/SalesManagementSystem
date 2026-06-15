@@ -50,7 +50,7 @@
     
     <div class="row g-3">
         <!-- Cột trái -->
-        <div class="col-md-9">
+        <div class="col-md-10">
 
             <!-- Card: Thông tin đối tác -->
             <div class="don-header-card">
@@ -126,6 +126,8 @@
                                 <th style="width:70px;">ĐVT</th>
                                 <th style="width:90px;">Số lượng</th>
                                 <th style="width:110px;">Đơn giá</th>
+                                <th style="width:120px;">Ngày SX</th>
+                                <th style="width:120px;">Hạn SD</th>
                                 <th style="width:120px;">Thành tiền</th>
                                 <th style="width:70px;">Thuế %</th>
                                 <th style="width:110px;">Tiền thuế</th>
@@ -143,7 +145,7 @@
         </div>
 
         <!-- Cột phải: Tổng tiền nổi bật -->
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="tong-tien-box">
                 <div class="label">Tổng tiền thanh toán</div>
                 <div class="amount" id="dispTongCong">0</div>
@@ -178,7 +180,7 @@
 </form>
 
 @section Scripts {
-<script src="@Url.Content("~/Scripts/phieu-nhap-kho.js")"></script>
+<script src="@Url.Content("~/Scripts/phieu-nhap-kho.js?v=1.1")"></script>
 <script>
     var isViewMode = @(isView.ToString().ToLower());
 

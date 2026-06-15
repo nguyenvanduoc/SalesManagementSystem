@@ -13,5 +13,7 @@ namespace SalesManagementSystem.Repositories.Interfaces
         int Insert(ChungTuBanHangViewModel model, int nguoiTao);
         void UpdateStatus(int id, int trangThai, int nguoiCapNhat);
         void Cancel(int id, int nguoiHuy, string lyDo);
+        IEnumerable<CheckTonKhoResponseViewModel> CheckTonKhoByKho(int idKho, List<CheckTonKhoRequestItem> sanPhams);
+        IEnumerable<CheckTonKhoResponseViewModel> CheckTonKhoAllKho(List<CheckTonKhoRequestItem> sanPhams);
     }
 }

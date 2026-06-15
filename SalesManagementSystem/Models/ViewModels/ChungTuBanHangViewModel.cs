@@ -47,4 +47,23 @@ namespace SalesManagementSystem.Models.ViewModels
             NgayChungTu = DateTime.Now;
         }
     }
+
+    public class CheckTonKhoRequestItem
+    {
+        public int IDSanPham { get; set; }
+        public decimal SoLuongCanXuat { get; set; }
+    }
+
+    public class CheckTonKhoResponseViewModel
+    {
+        public int IDKho { get; set; }
+        public string TenKhoHang { get; set; }
+        public int IDSanPham { get; set; }
+        public string MaSanPham { get; set; }
+        public string TenSanPham { get; set; }
+        public decimal SoLuongCanXuat { get; set; }
+        public decimal SoLuongTon { get; set; }
+        public decimal ChenhLech { get; set; }
+        public bool IsDuTon { get; set; }
+    }
 }

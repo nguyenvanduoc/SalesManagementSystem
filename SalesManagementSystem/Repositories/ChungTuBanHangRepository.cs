@@ -186,5 +186,28 @@ namespace SalesManagementSystem.Repositories
                 conn.Execute("sp_BAN_ChungTuBanHang_Cancel", p, commandType: System.Data.CommandType.StoredProcedure);
             }
         }
+
+        public IEnumerable<CheckTonKhoResponseViewModel> CheckTonKhoByKho(int idKho, List<CheckTonKhoRequestItem> sanPhams)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                var p = new DynamicParameters();
+                p.Add("@IDKho", idKho);
+                p.Add("@ListSanPham", Newtonsoft.Json.JsonConvert.SerializeObject(sanPhams));
+
+                return conn.Query<CheckTonKhoResponseViewModel>("sp_KHO_TonKho_CheckByKho", p, commandType: System.Data.CommandType.StoredProcedure);
+            }
+        }
+        
+        public IEnumerable<CheckTonKhoResponseViewModel> CheckTonKhoAllKho(List<CheckTonKhoRequestItem> sanPhams)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                var p = new DynamicParameters();
+                p.Add("@ListSanPham", Newtonsoft.Json.JsonConvert.SerializeObject(sanPhams));
+
+                return conn.Query<CheckTonKhoResponseViewModel>("sp_KHO_TonKho_CheckAllKho", p, commandType: System.Data.CommandType.StoredProcedure);
+            }
+        }
     }
 }

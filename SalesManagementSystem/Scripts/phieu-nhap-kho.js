@@ -130,6 +130,8 @@ var PhieuNhapKho = (function () {
         var thue = ct ? ct.ThueGTGT : 0;
         var ghiChu = ct ? ct.GhiChu || '' : '';
         var dvt = ct ? ct.DVT || '' : '';
+        var ngaySanXuat = (ct && ct.NgaySanXuat) ? ct.NgaySanXuat.split('T')[0] : '';
+        var hanSuDung = (ct && ct.HanSuDung) ? ct.HanSuDung.split('T')[0] : '';
 
         var html = '<tr data-id="' + id + '">' +
             '  <td class="text-center align-middle row-stt"></td>' +
@@ -137,6 +139,8 @@ var PhieuNhapKho = (function () {
             '  <td><input type="text" class="form-control readonly-cell txt-dvt" readonly value="' + dvt + '" /></td>' +
             '  <td><input type="text" class="form-control txt-soluong text-end" inputmode="numeric" value="' + _formatNumber(soLuong) + '" /></td>' +
             '  <td><input type="text" class="form-control txt-dongia text-end" inputmode="decimal" value="' + _formatNumber(donGia) + '" /></td>' +
+            '  <td><input type="date" class="form-control txt-ngaysanxuat" value="' + ngaySanXuat + '" /></td>' +
+            '  <td><input type="date" class="form-control txt-hansudung" value="' + hanSuDung + '" /></td>' +
             '  <td><input type="text" class="form-control readonly-cell txt-thanhtien text-end" readonly value="0" /></td>' +
             '  <td><input type="number" class="form-control txt-thue text-end" step="0.1" value="' + thue + '" /></td>' +
             '  <td><input type="text" class="form-control readonly-cell txt-tienthue text-end" readonly value="0" /></td>' +
@@ -258,6 +262,8 @@ var PhieuNhapKho = (function () {
                         IDSanPham: parseInt(spId),
                         SoLuong: sl,
                         DonGia: dg,
+                        NgaySanXuat: $row.find('.txt-ngaysanxuat').val() || null,
+                        HanSuDung: $row.find('.txt-hansudung').val() || null,
                         ThanhTien: _parseMoney($row.find('.txt-thanhtien').val()),
                         ThueGTGT: thue,
                         TienThue: _parseMoney($row.find('.txt-tienthue').val()),
