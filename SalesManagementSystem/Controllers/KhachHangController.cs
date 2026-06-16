@@ -156,7 +156,7 @@ namespace SalesManagementSystem.Controllers
 
                 AuditLog.AddUpdate("NS_KhachHang", khachHang.ID.ToString(), oldObj, khachHang);
 
-                return Json(new { success = true, message = "Cáº­p nháº­t khÃ¡ch hÃ ng thÃ nh cÃ´ng!" });
+                return Json(new { success = true, message = "Cập nhật khách hàng thành công!" });
             }
             PopulateDropdowns();
             return PartialView("Edit", khachHang);

@@ -30,7 +30,7 @@ namespace SalesManagementSystem.Controllers
             _excelExportService = excelExportService;
         }
 
-        // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ── Helpers ──────────────────────────────────────────────────────────
 
         private class DropdownItem { public int ID { get; set; } public string Name { get; set; } }
 
@@ -63,7 +63,7 @@ namespace SalesManagementSystem.Controllers
         private UserLoginViewModel GetCurrentUser()
             => (UserLoginViewModel)Session[CommonConstants.USER_SESSION];
 
-        // â”€â”€ Index / GetList â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ── Index / GetList ───────────────────────────────────────────────────
 
         public ActionResult Index(
             int page = 1, int pageSize = 10,
@@ -85,7 +85,7 @@ namespace SalesManagementSystem.Controllers
                 ActionName  = "GetList"
             };
 
-            ViewBag.Title      = "Danh sÃ¡ch Ä‘Æ¡n Ä‘áº·t hÃ ng";
+            ViewBag.Title      = "Danh sách đơn đặt hàng";
             ViewBag.TuNgay     = tuNgay;
             ViewBag.DenNgay    = denNgay;
             ViewBag.SoDonHang  = soDonHang;
@@ -122,7 +122,7 @@ namespace SalesManagementSystem.Controllers
             return PartialView("_DonDatHangList", model);
         }
 
-        // â”€â”€ Create â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ── Create ────────────────────────────────────────────────────────────
 
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult Create()
@@ -136,7 +136,7 @@ namespace SalesManagementSystem.Controllers
             model.NhanVienList  = GetNhanVienList();
             model.TrangThaiList = GetTrangThaiList();
 
-            ViewBag.Title = "Táº¡o Ä‘Æ¡n Ä‘áº·t hÃ ng";
+            ViewBag.Title = "Tạo đơn đặt hàng";
             return View("Create", model);
         }
 
@@ -145,39 +145,39 @@ namespace SalesManagementSystem.Controllers
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult Create(DonDatHangCreateEditViewModel model, string chiTietsJson)
         {
-            // Parse chi tiáº¿t tá»« JSON
+            // Parse chi tiết từ JSON
             var chiTiets = ParseChiTiets(chiTietsJson);
 
             // Validate header
             if (!model.IDKhachHang.HasValue || model.IDKhachHang == 0)
-                ModelState.AddModelError("IDKhachHang", "Vui lÃ²ng chá»n khÃ¡ch hÃ ng");
+                ModelState.AddModelError("IDKhachHang", "Vui lòng chọn khách hàng");
 
             if (string.IsNullOrWhiteSpace(model.SoDonHang))
             {
-                model.SoDonHang = "AUTO"; // Sáº½ sinh tá»± Ä‘á»™ng trong Repository
+                model.SoDonHang = "AUTO"; // Sẽ sinh tự động trong Repository
                 if (ModelState.ContainsKey("SoDonHang")) ModelState["SoDonHang"].Errors.Clear();
             }
             else if (_repo.CheckDuplicateSoDon(model.SoDonHang.Trim()))
-                ModelState.AddModelError("SoDonHang", "Sá»‘ Ä‘Æ¡n hÃ ng Ä‘Ã£ tá»“n táº¡i trong há»‡ thá»‘ng");
+                ModelState.AddModelError("SoDonHang", "Số đơn hàng đã tồn tại trong hệ thống");
 
             if (!model.IDNhanVien.HasValue || model.IDNhanVien == 0)
-                ModelState.AddModelError("IDNhanVien", "Vui lÃ²ng chá»n nhÃ¢n viÃªn phá»¥ trÃ¡ch");
+                ModelState.AddModelError("IDNhanVien", "Vui lòng chọn nhân viên phụ trách");
 
-            // Validate chi tiáº¿t
+            // Validate chi tiết
             if (chiTiets == null || chiTiets.Count == 0)
-                ModelState.AddModelError("", "Vui lÃ²ng thÃªm Ã­t nháº¥t má»™t sáº£n pháº©m vÃ o Ä‘Æ¡n hÃ ng");
+                ModelState.AddModelError("", "Vui lòng thêm ít nhất một sản phẩm vào đơn hàng");
             else
             {
                 for (int i = 0; i < chiTiets.Count; i++)
                 {
                     if (!chiTiets[i].IDSanPham.HasValue || chiTiets[i].IDSanPham == 0)
-                        ModelState.AddModelError("", $"DÃ²ng {i + 1}: Vui lÃ²ng chá»n sáº£n pháº©m");
+                        ModelState.AddModelError("", $"Dòng {i + 1}: Vui lòng chọn sản phẩm");
                     if (chiTiets[i].DonGia < 0)
-                        ModelState.AddModelError("", $"DÃ²ng {i + 1}: ÄÆ¡n giÃ¡ khÃ´ng Ä‘Æ°á»£c Ã¢m");
+                        ModelState.AddModelError("", $"Dòng {i + 1}: Đơn giá không được âm");
                     if (chiTiets[i].SoLuong < 0)
-                        ModelState.AddModelError("", $"DÃ²ng {i + 1}: Sá»‘ lÆ°á»£ng khÃ´ng Ä‘Æ°á»£c Ã¢m");
+                        ModelState.AddModelError("", $"Dòng {i + 1}: Số lượng không được âm");
                     if (chiTiets[i].ThueGTGT < 0)
-                        ModelState.AddModelError("", $"DÃ²ng {i + 1}: Thuáº¿ GTGT khÃ´ng Ä‘Æ°á»£c Ã¢m");
+                        ModelState.AddModelError("", $"Dòng {i + 1}: Thuế GTGT không được âm");
                 }
             }
 
@@ -185,7 +185,7 @@ namespace SalesManagementSystem.Controllers
             {
                 model.NhanVienList  = GetNhanVienList(model.IDNhanVien);
                 model.TrangThaiList = GetTrangThaiList(model.TrangThaiDon);
-                ViewBag.Title       = "Táº¡o Ä‘Æ¡n Ä‘áº·t hÃ ng";
+                ViewBag.Title       = "Tạo đơn đặt hàng";
                 ViewBag.ChiTietsJson = chiTietsJson;
                 return View("Create", model);
             }
@@ -306,21 +306,21 @@ namespace SalesManagementSystem.Controllers
         {
             var oldDon = _repo.GetById(model.ID);
             if (oldDon == null) return HttpNotFound();
-            if (oldDon.TrangThaiDon == 3) return new HttpStatusCodeResult(400, "ÄÆ¡n hÃ ng Ä‘Ã£ giao khÃ´ng Ä‘Æ°á»£c chá»‰nh sá»­a.");
-            if (oldDon.TrangThaiDon == 4) return new HttpStatusCodeResult(400, "ÄÆ¡n hÃ ng Ä‘Ã£ há»§y khÃ´ng Ä‘Æ°á»£c chá»‰nh sá»­a.");
+            if (oldDon.TrangThaiDon == 3) return new HttpStatusCodeResult(400, "Đơn hàng đã giao không được chỉnh sửa.");
+            if (oldDon.TrangThaiDon == 4) return new HttpStatusCodeResult(400, "Đơn hàng đã hủy không được chỉnh sửa.");
 
             var chiTiets = ParseChiTiets(chiTietsJson);
 
             if (!model.IDKhachHang.HasValue || model.IDKhachHang == 0)
-                ModelState.AddModelError("IDKhachHang", "Vui lÃ²ng chá»n khÃ¡ch hÃ ng");
+                ModelState.AddModelError("IDKhachHang", "Vui lòng chọn khách hàng");
 
             if (string.IsNullOrWhiteSpace(model.SoDonHang))
-                ModelState.AddModelError("SoDonHang", "Vui lÃ²ng nháº­p sá»‘ Ä‘Æ¡n hÃ ng");
+                ModelState.AddModelError("SoDonHang", "Vui lòng nhập số đơn hàng");
             else if (_repo.CheckDuplicateSoDon(model.SoDonHang.Trim(), model.ID))
-                ModelState.AddModelError("SoDonHang", "Sá»‘ Ä‘Æ¡n hÃ ng Ä‘Ã£ tá»“n táº¡i trong há»‡ thá»‘ng");
+                ModelState.AddModelError("SoDonHang", "Số đơn hàng đã tồn tại trong hệ thống");
 
             if (!model.IDNhanVien.HasValue || model.IDNhanVien == 0)
-                ModelState.AddModelError("IDNhanVien", "Vui lÃ²ng chá»n nhÃ¢n viÃªn phá»¥ trÃ¡ch");
+                ModelState.AddModelError("IDNhanVien", "Vui lòng chọn nhân viên phụ trách");
 
             if (chiTiets == null || chiTiets.Count == 0)
                 ModelState.AddModelError("", "Vui lÃ²ng thÃªm Ã­t nháº¥t má»™t sáº£n pháº©m vÃ o Ä‘Æ¡n hÃ ng");
@@ -329,7 +329,7 @@ namespace SalesManagementSystem.Controllers
                 for (int i = 0; i < chiTiets.Count; i++)
                 {
                     if (!chiTiets[i].IDSanPham.HasValue || chiTiets[i].IDSanPham == 0)
-                        ModelState.AddModelError("", $"DÃ²ng {i + 1}: Vui lÃ²ng chá»n sáº£n pháº©m");
+                        ModelState.AddModelError("", $"Dòng {i + 1}: Vui lòng chọn sản phẩm");
                     if (chiTiets[i].DonGia < 0)
                         ModelState.AddModelError("", $"DÃ²ng {i + 1}: ÄÆ¡n giÃ¡ khÃ´ng Ä‘Æ°á»£c Ã¢m");
                     if (chiTiets[i].SoLuong < 0)
@@ -343,7 +343,7 @@ namespace SalesManagementSystem.Controllers
             {
                 model.NhanVienList   = GetNhanVienList(model.IDNhanVien);
                 model.TrangThaiList  = GetTrangThaiList(model.TrangThaiDon);
-                ViewBag.Title        = "Chá»‰nh sá»­a Ä‘Æ¡n Ä‘áº·t hÃ ng";
+                ViewBag.Title        = "Chỉnh sửa đơn đặt hàng";
                 ViewBag.ChiTietsJson = chiTietsJson;
                 return View("Edit", model);
             }
@@ -410,7 +410,7 @@ namespace SalesManagementSystem.Controllers
                 var don = _repo.GetById(id.Value);
                 if (don != null && don.TrangThaiDon == 3)
                 {
-                    return Json(new { success = false, message = "KhÃ´ng thá»ƒ xÃ³a Ä‘Æ¡n Ä‘áº·t hÃ ng Ä‘Ã£ giao." });
+                    return Json(new { success = false, message = "Không thể xóa đơn đặt hàng đã giao." });
                 }
                 _repo.Delete(id.Value);
             }
@@ -421,13 +421,13 @@ namespace SalesManagementSystem.Controllers
                     var don = _repo.GetById(item);
                     if (don != null && don.TrangThaiDon == 3)
                     {
-                        return Json(new { success = false, message = "Má»™t sá»‘ Ä‘Æ¡n Ä‘áº·t hÃ ng Ä‘Ã£ giao, khÃ´ng thá»ƒ xÃ³a." });
+                        return Json(new { success = false, message = "Một số đơn đặt hàng đã giao, không thể xóa." });
                     }
                 }
                 foreach (var item in ids)
                     _repo.Delete(item);
             }
-            return Json(new { success = true, message = "XÃ³a Ä‘Æ¡n Ä‘áº·t hÃ ng thÃ nh cÃ´ng" });
+            return Json(new { success = true, message = "Xóa đơn đặt hàng thành công" });
         }
 
         [HttpPost]
@@ -435,9 +435,9 @@ namespace SalesManagementSystem.Controllers
         public ActionResult UpdateStatus(int id, int trangThaiMoi)
         {
             var oldDon = _repo.GetById(id);
-            if (oldDon == null) return Json(new { success = false, message = "KhÃ´ng tÃ¬m tháº¥y Ä‘Æ¡n hÃ ng." });
-            if (oldDon.TrangThaiDon == 3) return Json(new { success = false, message = "KhÃ´ng thá»ƒ chuyá»ƒn tráº¡ng thÃ¡i Ä‘Æ¡n hÃ ng Ä‘Ã£ giao." });
-            if (oldDon.TrangThaiDon == 4) return Json(new { success = false, message = "ÄÆ¡n hÃ ng nÃ y Ä‘Ã£ bá»‹ há»§y trÆ°á»›c Ä‘Ã³." });
+            if (oldDon == null) return Json(new { success = false, message = "Không tìm thấy đơn hàng." });
+            if (oldDon.TrangThaiDon == 3) return Json(new { success = false, message = "Không thể chuyển trạng thái đơn hàng đã giao." });
+            if (oldDon.TrangThaiDon == 4) return Json(new { success = false, message = "Đơn hàng này đã bị hủy trước đó." });
 
             var session = GetCurrentUser();
             int userId = session?.IDNhanSu ?? 0;
@@ -447,13 +447,13 @@ namespace SalesManagementSystem.Controllers
             {
                 var newDon = _repo.GetById(id);
                 AuditLog.AddUpdate("NS_DonDatHang", id.ToString(), oldDon, newDon);
-                AuditLog.SaveAudit(userId, "ÄÆ¡n Ä‘áº·t hÃ ng", "DonDatHangController", "UpdateStatus");
-                return Json(new { success = true, message = "Chuyá»ƒn tráº¡ng thÃ¡i Ä‘Æ¡n hÃ ng thÃ nh cÃ´ng." });
+                AuditLog.SaveAudit(userId, "Đơn đặt hàng", "DonDatHangController", "UpdateStatus");
+                return Json(new { success = true, message = "Chuyển trạng thái đơn hàng thành công." });
             }
-            return Json(new { success = false, message = "Lá»—i khi chuyá»ƒn tráº¡ng thÃ¡i Ä‘Æ¡n hÃ ng." });
+            return Json(new { success = false, message = "Lỗi khi chuyển trạng thái đơn hàng." });
         }
 
-        // â”€â”€ Export Excel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ——— Export Excel ————————————————————————————————————————————————
 
         public ActionResult ExportExcel(int id)
         {

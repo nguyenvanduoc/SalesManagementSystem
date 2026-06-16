@@ -115,7 +115,7 @@ namespace SalesManagementSystem.Controllers
                 // AUDIT LOG
                 AuditLog.AddUpdate("DM_ChucVu", chucVu.ID.ToString(), oldChucVu, chucVu);
 
-                return Json(new { success = true, message = "Cáº­p nháº­t chá»©c vá»¥ thÃ nh cÃ´ng!" });
+                return Json(new { success = true, message = "Cập nhật chức vụ thành công!" });
             }
             return PartialView("UpdateChucVu", chucVu);
         }

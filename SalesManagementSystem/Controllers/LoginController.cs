@@ -61,7 +61,7 @@ namespace SalesManagementSystem.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError("", "TÃªn Ä‘Äƒng nháº­p hoáº·c máº­t kháº©u khÃ´ng Ä‘Ãºng.");
+                    ModelState.AddModelError("", "Tên đăng nhập hoặc mật khẩu không đúng.");
                 }
             }
 

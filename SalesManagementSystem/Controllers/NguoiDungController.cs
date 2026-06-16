@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Web.Mvc;
 using SalesManagementSystem.Helpers;
 using SalesManagementSystem.Models.Entities;
@@ -33,7 +33,7 @@ namespace SalesManagementSystem.Controllers
             };
 
             ViewBag.Keyword = keyword;
-            ViewBag.Title = "Danh sÃ¡ch ngÆ°á»i dÃ¹ng";
+            ViewBag.Title = "Danh sách người dùng";
 
             if (Request.IsAjaxRequest())
             {
@@ -49,7 +49,7 @@ namespace SalesManagementSystem.Controllers
             var employees = _aclLoginRepo.GetEmployeesWithoutAccount();
             ViewBag.Employees = employees;
             ViewBag.IsManager = isManager;
-            ViewBag.Title = isManager ? "ThÃªm Cáº¥p TrÃªn" : "ThÃªm Má»›i TÃ i Khoáº£n";
+            ViewBag.Title = isManager ? "Thêm Cấp Trên" : "Thêm Mới Tài Khoản";
             if (!isManager)
             {
                 ViewBag.Managers = _aclLoginRepo.GetManagers();
@@ -73,7 +73,7 @@ namespace SalesManagementSystem.Controllers
                         var tenDangNhap = emp.MaNhanSu;
                         var existingLogin = _aclLoginRepo.GetByEmployeeId(emp.ID);
                         
-                        // Náº¿u Ä‘ang khÃ´i phá»¥c tÃ i khoáº£n, pháº£i truyá»n ID cá»§a tÃ i khoáº£n cÅ© vÃ o Ä‘á»ƒ bá» qua check trÃ¹ng láº·p vá»›i chÃ­nh nÃ³
+                        // Nếu đang khôi phục tài khoản, phải truyền ID của tài khoản cũ vào để bỏ qua check trùng lặp với chính nó
                         if (!_aclLoginRepo.IsDuplicateUsername(tenDangNhap, existingLogin?.ID ?? 0))
                         {
                             var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
@@ -94,7 +94,7 @@ namespace SalesManagementSystem.Controllers
                             }
                             else
                             {
-                                // ThÃªm má»›i hoÃ n toÃ n
+                                // Thêm mới hoàn toàn
                                 var login = new AclLogin
                                 {
                                     IDNhanSu = emp.ID,
@@ -112,10 +112,10 @@ namespace SalesManagementSystem.Controllers
                         }
                     }
                 }
-                return Json(new { success = true, message = "ThÃªm má»›i tÃ i khoáº£n thÃ nh cÃ´ng! Máº­t kháº©u máº·c Ä‘á»‹nh lÃ  1234." });
+                return Json(new { success = true, message = "Thêm mới tài khoản thành công! Mật khẩu mặc định là 1234." });
             }
             
-            ModelState.AddModelError("", "Vui lÃ²ng chá»n Ã­t nháº¥t má»™t nhÃ¢n sá»±.");
+            ModelState.AddModelError("", "Vui lòng chọn ít nhất một nhân sự.");
             var employeesReload = _aclLoginRepo.GetEmployeesWithoutAccount();
             ViewBag.Employees = employeesReload;
             ViewBag.IsManager = isManager;
@@ -137,7 +137,7 @@ namespace SalesManagementSystem.Controllers
             ViewBag.Ten = emp != null ? $"{emp.HoDem} {emp.Ten}" : "";
             ViewBag.Managers = _aclLoginRepo.GetManagers();
             
-            // XÃ³a máº­t kháº©u khi hiá»ƒn thá»‹
+            // Xóa mật khẩu khi hiển thị
             login.MatKhau = ""; 
             return PartialView(login);
         }
@@ -152,7 +152,7 @@ namespace SalesManagementSystem.Controllers
             {
                 if (_aclLoginRepo.IsDuplicateUsername(login.TenDangNhap, login.ID))
                 {
-                    ModelState.AddModelError("TenDangNhap", "TÃªn Ä‘Äƒng nháº­p Ä‘Ã£ tá»“n táº¡i trong há»‡ thá»‘ng.");
+                    ModelState.AddModelError("TenDangNhap", "Tên đăng nhập đã tồn tại trong hệ thống.");
                     var emp = _aclLoginRepo.GetEmployeeById(login.IDNhanSu);
                     ViewBag.Ten = emp != null ? emp.Ten : "";
                     ViewBag.Managers = _aclLoginRepo.GetManagers();
@@ -184,7 +184,7 @@ namespace SalesManagementSystem.Controllers
                     var oldExisting = _aclLoginRepo.GetById(existing.ID);
                     _aclLoginRepo.Update(existing);
                     AuditLog.AddUpdate("ACL_Login", existing.ID.ToString(), oldExisting, existing);
-                    return Json(new { success = true, message = "Cáº­p nháº­t tÃ i khoáº£n thÃ nh cÃ´ng!" });
+                    return Json(new { success = true, message = "Cập nhật tài khoản thành công!" });
                 }
             }
             
@@ -223,11 +223,11 @@ namespace SalesManagementSystem.Controllers
             try
             {
                 _aclLoginRepo.TransferManager(id, userId);
-                return Json(new { success = true, message = "Chuyá»ƒn quyá»n cáº¥p trÃªn thÃ nh cÃ´ng" });
+                return Json(new { success = true, message = "Chuyển quyền cấp trên thành công" });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Lá»—i: " + ex.Message });
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
 
@@ -247,19 +247,19 @@ namespace SalesManagementSystem.Controllers
                 var session = (UserLoginViewModel)Session[CommonConstants.USER_SESSION];
                 if (session == null)
                 {
-                    return Json(new { success = false, message = "PhiÃªn Ä‘Äƒng nháº­p Ä‘Ã£ háº¿t háº¡n. Vui lÃ²ng Ä‘Äƒng nháº­p láº¡i." });
+                    return Json(new { success = false, message = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." });
                 }
 
                 var user = _aclLoginRepo.GetById(session.UserID);
                 if (user == null)
                 {
-                    return Json(new { success = false, message = "KhÃ´ng tÃ¬m tháº¥y thÃ´ng tin tÃ i khoáº£n." });
+                    return Json(new { success = false, message = "Không tìm thấy thông tin tài khoản." });
                 }
 
                 string hashedOldPassword = SecurityHelper.GetMd5Hash(model.OldPassword);
                 if (user.MatKhau != hashedOldPassword)
                 {
-                    ModelState.AddModelError("OldPassword", "Máº­t kháº©u cÅ© khÃ´ng chÃ­nh xÃ¡c.");
+                    ModelState.AddModelError("OldPassword", "Mật khẩu cũ không chính xác.");
                     return PartialView(model);
                 }
 
@@ -269,7 +269,7 @@ namespace SalesManagementSystem.Controllers
                 _aclLoginRepo.Update(user);
                 AuditLog.AddUpdate("ACL_Login", user.ID.ToString(), oldUser, user);
 
-                return Json(new { success = true, message = "Äá»•i máº­t kháº©u thÃ nh cÃ´ng!" });
+                return Json(new { success = true, message = "Đổi mật khẩu thành công!" });
             }
 
             return PartialView(model);

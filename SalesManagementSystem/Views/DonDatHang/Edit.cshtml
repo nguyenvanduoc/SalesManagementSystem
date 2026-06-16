@@ -137,7 +137,7 @@
             <div class="don-header-card">
                 <div class="d-flex align-items-center mb-2 gap-2">
                     <div class="don-section-title mb-0"><i class="bi bi-table me-1"></i>Chi tiết sản phẩm</div>
-                    <button type="button" class="btn-add-row ms-auto" onclick="DonDatHang.addRow()">
+                    <button type="button" class="btn-add-row ms-auto" onclick="DonDatHang.addRow(this)">
                         <i class="bi bi-plus-lg me-1"></i> Thêm dòng
                     </button>
                 </div>
@@ -209,6 +209,10 @@
 <script src="@Url.Content("~/Scripts/don-dat-hang.js?v=2.3")"></script>
 <script>
     $(document).ready(function () {
+        var $form = $('#frmDonDatHang').last();
+        var $pane = $form.closest('.tab-pane');
+        if ($pane.length === 0) $pane = $(document);
+
         DonDatHang.init({
             searchKhUrl:      '@Url.Action("SearchKhachHang","DonDatHang")',
             searchSpUrl:      '@Url.Action("SearchSanPham","DonDatHang")',
@@ -217,10 +221,11 @@
             selectedKhText:   '@Html.Raw((Model.MaKhachHang + " - " + Model.TenKhachHang).Replace("'", "\\'"))'
         });
 
-        $('#btnSaveDon').on('click', function () {
-            if (!DonDatHang.validateAndSerialize()) return;
+        $pane.find('#btnSaveDon').on('click', function () {
+            if (!DonDatHang.validateAndSerialize($form)) return;
             
-            var confirmHtml = '<div class="modal fade" id="confirmSaveModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">' +
+            var confirmModalId = 'confirmSaveModal_' + Math.random().toString(36).substr(2, 9);
+            var confirmHtml = '<div class="modal fade" id="' + confirmModalId + '" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">' +
                 '<div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">' +
                     '<div class="modal-content shadow-lg" style="background-color: #ffffff; color: #333; border: none; border-top: 5px solid #ffc107; border-radius: 6px;">' +
                         '<div class="modal-body p-4">' +
@@ -238,30 +243,30 @@
                 '</div>' +
             '</div>';
             
-            if ($('#confirmSaveModal').length === 0) {
-                $('body').append(confirmHtml);
-                $('#btnConfirmSaveAction').on('click', function() {
-                    $('#confirmSaveModal').modal('hide');
-                    setTimeout(function() {
-                        $('#frmDonDatHang').submit();
-                    }, 150);
-                });
-            }
-            var myModal = new bootstrap.Modal(document.getElementById('confirmSaveModal'));
+            $('body').append(confirmHtml);
+            var $modal = $('#' + confirmModalId);
+            $modal.find('#btnConfirmSaveAction').on('click', function() {
+                $modal.modal('hide');
+                setTimeout(function() {
+                    $form.submit();
+                }, 150);
+            });
+            
+            var myModal = new bootstrap.Modal(document.getElementById(confirmModalId));
             myModal.show();
         });
 
         @if (Model.TrangThaiDon == 3 || Model.TrangThaiDon == 4 || ViewBag.IsView == true)
         {
             <text>
-            $('input, select, textarea').prop('disabled', true);
-            $('.btn-add-row, .btn-remove-row, .btn-danger').hide();
+            $pane.find('input, select, textarea').prop('disabled', true);
+            $pane.find('.btn-add-row, .btn-remove-row, .btn-danger').hide();
             setTimeout(function() {
-                $('.form-select, .select2-hidden-accessible').prop('disabled', true);
-                $('#tbodyChiTiet tr').each(function() {
+                $pane.find('.form-select, .select2-hidden-accessible').prop('disabled', true);
+                $pane.find('#tbodyChiTiet tr').each(function() {
                     $(this).find('td:last').hide();
                 });
-                $('#frmDonDatHang table thead th:last').hide();
+                $pane.find('#frmDonDatHang table thead th:last').hide();
             }, 100);
             </text>
         }

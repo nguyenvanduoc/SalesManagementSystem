@@ -36,7 +36,7 @@
                         <select name="trangThai" class="form-select form-select-sm">
                             <option value="">-- Tất cả --</option>
                             <option value="1" @(ViewBag.TrangThai == 1 ? "selected" : "")>Đề nghị ghi</option>
-                            <option value="2" @(ViewBag.TrangThai == 2 ? "selected" : "")>Đã ghi sổ</option>
+                            <option value="2" @(ViewBag.TrangThai == 2 ? "selected" : "")>Đã ghi</option>
                             <option value="3" @(ViewBag.TrangThai == 3 ? "selected" : "")>Đã hủy</option>
                         </select>
                     </div>
@@ -59,6 +59,29 @@
 
     <div id="modalContainer"></div>
 </div>
+
+    <div class="modal fade" id="huyChungTuModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold text-dark">Lý do hủy chứng từ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="huy_idChungTu" />
+                    <input type="hidden" id="huy_idDonHang" />
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Vui lòng nhập lý do hủy:</label>
+                        <textarea class="form-control" id="huy_lyDo" rows="3" placeholder="Nhập lý do hủy..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-danger" onclick="xacNhanHuy()">Xác nhận hủy</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 @section Scripts {
     <script src="~/Scripts/chung-tu-ban-hang.js?v=3.0"></script>
@@ -96,23 +119,34 @@
             }, 100);
         });
 
-        window.huyChungTu = function(btn, id) {
-            var $form = getCtbhContainer(btn).find('#searchForm');
-            var lyDo = prompt("Nhập lý do hủy:");
-            if (lyDo != null) {
-                if (!lyDo.trim()) {
-                    if (typeof showToast === 'function') showToast('warning', 'Vui lòng nhập lý do hủy!');
-                    return;
-                }
-                $.post('@Url.Action("Huy")', { id: id, lyDo: lyDo }, function (res) {
-                    if (res.success) {
-                        if (typeof showToast === 'function') showToast('success', 'Hủy thành công!');
-                        $form.trigger('submit');
-                    } else {
-                        if (typeof showToast === 'function') showToast('error', res.message);
-                    }
-                });
+        window.huyChungTu = function(btn, id, idDonDatHang) {
+            window.currentCtbhContainer = getCtbhContainer(btn);
+            $('#huy_idChungTu').val(id);
+            $('#huy_idDonHang').val(idDonDatHang);
+            $('#huy_lyDo').val('');
+            $('#huyChungTuModal').modal('show');
+        };
+
+        window.xacNhanHuy = function() {
+            var id = $('#huy_idChungTu').val();
+            var idDonDatHang = $('#huy_idDonHang').val();
+            var lyDo = $('#huy_lyDo').val();
+            if (!lyDo.trim()) {
+                if (typeof showToast === 'function') showToast('warning', 'Vui lòng nhập lý do hủy!');
+                return;
             }
+            $.post('@Url.Action("Huy")', { id: id, idDonDatHang: idDonDatHang, lyDo: lyDo }, function (res) {
+                if (res.success) {
+                    $('#huyChungTuModal').modal('hide');
+                    if (typeof showToast === 'function') showToast('success', 'Hủy thành công!');
+                    if (window.currentCtbhContainer) {
+                        var $form = window.currentCtbhContainer.find('#searchForm');
+                        $form.trigger('submit');
+                    }
+                } else {
+                    if (typeof showToast === 'function') showToast('error', res.message);
+                }
+            });
         };
     </script>
 }

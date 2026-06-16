@@ -58,15 +58,15 @@
                 <div class="row g-2">
                     <div class="col-md-4">
                         <label class="form-label text-muted fw-semibold small">Kho nhập <span class="text-danger">*</span></label>
-                        <select id="IDKho" class="form-control" style="width:100%;" @(isView ? "disabled" : "")></select>
+                        <select id="IDKho" class="form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label text-muted fw-semibold small">Nhà cung cấp <span class="text-danger">*</span></label>
-                        <select id="IDNhaCungCap" class="form-control" style="width:100%;" @(isView ? "disabled" : "")></select>
+                        <select id="IDNhaCungCap" class="form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label text-muted fw-semibold small">Người nhận <span class="text-danger">*</span></label>
-                        <select id="IDNhanSuNhan" class="form-control" style="width:100%;" @(isView ? "disabled" : "")></select>
+                        <select id="IDNhanSuNhan" class="form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label text-muted fw-semibold small">Người giao hàng</label>
@@ -180,7 +180,7 @@
 </form>
 
 @section Scripts {
-<script src="@Url.Content("~/Scripts/phieu-nhap-kho.js?v=1.1")"></script>
+<script src="@Url.Content("~/Scripts/phieu-nhap-kho.js?v=1.4")"></script>
 <script>
     var isViewMode = @(isView.ToString().ToLower());
 
@@ -191,11 +191,11 @@
             searchNhanSuUrl: '@Url.Action("SearchNhanSu")',
             searchSpUrl: '@Url.Action("SearchSanPham")',
             chiTietsJson: @Html.Raw(chiTietsJson),
-            selectedKhoId: @(Model.IDKho.HasValue ? Model.IDKho.Value.ToString() : "null"),
+            selectedKhoId: @(Model.IDKho.HasValue && Model.IDKho.Value > 0 ? Model.IDKho.Value.ToString() : "null"),
             selectedKhoText: '@Html.Raw(Model.TenKho)',
-            selectedNccId: @(Model.IDNhaCungCap.HasValue ? Model.IDNhaCungCap.Value.ToString() : "null"),
+            selectedNccId: @(Model.IDNhaCungCap.HasValue && Model.IDNhaCungCap.Value > 0 ? Model.IDNhaCungCap.Value.ToString() : "null"),
             selectedNccText: '@Html.Raw(Model.TenNhaCungCap)',
-            selectedNhanSuId: @(Model.IDNhanSuNhan.HasValue ? Model.IDNhanSuNhan.Value.ToString() : "null"),
+            selectedNhanSuId: @(Model.IDNhanSuNhan.HasValue && Model.IDNhanSuNhan.Value > 0 ? Model.IDNhanSuNhan.Value.ToString() : "null"),
             selectedNhanSuText: '@Html.Raw(Model.TenNhanSuNhan)'
         });
 

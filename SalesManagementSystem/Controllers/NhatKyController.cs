@@ -32,7 +32,7 @@ namespace SalesManagementSystem.Controllers
             };
 
             ViewBag.Keyword = keyword;
-            ViewBag.Title = "Nháº­t kÃ½ há»‡ thá»‘ng";
+            ViewBag.Title = "Nhật ký hệ thống";
 
             if (Request.IsAjaxRequest())
             {

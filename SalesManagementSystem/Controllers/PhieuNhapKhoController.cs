@@ -300,28 +300,28 @@ namespace SalesManagementSystem.Controllers
         public ActionResult SearchKhoHang(string q)
         {
             var data = _repo.GetKhoForDropdown(q);
-            return Json(data.Select(x => new { id = x.ID, text = x.MaKhoHang + " - " + x.TenKhoHang }), JsonRequestBehavior.AllowGet);
+            return Json(data.Select(x => new { id = (int)x.ID, text = (string)x.MaKhoHang + " - " + (string)x.TenKhoHang }), JsonRequestBehavior.AllowGet);
         }
 
         [HttpGet]
         public ActionResult SearchNhaCungCap(string q)
         {
             var data = _repo.GetNhaCungCapForDropdown(q);
-            return Json(data.Select(x => new { id = x.ID, text = x.MaNhaCungCap + " - " + x.TenNhaCungCap }), JsonRequestBehavior.AllowGet);
+            return Json(data.Select(x => new { id = (int)x.ID, text = (string)x.MaNhaCungCap + " - " + (string)x.TenNhaCungCap }), JsonRequestBehavior.AllowGet);
         }
 
         [HttpGet]
         public ActionResult SearchNhanSu(string q)
         {
             var data = _repo.GetNhanSuForDropdown(q);
-            return Json(data.Select(x => new { id = x.ID, text = x.MaNhanSu + " - " + x.HoTen }), JsonRequestBehavior.AllowGet);
+            return Json(data.Select(x => new { id = (int)x.ID, text = (string)x.MaNhanSu + " - " + (string)x.HoTen }), JsonRequestBehavior.AllowGet);
         }
 
         [HttpGet]
         public ActionResult SearchSanPham(string q)
         {
             var data = _repo.GetSanPhamForDropdown(q);
-            return Json(data.Select(x => new { id = x.ID, text = x.MaSanPham + " - " + x.TenSanPham, dvt = x.DVT }), JsonRequestBehavior.AllowGet);
+            return Json(data.Select(x => new { id = (int)x.ID, text = (string)x.MaSanPham + " - " + (string)x.TenSanPham, dvt = (string)x.DVT }), JsonRequestBehavior.AllowGet);
         }
     }
 }

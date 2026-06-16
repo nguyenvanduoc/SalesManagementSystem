@@ -14,7 +14,6 @@
                         <th>Khách hàng</th>
                         <th>Kho hàng</th>
                         <th>Ghi chú</th>
-                        <th class="text-center">Trạng thái ĐH</th>
                         <th class="text-center">Trạng thái</th>
                     </tr>
                 </thead>
@@ -33,24 +32,11 @@
                                         <ul class="dropdown-menu shadow">
                                             <li><h6 class="dropdown-header text-uppercase fw-bold text-dark">Thao tác</h6></li>
                                             <li><hr class="dropdown-divider"></li>
-                                            
-                                            @if (item.TrangThai == 1 && SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuXuatKho", SalesManagementSystem.Helpers.LoaiPhanQuyen.TuyChon))
-                                            {
-                                                <li>
-                                                    <button type="button" class="dropdown-item text-success" onclick="ghiSoPhieuXuat(this, @item.ID)">
-                                                        <i class="bi bi-check-circle me-2 text-success"></i> Ghi sổ
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button type="button" class="dropdown-item text-danger" onclick="huyPhieuXuat(this, @item.ID)">
-                                                        <i class="bi bi-x-circle me-2 text-danger"></i> Hủy
-                                                    </button>
-                                                </li>
-                                            }
-                                            else
-                                            {
-                                                <li><span class="dropdown-item text-muted small">Không có thao tác</span></li>
-                                            }
+                                            <li>
+                                                <a href="@Url.Action("Details", "PhieuXuatKho", new { id = item.ID })" class="dropdown-item text-primary">
+                                                    <i class="bi bi-eye me-2 text-primary"></i> Xem chi tiết
+                                                </a>
+                                            </li>
                                         </ul>
                                     </div>
                                 </td>
@@ -61,20 +47,6 @@
                                 <td class="align-middle">@item.TenKhachHang</td>
                                 <td class="align-middle">@item.TenKhoHang</td>
                                 <td class="align-middle">@item.GhiChu</td>
-                                <td class="text-center align-middle">
-                                    @if (item.TrangThaiDonHang == 2)
-                                    {
-                                        <span class="badge bg-success" style="font-size: 0.75rem;">Đã duyệt</span>
-                                    }
-                                    else if (item.TrangThaiDonHang == 4)
-                                    {
-                                        <span class="badge bg-info" style="font-size: 0.75rem;">Đã xuất kho</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary" style="font-size: 0.75rem;">Khác</span>
-                                    }
-                                </td>
                                 <td class="text-center align-middle">
                                     @if (item.TrangThai == 1)
                                     {
@@ -95,7 +67,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="10" class="text-center py-4 text-muted">
+                            <td colspan="9" class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox fs-2 d-block mb-2"></i>
                                 Không có dữ liệu
                             </td>

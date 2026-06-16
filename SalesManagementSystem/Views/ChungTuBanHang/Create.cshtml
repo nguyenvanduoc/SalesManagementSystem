@@ -38,6 +38,8 @@
 </div>
 
 <form id="frmSaveCTBH">
+    @Html.HiddenFor(m => m.ID)
+    @Html.HiddenFor(m => m.SoChungTu)
     @Html.HiddenFor(m => m.IDDonDatHang)
     @Html.HiddenFor(m => m.IDKhachHang)
 
@@ -110,7 +112,7 @@
                     <div class="col-md-4">
                         <label class="form-label text-muted fw-semibold small">Kho xuất</label>
                         <div class="input-group">
-                            <input type="hidden" name="IDKho" id="IDKho" value="@Model.IDKho" />
+                            <input type="hidden" name="IDKho" id="IDKho" value="@(Model.IDKho > 0 ? Model.IDKho.ToString() : "")" />
                             <input type="text" class="form-control bg-white" id="TenKhoHang" value="@Model.TenKhoHang" readonly placeholder="-- Chọn kho --" />
                             <button class="btn btn-outline-secondary" type="button" id="btnShowKhoTonKho"><i class="bi bi-search"></i> Chọn kho</button>
                         </div>

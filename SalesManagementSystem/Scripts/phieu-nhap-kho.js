@@ -37,11 +37,12 @@ var PhieuNhapKho = (function () {
     function _initSelect2() {
         $('#IDKho').select2({
             placeholder: '-- Chọn kho --',
+            minimumInputLength: 0,
             ajax: {
                 url: config.searchKhoUrl,
                 dataType: 'json',
                 delay: 250,
-                data: function (params) { return { q: params.term }; },
+                data: function (params) { return { q: params.term || '' }; },
                 processResults: function (data) { return { results: data }; },
                 cache: true
             }
@@ -49,11 +50,12 @@ var PhieuNhapKho = (function () {
 
         $('#IDNhaCungCap').select2({
             placeholder: '-- Chọn nhà cung cấp --',
+            minimumInputLength: 0,
             ajax: {
                 url: config.searchNccUrl,
                 dataType: 'json',
                 delay: 250,
-                data: function (params) { return { q: params.term }; },
+                data: function (params) { return { q: params.term || '' }; },
                 processResults: function (data) { return { results: data }; },
                 cache: true
             }
@@ -61,11 +63,12 @@ var PhieuNhapKho = (function () {
 
         $('#IDNhanSuNhan').select2({
             placeholder: '-- Chọn người nhận --',
+            minimumInputLength: 0,
             ajax: {
                 url: config.searchNhanSuUrl,
                 dataType: 'json',
                 delay: 250,
-                data: function (params) { return { q: params.term }; },
+                data: function (params) { return { q: params.term || '' }; },
                 processResults: function (data) { return { results: data }; },
                 cache: true
             }
@@ -86,11 +89,12 @@ var PhieuNhapKho = (function () {
         var $select = $row.find('.sel-sanpham');
         $select.select2({
             placeholder: 'Gõ để tìm SP...',
+            minimumInputLength: 0,
             ajax: {
                 url: config.searchSpUrl,
                 dataType: 'json',
                 delay: 250,
-                data: function (params) { return { q: params.term }; },
+                data: function (params) { return { q: params.term || '' }; },
                 processResults: function (data) { return { results: data }; },
                 cache: true
             }
@@ -244,17 +248,22 @@ var PhieuNhapKho = (function () {
             rows.each(function (idx) {
                 var stt = idx + 1;
                 var $row = $(this);
+                $row.removeClass('table-danger');
                 var spId = $row.find('.sel-sanpham').val();
-                if (!spId) { errorMsg += 'Dòng ' + stt + ': Chưa chọn sản phẩm.\n'; isValid = false; }
-
                 var sl = _parseMoney($row.find('.txt-soluong').val());
-                if (sl <= 0) { errorMsg += 'Dòng ' + stt + ': Số lượng phải > 0.\n'; isValid = false; }
-
                 var dg = _parseMoney($row.find('.txt-dongia').val());
-                if (dg < 0) { errorMsg += 'Dòng ' + stt + ': Đơn giá không được âm.\n'; isValid = false; }
+                var thue = _parseMoney($row.find('.txt-thue').val());
 
-                var thue = parseFloat($row.find('.txt-thue').val()) || 0;
-                if (thue < 0) { errorMsg += 'Dòng ' + stt + ': Thuế GTGT không được âm.\n'; isValid = false; }
+                var rowValid = true;
+                if (!spId) { errorMsg += 'Dòng ' + stt + ': Chưa chọn sản phẩm.\n'; rowValid = false; }
+                if (sl <= 0) { errorMsg += 'Dòng ' + stt + ': Số lượng phải > 0.\n'; rowValid = false; }
+                if (dg < 0) { errorMsg += 'Dòng ' + stt + ': Đơn giá không được âm.\n'; rowValid = false; }
+                if (thue < 0) { errorMsg += 'Dòng ' + stt + ': Thuế GTGT không được âm.\n'; rowValid = false; }
+                
+                if (!rowValid) {
+                    $row.addClass('table-danger');
+                    isValid = false;
+                }
 
                 if (isValid) {
                     chiTiets.push({

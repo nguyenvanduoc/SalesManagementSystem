@@ -28,7 +28,7 @@ var ChungTuBanHang = (function () {
                     "data": "TrangThai",
                     "render": function(data) {
                         if (data === 1) return '<span class="badge badge-warning">Đề nghị ghi</span>';
-                        if (data === 2) return '<span class="badge badge-success">Đã ghi sổ</span>';
+                        if (data === 2) return '<span class="badge badge-success">Đã ghi</span>';
                         if (data === 3) return '<span class="badge badge-danger">Đã hủy</span>';
                         return '';
                     }

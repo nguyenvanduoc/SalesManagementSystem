@@ -107,7 +107,10 @@
                     <select id="statusNewStatus" class="form-select">
                         @foreach (var item in (SelectList)ViewBag.TrangThais)
                         {
-                            <option value="@item.Value">@item.Text</option>
+                            if (item.Value == "3" || item.Value == "4")
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
                         }
                     </select>
                 </div>

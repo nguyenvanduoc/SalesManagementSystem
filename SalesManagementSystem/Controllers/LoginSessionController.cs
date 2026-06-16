@@ -31,7 +31,7 @@ namespace SalesManagementSystem.Controllers
             };
 
             ViewBag.Keyword = keyword;
-            ViewBag.Title = "Lá»‹ch sá»­ Ä‘Äƒng nháº­p";
+            ViewBag.Title = "Lịch sử đăng nhập";
 
             if (Request.IsAjaxRequest())
             {
@@ -46,7 +46,7 @@ namespace SalesManagementSystem.Controllers
         public ActionResult KickUser(int id)
         {
             _sessionRepo.KickSession(id);
-            return Json(new { success = true, message = "ÄÃ£ ngáº¯t phiÃªn Ä‘Äƒng nháº­p thÃ nh cÃ´ng." });
+            return Json(new { success = true, message = "Đã ngắt phiên đăng nhập thành công." });
         }
     }
 }

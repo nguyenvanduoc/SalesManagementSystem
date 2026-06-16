@@ -375,19 +375,61 @@ namespace SalesManagementSystem.Repositories
             }
         }
 
-        // ── UpdateStatus ──────────────────────────────────────────────────────
         public bool UpdateStatus(int id, int newStatus, int userId)
         {
             using (var conn = _db.CreateConnection())
             {
-                string sql = "UPDATE NS_DonDatHang SET TrangThaiDon = @NewStatus, NgayCapNhat = GETDATE(), NguoiCapNhat = @UserId WHERE ID = @ID AND TrangThaiDon != 3 AND TrangThaiDon != 4";
-                int rows = conn.Execute(sql, new { ID = id, NewStatus = newStatus, UserId = userId });
-                if (rows > 0)
+                conn.Open();
+                using (var tr = conn.BeginTransaction())
                 {
-                    conn.Execute("UPDATE NS_DonDatHangChiTiet SET TrangThaiDon = @NewStatus, NgayCapNhat = GETDATE(), NguoiCapNhat = @UserId WHERE IDDonDatHang = @ID", new { ID = id, NewStatus = newStatus, UserId = userId });
-                    return true;
+                    try
+                    {
+                        string sql = "UPDATE NS_DonDatHang SET TrangThaiDon = @NewStatus, NgayCapNhat = GETDATE(), NguoiCapNhat = @UserId WHERE ID = @ID AND TrangThaiDon != 3 AND TrangThaiDon != 4";
+                        int rows = conn.Execute(sql, new { ID = id, NewStatus = newStatus, UserId = userId }, transaction: tr);
+                        if (rows > 0)
+                        {
+                            conn.Execute("UPDATE NS_DonDatHangChiTiet SET TrangThaiDon = @NewStatus, NgayCapNhat = GETDATE(), NguoiCapNhat = @UserId WHERE IDDonDatHang = @ID", new { ID = id, NewStatus = newStatus, UserId = userId }, transaction: tr);
+                            
+                            // Nếu hủy đơn đặt hàng, hủy luôn chứng từ và phiếu xuất kho liên quan
+                            if (newStatus == 4)
+                            {
+                                // 1. Hủy các chứng từ bán hàng liên quan
+                                var listChungTu = conn.Query<int>("SELECT ID FROM BAN_ChungTuBanHang WHERE IDDonDatHang = @ID AND TrangThai != 3", new { ID = id }, transaction: tr).ToList();
+                                foreach (var idChungTu in listChungTu)
+                                {
+                                    var p = new DynamicParameters();
+                                    p.Add("@ID", idChungTu);
+                                    p.Add("@NguoiHuy", userId);
+                                    p.Add("@LyDoHuy", "Hủy theo đơn đặt hàng");
+                                    conn.Execute("UPDATE BAN_ChungTuBanHang SET TrangThai = 3, NguoiCapNhat = @NguoiHuy, NgayCapNhat = GETDATE() WHERE ID = @ID", new { NguoiHuy = userId, ID = idChungTu }, transaction: tr);
+                                    
+                                    conn.Execute("UPDATE KT_NhatKyChung SET IsHuy = 1 WHERE LoaiChungTu = 'BAN' AND IDChungTu = @ID", new { ID = idChungTu }, transaction: tr);
+                                }
+
+                                // 2. Hủy các phiếu xuất kho liên quan (trực tiếp từ IDDonDatHang hoặc qua IDChungTuBanHang)
+                                var listPhieuXuat = conn.Query<int>(@"
+                                    SELECT ID FROM KHO_PhieuXuat 
+                                    WHERE (IDDonDatHang = @ID OR IDChungTuBanHang IN (SELECT ID FROM BAN_ChungTuBanHang WHERE IDDonDatHang = @ID)) 
+                                    AND TrangThai != 3", new { ID = id }, transaction: tr).ToList();
+
+                                foreach (var idPhieuXuat in listPhieuXuat)
+                                {
+                                    conn.Execute("UPDATE KHO_PhieuXuat SET TrangThai = 3, NguoiCapNhat = @NguoiHuy, NgayCapNhat = GETDATE() WHERE ID = @IDPhieuXuat", new { NguoiHuy = userId, IDPhieuXuat = idPhieuXuat }, transaction: tr);
+                                    conn.Execute("DELETE FROM KHO_GiaoDichKho WHERE LoaiChungTu = 2 AND SoChungTu = (SELECT SoChungTu FROM KHO_PhieuXuat WHERE ID = @IDPhieuXuat)", new { IDPhieuXuat = idPhieuXuat }, transaction: tr);
+                                }
+                            }
+                            
+                            tr.Commit();
+                            return true;
+                        }
+                        return false;
+                    }
+                    catch
+                    {
+                        tr.Rollback();
+                        return false;
+                    }
                 }
-                return false;
             }
         }
 

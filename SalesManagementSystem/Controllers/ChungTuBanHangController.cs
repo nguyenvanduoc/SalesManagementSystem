@@ -109,7 +109,6 @@ namespace SalesManagementSystem.Controllers
 
             int totalKhos;
             var khos = _khoHangRepo.GetPaged(1, 1000, "", out totalKhos).ToList();
-            var firstKho = khos.FirstOrDefault();
 
             var model = new ChungTuBanHangViewModel();
             model.SoChungTu = _repo.GenerateSoChungTu();
@@ -117,8 +116,8 @@ namespace SalesManagementSystem.Controllers
             model.SoDonHang = donHang.SoDonHang;
             model.IDKhachHang = donHang.IDKhachHang ?? 0;
             model.TenKhachHang = khachHang?.TenKhachHang ?? "";
-            model.IDKho = firstKho?.ID ?? 0;
-            model.TenKhoHang = firstKho?.TenKhoHang ?? "";
+            model.IDKho = 0;
+            model.TenKhoHang = "";
             
             var chiTietsDon = _donDatHangRepo.GetChiTietByDonId(idDonDatHang);
 
@@ -229,101 +228,36 @@ namespace SalesManagementSystem.Controllers
 
             try
             {
-                // Kiểm tra tồn kho backend
-                var itemsCheck = model.ChiTiets.Select(x => new CheckTonKhoRequestItem { IDSanPham = x.IDSanPham, SoLuongCanXuat = x.SoLuong }).ToList();
-                var checkTon = _repo.CheckTonKhoByKho(model.IDKho, itemsCheck).ToList();
-                var missingItems = checkTon.Where(x => !x.IsDuTon).ToList();
-                if (missingItems.Any())
-                {
-                    var msg = string.Join("; ", missingItems.Select(x => $"Sản phẩm [{x.MaSanPham}] - {x.TenSanPham} vượt số lượng tồn. Tồn hiện tại: {x.SoLuongTon:N0}, số lượng cần xuất: {x.SoLuongCanXuat:N0}."));
-                    return Json(new { success = false, message = msg });
-                }
                 var user = GetCurrentUser();
                 int userId = user?.IDNhanSu ?? 0;
 
-                if (string.IsNullOrEmpty(model.SoChungTu))
+                if (model.ID > 0)
                 {
-                    model.SoChungTu = _repo.GenerateSoChungTu();
+                    _repo.Update(model, userId, ghiSo && PermissionHelper.HasPermission("ChungTuBanHang", LoaiPhanQuyen.TuyChon));
+                    return Json(new { success = true, id = model.ID });
                 }
-
-                // Bất kể có ghi sổ hay không, chứng từ khởi tạo trạng thái = 1 (Chờ ghi)
-                model.TrangThai = 1;
-
-                int newId = _repo.Insert(model, userId);
-
-                // Cập nhật trạng thái đơn đặt hàng: 2 (Đang lập chứng từ), 3 (Đã lập chứng từ)
-                int trangThaiDonHang = ghiSo ? 3 : 2;
-                if (model.IDDonDatHang.HasValue && model.IDDonDatHang.Value > 0)
+                else
                 {
-                    _donDatHangRepo.UpdateStatus(model.IDDonDatHang.Value, trangThaiDonHang, userId);
-                }
+                    if (string.IsNullOrEmpty(model.SoChungTu))
+                    {
+                        model.SoChungTu = _repo.GenerateSoChungTu();
+                    }
 
-                if (ghiSo && PermissionHelper.HasPermission("ChungTuBanHang", LoaiPhanQuyen.TuyChon))
-                {
-                    ProcessGhiSo(newId, userId);
-                }
+                    int newId = _repo.Insert(model, userId, ghiSo && PermissionHelper.HasPermission("ChungTuBanHang", LoaiPhanQuyen.TuyChon));
 
-                return Json(new { success = true, id = newId });
+                    // Cập nhật trạng thái đơn đặt hàng: 2 (Đang lập chứng từ), 3 (Đã lập chứng từ)
+                    int trangThaiDonHang = ghiSo ? 3 : 2;
+                    if (model.IDDonDatHang.HasValue && model.IDDonDatHang.Value > 0)
+                    {
+                        _donDatHangRepo.UpdateStatus(model.IDDonDatHang.Value, trangThaiDonHang, userId);
+                    }
+
+                    return Json(new { success = true, id = newId });
+                }
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message });
-            }
-        }
-
-        private void CreateAutoPhieuXuatKho(ChungTuBanHangViewModel model, int userId)
-        {
-            var dbFactory = new DbConnectionFactory();
-            using (var conn = dbFactory.CreateConnection())
-            {
-                conn.Open();
-                using (var tr = conn.BeginTransaction())
-                {
-                    try
-                    {
-                        var lastSo = conn.ExecuteScalar<string>("SELECT TOP 1 SoChungTu FROM KHO_PhieuXuat ORDER BY ID DESC", transaction: tr);
-                        string soPx = "PX00001";
-                        if (!string.IsNullOrEmpty(lastSo))
-                        {
-                            var numStr = lastSo.Replace("PX", "");
-                            if (int.TryParse(numStr, out int num))
-                                soPx = "PX" + (num + 1).ToString("D5");
-                        }
-
-                        var p = new DynamicParameters();
-                        p.Add("@SoChungTu", soPx);
-                        p.Add("@NgayXuat", model.NgayChungTu);
-                        p.Add("@IDKho", model.IDKho);
-                        p.Add("@IDNhanSuNhan", null, System.Data.DbType.Int32);
-                        p.Add("@TenNguoiNhan", model.TenKhachHang);
-                        p.Add("@IDChungTuBanHang", model.ID);
-                        p.Add("@IDDonDatHang", model.IDDonDatHang);
-                        p.Add("@GhiChu", "Xuất kho tự động từ CTBH " + model.SoChungTu);
-                        p.Add("@TongTienHang", model.TongTienHang);
-                        p.Add("@TongTienThue", model.TongTienThue);
-                        p.Add("@TongCong", model.TongCong);
-                        p.Add("@NguoiTao", userId);
-                        p.Add("@TrangThai", 1); // Đề nghị ghi
-                        p.Add("@NewID", dbType: System.Data.DbType.Int32, direction: System.Data.ParameterDirection.Output);
-
-                        conn.Execute("INSERT INTO KHO_PhieuXuat (SoChungTu, NgayXuat, IDChungTuBanHang, IDDonDatHang, IDKho, IDNhanSuNhan, TenNguoiNhan, GhiChu, TongTienHang, TongTienThue, TongCong, NguoiTao, NgayTao, TrangThai) VALUES (@SoChungTu, @NgayXuat, @IDChungTuBanHang, @IDDonDatHang, @IDKho, @IDNhanSuNhan, @TenNguoiNhan, @GhiChu, @TongTienHang, @TongTienThue, @TongCong, @NguoiTao, GETDATE(), @TrangThai); SELECT @NewID = SCOPE_IDENTITY();", p, transaction: tr);
-                        int idPhieu = p.Get<int>("@NewID");
-
-                        int stt = 1;
-                        foreach (var ct in model.ChiTiets)
-                        {
-                            conn.Execute("INSERT INTO KHO_PhieuXuat_ChiTiet (IDPhieuXuat, IDSanPham, STT, SoLuong, DonGia, ThanhTien, ThueGTGT, TienThue, TongSauThue) VALUES (@IDPhieuXuat, @IDSanPham, @STT, @SoLuong, @DonGia, @ThanhTien, @ThueGTGT, @TienThue, @TongSauThue)",
-                                new { IDPhieuXuat = idPhieu, IDSanPham = ct.IDSanPham, STT = stt++, SoLuong = ct.SoLuong, DonGia = ct.DonGia, ThanhTien = ct.ThanhTien, ThueGTGT = ct.ThueGTGT, TienThue = ct.TienThue, TongSauThue = ct.TongSauThue }, transaction: tr);
-                        }
-
-                        tr.Commit();
-                    }
-                    catch
-                    {
-                        tr.Rollback();
-                        throw;
-                    }
-                }
             }
         }
 
@@ -337,7 +271,7 @@ namespace SalesManagementSystem.Controllers
                 var user = GetCurrentUser();
                 int userId = user?.IDNhanSu ?? 0;
 
-                ProcessGhiSo(id, userId);
+                _repo.GhiSo(id, userId);
 
                 return Json(new { success = true });
             }
@@ -347,74 +281,8 @@ namespace SalesManagementSystem.Controllers
             }
         }
 
-        private void ProcessGhiSo(int id, int userId)
-        {
-            var model = _repo.GetById(id);
-            if (model == null) throw new Exception("Chứng từ không tồn tại.");
-            if (model.TrangThai != 1) throw new Exception("Chứng từ đã ghi hoặc đã hủy.");
-
-            // Kiểm tra tồn kho backend trước khi ghi sổ
-            var itemsCheck = model.ChiTiets.Select(x => new CheckTonKhoRequestItem { IDSanPham = x.IDSanPham, SoLuongCanXuat = x.SoLuong }).ToList();
-            var checkTon = _repo.CheckTonKhoByKho(model.IDKho, itemsCheck).ToList();
-            var missingItems = checkTon.Where(x => !x.IsDuTon).ToList();
-            if (missingItems.Any())
-            {
-                var msg = string.Join("; ", missingItems.Select(x => $"Sản phẩm [{x.MaSanPham}] - {x.TenSanPham} vượt số lượng tồn. Tồn hiện tại: {x.SoLuongTon:N0}, số lượng cần xuất: {x.SoLuongCanXuat:N0}."));
-                throw new Exception("Lỗi tồn kho: " + msg);
-            }
-
-            // Update Status to 2 (Đã ghi)
-            _repo.UpdateStatus(id, 2, userId);
-
-            // Auto-create PhieuXuatKho when status changes to Đã ghi
-            CreateAutoPhieuXuatKho(model, userId);
-
-            // Cập nhật trạng thái đơn đặt hàng thành 3 (Đã lập chứng từ)
-            if (model.IDDonDatHang.HasValue && model.IDDonDatHang.Value > 0)
-            {
-                _donDatHangRepo.UpdateStatus(model.IDDonDatHang.Value, 3, userId);
-            }
-
-            // Ghi Nhat Ky Chung
-            if (model.IDTaiKhoanThanhToan.HasValue)
-            {
-                var taiKhoanNo = _taiKhoanRepo.GetActive().FirstOrDefault(x => x.ID == model.IDTaiKhoanThanhToan.Value)?.SoTaiKhoan ?? "131";
-                
-                // Doanh thu
-                _nhatKyRepo.Insert(new KT_NhatKyChung
-                {
-                    NgayChungTu = model.NgayChungTu,
-                    SoChungTu = model.SoChungTu,
-                    LoaiChungTu = "BAN",
-                    IDChungTu = model.ID,
-                    TaiKhoanNo = taiKhoanNo,
-                    TaiKhoanCo = "5111", // Doanh thu
-                    SoTien = model.TongTienHang,
-                    DienGiai = "Doanh thu bán hàng hóa theo CT " + model.SoChungTu,
-                    NguoiTao = userId
-                });
-
-                // VAT
-                if (model.TongTienThue > 0)
-                {
-                    _nhatKyRepo.Insert(new KT_NhatKyChung
-                    {
-                        NgayChungTu = model.NgayChungTu,
-                        SoChungTu = model.SoChungTu,
-                        LoaiChungTu = "BAN",
-                        IDChungTu = model.ID,
-                        TaiKhoanNo = taiKhoanNo,
-                        TaiKhoanCo = "33311", // Thuế GTGT
-                        SoTien = model.TongTienThue,
-                        DienGiai = "Thuế GTGT đầu ra theo CT " + model.SoChungTu,
-                        NguoiTao = userId
-                    });
-                }
-            }
-        }
-
         [HttpPost]
-        public ActionResult Huy(int id, string lyDo)
+        public ActionResult Huy(int id, int? idDonDatHang, string lyDo)
         {
             if (!PermissionHelper.HasPermission("ChungTuBanHang", LoaiPhanQuyen.TuyChon)) return Json(new { success = false, message = "Không có quyền hủy" });
 
@@ -423,8 +291,7 @@ namespace SalesManagementSystem.Controllers
                 var user = GetCurrentUser();
                 int userId = user?.IDNhanSu ?? 0;
 
-                _repo.Cancel(id, userId, lyDo);
-                _nhatKyRepo.Cancel("BAN", id, userId);
+                _repo.Cancel(id, idDonDatHang, userId, lyDo);
 
                 return Json(new { success = true });
             }

@@ -9,12 +9,6 @@
         <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">
             @ViewBag.Title
         </h4>
-        @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuXuatKho", SalesManagementSystem.Helpers.LoaiPhanQuyen.Them))
-        {
-            <button type="button" class="btn btn-primary btn-sm" onclick="openDonDatHangModal()" style="background-color: #3498db; border-color: #3498db;">
-                <i class="bi bi-plus-lg fw-bold me-1"></i> Tạo xuất kho từ Đơn hàng
-            </button>
-        }
     </div>
 
     <div class="card shadow-sm mb-3">
@@ -42,7 +36,7 @@
                         <select name="trangThai" class="form-select form-select-sm">
                             <option value="">-- Tất cả --</option>
                             <option value="1" @(ViewBag.TrangThai == 1 ? "selected" : "")>Đề nghị ghi</option>
-                            <option value="2" @(ViewBag.TrangThai == 2 ? "selected" : "")>Đã ghi sổ</option>
+                            <option value="2" @(ViewBag.TrangThai == 2 ? "selected" : "")>Đã ghi</option>
                             <option value="3" @(ViewBag.TrangThai == 3 ? "selected" : "")>Đã hủy</option>
                         </select>
                     </div>
@@ -99,42 +93,5 @@
             });
         })();
 
-        // Global functions for list buttons
-        function getPxkContainer(btn) {
-            return $(btn).closest('[id^="pxk-"]');
-        }
-
-        window.ghiSoPhieuXuat = function(btn, id) {
-            var $form = getPxkContainer(btn).find('#searchForm');
-            showConfirm('Bạn có chắc chắn muốn ghi sổ phiếu xuất kho này? Tồn kho thực tế sẽ giảm và tự động sinh bút toán kế toán giá vốn.', function() {
-                $.post('/PhieuXuatKho/GhiSo', { id: id }, function (res) {
-                    if (res.success) {
-                        if (typeof showToast === 'function') showToast('success', 'Ghi sổ thành công!');
-                        $form.trigger('submit');
-                    } else {
-                        if (typeof showToast === 'function') showToast('error', res.message);
-                    }
-                });
-            });
-        };
-
-        window.huyPhieuXuat = function(btn, id) {
-            var $form = getPxkContainer(btn).find('#searchForm');
-            var lyDo = prompt("Nhập lý do hủy:");
-            if (lyDo != null) {
-                if (!lyDo.trim()) {
-                    if (typeof showToast === 'function') showToast('warning', 'Vui lòng nhập lý do hủy!');
-                    return;
-                }
-                $.post('/PhieuXuatKho/Huy', { id: id, lyDo: lyDo }, function (res) {
-                    if (res.success) {
-                        if (typeof showToast === 'function') showToast('success', 'Hủy thành công!');
-                        $form.trigger('submit');
-                    } else {
-                        if (typeof showToast === 'function') showToast('error', res.message);
-                    }
-                });
-            }
-        };
     </script>
 }

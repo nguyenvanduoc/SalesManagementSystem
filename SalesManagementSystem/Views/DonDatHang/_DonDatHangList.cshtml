@@ -2,9 +2,11 @@
 
 @using SalesManagementSystem.Helpers
 
+
+
 <div class="card shadow-sm">
     <div class="card-body p-0">
-        <div class="table-responsive" style="min-height:300px;">
+        <div class="table-responsive" style="min-height:300px; overflow:visible;">
             <table class="table table-custom table-bordered table-hover mb-0">
                 <thead>
                     <tr>
@@ -34,10 +36,10 @@
                                 <td class="text-center align-middle">
                                     <input type="checkbox" class="form-check-input row-checkbox" value="@item.ID" />
                                 </td>
-                                <td class="text-center align-middle">
+                                <td class="text-center align-middle" v>
                                     <div class="dropdown dropdown-hover">
                                         <button class="btn btn-sm btn-light border dropdown-toggle-hide-arrow shadow-sm"
-                                                type="button" data-bs-toggle="dropdown" style="padding:2px 6px;">
+                                                type="button" data-bs-toggle="dropdown" data-bs-boundary="window" style="padding:2px 6px;">
                                             <i class="bi bi-grid-3x3-gap-fill text-dark"></i>
                                         </button>
                                         <ul class="dropdown-menu shadow">
@@ -48,15 +50,18 @@
                                                 <li>
                                                     <a class="dropdown-item"
                                                        href="@Url.Action("Edit","DonDatHang", new { id = item.ID, isView = true })">
-                                                        <i class="bi bi-eye me-2 text-info"></i> Xem chi tiết
+                                                        <i class="bi bi-eye me-2 text-primary"></i> Xem chi tiết
                                                     </a>
                                                 </li>
-                                                <li>
-                                                    <a class="dropdown-item"
-                                                       href="@Url.Action("Edit","DonDatHang", new { id = item.ID })">
-                                                        <i class="bi bi-pencil me-2 text-warning"></i> Cập nhật
-                                                    </a>
-                                                </li>
+                                                if (item.TrangThaiDon == 1)
+                                                {
+                                                    <li>
+                                                        <a class="dropdown-item"
+                                                           href="@Url.Action("Edit","DonDatHang", new { id = item.ID })">
+                                                            <i class="bi bi-pencil me-2 text-warning"></i> Cập nhật
+                                                        </a>
+                                                    </li>
+                                                }
                                                 <li>
                                                     <a class="dropdown-item no-ajax" target="_blank"
                                                        href="@Url.Action("ExportExcel","DonDatHang", new { id = item.ID })">
@@ -73,7 +78,7 @@
                                                     </button>
                                                 </li>
                                             }
-                                            @if (item.TrangThaiDon != 3 && item.TrangThaiDon != 4)
+                                            @if (PermissionHelper.HasPermission("DonDatHang", LoaiPhanQuyen.CapNhat))
                                             {
                                                 <li>
                                                     <button type="button" class="dropdown-item"

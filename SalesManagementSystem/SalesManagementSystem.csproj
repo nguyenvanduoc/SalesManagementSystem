@@ -500,6 +500,15 @@
     <Content Include="Views\ChungTuBanHang\Edit.cshtml" />
     <Content Include="Scripts\chung-tu-ban-hang.js" />
     <Content Include="Views\NhatKyChung\Index.cshtml" />
+    <Content Include="Views\ChungTuBanHang\_ChungTuBanHangList.cshtml" />
+    <Content Include="Views\ChungTuBanHang\_ChonDonDatHangModal.cshtml" />
+    <Content Include="Views\DonDatHang\Detail.cshtml" />
+    <Content Include="Views\Shared\_SpaLayout.cshtml" />
+    <Content Include="Views\PhieuXuatKho\Details.cshtml" />
+    <Content Include="Views\PhieuXuatKho\_PhieuXuatKhoList.cshtml" />
+    <Content Include="Views\PhieuNhapKho\_EditModal.cshtml" />
+    <Content Include="Views\PhieuNhapKho\_PhieuNhapKhoList.cshtml" />
+    <Content Include="Views\NhatKyChung\_NhatKyChungList.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />

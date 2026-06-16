@@ -91,7 +91,7 @@ namespace SalesManagementSystem.Controllers
                 var oldManHinh = _manHinhRepo.GetById(manHinh.ID);
                 _manHinhRepo.Update(manHinh);
                 AuditLog.AddUpdate("ACL_ManHinh", manHinh.ID.ToString(), oldManHinh, manHinh);
-                return Json(new { success = true, message = "Cáº­p nháº­t mÃ n hÃ¬nh thÃ nh cÃ´ng!" });
+                return Json(new { success = true, message = "Cập nhật màn hình thành công!" });
             }
             return PartialView("UpdateManHinh", manHinh);
         }

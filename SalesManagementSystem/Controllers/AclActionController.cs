@@ -97,7 +97,7 @@ namespace SalesManagementSystem.Controllers
                 var oldAction = _actionRepo.GetById(aclAction.ID);
                 _actionRepo.Update(aclAction);
                 AuditLog.AddUpdate("ACL_Action", aclAction.ID.ToString(), oldAction, aclAction);
-                return Json(new { success = true, message = "Cáº­p nháº­t Action thÃ nh cÃ´ng!" });
+                return Json(new { success = true, message = "Cập nhật Action thành công!" });
             }
             ViewBag.ManHinhList = new SelectList(_manHinhRepo.GetAll().Where(m => m.IsSuDung == 1), "ID", "TenManHinh", aclAction.IDManHinh);
             return PartialView("UpdateAction", aclAction);

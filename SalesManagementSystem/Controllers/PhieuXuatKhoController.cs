@@ -104,182 +104,40 @@ namespace SalesManagementSystem.Controllers
 
         public ActionResult Create(int idDonDatHang)
         {
-            if (!PermissionHelper.HasPermission("PhieuXuatKho", LoaiPhanQuyen.Them)) return View("AccessDenied");
-
-            var donHang = _donDatHangRepo.GetById(idDonDatHang);
-            if (donHang == null || donHang.TrangThaiDon != 2) return HttpNotFound("Đơn hàng không tồn tại hoặc chưa được duyệt.");
-
-            var khachHang = donHang.IDKhachHang.HasValue ? (new SalesManagementSystem.Repositories.KhachHangRepository(new Data.DbConnectionFactory())).GetById(donHang.IDKhachHang.Value) : null;
-
-            int totalKhos;
-            var khos = _khoHangRepo.GetPaged(1, 1000, "", out totalKhos).ToList();
-            var firstKho = khos.FirstOrDefault();
-
-            var model = new PhieuXuatKhoViewModel();
-            model.SoChungTu = _repo.GenerateSoChungTu();
-            model.IDDonDatHang = idDonDatHang;
-            model.SoDonHang = donHang.SoDonHang;
-            model.TenKhachHang = khachHang?.TenKhachHang ?? "";
-            model.IDKho = firstKho?.ID ?? 0;
-            model.TenKhoHang = firstKho?.TenKhoHang ?? "";
-            model.NgayXuat = DateTime.Now.Date;
-
-            var chiTietsDon = _donDatHangRepo.GetChiTietByDonId(idDonDatHang);
-
-            int stt = 1;
-            foreach (var ct in chiTietsDon)
-            {
-                model.ChiTiets.Add(new PhieuXuatKhoChiTietViewModel
-                {
-                    IDSanPham = ct.IDSanPham ?? 0,
-                    MaSanPham = ct.MaSanPham,
-                    TenSanPham = ct.TenSanPham,
-                    DVT = ct.DVT,
-                    STT = stt++,
-                    SoLuong = ct.SoLuong,
-                    DonGia = ct.DonGia,
-                    ThanhTien = ct.ThanhTien,
-                    ThueGTGT = ct.ThueGTGT,
-                    TienThue = ct.ThanhTienThue,
-                    TongSauThue = ct.ThanhTienSauThue
-                });
-            }
-
-            model.TongTienHang = model.ChiTiets.Sum(x => x.ThanhTien);
-            model.TongTienThue = model.ChiTiets.Sum(x => x.TienThue);
-            model.TongCong = model.ChiTiets.Sum(x => x.TongSauThue);
-
-            ViewBag.KhoList = new SelectList(khos, "ID", "TenKhoHang", model.IDKho);
-
-            return View(model);
+            return Content("<div class='alert alert-danger'>Màn hình Phiếu xuất kho chỉ để xem. Vui lòng lập chứng từ bán hàng.</div>");
         }
 
         [HttpPost]
         public ActionResult Save(PhieuXuatKhoViewModel model)
         {
-            if (!PermissionHelper.HasPermission("PhieuXuatKho", LoaiPhanQuyen.Them)) return Json(new { success = false, message = "Không có quyền thêm mới" });
-
-            try
-            {
-                var user = GetCurrentUser();
-                int userId = user?.IDNhanSu ?? 0;
-
-                int newId = _repo.Insert(model, userId);
-
-                // Cập nhật trạng thái đơn hàng sang Đã Xuất Kho (3)
-                if (model.IDDonDatHang.HasValue)
-                {
-                    var p = new DynamicParameters();
-                    p.Add("@ID", model.IDDonDatHang.Value);
-                    p.Add("@TrangThaiDon", 3);
-                    p.Add("@IDNguoiCapNhat", userId);
-                    new DbConnectionFactory().CreateConnection().Execute("UPDATE NS_DonDatHang SET TrangThaiDon = @TrangThaiDon WHERE ID = @ID", p);
-                }
-
-                return Json(new { success = true, id = newId });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
+            return Json(new { success = false, message = "Màn hình Phiếu xuất kho chỉ hỗ trợ xem dữ liệu." });
         }
 
         [HttpPost]
         public ActionResult GhiSo(int id)
         {
-            if (!PermissionHelper.HasPermission("PhieuXuatKho", LoaiPhanQuyen.TuyChon)) return Json(new { success = false, message = "Không có quyền ghi sổ" });
-
-            try
-            {
-                var user = GetCurrentUser();
-                int userId = user?.IDNhanSu ?? 0;
-
-                var model = _repo.GetById(id);
-                if (model == null) return Json(new { success = false, message = "Phiếu xuất không tồn tại." });
-                if (model.TrangThai != 1) return Json(new { success = false, message = "Phiếu xuất đã ghi hoặc đã hủy." });
-
-                // 1. Cập nhật Status = 2
-                _repo.UpdateStatus(id, 2, userId);
-
-                // 2. Ghi Tồn kho (KHO_GiaoDichKho)
-                using (var conn = new DbConnectionFactory().CreateConnection())
-                {
-                    foreach (var ct in model.ChiTiets)
-                    {
-                        var p = new DynamicParameters();
-                        p.Add("@IDKho", model.IDKho);
-                        p.Add("@IDSanPham", ct.IDSanPham);
-                        p.Add("@NgayGiaoDich", model.NgayXuat);
-                        p.Add("@LoaiChungTu", 2); // 2 = Xuất
-                        p.Add("@IDChungTu", model.ID);
-                        p.Add("@SoChungTu", model.SoChungTu);
-                        p.Add("@SoLuong", ct.SoLuong);
-                        p.Add("@DonGia", ct.DonGia);
-                        p.Add("@ThanhTien", ct.ThanhTien);
-                        p.Add("@NguoiTao", userId);
-                        p.Add("@NgayTao", DateTime.Now);
-                        p.Add("@IsHuy", 0);
-
-                        conn.Execute(@"
-                            INSERT INTO KHO_GiaoDichKho (IDKho, IDSanPham, NgayGiaoDich, LoaiChungTu, IDChungTu, SoChungTu, SoLuong, DonGia, ThanhTien, NguoiTao, NgayTao, IsHuy) 
-                            VALUES (@IDKho, @IDSanPham, @NgayGiaoDich, @LoaiChungTu, @IDChungTu, @SoChungTu, @SoLuong, @DonGia, @ThanhTien, @NguoiTao, @NgayTao, @IsHuy)", p);
-                    }
-                }
-
-                // 3. Ghi Nhật ký chung (Giá vốn hàng bán: Nợ 632 / Có 156)
-                decimal tongGiaVon = model.ChiTiets.Sum(x => x.ThanhTien); // Ở đây tạm dùng ThanhTien làm giá vốn
-                if (tongGiaVon > 0)
-                {
-                    _nhatKyRepo.Insert(new KT_NhatKyChung
-                    {
-                        NgayChungTu = model.NgayXuat,
-                        SoChungTu = model.SoChungTu,
-                        LoaiChungTu = "PX",
-                        IDChungTu = model.ID,
-                        TaiKhoanNo = "632",
-                        TaiKhoanCo = "156",
-                        SoTien = tongGiaVon,
-                        DienGiai = "Giá vốn hàng bán xuất kho theo phiếu " + model.SoChungTu,
-                        NguoiTao = userId
-                    });
-                }
-
-                return Json(new { success = true });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
+            return Json(new { success = false, message = "Thao tác Ghi sổ được thực hiện ở màn hình Chứng từ bán hàng." });
         }
 
         [HttpPost]
         public ActionResult Huy(int id, string lyDo)
         {
-            if (!PermissionHelper.HasPermission("PhieuXuatKho", LoaiPhanQuyen.TuyChon)) return Json(new { success = false, message = "Không có quyền hủy" });
+            return Json(new { success = false, message = "Thao tác Hủy được thực hiện ở màn hình Chứng từ bán hàng." });
+        }
 
-            try
-            {
-                var user = GetCurrentUser();
-                int userId = user?.IDNhanSu ?? 0;
+        public ActionResult Details(int id)
+        {
+            if (!PermissionHelper.HasPermission("PhieuXuatKho", LoaiPhanQuyen.Xem)) return View("AccessDenied");
 
-                // 1. Cập nhật Status = 3
-                _repo.Cancel(id, userId, lyDo);
+            var model = _repo.GetById(id);
+            if (model == null) return HttpNotFound("Không tìm thấy phiếu xuất kho");
 
-                // 2. Hủy tồn kho
-                using (var conn = new DbConnectionFactory().CreateConnection())
-                {
-                    conn.Execute("UPDATE KHO_GiaoDichKho SET IsHuy = 1 WHERE LoaiChungTu = 2 AND IDChungTu = @ID", new { ID = id });
-                }
+            int totalKhos;
+            var khos = _khoHangRepo.GetPaged(1, 1000, "", out totalKhos).ToList();
+            ViewBag.KhoList = new SelectList(khos, "ID", "TenKhoHang", model.IDKho);
 
-                // 3. Hủy Nhật ký chung
-                _nhatKyRepo.Cancel("PX", id, userId);
-
-                return Json(new { success = true });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
+            ViewBag.IsReadOnly = true;
+            return View(model);
         }
     }
 }

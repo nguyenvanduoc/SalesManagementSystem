@@ -8,13 +8,13 @@
                     <tr style="background:#f4f6f9; font-weight:bold;">
                         <th class="text-center" style="width: 60px;">Thao tác</th>
                         <th class="text-center" style="width: 50px;">STT</th>
-                        <th>Số ĐH</th>
-                        <th class="text-center">Ngày ĐH</th>
+                        <th>Số đơn hàng</th>
+                        <th class="text-center">Ngày lập đơn hàng</th>
                         <th>Khách hàng</th>
-                        <th class="text-end">Tổng tiền ĐH</th>
-                        <th>Số CTBH</th>
-                        <th class="text-center">Ngày CTBH</th>
-                        <th class="text-center">Trạng thái CTBH</th>
+                        <th class="text-end">Tổng tiền đơn hàng</th>
+                        <th>Số chứng từ</th>
+                        <th class="text-center">Ngày chứng từ</th>
+                        <th class="text-center">Trạng thái chứng từ</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -33,15 +33,18 @@
                                             <li><h6 class="dropdown-header text-uppercase fw-bold text-dark">Thao tác</h6></li>
                                             <li><hr class="dropdown-divider"></li>
                                             
-                                            @if (item.TrangThaiChungTu == 1 && SalesManagementSystem.Helpers.PermissionHelper.HasPermission("ChungTuBanHang", SalesManagementSystem.Helpers.LoaiPhanQuyen.TuyChon))
+                                            @if ((item.TrangThaiChungTu == 1 || item.TrangThaiChungTu == null || item.TrangThaiChungTu == 0) && SalesManagementSystem.Helpers.PermissionHelper.HasPermission("ChungTuBanHang", SalesManagementSystem.Helpers.LoaiPhanQuyen.TuyChon))
                                             {
+                                                if (item.TrangThaiChungTu == 1)
+                                                {
+                                                    <li>
+                                                        <button type="button" class="dropdown-item text-success" onclick="ghiSoChungTu(this, @item.IDChungTuBanHang)">
+                                                            <i class="bi bi-check-circle me-2 text-success"></i> Ghi dữ liệu
+                                                        </button>
+                                                    </li>
+                                                }
                                                 <li>
-                                                    <button type="button" class="dropdown-item text-success" onclick="ghiSoChungTu(this, @item.IDChungTuBanHang)">
-                                                        <i class="bi bi-check-circle me-2 text-success"></i> Ghi dữ liệu
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button type="button" class="dropdown-item text-danger" onclick="huyChungTu(this, @item.IDChungTuBanHang)">
+                                                    <button type="button" class="dropdown-item text-danger" onclick="huyChungTu(this, @(item.IDChungTuBanHang ?? 0), @item.IDDonDatHang)">
                                                         <i class="bi bi-x-circle me-2 text-danger"></i> Hủy
                                                     </button>
                                                 </li>

@@ -66,10 +66,18 @@ namespace SalesManagementSystem.Repositories
         {
             using (var conn = _db.CreateConnection())
             {
-                return conn.Query<PhieuNhapKhoChiTietViewModel>(
-                    "sp_KHO_PhieuNhap_GetChiTiet", 
-                    new { IDPhieuNhap = idPhieuNhap }, 
-                    commandType: CommandType.StoredProcedure).ToList();
+                string sql = @"
+                    SELECT 
+                        c.ID, c.IDPhieuNhap, c.IDSanPham, 
+                        s.MaSanPham, s.TenSanPham, s.DVT,
+                        c.STT, c.SoLuong, c.DonGia, c.ThanhTien, 
+                        c.ThueGTGT, c.TienThue, c.TongSauThue, c.GhiChu,
+                        c.NgaySanXuat, c.HanSuDung
+                    FROM KHO_PhieuNhap_ChiTiet c
+                    LEFT JOIN DM_SanPham s ON c.IDSanPham = s.ID
+                    WHERE c.IDPhieuNhap = @IDPhieuNhap
+                    ORDER BY c.STT";
+                return conn.Query<PhieuNhapKhoChiTietViewModel>(sql, new { IDPhieuNhap = idPhieuNhap }).ToList();
             }
         }
 
@@ -103,6 +111,26 @@ namespace SalesManagementSystem.Repositories
 
                 // Tính toán lại và cập nhật TongTienHang, TongTienThue, TongCong vào KHO_PhieuNhap dựa trên KHO_PhieuNhap_ChiTiet
                 int activeId = model.ID > 0 ? model.ID : newId;
+
+                // Cập nhật NgaySanXuat, HanSuDung cho từng chi tiết
+                if (model.ChiTiets != null && model.ChiTiets.Count > 0)
+                {
+                    foreach (var ct in model.ChiTiets)
+                    {
+                        string updateDateSql = @"
+                            UPDATE [dbo].[KHO_PhieuNhap_ChiTiet] 
+                            SET NgaySanXuat = @NgaySanXuat, HanSuDung = @HanSuDung 
+                            WHERE IDPhieuNhap = @IDPhieuNhap AND IDSanPham = @IDSanPham
+                        ";
+                        conn.Execute(updateDateSql, new { 
+                            NgaySanXuat = ct.NgaySanXuat, 
+                            HanSuDung = ct.HanSuDung, 
+                            IDPhieuNhap = activeId, 
+                            IDSanPham = ct.IDSanPham 
+                        });
+                    }
+                }
+
                 string updateTotalsSql = @"
                     UPDATE [dbo].[KHO_PhieuNhap]
                     SET TongTienHang = ISNULL((SELECT SUM(ThanhTien) FROM [dbo].[KHO_PhieuNhap_ChiTiet] WHERE IDPhieuNhap = @ID), 0),

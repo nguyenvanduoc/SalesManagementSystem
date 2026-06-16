@@ -115,7 +115,7 @@ namespace SalesManagementSystem.Controllers
                 // AUDIT LOG
                 AuditLog.AddUpdate("DM_PhongBan", phongBan.ID.ToString(), oldPhongBan, phongBan);
 
-                return Json(new { success = true, message = "Cáº­p nháº­t phÃ²ng ban thÃ nh cÃ´ng!" });
+                return Json(new { success = true, message = "Cập nhật phòng ban thành công!" });
             }
             return PartialView("UpdatePhongBan", phongBan);
         }

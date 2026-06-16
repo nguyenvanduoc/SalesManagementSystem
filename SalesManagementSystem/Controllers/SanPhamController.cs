@@ -37,7 +37,7 @@ namespace SalesManagementSystem.Controllers
             };
 
             ViewBag.Keyword = keyword;
-            ViewBag.Title = "Danh má»¥c sáº£n pháº©m";
+            ViewBag.Title = "Danh mục sản phẩm";
 
             if (Request.IsAjaxRequest())
             {
@@ -173,7 +173,7 @@ namespace SalesManagementSystem.Controllers
                 };
 
                 _sanPhamRepo.Update(sp);
-                return Json(new { success = true, message = "Cáº­p nháº­t thÃ nh cÃ´ng" });
+                return Json(new { success = true, message = "Cập nhật thành công" });
             }
             return PartialView("Edit", model);
         }

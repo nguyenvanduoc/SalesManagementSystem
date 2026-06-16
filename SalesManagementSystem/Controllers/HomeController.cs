@@ -35,8 +35,8 @@ namespace SalesManagementSystem.Controllers
         }
 
         /// <summary>
-        /// Render sidebar menu Ä‘á»™ng tá»« ACL_ManHinh + ACL_Action.
-        /// [ChildActionOnly] = chá»‰ gá»i Ä‘Æ°á»£c báº±ng @Html.Action(), khÃ´ng thá»ƒ truy cáº­p trá»±c tiáº¿p qua URL.
+        /// Render sidebar menu động từ ACL_ManHinh + ACL_Action.
+        /// [ChildActionOnly] = chỉ gọi được bằng @Html.Action(), không thể truy cập trực tiếp qua URL.
         /// </summary>
         [ChildActionOnly]
         public ActionResult Menu()

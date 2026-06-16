@@ -18,7 +18,7 @@ namespace SalesManagementSystem.Controllers
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult Index()
         {
-            ViewBag.Title = "PhÃ¢n quyá»n ngÆ°á»i dÃ¹ng";
+            ViewBag.Title = "Phân quyền người dùng";
             var tree = _phanQuyenRepo.GetTreeLogin();
             return View(tree);
         }
@@ -42,12 +42,12 @@ namespace SalesManagementSystem.Controllers
                 var parentActionIds = _phanQuyenRepo.GetParentActionIds(idLogin);
                 if (parentActionIds == null)
                 {
-                    return Json(new { success = false, message = "NhÃ¢n sá»± nÃ y khÃ´ng cÃ³ cáº¥p trÃªn Ä‘á»ƒ káº¿ thá»«a quyá»n!" });
+                    return Json(new { success = false, message = "Nhân sự này không có cấp trên để kế thừa quyền!" });
                 }
                 checkedActionIds = parentActionIds;
             }
 
-            // Náº¿u khÃ´ng cÃ³ checked nÃ o, nháº­n vá» null tá»« ajax, thÃ¬ khá»Ÿi táº¡o láº¡i danh sÃ¡ch rá»—ng Ä‘á»ƒ thá»±c thi Delete all
+            // Nếu không có checked nào, nhận về null từ ajax, thì khởi tạo lại danh sách rỗng để thực thi Delete all
             if (checkedActionIds == null)
             {
                 checkedActionIds = new List<int>();
@@ -58,9 +58,9 @@ namespace SalesManagementSystem.Controllers
             if (result)
             {
                 AuditLog.AddUpdate("ACL_PhanQuyen", idLogin.ToString(), new { Roles = "Old Roles (Many)" }, new { Roles = string.Join(",", checkedActionIds) });
-                return Json(new { success = true, message = "LÆ°u phÃ¢n quyá»n thÃ nh cÃ´ng!" });
+                return Json(new { success = true, message = "Lưu phân quyền thành công!" });
             }
-            return Json(new { success = false, message = "CÃ³ lá»—i xáº£y ra khi lÆ°u phÃ¢n quyá»n." });
+            return Json(new { success = false, message = "Có lỗi xảy ra khi lưu phân quyền." });
         }
     }
 }

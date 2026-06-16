@@ -5,53 +5,71 @@
 var DonDatHang = (function () {
     'use strict';
 
-    var _config = {
-        searchKhUrl: '',
-        searchSpUrl: '',
-        isReadOnly: false
-    };
-
-    var _rowIndex = 0;
+    function getState($form) {
+        if (!$form || $form.length === 0) {
+            var $activePane = $('.tab-pane.active');
+            $form = $activePane.find('#frmDonDatHang');
+            if ($form.length === 0) {
+                $form = $('#frmDonDatHang').last();
+            }
+        }
+        var state = $form.data('donDatHangState');
+        if (!state) {
+            state = {
+                config: {
+                    searchKhUrl: '',
+                    searchSpUrl: '',
+                    isReadOnly: false
+                },
+                rowIndex: 0
+            };
+            $form.data('donDatHangState', state);
+        }
+        return state;
+    }
 
     function init(cfg) {
-        _config = $.extend(_config, cfg);
+        var $form = $('#frmDonDatHang').last();
+        var state = getState($form);
+        state.config = $.extend(state.config, cfg);
 
-        _initKhachHangSelect2();
+        _initKhachHangSelect2($form);
 
         if (cfg.selectedKhId && cfg.selectedKhId != 'null' && cfg.selectedKhId != null) {
             var option = new Option(cfg.selectedKhText || '', cfg.selectedKhId, true, true);
-            $('#selKhachHang').append(option).trigger('change');
-            $('#hdIDKhachHang').val(cfg.selectedKhId);
+            $form.find('#selKhachHang').append(option).trigger('change');
+            $form.find('#hdIDKhachHang').val(cfg.selectedKhId);
         }
 
         var existing = cfg.chiTietsJson;
         if (existing && Array.isArray(existing) && existing.length > 0) {
-            existing.forEach(function (ct) { _addRowWithData(ct); });
+            existing.forEach(function (ct) { _addRowWithData($form, ct); });
         } else {
-            addRow();
+            _addRowWithData($form, null);
         }
 
-        $('#PhiBocXepDisplay').on('input change blur', function (e) {
+        $form.find('#PhiBocXepDisplay').on('input change blur', function (e) {
             var val = $(this).val();
             if (e.type === 'blur' || e.type === 'change') {
                 $(this).val(_formatNumber(_parseMoney(val)));
             }
-            $('#PhiBocXep').val(_parseMoney(val));
-            calcTotal();
+            $form.find('#PhiBocXep').val(_parseMoney(val));
+            calcTotal($form);
         });
 
-        calcTotal();
+        calcTotal($form);
     }
 
-    function _initKhachHangSelect2() {
-        $('#selKhachHang').select2({
+    function _initKhachHangSelect2($form) {
+        var state = getState($form);
+        $form.find('#selKhachHang').select2({
             placeholder: 'Tìm theo mã, tên, SĐT, MST...',
-            allowClear: !_config.isReadOnly,
-            disabled: _config.isReadOnly,
+            allowClear: !state.config.isReadOnly,
+            disabled: state.config.isReadOnly,
             minimumInputLength: 0,
             width: '100%',
             ajax: {
-                url: _config.searchKhUrl,
+                url: state.config.searchKhUrl,
                 dataType: 'json',
                 delay: 250,
                 data: function (params) { return { q: params.term || '' }; },
@@ -62,21 +80,21 @@ var DonDatHang = (function () {
             templateSelection: function (d) { return d.text || d.id; }
         }).on('select2:select', function (e) {
             var d = e.params.data;
-            $('#hdIDKhachHang').val(d.id);
-            $('#txtMaKH').val(d.maKH || '');
-            $('#txtMaSoThue').val(d.maSoThue || '');
-            $('#txtDiaChi').val(d.diaChi || '');
-            $('#txtSDT').val(d.sdt || '');
+            $form.find('#hdIDKhachHang').val(d.id);
+            $form.find('#txtMaKH').val(d.maKH || '');
+            $form.find('#txtMaSoThue').val(d.maSoThue || '');
+            $form.find('#txtDiaChi').val(d.diaChi || '');
+            $form.find('#txtSDT').val(d.sdt || '');
 
             if (d.idNhanVien) {
-                var $selNV = $('#selNhanVien');
+                var $selNV = $form.find('#selNhanVien');
                 if ($selNV.find('option[value="' + d.idNhanVien + '"]').length > 0) {
                     $selNV.val(d.idNhanVien);
                 }
             }
         }).on('select2:clear', function () {
-            $('#hdIDKhachHang').val('');
-            $('#txtMaKH,#txtMaSoThue,#txtDiaChi,#txtSDT').val('');
+            $form.find('#hdIDKhachHang').val('');
+            $form.find('#txtMaKH,#txtMaSoThue,#txtDiaChi,#txtSDT').val('');
         });
     }
 
@@ -88,12 +106,22 @@ var DonDatHang = (function () {
             ' | SĐT: ' + (d.sdt || '—') + '</small></div>');
     }
 
-    function addRow() {
-        _addRowWithData(null);
+    function addRow(formOrBtn) {
+        var $form;
+        if (formOrBtn && $(formOrBtn).is('form')) {
+            $form = $(formOrBtn);
+        } else if (formOrBtn) {
+            $form = $(formOrBtn).closest('form');
+        } else {
+            $form = $('.tab-pane.active').find('#frmDonDatHang');
+            if ($form.length === 0) $form = $('#frmDonDatHang').last();
+        }
+        _addRowWithData($form, null);
     }
 
-    function _addRowWithData(ct) {
-        var idx = _rowIndex++;
+    function _addRowWithData($form, ct) {
+        var state = getState($form);
+        var idx = state.rowIndex++;
         var id = parseInt(_val(ct, 'id', 'ID')) || 0;
         var thueGTGT = _toNumber(_val(ct, 'thueGTGT', 'ThueGTGT'), 0);
         var donGia = _toNumber(_val(ct, 'donGia', 'DonGia'), 0);
@@ -143,13 +171,12 @@ var DonDatHang = (function () {
             '</tr>';
 
         var $row = $(html);
-        $('#tbodyChiTiet').append($row);
+        $form.find('#tbodyChiTiet').append($row);
 
-        _initSanPhamSelect2($row, ct);
+        _initSanPhamSelect2($form, $row, ct);
 
         $row.find('.txt-soluong').on('input change', function () {
             var val = $(this).val();
-            // Remove non-numeric except dots
             var sanitized = val.replace(/[^0-9.]/g, '');
             if (val !== sanitized) {
                 $(this).val(sanitized);
@@ -164,16 +191,17 @@ var DonDatHang = (function () {
             $(this).val(_formatNumber(_parseMoney($(this).val())));
         });
 
-        if (_config.isReadOnly) {
+        if (state.config.isReadOnly) {
             $row.find('.txt-dongia, .txt-soluong, .txt-thue, .txt-ghichu, .chk-km').prop('disabled', true);
             $row.find('.btn-remove').remove();
         }
 
-        _updateSTT();
+        _updateSTT($form);
         calcRow($row);
     }
 
-    function _initSanPhamSelect2($row, ct) {
+    function _initSanPhamSelect2($form, $row, ct) {
+        var state = getState($form);
         var $sel = $row.find('.sel-sp');
         var idSanPham = _val(ct, 'idSanPham', 'IDSanPham');
 
@@ -190,13 +218,13 @@ var DonDatHang = (function () {
 
         $sel.select2({
             placeholder: 'Tìm sản phẩm...',
-            allowClear: !_config.isReadOnly,
-            disabled: _config.isReadOnly,
+            allowClear: !state.config.isReadOnly,
+            disabled: state.config.isReadOnly,
             minimumInputLength: 0,
             width: '100%',
-            dropdownParent: $('body'),
+            dropdownParent: $form,
             ajax: {
-                url: _config.searchSpUrl,
+                url: state.config.searchSpUrl,
                 dataType: 'json',
                 delay: 250,
                 data: function (p) { return { q: p.term || '' }; },
@@ -225,22 +253,25 @@ var DonDatHang = (function () {
     }
 
     function removeRow(btn) {
-        $(btn).closest('tr').remove();
-        _updateSTT();
-        calcTotal();
+        var $row = $(btn).closest('tr');
+        var $form = $row.closest('form');
+        $row.remove();
+        _updateSTT($form);
+        calcTotal($form);
     }
 
-    function _updateSTT() {
-        $('#tbodyChiTiet tr').each(function (i) {
+    function _updateSTT($form) {
+        $form.find('#tbodyChiTiet tr').each(function (i) {
             var $cell = $(this).find('.stt-cell');
             var $id = $cell.find('.hd-idct').detach();
             $cell.text(i + 1);
             $cell.append($id);
         });
-        $('#dispSoDong').text($('#tbodyChiTiet tr').length);
+        $form.find('#dispSoDong').text($form.find('#tbodyChiTiet tr').length);
     }
 
     function calcRow($row) {
+        var $form = $row.closest('form');
         var donGia = _parseMoney($row.find('.txt-dongia').val());
         var soLuong = _parseMoney($row.find('.txt-soluong').val());
         var thue = _toNumber($row.find('.txt-thue').val(), 0);
@@ -255,65 +286,73 @@ var DonDatHang = (function () {
         $row.find('.txt-thanhtien').val(_formatNumber(Math.round(thanhTien)));
         $row.find('.txt-tien-thue').val(_formatNumber(Math.round(tienThue)));
         $row.find('.txt-tt-sau-thue').val(_formatNumber(Math.round(ttSauThue)));
-        calcTotal();
+        calcTotal($form);
     }
 
-    function calcTotal() {
+    function calcTotal($form) {
+        if (!$form || !$form.jquery) {
+            $form = $('.tab-pane.active').find('#frmDonDatHang');
+            if ($form.length === 0) $form = $('#frmDonDatHang').last();
+        }
         var totalTienHang = 0;
         var totalTienThue = 0;
-        $('#tbodyChiTiet tr').each(function () {
+        $form.find('#tbodyChiTiet tr').each(function () {
             var valThanhTien = $(this).find('.txt-thanhtien').val() || '0';
             var valTienThue = $(this).find('.txt-tien-thue').val() || '0';
             totalTienHang += _parseMoney(valThanhTien);
             totalTienThue += _parseMoney(valTienThue);
         });
         
-        var phiBocXep = _parseMoney($('#PhiBocXepDisplay').val() || '0');
+        var phiBocXep = _parseMoney($form.find('#PhiBocXepDisplay').val() || '0');
         var totalThanhToan = totalTienHang + totalTienThue - phiBocXep;
 
-        $('#dispTongTienHang').text(_formatNumber(Math.round(totalTienHang)));
-        $('#dispTongTienThue').text(_formatNumber(Math.round(totalTienThue)));
-        $('#dispTongTien, #dispTongTien2').text(_formatNumber(Math.round(totalThanhToan)));
-        $('#dispSoDong').text($('#tbodyChiTiet tr').length);
+        $form.find('#dispTongTienHang').text(_formatNumber(Math.round(totalTienHang)));
+        $form.find('#dispTongTienThue').text(_formatNumber(Math.round(totalTienThue)));
+        $form.find('#dispTongTien, #dispTongTien2').text(_formatNumber(Math.round(totalThanhToan)));
+        $form.find('#dispSoDong').text($form.find('#tbodyChiTiet tr').length);
     }
 
-    function validateAndSerialize() {
+    function validateAndSerialize($form) {
+        if (!$form || !$form.jquery) {
+            $form = $('.tab-pane.active').find('#frmDonDatHang');
+            if ($form.length === 0) $form = $('#frmDonDatHang').last();
+        }
         var ok = true;
 
-        var idKH = $('#hdIDKhachHang').val();
+        var idKH = $form.find('#hdIDKhachHang').val();
         if (!idKH || idKH === '0') {
-            $('#selKhachHang').next('.select2').find('.select2-selection')
+            $form.find('#selKhachHang').next('.select2').find('.select2-selection')
                 .css('border-color', '#dc3545');
             showToast('warning', 'Vui lòng chọn khách hàng.');
             ok = false;
         } else {
-            $('#selKhachHang').next('.select2').find('.select2-selection')
+            $form.find('#selKhachHang').next('.select2').find('.select2-selection')
                 .css('border-color', '');
         }
 
-        if (!$('#selNhanVien').val()) {
-            $('#selNhanVien').addClass('field-error');
+        if (!$form.find('#selNhanVien').val()) {
+            $form.find('#selNhanVien').addClass('field-error');
             if (ok) showToast('warning', 'Vui lòng chọn nhân viên phụ trách.');
             ok = false;
         } else {
-            $('#selNhanVien').removeClass('field-error');
+            $form.find('#selNhanVien').removeClass('field-error');
         }
 
-        if (!$('#SoDonHang').val().trim()) {
-            $('#SoDonHang').addClass('field-error');
+        if (!$form.find('#SoDonHang').val().trim()) {
+            $form.find('#SoDonHang').addClass('field-error');
             if (ok) showToast('warning', 'Vui lòng nhập số đơn hàng.');
             ok = false;
         } else {
-            $('#SoDonHang').removeClass('field-error');
+            $form.find('#SoDonHang').removeClass('field-error');
         }
 
-        var rows = $('#tbodyChiTiet tr');
+        var rows = $form.find('#tbodyChiTiet tr');
         if (rows.length === 0) {
-            $('#validChiTiet').show();
+            $form.find('#validChiTiet').show();
             if (ok) showToast('warning', 'Vui lòng thêm ít nhất một sản phẩm.');
             ok = false;
         } else {
-            $('#validChiTiet').hide();
+            $form.find('#validChiTiet').hide();
         }
 
         if (!ok) return false;
@@ -341,7 +380,7 @@ var DonDatHang = (function () {
             });
         });
 
-        $('#hdChiTietsJson').val(JSON.stringify(chiTiets));
+        $form.find('#hdChiTietsJson').val(JSON.stringify(chiTiets));
         return true;
     }
 

@@ -189,6 +189,10 @@
 <script src="@Url.Content("~/Scripts/don-dat-hang.js?v=2.3")"></script>
 <script>
     $(document).ready(function () {
+        var $form = $('#frmDonDatHang').last();
+        var $pane = $form.closest('.tab-pane');
+        if ($pane.length === 0) $pane = $(document);
+
         DonDatHang.init({
             searchKhUrl:      '@Url.Action("SearchKhachHang","DonDatHang")',
             searchSpUrl:      '@Url.Action("SearchSanPham","DonDatHang")',
@@ -197,15 +201,15 @@
             selectedKhText:   '@Html.Raw((Model.MaKhachHang + " - " + Model.TenKhachHang).Replace("'", "\\'"))'
         });
 
-        // Vô hiệu hóa tất cả input, select, textarea
-        $('input, select, textarea').prop('disabled', true);
-        $('.btn-add-row, .btn-remove-row, .btn-danger').hide();
+        // Vô hiệu hóa tất cả input, select, textarea trong pane
+        $pane.find('input, select, textarea').prop('disabled', true);
+        $pane.find('.btn-add-row, .btn-remove-row, .btn-danger').hide();
         setTimeout(function() {
-            $('.form-select, .select2-hidden-accessible').prop('disabled', true);
-            $('#tbodyChiTiet tr').each(function() {
+            $pane.find('.form-select, .select2-hidden-accessible').prop('disabled', true);
+            $pane.find('#tbodyChiTiet tr').each(function() {
                 $(this).find('td:last').hide();
             });
-            $('#frmDonDatHang table thead th:last').hide();
+            $pane.find('#frmDonDatHang table thead th:last').hide();
         }, 100);
     });
 </script>

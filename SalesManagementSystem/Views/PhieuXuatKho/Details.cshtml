@@ -7,7 +7,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header border-bottom">
-                <h4 class="card-title">Tạo Phiếu Xuất Kho từ Đơn Đặt Hàng: @Model.SoDonHang</h4>
+                <h4 class="card-title">Xem Chi Tiết Phiếu Xuất Kho: @Model.SoChungTu</h4>
             </div>
             <div class="card-body">
                  <form id="frmSavePX">
@@ -21,7 +21,7 @@
                         </div>
                         <div class="col-md-3">
                             <label>Ngày xuất</label>
-                            @Html.TextBoxFor(m => m.NgayXuat, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                            @Html.TextBoxFor(m => m.NgayXuat, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", @readonly = "readonly" })
                         </div>
                         <div class="col-md-3">
                             <label>Khách hàng</label>
@@ -29,13 +29,13 @@
                         </div>
                         <div class="col-md-3">
                             <label>Kho xuất</label>
-                            @Html.DropDownListFor(m => m.IDKho, (SelectList)ViewBag.KhoList, "-- Chọn kho --", new { @class = "form-control", id = "IDKho" })
+                            @Html.DropDownListFor(m => m.IDKho, (SelectList)ViewBag.KhoList, "-- Chọn kho --", new { @class = "form-control", id = "IDKho", disabled = "disabled" })
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-12">
                             <label>Ghi chú xuất kho</label>
-                            @Html.TextAreaFor(m => m.GhiChu, new { @class = "form-control", rows = 2 })
+                            @Html.TextAreaFor(m => m.GhiChu, new { @class = "form-control", rows = 2, @readonly = "readonly" })
                         </div>
                     </div>
 
@@ -95,8 +95,7 @@
 
                     <div class="row">
                         <div class="col-12 text-right">
-                            <button type="button" class="btn btn-primary" onclick="PhieuXuatKho.save()"><i class="fas fa-save"></i> Lưu Đề nghị ghi</button>
-                            <a href="/PhieuXuatKho/Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Quay lại</a>
+                            <a href="@Url.Action("Index", "PhieuXuatKho")" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Quay lại</a>
                         </div>
                     </div>
                 </form>
