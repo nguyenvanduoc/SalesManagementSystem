@@ -62,8 +62,8 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
             {
                 var sql = @"
-                    INSERT INTO DM_KhoHang (TenKhoHang, MaKhoHang, STT, NgayTao, NguoiTao) 
-                    VALUES (@TenKhoHang, @MaKhoHang, @STT, @NgayTao, @NguoiTao);
+                    INSERT INTO DM_KhoHang (TenKhoHang, MaKhoHang, DiaChi, NguoiDaiDien, STT, NgayTao, NguoiTao) 
+                    VALUES (@TenKhoHang, @MaKhoHang, @DiaChi, @NguoiDaiDien, @STT, @NgayTao, @NguoiTao);
                     SELECT CAST(SCOPE_IDENTITY() as int);";
                 return conn.ExecuteScalar<int>(sql, kh);
             }
@@ -77,6 +77,8 @@ namespace SalesManagementSystem.Repositories
                     UPDATE DM_KhoHang 
                     SET TenKhoHang = @TenKhoHang, 
                         MaKhoHang = @MaKhoHang, 
+                        DiaChi = @DiaChi,
+                        NguoiDaiDien = @NguoiDaiDien,
                         STT = @STT, 
                         NgayCapNhat = @NgayCapNhat, 
                         NguoiCapNhat = @NguoiCapNhat

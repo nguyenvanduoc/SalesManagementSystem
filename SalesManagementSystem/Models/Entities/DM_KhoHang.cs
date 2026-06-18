@@ -16,6 +16,12 @@ namespace SalesManagementSystem.Models.Entities
         [StringLength(100)]
         public string MaKhoHang { get; set; }
 
+        [StringLength(500)]
+        public string DiaChi { get; set; }
+
+        [StringLength(500)]
+        public string NguoiDaiDien { get; set; }
+
         public int? STT { get; set; }
 
         public DateTime? NgayTao { get; set; }

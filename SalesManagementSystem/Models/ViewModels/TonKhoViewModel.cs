@@ -24,6 +24,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public decimal TongXuat { get; set; }
         public decimal TonKho { get; set; }
         public decimal DonGiaTon { get; set; }
+        public decimal DonGiaCuoi => DonGiaTon; // Alias for Excel mapping
         public decimal GiaTriTon { get; set; }
         public DateTime? NgayNhapCuoi { get; set; }
         public DateTime? NgayXuatCuoi { get; set; }

@@ -240,6 +240,10 @@ namespace SalesManagementSystem.Services
             var templateRow = worksheet.GetRow(templateRowIndex);
             if (templateRow == null) return;
 
+            // Ensure we copy the entire template row bounds
+            firstColIndex = Math.Min(firstColIndex, templateRow.FirstCellNum);
+            lastColIndex = Math.Max(lastColIndex, templateRow.LastCellNum);
+
             int tmpRowIndex = -1;
             for (int r = templateRowIndex + 1; r <= worksheet.LastRowNum; r++)
             {
@@ -274,8 +278,8 @@ namespace SalesManagementSystem.Services
                 ExpandPrintArea(worksheet.Workbook, worksheet, templateRowIndex + 1, rowsToInsert);
             }
 
-            // 4. Gán dữ liệu theo cột động
-            for (int i = 0; i < data.Count; i++)
+            // 4. Gán dữ liệu (duyệt ngược để giữ nguyên templateRow cho đến khi copy xong)
+            for (int i = data.Count - 1; i >= 0; i--)
             {
                 var item = data[i];
                 var targetRow = worksheet.GetRow(templateRowIndex + i) ?? worksheet.CreateRow(templateRowIndex + i);
@@ -289,6 +293,45 @@ namespace SalesManagementSystem.Services
                 // Đảm bảo row tự động giãn chiều cao theo nội dung (AutoFit)
                 targetRow.Height = -1;
 
+                // Extract and map by placeholders FIRST (so data doesn't get wiped if it contains %)
+                for (int c = targetRow.FirstCellNum; c < targetRow.LastCellNum; c++)
+                {
+                    if (c < 0) continue;
+                    var cell = targetRow.GetCell(c);
+                    if (cell != null && cell.CellType == CellType.String)
+                    {
+                        string text = cell.StringCellValue;
+                        if (text.Contains("%"))
+                        {
+                            if (text.Contains("STT")) 
+                            {
+                                cell.SetCellValue(i + 1);
+                                continue;
+                            }
+                            
+                            // Try to find property by placeholder name (e.g., %TK01.GiaTriTon%)
+                            bool replaced = false;
+                            foreach (var prop in properties)
+                            {
+                                if (text.Contains("." + prop.Name) || text.Contains("%" + prop.Name + "%"))
+                                {
+                                    var value = prop.GetValue(item);
+                                    ApplyFormatterDirect(cell, value, dateStyleCache);
+                                    replaced = true;
+                                    break;
+                                }
+                            }
+                            
+                            // Only clear if it looks like a real unmapped placeholder, not just data with a % sign
+                            if (!replaced && System.Text.RegularExpressions.Regex.IsMatch(text, @"%[a-zA-Z0-9_\.]+%?")) 
+                            {
+                                cell.SetCellValue(System.Text.RegularExpressions.Regex.Replace(text, @"%[a-zA-Z0-9_\.]+%?", ""));
+                            }
+                        }
+                    }
+                }
+
+                // Map by Headers (colMap) OVERWRITING the placeholders
                 foreach (var kvp in colMap)
                 {
                     string propName = kvp.Key;
@@ -299,6 +342,27 @@ namespace SalesManagementSystem.Services
                     var value = prop.GetValue(item);
 
                     ApplyFormatterDirect(cell, value, dateStyleCache);
+                }
+
+                // Handle STT if present in header
+                int sttColIdx = -1;
+                var headerRow = worksheet.GetRow(headerRowIndex);
+                if (headerRow != null)
+                {
+                    for (int c = headerRow.FirstCellNum; c < headerRow.LastCellNum; c++)
+                    {
+                        var cell = headerRow.GetCell(c);
+                        if (cell != null && cell.CellType == CellType.String && NormalizeToPropertyName(cell.StringCellValue) == "stt")
+                        {
+                            sttColIdx = c;
+                            break;
+                        }
+                    }
+                }
+                if (sttColIdx >= 0)
+                {
+                    var cell = targetRow.GetCell(sttColIdx) ?? targetRow.CreateCell(sttColIdx);
+                    cell.SetCellValue(i + 1);
                 }
             }
         }

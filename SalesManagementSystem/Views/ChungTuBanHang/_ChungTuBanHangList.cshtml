@@ -33,6 +33,15 @@
                                             <li><h6 class="dropdown-header text-uppercase fw-bold text-dark">Thao tác</h6></li>
                                             <li><hr class="dropdown-divider"></li>
                                             
+                                            @if (item.IDChungTuBanHang.HasValue)
+                                            {
+                                                <li>
+                                                    <a class="dropdown-item text-primary no-ajax" href="@Url.Action("ExportExcel", "ChungTuBanHang", new { id = item.IDChungTuBanHang })" target="_blank">
+                                                        <i class="bi bi-file-earmark-excel me-2"></i> Xuất phiếu
+                                                    </a>
+                                                </li>
+                                            }
+
                                             @if ((item.TrangThaiChungTu == 1 || item.TrangThaiChungTu == null || item.TrangThaiChungTu == 0) && SalesManagementSystem.Helpers.PermissionHelper.HasPermission("ChungTuBanHang", SalesManagementSystem.Helpers.LoaiPhanQuyen.TuyChon))
                                             {
                                                 if (item.TrangThaiChungTu == 1)
@@ -49,10 +58,10 @@
                                                     </button>
                                                 </li>
                                             }
-                                            else
-                                            {
-                                                <li><span class="dropdown-item text-muted small">Không có thao tác</span></li>
-                                            }
+                                                @if (!item.IDChungTuBanHang.HasValue)
+                                                {
+                                                    <li><span class="dropdown-item text-muted small">Không có thao tác</span></li>
+                                                }
                                         </ul>
                                     </div>
                                 </td>

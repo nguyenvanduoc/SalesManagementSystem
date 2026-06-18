@@ -19,19 +19,22 @@ namespace SalesManagementSystem.Controllers
         private readonly ITaiKhoanKeToanRepository _taiKhoanRepo;
         private readonly INhatKyChungRepository _nhatKyRepo;
         private readonly IDmKhoHangRepository _khoHangRepo;
+        private readonly SalesManagementSystem.Services.Interfaces.IExcelExportService _excelExportService;
 
         public ChungTuBanHangController(
             IChungTuBanHangRepository repo,
             IDonDatHangRepository donDatHangRepo,
             ITaiKhoanKeToanRepository taiKhoanRepo,
             INhatKyChungRepository nhatKyRepo,
-            IDmKhoHangRepository khoHangRepo)
+            IDmKhoHangRepository khoHangRepo,
+            SalesManagementSystem.Services.Interfaces.IExcelExportService excelExportService)
         {
             _repo = repo;
             _donDatHangRepo = donDatHangRepo;
             _taiKhoanRepo = taiKhoanRepo;
             _nhatKyRepo = nhatKyRepo;
             _khoHangRepo = khoHangRepo;
+            _excelExportService = excelExportService;
         }
 
         public ActionResult Index(int page = 1, int pageSize = 20, string tuNgay = "", string denNgay = "", string soDonHang = "", int? idKhachHang = null, int? trangThai = null)
@@ -402,6 +405,83 @@ namespace SalesManagementSystem.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        public ActionResult ExportExcel(int id)
+        {
+            try
+            {
+                var model = _repo.GetById(id);
+                if (model == null) return HttpNotFound("Không tìm thấy chứng từ");
+
+                var session = (SalesManagementSystem.Models.ViewModels.UserLoginViewModel)Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION];
+                string nguoiLapBieu = session != null ? (session.HoDem + " " + session.Ten).Trim() : "";
+                if (string.IsNullOrEmpty(nguoiLapBieu)) nguoiLapBieu = session?.UserName ?? "";
+
+                // Get NhanSu and Kho info
+                string tenNhanSu = "";
+                string sdtNhanSu = "";
+                string diaChiKho = "";
+                
+                using (var conn = (new Data.DbConnectionFactory()).CreateConnection())
+                {
+                    if (model.IDNhanVien.HasValue && model.IDNhanVien.Value > 0)
+                    {
+                        var ns = conn.QueryFirstOrDefault("SELECT ISNULL(HoDem, '') + ' ' + ISNULL(Ten, '') AS TenNhanSu, DienThoai FROM NS_NhanSu WHERE ID = @ID", new { ID = model.IDNhanVien.Value });
+                        if (ns != null)
+                        {
+                            tenNhanSu = ((string)ns.TenNhanSu).Trim();
+                            sdtNhanSu = (string)ns.DienThoai ?? "";
+                        }
+                    }
+                    if (model.IDKho > 0)
+                    {
+                        diaChiKho = conn.QueryFirstOrDefault<string>("SELECT DiaChi FROM DM_KhoHang WHERE ID = @ID", new { ID = model.IDKho }) ?? "";
+                    }
+                }
+
+                var variables = new System.Collections.Generic.Dictionary<string, object>
+                {
+                    { "SoChungTu", model.SoChungTu },
+                    { "TenKhachHang", model.TenKhachHang },
+                    { "DiaChi", model.DiaChi },
+                    { "SoDienThoaiKhachHang", model.SoDienThoai },
+                    { "TenNhanSu", tenNhanSu },
+                    { "SoDienThoaiNhanSu", sdtNhanSu },
+                    { "DiaChiKho", diaChiKho },
+                    { "PhiBocXep", model.PhiBocXep.ToString("N0") },
+                    { "TongCongBangChu", SalesManagementSystem.Helpers.NumberToTextHelper.DocTienBangChu(model.TongCong) },
+                    { "ngaythangnam", $"Ngày {DateTime.Now.Day:D2} tháng {DateTime.Now.Month:D2} năm {DateTime.Now.Year}" },
+                    { "NguoiLapBieu", nguoiLapBieu }
+                };
+
+                int stt = 1;
+                var exportData = model.ChiTiets.Select(x => new {
+                    STT = stt++,
+                    MaSanPham = x.MaSanPham,
+                    TenSanPham = x.TenSanPham,
+                    DVT = x.DVT,
+                    HanSuDung = "", // Blank for now unless there's specific data
+                    SoLuong = x.SoLuong,
+                    DonGia = x.DonGia,
+                    TongSauThue = x.TongSauThue
+                }).ToList();
+
+                string fileExtension;
+                var fileBytes = _excelExportService.Export("CTBH01", exportData, out fileExtension, variables);
+
+                string contentType = fileExtension == "xls" 
+                    ? "application/vnd.ms-excel" 
+                    : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                return File(fileBytes, contentType, $"ChungTuBanHang_{model.SoChungTu}_{DateTime.Now:yyyyMMddHHmmss}.{fileExtension}");
+            }
+            catch (Exception ex)
+            {
+                TempData["ToastMessage"] = "Lỗi xuất Excel: " + ex.Message;
+                TempData["ToastType"] = "error";
+                return RedirectToAction("Detail", new { id = id });
             }
         }
     }

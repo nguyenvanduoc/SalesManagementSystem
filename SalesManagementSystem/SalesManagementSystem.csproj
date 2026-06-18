@@ -427,6 +427,8 @@
     <Content Include="Views\PhieuNhapKho\_PhieuNhapKhoList.cshtml" />
     <Content Include="Views\NhatKyChung\_NhatKyChungList.cshtml" />
     <Content Include="Views\ChungTuBanHang\Detail.cshtml" />
+    <Content Include="Views\TonKho\PrintTheKho.cshtml" />
+    <Content Include="Views\TonKho\PrintTheKhoMulti.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />

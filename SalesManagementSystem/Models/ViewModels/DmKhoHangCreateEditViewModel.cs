@@ -14,6 +14,12 @@ namespace SalesManagementSystem.Models.ViewModels
         [StringLength(500, ErrorMessage = "Tên kho hàng không được vượt quá 500 ký tự")]
         public string TenKhoHang { get; set; }
 
+        [StringLength(500, ErrorMessage = "Địa chỉ không được vượt quá 500 ký tự")]
+        public string DiaChi { get; set; }
+
+        [StringLength(500, ErrorMessage = "Người đại diện không được vượt quá 500 ký tự")]
+        public string NguoiDaiDien { get; set; }
+
         public int? STT { get; set; }
     }
 }

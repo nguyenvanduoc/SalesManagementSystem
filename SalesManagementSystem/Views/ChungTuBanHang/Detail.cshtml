@@ -22,6 +22,13 @@
         <i class="bi bi-arrow-left"></i> Quay lại
     </a>
 
+    @if (Model.ID > 0)
+    {
+        <a href="@Url.Action("ExportExcel", "ChungTuBanHang", new { id = Model.ID })" class="btn btn-sm text-white ms-2 no-ajax" style="background-color: #20c997; border: none;" target="_blank">
+            <i class="bi bi-file-earmark-excel me-1"></i> Xuất phiếu
+        </a>
+    }
+
     <span class="text-muted small ms-auto">
         <i class="bi bi-info-circle me-1"></i>@ViewBag.Title
     </span>

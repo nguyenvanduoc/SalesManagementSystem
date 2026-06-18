@@ -34,6 +34,16 @@
                 @Html.ValidationMessageFor(m => m.TenKhoHang, "", new { @class = "text-danger small" })
             </div>
             <div class="col-md-12">
+                <label class="form-label text-muted fw-semibold">Địa chỉ</label>
+                @Html.TextBoxFor(m => m.DiaChi, new { @class = "form-control", placeholder = "Nhập địa chỉ" })
+                @Html.ValidationMessageFor(m => m.DiaChi, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-md-12">
+                <label class="form-label text-muted fw-semibold">Người đại diện</label>
+                @Html.TextBoxFor(m => m.NguoiDaiDien, new { @class = "form-control", placeholder = "Nhập người đại diện" })
+                @Html.ValidationMessageFor(m => m.NguoiDaiDien, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-md-12">
                 <label class="form-label text-muted fw-semibold">Thứ tự</label>
                 @Html.TextBoxFor(m => m.STT, new { @class = "form-control", type = "number", placeholder = "Thứ tự sắp xếp" })
             </div>

@@ -11,6 +11,8 @@
                         <th class="text-center" style="width: 50px;"></th>
                         <th>Mã kho hàng</th>
                         <th>Tên kho hàng</th>
+                        <th>Địa chỉ</th>
+                        <th>Người đại diện</th>
                         <th class="text-center">Người tạo</th>
                         <th class="text-center">Ngày tạo</th>
                     </tr>
@@ -55,6 +57,8 @@
                                 <td class="text-center align-middle">@(stt++)</td>
                                 <td class="align-middle">@item.MaKhoHang</td>
                                 <td class="align-middle">@item.TenKhoHang</td>
+                                <td class="align-middle">@item.DiaChi</td>
+                                <td class="align-middle">@item.NguoiDaiDien</td>
                                 <td class="text-center align-middle">@item.TenNguoiTao</td>
                                 <td class="text-center align-middle">@(item.NgayTao.HasValue ? item.NgayTao.Value.ToString("dd/MM/yyyy HH:mm") : "")</td>
                             </tr>
@@ -63,7 +67,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="7" class="text-center py-4 text-muted">
+                            <td colspan="9" class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox fs-2 d-block mb-2"></i>
                                 Chưa có dữ liệu kho hàng.
                             </td>

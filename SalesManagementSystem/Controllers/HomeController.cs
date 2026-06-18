@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Web;
 using System.Web.Mvc;
 using SalesManagementSystem.Models.ViewModels;

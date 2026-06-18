@@ -108,6 +108,7 @@ namespace SalesManagementSystem.Repositories
                     IDTaiKhoanThanhToan = master.IDTaiKhoanThanhToan,
                     TongTienHang = master.TongTienHang,
                     TongTienThue = master.TongTienThue,
+                    PhiBocXep = master.PhiBocXep,
                     TongCong = master.TongCong,
                     DaThanhToan = master.DaThanhToan,
                     ConLai = master.ConLai,
@@ -161,6 +162,7 @@ namespace SalesManagementSystem.Repositories
                         p.Add("@IDTaiKhoanThanhToan", model.IDTaiKhoanThanhToan);
                         p.Add("@TongTienHang", model.TongTienHang);
                         p.Add("@TongTienThue", model.TongTienThue);
+                        p.Add("@PhiBocXep", model.PhiBocXep);
                         p.Add("@TongCong", model.TongCong);
                         p.Add("@DaThanhToan", model.DaThanhToan);
                         p.Add("@ConLai", model.ConLai);
@@ -332,6 +334,7 @@ namespace SalesManagementSystem.Repositories
                             SET NgayChungTu = @NgayChungTu,
                                 IDKho = @IDKho,
                                 IDTaiKhoanThanhToan = @IDTaiKhoanThanhToan,
+                                PhiBocXep = @PhiBocXep,
                                 TrangThai = @TrangThai,
                                 NguoiCapNhat = @NguoiCapNhat,
                                 NgayCapNhat = GETDATE()
@@ -340,6 +343,7 @@ namespace SalesManagementSystem.Repositories
                                 NgayChungTu = model.NgayChungTu, 
                                 IDKho = model.IDKho, 
                                 IDTaiKhoanThanhToan = model.IDTaiKhoanThanhToan, 
+                                PhiBocXep = model.PhiBocXep,
                                 TrangThai = trangThai, 
                                 NguoiCapNhat = nguoiCapNhat, 
                                 ID = model.ID 

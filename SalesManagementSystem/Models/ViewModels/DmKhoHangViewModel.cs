@@ -7,6 +7,8 @@ namespace SalesManagementSystem.Models.ViewModels
         public int ID { get; set; }
         public string MaKhoHang { get; set; }
         public string TenKhoHang { get; set; }
+        public string DiaChi { get; set; }
+        public string NguoiDaiDien { get; set; }
         public int? STT { get; set; }
         public DateTime? NgayTao { get; set; }
         public int? NguoiTao { get; set; }
