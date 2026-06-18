@@ -142,7 +142,8 @@ namespace SalesManagementSystem.Controllers
 
             model.TongTienHang = model.ChiTiets.Sum(x => x.ThanhTien);
             model.TongTienThue = model.ChiTiets.Sum(x => x.TienThue);
-            model.TongCong = model.ChiTiets.Sum(x => x.TongSauThue);
+            model.PhiBocXep = donHang.PhiBocXep;
+            model.TongCong = model.ChiTiets.Sum(x => x.TongSauThue) + model.PhiBocXep;
             model.ConLai = model.TongCong;
             model.DaThanhToan = 0;
 
@@ -192,6 +193,7 @@ namespace SalesManagementSystem.Controllers
                     model.ThoiHanGiaoHang = donHang.ThoiHanGiaoHang;
                     model.IDNhanVien = donHang.IDNhanVien;
                     model.TrangThaiDon = donHang.TrangThaiDon;
+                    model.PhiBocXep = donHang.PhiBocXep;
                 }
             }
             
@@ -219,6 +221,53 @@ namespace SalesManagementSystem.Controllers
             // Re-use Create view but maybe pass a flag or just let Create handle both
             ViewBag.IsEdit = true;
             return View("Create", model);
+        }
+
+        public ActionResult Detail(int id)
+        {
+            if (!PermissionHelper.HasPermission("ChungTuBanHang", LoaiPhanQuyen.Xem)) return View("AccessDenied");
+
+            var model = _repo.GetById(id);
+            if (model == null) return HttpNotFound("Không tìm thấy chứng từ");
+
+            int totalKhos;
+            var khos = _khoHangRepo.GetPaged(1, 1000, "", out totalKhos).ToList();
+
+            if (model.IDDonDatHang.HasValue)
+            {
+                var donHang = _donDatHangRepo.GetById(model.IDDonDatHang.Value);
+                if (donHang != null)
+                {
+                    model.NgayTaoDon = donHang.NgayTaoDon;
+                    model.ThoiHanGiaoHang = donHang.ThoiHanGiaoHang;
+                    model.IDNhanVien = donHang.IDNhanVien;
+                    model.TrangThaiDon = donHang.TrangThaiDon;
+                    model.PhiBocXep = donHang.PhiBocXep;
+                }
+            }
+            
+            var khachHang = (new SalesManagementSystem.Repositories.KhachHangRepository(new Data.DbConnectionFactory())).GetById(model.IDKhachHang);
+            if (khachHang != null)
+            {
+                model.MaKhachHang = khachHang.MaKhachHang ?? "";
+                model.MaSoThue = khachHang.MaSoThue ?? "";
+                model.DiaChi = khachHang.DiaChi ?? "";
+                model.SoDienThoai = khachHang.SoDienThoai ?? "";
+            }
+
+            using (var conn = (new Data.DbConnectionFactory()).CreateConnection())
+            {
+                var nvItems = conn.Query("SELECT ID, ISNULL(MaNhanSu, '') + ' - ' + LTRIM(RTRIM(ISNULL(HoDem, '') + ' ' + ISNULL(Ten, ''))) AS TenNhanVien FROM NS_NhanSu ORDER BY Ten")
+                    .Select(x => new { ID = (int)x.ID, TenNhanVien = (string)x.TenNhanVien })
+                    .ToList();
+                ViewBag.NhanVienList = new SelectList(nvItems, "ID", "TenNhanVien", model.IDNhanVien);
+            }
+            ViewBag.TrangThaiList = new SelectList(_donDatHangRepo.GetTrangThaiList(), "ID", "TenTrangThai", model.TrangThaiDon);
+
+            ViewBag.TaiKhoanThanhToanList = _taiKhoanRepo.GetActive().ToList();
+            ViewBag.KhoList = new SelectList(khos, "ID", "TenKhoHang", model.IDKho);
+            
+            return View(model);
         }
 
         [HttpPost]

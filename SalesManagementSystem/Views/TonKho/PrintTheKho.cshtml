@@ -1,0 +1,110 @@
+@model IEnumerable<SalesManagementSystem.Models.ViewModels.TheKhoListViewModel>
+@{
+    Layout = null;
+    var tuNgay = ViewBag.TuNgay as string;
+    var denNgay = ViewBag.DenNgay as string;
+    string thoiGian = "Tất cả thời gian";
+    if (!string.IsNullOrEmpty(tuNgay) && !string.IsNullOrEmpty(denNgay))
+    {
+        thoiGian = $"Từ ngày {DateTime.Parse(tuNgay):dd/MM/yyyy} đến ngày {DateTime.Parse(denNgay):dd/MM/yyyy}";
+    }
+    else if (!string.IsNullOrEmpty(tuNgay))
+    {
+        thoiGian = $"Từ ngày {DateTime.Parse(tuNgay):dd/MM/yyyy}";
+    }
+    else if (!string.IsNullOrEmpty(denNgay))
+    {
+        thoiGian = $"Đến ngày {DateTime.Parse(denNgay):dd/MM/yyyy}";
+    }
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Chi tiết thẻ kho</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        @@media print {
+            .no-print { display: none; }
+            body { font-size: 12pt; }
+        }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .table-bordered th, .table-bordered td { border: 1px solid #000 !important; padding: 4px; }
+        .table th { background-color: #f2f2f2 !important; }
+    </style>
+</head>
+<body onload="window.print()">
+    <div class="container-fluid mt-4">
+        <div class="row no-print mb-3">
+            <div class="col-12 text-center">
+                <button class="btn btn-primary" onclick="window.print()">In thẻ kho</button>
+                <button class="btn btn-secondary" onclick="window.close()">Đóng</button>
+            </div>
+        </div>
+
+        <h2 class="text-center font-weight-bold">CHI TIẾT THẺ KHO</h2>
+        <p class="text-center mb-1"><strong>Sản phẩm:</strong> @ViewBag.TenSanPham</p>
+        <p class="text-center mb-1"><strong>Kho hàng:</strong> @ViewBag.TenKho</p>
+        <p class="text-center mb-4"><strong>Thời gian:</strong> @thoiGian</p>
+
+        <table class="table table-bordered table-sm">
+            <thead>
+                <tr>
+                    <th class="text-center">Ngày CT</th>
+                    <th>Số CT</th>
+                    <th>Loại CT</th>
+                    <th>Diễn giải</th>
+                    <th class="text-right">Nhập</th>
+                    <th class="text-right">Xuất</th>
+                    <th class="text-right">Tồn lũy kế</th>
+                    <th class="text-right">Đơn giá</th>
+                    <th class="text-right">Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    string loaiCTName = "";
+                    if (item.LoaiChungTu == 1) 
+                    { 
+                        loaiCTName = "Nhập kho"; 
+                    }
+                    else if (item.LoaiChungTu == 2) 
+                    { 
+                        loaiCTName = "Xuất kho"; 
+                    }
+
+                    <tr>
+                        <td class="text-center">@item.NgayChungTu.ToString("dd/MM/yyyy")</td>
+                        <td>@item.SoChungTu</td>
+                        <td>@loaiCTName</td>
+                        <td>@item.DienGiai</td>
+                        <td class="text-right">@(item.Nhap > 0 ? item.Nhap.ToString("N0") : "")</td>
+                        <td class="text-right">@(item.Xuat > 0 ? item.Xuat.ToString("N0") : "")</td>
+                        <td class="text-right font-weight-bold">@item.TonLuyKe.ToString("N0")</td>
+                        <td class="text-right">@item.DonGia.ToString("N0")</td>
+                        <td class="text-right">@item.ThanhTien.ToString("N0")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        
+        <div class="row mt-5">
+            <div class="col-4 text-center">
+                <strong>Người lập biểu</strong><br /><br /><br /><br />
+                <span>(Ký, họ tên)</span>
+            </div>
+            <div class="col-4 text-center">
+                <strong>Thủ kho</strong><br /><br /><br /><br />
+                <span>(Ký, họ tên)</span>
+            </div>
+            <div class="col-4 text-center">
+                <em>Ngày ..... tháng ..... năm 20.....</em><br />
+                <strong>Giám đốc</strong><br /><br /><br /><br />
+                <span>(Ký, họ tên, đóng dấu)</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

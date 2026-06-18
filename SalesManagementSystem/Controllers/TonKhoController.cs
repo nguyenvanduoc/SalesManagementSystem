@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web.Mvc;
@@ -36,13 +37,13 @@ namespace SalesManagementSystem.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetDashboard(int? idKho = null, string tuNgay = "", string denNgay = "")
+        public ActionResult GetDashboard(int? idKho = null, int? idSanPham = null, string tuNgay = "", string denNgay = "", bool chiConTon = false)
         {
             if (!PermissionHelper.HasPermission("TonKho", LoaiPhanQuyen.Xem)) return Json(new { success = false }, JsonRequestBehavior.AllowGet);
 
             try
             {
-                var dashboard = _tonKhoRepo.GetDashboard(idKho, tuNgay, denNgay);
+                var dashboard = _tonKhoRepo.GetDashboard(idKho, idSanPham, tuNgay, denNgay, chiConTon);
                 return Json(new { success = true, data = dashboard }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
@@ -85,6 +86,10 @@ namespace SalesManagementSystem.Controllers
             try
             {
                 var list = _tonKhoRepo.GetTheKho(idKho, idSanPham, tuNgay, denNgay);
+                ViewBag.IdKho = idKho;
+                ViewBag.IdSanPham = idSanPham;
+                ViewBag.TuNgay = tuNgay;
+                ViewBag.DenNgay = denNgay;
                 return PartialView("_TheKhoModal", list);
             }
             catch (Exception ex)
@@ -154,6 +159,51 @@ namespace SalesManagementSystem.Controllers
             int total;
             var data = _sanPhamRepo.GetPaged(1, 20, q, out total);
             return Json(data.Select(x => new { id = x.ID, text = x.MaSanPham + " - " + x.TenSanPham }), JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public ActionResult PrintTheKho(int idKho, int idSanPham, string tuNgay = "", string denNgay = "")
+        {
+            if (!PermissionHelper.HasPermission("TonKho", LoaiPhanQuyen.Xem)) return Content("Không có quyền in");
+
+            var list = _tonKhoRepo.GetTheKho(idKho, idSanPham, tuNgay, denNgay);
+            ViewBag.TuNgay = tuNgay;
+            ViewBag.DenNgay = denNgay;
+
+            int totalKho;
+            var kho = _khoHangRepo.GetPaged(1, 1, null, out totalKho).FirstOrDefault(x => x.ID == idKho);
+            ViewBag.TenKho = kho != null ? kho.TenKhoHang : "Tất cả kho";
+
+            int totalSP;
+            var sp = _sanPhamRepo.GetPaged(1, 1, null, out totalSP).FirstOrDefault(x => x.ID == idSanPham);
+            ViewBag.TenSanPham = sp != null ? sp.TenSanPham : "Không xác định";
+
+            return View(list);
+        }
+
+        [HttpGet]
+        public ActionResult PrintTheKhoMulti(int? idKho = null, int? idSanPham = null, string tuNgay = "", string denNgay = "", bool chiConTon = false)
+        {
+            if (!PermissionHelper.HasPermission("TonKho", LoaiPhanQuyen.Xem)) return Content("Không có quyền in");
+
+            var products = _tonKhoRepo.GetList(idKho, idSanPham, tuNgay, denNgay, chiConTon).ToList();
+            var model = new List<PrintTheKhoMultiViewModel>();
+
+            foreach(var p in products)
+            {
+                var cards = _tonKhoRepo.GetTheKho(p.IDKho, p.IDSanPham, tuNgay, denNgay);
+                model.Add(new PrintTheKhoMultiViewModel
+                {
+                    TenKho = p.TenKho,
+                    TenSanPham = p.MaSanPham + " - " + p.TenSanPham,
+                    TheKhoList = cards
+                });
+            }
+
+            ViewBag.TuNgay = tuNgay;
+            ViewBag.DenNgay = denNgay;
+
+            return View(model);
         }
     }
 }

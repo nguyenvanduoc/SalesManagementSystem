@@ -342,7 +342,7 @@ var ChungTuBanHang = (function () {
             data: JSON.stringify({ sanPhams: sanPhams }),
             success: function (res) {
                 if (res.success) {
-                    var tbody = tabPane.find('#tableTonKho tbody');
+                    var tbody = tabPane.find('#CTBH_tableTonKho tbody');
                     tbody.empty();
                     
                     res.data.forEach(function (kho) {
@@ -391,9 +391,9 @@ var ChungTuBanHang = (function () {
     
     var selectKho = function(idKho, tenKho, btn) {
         var tabPane = $(btn).closest('.tab-pane');
-        tabPane.find('#IDKho').val(idKho);
-        tabPane.find('#TenKhoHang').val(tenKho);
-        window.tonKhoHasError = false; // Khi chọn được kho từ modal có nghĩa là đủ tồn
+        tabPane.find('#CTBH_IDKho').val(idKho);
+        tabPane.find('#CTBH_TenKhoHang').val(tenKho);
+        window.tonKhoHasError = false; 
         
         var modalEl = tabPane.find('#modalTonKho')[0];
         var modalTonKho = bootstrap.Modal.getInstance(modalEl);
@@ -403,7 +403,7 @@ var ChungTuBanHang = (function () {
     };
 
     var initEvents = function() {
-        $(document).off('click', '#btnShowKhoTonKho').on('click', '#btnShowKhoTonKho', function() {
+        $(document).off('click', '#CTBH_btnShowKhoTonKho').on('click', '#CTBH_btnShowKhoTonKho', function() {
             var tabPane = $(this).closest('.tab-pane');
             openModalChonKho(tabPane);
         });

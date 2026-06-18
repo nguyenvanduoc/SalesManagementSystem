@@ -14,6 +14,10 @@ namespace SalesManagementSystem.Models.ViewModels
         public int IDKho { get; set; }
         public string TenKhoHang { get; set; }
         public string TenKhachHang { get; set; }
+        public string MaKhachHang { get; set; }
+        public string DiaChiKhachHang { get; set; }
+        public string SoDienThoaiKhachHang { get; set; }
+        public string MaSoThueKhachHang { get; set; }
         
         public int? IDNhanSuNhan { get; set; }
         public string TenNguoiNhan { get; set; }

@@ -1,6 +1,6 @@
 @model SalesManagementSystem.Models.ViewModels.ChungTuBanHangViewModel
 @{
-    ViewBag.Title = ViewBag.IsEdit == true ? "Xem/Chỉnh sửa chứng từ bán hàng" : "Lập chứng từ bán hàng";
+    ViewBag.Title = "Chi tiết chứng từ bán hàng";
 }
 
 <style>
@@ -21,16 +21,6 @@
     <a href="@Url.Action("Index","ChungTuBanHang")" class="btn btn-secondary btn-sm">
         <i class="bi bi-arrow-left"></i> Quay lại
     </a>
-    
-    @if (Model.TrangThai == 0 || Model.TrangThai == 1)
-    {
-        <button type="button" class="btn btn-sm text-white" style="background-color:#17a2b8;border:none;" onclick="ChungTuBanHang.save(false)">
-            <i class="bi bi-save me-1"></i> Lưu dữ liệu
-        </button>
-        <button type="button" class="btn btn-sm text-white" style="background-color:#28a745;border:none;" onclick="ChungTuBanHang.save(true)">
-            <i class="bi bi-check-circle me-1"></i> Lưu và ghi
-        </button>
-    }
 
     <span class="text-muted small ms-auto">
         <i class="bi bi-info-circle me-1"></i>@ViewBag.Title
@@ -107,19 +97,18 @@
                 <div class="row g-2">
                     <div class="col-md-3">
                         <label class="form-label text-muted fw-semibold small">Ngày chứng từ</label>
-                        @Html.TextBoxFor(m => m.NgayChungTu, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                        @Html.TextBoxFor(m => m.NgayChungTu, "{0:yyyy-MM-dd}", new { @class = "form-control readonly-cell", type = "date", @readonly = "readonly" })
                     </div>
                     <div class="col-md-4">
                         <label class="form-label text-muted fw-semibold small">Kho xuất</label>
                         <div class="input-group">
                             <input type="hidden" name="IDKho" id="CTBH_IDKho" value="@(Model.IDKho > 0 ? Model.IDKho.ToString() : "")" />
-                            <input type="text" class="form-control bg-white" id="CTBH_TenKhoHang" value="@Model.TenKhoHang" readonly placeholder="-- Chọn kho --" />
-                            <button class="btn btn-outline-secondary" type="button" id="CTBH_btnShowKhoTonKho"><i class="bi bi-search"></i> Chọn kho</button>
+                            <input type="text" class="form-control readonly-cell" id="CTBH_TenKhoHang" value="@Model.TenKhoHang" readonly />
                         </div>
                     </div>
                     <div class="col-md-5">
                         <label class="form-label text-muted fw-semibold small">Tài khoản thanh toán</label>
-                        <select class="form-select" name="IDTaiKhoanThanhToan" id="CTBH_IDTaiKhoanThanhToan">
+                        <select class="form-select readonly-cell" name="IDTaiKhoanThanhToan" id="CTBH_IDTaiKhoanThanhToan" disabled="disabled">
                             <option value="">-- Chọn tài khoản --</option>
                             @foreach (var tk in ViewBag.TaiKhoanThanhToanList)
                             {
@@ -221,43 +210,10 @@
     </div>
 </form>
 
-<!-- Modal Kiểm tra tồn kho -->
-<div class="modal fade" id="modalTonKho" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content shadow-lg" style="border: none;">
-            <div class="modal-header bg-light">
-                <h5 class="modal-title fw-bold text-uppercase" style="color:#0b5b84;">CHỌN KHO XUẤT (KIỂM TRA TỒN)</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-0">
-                <div class="table-responsive" style="max-height: 400px;">
-                    <table class="table table-bordered mb-0" id="CTBH_tableTonKho">
-                        <thead style="background:#f4f6f9; font-weight:bold; position: sticky; top: 0; z-index: 1;">
-                            <tr>
-                                <th>Tên kho hàng</th>
-                                <th class="text-center" style="width:130px;">Tình trạng</th>
-                                <th>Chi tiết tồn kho (Tồn / Cần xuất)</th>
-                                <th class="text-center" style="width:100px;">Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Nội dung render qua JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary text-white" style="background:#6c757d; border:none;" data-bs-dismiss="modal">Đóng</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 @section Scripts {
-    <script src="~/Scripts/chung-tu-ban-hang.js?v=3.4"></script>
     <script>
         $(function () {
-            ChungTuBanHang.init();
+            // Không khởi tạo JS cho Detail view
         });
     </script>
 }

@@ -1,5 +1,5 @@
 using System;
-
+using System.Collections.Generic;
 namespace SalesManagementSystem.Models.ViewModels
 {
     public class TonKhoFilterViewModel
@@ -42,6 +42,13 @@ namespace SalesManagementSystem.Models.ViewModels
         public decimal DonGia { get; set; }
         public decimal ThanhTien { get; set; }
         public decimal TonLuyKe { get; set; }
+    }
+
+    public class PrintTheKhoMultiViewModel
+    {
+        public string TenKho { get; set; }
+        public string TenSanPham { get; set; }
+        public IEnumerable<TheKhoListViewModel> TheKhoList { get; set; }
     }
 
     public class TonKhoDashboardViewModel

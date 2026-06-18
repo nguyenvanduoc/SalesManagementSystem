@@ -37,12 +37,12 @@ namespace SalesManagementSystem.Controllers
             string tuNgay = "", string denNgay = "",
             string soChungTu = "", int? idKho = null,
             int? idNhaCungCap = null, int? trangThai = null,
-            int? idNhanSuNhan = null)
+            string tenNguoiNhan = "")
         {
             if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.Xem)) return View("AccessDenied");
 
             int totalRecords;
-            var list = _repo.GetPaged(page, pageSize, tuNgay, denNgay, soChungTu, idKho, idNhaCungCap, trangThai, idNhanSuNhan, out totalRecords);
+            var list = _repo.GetPaged(page, pageSize, tuNgay, denNgay, soChungTu, idKho, idNhaCungCap, trangThai, tenNguoiNhan, out totalRecords);
 
             var model = new PagedListViewModel<PhieuNhapKhoListViewModel>
             {
@@ -67,13 +67,13 @@ namespace SalesManagementSystem.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetList(int page = 1, int pageSize = 20, string tuNgay = "", string denNgay = "", string soChungTu = "", int? idKho = null, int? idNhaCungCap = null, int? trangThai = null, int? idNhanSuNhan = null)
+        public ActionResult GetList(int page = 1, int pageSize = 20, string tuNgay = "", string denNgay = "", string soChungTu = "", int? idKho = null, int? idNhaCungCap = null, int? trangThai = null, string tenNguoiNhan = "")
         {
             if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.Xem)) return Content("<div class='alert alert-danger'>Không có quyền truy cập</div>");
 
             try 
             {
-                var list = _repo.GetPaged(page, pageSize, tuNgay, denNgay, soChungTu, idKho, idNhaCungCap, trangThai, idNhanSuNhan, out int totalRecords);
+                var list = _repo.GetPaged(page, pageSize, tuNgay, denNgay, soChungTu, idKho, idNhaCungCap, trangThai, tenNguoiNhan, out int totalRecords);
 
                 var model = new PagedListViewModel<PhieuNhapKhoListViewModel>
                 {
@@ -93,14 +93,14 @@ namespace SalesManagementSystem.Controllers
         }
 
         [HttpGet]
-        public ActionResult ExportExcel(string tuNgay = "", string denNgay = "", string soChungTu = "", int? idKho = null, int? idNhaCungCap = null, int? trangThai = null, int? idNhanSuNhan = null)
+        public ActionResult ExportExcel(string tuNgay = "", string denNgay = "", string soChungTu = "", int? idKho = null, int? idNhaCungCap = null, int? trangThai = null, string tenNguoiNhan = "")
         {
             if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.Xem)) 
                 return View("AccessDenied");
 
             try
             {
-                var list = _repo.GetPaged(1, 100000, tuNgay, denNgay, soChungTu, idKho, idNhaCungCap, trangThai, idNhanSuNhan, out int totalRecords);
+                var list = _repo.GetPaged(1, 100000, tuNgay, denNgay, soChungTu, idKho, idNhaCungCap, trangThai, tenNguoiNhan, out int totalRecords);
 
                 var session = (UserLoginViewModel)Session[CommonConstants.USER_SESSION];
                 string nguoiLapBieu = session != null ? (session.HoDem + " " + session.Ten).Trim() : "Hệ thống";
@@ -125,7 +125,7 @@ namespace SalesManagementSystem.Controllers
                     NgayHoaDon = item.NgayHoaDon,
                     TenNguoiGiao = item.TenNguoiGiao,
                     SoDienThoaiNguoiGiao = item.SoDienThoaiNguoiGiao,
-                    TenNhanSuNhan = item.TenNhanSuNhan,
+                    TenNguoiNhan = item.TenNguoiNhan,
                     TongTienHang = item.TongTienHang,
                     TongTienThue = item.TongTienThue,
                     TongCong = item.TongCong,
@@ -179,7 +179,7 @@ namespace SalesManagementSystem.Controllers
                 NgayHoaDon = entity.NgayHoaDon,
                 TenNguoiGiao = entity.TenNguoiGiao,
                 SoDienThoaiNguoiGiao = entity.SoDienThoaiNguoiGiao,
-                IDNhanSuNhan = entity.IDNhanSuNhan,
+                TenNguoiNhan = entity.TenNguoiNhan,
                 GhiChu = entity.GhiChu,
                 TrangThai = entity.TrangThai,
                 IsReadOnly = isView || entity.TrangThai == 2 || entity.TrangThai == 3
@@ -192,7 +192,6 @@ namespace SalesManagementSystem.Controllers
             {
                 model.TenKho = item.TenKho;
                 model.TenNhaCungCap = item.TenNhaCungCap;
-                model.TenNhanSuNhan = item.TenNhanSuNhan;
             }
 
             model.ChiTiets = _repo.GetChiTiet(id);

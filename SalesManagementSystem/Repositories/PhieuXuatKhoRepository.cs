@@ -53,6 +53,23 @@ namespace SalesManagementSystem.Repositories
                     var pDetails = new DynamicParameters();
                     pDetails.Add("@IDPhieuXuat", id);
                     model.ChiTiets = conn.Query<PhieuXuatKhoChiTietViewModel>("sp_KHO_PhieuXuat_ChiTiet_GetList", pDetails, commandType: CommandType.StoredProcedure).ToList();
+
+                    if (model.IDDonDatHang.HasValue)
+                    {
+                        var khQuery = @"
+                            SELECT kh.MaKhachHang, kh.DiaChi, kh.SoDienThoai, kh.MaSoThue
+                            FROM NS_DonDatHang dh
+                            JOIN NS_KhachHang kh ON dh.IDKhachHang = kh.ID
+                            WHERE dh.ID = @IDDonDatHang";
+                        var khInfo = conn.QueryFirstOrDefault(khQuery, new { IDDonDatHang = model.IDDonDatHang });
+                        if (khInfo != null)
+                        {
+                            model.MaKhachHang = khInfo.MaKhachHang;
+                            model.DiaChiKhachHang = khInfo.DiaChi;
+                            model.SoDienThoaiKhachHang = khInfo.SoDienThoai;
+                            model.MaSoThueKhachHang = khInfo.MaSoThue;
+                        }
+                    }
                 }
 
                 return model;

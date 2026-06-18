@@ -5,15 +5,18 @@ var PhieuNhapKho = (function () {
         selectedKhoText: '',
         selectedNccId: null,
         selectedNccText: '',
-        selectedNhanSuId: null,
-        selectedNhanSuText: '',
+        selectedKhoId: null,
+        selectedKhoText: '',
+        selectedNccId: null,
+        selectedNccText: '',
         searchKhoUrl: '',
         searchNccUrl: '',
-        searchNhanSuUrl: '',
         searchSpUrl: ''
     };
 
     function _formatNumber(n) {
+        if (n === '' || n == null) return '';
+        if (n === 0 || n === '0') return '0';
         if (!n) return '0';
         var parts = n.toString().split(".");
         parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -21,7 +24,8 @@ var PhieuNhapKho = (function () {
     }
 
     function _parseMoney(str) {
-        if (!str) return 0;
+        if (str === '' || str == null) return 0;
+        if (!str && str !== 0) return 0;
         str = str.toString().replace(/\./g, '').replace(/,/g, '.');
         var val = parseFloat(str);
         return isNaN(val) ? 0 : val;
@@ -61,27 +65,11 @@ var PhieuNhapKho = (function () {
             }
         });
 
-        $('#IDNhanSuNhan').select2({
-            placeholder: '-- Chọn người nhận --',
-            minimumInputLength: 0,
-            ajax: {
-                url: config.searchNhanSuUrl,
-                dataType: 'json',
-                delay: 250,
-                data: function (params) { return { q: params.term || '' }; },
-                processResults: function (data) { return { results: data }; },
-                cache: true
-            }
-        });
-
         if (config.selectedKhoId) {
             $('#IDKho').append(new Option(config.selectedKhoText, config.selectedKhoId, true, true)).trigger('change');
         }
         if (config.selectedNccId) {
             $('#IDNhaCungCap').append(new Option(config.selectedNccText, config.selectedNccId, true, true)).trigger('change');
-        }
-        if (config.selectedNhanSuId) {
-            $('#IDNhanSuNhan').append(new Option(config.selectedNhanSuText, config.selectedNhanSuId, true, true)).trigger('change');
         }
     }
 
@@ -108,15 +96,12 @@ var PhieuNhapKho = (function () {
         $select.on('select2:select', function (e) {
             var data = e.params.data;
             $row.find('.txt-dvt').val(data.dvt || '');
-            if (!_parseMoney($row.find('.txt-soluong').val())) {
-                $row.find('.txt-soluong').val(1);
-            }
             calcRow($row);
         });
     }
 
     function _renderTable(dataList) {
-        var $tbody = $('#tblChiTiet tbody');
+        var $tbody = $('#PNK_tblChiTiet tbody');
         $tbody.empty();
 
         if (dataList && dataList.length > 0) {
@@ -129,8 +114,8 @@ var PhieuNhapKho = (function () {
 
     function _addRowWithData($tbody, ct) {
         var id = ct ? ct.ID : 0;
-        var soLuong = ct ? ct.SoLuong : 1;
-        var donGia = ct ? ct.DonGia : 0;
+        var soLuong = ct ? ct.SoLuong : '';
+        var donGia = ct ? ct.DonGia : '';
         var thue = ct ? ct.ThueGTGT : 0;
         var ghiChu = ct ? ct.GhiChu || '' : '';
         var dvt = ct ? ct.DVT || '' : '';
@@ -146,8 +131,8 @@ var PhieuNhapKho = (function () {
             '  <td><input type="date" class="form-control txt-ngaysanxuat" value="' + ngaySanXuat + '" /></td>' +
             '  <td><input type="date" class="form-control txt-hansudung" value="' + hanSuDung + '" /></td>' +
             '  <td><input type="text" class="form-control readonly-cell txt-thanhtien text-end" readonly value="0" /></td>' +
-            '  <td><input type="number" class="form-control txt-thue text-end" step="0.1" value="' + thue + '" /></td>' +
-            '  <td><input type="text" class="form-control readonly-cell txt-tienthue text-end" readonly value="0" /></td>' +
+            '  <td class="d-none"><input type="number" class="form-control txt-thue text-end" step="0.1" value="' + thue + '" /></td>' +
+            '  <td class="d-none"><input type="text" class="form-control readonly-cell txt-tienthue text-end" readonly value="0" /></td>' +
             '  <td><input type="text" class="form-control readonly-cell txt-tongsauthue text-end" readonly value="0" /></td>' +
             '  <td><input type="text" class="form-control txt-ghichu" value="' + ghiChu + '" /></td>' +
             '  <td class="text-center align-middle">' +
@@ -180,11 +165,11 @@ var PhieuNhapKho = (function () {
     }
 
     function _initEvents() {
-        $('#btnAddRow').on('click', function () {
-            _addRowWithData($('#tblChiTiet tbody'), null);
+        $('#PNK_btnAddRow').on('click', function () {
+            _addRowWithData($('#PNK_tblChiTiet tbody'), null);
         });
 
-        $('#tblChiTiet').on('click', '.btn-remove-row', function () {
+        $('#PNK_tblChiTiet').on('click', '.btn-remove-row', function () {
             $(this).closest('tr').remove();
             _updateSTT();
             _updateTotal();
@@ -192,7 +177,7 @@ var PhieuNhapKho = (function () {
     }
 
     function _updateSTT() {
-        $('#tblChiTiet tbody tr').each(function (idx) {
+        $('#PNK_tblChiTiet tbody tr').each(function (idx) {
             $(this).find('.row-stt').text(idx + 1);
         });
     }
@@ -218,7 +203,7 @@ var PhieuNhapKho = (function () {
         var totalTienThue = 0;
         var totalCong = 0;
 
-        $('#tblChiTiet tbody tr').each(function () {
+        $('#PNK_tblChiTiet tbody tr').each(function () {
             totalTienHang += _parseMoney($(this).find('.txt-thanhtien').val());
             totalTienThue += _parseMoney($(this).find('.txt-tienthue').val());
             totalCong += _parseMoney($(this).find('.txt-tongsauthue').val());
@@ -237,10 +222,9 @@ var PhieuNhapKho = (function () {
         if (!$('#NgayNhap').val()) { errorMsg += 'Ngày nhập không được để trống.\n'; isValid = false; }
         if (!$('#IDKho').val()) { errorMsg += 'Vui lòng chọn Kho.\n'; isValid = false; }
         if (!$('#IDNhaCungCap').val()) { errorMsg += 'Vui lòng chọn Nhà cung cấp.\n'; isValid = false; }
-        if (!$('#IDNhanSuNhan').val()) { errorMsg += 'Vui lòng chọn Người nhận.\n'; isValid = false; }
 
         var chiTiets = [];
-        var rows = $('#tblChiTiet tbody tr');
+        var rows = $('#PNK_tblChiTiet tbody tr');
         if (rows.length === 0) {
             errorMsg += 'Phiếu nhập phải có ít nhất 1 mặt hàng.\n';
             isValid = false;
@@ -302,7 +286,7 @@ var PhieuNhapKho = (function () {
             NgayHoaDon: $('#NgayHoaDon').val(),
             TenNguoiGiao: $('#TenNguoiGiao').val(),
             SoDienThoaiNguoiGiao: $('#SoDienThoaiNguoiGiao').val(),
-            IDNhanSuNhan: $('#IDNhanSuNhan').val(),
+            TenNguoiNhan: $('#TenNguoiNhan').val(),
             GhiChu: $('#GhiChu').val(),
             ChiTiets: chiTiets
         };

@@ -16,7 +16,7 @@
                     
                     <div class="row mb-3">
                         <div class="col-md-3">
-                            <label>Số chứng từ</label>
+                            <label>Số phiếu xuất</label>
                             <input type="text" class="form-control" value="@Model.SoChungTu" readonly />
                         </div>
                         <div class="col-md-3">
@@ -24,8 +24,26 @@
                             @Html.TextBoxFor(m => m.NgayXuat, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", @readonly = "readonly" })
                         </div>
                         <div class="col-md-3">
-                            <label>Khách hàng</label>
+                            <label>Mã khách hàng</label>
+                            <input type="text" class="form-control" value="@Model.MaKhachHang" readonly />
+                        </div>
+                        <div class="col-md-3">
+                            <label>Tên khách hàng</label>
                             <input type="text" class="form-control" value="@Model.TenKhachHang" readonly />
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label>Địa chỉ</label>
+                            <input type="text" class="form-control" value="@Model.DiaChiKhachHang" readonly />
+                        </div>
+                        <div class="col-md-3">
+                            <label>Số điện thoại</label>
+                            <input type="text" class="form-control" value="@Model.SoDienThoaiKhachHang" readonly />
+                        </div>
+                        <div class="col-md-3">
+                            <label>Mã số thuế</label>
+                            <input type="text" class="form-control" value="@Model.MaSoThueKhachHang" readonly />
                         </div>
                         <div class="col-md-3">
                             <label>Kho xuất</label>
@@ -46,9 +64,9 @@
                                     <th>STT</th>
                                     <th>Sản phẩm</th>
                                     <th>ĐVT</th>
-                                    <th>Số lượng</th>
-                                    <th>Đơn giá</th>
-                                    <th>Thành tiền</th>
+                                    <th class="d-none">Số lượng</th>
+                                    <th class="d-none">Đơn giá</th>
+                                    <th class="d-none">Thành tiền</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -61,15 +79,15 @@
                                         </td>
                                         <td>@Model.ChiTiets[i].MaSanPham - @Model.ChiTiets[i].TenSanPham</td>
                                         <td>@Model.ChiTiets[i].DVT</td>
-                                        <td>
+                                        <td class="d-none">
                                             @Model.ChiTiets[i].SoLuong.ToString("N0")
                                             <input type="hidden" name="ChiTiets[@i].SoLuong" value="@Model.ChiTiets[i].SoLuong" />
                                         </td>
-                                        <td>
+                                        <td class="d-none">
                                             @Model.ChiTiets[i].DonGia.ToString("N0")
                                             <input type="hidden" name="ChiTiets[@i].DonGia" value="@Model.ChiTiets[i].DonGia" />
                                         </td>
-                                        <td>
+                                        <td class="d-none">
                                             @Model.ChiTiets[i].ThanhTien.ToString("N0")
                                             <input type="hidden" name="ChiTiets[@i].ThanhTien" value="@Model.ChiTiets[i].ThanhTien" />
                                             
@@ -80,7 +98,7 @@
                                     </tr>
                                 }
                             </tbody>
-                            <tfoot>
+                            <tfoot class="d-none">
                                 <tr>
                                     <th colspan="5" class="text-right">Tổng tiền hàng:</th>
                                     <th>@Model.TongTienHang.ToString("N0")

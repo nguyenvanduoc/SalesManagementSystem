@@ -77,11 +77,23 @@ var DonDatHang = (function () {
                 cache: true
             },
             templateResult: _formatKhachHangOption,
-            templateSelection: function (d) { return d.text || d.id; }
+            templateSelection: function (d) { return d.maKH || (d.text ? d.text.split(' - ')[0] : d.text) || d.id; }
         }).on('select2:select', function (e) {
             var d = e.params.data;
             $form.find('#hdIDKhachHang').val(d.id);
-            $form.find('#txtMaKH').val(d.maKH || '');
+            
+            // Extract TenKhachHang from text (usually "MaKH - TenKH")
+            var tenKH = d.tenKhachHang || d.tenKH || '';
+            if (!tenKH && d.text) {
+                var parts = d.text.split(' - ');
+                if (parts.length > 1) {
+                    tenKH = parts.slice(1).join(' - ');
+                } else {
+                    tenKH = d.text;
+                }
+            }
+            $form.find('#txtTenKH').val(tenKH);
+            
             $form.find('#txtMaSoThue').val(d.maSoThue || '');
             $form.find('#txtDiaChi').val(d.diaChi || '');
             $form.find('#txtSDT').val(d.sdt || '');
@@ -94,7 +106,7 @@ var DonDatHang = (function () {
             }
         }).on('select2:clear', function () {
             $form.find('#hdIDKhachHang').val('');
-            $form.find('#txtMaKH,#txtMaSoThue,#txtDiaChi,#txtSDT').val('');
+            $form.find('#txtTenKH,#txtMaSoThue,#txtDiaChi,#txtSDT').val('');
         });
     }
 
@@ -124,12 +136,13 @@ var DonDatHang = (function () {
         var idx = state.rowIndex++;
         var id = parseInt(_val(ct, 'id', 'ID')) || 0;
         var thueGTGT = _toNumber(_val(ct, 'thueGTGT', 'ThueGTGT'), 0);
-        var donGia = _toNumber(_val(ct, 'donGia', 'DonGia'), 0);
-        var soLuong = _toNumber(_val(ct, 'soLuong', 'SoLuong'), 1);
+        var ctDonGia = _val(ct, 'donGia', 'DonGia');
+        var ctSoLuong = _val(ct, 'soLuong', 'SoLuong');
         var isHangKhuyenMai = !!_val(ct, 'isHangKhuyenMai', 'IsHangKhuyenMai');
         var ghiChu = _val(ct, 'ghiChu', 'GhiChu') || '';
 
-        if (soLuong < 0) soLuong = 1;
+        var soLuongStr = (ctSoLuong !== undefined && ctSoLuong !== null) ? _formatNumber(Math.round(ctSoLuong)) : '';
+        var donGiaStr = (ctDonGia !== undefined && ctDonGia !== null) ? _formatNumber(ctDonGia) : '';
 
         var html =
             '<tr data-idx="' + idx + '">' +
@@ -142,21 +155,21 @@ var DonDatHang = (function () {
             '  </td>' +
             '  <td class="text-center"><input type="text" class="form-control readonly-cell txt-dvt" readonly placeholder="-" style="text-align:center;" /></td>' +
             '  <td>' +
-            '    <input type="text" class="form-control txt-soluong text-end" inputmode="numeric" value="' + _formatNumber(Math.round(soLuong)) + '" />' +
+            '    <input type="text" class="form-control txt-soluong text-end" inputmode="numeric" value="' + soLuongStr + '" />' +
             '  </td>' +
             '  <td>' +
-            '    <input type="text" class="form-control txt-dongia text-end" inputmode="decimal" value="' + _formatNumber(donGia) + '" />' +
+            '    <input type="text" class="form-control txt-dongia text-end" inputmode="decimal" value="' + donGiaStr + '" />' +
             '  </td>' +
             '  <td>' +
-            '    <input type="text" class="form-control readonly-cell txt-thanhtien text-end" readonly value="0" />' +
+            '    <input type="text" class="form-control readonly-cell txt-thanhtien text-end" readonly value="" />' +
             '  </td>' +
-            '  <td class="text-center">' +
+            '  <td class="text-center d-none">' +
             '    <input type="number" class="form-control txt-thue" min="0" step="0.01" value="' + thueGTGT + '" />' +
             '  </td>' +
-            '  <td>' +
+            '  <td class="d-none">' +
             '    <input type="text" class="form-control readonly-cell txt-tien-thue text-end" readonly value="0" />' +
             '  </td>' +
-            '  <td>' +
+            '  <td class="d-none">' +
             '    <input type="text" class="form-control readonly-cell txt-tt-sau-thue text-end" readonly value="0" />' +
             '  </td>' +
             '  <td class="text-center">' +
@@ -188,7 +201,10 @@ var DonDatHang = (function () {
             calcRow($row);
         });
         $row.find('.txt-dongia, .txt-soluong').on('blur change', function () {
-            $(this).val(_formatNumber(_parseMoney($(this).val())));
+            var val = $(this).val();
+            if (val !== '') {
+                $(this).val(_formatNumber(_parseMoney(val)));
+            }
         });
 
         if (state.config.isReadOnly) {
@@ -272,8 +288,11 @@ var DonDatHang = (function () {
 
     function calcRow($row) {
         var $form = $row.closest('form');
-        var donGia = _parseMoney($row.find('.txt-dongia').val());
-        var soLuong = _parseMoney($row.find('.txt-soluong').val());
+        var strDonGia = $row.find('.txt-dongia').val();
+        var strSoLuong = $row.find('.txt-soluong').val();
+        
+        var donGia = _parseMoney(strDonGia);
+        var soLuong = _parseMoney(strSoLuong);
         var thue = _toNumber($row.find('.txt-thue').val(), 0);
 
         if (donGia < 0) donGia = 0;
@@ -283,9 +302,12 @@ var DonDatHang = (function () {
         var thanhTien = donGia * soLuong;
         var tienThue = thanhTien * thue / 100;
         var ttSauThue = thanhTien + tienThue;
-        $row.find('.txt-thanhtien').val(_formatNumber(Math.round(thanhTien)));
-        $row.find('.txt-tien-thue').val(_formatNumber(Math.round(tienThue)));
-        $row.find('.txt-tt-sau-thue').val(_formatNumber(Math.round(ttSauThue)));
+
+        var hasValue = (strDonGia !== '' || strSoLuong !== '');
+        
+        $row.find('.txt-thanhtien').val(hasValue ? _formatNumber(Math.round(thanhTien)) : '');
+        $row.find('.txt-tien-thue').val(hasValue ? _formatNumber(Math.round(tienThue)) : '');
+        $row.find('.txt-tt-sau-thue').val(hasValue ? _formatNumber(Math.round(ttSauThue)) : '');
         calcTotal($form);
     }
 

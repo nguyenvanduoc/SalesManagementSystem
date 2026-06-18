@@ -20,7 +20,9 @@ namespace SalesManagementSystem.Repositories.Interfaces
 
         TonKhoDashboardViewModel GetDashboard(
             int? idKho, 
+            int? idSanPham,
             string tuNgay, 
-            string denNgay);
+            string denNgay,
+            bool chiConTon);
     }
 }

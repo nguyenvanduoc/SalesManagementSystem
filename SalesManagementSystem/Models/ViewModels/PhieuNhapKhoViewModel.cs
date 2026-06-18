@@ -16,8 +16,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public DateTime? NgayHoaDon { get; set; }
         public string TenNguoiGiao { get; set; }
         public string SoDienThoaiNguoiGiao { get; set; }
-        public int? IDNhanSuNhan { get; set; }
-        public string TenNhanSuNhan { get; set; }
+        public string TenNguoiNhan { get; set; }
         public string GhiChu { get; set; }
         public int TrangThai { get; set; }
         public bool IsReadOnly { get; set; } // Set to true if TrangThai == 2 or 3

@@ -11,6 +11,9 @@
     <!-- Font: dùng system fonts hỗ trợ tiếng Việt, không cần internet -->
     <!-- Bootstrap Icons (local - không cần internet) -->
     <link rel="stylesheet" href="@Url.Content("~/Content/bootstrap-icons.min.css")" />
+    <!-- Global Search CSS -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/css/global-search.css")" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <style>
         /* ─── Variables ─────────────────────────────────── */
@@ -283,6 +286,7 @@
             padding: 12px;
             /* Đảm bảo flex child có min-height để không trào grid */
             min-height: 0; 
+            outline: none;
         }
         .page-header {
             display: flex;
@@ -625,13 +629,47 @@
                 <i class="bi bi-chevron-left"></i>
             </button>
             <div class="tabs-container" id="tabsContainerScroll">
+                @{
+                    string currentUrl = Request.Url != null ? Request.Url.AbsolutePath.ToLower() : "";
+                    bool isHome = currentUrl == "/" || currentUrl == "/home/index" || currentUrl == "/home" || string.IsNullOrEmpty(currentUrl);
+                    string tabTitle = ViewBag.Title;
+                    if (!isHome)
+                    {
+                        string controllerName = ViewContext.RouteData.Values["controller"]?.ToString();
+                        if (!string.IsNullOrEmpty(controllerName))
+                        {
+                            using (var conn = new SalesManagementSystem.Data.DbConnectionFactory().CreateConnection())
+                            {
+                                string sql = @"
+                                    SELECT TOP 1 am.TenManHinh 
+                                    FROM ACL_Action aa 
+                                    JOIN ACL_ManHinh am ON aa.IDManHinh = am.ID 
+                                    WHERE aa.TenController = @Controller 
+                                      AND am.IsSuDung = 1";
+                                var menuTitle = Dapper.SqlMapper.QueryFirstOrDefault<string>(conn, sql, new { Controller = controllerName });
+                                if (!string.IsNullOrEmpty(menuTitle))
+                                {
+                                    tabTitle = menuTitle;
+                                }
+                            }
+                        }
+                    }
+                }
                 <ul class="nav nav-tabs" id="mainTabHeader" role="tablist">
                     <!-- Default tab for manual page load -->
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="default-tab" data-bs-toggle="tab" data-bs-target="#default-tab-pane" type="button" role="tab" aria-controls="default-tab-pane" aria-selected="true">
-                            <span class="tab-title">@(ViewBag.Title ?? "Trang chủ")</span> <i class="bi bi-house-door ms-1"></i>
+                        <button class="nav-link @(isHome ? "active" : "")" id="default-tab" data-bs-toggle="tab" data-bs-target="#default-tab-pane" type="button" role="tab" aria-controls="default-tab-pane" aria-selected="@(isHome ? "true" : "false")">
+                            <span class="tab-title">Dashboard</span> <i class="bi bi-house-door ms-1"></i>
                         </button>
                     </li>
+                    @if (!isHome)
+                    {
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="tab-direct-load" data-bs-toggle="tab" data-bs-target="#tab-direct-load-pane" type="button" role="tab" aria-controls="tab-direct-load-pane" aria-selected="true">
+                                <span class="tab-title">@(tabTitle)</span> <span class="close-tab-btn" title="Đóng tab">&times;</span>
+                            </button>
+                        </li>
+                    }
                 </ul>
             </div>
             <button class="tab-scroll-btn" id="btnScrollRightTab" type="button" title="Cuộn phải">
@@ -641,9 +679,18 @@
         
         <!-- TAB CONTENT -->
         <div class="tab-content" id="mainTabContent">
-            <div class="tab-pane fade show active" id="default-tab-pane" role="tabpanel" aria-labelledby="default-tab" tabindex="0">
-                @RenderBody()
+            <div class="tab-pane fade @(isHome ? "show active" : "")" id="default-tab-pane" role="tabpanel" aria-labelledby="default-tab" tabindex="0" data-url="@Url.Action("Index", "Home")">
+                @if (isHome)
+                {
+                    @RenderBody()
+                }
             </div>
+            @if (!isHome)
+            {
+                <div class="tab-pane fade show active" id="tab-direct-load-pane" role="tabpanel" aria-labelledby="tab-direct-load" tabindex="0" data-url="@Request.Url.PathAndQuery">
+                    @RenderBody()
+                </div>
+            }
         </div>
     </main>
 </div>
@@ -669,6 +716,7 @@
                 <p id="globalDeleteMessage" class="mb-4" style="font-size: 1rem; color: #555;">Bạn có chắc chắn muốn xóa không?</p>
                 <div class="d-flex justify-content-end gap-2">
                     <form id="globalDeleteForm" method="post" class="m-0">
+                        @Html.AntiForgeryToken()
                         <button type="submit" class="btn" style="background-color: #ffc107; color: #fff; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem;">ĐỒNG Ý</button>
                     </form>
                     <button type="button" class="btn" data-bs-dismiss="modal" style="background-color: #e9ecef; color: #333; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem; border: none;">ĐỂ SAU</button>
@@ -679,6 +727,25 @@
 </div>
 
 
+
+<!-- ═══════════════ GLOBAL CONFIRM MODAL ═══════════════ -->
+<div class="modal fade" id="globalConfirmModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+        <div class="modal-content shadow-lg" style="background-color: #ffffff; color: #333; border: none; border-top: 5px solid #ffc107; border-radius: 6px;">
+            <div class="modal-body p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-exclamation-triangle-fill text-warning me-3" style="font-size: 1.6rem;"></i>
+                    <h5 class="mb-0" style="font-size: 1.3rem; font-weight: 600; color: #333;">Thông báo!</h5>
+                </div>
+                <p id="globalConfirmMessage" class="mb-4" style="font-size: 1rem; color: #555;">Bạn có chắc chắn muốn thực hiện thao tác này?</p>
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="button" id="btnGlobalConfirmYes" class="btn" style="background-color: #ffc107; color: #fff; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem;">ĐỒNG Ý</button>
+                    <button type="button" class="btn" data-bs-dismiss="modal" style="background-color: #e9ecef; color: #333; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem; border: none;">ĐỂ SAU</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- ═══════════════ GLOBAL TOAST NOTIFICATION ═══════════════ -->
 <div class="toast-container position-fixed" style="top: 25px; right: 25px; z-index: 1055;">
@@ -692,9 +759,31 @@
     </div>
 </div>
 
+<!-- ═══════════════ GLOBAL SEARCH MODAL (Ctrl+Q) ═══════════════ -->
+<div class="global-search-overlay" id="globalSearchOverlay">
+    <div class="global-search-modal" id="globalSearchModal">
+        <div class="global-search-header">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" id="globalSearchInput" class="global-search-input" placeholder="Tìm màn hình..." autocomplete="off">
+            <button type="button" class="btn-close-search" id="btnCloseSearch" title="Đóng (Esc)"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="global-search-body">
+            <ul class="global-search-results" id="globalSearchResults">
+                <!-- Results will be rendered here -->
+            </ul>
+        </div>
+        <div class="global-search-footer">
+            <span class="key-hint"><kbd>↑</kbd> <kbd>↓</kbd> Lựa chọn menu</span>
+            <span class="key-hint"><kbd>Enter</kbd> Mở màn hình</span>
+            <span class="key-hint"><kbd>Esc</kbd> Đóng cửa sổ</span>
+        </div>
+    </div>
+</div>
+
 <!-- Scripts -->
 <script src="@Url.Content("~/Scripts/jquery-3.7.0.min.js")"></script>
 <script src="@Url.Content("~/Scripts/bootstrap.bundle.min.js")"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     // Sidebar toggle
     const toggleBtn   = document.getElementById('sidebarToggle');
@@ -852,6 +941,22 @@
         myModal.show();
     }
 
+    // Hàm gọi Global Confirm Modal (Xác nhận chung)
+    function showConfirm(message, onConfirm) {
+        var msgEl = document.getElementById('globalConfirmMessage');
+        msgEl.innerText = message;
+        
+        var btnYes = document.getElementById('btnGlobalConfirmYes');
+        btnYes.onclick = function() {
+            var myModal = bootstrap.Modal.getInstance(document.getElementById('globalConfirmModal'));
+            if (myModal) myModal.hide();
+            if (typeof onConfirm === 'function') onConfirm();
+        };
+
+        var myModal = new bootstrap.Modal(document.getElementById('globalConfirmModal'));
+        myModal.show();
+    }
+
     // Hàm hiển thị Form Modal qua AJAX
     function openFormModal(url) {
         $.ajax({
@@ -958,10 +1063,13 @@
     @if (TempData["ToastMessage"] != null)
     {
         var toastType = TempData["ToastType"] ?? "success";
+        var toastMsg = TempData["ToastMessage"];
+        TempData.Remove("ToastMessage");
+        TempData.Remove("ToastType");
         <text>
         document.addEventListener("DOMContentLoaded", function() {
             if (typeof showToast === 'function') {
-                showToast('@toastType', '@TempData["ToastMessage"]');
+                showToast('@toastType', '@toastMsg');
             }
         });
         </text>
@@ -996,8 +1104,20 @@
             }
         });
     });
+
+    // Sửa lỗi dropdown "Thao tác" bị cắt ngang bởi table-responsive
+    $(document).ready(function() {
+        $('.table-responsive').on('mouseenter', '.dropdown-hover', function() {
+            // Khi hover vào dropdown, cho phép tràn viền
+            $(this).closest('.table-responsive').css('overflow', 'visible');
+        }).on('mouseleave', '.dropdown-hover', function() {
+            // Khi chuột rời đi, trả lại thuộc tính ban đầu
+            $(this).closest('.table-responsive').css('overflow', '');
+        });
+    });
 </script>
 <script src="~/Scripts/tab-manager.js?v=@DateTime.Now.Ticks"></script>
+<script src="~/Scripts/global-search.js?v=@DateTime.Now.Ticks"></script>
 @RenderSection("scripts", required: false)
 </body>
 </html>

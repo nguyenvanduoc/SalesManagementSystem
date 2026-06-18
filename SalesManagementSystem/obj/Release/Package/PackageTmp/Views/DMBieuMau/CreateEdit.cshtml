@@ -56,6 +56,7 @@
         
         form.on('submit', function (e) {
             e.preventDefault();
+            e.stopPropagation(); // Ngăn global handler trong _Layout.cshtml chạy lần 2
             
             // Client side validation
             var maBieuMau = $('#MaBieuMau').val().trim();
@@ -78,7 +79,11 @@
                     if (res.success) {
                         $('#globalFormModal').modal('hide');
                         showToast('success', res.message);
-                        $('#searchForm').submit(); // reload list
+                        if (typeof TabManager !== 'undefined') {
+                            TabManager.reloadActiveTabGrid(false);
+                        } else {
+                            $('#searchForm').submit(); // reload list (fallback)
+                        }
                     } else {
                         // If it returns HTML with validation errors
                         $('#globalFormModal .modal-content').html(res);

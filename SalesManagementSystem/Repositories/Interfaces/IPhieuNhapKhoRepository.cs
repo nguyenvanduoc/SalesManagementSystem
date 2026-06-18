@@ -11,7 +11,7 @@ namespace SalesManagementSystem.Repositories.Interfaces
             int page, int pageSize,
             string tuNgay, string denNgay,
             string soChungTu, int? idKho, int? idNhaCungCap, 
-            int? trangThai, int? idNhanSuNhan,
+            int? trangThai, string tenNguoiNhan,
             out int totalRecords);
 
         KHO_PhieuNhap GetByID(int id);

@@ -24,7 +24,7 @@ namespace SalesManagementSystem.Repositories
             int page, int pageSize,
             string tuNgay, string denNgay,
             string soChungTu, int? idKho, int? idNhaCungCap, 
-            int? trangThai, int? idNhanSuNhan,
+            int? trangThai, string tenNguoiNhan,
             out int totalRecords)
         {
             using (var conn = _db.CreateConnection())
@@ -36,7 +36,7 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@IDKho", idKho);
                 p.Add("@IDNhaCungCap", idNhaCungCap);
                 p.Add("@TrangThai", trangThai);
-                p.Add("@IDNhanSuNhan", idNhanSuNhan);
+                p.Add("@TenNguoiNhan", tenNguoiNhan);
                 p.Add("@Offset", (page - 1) * pageSize);
                 p.Add("@PageSize", pageSize);
                 p.Add("@TotalRecords", dbType: DbType.Int32, direction: ParameterDirection.Output);
@@ -97,7 +97,7 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@NgayHoaDon", model.NgayHoaDon);
                 p.Add("@TenNguoiGiao", model.TenNguoiGiao);
                 p.Add("@SoDienThoaiNguoiGiao", model.SoDienThoaiNguoiGiao);
-                p.Add("@IDNhanSuNhan", model.IDNhanSuNhan);
+                p.Add("@TenNguoiNhan", model.TenNguoiNhan);
                 p.Add("@GhiChu", model.GhiChu);
                 p.Add("@NguoiTao", userId);
                 p.Add("@ChiTietJson", chiTietJson);
@@ -157,7 +157,7 @@ namespace SalesManagementSystem.Repositories
                         NgayHoaDon = @NgayHoaDon,
                         TenNguoiGiao = @TenNguoiGiao,
                         SoDienThoaiNguoiGiao = @SoDienThoaiNguoiGiao,
-                        IDNhanSuNhan = @IDNhanSuNhan,
+                        TenNguoiNhan = @TenNguoiNhan,
                         GhiChu = @GhiChu,
                         NguoiCapNhat = @NguoiTao,
                         NgayCapNhat = GETDATE()
@@ -173,7 +173,7 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@NgayHoaDon", model.NgayHoaDon);
                 p.Add("@TenNguoiGiao", model.TenNguoiGiao);
                 p.Add("@SoDienThoaiNguoiGiao", model.SoDienThoaiNguoiGiao);
-                p.Add("@IDNhanSuNhan", model.IDNhanSuNhan);
+                p.Add("@TenNguoiNhan", model.TenNguoiNhan);
                 p.Add("@GhiChu", model.GhiChu);
                 p.Add("@NguoiTao", userId);
 

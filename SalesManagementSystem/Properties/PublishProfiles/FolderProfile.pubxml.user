@@ -3,10 +3,22 @@
 <Project>
   <PropertyGroup>
     <_PublishTargetUrl>C:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\Public</_PublishTargetUrl>
-    <History>True|2026-06-06T08:29:51.4345355Z||;True|2026-06-05T17:25:32.7233419+07:00||;</History>
+    <History>True|2026-06-17T15:08:57.7238354Z||;True|2026-06-17T22:08:34.5086111+07:00||;True|2026-06-17T16:29:34.0173532+07:00||;False|2026-06-17T16:28:38.8818574+07:00||;False|2026-06-17T16:28:15.5645262+07:00||;False|2026-06-17T16:28:05.2424622+07:00||;False|2026-06-17T16:27:58.2755341+07:00||;False|2026-06-17T16:27:25.0763427+07:00||;False|2026-06-17T16:26:46.9867423+07:00||;False|2026-06-17T16:24:46.7897824+07:00||;False|2026-06-17T16:20:05.4808715+07:00||;False|2026-06-17T16:19:35.7609632+07:00||;False|2026-06-17T16:18:37.8550928+07:00||;False|2026-06-17T16:18:18.3832192+07:00||;False|2026-06-17T16:14:35.9609549+07:00||;False|2026-06-17T16:14:25.8063578+07:00||;False|2026-06-17T16:14:02.3358264+07:00||;True|2026-06-06T15:29:51.4345355+07:00||;True|2026-06-05T17:25:32.7233419+07:00||;</History>
     <LastFailureDetails />
   </PropertyGroup>
   <ItemGroup>
+    <File Include="AGENTS.md">
+      <publishTime>06/16/2026 19:20:14</publishTime>
+    </File>
+    <File Include="App_Config/system.dat">
+      <publishTime>06/06/2026 16:56:09</publishTime>
+    </File>
+    <File Include="App_Data/create_don_dat_hang.sql">
+      <publishTime>06/08/2026 21:26:16</publishTime>
+    </File>
+    <File Include="ARCHITECTURE_STANDARD.md">
+      <publishTime>06/11/2026 13:40:09</publishTime>
+    </File>
     <File Include="bin/Antlr3.Runtime.dll">
       <publishTime>09/10/2013 16:29:20</publishTime>
     </File>
@@ -206,13 +218,13 @@
       <publishTime>08/08/2018 12:18:16</publishTime>
     </File>
     <File Include="bin/SalesManagementSystem.dll">
-      <publishTime>06/06/2026 15:29:50</publishTime>
+      <publishTime>06/17/2026 22:08:33</publishTime>
     </File>
     <File Include="bin/SalesManagementSystem.dll.config">
       <publishTime>06/05/2026 22:46:06</publishTime>
     </File>
     <File Include="bin/SalesManagementSystem.pdb">
-      <publishTime>06/06/2026 15:29:50</publishTime>
+      <publishTime>06/17/2026 22:08:33</publishTime>
     </File>
     <File Include="bin/System.Runtime.CompilerServices.Unsafe.dll">
       <publishTime>09/19/2018 02:38:10</publishTime>
@@ -364,6 +376,12 @@
     <File Include="Content/bootstrap.rtl.min.css.map">
       <publishTime>06/02/2026 11:21:27</publishTime>
     </File>
+    <File Include="Content/css/global-search.css">
+      <publishTime>06/08/2026 12:14:37</publishTime>
+    </File>
+    <File Include="Content/css/tab-manager.css">
+      <publishTime>06/05/2026 23:22:19</publishTime>
+    </File>
     <File Include="Content/fonts/bootstrap-icons.woff">
       <publishTime>06/02/2026 11:50:02</publishTime>
     </File>
@@ -373,11 +391,17 @@
     <File Include="Content/IMG/bg-login.png">
       <publishTime>06/03/2026 09:45:20</publishTime>
     </File>
+    <File Include="Content/IMG/default-avatar.svg">
+      <publishTime>06/05/2026 22:10:29</publishTime>
+    </File>
     <File Include="Content/IMG/logo-login.png">
       <publishTime>06/03/2026 09:45:33</publishTime>
     </File>
     <File Include="Content/Site.css">
       <publishTime>06/02/2026 11:21:23</publishTime>
+    </File>
+    <File Include="DATABASE_STANDARD.md">
+      <publishTime>06/11/2026 13:47:55</publishTime>
     </File>
     <File Include="favicon.ico">
       <publishTime>06/02/2026 11:21:23</publishTime>
@@ -427,6 +451,15 @@
     <File Include="Scripts/bootstrap.min.js.map">
       <publishTime>06/02/2026 11:21:26</publishTime>
     </File>
+    <File Include="Scripts/chung-tu-ban-hang.js">
+      <publishTime>06/16/2026 22:31:23</publishTime>
+    </File>
+    <File Include="Scripts/don-dat-hang.js">
+      <publishTime>06/15/2026 16:06:09</publishTime>
+    </File>
+    <File Include="Scripts/global-search.js">
+      <publishTime>06/08/2026 12:18:00</publishTime>
+    </File>
     <File Include="Scripts/jquery-3.7.0.js">
       <publishTime>06/02/2026 11:21:28</publishTime>
     </File>
@@ -460,14 +493,23 @@
     <File Include="Scripts/modernizr-2.8.3.js">
       <publishTime>06/02/2026 11:21:32</publishTime>
     </File>
+    <File Include="Scripts/phieu-nhap-kho.js">
+      <publishTime>06/16/2026 22:57:18</publishTime>
+    </File>
+    <File Include="Scripts/phieu-xuat-kho.js">
+      <publishTime>06/16/2026 19:20:12</publishTime>
+    </File>
+    <File Include="Scripts/tab-manager.js">
+      <publishTime>06/12/2026 17:07:05</publishTime>
+    </File>
     <File Include="UI_STANDARD.md">
-      <publishTime>06/04/2026 18:08:27</publishTime>
+      <publishTime>06/11/2026 13:35:19</publishTime>
     </File>
     <File Include="Views/AclAction/CreateAction.cshtml">
       <publishTime>06/04/2026 10:47:23</publishTime>
     </File>
     <File Include="Views/AclAction/GetAction.cshtml">
-      <publishTime>06/06/2026 13:00:41</publishTime>
+      <publishTime>06/12/2026 22:22:50</publishTime>
     </File>
     <File Include="Views/AclAction/UpdateAction.cshtml">
       <publishTime>06/04/2026 10:47:25</publishTime>
@@ -479,7 +521,7 @@
       <publishTime>06/04/2026 10:54:05</publishTime>
     </File>
     <File Include="Views/AclManHinh/GetManHinh.cshtml">
-      <publishTime>06/06/2026 13:00:43</publishTime>
+      <publishTime>06/12/2026 22:22:31</publishTime>
     </File>
     <File Include="Views/AclManHinh/UpdateManHinh.cshtml">
       <publishTime>06/04/2026 10:54:08</publishTime>
@@ -491,7 +533,7 @@
       <publishTime>06/04/2026 10:53:35</publishTime>
     </File>
     <File Include="Views/ChucVu/GetChucVu.cshtml">
-      <publishTime>06/06/2026 13:00:22</publishTime>
+      <publishTime>06/12/2026 22:22:12</publishTime>
     </File>
     <File Include="Views/ChucVu/UpdateChucVu.cshtml">
       <publishTime>06/04/2026 10:53:37</publishTime>
@@ -499,14 +541,44 @@
     <File Include="Views/ChucVu/_ChucVuList.cshtml">
       <publishTime>06/04/2026 17:56:15</publishTime>
     </File>
+    <File Include="Views/ChungTuBanHang/Create.cshtml">
+      <publishTime>06/16/2026 22:30:43</publishTime>
+    </File>
+    <File Include="Views/ChungTuBanHang/Detail.cshtml">
+      <publishTime>06/16/2026 22:32:46</publishTime>
+    </File>
+    <File Include="Views/ChungTuBanHang/Index.cshtml">
+      <publishTime>06/16/2026 19:25:00</publishTime>
+    </File>
+    <File Include="Views/ChungTuBanHang/_ChonDonDatHangModal.cshtml">
+      <publishTime>06/16/2026 19:24:22</publishTime>
+    </File>
+    <File Include="Views/ChungTuBanHang/_ChungTuBanHangList.cshtml">
+      <publishTime>06/16/2026 22:34:43</publishTime>
+    </File>
     <File Include="Views/DMBieuMau/CreateEdit.cshtml">
-      <publishTime>06/05/2026 11:53:46</publishTime>
+      <publishTime>06/10/2026 10:42:16</publishTime>
     </File>
     <File Include="Views/DMBieuMau/Index.cshtml">
-      <publishTime>06/06/2026 13:20:42</publishTime>
+      <publishTime>06/10/2026 10:34:49</publishTime>
     </File>
     <File Include="Views/DMBieuMau/_BieuMauList.cshtml">
       <publishTime>06/05/2026 23:30:45</publishTime>
+    </File>
+    <File Include="Views/DonDatHang/Create.cshtml">
+      <publishTime>06/15/2026 17:47:54</publishTime>
+    </File>
+    <File Include="Views/DonDatHang/Detail.cshtml">
+      <publishTime>06/15/2026 16:06:31</publishTime>
+    </File>
+    <File Include="Views/DonDatHang/Edit.cshtml">
+      <publishTime>06/15/2026 16:06:25</publishTime>
+    </File>
+    <File Include="Views/DonDatHang/Index.cshtml">
+      <publishTime>06/16/2026 21:00:18</publishTime>
+    </File>
+    <File Include="Views/DonDatHang/_DonDatHangList.cshtml">
+      <publishTime>06/16/2026 21:02:55</publishTime>
     </File>
     <File Include="Views/Home/Index.cshtml">
       <publishTime>06/04/2026 22:50:37</publishTime>
@@ -514,11 +586,35 @@
     <File Include="Views/Home/_Menu.cshtml">
       <publishTime>06/05/2026 23:06:53</publishTime>
     </File>
+    <File Include="Views/KhachHang/Create.cshtml">
+      <publishTime>06/10/2026 21:54:11</publishTime>
+    </File>
+    <File Include="Views/KhachHang/Edit.cshtml">
+      <publishTime>06/10/2026 21:54:13</publishTime>
+    </File>
+    <File Include="Views/KhachHang/Index.cshtml">
+      <publishTime>06/12/2026 22:20:37</publishTime>
+    </File>
+    <File Include="Views/KhachHang/_KhachHangList.cshtml">
+      <publishTime>06/10/2026 21:54:15</publishTime>
+    </File>
+    <File Include="Views/KhoHang/Create.cshtml">
+      <publishTime>06/08/2026 15:29:08</publishTime>
+    </File>
+    <File Include="Views/KhoHang/Edit.cshtml">
+      <publishTime>06/08/2026 15:29:20</publishTime>
+    </File>
+    <File Include="Views/KhoHang/Index.cshtml">
+      <publishTime>06/12/2026 22:21:26</publishTime>
+    </File>
+    <File Include="Views/KhoHang/_KhoHangList.cshtml">
+      <publishTime>06/08/2026 15:38:07</publishTime>
+    </File>
     <File Include="Views/Login/Index.cshtml">
       <publishTime>06/04/2026 22:58:08</publishTime>
     </File>
     <File Include="Views/LoginSession/Index.cshtml">
-      <publishTime>06/06/2026 13:22:59</publishTime>
+      <publishTime>06/12/2026 22:23:45</publishTime>
     </File>
     <File Include="Views/LoginSession/_LoginSessionList.cshtml">
       <publishTime>06/05/2026 12:49:40</publishTime>
@@ -533,16 +629,28 @@
       <publishTime>06/04/2026 22:58:08</publishTime>
     </File>
     <File Include="Views/NguoiDung/GetNguoiDung.cshtml">
-      <publishTime>06/06/2026 13:51:16</publishTime>
+      <publishTime>06/12/2026 22:24:15</publishTime>
     </File>
     <File Include="Views/NguoiDung/_NguoiDungList.cshtml">
       <publishTime>06/05/2026 12:49:38</publishTime>
+    </File>
+    <File Include="Views/NhaCungCap/Create.cshtml">
+      <publishTime>06/11/2026 16:32:52</publishTime>
+    </File>
+    <File Include="Views/NhaCungCap/Edit.cshtml">
+      <publishTime>06/11/2026 16:32:57</publishTime>
+    </File>
+    <File Include="Views/NhaCungCap/Index.cshtml">
+      <publishTime>06/12/2026 22:21:01</publishTime>
+    </File>
+    <File Include="Views/NhaCungCap/_NhaCungCapList.cshtml">
+      <publishTime>06/11/2026 16:32:44</publishTime>
     </File>
     <File Include="Views/NhanSu/Create.cshtml">
       <publishTime>06/05/2026 22:23:21</publishTime>
     </File>
     <File Include="Views/NhanSu/Index.cshtml">
-      <publishTime>06/06/2026 14:02:05</publishTime>
+      <publishTime>06/12/2026 22:25:45</publishTime>
     </File>
     <File Include="Views/NhanSu/Update.cshtml">
       <publishTime>06/05/2026 22:23:21</publishTime>
@@ -559,6 +667,12 @@
     <File Include="Views/NhatKy/_NhatKyList.cshtml">
       <publishTime>06/04/2026 23:03:40</publishTime>
     </File>
+    <File Include="Views/NhatKyChung/Index.cshtml">
+      <publishTime>06/12/2026 17:12:19</publishTime>
+    </File>
+    <File Include="Views/NhatKyChung/_NhatKyChungList.cshtml">
+      <publishTime>06/12/2026 17:12:14</publishTime>
+    </File>
     <File Include="Views/PhanQuyen/Index.cshtml">
       <publishTime>06/06/2026 13:23:14</publishTime>
     </File>
@@ -568,17 +682,53 @@
     <File Include="Views/PhanQuyen/_TreeRecursive.cshtml">
       <publishTime>06/04/2026 22:50:18</publishTime>
     </File>
+    <File Include="Views/PhieuNhapKho/Edit.cshtml">
+      <publishTime>06/16/2026 22:59:21</publishTime>
+    </File>
+    <File Include="Views/PhieuNhapKho/Index.cshtml">
+      <publishTime>06/16/2026 19:20:12</publishTime>
+    </File>
+    <File Include="Views/PhieuNhapKho/_EditModal.cshtml">
+      <publishTime>06/15/2026 10:20:58</publishTime>
+    </File>
+    <File Include="Views/PhieuNhapKho/_PhieuNhapKhoList.cshtml">
+      <publishTime>06/11/2026 22:32:41</publishTime>
+    </File>
+    <File Include="Views/PhieuXuatKho/Details.cshtml">
+      <publishTime>06/15/2026 12:40:42</publishTime>
+    </File>
+    <File Include="Views/PhieuXuatKho/Index.cshtml">
+      <publishTime>06/16/2026 19:20:12</publishTime>
+    </File>
+    <File Include="Views/PhieuXuatKho/_ChonDonDatHangModal.cshtml">
+      <publishTime>06/12/2026 16:28:47</publishTime>
+    </File>
+    <File Include="Views/PhieuXuatKho/_PhieuXuatKhoList.cshtml">
+      <publishTime>06/16/2026 20:54:22</publishTime>
+    </File>
     <File Include="Views/PhongBan/CreatePhongBan.cshtml">
       <publishTime>06/04/2026 10:53:30</publishTime>
     </File>
     <File Include="Views/PhongBan/GetPhongBan.cshtml">
-      <publishTime>06/06/2026 13:00:20</publishTime>
+      <publishTime>06/12/2026 22:21:48</publishTime>
     </File>
     <File Include="Views/PhongBan/UpdatePhongBan.cshtml">
       <publishTime>06/04/2026 10:53:33</publishTime>
     </File>
     <File Include="Views/PhongBan/_PhongBanList.cshtml">
       <publishTime>06/04/2026 17:56:15</publishTime>
+    </File>
+    <File Include="Views/SanPham/Create.cshtml">
+      <publishTime>06/08/2026 15:51:59</publishTime>
+    </File>
+    <File Include="Views/SanPham/Edit.cshtml">
+      <publishTime>06/08/2026 15:52:01</publishTime>
+    </File>
+    <File Include="Views/SanPham/Index.cshtml">
+      <publishTime>06/12/2026 22:20:05</publishTime>
+    </File>
+    <File Include="Views/SanPham/_SanPhamList.cshtml">
+      <publishTime>06/08/2026 15:52:16</publishTime>
     </File>
     <File Include="Views/Shared/AccessDenied.cshtml">
       <publishTime>06/04/2026 16:08:15</publishTime>
@@ -587,10 +737,25 @@
       <publishTime>06/02/2026 11:21:23</publishTime>
     </File>
     <File Include="Views/Shared/_Layout.cshtml">
-      <publishTime>06/06/2026 15:08:36</publishTime>
+      <publishTime>06/11/2026 15:42:11</publishTime>
     </File>
     <File Include="Views/Shared/_Pagination.cshtml">
       <publishTime>06/04/2026 17:29:40</publishTime>
+    </File>
+    <File Include="Views/Shared/_SpaLayout.cshtml">
+      <publishTime>06/05/2026 23:30:27</publishTime>
+    </File>
+    <File Include="Views/TonKho/Index.cshtml">
+      <publishTime>06/12/2026 10:03:46</publishTime>
+    </File>
+    <File Include="Views/TonKho/Print.cshtml">
+      <publishTime>06/12/2026 09:08:54</publishTime>
+    </File>
+    <File Include="Views/TonKho/_TheKhoModal.cshtml">
+      <publishTime>06/12/2026 15:52:42</publishTime>
+    </File>
+    <File Include="Views/TonKho/_TonKhoList.cshtml">
+      <publishTime>06/12/2026 10:09:06</publishTime>
     </File>
     <File Include="Views/Web.config">
       <publishTime>06/02/2026 11:21:23</publishTime>
@@ -599,7 +764,7 @@
       <publishTime>06/05/2026 23:30:36</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>06/06/2026 15:29:51</publishTime>
+      <publishTime>06/17/2026 16:28:15</publishTime>
     </File>
   </ItemGroup>
 </Project>

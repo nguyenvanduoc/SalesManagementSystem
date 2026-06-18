@@ -64,10 +64,12 @@ namespace SalesManagementSystem.Repositories
 
         public TonKhoDashboardViewModel GetDashboard(
             int? idKho, 
+            int? idSanPham,
             string tuNgay, 
-            string denNgay)
+            string denNgay,
+            bool chiConTon)
         {
-            var list = GetList(idKho, null, tuNgay, denNgay, false);
+            var list = GetList(idKho, idSanPham, tuNgay, denNgay, chiConTon);
             
             var dashboard = new TonKhoDashboardViewModel
             {

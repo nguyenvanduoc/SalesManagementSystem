@@ -49,8 +49,8 @@
     <input type="hidden" id="ID" value="@Model.ID" />
     
     <div class="row g-3">
-        <!-- Cột trái -->
-        <div class="col-md-10">
+        <!-- Nội dung chính -->
+        <div class="col-md-12">
 
             <!-- Card: Thông tin đối tác -->
             <div class="don-header-card">
@@ -65,8 +65,8 @@
                         <select id="IDNhaCungCap" class="form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label text-muted fw-semibold small">Người nhận <span class="text-danger">*</span></label>
-                        <select id="IDNhanSuNhan" class="form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
+                        <label class="form-label text-muted fw-semibold small">Người nhận</label>
+                        <input type="text" id="TenNguoiNhan" class="form-control form-control-sm" value="@Model.TenNguoiNhan" @(isView ? "disabled" : "") />
                     </div>
                     <div class="col-md-4">
                         <label class="form-label text-muted fw-semibold small">Người giao hàng</label>
@@ -112,13 +112,13 @@
                     <div class="don-section-title mb-0"><i class="bi bi-table me-1"></i>Chi tiết hàng hóa</div>
                     @if (!isView)
                     {
-                        <button type="button" class="btn-add-row ms-auto" id="btnAddRow">
+                        <button type="button" class="btn-add-row ms-auto" id="PNK_btnAddRow">
                             <i class="bi bi-plus-lg me-1"></i> Thêm mặt hàng
                         </button>
                     }
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-bordered grid-detail mb-0" id="tblChiTiet" style="min-width:900px;">
+                    <table class="table table-bordered grid-detail mb-0" id="PNK_tblChiTiet" style="min-width:900px;">
                         <thead>
                             <tr>
                                 <th style="width:40px;">STT</th>
@@ -126,11 +126,11 @@
                                 <th style="width:70px;">ĐVT</th>
                                 <th style="width:90px;">Số lượng</th>
                                 <th style="width:110px;">Đơn giá</th>
-                                <th style="width:120px;">Ngày SX</th>
-                                <th style="width:120px;">Hạn SD</th>
+                                <th style="width:120px;">Ngày sản xuất</th>
+                                <th style="width:120px;">Hạn sữ dụng</th>
                                 <th style="width:120px;">Thành tiền</th>
-                                <th style="width:70px;">Thuế %</th>
-                                <th style="width:110px;">Tiền thuế</th>
+                                <th style="width:70px;" class="d-none">Thuế %</th>
+                                <th style="width:110px;" class="d-none">Tiền thuế</th>
                                 <th style="width:120px;">Tổng cộng</th>
                                 <th style="min-width:120px;">Ghi chú</th>
                                 @if (!isView) { <th style="width:40px;"></th> }
@@ -142,37 +142,33 @@
                     </table>
                 </div>
             </div>
-        </div>
-
-        <!-- Cột phải: Tổng tiền nổi bật -->
-        <div class="col-md-2">
-            <div class="tong-tien-box">
-                <div class="label">Tổng tiền thanh toán</div>
-                <div class="amount" id="dispTongCong">0</div>
-                <div class="label mt-1" style="font-size:.7rem;">VNĐ</div>
-            </div>
-            
-            <div class="mt-2 p-3 bg-white border rounded">
-                <div class="d-flex justify-content-between small text-muted mb-2">
-                    <span>Trạng thái:</span>
-                    @if (Model.TrangThai == 1) { <span class="badge bg-secondary" id="badgeTrangThai">Đề nghị ghi</span> }
-                    else if (Model.TrangThai == 2) { <span class="badge bg-success" id="badgeTrangThai">Đã ghi</span> }
-                    else if (Model.TrangThai == 3) { <span class="badge bg-danger" id="badgeTrangThai">Đã hủy</span> }
-                    else { <span class="badge bg-secondary" id="badgeTrangThai">Thêm mới</span> }
-                </div>
-                <hr class="my-2">
-                <div class="d-flex justify-content-between small text-muted mb-2">
-                    <span>Cộng tiền hàng:</span>
-                    <span id="dispTongTienHang" class="fw-bold text-dark">0</span>
-                </div>
-                <div class="d-flex justify-content-between small text-muted mb-2">
-                    <span>Tiền thuế GTGT:</span>
-                    <span id="dispTongTienThue" class="fw-bold text-dark">0</span>
-                </div>
-                <hr class="my-2">
-                <div class="d-flex justify-content-between small">
-                    <span class="text-muted fw-bold">Tổng cộng:</span>
-                    <span id="dispTongCongMini" class="fw-bold" style="color:#1a5276;">0</span>
+            <!-- Card: Tổng tiền -->
+            <div class="don-header-card mt-3 mb-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small me-2">Trạng thái:</span>
+                        @if (Model.TrangThai == 1) { <span class="badge bg-secondary" id="badgeTrangThai">Đề nghị ghi</span> }
+                        else if (Model.TrangThai == 2) { <span class="badge bg-success" id="badgeTrangThai">Đã ghi</span> }
+                        else if (Model.TrangThai == 3) { <span class="badge bg-danger" id="badgeTrangThai">Đã hủy</span> }
+                        else { <span class="badge bg-secondary" id="badgeTrangThai">Thêm mới</span> }
+                    </div>
+                    
+                    <div class="d-flex align-items-center gap-3">
+                        <div>
+                            <span class="text-muted small me-1">Cộng tiền hàng:</span>
+                            <span class="fs-6 text-dark" id="dispTongTienHang">0</span>
+                        </div>
+                        <div class="d-none">
+                            <span class="text-muted small me-1">Tiền thuế GTGT:</span>
+                            <span class="fs-6 text-dark" id="dispTongTienThue">0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted text-uppercase fw-bold">Tổng thanh toán:</span>
+                        <span class="fs-4 fw-bold" style="color:#1a5276;" id="dispTongCong">0</span>
+                        <span class="text-muted small">VNĐ</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -188,15 +184,12 @@
         PhieuNhapKho.init({
             searchKhoUrl: '@Url.Action("SearchKhoHang")',
             searchNccUrl: '@Url.Action("SearchNhaCungCap")',
-            searchNhanSuUrl: '@Url.Action("SearchNhanSu")',
             searchSpUrl: '@Url.Action("SearchSanPham")',
             chiTietsJson: @Html.Raw(chiTietsJson),
             selectedKhoId: @(Model.IDKho.HasValue && Model.IDKho.Value > 0 ? Model.IDKho.Value.ToString() : "null"),
             selectedKhoText: '@Html.Raw(Model.TenKho)',
             selectedNccId: @(Model.IDNhaCungCap.HasValue && Model.IDNhaCungCap.Value > 0 ? Model.IDNhaCungCap.Value.ToString() : "null"),
-            selectedNccText: '@Html.Raw(Model.TenNhaCungCap)',
-            selectedNhanSuId: @(Model.IDNhanSuNhan.HasValue && Model.IDNhanSuNhan.Value > 0 ? Model.IDNhanSuNhan.Value.ToString() : "null"),
-            selectedNhanSuText: '@Html.Raw(Model.TenNhanSuNhan)'
+            selectedNccText: '@Html.Raw(Model.TenNhaCungCap)'
         });
 
         if (isViewMode) {

@@ -60,7 +60,14 @@
                                 <td class="align-middle fw-bold">
                                     @if (item.IDChungTuBanHang.HasValue)
                                     {
-                                        <a href="@Url.Action("Edit", "ChungTuBanHang", new { id = item.IDChungTuBanHang })" class="text-decoration-none">@item.SoDonHang</a>
+                                        if (item.TrangThaiChungTu == 2 || item.TrangThaiChungTu == 3)
+                                        {
+                                            <a href="@Url.Action("Detail", "ChungTuBanHang", new { id = item.IDChungTuBanHang })" class="text-decoration-none">@item.SoDonHang</a>
+                                        }
+                                        else
+                                        {
+                                            <a href="@Url.Action("Edit", "ChungTuBanHang", new { id = item.IDChungTuBanHang })" class="text-decoration-none">@item.SoDonHang</a>
+                                        }
                                     }
                                     else
                                     {
