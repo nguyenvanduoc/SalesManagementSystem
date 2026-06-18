@@ -1,4 +1,4 @@
-using SalesManagementSystem.Models.Entities;
+﻿using SalesManagementSystem.Models.Entities;
 using System.Collections.Generic;
 
 namespace SalesManagementSystem.Repositories.Interfaces

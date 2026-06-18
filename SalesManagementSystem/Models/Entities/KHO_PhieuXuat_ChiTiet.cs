@@ -1,4 +1,4 @@
-namespace SalesManagementSystem.Models.Entities
+﻿namespace SalesManagementSystem.Models.Entities
 {
     public class KHO_PhieuXuat_ChiTiet
     {

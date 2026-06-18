@@ -1,4 +1,4 @@
-namespace SalesManagementSystem.Helpers
+﻿namespace SalesManagementSystem.Helpers
 {
     /// <summary>
     /// Lưu trữ các mã biểu mẫu được dùng chung toàn hệ thống để tránh hardcode string.

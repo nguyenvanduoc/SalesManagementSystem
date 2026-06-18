@@ -1,4 +1,4 @@
-namespace SalesManagementSystem.Models.ViewModels
+﻿namespace SalesManagementSystem.Models.ViewModels
 {
     public class MenuSearchResultVM
     {

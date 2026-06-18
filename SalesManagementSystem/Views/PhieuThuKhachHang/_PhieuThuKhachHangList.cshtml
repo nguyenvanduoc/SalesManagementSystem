@@ -1,0 +1,83 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.PhieuThuKhachHangListViewModel>
+@using SalesManagementSystem.Helpers
+@using System.Globalization
+
+@{
+    var cultureVi = new CultureInfo("vi-VN");
+}
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive" style="min-height: 350px;">
+            <table class="table table-custom table-bordered table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width: 60px;">STT</th>
+                        <th class="text-center" style="width: 140px;">Số chứng từ</th>
+                        <th class="text-center" style="width: 120px;">Ngày chứng từ</th>
+                        <th>Khách hàng</th>
+                        <th class="text-end" style="width: 150px;">Tổng tiền</th>
+                        <th class="text-end" style="width: 150px;">Đã thanh toán</th>
+                        <th class="text-end" style="width: 150px;">Còn lại</th>
+                        <th class="text-center" style="width: 180px;">Trạng thái công nợ</th>
+                        <th>Người tạo</th>
+                        <th class="text-center" style="width: 160px;">Ngày tạo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Items != null && Model.Items.Any())
+                    {
+                        int rowNum = 1;
+                        foreach (var item in Model.Items)
+                        {
+                            int stt = ((Model.CurrentPage - 1) * Model.PageSize) + rowNum;
+                            rowNum++;
+                            
+                            string badgeClass = "bg-danger text-white";
+                            string statusText = "CHƯA THANH TOÁN";
+                            
+                            if (item.TrangThaiCongNo == 2)
+                            {
+                                badgeClass = "bg-warning text-dark";
+                                statusText = "THANH TOÁN MỘT PHẦN";
+                            }
+                            else if (item.TrangThaiCongNo == 3)
+                            {
+                                badgeClass = "bg-success text-white";
+                                statusText = "ĐÃ THANH TOÁN";
+                            }
+
+                            <tr>
+                                <td class="text-center align-middle">@stt</td>
+                                <td class="align-middle text-center">
+                                    <a href="@Url.Action("Edit", "PhieuThuKhachHang", new { id = item.ID })" class="fw-bold text-decoration-none" style="color: #2998e4;">
+                                        @item.SoChungTu
+                                    </a>
+                                </td>
+                                <td class="align-middle text-center">@item.NgayChungTu.ToString("dd/MM/yyyy")</td>
+                                <td class="align-middle">@item.TenKhachHang</td>
+                                <td class="align-middle text-end text-dark fw-semibold">@item.TongCong.ToString("N0", cultureVi)</td>
+                                <td class="align-middle text-end text-success">@item.DaThanhToan.ToString("N0", cultureVi)</td>
+                                <td class="align-middle text-end text-danger fw-semibold">@item.ConLai.ToString("N0", cultureVi)</td>
+                                <td class="text-center align-middle">
+                                    <span class="badge @badgeClass px-2.5 py-1.5" style="font-size: 0.75rem; font-weight: 600; border-radius: 4px; display: inline-block; min-width: 140px;">
+                                        @statusText
+                                    </span>
+                                </td>
+                                <td class="align-middle">@item.TenNguoiTao</td>
+                                <td class="align-middle text-center">@item.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="10" class="text-center py-4 text-muted">Chưa có chứng từ bán hàng nào phù hợp.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @Html.Partial("_Pagination", Model)
+</div>

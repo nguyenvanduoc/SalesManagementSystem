@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -66,6 +66,17 @@ namespace SalesManagementSystem
             routes.MapRoute(name: "DMBieuMau_CreateEdit", url: "danh-muc-bieu-mau/cap-nhat", defaults: new { controller = "DMBieuMau", action = "CreateEdit" });
             routes.MapRoute(name: "DMBieuMau_Delete", url: "danh-muc-bieu-mau/xoa", defaults: new { controller = "DMBieuMau", action = "Delete" });
             routes.MapRoute(name: "DMBieuMau_Download", url: "danh-muc-bieu-mau/tai-ve", defaults: new { controller = "DMBieuMau", action = "Download" });
+
+            // Phiếu thu khách hàng
+            routes.MapRoute(name: "PhieuThuKhachHang_List", url: "phieu-thu", defaults: new { controller = "PhieuThuKhachHang", action = "Index" });
+            routes.MapRoute(name: "PhieuThuKhachHang_GetData", url: "phieu-thu/danh-sach", defaults: new { controller = "PhieuThuKhachHang", action = "GetList" });
+            routes.MapRoute(name: "PhieuThuKhachHang_Create", url: "phieu-thu/them-moi", defaults: new { controller = "PhieuThuKhachHang", action = "Create" });
+            routes.MapRoute(name: "PhieuThuKhachHang_Update", url: "phieu-thu/cap-nhat", defaults: new { controller = "PhieuThuKhachHang", action = "Edit" });
+            routes.MapRoute(name: "PhieuThuKhachHang_Save", url: "phieu-thu/save", defaults: new { controller = "PhieuThuKhachHang", action = "Save" });
+            routes.MapRoute(name: "PhieuThuKhachHang_GhiSo", url: "phieu-thu/ghi-so", defaults: new { controller = "PhieuThuKhachHang", action = "GhiSo" });
+            routes.MapRoute(name: "PhieuThuKhachHang_Huy", url: "phieu-thu/huy", defaults: new { controller = "PhieuThuKhachHang", action = "Huy" });
+            routes.MapRoute(name: "PhieuThuKhachHang_Delete", url: "phieu-thu/xoa", defaults: new { controller = "PhieuThuKhachHang", action = "Delete" });
+            routes.MapRoute(name: "PhieuThuKhachHang_GetCongNo", url: "phieu-thu/get-cong-no", defaults: new { controller = "PhieuThuKhachHang", action = "GetCongNoChungTu" });
 
             routes.MapRoute(
                 name: "Default",

@@ -1,4 +1,4 @@
-using SalesManagementSystem.Helpers;
+﻿using SalesManagementSystem.Helpers;
 using SalesManagementSystem.Helpers.Security;
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Models.ViewModels;

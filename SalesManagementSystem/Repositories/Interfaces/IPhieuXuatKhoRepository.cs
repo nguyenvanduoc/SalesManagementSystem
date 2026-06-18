@@ -1,4 +1,4 @@
-using SalesManagementSystem.Models.ViewModels;
+﻿using SalesManagementSystem.Models.ViewModels;
 using System.Collections.Generic;
 
 namespace SalesManagementSystem.Repositories.Interfaces

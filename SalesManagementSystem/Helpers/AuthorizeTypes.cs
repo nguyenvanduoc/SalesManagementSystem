@@ -1,4 +1,4 @@
-namespace SalesManagementSystem.Helpers
+﻿namespace SalesManagementSystem.Helpers
 {
     public enum AuthorizeTypes
     {

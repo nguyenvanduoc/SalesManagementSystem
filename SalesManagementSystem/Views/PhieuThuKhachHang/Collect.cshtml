@@ -1,0 +1,598 @@
+@model SalesManagementSystem.Models.ViewModels.PhieuThuKhachHangViewModel
+@using SalesManagementSystem.Helpers
+@using System.Globalization
+
+@{
+    ViewBag.Title = "Thu tiền khách hàng";
+    var history = ViewBag.PaymentHistory as IEnumerable<dynamic> ?? new List<dynamic>();
+    var recent = ViewBag.RecentActivities as IEnumerable<dynamic> ?? new List<dynamic>();
+    var cultureVi = new CultureInfo("vi-VN");
+    
+    decimal percentDaThu = 0;
+    if (Model.TongChungTu > 0)
+    {
+        percentDaThu = Math.Min(100, Math.Round((Model.DaThanhToanTruoc / Model.TongChungTu) * 100, 1));
+    }
+    decimal percentChuaThu = 100 - percentDaThu;
+    
+    decimal sumHistory = history.Where(x => x.TrangThai == 2).Sum(x => (decimal)x.SoTienThu);
+
+    var selectList = ViewBag.TaiKhoanThanhToans as SelectList;
+    var hasAccounts = selectList != null && selectList.Any();
+    
+    string uniqueId = Guid.NewGuid().ToString("N");
+}
+
+<div id="collect-container-@uniqueId" class="collect-container" style="background-color: #f8fafc; padding: 20px; border-radius: 8px;">
+    <!-- Top Action Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <div class="d-flex align-items-center">
+            <a href="@Url.Action("Index", "PhieuThuKhachHang")" class="text-decoration-none text-muted me-3 fs-5" title="Quay lại danh sách">
+                <i class="bi bi-arrow-left fs-3 align-middle" style="color: #0b5b84;"></i>
+            </a>
+            <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.35rem;">
+                Phiếu thu khách hàng
+            </h4>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" id="btn-save" class="btn btn-outline-secondary px-3" onclick="submitCollectForm(false)">
+                <i class="bi bi-save me-1"></i> Lưu dữ liệu
+            </button>
+            <button type="button" id="btn-save-post" class="btn btn-primary px-3" style="background-color: #0b5b84; border-color: #0b5b84;" onclick="submitCollectForm(true)">
+                <i class="bi bi-journal-check me-1"></i> Lưu và ghi sổ
+            </button>
+            <button type="button" class="btn btn-outline-dark px-3" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i> In
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="row g-4">
+        <!-- Main Form & Content -->
+        <div class="col-lg-9">
+            <form id="collectForm" action="@Url.Action("Save")" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="ID" name="ID" value="@Model.ID" />
+                @Html.HiddenFor(m => m.IDChungTuBanHang)
+                @Html.HiddenFor(m => m.IDKhachHang)
+
+                <!-- General Info Box -->
+                <div class="card border-0 shadow-sm mb-4" style="border-radius: 6px;">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h6 class="mb-0 fw-bold text-muted text-uppercase" style="font-size: 0.85rem; letter-spacing: 0.5px;">Thông tin chung phiếu thu</h6>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="row g-3">
+                            <div class="col-md-6 border-end pe-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label small text-muted fw-semibold">Số phiếu thu</label>
+                                    @Html.TextBoxFor(m => m.SoPhieuThu, new { @class = "form-control fw-bold text-dark", @readonly = "readonly" })
+                                    @Html.ValidationMessageFor(m => m.SoPhieuThu, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small text-muted fw-semibold">Ngày thu</label>
+                                    <input type="date" name="NgayThu" class="form-control" value="@Model.NgayThu.ToString("yyyy-MM-dd")" required>
+                                    @Html.ValidationMessageFor(m => m.NgayThu, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small text-muted fw-semibold">Khách hàng</label>
+                                    @Html.TextBoxFor(m => m.TenKhachHang, new { @class = "form-control", @readonly = "readonly" })
+                                </div>
+                                <div class="mb-0">
+                                    <label class="form-label small text-muted fw-semibold">Chứng từ bán hàng</label>
+                                    @Html.TextBoxFor(m => m.SoChungTuBanHang, new { @class = "form-control fw-semibold", @readonly = "readonly" })
+                                </div>
+                            </div>
+                            <div class="col-md-6 ps-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label small text-muted fw-semibold">Tài khoản nhận tiền</label>
+                                    @if (!hasAccounts)
+                                    {
+                                        <select id="IDTaiKhoanThanhToan" name="IDTaiKhoanThanhToan" class="form-select" required>
+                                            <option value="">--- Chọn tài khoản nhận tiền ---</option>
+                                        </select>
+                                        <div class="text-danger mt-1 small" style="font-size: 0.8rem;">
+                                            <i class="bi bi-exclamation-triangle-fill"></i> Chưa có tài khoản thanh toán. Vui lòng cấu hình danh mục tài khoản thanh toán.
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        @Html.DropDownList("IDTaiKhoanThanhToan", selectList, "--- Chọn tài khoản nhận tiền ---", new { @class = "form-select", required = "required" })
+                                    }
+                                    @Html.ValidationMessageFor(m => m.IDTaiKhoanThanhToan, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small text-muted fw-semibold">Người thu</label>
+                                    @Html.DropDownList("IDNguoiThu", ViewBag.NhanSus as SelectList, "--- Chọn người thu ---", new { @class = "form-select" })
+                                    @Html.ValidationMessageFor(m => m.IDNguoiThu, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="mb-0">
+                                    <label class="form-label small text-muted fw-semibold">Ghi chú / Diễn giải</label>
+                                    @Html.TextAreaFor(m => m.GhiChu, new { @class = "form-control", rows = 3, placeholder = "Nhập nội dung ghi chú..." })
+                                    @Html.ValidationMessageFor(m => m.GhiChu, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Debt Cards Summary -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm text-center py-3" style="border-radius: 6px; border-left: 4px solid #3498db !important;">
+                            <div class="small text-muted fw-semibold text-uppercase">Tổng tiền hóa đơn</div>
+                            <div class="fs-4 fw-bold mt-1 text-dark">@Model.TongChungTu.ToString("N0", cultureVi) <span class="fs-6 fw-normal">VND</span></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm text-center py-3" style="border-radius: 6px; border-left: 4px solid #2ecc71 !important;">
+                            <div class="small text-muted fw-semibold text-uppercase">Đã thanh toán</div>
+                            <div class="fs-4 fw-bold mt-1 text-success">@Model.DaThanhToanTruoc.ToString("N0", cultureVi) <span class="fs-6 fw-normal">VND</span></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm text-center py-3" style="border-radius: 6px; border-left: 4px solid #e74c3c !important;">
+                            <div class="small text-muted fw-semibold text-uppercase">Còn lại</div>
+                            <div class="fs-4 fw-bold mt-1 text-danger" id="con-lai-value">@Model.ConLaiSauThu.ToString("N0", cultureVi) <span class="fs-6 fw-normal">VND</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment input section -->
+                <div class="card border-0 shadow-sm mb-4" style="border-radius: 6px; background-color: #fff;">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-cash-coin me-1 text-success"></i> Chi tiết thanh toán lần này</h6>
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted fw-semibold">Số tiền thu</label>
+                                <div class="input-group">
+                                    @Html.TextBoxFor(m => m.SoTienThu, new { @class = "form-control fw-bold text-dark fs-5", type = "text", placeholder = "0" })
+                                    <span class="input-group-text bg-light text-muted">VND</span>
+                                </div>
+                                <div class="overpayment-warning text-danger mt-1" style="display:none; font-size: 0.85rem;">
+                                    <i class="bi bi-exclamation-circle-fill"></i> Số tiền thu không được lớn hơn số tiền còn phải thu.
+                                </div>
+                                @Html.ValidationMessageFor(m => m.SoTienThu, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-6 d-flex gap-2">
+                                <button type="button" class="btn text-white w-100 py-2.5 fw-semibold" style="background-color: #0b5b84;" onclick="quickFillRemaining()">
+                                    <i class="bi bi-box-arrow-in-down-left"></i> Thu hết số nợ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <!-- History grid -->
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 6px;">
+                <div class="card-header bg-white border-0 py-3">
+                    <h6 class="mb-0 fw-bold text-dark text-uppercase" style="font-size: 0.85rem; letter-spacing: 0.5px;"><i class="bi bi-clock-history me-1 text-info"></i> Lịch sử thanh toán chứng từ</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-custom table-bordered table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-center" style="width: 60px;"></th>
+                                    <th class="text-center" style="width: 50px;">STT</th>
+                                    <th class="text-center" style="width: 120px;">Ngày thu</th>
+                                    <th class="text-center" style="width: 140px;">Số phiếu thu</th>
+                                    <th>Phương thức / Tài khoản</th>
+                                    <th class="text-end" style="width: 150px;">Số tiền</th>
+                                    <th>Người tạo</th>
+                                    <th class="text-center" style="width: 130px;">Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (history.Any())
+                                {
+                                    int index = 1;
+                                    foreach (var h in history)
+                                    {
+                                        string statusClass = "bg-warning text-dark";
+                                        string statusText = "Đề nghị ghi";
+                                        if (h.TrangThai == 2)
+                                        {
+                                            statusClass = "bg-success text-white";
+                                            statusText = "Đã ghi";
+                                        }
+                                        else if (h.TrangThai == 3)
+                                        {
+                                            statusClass = "bg-danger text-white";
+                                            statusText = "Đã hủy";
+                                        }
+
+                                        <tr>
+                                            <td class="text-center align-middle">
+                                                @if (h.TrangThai == 1 || (h.TrangThai == 2 && PermissionHelper.HasPermission("PhieuThuKhachHang", LoaiPhanQuyen.TuyChon)))
+                                                {
+                                                    <div class="dropdown dropdown-hover position-static">
+                                                        <button class="btn btn-sm btn-light border dropdown-toggle-hide-arrow shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 2px 6px;">
+                                                            <i class="bi bi-grid-3x3-gap-fill text-dark"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu shadow" style="min-width: 150px; font-size: 0.85rem;">
+                                                            <li><h6 class="dropdown-header text-uppercase fw-bold text-dark">Thao tác</h6></li>
+                                                            <li><hr class="dropdown-divider"></li>
+                                                            @if (h.TrangThai == 1)
+                                                            {
+                                                                <li><a class="dropdown-item py-2" href="javascript:void(0)" onclick="deleteHistoryRow(@h.ID)"><i class="bi bi-trash-fill text-danger me-2"></i> Xóa phiếu nháp</a></li>
+                                                                if (PermissionHelper.HasPermission("PhieuThuKhachHang", LoaiPhanQuyen.TuyChon))
+                                                                {
+                                                                    <li><a class="dropdown-item py-2" href="javascript:void(0)" onclick="ghiSoHistoryRow(@h.ID, '@h.SoPhieuThu')"><i class="bi bi-check2-circle text-success me-2"></i> Ghi sổ</a></li>
+                                                                }
+                                                            }
+                                                            else if (h.TrangThai == 2)
+                                                            {
+                                                                <li><a class="dropdown-item py-2" href="javascript:void(0)" onclick="huyHistoryRow(@h.ID, '@h.SoPhieuThu')"><i class="bi bi-slash-circle text-danger me-2"></i> Hủy phiếu thu</a></li>
+                                                            }
+                                                        </ul>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                }
+                                            </td>
+                                            <td class="text-center align-middle">@(index++)</td>
+                                            <td class="text-center align-middle">@h.NgayThu.ToString("dd/MM/yyyy")</td>
+                                            <td class="text-center align-middle fw-semibold">@h.SoPhieuThu</td>
+                                            <td class="align-middle">@h.TenTaiKhoan</td>
+                                            <td class="text-end align-middle text-dark fw-semibold">@h.SoTienThu.ToString("N0", cultureVi)</td>
+                                            <td class="align-middle">@h.TenNguoiTao</td>
+                                            <td class="text-center align-middle">
+                                                <span class="badge @statusClass px-2 py-1.5" style="border-radius: 4px; font-weight: 500; font-size: 0.75rem;">@statusText</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                    <tr class="table-light fw-bold text-dark">
+                                        <td colspan="5" class="text-end text-uppercase">Tổng cộng các phiếu thu đã ghi:</td>
+                                        <td class="text-end text-success fs-6">@sumHistory.ToString("N0", cultureVi)</td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="8" class="text-center py-3 text-muted">Chưa có lịch sử thanh toán cho chứng từ này.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Widgets -->
+        <div class="col-lg-3">
+            <!-- Progress circles -->
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 6px;">
+                <div class="card-header bg-white border-0 py-3">
+                    <h6 class="mb-0 fw-bold text-dark text-uppercase text-center" style="font-size: 0.85rem; letter-spacing: 0.5px;">Trạng thái công nợ</h6>
+                </div>
+                <div class="card-body">
+                    <div class="position-relative py-3">
+                        <svg width="150" height="150" viewBox="0 0 150 150" class="mx-auto d-block">
+                            <circle cx="75" cy="75" r="60" fill="transparent" stroke="#f1f5f9" stroke-width="12"></circle>
+                            <circle cx="75" cy="75" r="60" fill="transparent" stroke="@(percentDaThu >= 100 ? "#2ecc71" : (percentDaThu > 0 ? "#f1c40f" : "#e74c3c"))" stroke-width="12" 
+                                    stroke-dasharray="377" stroke-dashoffset="@(377 - (377 * percentDaThu / 100))" 
+                                    stroke-linecap="round" transform="rotate(-90 75 75)" style="transition: stroke-dashoffset 0.5s ease;"></circle>
+                            <text x="75" y="70" text-anchor="middle" dominant-baseline="middle" font-weight="bold" font-size="1.45rem" fill="#1e293b">@((int)percentDaThu)%</text>
+                            <text x="75" y="92" text-anchor="middle" dominant-baseline="middle" font-size="0.7rem" fill="#64748b" font-weight="bold" style="letter-spacing: 0.5px;">ĐÃ THU</text>
+                        </svg>
+                    </div>
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                                            <span class="small text-muted fw-semibold"><i class="bi bi-circle-fill me-1 text-success"></i> Đã thu tiền:</span>
+                                                            <span class="fw-bold text-dark">@Model.DaThanhToanTruoc.ToString("N0", cultureVi)</span>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <span class="small text-muted fw-semibold"><i class="bi bi-circle-fill me-1 text-danger"></i> Chưa thanh toán:</span>
+                                                            <span class="fw-bold text-dark">@Model.ConLaiSauThu.ToString("N0", cultureVi)</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                
+                                            <!-- Credit limit card -->
+                                            <div class="card border-0 shadow-sm mb-4" style="border-radius: 6px;">
+                                                <div class="card-header bg-white border-0 py-3">
+                                                    <h6 class="mb-0 fw-bold text-dark text-uppercase" style="font-size: 0.85rem; letter-spacing: 0.5px;"><i class="bi bi-shield-check me-1 text-primary"></i> Thông tin tín dụng</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="alert alert-success py-2 px-3 small border-0 mb-3" style="background-color: #ecfdf5; color: #065f46;">
+                                                        <i class="bi bi-hand-thumbs-up-fill me-1"></i> Khách hàng có lịch sử thanh toán tốt.
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <div class="small text-muted fw-semibold">Tổng nợ hiện tại:</div>
+                                                        <div class="fw-bold text-dark fs-5 mt-0.5">@(((decimal)ViewBag.TotalDebt).ToString("N0", cultureVi)) <span class="fs-6 fw-normal">đ</span></div>
+                                                    </div>
+                                                    <div class="mb-0 border-top pt-2">
+                                                        <div class="small text-muted fw-semibold">Hạn mức công nợ còn lại:</div>
+                                                        <div class="fw-bold text-success fs-5 mt-0.5">@(((decimal)ViewBag.CreditLimitRemaining).ToString("N0", cultureVi)) <span class="fs-6 fw-normal">đ</span></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+            <!-- Recent activities -->
+            <div class="card border-0 shadow-sm" style="border-radius: 6px;">
+                <div class="card-header bg-white border-0 py-3">
+                    <h6 class="mb-0 fw-bold text-dark text-uppercase" style="font-size: 0.85rem; letter-spacing: 0.5px;"><i class="bi bi-activity me-1 text-warning"></i> Hoạt động gần đây</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush small" style="max-height: 250px; overflow-y: auto;">
+                        @if (recent.Any())
+                        {
+                            foreach (var r in recent)
+                            {
+                                string stat = r.TrangThai == 2 ? "đã ghi sổ" : (r.TrangThai == 3 ? "đã hủy" : "đã tạo nháp");
+                                string icon = r.TrangThai == 2 ? "bi-check-circle-fill text-success" : (r.TrangThai == 3 ? "bi-slash-circle-fill text-danger" : "bi-pencil-fill text-warning");
+                                <div class="list-group-item bg-transparent py-2.5 px-3">
+                                    <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                                        <strong class="text-dark">@r.SoPhieuThu</strong>
+                                        <small class="text-muted" style="font-size: 0.7rem;">@((r.ThoiGianGhiSo ?? r.NgayCapNhat ?? r.NgayThu).ToString("dd/MM HH:mm"))</small>
+                                    </div>
+                                    <p class="mb-0 text-muted" style="line-height: 1.3;">
+                                        <i class="bi @icon me-1"></i> Số tiền <strong>@r.SoTienThu.ToString("N0", cultureVi)</strong> @stat bởi <em>@(r.NguoiGhiSo ?? r.NguoiCapNhat ?? "Hệ thống")</em>
+                                    </p>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="py-3 px-3 text-muted text-center">Chưa ghi nhận hoạt động nào.</div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        var $container = $('#collect-container-@uniqueId');
+        var $pane = $container.closest('.tab-pane');
+        if ($pane.length === 0) {
+            $pane = $container;
+        }
+        
+        var $soTienThuInput = $pane.find('[name="SoTienThu"]');
+        var maxPayment = @Model.ConLaiSauThu.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+        var hasAccounts = @(hasAccounts.ToString().ToLower());
+
+        // Disable buttons initially if no accounts exist
+        if (!hasAccounts) {
+            $pane.find('#btn-save, #btn-save-post').attr('disabled', 'disabled');
+        }
+
+        // Helper to format number with dots for thousands
+        function formatNumberVi(valStr) {
+            var clean = valStr.replace(/\D/g, '');
+            if (!clean) return '';
+            return clean.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        // Helper to unformat number (remove dots)
+        function unformatNumberVi(valStr) {
+            return valStr.replace(/\./g, '');
+        }
+
+        // Format initial value if any
+        if ($soTienThuInput.val()) {
+            $soTienThuInput.val(formatNumberVi($soTienThuInput.val()));
+        }
+
+        $soTienThuInput.on('input', function() {
+            var raw = unformatNumberVi($(this).val());
+            if (raw !== '') {
+                $(this).val(formatNumberVi(raw));
+            } else {
+                $(this).val('');
+            }
+        });
+
+        // Validation logic on number input
+        $soTienThuInput.on('input change', function() {
+            if (!hasAccounts) return;
+            
+            var rawValStr = unformatNumberVi($(this).val());
+            var val = parseFloat(rawValStr) || 0;
+            
+            if (val > maxPayment) {
+                $pane.find('.overpayment-warning').show();
+                $pane.find('.btn-save, .btn-save-post').attr('disabled', 'disabled');
+            } else {
+                $pane.find('.overpayment-warning').hide();
+                $pane.find('.btn-save, .btn-save-post').removeAttr('disabled');
+            }
+        });
+
+        // Quick fill remaining debt helper
+        window.quickFillRemaining = function() {
+            if (!hasAccounts) return;
+            var formatted = formatNumberVi(maxPayment.toString());
+            $soTienThuInput.val(formatted).trigger('change');
+            $pane.find('.overpayment-warning').hide();
+            $pane.find('.btn-save, .btn-save-post').removeAttr('disabled');
+        };
+
+        // Form Submit Handler
+        window.submitCollectForm = function(ghiSo) {
+            var form = $pane.find('form').first();
+            var rawValStr = unformatNumberVi($soTienThuInput.val());
+            var val = parseFloat(rawValStr) || 0;
+            
+            if (val <= 0) {
+                showToast('warning', 'Số tiền thu không hợp lệ.');
+                return;
+            }
+            if (val > maxPayment) {
+                showToast('error', 'Số tiền thu không được vượt quá số tiền còn lại.');
+                return;
+            }
+            
+            var tk = $pane.find('[name="IDTaiKhoanThanhToan"]').val();
+            if (!tk || tk === '0') {
+                showToast('warning', 'Vui lòng chọn tài khoản nhận tiền.');
+                return;
+            }
+
+            // Gửi dữ liệu form qua AJAX sau khi unformat số tiền
+            var actionUrl = form.attr('action');
+            
+            var formDataArray = form.serializeArray();
+            formDataArray = formDataArray.map(function(item) {
+                if (item.name === 'SoTienThu') {
+                    return { name: 'SoTienThu', value: rawValStr };
+                }
+                return item;
+            });
+            
+            var formData = $.param(formDataArray) + '&ghiSo=' + ghiSo;
+
+            $.ajax({
+                url: actionUrl,
+                type: 'POST',
+                data: formData,
+                success: function(res) {
+                    if (typeof res === 'string') {
+                        $pane.html(res);
+                    } else {
+                        if (res.success) {
+                            showToast('success', res.message);
+                            if (res.redirectUrl) {
+                                var paneId = $pane.attr('id');
+                                var key = paneId.replace('-pane', '');
+                                if (typeof TabManager !== 'undefined') {
+                                    TabManager.openTab(key, 'Thu tiền ' + '@Model.SoChungTuBanHang', res.redirectUrl);
+                                } else {
+                                    location.reload();
+                                }
+                            }
+                        } else {
+                            showToast('error', res.message);
+                        }
+                    }
+                },
+                error: function() {
+                    showToast('error', 'Lỗi máy chủ. Vui lòng thử lại.');
+                }
+            });
+        };
+
+        // AJAX Handlers for payment history rows
+        window.deleteHistoryRow = function(id) {
+            showConfirm("Bạn có chắc chắn muốn xóa phiếu thu này không?", function() {
+                $.ajax({
+                    url: '@Url.Action("Delete", "PhieuThuKhachHang")',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function(res) {
+                        if (res.success) {
+                            showToast('success', res.message);
+                            reloadCollectPage();
+                        } else {
+                            showToast('error', res.message);
+                        }
+                    }
+                });
+            });
+        };
+
+        window.ghiSoHistoryRow = function(id, soPhieu) {
+            showConfirm("Bạn có chắc chắn muốn ghi sổ phiếu thu [" + soPhieu + "] không?", function() {
+                $.ajax({
+                    url: '@Url.Action("GhiSo", "PhieuThuKhachHang")',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function(res) {
+                        if (res.success) {
+                            showToast('success', res.message);
+                            reloadCollectPage();
+                        } else {
+                            showToast('error', res.message);
+                        }
+                    }
+                });
+            });
+        };
+
+        window.huyHistoryRow = function(id, soPhieu) {
+            $pane.find('.HuyPhieuID').val(id);
+            $pane.find('.LyDoHuy').val('');
+            $pane.find('.HuyPhieuError').hide();
+            
+            var modalEl = $pane.find('.modalHuyPhieu')[0];
+            var modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        };
+
+        window.submitHuyPhieu = function() {
+            var id = $pane.find('.HuyPhieuID').val();
+            var lyDo = $pane.find('.LyDoHuy').val();
+            
+            if (!lyDo || lyDo.trim() === '') {
+                $pane.find('.HuyPhieuError').show();
+                return;
+            }
+            $pane.find('.HuyPhieuError').hide();
+
+            $.ajax({
+                url: '@Url.Action("Huy", "PhieuThuKhachHang")',
+                type: 'POST',
+                data: { id: id, lyDo: lyDo },
+                success: function(res) {
+                    var modalEl = $pane.find('.modalHuyPhieu')[0];
+                    var modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) {
+                        modal.hide();
+                    }
+
+                    if (res.success) {
+                        showToast('success', res.message);
+                        reloadCollectPage();
+                    } else {
+                        showToast('error', res.message);
+                    }
+                }
+            });
+        };
+
+        function reloadCollectPage() {
+            var url = '@Url.Action("Edit", "PhieuThuKhachHang", new { id = Model.IDChungTuBanHang })';
+            $.get(url, function(res) {
+                if (typeof res === 'string') {
+                    $pane.html(res);
+                }
+            }).fail(function() {
+                location.reload();
+            });
+        }
+    })();
+</script>
+
+<!-- Modal Hủy Phiếu Thu -->
+<div class="modal fade modalHuyPhieu" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-uppercase" style="color:#0b5b84;">HỦY PHIẾU THU</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" class="HuyPhieuID" />
+                <div class="mb-3">
+                    <label class="form-label">Lý do hủy <span class="text-danger">*</span></label>
+                    <textarea class="form-control LyDoHuy" rows="3" placeholder="Nhập lý do hủy..."></textarea>
+                    <div class="text-danger mt-1 HuyPhieuError" style="display:none; font-size: 0.85rem;"><i class="bi bi-exclamation-circle-fill"></i> Vui lòng nhập lý do hủy</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn text-dark fw-semibold px-4" style="background:#e9ecef;" data-bs-dismiss="modal">Để sau</button>
+                <button type="button" class="btn text-white fw-semibold px-4" style="background:#f1c40f;" onclick="submitHuyPhieu()">Đồng ý</button>
+            </div>
+        </div>
+    </div>
+</div>

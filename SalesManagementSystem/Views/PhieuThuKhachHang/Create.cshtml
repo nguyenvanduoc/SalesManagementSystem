@@ -1,0 +1,409 @@
+﻿@model SalesManagementSystem.Models.ViewModels.PhieuThuKhachHangViewModel
+@using SalesManagementSystem.Helpers
+
+@{
+    Layout = null;
+    bool isReadOnly = Model.TrangThai == 2 || Model.TrangThai == 3;
+    ViewBag.Title = Model.ID == 0 ? "Lập phiếu thu khách hàng" : (isReadOnly ? "Chi tiết phiếu thu khách hàng" : "Chỉnh sửa phiếu thu khách hàng");
+}
+
+<style>
+    .debt-card {
+        border-radius: 8px;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        padding: 16px;
+    }
+    .debt-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+    .debt-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    .debt-value.highlight-red {
+        color: #ef4444;
+    }
+    .debt-value.highlight-green {
+        color: #10b981;
+    }
+    .debt-value.highlight-blue {
+        color: #2563eb;
+    }
+</style>
+
+<div class="modal-header bg-light">
+    <h5 class="modal-title fw-bold text-uppercase" style="color: #0b5b84;">@ViewBag.Title</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+@using (Html.BeginForm("Save", "PhieuThuKhachHang", FormMethod.Post, new { id = "frmSavePhieuThu" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.ID)
+    @Html.HiddenFor(m => m.IDKhachHang, new { id = "hdnIDKhachHang" })
+    @Html.HiddenFor(m => m.TrangThai)
+
+    <div class="modal-body p-4">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger mb-3 py-2 px-3 small">
+                @Html.ValidationSummary(false, "")
+            </div>
+        }
+
+        <div class="row g-3">
+            <!-- Số phiếu thu -->
+            <div class="col-md-4">
+                <label class="form-label text-muted fw-semibold small">Số phiếu thu</label>
+                @Html.TextBoxFor(m => m.SoPhieuThu, new { @class = "form-control", @readonly = "readonly", style = "background-color: #f1f5f9; font-weight: 600;" })
+                @Html.ValidationMessageFor(m => m.SoPhieuThu, "", new { @class = "text-danger small" })
+            </div>
+
+            <!-- Ngày thu -->
+            <div class="col-md-4">
+                <label class="form-label text-muted fw-semibold small">Ngày thu <span class="text-danger">*</span></label>
+                @if (isReadOnly)
+                {
+                    <input type="text" class="form-control" value="@Model.NgayThu.ToString("dd/MM/yyyy")" readonly style="background-color: #f1f5f9;" />
+                    @Html.Hidden("NgayThu", Model.NgayThu.ToString("yyyy-MM-dd"))
+                }
+                else
+                {
+                    <input type="date" name="NgayThu" id="NgayThu" class="form-control" required="required" value="@Model.NgayThu.ToString("yyyy-MM-dd")" />
+                    @Html.ValidationMessageFor(m => m.NgayThu, "", new { @class = "text-danger small" })
+                }
+            </div>
+
+            <!-- Tài khoản nhận tiền -->
+            <div class="col-md-4">
+                <label class="form-label text-muted fw-semibold small">Tài khoản nhận tiền <span class="text-danger">*</span></label>
+                @if (isReadOnly)
+                {
+                    <input type="text" class="form-control" value="@Model.SoTaiKhoan - @Model.TenTaiKhoan" readonly style="background-color: #f1f5f9;" />
+                    @Html.HiddenFor(m => m.IDTaiKhoanThanhToan)
+                }
+                else
+                {
+                    @Html.DropDownListFor(m => m.IDTaiKhoanThanhToan, ViewBag.TaiKhoanThanhToans as SelectList, "Chọn tài khoản", new { @class = "form-select select2-modal", required = "required", data_placeholder = "Chọn tài khoản" })
+                    @Html.ValidationMessageFor(m => m.IDTaiKhoanThanhToan, "", new { @class = "text-danger small" })
+                }
+            </div>
+
+            <!-- Chứng từ bán hàng -->
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold small">Chứng từ bán hàng <span class="text-danger">*</span></label>
+                @if (isReadOnly)
+                {
+                    <input type="text" class="form-control" value="@Model.SoChungTuBanHang" readonly style="background-color: #f1f5f9;" />
+                    @Html.HiddenFor(m => m.IDChungTuBanHang)
+                }
+                else
+                {
+                    @Html.DropDownListFor(m => m.IDChungTuBanHang, ViewBag.ChungTuBanHangs as SelectList, "Chọn chứng từ bán hàng", new { @class = "form-select select2-modal", required = "required", id = "ddlChungTuBanHang", data_placeholder = "Chọn chứng từ bán hàng" })
+                    @Html.ValidationMessageFor(m => m.IDChungTuBanHang, "", new { @class = "text-danger small" })
+                }
+            </div>
+
+            <!-- Khách hàng (tự động theo chứng từ) -->
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold small">Khách hàng thanh toán</label>
+                @Html.TextBoxFor(m => m.TenKhachHang, new { @class = "form-control", @readonly = "readonly", id = "txtTenKhachHang", style = "background-color: #f1f5f9;" })
+            </div>
+
+            <!-- Khối thông tin công nợ -->
+            <div class="col-12 mt-3">
+                <div class="debt-card">
+                    <div class="row text-center text-md-start g-3">
+                        <div class="col-md-2.4 col-6">
+                            <div class="debt-title">Tổng giá trị</div>
+                            <div class="debt-value" id="lblTongCong">@string.Format("{0:N0}", Model.TongChungTu)đ</div>
+                        </div>
+                        <div class="col-md-2.4 col-6">
+                            <div class="debt-title">Đã thanh toán</div>
+                            <div class="debt-value text-muted" id="lblDaThanhToan">@string.Format("{0:N0}", Model.DaThanhToanTruoc)đ</div>
+                        </div>
+                        <div class="col-md-2.4 col-6">
+                            <div class="debt-title">Còn phải thu</div>
+                            <div class="debt-value highlight-blue" id="lblConLai">@string.Format("{0:N0}", Model.TongChungTu - Model.DaThanhToanTruoc)đ</div>
+                        </div>
+                        <div class="col-md-2.4 col-6">
+                            <div class="debt-title">Thu lần này</div>
+                            <div class="debt-value highlight-green" id="lblThuLanNay">@string.Format("{0:N0}", Model.SoTienThu)đ</div>
+                        </div>
+                        <div class="col-md-2.4 col-6">
+                            <div class="debt-title">Còn lại sau thu</div>
+                            <div class="debt-value highlight-red" id="lblConLaiSauThu">@string.Format("{0:N0}", Model.TongChungTu - Model.DaThanhToanTruoc - Model.SoTienThu)đ</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Số tiền thu -->
+            <div class="col-md-6 mt-3">
+                <label class="form-label text-muted fw-semibold small">Số tiền thu <span class="text-danger">*</span></label>
+                @if (isReadOnly)
+                {
+                    <input type="text" class="form-control text-end fw-bold text-primary" value="@string.Format("{0:N0}", Model.SoTienThu)" readonly style="background-color: #f1f5f9; font-size: 1.1rem;" />
+                }
+                else
+                {
+                    @Html.TextBoxFor(m => m.SoTienThu, new { @class = "form-control text-end fw-bold text-primary", type = "number", min = "1", step = "1", id = "txtSoTienThu", style = "font-size: 1.1rem;", required = "required" })
+                    <div id="divTienThuError" class="text-danger small mt-1 d-none">Số tiền thu không được vượt quá số tiền còn phải thu.</div>
+                    @Html.ValidationMessageFor(m => m.SoTienThu, "", new { @class = "text-danger small" })
+                }
+            </div>
+
+            <!-- Ghi chú -->
+            <div class="col-md-6 mt-3">
+                <label class="form-label text-muted fw-semibold small">Ghi chú</label>
+                @if (isReadOnly)
+                {
+                    @Html.TextAreaFor(m => m.GhiChu, new { @class = "form-control", rows = 2, @readonly = "readonly", style = "background-color: #f1f5f9;" })
+                }
+                else
+                {
+                    @Html.TextAreaFor(m => m.GhiChu, new { @class = "form-control", rows = 2, placeholder = "Nhập nội dung thu..." })
+                    @Html.ValidationMessageFor(m => m.GhiChu, "", new { @class = "text-danger small" })
+                }
+            </div>
+        </div>
+
+        @if (isReadOnly)
+        {
+            <div class="row mt-4 small g-3">
+                <hr />
+                @if (Model.NgayGhi.HasValue)
+                {
+                    <div class="col-md-6 text-muted">
+                        <i class="bi bi-check-circle me-1"></i> Đã ghi sổ bởi <strong>@Model.TenNguoiTao</strong> vào lúc @Model.NgayGhi.Value.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                }
+                @if (Model.NgayHuy.HasValue)
+                {
+                    <div class="col-md-6 text-danger">
+                        <i class="bi bi-x-circle me-1"></i> Đã bị hủy. Lý do: <em>@Model.LyDoHuy</em>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="modal-footer bg-light d-flex justify-content-between">
+        <div>
+            @if (isReadOnly)
+            {
+                <button type="button" class="btn btn-outline-primary px-3" onclick="window.print();">
+                    <i class="bi bi-printer me-1"></i> In phiếu thu
+                </button>
+            }
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Đóng</button>
+            @if (!isReadOnly)
+            {
+                <!-- Nút Lưu Đề nghị ghi -->
+                <button type="button" class="btn btn-warning text-dark px-4 fw-semibold" id="btnSavePending">
+                    <i class="bi bi-save me-1"></i> Lưu nháp (1)
+                </button>
+                <!-- Nút Lưu và ghi sổ -->
+                <button type="button" class="btn btn-success text-white px-4 fw-semibold" id="btnSaveAndRecord">
+                    <i class="bi bi-check-circle me-1"></i> Lưu & Ghi sổ (2)
+                </button>
+            }
+        </div>
+    </div>
+}
+
+<script>
+    $(document).ready(function() {
+        var $modal = $('#globalFormModal');
+
+        $modal.find('.select2-modal').select2({
+            dropdownParent: $modal,
+            width: '100%'
+        });
+
+        // Cache variables
+        var $ddlChungTu = $('#ddlChungTuBanHang');
+        var $txtKhachHang = $('#txtTenKhachHang');
+        var $hdnIDKhachHang = $('#hdnIDKhachHang');
+        var $txtSoTienThu = $('#txtSoTienThu');
+        
+        var $lblTongCong = $('#lblTongCong');
+        var $lblDaThanhToan = $('#lblDaThanhToan');
+        var $lblConLai = $('#lblConLai');
+        var $lblThuLanNay = $('#lblThuLanNay');
+        var $lblConLaiSauThu = $('#lblConLaiSauThu');
+        var $btnSavePending = $('#btnSavePending');
+        var $btnSaveAndRecord = $('#btnSaveAndRecord');
+        var $errorDiv = $('#divTienThuError');
+
+        // State variables
+        var valTongCong = parseFloat('@Model.TongChungTu');
+        var valDaThanhToan = parseFloat('@Model.DaThanhToanTruoc');
+        var valConLai = valTongCong - valDaThanhToan;
+
+        // Formats currency numbers
+        function formatNumber(num) {
+            return new Intl.NumberFormat('vi-VN').format(Math.round(num));
+        }
+
+        // Calculates card values and checks limit validation
+        function updateDebtCard() {
+            var valSoTienThu = parseFloat($txtSoTienThu.val()) || 0;
+            var valConLaiSauThu = valConLai - valSoTienThu;
+
+            // Update label values
+            $lblThuLanNay.text(formatNumber(valSoTienThu) + 'đ');
+            $lblConLaiSauThu.text(formatNumber(valConLaiSauThu) + 'đ');
+
+            if (valConLaiSauThu < 0) {
+                $lblConLaiSauThu.addClass('highlight-red');
+            } else {
+                $lblConLaiSauThu.removeClass('highlight-red');
+            }
+
+            // Client-side validation: SoTienThu > ConLai
+            if (valSoTienThu <= 0) {
+                $btnSavePending.prop('disabled', true);
+                $btnSaveAndRecord.prop('disabled', true);
+                $txtSoTienThu.removeClass('is-invalid');
+                $errorDiv.addClass('d-none');
+            }
+            else if (valSoTienThu > valConLai) {
+                $txtSoTienThu.addClass('is-invalid');
+                $errorDiv.removeClass('d-none').text('Số tiền thu không được vượt quá số tiền còn phải thu (' + formatNumber(valConLai) + 'đ).');
+                $btnSavePending.prop('disabled', true);
+                $btnSaveAndRecord.prop('disabled', true);
+            } else {
+                $txtSoTienThu.removeClass('is-invalid');
+                $errorDiv.addClass('d-none');
+                $btnSavePending.prop('disabled', false);
+                $btnSaveAndRecord.prop('disabled', false);
+            }
+        }
+
+        // On Sales Voucher change: load debt info and fill customer
+        $ddlChungTu.change(function() {
+            var selectedId = $(this).val();
+            if (!selectedId) {
+                $txtKhachHang.val('');
+                $hdnIDKhachHang.val('');
+                valTongCong = 0;
+                valDaThanhToan = 0;
+                valConLai = 0;
+                
+                $lblTongCong.text('0đ');
+                $lblDaThanhToan.text('0đ');
+                $lblConLai.text('0đ');
+                updateDebtCard();
+                return;
+            }
+
+            // AJAX request to fetch details
+            $.ajax({
+                url: '@Url.Action("GetCongNoChungTu", "PhieuThuKhachHang")',
+                type: 'GET',
+                data: { id: selectedId },
+                success: function(res) {
+                    if (res.success) {
+                        var data = res.data;
+                        $txtKhachHang.val(data.TenKhachHang);
+                        $hdnIDKhachHang.val(data.IDKhachHang);
+
+                        valTongCong = data.TongCong;
+                        // Đối với phiếu thu mới, DaThanhToan chính là DaThanhToan trước đó.
+                        // Đối với phiếu thu đang chỉnh sửa, DaThanhToan trước đó = DaThanhToan (trong DB của CTBH) - SoTienThu của phiếu hiện tại (đã được lưu nếu TrangThai = 2, nhưng form edit chỉ mở ở TrangThai = 1, nên DaThanhToan của CTBH chính là DaThanhToan trước đó thực tế).
+                        valDaThanhToan = data.DaThanhToan;
+                        
+                        // Ở form edit, ta cần trừ đi số tiền của chính phiếu này nếu phiếu này đã ghi (nhưng form edit chỉ mở cho phiếu = 1 chưa ghi, nên không cần trừ).
+                        valConLai = data.ConLai;
+
+                        $lblTongCong.text(formatNumber(valTongCong) + 'đ');
+                        $lblDaThanhToan.text(formatNumber(valDaThanhToan) + 'đ');
+                        $lblConLai.text(formatNumber(valConLai) + 'đ');
+
+                        // Gợi ý điền số tiền thu bằng số tiền còn lại
+                        if (!$txtSoTienThu.val() || parseFloat($txtSoTienThu.val()) === 0) {
+                            $txtSoTienThu.val(valConLai);
+                        }
+
+                        updateDebtCard();
+                    } else {
+                        showToast('error', res.message);
+                    }
+                },
+                error: function() {
+                    showToast('error', 'Không thể lấy thông tin công nợ.');
+                }
+            });
+        });
+
+        // Trigger debt card update on input
+        $txtSoTienThu.on('input change', function() {
+            updateDebtCard();
+        });
+
+        // Submits form as pending (TrangThai = 1)
+        $btnSavePending.click(function() {
+            submitForm(false);
+        });
+
+        // Submits form and records (TrangThai = 2)
+        $btnSaveAndRecord.click(function() {
+            showConfirm("Bạn có chắc chắn muốn lưu và ghi sổ trực tiếp phiếu thu này không?", function() {
+                submitForm(true);
+            });
+        });
+
+        function submitForm(ghiSo) {
+            var $form = $('#frmSavePhieuThu');
+            if (!$form[0].checkValidity()) {
+                $form[0].reportValidity();
+                return;
+            }
+
+            var formData = new FormData($form[0]);
+            formData.append('ghiSo', ghiSo);
+
+            $.ajax({
+                url: $form.attr('action'),
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(res) {
+                    if (res.success === true) {
+                        $modal.modal('hide');
+                        showToast('success', res.message);
+                        if (typeof TabManager !== 'undefined') {
+                            TabManager.reloadActiveTabGrid(false);
+                        } else if (typeof loadData === 'function') {
+                            loadData('');
+                        } else {
+                            location.reload();
+                        }
+                    } else if (res.success === false) {
+                        showToast('error', res.message);
+                    } else {
+                        // Trả về HTML chứa validation errors
+                        $('#globalFormModalContent').html(res);
+                    }
+                },
+                error: function() {
+                    showToast('error', 'Lỗi hệ thống khi lưu dữ liệu.');
+                }
+            });
+        }
+
+        // Initialize state
+        updateDebtCard();
+    });
+</script>

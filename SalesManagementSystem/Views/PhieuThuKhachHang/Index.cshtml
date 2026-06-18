@@ -1,0 +1,101 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.PhieuThuKhachHangListViewModel>
+
+@{
+    ViewBag.Title = "Phiếu thu khách hàng";
+}
+
+@using SalesManagementSystem.Helpers
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">@ViewBag.Title</h4>
+</div>
+
+<!-- Bộ lọc tìm kiếm theo chuẩn UI -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" action="@Url.Action("GetList")" id="searchForm">
+            <div class="row g-3">
+                <div class="col-md-2">
+                    <label class="form-label small text-muted fw-semibold">Từ ngày</label>
+                    <input type="date" name="tuNgay" class="form-control" value="@ViewBag.TuNgay">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted fw-semibold">Đến ngày</label>
+                    <input type="date" name="denNgay" class="form-control" value="@ViewBag.DenNgay">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted fw-semibold">Số chứng từ</label>
+                    <input type="text" name="soChungTu" class="form-control" placeholder="Nhập số chứng từ..." value="@ViewBag.SoChungTu">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small text-muted fw-semibold">Khách hàng</label>
+                    <select name="idKhachHang" id="idKhachHang_PhieuThu" class="form-select select2" data-placeholder="Tất cả khách hàng">
+                        <option value="">Tất cả khách hàng</option>
+                        @if (ViewBag.KhachHangList != null)
+                        {
+                            foreach (var item in (SelectList)ViewBag.KhachHangList)
+                            {
+                                <option value="@item.Value" @(item.Selected ? "selected" : "")>@item.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small text-muted fw-semibold">Trạng thái công nợ</label>
+                    <select name="trangThaiCongNo" class="form-select">
+                        <option value="">Tất cả</option>
+                        <option value="1" @(ViewBag.TrangThaiCongNo == 1 ? "selected" : "")>Chưa thanh toán</option>
+                        <option value="2" @(ViewBag.TrangThaiCongNo == 2 ? "selected" : "")>Thanh toán một phần</option>
+                        <option value="3" @(ViewBag.TrangThaiCongNo == 3 ? "selected" : "")>Đã thanh toán</option>
+                    </select>
+                </div>
+                <div class="col-md-12 d-flex justify-content-end gap-2 mt-3">
+                    <button type="submit" class="btn text-white px-4" style="background-color: #2998e4; border: none; min-width: 120px;">
+                        <i class="bi bi-search"></i> Tìm kiếm
+                    </button>
+                    <button type="button" class="btn text-white px-4 btn-reset" style="background-color: #f1c40f; border: none; min-width: 120px;">
+                        Làm mới
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="table-container">
+    @Html.Partial("_PhieuThuKhachHangList", Model)
+</div>
+
+@section Scripts {
+    <style>
+        .select2-container .select2-selection--single {
+            height: 38px;
+            padding-top: 5px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px;
+        }
+    </style>
+    <script>
+        (function() {
+            var $pane = $('#searchForm').closest('.tab-pane');
+            if ($pane.length === 0) $pane = $('body');
+
+            // Initialize select2 simply
+            $pane.find('.select2').select2({
+                width: '100%'
+            });
+
+            // Handle Reset button click
+            $pane.on('click', '.btn-reset', function() {
+                $pane.find('input[name="tuNgay"]').val('');
+                $pane.find('input[name="denNgay"]').val('');
+                $pane.find('input[name="soChungTu"]').val('');
+                $pane.find('select[name="idKhachHang"]').val('').trigger('change');
+                $pane.find('select[name="trangThaiCongNo"]').val('').trigger('change');
+                $pane.find('#searchForm').trigger('submit');
+            });
+        })();
+    </script>
+}

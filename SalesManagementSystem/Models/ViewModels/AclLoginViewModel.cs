@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using SalesManagementSystem.Models.Entities;
 
 namespace SalesManagementSystem.Models.ViewModels

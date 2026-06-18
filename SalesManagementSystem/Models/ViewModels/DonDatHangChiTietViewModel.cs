@@ -1,4 +1,4 @@
-namespace SalesManagementSystem.Models.ViewModels
+﻿namespace SalesManagementSystem.Models.ViewModels
 {
     /// <summary>ViewModel cho từng dòng chi tiết trong form đơn hàng.</summary>
     public class DonDatHangChiTietViewModel

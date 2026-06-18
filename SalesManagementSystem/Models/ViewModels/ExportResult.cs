@@ -1,4 +1,4 @@
-namespace SalesManagementSystem.Models.ViewModels
+﻿namespace SalesManagementSystem.Models.ViewModels
 {
     /// <summary>
     /// Kết quả trả về sau khi export file Word/PDF

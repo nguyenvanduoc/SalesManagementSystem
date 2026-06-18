@@ -1,4 +1,4 @@
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using Unity;
 using Unity.Mvc5;
 using SalesManagementSystem.Data;
@@ -47,6 +47,7 @@ namespace SalesManagementSystem.App_Start
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.INhatKyChungRepository, NhatKyChungRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.ITaiKhoanKeToanRepository, TaiKhoanKeToanRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IPhieuXuatKhoRepository, PhieuXuatKhoRepository>(new HierarchicalLifetimeManager());
+            container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IPhieuThuKhachHangRepository, PhieuThuKhachHangRepository>(new HierarchicalLifetimeManager());
             // ── Services (logic nghiệp vụ) ────────────────────────────────────
             container.RegisterType<InventoryService>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Services.Interfaces.IExcelExportService, ExcelExportService>(new HierarchicalLifetimeManager());

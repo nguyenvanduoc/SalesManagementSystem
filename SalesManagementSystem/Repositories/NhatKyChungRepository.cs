@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Dapper;
 using SalesManagementSystem.Data;
 using SalesManagementSystem.Models.Entities;

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using SalesManagementSystem.Models.ViewModels;
 
 namespace SalesManagementSystem.Services.Interfaces

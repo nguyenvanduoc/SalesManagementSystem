@@ -3,11 +3,15 @@
   "WorkspaceRootPath": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\salesmanagementsystem\\global.asax.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\print_cs.exe.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:SalesManagementSystem\\print_cs.exe.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|c:\\users\\duoc0\\onedrive\\desktop\\web_qlbh\\quanlybanhang\\salesmanagementsystem\\salesmanagementsystem\\global.asax.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|solutionrelative:salesmanagementsystem\\global.asax.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|c:\\users\\duoc0\\onedrive\\desktop\\web_qlbh\\quanlybanhang\\salesmanagementsystem\\salesmanagementsystem\\print_cs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\salesmanagementsystem\\print_cs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|solutionrelative:salesmanagementsystem\\print_cs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -15,11 +19,11 @@
       "RelativeMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|solutionrelative:salesmanagementsystem\\views\\tonkho\\_thekhomodal.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|c:\\users\\duoc0\\onedrive\\desktop\\web_qlbh\\quanlybanhang\\salesmanagementsystem\\salesmanagementsystem\\views\\tonkho\\_tonkholist.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\salesmanagementsystem\\views\\tonkho\\_tonkholist.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|solutionrelative:salesmanagementsystem\\views\\tonkho\\_tonkholist.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|c:\\users\\duoc0\\onedrive\\desktop\\web_qlbh\\quanlybanhang\\salesmanagementsystem\\salesmanagementsystem\\repositories\\phieunhapkhorepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\salesmanagementsystem\\repositories\\phieunhapkhorepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|solutionrelative:salesmanagementsystem\\repositories\\phieunhapkhorepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -454,11 +458,24 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 8,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
+              "Title": "print_cs.exe.config",
+              "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\print_cs.exe.config",
+              "RelativeDocumentMoniker": "SalesManagementSystem\\print_cs.exe.config",
+              "ToolTip": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\print_cs.exe.config",
+              "RelativeToolTip": "SalesManagementSystem\\print_cs.exe.config",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000601|",
+              "WhenOpened": "2026-06-18T16:10:06.195Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "print_cs.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\print_cs.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\print_cs.cs",
@@ -466,12 +483,11 @@
               "RelativeToolTip": "SalesManagementSystem\\print_cs.cs",
               "ViewState": "AgIAAAYAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-18T04:33:27.275Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-18T04:33:27.275Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "_TonKhoList.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\TonKho\\_TonKhoList.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\TonKho\\_TonKhoList.cshtml",
@@ -479,12 +495,11 @@
               "RelativeToolTip": "SalesManagementSystem\\Views\\TonKho\\_TonKhoList.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-06-18T03:25:40.087Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-18T03:25:40.087Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "internal.js",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\node_modules\\iconv-lite\\encodings\\internal.js",
               "RelativeDocumentMoniker": "SalesManagementSystem\\node_modules\\iconv-lite\\encodings\\internal.js",
@@ -496,7 +511,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 108,
+              "DocumentIndex": 109,
               "Title": "_SpaLayout.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\Shared\\_SpaLayout.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\Shared\\_SpaLayout.cshtml",
@@ -508,7 +523,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "AuditHelper.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Helpers\\AuditHelper.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Helpers\\AuditHelper.cs",
@@ -520,7 +535,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "DbConnectionFactory.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Data\\DbConnectionFactory.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Data\\DbConnectionFactory.cs",
@@ -532,7 +547,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "system.dat",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\App_Config\\system.dat",
               "RelativeDocumentMoniker": "SalesManagementSystem\\App_Config\\system.dat",
@@ -544,7 +559,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "PhieuNhapKhoRepository.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Repositories\\PhieuNhapKhoRepository.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Repositories\\PhieuNhapKhoRepository.cs",
@@ -552,25 +567,24 @@
               "RelativeToolTip": "SalesManagementSystem\\Repositories\\PhieuNhapKhoRepository.cs",
               "ViewState": "AgIAABIAAAAAAAAAAADwvykAAABjAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-10T16:21:22.457Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-10T16:21:22.457Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Global.asax.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Global.asax.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Global.asax.cs",
               "ToolTip": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Global.asax.cs",
               "RelativeToolTip": "SalesManagementSystem\\Global.asax.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAtAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB4AAABFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-06-04T05:53:52.25Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "_TheKhoModal.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\TonKho\\_TheKhoModal.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\TonKho\\_TheKhoModal.cshtml",
@@ -578,12 +592,11 @@
               "RelativeToolTip": "SalesManagementSystem\\Views\\TonKho\\_TheKhoModal.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAA4AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-06-12T08:50:06.737Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-12T08:50:06.737Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "PhieuNhapKhoController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\PhieuNhapKhoController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\PhieuNhapKhoController.cs",
@@ -595,7 +608,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 23,
               "Title": "IChungTuBanHangRepository.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Repositories\\Interfaces\\IChungTuBanHangRepository.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Repositories\\Interfaces\\IChungTuBanHangRepository.cs",
@@ -607,7 +620,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 24,
               "Title": "PhieuXuatKhoController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\PhieuXuatKhoController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\PhieuXuatKhoController.cs",
@@ -619,7 +632,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 20,
               "Title": "BieuMauConstants.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Helpers\\BieuMauConstants.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Helpers\\BieuMauConstants.cs",
@@ -631,7 +644,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 16,
               "Title": "AGENTS.md",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\AGENTS.md",
               "RelativeDocumentMoniker": "SalesManagementSystem\\AGENTS.md",
@@ -643,7 +656,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 13,
               "Title": "_ChungTuBanHangList.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\ChungTuBanHang\\_ChungTuBanHangList.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\ChungTuBanHang\\_ChungTuBanHangList.cshtml",
@@ -655,7 +668,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\ChungTuBanHang\\Index.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\ChungTuBanHang\\Index.cshtml",
@@ -667,7 +680,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 109,
+              "DocumentIndex": 110,
               "Title": "Details.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\PhieuXuatKho\\Details.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\PhieuXuatKho\\Details.cshtml",
@@ -679,7 +692,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 14,
               "Title": "_ChonDonDatHangModal.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\ChungTuBanHang\\_ChonDonDatHangModal.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\ChungTuBanHang\\_ChonDonDatHangModal.cshtml",
@@ -691,7 +704,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 12,
               "Title": "Create.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\ChungTuBanHang\\Create.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\ChungTuBanHang\\Create.cshtml",
@@ -703,7 +716,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 22,
               "Title": "ChungTuBanHangViewModel.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Models\\ViewModels\\ChungTuBanHangViewModel.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Models\\ViewModels\\ChungTuBanHangViewModel.cs",
@@ -715,7 +728,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 19,
               "Title": "CustomAuthorizeAttribute.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Helpers\\CustomAuthorizeAttribute.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Helpers\\CustomAuthorizeAttribute.cs",
@@ -727,7 +740,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 15,
               "Title": "ChungTuBanHangController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\ChungTuBanHangController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\ChungTuBanHangController.cs",
@@ -739,7 +752,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 18,
               "Title": "CommonConstants.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Helpers\\CommonConstants.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Helpers\\CommonConstants.cs",
@@ -751,7 +764,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 17,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\DonDatHang\\Index.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\DonDatHang\\Index.cshtml",
@@ -763,7 +776,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 21,
               "Title": "phieu-xuat-kho.js",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Scripts\\phieu-xuat-kho.js",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Scripts\\phieu-xuat-kho.js",
@@ -775,7 +788,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 27,
               "Title": "TonKhoController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\TonKhoController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\TonKhoController.cs",
@@ -787,7 +800,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 50,
+              "DocumentIndex": 51,
               "Title": "DonDatHangRepository.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Repositories\\DonDatHangRepository.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Repositories\\DonDatHangRepository.cs",
@@ -799,7 +812,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 51,
+              "DocumentIndex": 52,
               "Title": "UI_STANDARD.md",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\UI_STANDARD.md",
               "RelativeDocumentMoniker": "SalesManagementSystem\\UI_STANDARD.md",
@@ -811,7 +824,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 25,
               "Title": "UnityConfig.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\App_Start\\UnityConfig.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\App_Start\\UnityConfig.cs",
@@ -823,7 +836,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 28,
               "Title": "TonKhoViewModel.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Models\\ViewModels\\TonKhoViewModel.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Models\\ViewModels\\TonKhoViewModel.cs",
@@ -835,7 +848,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 26,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\TonKho\\Index.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\TonKho\\Index.cshtml",
@@ -847,7 +860,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 52,
+              "DocumentIndex": 53,
               "Title": "NhanSuController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\NhanSuController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\NhanSuController.cs",
@@ -859,7 +872,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 53,
+              "DocumentIndex": 54,
               "Title": "NhaCungCapController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\NhaCungCapController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\NhaCungCapController.cs",
@@ -871,7 +884,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 54,
+              "DocumentIndex": 55,
               "Title": "_Layout.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\Shared\\_Layout.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\Shared\\_Layout.cshtml",
@@ -883,7 +896,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 55,
+              "DocumentIndex": 56,
               "Title": "DATABASE_STANDARD.md",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\DATABASE_STANDARD.md",
               "RelativeDocumentMoniker": "SalesManagementSystem\\DATABASE_STANDARD.md",
@@ -895,7 +908,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 56,
+              "DocumentIndex": 57,
               "Title": "ARCHITECTURE_STANDARD.md",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\ARCHITECTURE_STANDARD.md",
               "RelativeDocumentMoniker": "SalesManagementSystem\\ARCHITECTURE_STANDARD.md",
@@ -907,7 +920,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 49,
+              "DocumentIndex": 50,
               "Title": "UI_STANDARD.md",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\obj\\Release\\Package\\PackageTmp\\UI_STANDARD.md",
               "RelativeDocumentMoniker": "SalesManagementSystem\\obj\\Release\\Package\\PackageTmp\\UI_STANDARD.md",
@@ -919,7 +932,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 57,
+              "DocumentIndex": 58,
               "Title": "DonDatHangController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\DonDatHangController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\DonDatHangController.cs",
@@ -931,7 +944,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 31,
+              "DocumentIndex": 32,
               "Title": "addChangeStatus.ps1",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\addChangeStatus.ps1",
               "RelativeDocumentMoniker": "addChangeStatus.ps1",
@@ -942,7 +955,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 58,
+              "DocumentIndex": 59,
               "Title": "NguoiDungController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\NguoiDungController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\NguoiDungController.cs",
@@ -954,7 +967,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 59,
+              "DocumentIndex": 60,
               "Title": "ExcelExportService.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Services\\ExcelExportService.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Services\\ExcelExportService.cs",
@@ -966,7 +979,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 30,
               "Title": "fixController.ps1",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\fixController.ps1",
               "RelativeDocumentMoniker": "fixController.ps1",
@@ -977,7 +990,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 60,
+              "DocumentIndex": 61,
               "Title": "Edit.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\DonDatHang\\Edit.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\DonDatHang\\Edit.cshtml",
@@ -989,7 +1002,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 61,
+              "DocumentIndex": 62,
               "Title": "Create.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\DonDatHang\\Create.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\DonDatHang\\Create.cshtml",
@@ -1001,7 +1014,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 30,
+              "DocumentIndex": 31,
               "Title": "fix.ps1",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\fix.ps1",
               "RelativeDocumentMoniker": "fix.ps1",
@@ -1012,7 +1025,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
+              "DocumentIndex": 29,
               "Title": "fixFont.ps1",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\fixFont.ps1",
               "RelativeDocumentMoniker": "fixFont.ps1",
@@ -1023,7 +1036,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 62,
+              "DocumentIndex": 63,
               "Title": "_DonDatHangList.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\DonDatHang\\_DonDatHangList.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\DonDatHang\\_DonDatHangList.cshtml",
@@ -1035,7 +1048,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 63,
+              "DocumentIndex": 64,
               "Title": "IKhachHangRepository.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Repositories\\Interfaces\\IKhachHangRepository.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Repositories\\Interfaces\\IKhachHangRepository.cs",
@@ -1047,7 +1060,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 64,
+              "DocumentIndex": 65,
               "Title": "IDonDatHangRepository.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Repositories\\Interfaces\\IDonDatHangRepository.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Repositories\\Interfaces\\IDonDatHangRepository.cs",
@@ -1059,7 +1072,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 65,
+              "DocumentIndex": 66,
               "Title": "DmSanPhamRepository.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Repositories\\DmSanPhamRepository.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Repositories\\DmSanPhamRepository.cs",
@@ -1071,7 +1084,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 66,
+              "DocumentIndex": 67,
               "Title": "IWordExportService.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Services\\Interfaces\\IWordExportService.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Services\\Interfaces\\IWordExportService.cs",
@@ -1083,7 +1096,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 67,
+              "DocumentIndex": 68,
               "Title": "KhachHangRepository.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Repositories\\KhachHangRepository.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Repositories\\KhachHangRepository.cs",
@@ -1095,7 +1108,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 68,
+              "DocumentIndex": 69,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\PhanQuyen\\Index.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\PhanQuyen\\Index.cshtml",
@@ -1107,7 +1120,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 69,
+              "DocumentIndex": 70,
               "Title": "SanPhamController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\SanPhamController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\SanPhamController.cs",
@@ -1119,7 +1132,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 32,
+              "DocumentIndex": 33,
               "Title": "DbSetup.ashx",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\DbSetup.ashx",
               "RelativeDocumentMoniker": "SalesManagementSystem\\DbSetup.ashx",
@@ -1130,7 +1143,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 70,
+              "DocumentIndex": 71,
               "Title": "IExcelExportService.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Services\\Interfaces\\IExcelExportService.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Services\\Interfaces\\IExcelExportService.cs",
@@ -1142,7 +1155,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 71,
+              "DocumentIndex": 72,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\SanPham\\Index.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\SanPham\\Index.cshtml",
@@ -1154,7 +1167,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 72,
+              "DocumentIndex": 73,
               "Title": "ConfigManager.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Helpers\\Security\\ConfigManager.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Helpers\\Security\\ConfigManager.cs",
@@ -1166,7 +1179,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 33,
+              "DocumentIndex": 34,
               "Title": "ConfigEncryptor.exe",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\ConfigEncryptorTool\\ConfigEncryptor.exe",
               "RelativeDocumentMoniker": "ConfigEncryptorTool\\ConfigEncryptor.exe",
@@ -1177,7 +1190,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 73,
+              "DocumentIndex": 74,
               "Title": "Web.config",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Web.config",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Web.config",
@@ -1190,7 +1203,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 74,
+              "DocumentIndex": 75,
               "Title": "ChucVuController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\ChucVuController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\ChucVuController.cs",
@@ -1202,7 +1215,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 75,
+              "DocumentIndex": 76,
               "Title": "KhachHangController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\KhachHangController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\KhachHangController.cs",
@@ -1214,7 +1227,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 110,
+              "DocumentIndex": 111,
               "Title": "tab-manager.js",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Scripts\\tab-manager.js",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Scripts\\tab-manager.js",
@@ -1226,7 +1239,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 76,
+              "DocumentIndex": 77,
               "Title": "AesCryptoHelper.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Helpers\\Security\\AesCryptoHelper.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Helpers\\Security\\AesCryptoHelper.cs",
@@ -1238,7 +1251,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 77,
+              "DocumentIndex": 78,
               "Title": "AuthorizeTypes.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Helpers\\AuthorizeTypes.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Helpers\\AuthorizeTypes.cs",
@@ -1250,7 +1263,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 78,
+              "DocumentIndex": 79,
               "Title": "PermissionHelper.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Helpers\\PermissionHelper.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Helpers\\PermissionHelper.cs",
@@ -1262,7 +1275,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 79,
+              "DocumentIndex": 80,
               "Title": "PagedListViewModel.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Models\\ViewModels\\PagedListViewModel.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Models\\ViewModels\\PagedListViewModel.cs",
@@ -1274,7 +1287,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 80,
+              "DocumentIndex": 81,
               "Title": "_NhatKyList.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\NhatKy\\_NhatKyList.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\NhatKy\\_NhatKyList.cshtml",
@@ -1286,7 +1299,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 81,
+              "DocumentIndex": 82,
               "Title": "Detail.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\NhatKy\\Detail.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\NhatKy\\Detail.cshtml",
@@ -1298,7 +1311,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 82,
+              "DocumentIndex": 83,
               "Title": "2026-06-05.log",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Logs\\2026-06-05.log",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Logs\\2026-06-05.log",
@@ -1310,7 +1323,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 83,
+              "DocumentIndex": 84,
               "Title": "CreateNguoiDung.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\NguoiDung\\CreateNguoiDung.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\NguoiDung\\CreateNguoiDung.cshtml",
@@ -1322,7 +1335,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 84,
+              "DocumentIndex": 85,
               "Title": "CreateChucVu.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\ChucVu\\CreateChucVu.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\ChucVu\\CreateChucVu.cshtml",
@@ -1334,7 +1347,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 85,
+              "DocumentIndex": 86,
               "Title": "LoginController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\LoginController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\LoginController.cs",
@@ -1346,7 +1359,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 44,
+              "DocumentIndex": 45,
               "Title": "UserLogin.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Models\\ViewModels\\UserLogin.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Models\\ViewModels\\UserLogin.cs",
@@ -1357,7 +1370,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 34,
+              "DocumentIndex": 35,
               "Title": "NhanVienController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\NhanVienController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\NhanVienController.cs",
@@ -1368,7 +1381,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 86,
+              "DocumentIndex": 87,
               "Title": "HomeController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\HomeController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\HomeController.cs",
@@ -1380,7 +1393,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 87,
+              "DocumentIndex": 88,
               "Title": "BaseController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\BaseController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\BaseController.cs",
@@ -1392,7 +1405,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 88,
+              "DocumentIndex": 89,
               "Title": "PhanQuyenController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\PhanQuyenController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\PhanQuyenController.cs",
@@ -1404,7 +1417,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 89,
+              "DocumentIndex": 90,
               "Title": "UpdateChucVu.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\ChucVu\\UpdateChucVu.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\ChucVu\\UpdateChucVu.cshtml",
@@ -1416,7 +1429,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 90,
+              "DocumentIndex": 91,
               "Title": "NhatKyController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\NhatKyController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\NhatKyController.cs",
@@ -1428,7 +1441,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 45,
+              "DocumentIndex": 46,
               "Title": "OrderFormVM.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Models\\ViewModels\\OrderFormVM.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Models\\ViewModels\\OrderFormVM.cs",
@@ -1439,7 +1452,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 91,
+              "DocumentIndex": 92,
               "Title": "_Menu.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\Home\\_Menu.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\Home\\_Menu.cshtml",
@@ -1451,7 +1464,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 92,
+              "DocumentIndex": 93,
               "Title": "_ChucVuList.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\ChucVu\\_ChucVuList.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\ChucVu\\_ChucVuList.cshtml",
@@ -1463,7 +1476,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 93,
+              "DocumentIndex": 94,
               "Title": "InventoryService.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Services\\InventoryService.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Services\\InventoryService.cs",
@@ -1475,7 +1488,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 46,
+              "DocumentIndex": 47,
               "Title": "AuditModels.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Models\\ViewModels\\AuditModels.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Models\\ViewModels\\AuditModels.cs",
@@ -1486,7 +1499,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 94,
+              "DocumentIndex": 95,
               "Title": "ChucVuRepository.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Repositories\\ChucVuRepository.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Repositories\\ChucVuRepository.cs",
@@ -1498,7 +1511,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 95,
+              "DocumentIndex": 96,
               "Title": "AclPhanQuyenRepository.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Repositories\\AclPhanQuyenRepository.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Repositories\\AclPhanQuyenRepository.cs",
@@ -1510,7 +1523,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 96,
+              "DocumentIndex": 97,
               "Title": "EditNguoiDung.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\NguoiDung\\EditNguoiDung.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\NguoiDung\\EditNguoiDung.cshtml",
@@ -1522,7 +1535,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 48,
+              "DocumentIndex": 49,
               "Title": "_NhanVienList.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\NhanVien\\_NhanVienList.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\NhanVien\\_NhanVienList.cshtml",
@@ -1533,7 +1546,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 97,
+              "DocumentIndex": 98,
               "Title": "AclPhanQuyen.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Models\\Entities\\AclPhanQuyen.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Models\\Entities\\AclPhanQuyen.cs",
@@ -1545,7 +1558,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 98,
+              "DocumentIndex": 99,
               "Title": "RouteConfig.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\App_Start\\RouteConfig.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\App_Start\\RouteConfig.cs",
@@ -1557,7 +1570,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 99,
+              "DocumentIndex": 100,
               "Title": "PhongBanRepository.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Repositories\\PhongBanRepository.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Repositories\\PhongBanRepository.cs",
@@ -1569,7 +1582,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 100,
+              "DocumentIndex": 101,
               "Title": "_NguoiDungList.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\NguoiDung\\_NguoiDungList.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\NguoiDung\\_NguoiDungList.cshtml",
@@ -1581,7 +1594,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 39,
+              "DocumentIndex": 40,
               "Title": "EmployeeController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\EmployeeController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\EmployeeController.cs",
@@ -1592,7 +1605,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 47,
+              "DocumentIndex": 48,
               "Title": "MenuVM.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Models\\ViewModels\\MenuVM.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Models\\ViewModels\\MenuVM.cs",
@@ -1603,7 +1616,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 101,
+              "DocumentIndex": 102,
               "Title": "IChucVuRepository.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Repositories\\Interfaces\\IChucVuRepository.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Repositories\\Interfaces\\IChucVuRepository.cs",
@@ -1615,7 +1628,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 40,
+              "DocumentIndex": 41,
               "Title": "Update.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\Employee\\Update.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\Employee\\Update.cshtml",
@@ -1626,7 +1639,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 41,
+              "DocumentIndex": 42,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\Employee\\Index.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\Employee\\Index.cshtml",
@@ -1637,7 +1650,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 102,
+              "DocumentIndex": 103,
               "Title": "PhongBanController.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Controllers\\PhongBanController.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Controllers\\PhongBanController.cs",
@@ -1649,7 +1662,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 36,
+              "DocumentIndex": 37,
               "Title": "_ChucVuList.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\DanhMuc\\_ChucVuList.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\DanhMuc\\_ChucVuList.cshtml",
@@ -1660,7 +1673,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 42,
+              "DocumentIndex": 43,
               "Title": "EmployeeRepository.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Repositories\\EmployeeRepository.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Repositories\\EmployeeRepository.cs",
@@ -1671,7 +1684,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 35,
+              "DocumentIndex": 36,
               "Title": "GetChucVu.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\DanhMuc\\GetChucVu.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\DanhMuc\\GetChucVu.cshtml",
@@ -1682,7 +1695,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 37,
+              "DocumentIndex": 38,
               "Title": "CreateChucVu.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\DanhMuc\\CreateChucVu.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\DanhMuc\\CreateChucVu.cshtml",
@@ -1693,7 +1706,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 38,
+              "DocumentIndex": 39,
               "Title": "UpdateChucVu.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\DanhMuc\\UpdateChucVu.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\DanhMuc\\UpdateChucVu.cshtml",
@@ -1704,7 +1717,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 43,
+              "DocumentIndex": 44,
               "Title": "Create.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\Employee\\Create.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\Employee\\Create.cshtml",
@@ -1715,7 +1728,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 103,
+              "DocumentIndex": 104,
               "Title": "Error.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\Shared\\Error.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\Shared\\Error.cshtml",
@@ -1727,7 +1740,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 104,
+              "DocumentIndex": 105,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\Home\\Index.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\Home\\Index.cshtml",
@@ -1739,7 +1752,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 105,
+              "DocumentIndex": 106,
               "Title": "_ViewStart.cshtml",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\_ViewStart.cshtml",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\_ViewStart.cshtml",
@@ -1751,7 +1764,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 106,
+              "DocumentIndex": 107,
               "Title": "FilterConfig.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\App_Start\\FilterConfig.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\App_Start\\FilterConfig.cs",
@@ -1763,7 +1776,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 107,
+              "DocumentIndex": 108,
               "Title": "Category.cs",
               "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Models\\Entities\\Category.cs",
               "RelativeDocumentMoniker": "SalesManagementSystem\\Models\\Entities\\Category.cs",

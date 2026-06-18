@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Models.ViewModels;
 

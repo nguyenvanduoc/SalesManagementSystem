@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using Dapper;
 using SalesManagementSystem.Data;
 using SalesManagementSystem.Models.ViewModels;

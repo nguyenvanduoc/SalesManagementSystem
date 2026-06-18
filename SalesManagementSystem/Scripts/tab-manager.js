@@ -145,11 +145,36 @@ var TabManager = (function () {
             var $li = $(this).closest('li');
             if ($li.hasClass('disabled') || $li.hasClass('active')) return;
 
-            var url = $(this).attr('href');
-            if (!url || url === '#' || url.indexOf('javascript:') === 0) return;
+            var href = $(this).attr('href');
+            if (!href || href === '#' || href.indexOf('javascript:') === 0) return;
 
-            // Scope tìm container vào đúng tab-pane chứa link này
             var $pane = $(this).closest('.tab-pane');
+
+            // Trích xuất số trang từ href
+            var page = 1;
+            var matchPage = href.match(/[?&]page=(\d+)/);
+            if (matchPage) page = parseInt(matchPage[1], 10);
+
+            // Lấy kích thước trang hiện tại từ dropdown
+            var pageSize = $pane.find('.page-size-select').val() || 20;
+
+            // Tìm form tìm kiếm trong cùng tab-pane
+            var $form = $pane.find('#searchForm');
+            var url;
+            if ($form.length > 0) {
+                var action = $form.attr('action') || href.split('?')[0];
+                var params = $form.serializeArray();
+                // Loại bỏ page và pageSize cũ nếu có trong form
+                params = params.filter(function (item) {
+                    return item.name !== 'page' && item.name !== 'pageSize';
+                });
+                params.push({ name: 'page', value: page });
+                params.push({ name: 'pageSize', value: pageSize });
+                url = action + '?' + $.param(params);
+            } else {
+                url = href;
+            }
+
             var grid = null;
             if ($pane.length > 0) {
                 grid = findGrid($pane);
@@ -158,7 +183,6 @@ var TabManager = (function () {
             if (grid) {
                 ajaxLoadGrid(url, grid);
             } else {
-                // Fallback: nếu không nằm trong tab-pane (ví dụ chạy độc lập không qua SPA)
                 var $fallback = $('[id="table-container"], [id="gridData"]').last();
                 if ($fallback.length > 0) {
                     ajaxLoadGrid(url, $fallback);
@@ -181,9 +205,6 @@ var TabManager = (function () {
             var pageSize = $(this).val();
             var $pane = $(this).closest('.tab-pane');
 
-            // Lấy keyword từ form tìm kiếm trong cùng pane (nếu có)
-            var keyword = $pane.find('input[name="keyword"]').val() || '';
-
             // Tìm URL gốc từ data-action của thẻ cha
             var $paginationBlock = $(this).closest('.custom-pagination');
             var baseUrl = $paginationBlock.attr('data-action');
@@ -197,9 +218,21 @@ var TabManager = (function () {
 
             if (!baseUrl) return;
 
-            var url = baseUrl + '?page=1&pageSize=' + pageSize;
-            if (keyword) {
-                url += '&keyword=' + encodeURIComponent(keyword);
+            // Tìm form tìm kiếm trong cùng tab-pane
+            var $form = $pane.find('#searchForm');
+            var url;
+            if ($form.length > 0) {
+                var action = $form.attr('action') || baseUrl;
+                var params = $form.serializeArray();
+                params = params.filter(function (item) {
+                    return item.name !== 'page' && item.name !== 'pageSize';
+                });
+                // Khi đổi page size thì quay về page 1 (Yêu cầu 8)
+                params.push({ name: 'page', value: 1 });
+                params.push({ name: 'pageSize', value: pageSize });
+                url = action + '?' + $.param(params);
+            } else {
+                url = baseUrl + '?page=1&pageSize=' + pageSize;
             }
 
             var grid = null;
@@ -223,24 +256,28 @@ var TabManager = (function () {
     /**
      * Bắt submit form tìm kiếm trong tab-pane (KHÔNG bắt modal form hoặc các form khác).
      * Để form submit trong modal vẫn chạy qua handler riêng ở _Layout.cshtml.
-     *
-     * NOTE: handler này chỉ cần khi view KHÔNG có handler form riêng.
-     * Nếu view có handler riêng đã e.preventDefault() rồi thì sẽ không ảnh hưởng.
      */
     function initSearchFormHandler() {
         $(document).on('submit.tabmanager', '.tab-pane #searchForm', function (e) {
-            // Để handler gốc của từng view tự xử lý nếu nó đã gọi e.preventDefault()
-            // — handler gốc chạy trước do được đăng ký sau khi DOM load
-            // Chỉ chặn nếu chưa được preventDefault bởi view
             if (e.isDefaultPrevented()) return;
 
             e.preventDefault();
             var $form = $(this);
             var action = $form.attr('action');
-            var data = $form.serialize();
-            var url = action + '?' + data;
-
             var $pane = $form.closest('.tab-pane');
+
+            // Lấy kích thước trang hiện tại từ dropdown
+            var pageSize = $pane.find('.page-size-select').val() || 20;
+
+            var params = $form.serializeArray();
+            params = params.filter(function (item) {
+                return item.name !== 'page' && item.name !== 'pageSize';
+            });
+            // Khi tìm kiếm/filter thì quay về page 1 (Yêu cầu 8)
+            params.push({ name: 'page', value: 1 });
+            params.push({ name: 'pageSize', value: pageSize });
+            var url = action + '?' + $.param(params);
+
             var grid = findGrid($pane);
             if (grid) {
                 ajaxLoadGrid(url, grid);

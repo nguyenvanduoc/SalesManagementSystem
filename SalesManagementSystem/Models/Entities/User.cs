@@ -1,4 +1,4 @@
-namespace SalesManagementSystem.Models.Entities
+﻿namespace SalesManagementSystem.Models.Entities
 {
     /// <summary>Role: "Admin" | "Warehouse" | "Sale"</summary>
     public class User
