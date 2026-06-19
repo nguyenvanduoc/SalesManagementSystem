@@ -2,66 +2,242 @@
 
 @{
     ViewBag.Title = "Phiếu Chi";
+    var dashboard = ViewBag.Dashboard as SalesManagementSystem.Models.ViewModels.PhieuChiDashboardViewModel;
+    if (dashboard == null)
+    {
+        dashboard = new SalesManagementSystem.Models.ViewModels.PhieuChiDashboardViewModel
+        {
+            TongChiText = "0 đ",
+            TongChiTrend = "0% so với tháng trước",
+            TongChiTrendClass = "stable",
+            QuyTienMatText = "0 đ",
+            QuyTienMatStatus = "",
+            DuNganHangText = "0 đ",
+            DuNganHangCount = 0,
+            CongNoNccText = "0 đ",
+            CongNoNccLabel = ""
+        };
+    }
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="mb-0 fw-bold text-uppercase" style="color:#0b5b84;font-size:1.25rem;">
-        PHIẾU CHI
-    </h4>
-    @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuChi", SalesManagementSystem.Helpers.LoaiPhanQuyen.Them))
-    {
-        <button type="button" class="btn btn-primary" style="background-color:#3498db;border-color:#3498db;"
-                onclick="openFormModal('@Url.Action("Create","PhieuChi")')">
-            <i class="bi bi-plus-lg fw-bold me-1"></i>Thêm mới
-        </button>
+<style>
+    /* Stat Cards CSS */
+    .stat-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 10px rgba(0,0,0,.03);
+        border: 1px solid #eef2f5;
+        transition: transform .2s, box-shadow .2s;
+        height: 110px;
     }
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,.06);
+    }
+    .stat-body {
+        flex-grow: 1;
+    }
+    .stat-body .label {
+        font-size: 0.75rem;
+        color: #8c98a5;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+    }
+    .stat-body .value {
+        font-size: 1.55rem;
+        font-weight: 700;
+        line-height: 1.1;
+        color: #1e293b;
+    }
+    .stat-body .trend {
+        font-size: 0.72rem;
+        margin-top: 6px;
+        display: inline-block;
+        font-weight: 500;
+    }
+    .stat-icon-wrap {
+        width: 46px;
+        height: 46px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    /* Color modifiers */
+    .bg-light-red { background-color: #fdf2f2; color: #ef5350; }
+    .bg-light-blue { background-color: #f0f7ff; color: #2563eb; }
+    .bg-light-teal { background-color: #f0fdf4; color: #0d9488; }
+    .bg-light-orange { background-color: #fffbeb; color: #d97706; }
+
+    .trend.up { color: #10b981; }
+    .trend.down { color: #ef4444; }
+    .trend.stable { color: #64748b; }
+</style>
+
+<!-- Header UI theo chuẩn Premium -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1 fw-bold text-uppercase" style="color:#0b5b84;font-size:1.25rem;">
+            PHIẾU CHI
+        </h4>
+        <p class="text-muted small mb-0">Quản lý các chứng từ chi tiền mặt và chuyển khoản</p>
+    </div>
+    <div class="d-flex gap-2">
+        @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuChi", SalesManagementSystem.Helpers.LoaiPhanQuyen.Them))
+        {
+            <button type="button" class="btn text-white fw-bold px-3 d-flex align-items-center gap-1" style="background-color:#0b5b84;border:none;"
+                    onclick="openFormModal('@Url.Action("Create","PhieuChi")')">
+                <i class="bi bi-plus-lg fw-bold"></i> Thêm mới
+            </button>
+        }
+        <button type="button" class="btn btn-outline-secondary fw-semibold px-3 d-flex align-items-center gap-1 btn-export-excel" style="border-color:#d0d7de;color:#24292f;background-color:#fff;">
+            <i class="bi bi-file-earmark-excel"></i> Xuất Excel
+        </button>
+        <button type="button" class="btn btn-outline-secondary fw-semibold px-3 d-flex align-items-center gap-1" style="border-color:#d0d7de;color:#24292f;background-color:#fff;">
+            <i class="bi bi-printer"></i> In
+        </button>
+    </div>
+</div>
+
+<!-- ═══════════════ DASHBOARD CARDS ═══════════════ -->
+<div class="row g-3 mb-4">
+    <!-- Card 1: Tổng chi -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-body">
+                <div class="label" id="db-label-tong-chi">Tổng chi tháng này</div>
+                <div class="value text-danger" id="db-tong-chi">@dashboard.TongChiText</div>
+                <div class="trend" id="db-tong-chi-trend">
+                    @if (dashboard.TongChiTrendClass == "up")
+                    {
+                        <span class="trend up text-success"><i class="bi bi-arrow-up-short"></i>@dashboard.TongChiTrend</span>
+                    }
+                    else if (dashboard.TongChiTrendClass == "down")
+                    {
+                        <span class="trend down text-danger"><i class="bi bi-arrow-down-short"></i>@dashboard.TongChiTrend</span>
+                    }
+                    else
+                    {
+                        <span class="trend text-muted">@dashboard.TongChiTrend</span>
+                    }
+                </div>
+            </div>
+            <div class="stat-icon-wrap bg-light-red">
+                <i class="bi bi-credit-card-2-back-fill fs-4"></i>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Card 2: Số dư quỹ tiền mặt -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-body">
+                <div class="label">Số dư quỹ tiền mặt</div>
+                <div class="value" id="db-quy-tien-mat" style="color: #1e293b;">@dashboard.QuyTienMatText</div>
+                <div class="trend" id="db-quy-tien-mat-status">
+                    Trạng thái: <span class="text-success fw-semibold">Ổn định</span>
+                </div>
+            </div>
+            <div class="stat-icon-wrap bg-light-teal">
+                <i class="bi bi-cash-coin fs-4"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 3: Số dư ngân hàng -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-body">
+                <div class="label">Số dư ngân hàng</div>
+                <div class="value" id="db-du-ngan-hang" style="color: #1e293b;">@dashboard.DuNganHangText</div>
+                <div class="trend" id="db-du-ngan-hang-status">
+                    Liên kết: <span class="fw-semibold text-primary" id="db-ngan-hang-count">@dashboard.DuNganHangCount.ToString("D2") ngân hàng</span>
+                </div>
+            </div>
+            <div class="stat-icon-wrap bg-light-blue">
+                <i class="bi bi-bank fs-4"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 4: Công nợ phải trả NCC -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-body">
+                <div class="label">Công nợ phải trả NCC</div>
+                <div class="value" id="db-cong-no-ncc" style="color: #e67e22;">@dashboard.CongNoNccText</div>
+                <div class="trend text-muted small" id="db-cong-no-ncc-label">
+                    @dashboard.CongNoNccLabel
+                </div>
+            </div>
+            <div class="stat-icon-wrap bg-light-orange">
+                <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Bộ lọc tìm kiếm -->
 <div class="card shadow-sm mb-4">
     <div class="card-body">
         <form method="get" action="@Url.Action("GetList","PhieuChi")" id="searchForm">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-2">
+            <div class="row g-2 align-items-end">
+                <div class="col-md col-sm-6">
                     <label class="form-label text-muted small mb-1 fw-semibold">Từ ngày</label>
                     <input type="date" class="form-control form-control-sm" name="tuNgay" value="@ViewBag.TuNgay" />
                 </div>
-                <div class="col-md-2">
+                <div class="col-md col-sm-6">
                     <label class="form-label text-muted small mb-1 fw-semibold">Đến ngày</label>
                     <input type="date" class="form-control form-control-sm" name="denNgay" value="@ViewBag.DenNgay" />
                 </div>
-                <div class="col-md-2">
+                <div class="col-md col-sm-6">
                     <label class="form-label text-muted small mb-1 fw-semibold">Số phiếu</label>
                     <input type="text" class="form-control form-control-sm" name="soPhieuChi" value="@ViewBag.SoPhieuChi" placeholder="Nhập số phiếu..." />
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label text-muted small mb-1 fw-semibold">Nhà cung cấp</label>
-                    <select class="form-select form-select-sm" name="idNhaCungCap">
-                        <option value="">-- Tất cả --</option>
-                        @if (ViewBag.NhaCungCapList != null)
+                <div class="col-md col-sm-6">
+                    <label class="form-label text-muted small mb-1 fw-semibold">Người nhận</label>
+                    <input type="text" class="form-control form-control-sm" name="nguoiNhanTien" value="@ViewBag.NguoiNhanTien" placeholder="Họ tên..." />
+                </div>
+                <div class="col-md col-sm-6">
+                    <label class="form-label text-muted small mb-1 fw-semibold">Khoản mục chi</label>
+                    <select class="form-select form-select-sm" name="idKhoanMucChi">
+                        <option value="">Tất cả</option>
+                        @if (ViewBag.KhoanMucList != null)
                         {
-                            foreach (System.Web.Mvc.SelectListItem item in ViewBag.NhaCungCapList)
+                            foreach (SelectListItem item in ViewBag.KhoanMucList)
                             {
-                                <option value="@item.Value" @(item.Selected ? "selected" : "")>@item.Text</option>
+                                <option value="@item.Value" @(item.Value == (ViewBag.IDKhoanMucChi != null ? ViewBag.IDKhoanMucChi.ToString() : "") ? "selected" : "")>@item.Text</option>
                             }
                         }
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label text-muted small mb-1 fw-semibold">Trạng thái</label>
-                    <select class="form-select form-select-sm" name="trangThai">
-                        <option value="">-- Tất cả --</option>
-                        <option value="1" @(ViewBag.TrangThai == 1 ? "selected" : "")>Đề nghị</option>
-                        <option value="2" @(ViewBag.TrangThai == 2 ? "selected" : "")>Đã ghi sổ</option>
-                        <option value="3" @(ViewBag.TrangThai == 3 ? "selected" : "")>Đã hủy</option>
+                <div class="col-md col-sm-6">
+                    <label class="form-label text-muted small mb-1 fw-semibold">Tài khoản chi</label>
+                    <select class="form-select form-select-sm" name="idTaiKhoanThanhToan">
+                        <option value="">Tất cả</option>
+                        @if (ViewBag.TaiKhoanList != null)
+                        {
+                            foreach (SelectListItem item in ViewBag.TaiKhoanList)
+                            {
+                                <option value="@item.Value" @(item.Value == (ViewBag.IDTaiKhoanThanhToan != null ? ViewBag.IDTaiKhoanThanhToan.ToString() : "") ? "selected" : "")>@item.Text</option>
+                            }
+                        }
                     </select>
                 </div>
-                <div class="col-md-2 d-flex gap-2">
-                    <button type="submit" class="btn btn-sm text-white px-3" style="background-color:#2998e4;border:none;">
-                        <i class="bi bi-search me-1"></i>Tìm kiếm
+                <div class="col-auto d-flex gap-2">
+                    <button type="submit" class="btn btn-sm text-white px-3 d-flex align-items-center gap-1" style="background-color:#2998e4;border:none;height:31px;">
+                        <i class="bi bi-search"></i> Tìm kiếm
                     </button>
-                    <button type="button" class="btn btn-sm text-white px-3 btn-reset" style="background-color:#f1c40f;border:none;">
-                        Làm mới
+                    <button type="button" class="btn btn-sm btn-outline-secondary px-2 btn-reset d-flex align-items-center justify-content-center" style="border-color:#dee2e6;height:31px;width:31px;background-color:#fff;">
+                        <i class="bi bi-arrow-clockwise"></i>
                     </button>
                 </div>
             </div>
@@ -85,9 +261,16 @@
                 $pane.find('input[name="tuNgay"]').val('');
                 $pane.find('input[name="denNgay"]').val('');
                 $pane.find('input[name="soPhieuChi"]').val('');
-                $pane.find('select[name="idNhaCungCap"]').val('');
-                $pane.find('select[name="trangThai"]').val('');
+                $pane.find('input[name="nguoiNhanTien"]').val('');
+                $pane.find('select[name="idKhoanMucChi"]').val('');
+                $pane.find('select[name="idTaiKhoanThanhToan"]').val('');
                 $pane.find('#searchForm').trigger('submit');
+            });
+
+            $pane.off('click.phieuchi_export', '.btn-export-excel');
+            $pane.on('click.phieuchi_export', '.btn-export-excel', function () {
+                var params = $pane.find('#searchForm').serialize();
+                window.location.href = '@Url.Action("ExportExcel","PhieuChi")?' + params;
             });
         })();
     </script>

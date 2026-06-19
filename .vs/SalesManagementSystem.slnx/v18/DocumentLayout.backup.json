@@ -7,7 +7,7 @@
       "RelativeMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|solutionrelative:salesmanagementsystem\\repositories\\phieuchirepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|c:\\users\\duoc0\\onedrive\\desktop\\web_qlbh\\quanlybanhang\\salesmanagementsystem\\salesmanagementsystem\\controllers\\taikhoanthanhtoancontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\salesmanagementsystem\\controllers\\taikhoanthanhtoancontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C4FCFCCA-27C9-4E15-A293-2929707A4255}|SalesManagementSystem\\SalesManagementSystem.csproj|solutionrelative:salesmanagementsystem\\controllers\\taikhoanthanhtoancontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -476,7 +476,7 @@
               "RelativeDocumentMoniker": "SalesManagementSystem\\Repositories\\PhieuChiRepository.cs",
               "ToolTip": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Repositories\\PhieuChiRepository.cs",
               "RelativeToolTip": "SalesManagementSystem\\Repositories\\PhieuChiRepository.cs",
-              "ViewState": "AgIAAJMAAAAAAAAAAAAkwK4AAAANAAAAAAAAAA==",
+              "ViewState": "AgIAAJMAAAAAAAAAAAAkwKwAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-06-19T09:11:28.286Z",
               "EditorCaption": ""
@@ -491,8 +491,7 @@
               "RelativeToolTip": "SalesManagementSystem\\Controllers\\TaiKhoanThanhToanController.cs",
               "ViewState": "AgIAAG0AAAAAAAAAAAAcwKoAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-19T06:56:53.582Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-19T06:56:53.582Z"
             },
             {
               "$type": "Document",
@@ -504,7 +503,8 @@
               "RelativeToolTip": "SalesManagementSystem\\print_cs.exe.config",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000601|",
-              "WhenOpened": "2026-06-18T16:10:06.195Z"
+              "WhenOpened": "2026-06-18T16:10:06.195Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -540,7 +540,8 @@
               "RelativeToolTip": "SalesManagementSystem\\node_modules\\iconv-lite\\encodings\\internal.js",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAALAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-06-16T15:27:47.022Z"
+              "WhenOpened": "2026-06-16T15:27:47.022Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -960,7 +961,8 @@
               "RelativeToolTip": "SalesManagementSystem\\obj\\Release\\Package\\PackageTmp\\UI_STANDARD.md",
               "ViewState": "AgIAAP8AAAAAAAAAAAAAABQBAAADAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
-              "WhenOpened": "2026-06-11T06:28:15.833Z"
+              "WhenOpened": "2026-06-11T06:28:15.833Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",

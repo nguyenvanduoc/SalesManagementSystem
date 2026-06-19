@@ -316,7 +316,7 @@ namespace SalesManagementSystem.Controllers
         [HttpPost]
         public ActionResult GhiSo(int id)
         {
-            if (!PermissionHelper.HasPermission("ChungTuBanHang", LoaiPhanQuyen.TuyChon)) return Json(new { success = false, message = "Không có quyền ghi sổ" });
+            if (!PermissionHelper.HasPermission("ChungTuBanHang", LoaiPhanQuyen.TuyChon)) return Json(new { success = false, message = "Không có quyền ghi" });
 
             try
             {

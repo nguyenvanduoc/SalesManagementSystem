@@ -24,7 +24,9 @@ namespace SalesManagementSystem.Repositories
             string soPhieuChi,
             int? idNhaCungCap,
             int? idKhoanMucChi,
-            int? trangThai)
+            int? trangThai,
+            string nguoiNhanTien = null,
+            int? idTaiKhoanThanhToan = null)
         {
             using (var conn = _db.CreateConnection())
             {
@@ -35,6 +37,8 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@IDNhaCungCap",  idNhaCungCap);
                 p.Add("@IDKhoanMucChi", idKhoanMucChi);
                 p.Add("@TrangThai",     trangThai);
+                p.Add("@NguoiNhanTien",  string.IsNullOrEmpty(nguoiNhanTien) ? null : nguoiNhanTien);
+                p.Add("@IDTaiKhoanThanhToan", idTaiKhoanThanhToan);
 
                 return conn.Query<PhieuChiListViewModel>(
                     "sp_KT_PhieuChi_GetList",
@@ -198,6 +202,192 @@ namespace SalesManagementSystem.Repositories
                     "SELECT SoPhieuChi, NgayChi, SoTienChi, TrangThai FROM KT_PhieuChi WHERE IDPhieuNhap = @IDPhieuNhap AND IsDeleted = 0 ORDER BY NgayChi DESC, ID DESC",
                     new { IDPhieuNhap = idPhieuNhap }
                 ).ToList();
+            }
+        }
+
+        public PhieuChiDashboardViewModel GetDashboardData(
+            string tuNgay,
+            string denNgay,
+            string soPhieuChi,
+            int? idNhaCungCap,
+            int? idKhoanMucChi,
+            int? trangThai,
+            string nguoiNhanTien = null,
+            int? idTaiKhoanThanhToan = null)
+        {
+            var cultureVi = new System.Globalization.CultureInfo("vi-VN");
+            
+            DateTime? startCurr = string.IsNullOrEmpty(tuNgay) ? (DateTime?)null : DateTime.Parse(tuNgay);
+            DateTime? endCurr = string.IsNullOrEmpty(denNgay) ? (DateTime?)null : DateTime.Parse(denNgay);
+            DateTime? startPrev = null;
+            DateTime? endPrev = null;
+            string periodLabel = "tháng trước";
+
+            if (startCurr.HasValue && endCurr.HasValue)
+            {
+                int days = (endCurr.Value - startCurr.Value).Days + 1;
+                startPrev = startCurr.Value.AddDays(-days);
+                endPrev = startCurr.Value.AddDays(-1);
+                periodLabel = "kỳ trước";
+            }
+            else if (startCurr.HasValue)
+            {
+                startPrev = startCurr.Value.AddDays(-30);
+                endPrev = startCurr.Value.AddDays(-1);
+                periodLabel = "kỳ trước";
+            }
+            else if (endCurr.HasValue)
+            {
+                startPrev = endCurr.Value.AddDays(-30);
+                endPrev = endCurr.Value.AddDays(-1);
+                periodLabel = "kỳ trước";
+            }
+            else
+            {
+                var today = DateTime.Today;
+                startCurr = new DateTime(today.Year, today.Month, 1);
+                endCurr = today;
+                startPrev = startCurr.Value.AddMonths(-1);
+                endPrev = new DateTime(startPrev.Value.Year, startPrev.Value.Month, DateTime.DaysInMonth(startPrev.Value.Year, startPrev.Value.Month));
+                periodLabel = "tháng trước";
+            }
+
+            using (var conn = _db.CreateConnection())
+            {
+                // 1. Calculate Balances
+                string balanceSql = @"
+                    WITH Balances AS (
+                        SELECT t.ID, k.SoTaiKhoan, t.IsHoatDong,
+                          (SELECT ISNULL(SUM(pth.SoTienThu), 0) FROM BAN_PhieuThuKhachHang pth WHERE pth.IDTaiKhoanThanhToan = t.ID AND pth.TrangThai = 2 AND pth.IsDeleted = 0) AS Thu,
+                          (SELECT ISNULL(SUM(pc.SoTienChi), 0) FROM KT_PhieuChi pc WHERE pc.IDTaiKhoanThanhToan = t.ID AND pc.TrangThai = 2 AND pc.IsDeleted = 0) AS Chi
+                        FROM DM_TaiKhoanThanhToan t
+                        LEFT JOIN KT_TaiKhoanKeToan k ON t.IDTaiKhoanKeToan = k.ID
+                    )
+                    SELECT
+                        SUM(CASE WHEN SoTaiKhoan LIKE '111%' THEN Thu - Chi ELSE 0 END) AS CashBalance,
+                        SUM(CASE WHEN SoTaiKhoan LIKE '112%' THEN Thu - Chi ELSE 0 END) AS BankBalance,
+                        COUNT(CASE WHEN SoTaiKhoan LIKE '112%' AND IsHoatDong = 1 THEN 1 END) AS BankAccountCount
+                    FROM Balances";
+                
+                var balance = conn.QueryFirstOrDefault<dynamic>(balanceSql);
+                decimal cashVal = balance?.CashBalance ?? 0;
+                decimal bankVal = balance?.BankBalance ?? 0;
+                int bankCount = balance?.BankAccountCount ?? 0;
+
+                // 2. Accounts Payable
+                string congNoSql = @"
+                    SELECT SUM(ConLai) AS CongNoNCC
+                    FROM (
+                        SELECT pn.TongTienHang - ISNULL((SELECT SUM(pc2.SoTienChi) FROM KT_PhieuChi pc2 WHERE pc2.IDPhieuNhap = pn.ID AND pc2.TrangThai = 2 AND pc2.IsDeleted = 0), 0) AS ConLai
+                        FROM KHO_PhieuNhap pn
+                        WHERE pn.IsDeleted = 0
+                          AND (@IDNhaCungCap IS NULL OR pn.IDNhaCungCap = @IDNhaCungCap)
+                    ) t";
+                decimal congNoVal = conn.QueryFirstOrDefault<decimal?>(congNoSql, new { IDNhaCungCap = idNhaCungCap }) ?? 0;
+
+                string nccLabel = "Hạn chót: Cuối kỳ";
+                if (idNhaCungCap.HasValue)
+                {
+                    string nccName = conn.QueryFirstOrDefault<string>("SELECT TenNhaCungCap FROM DM_NhaCungCap WHERE ID = @IDNhaCungCap", new { IDNhaCungCap = idNhaCungCap });
+                    if (!string.IsNullOrEmpty(nccName))
+                    {
+                        nccLabel = "NCC: " + (nccName.Length > 20 ? nccName.Substring(0, 18) + "..." : nccName);
+                    }
+                }
+
+                // 3. Current Period Chi
+                int checkTrangThai = trangThai ?? 2;
+                string currChiSql = @"
+                    SELECT ISNULL(SUM(pc.SoTienChi), 0)
+                    FROM KT_PhieuChi pc
+                    LEFT JOIN NS_NhanSu ns ON pc.IDNguoiNhan = ns.ID
+                    WHERE pc.IsDeleted = 0
+                      AND pc.NgayChi >= @StartCurr AND pc.NgayChi <= @EndCurr
+                      AND (@SoPhieuChi IS NULL OR pc.SoPhieuChi LIKE '%' + @SoPhieuChi + '%')
+                      AND (@IDNhaCungCap IS NULL OR pc.IDNhaCungCap = @IDNhaCungCap)
+                      AND (@IDKhoanMucChi IS NULL OR pc.IDKhoanMucChi = @IDKhoanMucChi)
+                      AND (pc.TrangThai = @TrangThai)
+                      AND (@NguoiNhanTien IS NULL OR pc.NguoiNhanTien LIKE '%' + @NguoiNhanTien + '%' OR (ISNULL(ns.HoDem, '') + ' ' + ISNULL(ns.Ten, '')) LIKE '%' + @NguoiNhanTien + '%')
+                      AND (@IDTaiKhoanThanhToan IS NULL OR pc.IDTaiKhoanThanhToan = @IDTaiKhoanThanhToan)";
+                decimal currChi = conn.QueryFirstOrDefault<decimal>(currChiSql, new {
+                    StartCurr = startCurr,
+                    EndCurr = endCurr,
+                    SoPhieuChi = string.IsNullOrEmpty(soPhieuChi) ? null : soPhieuChi,
+                    IDNhaCungCap = idNhaCungCap,
+                    IDKhoanMucChi = idKhoanMucChi,
+                    TrangThai = checkTrangThai,
+                    NguoiNhanTien = string.IsNullOrEmpty(nguoiNhanTien) ? null : nguoiNhanTien,
+                    IDTaiKhoanThanhToan = idTaiKhoanThanhToan
+                });
+
+                // 4. Previous Period Chi
+                string prevChiSql = @"
+                    SELECT ISNULL(SUM(pc.SoTienChi), 0)
+                    FROM KT_PhieuChi pc
+                    LEFT JOIN NS_NhanSu ns ON pc.IDNguoiNhan = ns.ID
+                    WHERE pc.IsDeleted = 0
+                      AND pc.NgayChi >= @StartPrev AND pc.NgayChi <= @EndPrev
+                      AND (@SoPhieuChi IS NULL OR pc.SoPhieuChi LIKE '%' + @SoPhieuChi + '%')
+                      AND (@IDNhaCungCap IS NULL OR pc.IDNhaCungCap = @IDNhaCungCap)
+                      AND (@IDKhoanMucChi IS NULL OR pc.IDKhoanMucChi = @IDKhoanMucChi)
+                      AND (pc.TrangThai = @TrangThai)
+                      AND (@NguoiNhanTien IS NULL OR pc.NguoiNhanTien LIKE '%' + @NguoiNhanTien + '%' OR (ISNULL(ns.HoDem, '') + ' ' + ISNULL(ns.Ten, '')) LIKE '%' + @NguoiNhanTien + '%')
+                      AND (@IDTaiKhoanThanhToan IS NULL OR pc.IDTaiKhoanThanhToan = @IDTaiKhoanThanhToan)";
+                decimal prevChi = conn.QueryFirstOrDefault<decimal>(prevChiSql, new {
+                    StartPrev = startPrev,
+                    EndPrev = endPrev,
+                    SoPhieuChi = string.IsNullOrEmpty(soPhieuChi) ? null : soPhieuChi,
+                    IDNhaCungCap = idNhaCungCap,
+                    IDKhoanMucChi = idKhoanMucChi,
+                    TrangThai = checkTrangThai,
+                    NguoiNhanTien = string.IsNullOrEmpty(nguoiNhanTien) ? null : nguoiNhanTien,
+                    IDTaiKhoanThanhToan = idTaiKhoanThanhToan
+                });
+
+                // Trend formatting
+                decimal trendPct = 0;
+                if (prevChi > 0)
+                    trendPct = Math.Round(((currChi - prevChi) / prevChi) * 100, 1);
+                else if (currChi > 0)
+                    trendPct = 100;
+
+                string trendText;
+                string trendClass;
+                if (trendPct > 0)
+                {
+                    trendText = $"~{trendPct}% so với {periodLabel}";
+                    trendClass = "up";
+                }
+                else if (trendPct < 0)
+                {
+                    trendText = $"~{Math.Abs(trendPct)}% so với {periodLabel}";
+                    trendClass = "down";
+                }
+                else
+                {
+                    trendText = $"0% so với {periodLabel}";
+                    trendClass = "stable";
+                }
+
+                return new PhieuChiDashboardViewModel
+                {
+                    TongChi = currChi,
+                    TongChiText = currChi.ToString("N0", cultureVi) + " đ",
+                    TongChiTrend = trendText,
+                    TongChiTrendClass = trendClass,
+
+                    QuyTienMat = cashVal,
+                    QuyTienMatText = cashVal.ToString("N0", cultureVi) + " đ",
+                    QuyTienMatStatus = "Trạng thái: Ổn định",
+
+                    DuNganHang = bankVal,
+                    DuNganHangText = bankVal.ToString("N0", cultureVi) + " đ",
+                    DuNganHangCount = bankCount,
+
+                    CongNoNcc = congNoVal,
+                    CongNoNccText = congNoVal.ToString("N0", cultureVi) + " đ",
+                    CongNoNccLabel = nccLabel
+                };
             }
         }
     }

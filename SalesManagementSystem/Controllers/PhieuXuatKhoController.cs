@@ -116,7 +116,7 @@ namespace SalesManagementSystem.Controllers
         [HttpPost]
         public ActionResult GhiSo(int id)
         {
-            return Json(new { success = false, message = "Thao tác Ghi sổ được thực hiện ở màn hình Chứng từ bán hàng." });
+            return Json(new { success = false, message = "Thao tác ghi được thực hiện ở màn hình Chứng từ bán hàng." });
         }
 
         [HttpPost]

@@ -235,7 +235,7 @@ namespace SalesManagementSystem.Controllers
         [HttpPost]
         public ActionResult GhiSo(int id)
         {
-            if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.TuyChon)) return Json(new { success = false, message = "Không có quyền ghi sổ" });
+            if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.TuyChon)) return Json(new { success = false, message = "Không có quyền ghi" });
 
             try
             {
@@ -243,7 +243,7 @@ namespace SalesManagementSystem.Controllers
                 int userId = user?.IDNhanSu ?? 0;
 
                 _repo.GhiSo(id, userId);
-                return Json(new { success = true, message = "Ghi sổ thành công" });
+                return Json(new { success = true, message = "ghi thành công" });
             }
             catch (Exception ex)
             {

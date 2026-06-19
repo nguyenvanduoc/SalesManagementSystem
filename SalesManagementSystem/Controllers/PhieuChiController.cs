@@ -5,16 +5,19 @@ using System.Web.Mvc;
 using SalesManagementSystem.Helpers;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories.Interfaces;
+using SalesManagementSystem.Services.Interfaces;
 
 namespace SalesManagementSystem.Controllers
 {
     public class PhieuChiController : BaseController
     {
         private readonly IPhieuChiRepository _repo;
+        private readonly IExcelExportService _excelExportService;
 
-        public PhieuChiController(IPhieuChiRepository repo)
+        public PhieuChiController(IPhieuChiRepository repo, IExcelExportService excelExportService)
         {
             _repo = repo;
+            _excelExportService = excelExportService;
         }
 
         // GET: /phieu-chi
@@ -24,12 +27,14 @@ namespace SalesManagementSystem.Controllers
             string soPhieuChi = "",
             int? idNhaCungCap = null,
             int? idKhoanMucChi = null,
-            int? trangThai = null)
+            int? trangThai = null,
+            string nguoiNhanTien = "",
+            int? idTaiKhoanThanhToan = null)
         {
             if (!PermissionHelper.HasPermission("PhieuChi", LoaiPhanQuyen.Xem))
                 return View("AccessDenied");
 
-            var list = _repo.GetList(tuNgay, denNgay, soPhieuChi, idNhaCungCap, idKhoanMucChi, trangThai).ToList();
+            var list = _repo.GetList(tuNgay, denNgay, soPhieuChi, idNhaCungCap, idKhoanMucChi, trangThai, nguoiNhanTien, idTaiKhoanThanhToan).ToList();
             int totalRecords = list.Count;
             var pagedItems = list.Skip((page - 1) * pageSize).Take(pageSize);
 
@@ -43,14 +48,19 @@ namespace SalesManagementSystem.Controllers
                 Keyword      = soPhieuChi
             };
 
+            var dashboard = _repo.GetDashboardData(tuNgay, denNgay, soPhieuChi, idNhaCungCap, idKhoanMucChi, trangThai, nguoiNhanTien, idTaiKhoanThanhToan);
+            ViewBag.Dashboard = dashboard;
+
             PopulateFilterDropdowns();
-            ViewBag.TuNgay        = tuNgay;
-            ViewBag.DenNgay       = denNgay;
-            ViewBag.SoPhieuChi    = soPhieuChi;
-            ViewBag.IDNhaCungCap  = idNhaCungCap;
-            ViewBag.IDKhoanMucChi = idKhoanMucChi;
-            ViewBag.TrangThai     = trangThai;
-            ViewBag.Title         = "Phiếu Chi";
+            ViewBag.TuNgay               = tuNgay;
+            ViewBag.DenNgay              = denNgay;
+            ViewBag.SoPhieuChi           = soPhieuChi;
+            ViewBag.IDNhaCungCap         = idNhaCungCap;
+            ViewBag.IDKhoanMucChi        = idKhoanMucChi;
+            ViewBag.TrangThai            = trangThai;
+            ViewBag.NguoiNhanTien        = nguoiNhanTien;
+            ViewBag.IDTaiKhoanThanhToan = idTaiKhoanThanhToan;
+            ViewBag.Title                = "Phiếu Chi";
 
             if (Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 return PartialView("_PhieuChiList", model);
@@ -65,14 +75,16 @@ namespace SalesManagementSystem.Controllers
             string soPhieuChi = "",
             int? idNhaCungCap = null,
             int? idKhoanMucChi = null,
-            int? trangThai = null)
+            int? trangThai = null,
+            string nguoiNhanTien = "",
+            int? idTaiKhoanThanhToan = null)
         {
             if (!PermissionHelper.HasPermission("PhieuChi", LoaiPhanQuyen.Xem))
                 return Content("<div class='alert alert-danger'>Không có quyền truy cập</div>");
 
             try
             {
-                var list = _repo.GetList(tuNgay, denNgay, soPhieuChi, idNhaCungCap, idKhoanMucChi, trangThai).ToList();
+                var list = _repo.GetList(tuNgay, denNgay, soPhieuChi, idNhaCungCap, idKhoanMucChi, trangThai, nguoiNhanTien, idTaiKhoanThanhToan).ToList();
                 int totalRecords = list.Count;
                 var pagedItems   = list.Skip((page - 1) * pageSize).Take(pageSize);
 
@@ -86,11 +98,68 @@ namespace SalesManagementSystem.Controllers
                     Keyword      = soPhieuChi
                 };
 
+                var dashboard = _repo.GetDashboardData(tuNgay, denNgay, soPhieuChi, idNhaCungCap, idKhoanMucChi, trangThai, nguoiNhanTien, idTaiKhoanThanhToan);
+                ViewBag.Dashboard = dashboard;
+
                 return PartialView("_PhieuChiList", model);
             }
             catch (Exception ex)
             {
                 return Content($"<div class='alert alert-danger'>Lỗi: {ex.Message}</div>");
+            }
+        }
+
+        // GET: /phieu-chi/export-excel
+        [HttpGet]
+        public ActionResult ExportExcel(
+            string tuNgay = "", string denNgay = "",
+            string soPhieuChi = "",
+            int? idNhaCungCap = null,
+            int? idKhoanMucChi = null,
+            int? trangThai = null,
+            string nguoiNhanTien = "",
+            int? idTaiKhoanThanhToan = null)
+        {
+            if (!PermissionHelper.HasPermission("PhieuChi", LoaiPhanQuyen.Xem))
+                return Content("Không có quyền xuất Excel");
+
+            try
+            {
+                var list = _repo.GetList(tuNgay, denNgay, soPhieuChi, idNhaCungCap, idKhoanMucChi, trangThai, nguoiNhanTien, idTaiKhoanThanhToan).ToList();
+
+                var variables = new Dictionary<string, object>
+                {
+                    { "TuNgay", string.IsNullOrEmpty(tuNgay) ? "" : $"Từ ngày: {DateTime.Parse(tuNgay):dd/MM/yyyy}" },
+                    { "DenNgay", string.IsNullOrEmpty(denNgay) ? "" : $"Đến ngày: {DateTime.Parse(denNgay):dd/MM/yyyy}" }
+                };
+
+                int stt = 1;
+                var exportData = list.Select(item => new {
+                    STT = stt++,
+                    SoPhieuChi = item.SoPhieuChi,
+                    NgayChi = item.NgayChi,
+                    KhoanMucChi = item.TenKhoanMuc,
+                    TaiKhoanTT = item.TenTaiKhoanThanhToan,
+                    NhaCungCap = item.TenNhaCungCap,
+                    NguoiNhan = !string.IsNullOrEmpty(item.NguoiNhanTien) 
+                        ? item.NguoiNhanTien + (!string.IsNullOrEmpty(item.SoDienThoaiNguoiNhan) ? $" ({item.SoDienThoaiNguoiNhan})" : "") 
+                        : item.TenNguoiNhan,
+                    SoTienChi = item.SoTienChi,
+                    TrangThai = item.TenTrangThai
+                }).ToList();
+
+                string fileExtension;
+                var fileBytes = _excelExportService.Export("PC01", exportData, out fileExtension, variables);
+
+                string contentType = fileExtension == "xls" 
+                    ? "application/vnd.ms-excel" 
+                    : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                return File(fileBytes, contentType, $"DanhSachPhieuChi_{DateTime.Now:yyyyMMddHHmmss}.{fileExtension}");
+            }
+            catch (Exception ex)
+            {
+                return Content($"Lỗi xuất Excel: {ex.Message}");
             }
         }
 
@@ -119,7 +188,7 @@ namespace SalesManagementSystem.Controllers
             if (model == null) return HttpNotFound();
 
             if (model.TrangThai == 2)
-                return Content("<div class='alert alert-warning'>Phiếu đã ghi sổ, không thể chỉnh sửa.</div>");
+                return Content("<div class='alert alert-warning'>Phiếu đã ghi, không thể chỉnh sửa.</div>");
             if (model.TrangThai == 3)
                 return Content("<div class='alert alert-warning'>Phiếu đã hủy, không thể chỉnh sửa.</div>");
 
@@ -170,7 +239,7 @@ namespace SalesManagementSystem.Controllers
                     AuditLog.AddUpdate("KT_PhieuChi", savedId.ToString(), null, new { TrangThai = 2 });
                 }
 
-                string msg = ghiSo ? "Lưu và ghi sổ thành công" : "Lưu thành công";
+                string msg = ghiSo ? "Lưu và ghi thành công" : "Lưu thành công";
                 return Json(new { success = true, id = savedId, message = msg });
             }
             catch (Exception ex)
@@ -184,17 +253,17 @@ namespace SalesManagementSystem.Controllers
         public ActionResult GhiSo(int id)
         {
             if (!PermissionHelper.HasPermission("PhieuChi", LoaiPhanQuyen.TuyChon))
-                return Json(new { success = false, message = "Không có quyền ghi sổ" });
+                return Json(new { success = false, message = "Không có quyền ghi" });
 
             try
             {
                 var user = GetCurrentUser();
                 _repo.GhiSo(id, user?.IDNhanSu ?? 0);
-                return Json(new { success = true, message = "Ghi sổ thành công" });
+                return Json(new { success = true, message = "ghi thành công" });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Ghi sổ thất bại: " + ex.Message });
+                return Json(new { success = false, message = "ghi thất bại: " + ex.Message });
             }
         }
 
@@ -234,7 +303,7 @@ namespace SalesManagementSystem.Controllers
                 if (model == null)
                     return Json(new { success = false, message = "Phiếu chi không tồn tại." });
                 if (model.TrangThai == 2)
-                    return Json(new { success = false, message = "Không thể xóa phiếu đã ghi sổ." });
+                    return Json(new { success = false, message = "Không thể xóa phiếu đã ghi." });
 
                 _repo.Delete(id, user?.IDNhanSu ?? 0);
                 AuditLog.AddDelete("KT_PhieuChi", id.ToString(), model);
@@ -300,6 +369,10 @@ namespace SalesManagementSystem.Controllers
             var nccs = _repo.GetNhaCungCapDropdown()
                 .Select(x => new SelectListItem { Value = ((int)x.ID).ToString(), Text = (string)x.TenHienThi });
             ViewBag.NhaCungCapList = new SelectList(nccs.ToList(), "Value", "Text");
+
+            var taiKhoans = _repo.GetTaiKhoanDropdown()
+                .Select(x => new SelectListItem { Value = ((int)x.ID).ToString(), Text = (string)x.TenHienThi });
+            ViewBag.TaiKhoanList = new SelectList(taiKhoans.ToList(), "Value", "Text");
         }
 
         private void PopulateFormDropdowns(int? idNhaCungCap = null)

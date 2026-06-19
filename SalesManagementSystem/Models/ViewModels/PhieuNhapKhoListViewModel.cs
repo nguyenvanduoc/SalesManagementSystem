@@ -18,7 +18,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public string TenNguoiGiao { get; set; }
         public string SoDienThoaiNguoiGiao { get; set; }
         public string TenNguoiNhan { get; set; }
-        public int TrangThai { get; set; } // 1: Nháp, 2: Ghi sổ, 3: Hủy
+        public int TrangThai { get; set; } // 1: Nháp, 2: ghi, 3: Hủy
         public int TrangThaiThanhToan { get; set; } // 0: Chưa thanh toán, 1: Thanh toán một phần, 2: Đã thanh toán
         public decimal DaThanhToan { get; set; }
         public decimal ConLai { get; set; }

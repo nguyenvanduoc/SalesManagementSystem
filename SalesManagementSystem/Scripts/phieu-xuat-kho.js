@@ -48,7 +48,7 @@ var PhieuXuatKho = (function () {
                         var html = '<div class="btn-group">';
                         
                         if (row.TrangThai === 1) {
-                            html += '<button type="button" class="btn btn-sm btn-success" onclick="PhieuXuatKho.ghiSo(' + data + ')" title="Ghi sổ"><i class="fas fa-check"></i> Ghi sổ</button>';
+                            html += '<button type="button" class="btn btn-sm btn-success" onclick="PhieuXuatKho.ghiSo(' + data + ')" title="ghi"><i class="fas fa-check"></i> ghi</button>';
                             html += '<button type="button" class="btn btn-sm btn-danger" onclick="PhieuXuatKho.huy(' + data + ')" title="Hủy"><i class="fas fa-times"></i> Hủy</button>';
                         }
 
@@ -130,14 +130,14 @@ var PhieuXuatKho = (function () {
     };
 
     var ghiSo = function (id) {
-        if (confirm("Bạn có chắc muốn ghi sổ phiếu xuất này? Hệ thống sẽ trừ tồn kho và ghi nhận Giá Vốn Hàng Bán (Nợ 632 / Có 156).")) {
+        if (confirm("Bạn có chắc muốn ghi phiếu xuất này? Hệ thống sẽ trừ tồn kho và ghi nhận Giá Vốn Hàng Bán (Nợ 632 / Có 156).")) {
             $.ajax({
                 url: '/PhieuXuatKho/GhiSo',
                 type: 'POST',
                 data: { id: id },
                 success: function (res) {
                     if (res.success) {
-                        alert("Ghi sổ thành công!");
+                        alert("ghi thành công!");
                         loadData();
                     } else {
                         alert("Lỗi: " + res.message);

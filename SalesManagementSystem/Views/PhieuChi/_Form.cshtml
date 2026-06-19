@@ -217,7 +217,7 @@
                                 if (item.trangThai === 1) {
                                     badge = '<span class="badge bg-secondary" style="font-size:0.75rem;">Đề nghị ghi</span>';
                                 } else if (item.trangThai === 2) {
-                                    badge = '<span class="badge bg-success" style="font-size:0.75rem;">Đã ghi sổ</span>';
+                                    badge = '<span class="badge bg-success" style="font-size:0.75rem;">Đã ghi</span>';
                                 } else if (item.trangThai === 3) {
                                     badge = '<span class="badge bg-danger" style="font-size:0.75rem;">Đã hủy</span>';
                                 }
@@ -296,7 +296,7 @@
         @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuChi", SalesManagementSystem.Helpers.LoaiPhanQuyen.TuyChon))
         {
             <button type="button" class="btn text-white px-4" style="background:#2998e4" id="btnLuuVaGhi">
-                <i class="bi bi-journal-check me-1"></i>Lưu và ghi sổ
+                <i class="bi bi-journal-check me-1"></i>Lưu và ghi
             </button>
         }
         <button type="submit" class="btn text-white px-4" style="background:#f1c40f">
@@ -319,7 +319,7 @@
             }
         });
 
-        // Lưu và ghi sổ
+        // Lưu và ghi
         $modal.find('#btnLuuVaGhi').off('click.phieuchi_ghiso').on('click.phieuchi_ghiso', function () {
             // Thêm trường ghiSo=true vào form
             if ($form.find('input[name="ghiSo"]').length === 0) {

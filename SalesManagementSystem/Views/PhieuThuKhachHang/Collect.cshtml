@@ -39,7 +39,7 @@
                 <i class="bi bi-save me-1"></i> Lưu dữ liệu
             </button>
             <button type="button" id="btn-save-post" class="btn btn-primary px-3" style="background-color: #0b5b84; border-color: #0b5b84;" onclick="submitCollectForm(true)">
-                <i class="bi bi-journal-check me-1"></i> Lưu và ghi sổ
+                <i class="bi bi-journal-check me-1"></i> Lưu và ghi
             </button>
             <button type="button" class="btn btn-outline-dark px-3" onclick="window.print()">
                 <i class="bi bi-printer me-1"></i> In
@@ -220,7 +220,7 @@
                                                                 <li><a class="dropdown-item py-2" href="javascript:void(0)" onclick="deleteHistoryRow(@h.ID)"><i class="bi bi-trash-fill text-danger me-2"></i> Xóa phiếu nháp</a></li>
                                                                 if (PermissionHelper.HasPermission("PhieuThuKhachHang", LoaiPhanQuyen.TuyChon))
                                                                 {
-                                                                    <li><a class="dropdown-item py-2" href="javascript:void(0)" onclick="ghiSoHistoryRow(@h.ID, '@h.SoPhieuThu')"><i class="bi bi-check2-circle text-success me-2"></i> Ghi sổ</a></li>
+                                                                    <li><a class="dropdown-item py-2" href="javascript:void(0)" onclick="ghiSoHistoryRow(@h.ID, '@h.SoPhieuThu')"><i class="bi bi-check2-circle text-success me-2"></i> ghi</a></li>
                                                                 }
                                                             }
                                                             else if (h.TrangThai == 2)
@@ -326,7 +326,7 @@
                         {
                             foreach (var r in recent)
                             {
-                                string stat = r.TrangThai == 2 ? "đã ghi sổ" : (r.TrangThai == 3 ? "đã hủy" : "đã tạo nháp");
+                                string stat = r.TrangThai == 2 ? "đã ghi" : (r.TrangThai == 3 ? "đã hủy" : "đã tạo nháp");
                                 string icon = r.TrangThai == 2 ? "bi-check-circle-fill text-success" : (r.TrangThai == 3 ? "bi-slash-circle-fill text-danger" : "bi-pencil-fill text-warning");
                                 <div class="list-group-item bg-transparent py-2.5 px-3">
                                     <div class="d-flex w-100 justify-content-between align-items-center mb-1">
@@ -502,7 +502,7 @@
         };
 
         window.ghiSoHistoryRow = function(id, soPhieu) {
-            showConfirm("Bạn có chắc chắn muốn ghi sổ phiếu thu [" + soPhieu + "] không?", function() {
+            showConfirm("Bạn có chắc chắn muốn ghi phiếu thu [" + soPhieu + "] không?", function() {
                 $.ajax({
                     url: '@Url.Action("GhiSo", "PhieuThuKhachHang")',
                     type: 'POST',

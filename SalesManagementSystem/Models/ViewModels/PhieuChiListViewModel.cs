@@ -34,7 +34,7 @@ namespace SalesManagementSystem.Models.ViewModels
                 switch (TrangThai)
                 {
                     case 1: return "Đề nghị";
-                    case 2: return "Đã ghi sổ";
+                    case 2: return "Đã ghi";
                     case 3: return "Đã hủy";
                     default: return "Không xác định";
                 }

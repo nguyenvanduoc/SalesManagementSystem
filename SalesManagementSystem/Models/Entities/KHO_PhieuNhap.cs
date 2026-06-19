@@ -15,7 +15,7 @@ namespace SalesManagementSystem.Models.Entities
         public string SoDienThoaiNguoiGiao { get; set; }
         public string TenNguoiNhan { get; set; }
         public string GhiChu { get; set; }
-        public int TrangThai { get; set; } // 1: Nháp, 2: Ghi sổ, 3: Hủy
+        public int TrangThai { get; set; } // 1: Nháp, 2: ghi, 3: Hủy
         public DateTime? NgayGhiSo { get; set; }
         public int? NguoiGhiSo { get; set; }
         public DateTime? NgayHuy { get; set; }

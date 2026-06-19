@@ -39,7 +39,7 @@ var ChungTuBanHang = (function () {
                         var html = '<div class="btn-group">';
                         
                         if (row.TrangThai === 1) {
-                            html += '<button type="button" class="btn btn-sm btn-success" onclick="ChungTuBanHang.ghiSo(' + data + ')" title="Ghi sổ"><i class="fas fa-check"></i> Ghi sổ</button>';
+                            html += '<button type="button" class="btn btn-sm btn-success" onclick="ChungTuBanHang.ghiSo(' + data + ')" title="ghi"><i class="fas fa-check"></i> ghi</button>';
                             html += '<button type="button" class="btn btn-sm btn-danger" onclick="ChungTuBanHang.huy(' + data + ')" title="Hủy"><i class="fas fa-times"></i> Hủy</button>';
                         }
 

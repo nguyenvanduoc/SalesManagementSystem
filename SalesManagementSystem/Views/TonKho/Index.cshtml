@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewBag.Title = "Tồn kho";
     var uid = Guid.NewGuid().ToString("N");
 }
@@ -36,7 +36,7 @@
         <div class="col-md-12">
             <div class="card shadow-sm mb-3">
                 <div class="card-body">
-                    <form id="frmFilter" class="row align-items-end">
+                    <form id="searchForm" method="get" action="@Url.Action("GetList")" class="row align-items-end">
                         <div class="col-md-2 form-group mb-2">
                             <label class="form-label text-muted mb-1">Từ ngày</label>
                             <input type="date" class="form-control" name="TuNgay" />
@@ -102,7 +102,7 @@
                         </div>
                     </div>
 
-                    <div id="gridContainer" class="table-responsive">
+                    <div id="table-container" class="table-responsive">
                     </div>
                 </div>
             </div>
@@ -114,7 +114,12 @@
     <script>
         (function() {
             var $container = $('#tonkho-@uid');
-            var $form = $container.find('#frmFilter');
+            var $form = $container.find('#searchForm');
+            $form.on('submit', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                loadData();
+            });
 
             function formatNumber(num) {
                 if (num == null || num === '') return '0';
@@ -136,7 +141,7 @@
 
                 var url = urlOverride || ('/TonKho/GetList?' + params);
                 $.get(url, function (html) {
-                    $container.find('#gridContainer').html(html);
+                    $container.find('#table-container').html(html);
                 });
             }
 

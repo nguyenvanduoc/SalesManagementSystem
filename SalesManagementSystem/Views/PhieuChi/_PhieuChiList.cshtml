@@ -1,5 +1,21 @@
 @model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.PhieuChiListViewModel>
 
+@{
+    var dashboard = ViewBag.Dashboard as SalesManagementSystem.Models.ViewModels.PhieuChiDashboardViewModel;
+}
+@if (dashboard != null)
+{
+    <div id="dashboard-data-bridge" style="display:none;"
+         data-tong-chi="@dashboard.TongChiText"
+         data-tong-chi-trend="@dashboard.TongChiTrend"
+         data-tong-chi-trend-class="@dashboard.TongChiTrendClass"
+         data-quy-tien-mat="@dashboard.QuyTienMatText"
+         data-du-ngan-hang="@dashboard.DuNganHangText"
+         data-ngan-hang-count="@dashboard.DuNganHangCount.ToString("D2")"
+         data-cong-no-ncc="@dashboard.CongNoNccText"
+         data-cong-no-ncc-label="@dashboard.CongNoNccLabel"></div>
+}
+
 <div class="card shadow-sm">
     <div class="card-body p-0">
         <div class="table-responsive" style="min-height:350px;">
@@ -51,7 +67,7 @@
                                                     <li>
                                                         <button type="button" class="dropdown-item py-2 text-success btn-ghiso"
                                                                 data-id="@item.ID" data-so="@item.SoPhieuChi">
-                                                            <i class="bi bi-journal-check text-success me-2"></i>Ghi sổ
+                                                            <i class="bi bi-journal-check text-success me-2"></i>ghi
                                                         </button>
                                                     </li>
                                                 }
@@ -133,12 +149,52 @@
     var $pane = $('#table-container').closest('.tab-pane');
     if ($pane.length === 0) $pane = $('body');
 
-    // Ghi sổ
+    // Cập nhật Dashboard nếu có dữ liệu cầu nối
+    var $bridge = $('#dashboard-data-bridge');
+    if ($bridge.length) {
+        var tongChi = $bridge.attr('data-tong-chi');
+        var trend = $bridge.attr('data-tong-chi-trend');
+        var trendClass = $bridge.attr('data-tong-chi-trend-class');
+        var quyTienMat = $bridge.attr('data-quy-tien-mat');
+        var duNganHang = $bridge.attr('data-du-ngan-hang');
+        var nganHangCount = $bridge.attr('data-ngan-hang-count');
+        var congNoNcc = $bridge.attr('data-cong-no-ncc');
+        var congNoNccLabel = $bridge.attr('data-cong-no-ncc-label');
+
+        $pane.find('#db-tong-chi').text(tongChi);
+        
+        var trendHtml = '';
+        if (trendClass === 'up') {
+            trendHtml = '<span class="trend up text-success"><i class="bi bi-arrow-up-short"></i>' + trend + '</span>';
+        } else if (trendClass === 'down') {
+            trendHtml = '<span class="trend down text-danger"><i class="bi bi-arrow-down-short"></i>' + trend + '</span>';
+        } else {
+            trendHtml = '<span class="trend text-muted">' + trend + '</span>';
+        }
+        $pane.find('#db-tong-chi-trend').html(trendHtml);
+        
+        $pane.find('#db-quy-tien-mat').text(quyTienMat);
+        $pane.find('#db-du-ngan-hang').text(duNganHang);
+        $pane.find('#db-ngan-hang-count').text(nganHangCount + ' ngân hàng');
+        $pane.find('#db-cong-no-ncc').text(congNoNcc);
+        $pane.find('#db-cong-no-ncc-label').text(congNoNccLabel);
+
+        // Cập nhật tiêu đề nhãn "Tổng chi" dựa theo bộ lọc ngày
+        var tuNgay = $pane.find('input[name="tuNgay"]').val();
+        var denNgay = $pane.find('input[name="denNgay"]').val();
+        if (tuNgay || denNgay) {
+            $pane.find('#db-label-tong-chi').text('Tổng chi kỳ này');
+        } else {
+            $pane.find('#db-label-tong-chi').text('Tổng chi tháng này');
+        }
+    }
+
+    // ghi
     $pane.off('click.phieuchi_ghiso', '.btn-ghiso');
     $pane.on('click.phieuchi_ghiso', '.btn-ghiso', function () {
         var id = $(this).data('id');
         var so = $(this).data('so');
-        if (!confirm('Bạn có chắc muốn ghi sổ phiếu ' + so + '?')) return;
+        if (!confirm('Bạn có chắc muốn ghi phiếu ' + so + '?')) return;
         $.post('@Url.Action("GhiSo","PhieuChi")', { id: id }, function (res) {
             if (res.success) {
                 showToast('success', res.message);

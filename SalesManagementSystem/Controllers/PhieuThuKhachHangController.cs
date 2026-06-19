@@ -275,7 +275,7 @@ namespace SalesManagementSystem.Controllers
                     AuditLog.AddUpdate("BAN_PhieuThuKhachHang", savedId.ToString(), oldModelGhi, newModelGhi);
                 }
 
-                return Json(new { success = true, id = savedId, message = ghiSo ? "Lưu và ghi sổ thành công" : "Lưu đề nghị ghi thành công", redirectUrl = Url.Action("Edit", "PhieuThuKhachHang", new { id = model.IDChungTuBanHang }) });
+                return Json(new { success = true, id = savedId, message = ghiSo ? "Lưu và ghi thành công" : "Lưu đề nghị ghi thành công", redirectUrl = Url.Action("Edit", "PhieuThuKhachHang", new { id = model.IDChungTuBanHang }) });
             }
             catch (Exception ex)
             {
@@ -288,7 +288,7 @@ namespace SalesManagementSystem.Controllers
         public ActionResult GhiSo(int id)
         {
             if (!PermissionHelper.HasPermission("PhieuThuKhachHang", LoaiPhanQuyen.TuyChon))
-                return Json(new { success = false, message = "Không có quyền thực hiện chức năng ghi sổ" });
+                return Json(new { success = false, message = "Không có quyền thực hiện chức năng ghi" });
 
             try
             {
@@ -303,11 +303,11 @@ namespace SalesManagementSystem.Controllers
                 var newModel = _repo.GetByID(id);
                 AuditLog.AddUpdate("BAN_PhieuThuKhachHang", id.ToString(), oldModel, newModel);
 
-                return Json(new { success = true, message = "Ghi sổ thành công" });
+                return Json(new { success = true, message = "ghi thành công" });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Ghi sổ thất bại: " + ex.Message });
+                return Json(new { success = false, message = "ghi thất bại: " + ex.Message });
             }
         }
 

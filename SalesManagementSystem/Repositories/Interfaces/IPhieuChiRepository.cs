@@ -11,7 +11,9 @@ namespace SalesManagementSystem.Repositories.Interfaces
             string soPhieuChi,
             int? idNhaCungCap,
             int? idKhoanMucChi,
-            int? trangThai);
+            int? trangThai,
+            string nguoiNhanTien = null,
+            int? idTaiKhoanThanhToan = null);
 
         PhieuChiViewModel GetByID(int id);
         int Save(PhieuChiViewModel model, int userId);
@@ -27,5 +29,14 @@ namespace SalesManagementSystem.Repositories.Interfaces
         IEnumerable<dynamic> GetNhanSuDropdown();
         dynamic GetPhieuNhapDetail(int idPhieuNhap);
         IEnumerable<dynamic> GetLichSuChiTienPhieuNhap(int idPhieuNhap);
+        PhieuChiDashboardViewModel GetDashboardData(
+            string tuNgay,
+            string denNgay,
+            string soPhieuChi,
+            int? idNhaCungCap,
+            int? idKhoanMucChi,
+            int? trangThai,
+            string nguoiNhanTien = null,
+            int? idTaiKhoanThanhToan = null);
     }
 }

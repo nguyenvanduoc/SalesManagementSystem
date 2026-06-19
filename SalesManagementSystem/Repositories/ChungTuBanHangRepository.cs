@@ -135,7 +135,7 @@ namespace SalesManagementSystem.Repositories
                 {
                     try
                     {
-                        // 1. Kiểm tra tồn kho nếu ghi sổ
+                        // 1. Kiểm tra tồn kho nếu ghi
                         if (ghiSo)
                         {
                             var itemsCheck = model.ChiTiets.Select(x => new CheckTonKhoRequestItem { IDSanPham = x.IDSanPham, SoLuongCanXuat = x.SoLuong }).ToList();
@@ -310,7 +310,7 @@ namespace SalesManagementSystem.Repositories
                 {
                     try
                     {
-                        // 1. Kiểm tra tồn kho nếu ghi sổ
+                        // 1. Kiểm tra tồn kho nếu ghi
                         if (ghiSo)
                         {
                             var itemsCheck = model.ChiTiets.Select(x => new CheckTonKhoRequestItem { IDSanPham = x.IDSanPham, SoLuongCanXuat = x.SoLuong }).ToList();
@@ -363,7 +363,7 @@ namespace SalesManagementSystem.Repositories
                                 IDChungTu = model.ID
                             }, transaction: tr);
 
-                        // 4. Nếu ghi sổ, sinh giao dịch kho và nhật ký chung
+                        // 4. Nếu ghi, sinh giao dịch kho và nhật ký chung
                         if (ghiSo)
                         {
                             int idPhieuXuat = conn.ExecuteScalar<int>("SELECT ID FROM KHO_PhieuXuat WHERE IDChungTuBanHang = @ID", new { ID = model.ID }, transaction: tr);

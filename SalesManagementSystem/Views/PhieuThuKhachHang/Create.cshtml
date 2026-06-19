@@ -182,7 +182,7 @@
                 @if (Model.NgayGhi.HasValue)
                 {
                     <div class="col-md-6 text-muted">
-                        <i class="bi bi-check-circle me-1"></i> Đã ghi sổ bởi <strong>@Model.TenNguoiTao</strong> vào lúc @Model.NgayGhi.Value.ToString("dd/MM/yyyy HH:mm")
+                        <i class="bi bi-check-circle me-1"></i> Đã ghi bởi <strong>@Model.TenNguoiTao</strong> vào lúc @Model.NgayGhi.Value.ToString("dd/MM/yyyy HH:mm")
                     </div>
                 }
                 @if (Model.NgayHuy.HasValue)
@@ -212,9 +212,9 @@
                 <button type="button" class="btn btn-warning text-dark px-4 fw-semibold" id="btnSavePending">
                     <i class="bi bi-save me-1"></i> Lưu nháp (1)
                 </button>
-                <!-- Nút Lưu và ghi sổ -->
+                <!-- Nút Lưu và ghi -->
                 <button type="button" class="btn btn-success text-white px-4 fw-semibold" id="btnSaveAndRecord">
-                    <i class="bi bi-check-circle me-1"></i> Lưu & Ghi sổ (2)
+                    <i class="bi bi-check-circle me-1"></i> Lưu & ghi (2)
                 </button>
             }
         </div>
@@ -358,7 +358,7 @@
 
         // Submits form and records (TrangThai = 2)
         $btnSaveAndRecord.click(function() {
-            showConfirm("Bạn có chắc chắn muốn lưu và ghi sổ trực tiếp phiếu thu này không?", function() {
+            showConfirm("Bạn có chắc chắn muốn lưu và ghi trực tiếp phiếu thu này không?", function() {
                 submitForm(true);
             });
         });

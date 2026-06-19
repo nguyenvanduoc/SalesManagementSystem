@@ -131,7 +131,7 @@
         // Publish functions to global scope but tied to this container (for onclick handlers like ghiSoPhieu)
         // A better approach is to use event delegation inside container.
         window.ghiSoPhieu = function(id) {
-            showConfirm('Bạn có chắc chắn muốn ghi sổ phiếu nhập kho này?', function() {
+            showConfirm('Bạn có chắc chắn muốn ghi phiếu nhập kho này?', function() {
                 $.post('@Url.Action("GhiSo")', { id: id }, function (res) {
                     if (res.success) {
                         if (typeof showToast === 'function') showToast('success', res.message);

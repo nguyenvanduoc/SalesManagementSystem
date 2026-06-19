@@ -259,7 +259,7 @@ BEGIN
         NguoiCapNhat = @NguoiGhi
     WHERE ID = @ID AND IsDeleted = 0 AND TrangThai = 1;
 
-    -- Ghi vào Nhật Ký Chung (khi ghi sổ)
+    -- Ghi vào Nhật Ký Chung (khi ghi)
     DECLARE @SoPhieuChi         NVARCHAR(50);
     DECLARE @NgayChi            DATE;
     DECLARE @SoTienChi          DECIMAL(18,2);
@@ -319,7 +319,7 @@ BEGIN
         NguoiCapNhat = @NguoiHuy
     WHERE ID = @ID AND IsDeleted = 0;
 
-    -- Đánh dấu hủy bút toán NKC nếu đã ghi sổ
+    -- Đánh dấu hủy bút toán NKC nếu đã ghi
     UPDATE KT_NhatKyChung
     SET IsHuy = 1
     WHERE LoaiChungTu = N'PHIEUCHI' AND IDChungTu = @ID;
@@ -336,7 +336,7 @@ BEGIN
     SET IsDeleted    = 1,
         NgayCapNhat  = GETDATE(),
         NguoiCapNhat = @NguoiXoa
-    WHERE ID = @ID AND TrangThai <> 2; -- Không xóa phiếu đã ghi sổ
+    WHERE ID = @ID AND TrangThai <> 2; -- Không xóa phiếu đã ghi
 END
 GO
 
@@ -366,7 +366,7 @@ BEGIN
     FROM BAN_PhieuThuKhachHang pth
     LEFT JOIN DM_TaiKhoanThanhToan tk ON pth.IDTaiKhoanThanhToan = tk.ID
     WHERE pth.IsDeleted = 0
-      AND pth.TrangThai = 2  -- Chỉ lấy đã ghi sổ
+      AND pth.TrangThai = 2  -- Chỉ lấy đã ghi
       AND (@TuNgay IS NULL OR CAST(pth.NgayThu AS DATE) >= CAST(@TuNgay AS DATE))
       AND (@DenNgay IS NULL OR CAST(pth.NgayThu AS DATE) <= CAST(@DenNgay AS DATE))
       AND (@IDTaiKhoanThanhToan IS NULL OR pth.IDTaiKhoanThanhToan = @IDTaiKhoanThanhToan)
@@ -387,7 +387,7 @@ BEGIN
     FROM KT_PhieuChi pc
     LEFT JOIN DM_TaiKhoanThanhToan tk2 ON pc.IDTaiKhoanThanhToan = tk2.ID
     WHERE pc.IsDeleted = 0
-      AND pc.TrangThai = 2  -- Chỉ lấy đã ghi sổ
+      AND pc.TrangThai = 2  -- Chỉ lấy đã ghi
       AND (@TuNgay IS NULL OR CAST(pc.NgayChi AS DATE) >= CAST(@TuNgay AS DATE))
       AND (@DenNgay IS NULL OR CAST(pc.NgayChi AS DATE) <= CAST(@DenNgay AS DATE))
       AND (@IDTaiKhoanThanhToan IS NULL OR pc.IDTaiKhoanThanhToan = @IDTaiKhoanThanhToan)
