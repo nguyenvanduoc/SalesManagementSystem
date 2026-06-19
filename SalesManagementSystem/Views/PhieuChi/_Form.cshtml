@@ -1,0 +1,333 @@
+@model SalesManagementSystem.Models.ViewModels.PhieuChiViewModel
+
+<style>
+    /* Style Select2 elements to match textbox height (38px) */
+    .select2-container--default .select2-selection--single {
+        height: 38px !important;
+        border: 1px solid #ced4da !important;
+        border-radius: 0.375rem !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 36px !important;
+        padding-left: 12px !important;
+        color: #212529 !important;
+        font-size: 0.95rem !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px !important;
+    }
+</style>
+
+<form action="@Url.Action("Save", "PhieuChi")" method="post" id="phieuChiForm">
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.ID)
+    @Html.HiddenFor(m => m.TrangThai)
+
+    <div class="modal-header border-bottom-0 pb-0">
+        <h5 class="modal-title fw-bold text-uppercase" style="color:#0b5b84;">
+            @ViewBag.Title
+        </h5>
+        <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+
+    <div class="modal-body pt-3 pb-2">
+        <div class="row g-3">
+            <!-- Số phiếu chi -->
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Số phiếu chi <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.SoPhieuChi, new { @class = "form-control", @readonly = "readonly", @style = "background:#f8f9fa;" })
+                @Html.ValidationMessageFor(m => m.SoPhieuChi, "", new { @class = "text-danger small" })
+            </div>
+
+            <!-- Ngày chi -->
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Ngày chi <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.NgayChi, "{0:yyyy-MM-dd}", new { @class = "form-control", @type = "date" })
+                @Html.ValidationMessageFor(m => m.NgayChi, "", new { @class = "text-danger small" })
+            </div>
+
+            <!-- Khoản mục chi -->
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Khoản mục chi</label>
+                @Html.DropDownListFor(m => m.IDKhoanMucChi,
+                    (IEnumerable<SelectListItem>)ViewBag.KhoanMucList,
+                    "-- Chọn khoản mục --",
+                    new { @class = "form-select" })
+                @Html.ValidationMessageFor(m => m.IDKhoanMucChi, "", new { @class = "text-danger small" })
+            </div>
+
+            <!-- Tài khoản thanh toán -->
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Tài khoản thanh toán <span class="text-danger">*</span></label>
+                @Html.DropDownListFor(m => m.IDTaiKhoanThanhToan,
+                    (IEnumerable<SelectListItem>)ViewBag.TaiKhoanList,
+                    "-- Chọn tài khoản --",
+                    new { @class = "form-select select2" })
+                @Html.ValidationMessageFor(m => m.IDTaiKhoanThanhToan, "", new { @class = "text-danger small" })
+            </div>
+
+            <!-- Người nhận tiền -->
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Người nhận tiền</label>
+                @Html.TextBoxFor(m => m.NguoiNhanTien, new { @class = "form-control", @placeholder = "Nhập người nhận..." })
+                @Html.ValidationMessageFor(m => m.NguoiNhanTien, "", new { @class = "text-danger small" })
+            </div>
+
+            <!-- Số điện thoại người nhận -->
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Số điện thoại người nhận</label>
+                @Html.TextBoxFor(m => m.SoDienThoaiNguoiNhan, new { @class = "form-control", @placeholder = "Nhập số điện thoại..." })
+                @Html.ValidationMessageFor(m => m.SoDienThoaiNguoiNhan, "", new { @class = "text-danger small" })
+            </div>
+
+            <!-- Nhà cung cấp -->
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Nhà cung cấp</label>
+                <select name="IDNhaCungCap" id="IDNhaCungCap" class="form-select select2">
+                    <option value="">-- Chọn nhà cung cấp --</option>
+                    @if (ViewBag.NhaCungCapList != null)
+                    {
+                        foreach (SelectListItem item in ViewBag.NhaCungCapList)
+                        {
+                            <option value="@item.Value" @(item.Value == Model.IDNhaCungCap?.ToString() ? "selected" : "")>@item.Text</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <!-- Phiếu nhập -->
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Theo phiếu nhập</label>
+                <select name="IDPhieuNhap" id="IDPhieuNhap" class="form-select select2">
+                    <option value="">-- Chọn phiếu nhập --</option>
+                    @if (ViewBag.PhieuNhapList != null)
+                    {
+                        foreach (SelectListItem item in ViewBag.PhieuNhapList)
+                        {
+                            <option value="@item.Value" @(item.Value == Model.IDPhieuNhap?.ToString() ? "selected" : "")>@item.Text</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <!-- Số tiền chi -->
+            <div class="col-md-4">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label class="form-label fw-bold mb-0">Số tiền chi <span class="text-danger">*</span></label>
+                    <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none fw-bold" id="btnChiToanBo" style="font-size: 0.8rem; display: none; color: #2998e4;">Chi toàn bộ</button>
+                </div>
+                <div class="input-group">
+                    @Html.TextBoxFor(m => m.SoTienChi, "{0:N0}", new { @class = "form-control text-end", @id = "SoTienChi", @placeholder = "Nhập số tiền..." })
+                    <span class="input-group-text bg-light text-muted" style="font-size: 0.85rem; font-weight: 500;">đ</span>
+                </div>
+                @Html.ValidationMessageFor(m => m.SoTienChi, "", new { @class = "text-danger small" })
+            </div>
+
+            <!-- Diễn giải -->
+            <div class="col-md-8">
+                <label class="form-label fw-bold">Diễn giải</label>
+                @Html.TextBoxFor(m => m.DienGiai, new { @class = "form-control", @placeholder = "Nhập diễn giải..." })
+                @Html.ValidationMessageFor(m => m.DienGiai, "", new { @class = "text-danger small" })
+            </div>
+
+            <!-- Thông tin chi tiết Phiếu Nhập -->
+            <div class="col-md-12" id="divThongTinPhieuNhap" style="display:none; margin-top: 15px;">
+                <div class="card border border-warning-subtle bg-warning bg-opacity-10 shadow-none p-3 rounded-3">
+                    <h6 class="fw-bold mb-3 text-warning-emphasis d-flex align-items-center" style="font-size: 0.95rem;">
+                        <i class="bi bi-info-circle-fill me-2 fs-5 text-warning"></i> THÔNG TIN THANH TOÁN PHIẾU NHẬP
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="p-2 bg-white rounded border border-light-subtle shadow-sm">
+                                <span class="small text-muted d-block fw-semibold mb-1" style="font-size: 0.75rem;">TỔNG TIỀN PHIẾU NHẬP (NỢ)</span>
+                                <span class="fs-6 fw-bold text-dark" id="pnTongCong">0</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-2 bg-white rounded border border-light-subtle shadow-sm">
+                                <span class="small text-muted d-block fw-semibold mb-1" style="font-size: 0.75rem;">ĐÃ THANH TOÁN (CHI)</span>
+                                <span class="fs-6 fw-bold text-success" id="pnDaThanhToan">0</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-2 bg-white rounded border border-light-subtle shadow-sm">
+                                <span class="small text-muted d-block fw-semibold mb-1" style="font-size: 0.75rem;">CÒN LẠI PHẢI TRẢ</span>
+                                <span class="fs-6 fw-bold text-danger" id="pnConLai">0</span>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="p-2 bg-white rounded border border-light-subtle shadow-sm">
+                                <span class="small text-muted d-block fw-semibold mb-2" style="font-size: 0.75rem;">LỊCH SỬ CÁC DÒNG CHI</span>
+                                <div class="table-responsive" style="max-height: 150px; overflow-y: auto;">
+                                    <table class="table table-sm table-bordered table-hover align-middle mb-0" style="font-size:0.8rem;" id="tblLichSuChi">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="text-center" style="width: 50px;">STT</th>
+                                                <th>Số phiếu chi</th>
+                                                <th class="text-center" style="width: 100px;">Ngày chi</th>
+                                                <th class="text-end" style="width: 120px;">Số tiền chi</th>
+                                                <th class="text-center" style="width: 120px;">Trạng thái</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Render động từ Ajax -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            var $modal = $('#globalFormModalContent').closest('.modal');
+            if ($modal.length > 0) {
+                // Phóng to popup sang modal-xl và đưa lên cao thêm tí (loại bỏ centered, margin-top: 30px)
+                $modal.find('.modal-dialog')
+                      .removeClass('modal-lg modal-dialog-centered')
+                      .addClass('modal-xl')
+                      .css('margin-top', '30px');
+                $modal.find('.select2').select2({ dropdownParent: $modal, width: '100%' });
+            }
+
+            // Hàm load chi tiết phiếu nhập
+            function loadPhieuNhapDetail(idPhieuNhap) {
+                if (!idPhieuNhap) {
+                    $modal.find('#divThongTinPhieuNhap').slideUp(200);
+                    $modal.find('#btnChiToanBo').hide().data('amount', 0);
+                    return;
+                }
+                $.getJSON('@Url.Action("GetPhieuNhapDetail", "PhieuChi")', { idPhieuNhap: idPhieuNhap }, function (res) {
+                    if (res && res.success) {
+                        $modal.find('#pnTongCong').text(res.tongCong + ' đ');
+                        $modal.find('#pnDaThanhToan').text(res.daThanhToan + ' đ');
+                        $modal.find('#pnConLai').text(res.conLai + ' đ');
+                        
+                        // Cấu hình nút Chi toàn bộ
+                        $modal.find('#btnChiToanBo').data('amount', res.rawConLai).show();
+                        
+                        var rows = '';
+                        if (res.lichSu && res.lichSu.length > 0) {
+                            $.each(res.lichSu, function (i, item) {
+                                var badge = '';
+                                if (item.trangThai === 1) {
+                                    badge = '<span class="badge bg-secondary" style="font-size:0.75rem;">Đề nghị ghi</span>';
+                                } else if (item.trangThai === 2) {
+                                    badge = '<span class="badge bg-success" style="font-size:0.75rem;">Đã ghi sổ</span>';
+                                } else if (item.trangThai === 3) {
+                                    badge = '<span class="badge bg-danger" style="font-size:0.75rem;">Đã hủy</span>';
+                                }
+                                rows += '<tr>' +
+                                    '<td class="text-center">' + (i + 1) + '</td>' +
+                                    '<td class="fw-bold" style="color: #2998e4;">' + item.soPhieuChi + '</td>' +
+                                    '<td class="text-center">' + item.ngayChi + '</td>' +
+                                    '<td class="text-end fw-semibold text-dark">' + item.soTienChi + '</td>' +
+                                    '<td class="text-center">' + badge + '</td>' +
+                                    '</tr>';
+                            });
+                        } else {
+                            rows = '<tr><td colspan="5" class="text-center py-2 text-muted">Chưa có lịch sử chi tiền cho phiếu nhập này</td></tr>';
+                        }
+                        $modal.find('#tblLichSuChi tbody').html(rows);
+                        $modal.find('#divThongTinPhieuNhap').slideDown(200);
+                    } else {
+                        $modal.find('#divThongTinPhieuNhap').slideUp(200);
+                        $modal.find('#btnChiToanBo').hide().data('amount', 0);
+                    }
+                });
+            }
+
+            // Khi chọn NCC thì load phiếu nhập
+            $modal.find('#IDNhaCungCap').off('change.phieuchi').on('change.phieuchi', function () {
+                var idNcc = $(this).val();
+                $modal.find('#IDPhieuNhap').html('<option value="">-- Chọn phiếu nhập --</option>');
+                $modal.find('#divThongTinPhieuNhap').slideUp(200);
+                $modal.find('#btnChiToanBo').hide().data('amount', 0);
+                
+                if (idNcc) {
+                    $modal.find('#IDPhieuNhap').html('<option value="">-- Đang tải --</option>');
+                    $.getJSON('@Url.Action("GetPhieuNhapByNCC","PhieuChi")', { idNhaCungCap: idNcc }, function (data) {
+                        var opts = '<option value="">-- Chọn phiếu nhập --</option>';
+                        $.each(data, function (i, d) { opts += '<option value="' + d.id + '">' + d.text + '</option>'; });
+                        $modal.find('#IDPhieuNhap').html(opts);
+                        if ($modal.find('#IDPhieuNhap').hasClass('select2-hidden-accessible'))
+                            $modal.find('#IDPhieuNhap').trigger('change');
+                    });
+                }
+            });
+
+            // Lắng nghe sự kiện chọn phiếu nhập để hiển thị thông tin
+            $modal.find('#IDPhieuNhap').off('change.phieuchi_detail').on('change.phieuchi_detail', function () {
+                loadPhieuNhapDetail($(this).val());
+            });
+
+            // Lắng nghe sự kiện click nút Chi toàn bộ
+            $modal.find('#btnChiToanBo').off('click.chitoanbo').on('click.chitoanbo', function () {
+                var amt = $(this).data('amount');
+                if (amt !== undefined && amt !== null) {
+                    $modal.find('#SoTienChi').val(parseFloat(amt).toLocaleString('vi-VN')).trigger('blur');
+                }
+            });
+
+            // Tự động load chi tiết phiếu nhập nếu form mở lên đã có sẵn (chế độ Edit)
+            var initPhieuNhapVal = $modal.find('#IDPhieuNhap').val();
+            if (initPhieuNhapVal) {
+                loadPhieuNhapDetail(initPhieuNhapVal);
+            }
+
+            // Format số tiền khi nhập
+            $modal.find('#SoTienChi').off('blur.phieuchi').on('blur.phieuchi', function () {
+                var val = $(this).val().replace(/\./g, '').replace(/,/g, '');
+                if (!isNaN(val) && val !== '') {
+                    $(this).val(parseFloat(val).toLocaleString('vi-VN'));
+                }
+            });
+        });
+    </script>
+
+    <div class="modal-footer bg-light border-top-0 rounded-bottom">
+        <button type="button" class="btn text-dark" style="background:#e9ecef" data-bs-dismiss="modal">
+            Để sau
+        </button>
+        @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuChi", SalesManagementSystem.Helpers.LoaiPhanQuyen.TuyChon))
+        {
+            <button type="button" class="btn text-white px-4" style="background:#2998e4" id="btnLuuVaGhi">
+                <i class="bi bi-journal-check me-1"></i>Lưu và ghi sổ
+            </button>
+        }
+        <button type="submit" class="btn text-white px-4" style="background:#f1c40f">
+            Đồng ý
+        </button>
+    </div>
+</form>
+
+<script>
+    $(document).ready(function () {
+        var $modal = $('#globalFormModalContent').closest('.modal');
+        var $form = $modal.find('#phieuChiForm');
+
+        // Bỏ định dạng dấu phân cách nghìn trước khi submit để tránh lỗi model binding
+        $form.off('submit.clean').on('submit.clean', function () {
+            var $soTien = $(this).find('#SoTienChi');
+            if ($soTien.length > 0) {
+                var rawVal = $soTien.val().replace(/\./g, '').replace(/,/g, '');
+                $soTien.val(rawVal);
+            }
+        });
+
+        // Lưu và ghi sổ
+        $modal.find('#btnLuuVaGhi').off('click.phieuchi_ghiso').on('click.phieuchi_ghiso', function () {
+            // Thêm trường ghiSo=true vào form
+            if ($form.find('input[name="ghiSo"]').length === 0) {
+                $form.append('<input type="hidden" name="ghiSo" value="true">');
+            } else {
+                $form.find('input[name="ghiSo"]').val('true');
+            }
+            $form.trigger('submit');
+        });
+    });
+</script>

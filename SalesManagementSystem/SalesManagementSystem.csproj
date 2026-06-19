@@ -311,6 +311,19 @@
     <Compile Include="Repositories\Interfaces\ITaiKhoanThanhToanRepository.cs" />
     <Compile Include="Repositories\TaiKhoanThanhToanRepository.cs" />
     <Compile Include="Controllers\TaiKhoanThanhToanController.cs" />
+    <Compile Include="Models\ViewModels\PhieuChiViewModel.cs" />
+    <Compile Include="Models\ViewModels\PhieuChiListViewModel.cs" />
+    <Compile Include="Models\ViewModels\SoQuyViewModel.cs" />
+    <Compile Include="Models\ViewModels\CongNoNCCViewModel.cs" />
+    <Compile Include="Repositories\Interfaces\IPhieuChiRepository.cs" />
+    <Compile Include="Repositories\PhieuChiRepository.cs" />
+    <Compile Include="Repositories\Interfaces\ISoQuyRepository.cs" />
+    <Compile Include="Repositories\SoQuyRepository.cs" />
+    <Compile Include="Repositories\Interfaces\ICongNoNCCRepository.cs" />
+    <Compile Include="Repositories\CongNoNCCRepository.cs" />
+    <Compile Include="Controllers\PhieuChiController.cs" />
+    <Compile Include="Controllers\SoQuyController.cs" />
+    <Compile Include="Controllers\CongNoNCCController.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-grid.css" />
@@ -446,6 +459,14 @@
     <Content Include="Views\TaiKhoanThanhToan\Index.cshtml" />
     <Content Include="Views\TaiKhoanThanhToan\_TaiKhoanThanhToanList.cshtml" />
     <Content Include="Views\TaiKhoanThanhToan\_Form.cshtml" />
+    <Content Include="Views\PhieuChi\Index.cshtml" />
+    <Content Include="Views\PhieuChi\_PhieuChiList.cshtml" />
+    <Content Include="Views\PhieuChi\_Form.cshtml" />
+    <Content Include="Views\SoQuy\Index.cshtml" />
+    <Content Include="Views\SoQuy\_SoQuyList.cshtml" />
+    <Content Include="Views\CongNoNCC\Index.cshtml" />
+    <Content Include="Views\CongNoNCC\_CongNoNCCList.cshtml" />
+    <Content Include="App_Data\create_phieuchi_soquy_congncc.sql" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />

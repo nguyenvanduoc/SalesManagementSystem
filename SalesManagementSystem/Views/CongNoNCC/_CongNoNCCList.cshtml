@@ -1,0 +1,72 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.CongNoNCCViewModel>
+
+@{
+    decimal tongPhaiTra = ViewBag.TongPhaiTra ?? 0M;
+    decimal tongDaTra   = ViewBag.TongDaTra   ?? 0M;
+    decimal tongConLai  = ViewBag.TongConLai  ?? 0M;
+}
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive" style="min-height:350px;">
+            <table class="table table-custom table-bordered table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th width="40"  class="text-center fw-bold">STT</th>
+                        <th width="130" class="text-center fw-bold">Số phiếu nhập</th>
+                        <th width="105" class="text-center fw-bold">Ngày nhập</th>
+                        <th class="fw-bold">Nhà cung cấp</th>
+                        <th width="100" class="text-center fw-bold">Điện thoại</th>
+                        <th width="140" class="text-end fw-bold">Tổng tiền hàng</th>
+                        <th width="140" class="text-end fw-bold">Đã thanh toán</th>
+                        <th width="140" class="text-end fw-bold">Còn lại</th>
+                        <th width="130" class="text-center fw-bold">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Items != null && Model.Items.Any())
+                    {
+                        int stt = (Model.CurrentPage - 1) * Model.PageSize + 1;
+                        foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td class="text-center align-middle">@(stt++)</td>
+                                <td class="text-center align-middle fw-semibold text-primary">@item.SoPhieuNhap</td>
+                                <td class="text-center align-middle">@item.NgayNhap.ToString("dd/MM/yyyy")</td>
+                                <td class="align-middle">@item.TenNhaCungCap</td>
+                                <td class="text-center align-middle">@item.DienThoaiNCC</td>
+                                <td class="text-end align-middle">@item.TongTienHang.ToString("N0")</td>
+                                <td class="text-end align-middle text-success fw-semibold">@item.DaThanhToan.ToString("N0")</td>
+                                <td class="text-end align-middle @(item.ConLai > 0 ? "text-danger fw-bold" : "text-muted")">
+                                    @item.ConLai.ToString("N0")
+                                </td>
+                                <td class="text-center align-middle">
+                                    <span class="@item.CssTrangThaiCongNo">@item.TrangThaiCongNo</span>
+                                </td>
+                            </tr>
+                        }
+
+                        <!-- Dòng tổng -->
+                        <tr class="fw-bold" style="background:#f4f6f9;">
+                            <td colspan="5" class="text-end align-middle">Tổng cộng:</td>
+                            <td class="text-end align-middle">@tongPhaiTra.ToString("N0")</td>
+                            <td class="text-end align-middle text-success">@tongDaTra.ToString("N0")</td>
+                            <td class="text-end align-middle text-danger">@tongConLai.ToString("N0")</td>
+                            <td></td>
+                        </tr>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
+                                Không có dữ liệu công nợ
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @Html.Partial("_Pagination", Model)
+</div>

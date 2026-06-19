@@ -1,0 +1,169 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.PhieuChiListViewModel>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive" style="min-height:350px;">
+            <table class="table table-custom table-bordered table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th width="60"  class="text-center fw-bold">Thao tác</th>
+                        <th width="40"  class="text-center fw-bold">STT</th>
+                        <th width="130" class="text-center fw-bold">Số phiếu chi</th>
+                        <th width="100" class="text-center fw-bold">Ngày chi</th>
+                        <th class="fw-bold">Khoản mục chi</th>
+                        <th class="fw-bold">Tài khoản TT</th>
+                        <th class="fw-bold">Nhà cung cấp</th>
+                        <th class="fw-bold">Người nhận</th>
+                        <th width="130" class="text-end fw-bold">Số tiền chi</th>
+                        <th width="110" class="text-center fw-bold">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Items != null && Model.Items.Any())
+                    {
+                        int stt = (Model.CurrentPage - 1) * Model.PageSize + 1;
+                        bool canSua     = SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuChi", SalesManagementSystem.Helpers.LoaiPhanQuyen.CapNhat);
+                        bool canTuyChon = SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuChi", SalesManagementSystem.Helpers.LoaiPhanQuyen.TuyChon);
+                        bool canXoa     = SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuChi", SalesManagementSystem.Helpers.LoaiPhanQuyen.Xoa);
+
+                        foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td class="text-center align-middle">
+                                    <div class="dropdown dropdown-hover">
+                                        <button class="btn btn-sm btn-light border-0 shadow-none" type="button" data-bs-toggle="dropdown">
+                                            <i class="bi bi-grid-3x3-gap-fill text-muted"></i>
+                                        </button>
+                                        <ul class="dropdown-menu shadow-sm">
+                                            @if (item.TrangThai == 1)
+                                            {
+                                                if (canSua)
+                                                {
+                                                    <li>
+                                                        <button type="button" class="dropdown-item py-2"
+                                                                onclick="openFormModal('@Url.Action("Edit","PhieuChi",new{id=item.ID})')">
+                                                            <i class="bi bi-pencil-square text-primary me-2"></i>Cập nhật
+                                                        </button>
+                                                    </li>
+                                                }
+                                                if (canTuyChon)
+                                                {
+                                                    <li>
+                                                        <button type="button" class="dropdown-item py-2 text-success btn-ghiso"
+                                                                data-id="@item.ID" data-so="@item.SoPhieuChi">
+                                                            <i class="bi bi-journal-check text-success me-2"></i>Ghi sổ
+                                                        </button>
+                                                    </li>
+                                                }
+                                                if (canXoa)
+                                                {
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li>
+                                                        <button type="button" class="dropdown-item py-2 text-danger"
+                                                                onclick="confirmDelete('@Url.Action("Delete","PhieuChi",new{id=item.ID})', 'Bạn có chắc chắn muốn xóa phiếu @item.SoPhieuChi?')">
+                                                            <i class="bi bi-trash-fill text-danger me-2"></i>Xóa
+                                                        </button>
+                                                    </li>
+                                                }
+                                            }
+                                            else if (item.TrangThai == 2)
+                                            {
+                                                if (canTuyChon)
+                                                {
+                                                    <li>
+                                                        <button type="button" class="dropdown-item py-2 text-warning btn-huy"
+                                                                data-id="@item.ID" data-so="@item.SoPhieuChi">
+                                                                <i class="bi bi-x-circle text-warning me-2"></i>Hủy
+                                                        </button>
+                                                    </li>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <li><span class="dropdown-item text-muted disabled">Phiếu đã hủy</span></li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </td>
+                                <td class="text-center align-middle">@(stt++)</td>
+                                <td class="text-center align-middle fw-semibold text-primary">@item.SoPhieuChi</td>
+                                <td class="text-center align-middle">@item.NgayChi.ToString("dd/MM/yyyy")</td>
+                                <td class="align-middle">@item.TenKhoanMuc</td>
+                                <td class="align-middle">@item.TenTaiKhoanThanhToan</td>
+                                <td class="align-middle">@item.TenNhaCungCap</td>
+                                <td class="align-middle">
+                                    @if (!string.IsNullOrEmpty(item.NguoiNhanTien))
+                                    {
+                                        @item.NguoiNhanTien
+                                        if (!string.IsNullOrEmpty(item.SoDienThoaiNguoiNhan))
+                                        {
+                                            <br/><small class="text-muted">(@item.SoDienThoaiNguoiNhan)</small>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        @item.TenNguoiNhan
+                                    }
+                                </td>
+                                <td class="text-end align-middle fw-semibold">@item.SoTienChi.ToString("N0")</td>
+                                <td class="text-center align-middle">
+                                    <span class="@item.CssTrangThai">@item.TenTrangThai</span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="10" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
+                                Không có dữ liệu
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @Html.Partial("_Pagination", Model)
+</div>
+
+<script>
+(function () {
+    var $pane = $('#table-container').closest('.tab-pane');
+    if ($pane.length === 0) $pane = $('body');
+
+    // Ghi sổ
+    $pane.off('click.phieuchi_ghiso', '.btn-ghiso');
+    $pane.on('click.phieuchi_ghiso', '.btn-ghiso', function () {
+        var id = $(this).data('id');
+        var so = $(this).data('so');
+        if (!confirm('Bạn có chắc muốn ghi sổ phiếu ' + so + '?')) return;
+        $.post('@Url.Action("GhiSo","PhieuChi")', { id: id }, function (res) {
+            if (res.success) {
+                showToast('success', res.message);
+                TabManager.reloadActiveTabGrid(false);
+            } else {
+                showToast('error', res.message);
+            }
+        }).fail(function () { showToast('error', 'Lỗi kết nối máy chủ.'); });
+    });
+
+    // Hủy
+    $pane.off('click.phieuchi_huy', '.btn-huy');
+    $pane.on('click.phieuchi_huy', '.btn-huy', function () {
+        var id = $(this).data('id');
+        var so = $(this).data('so');
+        var lyDo = prompt('Nhập lý do hủy phiếu ' + so + ':');
+        if (!lyDo) return;
+        $.post('@Url.Action("Huy","PhieuChi")', { id: id, lyDo: lyDo }, function (res) {
+            if (res.success) {
+                showToast('success', res.message);
+                TabManager.reloadActiveTabGrid(false);
+            } else {
+                showToast('error', res.message);
+            }
+        }).fail(function () { showToast('error', 'Lỗi kết nối máy chủ.'); });
+    });
+})();
+</script>

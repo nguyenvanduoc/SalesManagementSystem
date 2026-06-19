@@ -1,0 +1,105 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.SoQuyViewModel>
+
+@{
+    ViewBag.Title = "Sổ Quỹ";
+    decimal tongThu = ViewBag.TongThu ?? 0M;
+    decimal tongChi = ViewBag.TongChi ?? 0M;
+    decimal tonQuy  = tongThu - tongChi;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0 fw-bold text-uppercase" style="color:#0b5b84;font-size:1.25rem;">
+        SỔ QUỸ
+    </h4>
+</div>
+
+<!-- Bộ lọc tìm kiếm -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" action="@Url.Action("GetList","SoQuy")" id="searchForm">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label text-muted small mb-1 fw-semibold">Từ ngày</label>
+                    <input type="date" class="form-control form-control-sm" name="tuNgay" value="@ViewBag.TuNgay" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label text-muted small mb-1 fw-semibold">Đến ngày</label>
+                    <input type="date" class="form-control form-control-sm" name="denNgay" value="@ViewBag.DenNgay" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label text-muted small mb-1 fw-semibold">Tài khoản</label>
+                    <select class="form-select form-select-sm" name="idTaiKhoanThanhToan">
+                        <option value="">-- Tất cả tài khoản --</option>
+                        @if (ViewBag.TaiKhoanList != null)
+                        {
+                            foreach (System.Web.Mvc.SelectListItem item in ViewBag.TaiKhoanList)
+                            {
+                                <option value="@item.Value" @(item.Selected ? "selected" : "")>@item.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-sm text-white px-3" style="background-color:#2998e4;border:none;">
+                        <i class="bi bi-search me-1"></i>Tìm kiếm
+                    </button>
+                    <button type="button" class="btn btn-sm text-white px-3 btn-reset" style="background-color:#f1c40f;border:none;">
+                        Làm mới
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tổng hợp -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm" style="border-left:4px solid #27ae60!important;">
+            <div class="card-body py-3">
+                <div class="text-muted small fw-semibold mb-1">TỔNG THU</div>
+                <div class="fw-bold fs-5 text-success">@tongThu.ToString("N0") <small class="fs-6 fw-normal">VND</small></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm" style="border-left:4px solid #e74c3c!important;">
+            <div class="card-body py-3">
+                <div class="text-muted small fw-semibold mb-1">TỔNG CHI</div>
+                <div class="fw-bold fs-5 text-danger">@tongChi.ToString("N0") <small class="fs-6 fw-normal">VND</small></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm" style="border-left:4px solid #3498db!important;">
+            <div class="card-body py-3">
+                <div class="text-muted small fw-semibold mb-1">TỒN QUỸ</div>
+                <div class="fw-bold fs-5 @(tonQuy >= 0 ? "text-primary" : "text-danger")">
+                    @tonQuy.ToString("N0") <small class="fs-6 fw-normal">VND</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grid dữ liệu -->
+<div id="table-container">
+    @Html.Partial("_SoQuyList", Model)
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var $pane = $('#searchForm').closest('.tab-pane');
+            if ($pane.length === 0) $pane = $('body');
+
+            $pane.off('click.soquy_reset', '.btn-reset');
+            $pane.on('click.soquy_reset', '.btn-reset', function () {
+                $pane.find('input[name="tuNgay"]').val('');
+                $pane.find('input[name="denNgay"]').val('');
+                $pane.find('select[name="idTaiKhoanThanhToan"]').val('');
+                $pane.find('#searchForm').trigger('submit');
+            });
+        })();
+    </script>
+}

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
@@ -963,6 +963,8 @@
             url: url,
             type: 'GET',
             success: function(res) {
+                // Đảm bảo kích thước mặc định là modal-lg
+                $('#globalFormModal .modal-dialog').removeClass('modal-xl modal-sm').addClass('modal-lg');
                 $('#globalFormModalContent').html(res);
                 var formModal = new bootstrap.Modal(document.getElementById('globalFormModal'));
                 formModal.show();
@@ -989,8 +991,6 @@
                 if (res.success === true) {
                     $('#globalFormModal').modal('hide');
                     showToast('success', res.message);
-                    // Dùng TabManager.reloadActiveTabGrid() thay cho loadData() toàn cục
-                    // để tránh bị overwrite khi nhiều tab đang mở cùng lúc
                     if (typeof TabManager !== 'undefined') {
                         TabManager.reloadActiveTabGrid(false);
                     } else if (typeof loadData === 'function') {
@@ -1011,7 +1011,6 @@
         });
     });
 
-    // Hàm hiển thị Toast thông báo chung
     function showToast(type, message) {
         var toastEl = document.getElementById('globalToast');
         var messageEl = document.getElementById('globalToastMessage');

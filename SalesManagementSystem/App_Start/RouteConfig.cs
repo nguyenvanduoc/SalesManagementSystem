@@ -86,6 +86,26 @@ namespace SalesManagementSystem
             routes.MapRoute(name: "TaiKhoanThanhToan_Save", url: "tai-khoan-thanh-toan/save", defaults: new { controller = "TaiKhoanThanhToan", action = "Save" });
             routes.MapRoute(name: "TaiKhoanThanhToan_Delete", url: "tai-khoan-thanh-toan/xoa", defaults: new { controller = "TaiKhoanThanhToan", action = "Delete" });
 
+            // Phiếu Chi
+            routes.MapRoute(name: "PhieuChi_List",    url: "phieu-chi",             defaults: new { controller = "PhieuChi", action = "Index" });
+            routes.MapRoute(name: "PhieuChi_GetList", url: "phieu-chi/danh-sach",   defaults: new { controller = "PhieuChi", action = "GetList" });
+            routes.MapRoute(name: "PhieuChi_Create",  url: "phieu-chi/them-moi",    defaults: new { controller = "PhieuChi", action = "Create" });
+            routes.MapRoute(name: "PhieuChi_Update",  url: "phieu-chi/cap-nhat",    defaults: new { controller = "PhieuChi", action = "Edit" });
+            routes.MapRoute(name: "PhieuChi_Save",    url: "phieu-chi/save",        defaults: new { controller = "PhieuChi", action = "Save" });
+            routes.MapRoute(name: "PhieuChi_GhiSo",  url: "phieu-chi/ghi-so",      defaults: new { controller = "PhieuChi", action = "GhiSo" });
+            routes.MapRoute(name: "PhieuChi_Huy",    url: "phieu-chi/huy",         defaults: new { controller = "PhieuChi", action = "Huy" });
+            routes.MapRoute(name: "PhieuChi_Delete", url: "phieu-chi/xoa",         defaults: new { controller = "PhieuChi", action = "Delete" });
+            routes.MapRoute(name: "PhieuChi_GetPhieuNhap", url: "phieu-chi/get-phieu-nhap", defaults: new { controller = "PhieuChi", action = "GetPhieuNhapByNCC" });
+            routes.MapRoute(name: "PhieuChi_GetPhieuNhapDetail", url: "phieu-chi/get-phieu-nhap-detail", defaults: new { controller = "PhieuChi", action = "GetPhieuNhapDetail" });
+
+            // Sổ Quỹ
+            routes.MapRoute(name: "SoQuy_List",    url: "so-quy",           defaults: new { controller = "SoQuy", action = "Index" });
+            routes.MapRoute(name: "SoQuy_GetList", url: "so-quy/danh-sach", defaults: new { controller = "SoQuy", action = "GetList" });
+
+            // Công Nợ Phải Trả NCC
+            routes.MapRoute(name: "CongNoNCC_List",    url: "cong-no-ncc",           defaults: new { controller = "CongNoNCC", action = "Index" });
+            routes.MapRoute(name: "CongNoNCC_GetList", url: "cong-no-ncc/danh-sach", defaults: new { controller = "CongNoNCC", action = "GetList" });
+
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",

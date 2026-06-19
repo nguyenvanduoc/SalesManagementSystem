@@ -1,0 +1,76 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.SoQuyViewModel>
+
+@{
+    decimal tongThu = ViewBag.TongThu ?? 0M;
+    decimal tongChi = ViewBag.TongChi ?? 0M;
+}
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive" style="min-height:350px;">
+            <table class="table table-custom table-bordered table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th width="40"  class="text-center fw-bold">STT</th>
+                        <th width="105" class="text-center fw-bold">Ngày</th>
+                        <th width="140" class="text-center fw-bold">Số chứng từ</th>
+                        <th width="80"  class="text-center fw-bold">Loại</th>
+                        <th class="fw-bold">Tài khoản</th>
+                        <th class="fw-bold">Diễn giải</th>
+                        <th width="140" class="text-end fw-bold">Số tiền thu</th>
+                        <th width="140" class="text-end fw-bold">Số tiền chi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Items != null && Model.Items.Any())
+                    {
+                        int stt = (Model.CurrentPage - 1) * Model.PageSize + 1;
+                        foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td class="text-center align-middle">@(stt++)</td>
+                                <td class="text-center align-middle">@item.NgayChungTu.ToString("dd/MM/yyyy")</td>
+                                <td class="text-center align-middle fw-semibold text-primary">@item.SoChungTu</td>
+                                <td class="text-center align-middle">
+                                    @if (item.LoaiChungTu == "THU")
+                                    {
+                                        <span class="badge bg-success bg-opacity-10 text-success">Thu</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger bg-opacity-10 text-danger">Chi</span>
+                                    }
+                                </td>
+                                <td class="align-middle">@item.TenTaiKhoanThanhToan</td>
+                                <td class="align-middle">@item.DienGiai</td>
+                                <td class="text-end align-middle fw-semibold @(item.SoTienThu > 0 ? "text-success" : "text-muted")">
+                                    @(item.SoTienThu > 0 ? item.SoTienThu.ToString("N0") : "-")
+                                </td>
+                                <td class="text-end align-middle fw-semibold @(item.SoTienChi > 0 ? "text-danger" : "text-muted")">
+                                    @(item.SoTienChi > 0 ? item.SoTienChi.ToString("N0") : "-")
+                                </td>
+                            </tr>
+                        }
+
+                        <!-- Dòng tổng cộng -->
+                        <tr class="fw-bold" style="background:#f4f6f9;">
+                            <td colspan="6" class="text-end align-middle">Tổng cộng:</td>
+                            <td class="text-end align-middle text-success">@tongThu.ToString("N0")</td>
+                            <td class="text-end align-middle text-danger">@tongChi.ToString("N0")</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">
+                                <i class="bi bi-journal-x fs-2 d-block mb-2 text-secondary"></i>
+                                Không có giao dịch trong kỳ này
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @Html.Partial("_Pagination", Model)
+</div>

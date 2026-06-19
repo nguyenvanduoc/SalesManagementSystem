@@ -1,4 +1,4 @@
-﻿@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.PhieuNhapKhoListViewModel>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.PhieuNhapKhoListViewModel>
 
 <div class="card shadow-sm border-0 mb-4">
     <div class="card-body p-0">
@@ -99,7 +99,18 @@
                                     }
                                     else if (item.TrangThai == 2)
                                     {
-                                        <span class="badge bg-success" style="font-size: 0.8rem; padding: 5px 8px;">Đã ghi</span>
+                                        if (item.TrangThaiThanhToan == 1)
+                                        {
+                                            <span class="badge bg-warning text-dark" style="font-size: 0.8rem; padding: 5px 8px;">Thanh toán một phần</span>
+                                        }
+                                        else if (item.TrangThaiThanhToan == 2)
+                                        {
+                                            <span class="badge bg-success" style="font-size: 0.8rem; padding: 5px 8px;">Đã thanh toán</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger" style="font-size: 0.8rem; padding: 5px 8px;">Chưa thanh toán</span>
+                                        }
                                     }
                                     else if (item.TrangThai == 3)
                                     {

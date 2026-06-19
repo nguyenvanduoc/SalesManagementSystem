@@ -1,0 +1,94 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.PhieuChiListViewModel>
+
+@{
+    ViewBag.Title = "Phiếu Chi";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0 fw-bold text-uppercase" style="color:#0b5b84;font-size:1.25rem;">
+        PHIẾU CHI
+    </h4>
+    @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuChi", SalesManagementSystem.Helpers.LoaiPhanQuyen.Them))
+    {
+        <button type="button" class="btn btn-primary" style="background-color:#3498db;border-color:#3498db;"
+                onclick="openFormModal('@Url.Action("Create","PhieuChi")')">
+            <i class="bi bi-plus-lg fw-bold me-1"></i>Thêm mới
+        </button>
+    }
+</div>
+
+<!-- Bộ lọc tìm kiếm -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" action="@Url.Action("GetList","PhieuChi")" id="searchForm">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label text-muted small mb-1 fw-semibold">Từ ngày</label>
+                    <input type="date" class="form-control form-control-sm" name="tuNgay" value="@ViewBag.TuNgay" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small mb-1 fw-semibold">Đến ngày</label>
+                    <input type="date" class="form-control form-control-sm" name="denNgay" value="@ViewBag.DenNgay" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small mb-1 fw-semibold">Số phiếu</label>
+                    <input type="text" class="form-control form-control-sm" name="soPhieuChi" value="@ViewBag.SoPhieuChi" placeholder="Nhập số phiếu..." />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small mb-1 fw-semibold">Nhà cung cấp</label>
+                    <select class="form-select form-select-sm" name="idNhaCungCap">
+                        <option value="">-- Tất cả --</option>
+                        @if (ViewBag.NhaCungCapList != null)
+                        {
+                            foreach (System.Web.Mvc.SelectListItem item in ViewBag.NhaCungCapList)
+                            {
+                                <option value="@item.Value" @(item.Selected ? "selected" : "")>@item.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small mb-1 fw-semibold">Trạng thái</label>
+                    <select class="form-select form-select-sm" name="trangThai">
+                        <option value="">-- Tất cả --</option>
+                        <option value="1" @(ViewBag.TrangThai == 1 ? "selected" : "")>Đề nghị</option>
+                        <option value="2" @(ViewBag.TrangThai == 2 ? "selected" : "")>Đã ghi sổ</option>
+                        <option value="3" @(ViewBag.TrangThai == 3 ? "selected" : "")>Đã hủy</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-sm text-white px-3" style="background-color:#2998e4;border:none;">
+                        <i class="bi bi-search me-1"></i>Tìm kiếm
+                    </button>
+                    <button type="button" class="btn btn-sm text-white px-3 btn-reset" style="background-color:#f1c40f;border:none;">
+                        Làm mới
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Grid dữ liệu -->
+<div id="table-container">
+    @Html.Partial("_PhieuChiList", Model)
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var $pane = $('#searchForm').closest('.tab-pane');
+            if ($pane.length === 0) $pane = $('body');
+
+            $pane.off('click.phieuchi_reset', '.btn-reset');
+            $pane.on('click.phieuchi_reset', '.btn-reset', function () {
+                $pane.find('input[name="tuNgay"]').val('');
+                $pane.find('input[name="denNgay"]').val('');
+                $pane.find('input[name="soPhieuChi"]').val('');
+                $pane.find('select[name="idNhaCungCap"]').val('');
+                $pane.find('select[name="trangThai"]').val('');
+                $pane.find('#searchForm').trigger('submit');
+            });
+        })();
+    </script>
+}
