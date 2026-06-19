@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -77,6 +77,14 @@ namespace SalesManagementSystem
             routes.MapRoute(name: "PhieuThuKhachHang_Huy", url: "phieu-thu/huy", defaults: new { controller = "PhieuThuKhachHang", action = "Huy" });
             routes.MapRoute(name: "PhieuThuKhachHang_Delete", url: "phieu-thu/xoa", defaults: new { controller = "PhieuThuKhachHang", action = "Delete" });
             routes.MapRoute(name: "PhieuThuKhachHang_GetCongNo", url: "phieu-thu/get-cong-no", defaults: new { controller = "PhieuThuKhachHang", action = "GetCongNoChungTu" });
+
+            // Tài khoản thanh toán
+            routes.MapRoute(name: "TaiKhoanThanhToan_List", url: "tai-khoan-thanh-toan", defaults: new { controller = "TaiKhoanThanhToan", action = "Index" });
+            routes.MapRoute(name: "TaiKhoanThanhToan_GetList", url: "tai-khoan-thanh-toan/danh-sach", defaults: new { controller = "TaiKhoanThanhToan", action = "GetList" });
+            routes.MapRoute(name: "TaiKhoanThanhToan_Create", url: "tai-khoan-thanh-toan/them-moi", defaults: new { controller = "TaiKhoanThanhToan", action = "Create" });
+            routes.MapRoute(name: "TaiKhoanThanhToan_Update", url: "tai-khoan-thanh-toan/cap-nhat", defaults: new { controller = "TaiKhoanThanhToan", action = "Edit" });
+            routes.MapRoute(name: "TaiKhoanThanhToan_Save", url: "tai-khoan-thanh-toan/save", defaults: new { controller = "TaiKhoanThanhToan", action = "Save" });
+            routes.MapRoute(name: "TaiKhoanThanhToan_Delete", url: "tai-khoan-thanh-toan/xoa", defaults: new { controller = "TaiKhoanThanhToan", action = "Delete" });
 
             routes.MapRoute(
                 name: "Default",

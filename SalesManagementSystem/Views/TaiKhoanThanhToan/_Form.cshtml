@@ -1,0 +1,81 @@
+@model SalesManagementSystem.Models.ViewModels.TaiKhoanThanhToanViewModel
+
+<form action="@Url.Action("Save", "TaiKhoanThanhToan")" method="post">
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.ID)
+
+    <div class="modal-header border-bottom-0 pb-0">
+        <h5 class="modal-title fw-bold text-uppercase" style="color:#0b5b84;">
+            @ViewBag.Title
+        </h5>
+        <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    
+    <div class="modal-body pt-3 pb-4">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Mã tài khoản <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.MaTaiKhoan, new { @class = "form-control", @placeholder = "Nhập mã..." })
+                @Html.ValidationMessageFor(m => m.MaTaiKhoan, "", new { @class = "text-danger small" })
+            </div>
+            
+            <div class="col-md-8">
+                <label class="form-label fw-bold">Tên tài khoản <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.TenTaiKhoan, new { @class = "form-control", @placeholder = "Nhập tên tài khoản..." })
+                @Html.ValidationMessageFor(m => m.TenTaiKhoan, "", new { @class = "text-danger small" })
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Ngân hàng</label>
+                @Html.TextBoxFor(m => m.NganHang, new { @class = "form-control", @placeholder = "Vietcombank, ACB..." })
+                @Html.ValidationMessageFor(m => m.NganHang, "", new { @class = "text-danger small" })
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Số tài khoản</label>
+                @Html.TextBoxFor(m => m.SoTaiKhoan, new { @class = "form-control", @placeholder = "Nhập số tài khoản..." })
+                @Html.ValidationMessageFor(m => m.SoTaiKhoan, "", new { @class = "text-danger small" })
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Chủ tài khoản</label>
+                @Html.TextBoxFor(m => m.ChuTaiKhoan, new { @class = "form-control", @placeholder = "Nhập tên người đại diện..." })
+                @Html.ValidationMessageFor(m => m.ChuTaiKhoan, "", new { @class = "text-danger small" })
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Tài khoản kế toán</label>
+                @Html.DropDownListFor(m => m.IDTaiKhoanKeToan, (IEnumerable<SelectListItem>)ViewBag.TaiKhoanKeToanList, "-- Chọn tài khoản kế toán --", new { @class = "form-select select2" })
+                @Html.ValidationMessageFor(m => m.IDTaiKhoanKeToan, "", new { @class = "text-danger small" })
+            </div>
+
+            <div class="col-md-12 pb-2">
+                <div class="form-check form-switch fs-5">
+                    @Html.CheckBoxFor(m => m.IsHoatDong, new { @class = "form-check-input", role = "switch" })
+                    <label class="form-check-label fs-6 pt-1 fw-semibold" for="IsHoatDong">Đang hoạt động</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        $(document).ready(function() {
+            var $modal = $('#globalFormModalContent').closest('.modal');
+            if ($modal.length > 0) {
+                $modal.find('.select2').select2({
+                    dropdownParent: $modal,
+                    width: '100%'
+                });
+            }
+        });
+    </script>
+    
+    <div class="modal-footer bg-light border-top-0 rounded-bottom">
+        <button type="button" class="btn text-dark" style="background:#e9ecef" data-bs-dismiss="modal">
+            Để sau
+        </button>
+        <button type="submit" class="btn text-white px-4" style="background:#f1c40f">
+            Đồng ý
+        </button>
+    </div>
+</form>

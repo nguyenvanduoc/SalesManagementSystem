@@ -307,6 +307,10 @@
     <Compile Include="Repositories\Interfaces\IPhieuThuKhachHangRepository.cs" />
     <Compile Include="Repositories\PhieuThuKhachHangRepository.cs" />
     <Compile Include="Controllers\PhieuThuKhachHangController.cs" />
+    <Compile Include="Models\ViewModels\TaiKhoanThanhToanViewModel.cs" />
+    <Compile Include="Repositories\Interfaces\ITaiKhoanThanhToanRepository.cs" />
+    <Compile Include="Repositories\TaiKhoanThanhToanRepository.cs" />
+    <Compile Include="Controllers\TaiKhoanThanhToanController.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-grid.css" />
@@ -439,6 +443,9 @@
     <Content Include="Views\PhieuThuKhachHang\_PhieuThuKhachHangList.cshtml" />
     <Content Include="Views\PhieuThuKhachHang\Create.cshtml" />
     <Content Include="Views\PhieuThuKhachHang\Collect.cshtml" />
+    <Content Include="Views\TaiKhoanThanhToan\Index.cshtml" />
+    <Content Include="Views\TaiKhoanThanhToan\_TaiKhoanThanhToanList.cshtml" />
+    <Content Include="Views\TaiKhoanThanhToan\_Form.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />

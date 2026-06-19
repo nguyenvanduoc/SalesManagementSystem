@@ -1,0 +1,68 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.TaiKhoanThanhToanListViewModel>
+
+@{
+    ViewBag.Title = "Danh mục Tài khoản thanh toán";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0 fw-bold text-uppercase" style="color:#0b5b84;font-size:1.25rem;">
+        @ViewBag.Title
+    </h4>
+    @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("TaiKhoanThanhToan", SalesManagementSystem.Helpers.LoaiPhanQuyen.Them))
+    {
+        <button type="button" class="btn btn-primary" style="background-color: #3498db; border-color: #3498db;" onclick="openFormModal('@Url.Action("Create", "TaiKhoanThanhToan")')">
+            <i class="bi bi-plus-lg fw-bold me-1"></i>Thêm mới
+        </button>
+    }
+</div>
+
+<!-- Bộ lọc tìm kiếm -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" action="@Url.Action("GetList", "TaiKhoanThanhToan")" id="searchForm">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label text-muted small mb-1 fw-semibold">Từ khóa</label>
+                    <input type="text" class="form-control form-control-sm" name="keyword" placeholder="Nhập mã, tên hoặc số TK..." value="@ViewBag.Keyword">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label text-muted small mb-1 fw-semibold">Trạng thái</label>
+                    <select class="form-select form-select-sm" name="isHoatDong">
+                        <option value="">-- Tất cả --</option>
+                        <option value="1" @(ViewBag.IsHoatDong == 1 ? "selected" : "")>Đang hoạt động</option>
+                        <option value="0" @(ViewBag.IsHoatDong == 0 ? "selected" : "")>Ngừng hoạt động</option>
+                    </select>
+                </div>
+                <div class="col-md-5 d-flex gap-2">
+                    <button type="submit" class="btn btn-sm text-white px-3" style="background-color: #2998e4; border: none;">
+                        <i class="bi bi-search me-1"></i>Tìm kiếm
+                    </button>
+                    <button type="button" class="btn btn-sm text-white px-3 btn-reset" style="background-color: #f1c40f; border: none;">
+                        Làm mới
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Grid dữ liệu -->
+<div id="table-container">
+    @Html.Partial("_TaiKhoanThanhToanList", Model)
+</div>
+
+@section Scripts {
+    <script>
+        (function() {
+            var $pane = $('#searchForm').closest('.tab-pane');
+            if ($pane.length === 0) $pane = $('body');
+
+            $pane.off('click.localreset', '.btn-reset');
+            $pane.on('click.localreset', '.btn-reset', function() {
+                $pane.find('input[name="keyword"]').val('');
+                $pane.find('select[name="isHoatDong"]').val('');
+                $pane.find('#searchForm').trigger('submit');
+            });
+        })();
+    </script>
+}
