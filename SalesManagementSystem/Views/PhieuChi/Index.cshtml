@@ -24,15 +24,15 @@
     /* Stat Cards CSS */
     .stat-card {
         background: #fff;
-        border-radius: 12px;
-        padding: 20px 24px;
+        border-radius: 10px;
+        padding: 12px 18px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         box-shadow: 0 2px 10px rgba(0,0,0,.03);
         border: 1px solid #eef2f5;
         transition: transform .2s, box-shadow .2s;
-        height: 110px;
+        height: 85px;
     }
     .stat-card:hover {
         transform: translateY(-2px);
@@ -42,33 +42,36 @@
         flex-grow: 1;
     }
     .stat-body .label {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         color: #8c98a5;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        margin-bottom: 6px;
+        margin-bottom: 2px;
     }
     .stat-body .value {
-        font-size: 1.55rem;
+        font-size: 1.25rem;
         font-weight: 700;
         line-height: 1.1;
         color: #1e293b;
     }
     .stat-body .trend {
-        font-size: 0.72rem;
-        margin-top: 6px;
+        font-size: 0.68rem;
+        margin-top: 2px;
         display: inline-block;
         font-weight: 500;
     }
     .stat-icon-wrap {
-        width: 46px;
-        height: 46px;
-        border-radius: 10px;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
+    }
+    .stat-icon-wrap i {
+        font-size: 1.1rem !important;
     }
     
     /* Color modifiers */
@@ -88,7 +91,6 @@
         <h4 class="mb-1 fw-bold text-uppercase" style="color:#0b5b84;font-size:1.25rem;">
             PHIẾU CHI
         </h4>
-        <p class="text-muted small mb-0">Quản lý các chứng từ chi tiền mặt và chuyển khoản</p>
     </div>
     <div class="d-flex gap-2">
         @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuChi", SalesManagementSystem.Helpers.LoaiPhanQuyen.Them))
@@ -236,9 +238,9 @@
                     <button type="submit" class="btn btn-sm text-white px-3 d-flex align-items-center gap-1" style="background-color:#2998e4;border:none;height:31px;">
                         <i class="bi bi-search"></i> Tìm kiếm
                     </button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary px-2 btn-reset d-flex align-items-center justify-content-center" style="border-color:#dee2e6;height:31px;width:31px;background-color:#fff;">
-                        <i class="bi bi-arrow-clockwise"></i>
-                    </button>
+                    <a class="btn btn-sm text-white btn-reset" style="background:#f1c40f;height:31px;line-height:1.5;display:inline-flex;align-items:center;">
+                        Làm mới
+                    </a>
                 </div>
             </div>
         </form>

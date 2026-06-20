@@ -91,6 +91,7 @@ namespace SalesManagementSystem
             routes.MapRoute(name: "PhieuChi_GetList", url: "phieu-chi/danh-sach",   defaults: new { controller = "PhieuChi", action = "GetList" });
             routes.MapRoute(name: "PhieuChi_Create",  url: "phieu-chi/them-moi",    defaults: new { controller = "PhieuChi", action = "Create" });
             routes.MapRoute(name: "PhieuChi_Update",  url: "phieu-chi/cap-nhat",    defaults: new { controller = "PhieuChi", action = "Edit" });
+            routes.MapRoute(name: "PhieuChi_Details", url: "phieu-chi/chi-tiet",    defaults: new { controller = "PhieuChi", action = "Details" });
             routes.MapRoute(name: "PhieuChi_Save",    url: "phieu-chi/save",        defaults: new { controller = "PhieuChi", action = "Save" });
             routes.MapRoute(name: "PhieuChi_GhiSo",  url: "phieu-chi/ghi-so",      defaults: new { controller = "PhieuChi", action = "GhiSo" });
             routes.MapRoute(name: "PhieuChi_Huy",    url: "phieu-chi/huy",         defaults: new { controller = "PhieuChi", action = "Huy" });

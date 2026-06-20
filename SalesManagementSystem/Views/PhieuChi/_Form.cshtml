@@ -191,6 +191,13 @@
                       .removeClass('modal-lg modal-dialog-centered')
                       .addClass('modal-xl')
                       .css('margin-top', '30px');
+
+                var isView = @(ViewBag.IsView == true ? "true" : "false");
+                if (isView) {
+                    $modal.find('input, select, textarea').prop('disabled', true);
+                    $modal.find('#btnChiToanBo').hide();
+                }
+
                 $modal.find('.select2').select2({ dropdownParent: $modal, width: '100%' });
             }
 
@@ -208,7 +215,12 @@
                         $modal.find('#pnConLai').text(res.conLai + ' đ');
                         
                         // Cấu hình nút Chi toàn bộ
-                        $modal.find('#btnChiToanBo').data('amount', res.rawConLai).show();
+                        $modal.find('#btnChiToanBo').data('amount', res.rawConLai);
+                        if (!isView) {
+                            $modal.find('#btnChiToanBo').show();
+                        } else {
+                            $modal.find('#btnChiToanBo').hide();
+                        }
                         
                         var rows = '';
                         if (res.lichSu && res.lichSu.length > 0) {
@@ -290,18 +302,27 @@
     </script>
 
     <div class="modal-footer bg-light border-top-0 rounded-bottom">
-        <button type="button" class="btn text-dark" style="background:#e9ecef" data-bs-dismiss="modal">
-            Để sau
-        </button>
-        @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuChi", SalesManagementSystem.Helpers.LoaiPhanQuyen.TuyChon))
+        @if (ViewBag.IsView == true)
         {
-            <button type="button" class="btn text-white px-4" style="background:#2998e4" id="btnLuuVaGhi">
-                <i class="bi bi-journal-check me-1"></i>Lưu và ghi
+            <button type="button" class="btn text-white px-4" style="background:#0b5b84;" data-bs-dismiss="modal">
+                Đóng
             </button>
         }
-        <button type="submit" class="btn text-white px-4" style="background:#f1c40f">
-            Đồng ý
-        </button>
+        else
+        {
+            <button type="submit" class="btn text-white px-4" style="background:#f1c40f">
+                Lưu dữ liệu
+            </button>
+            if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuChi", SalesManagementSystem.Helpers.LoaiPhanQuyen.TuyChon))
+            {
+                <button type="button" class="btn text-white px-4" style="background:#2998e4" id="btnLuuVaGhi">
+                    <i class="bi bi-journal-check me-1"></i>Lưu và ghi
+                </button>
+            }
+            <button type="button" class="btn text-dark px-4" style="background:#e9ecef" data-bs-dismiss="modal">
+                Đóng
+            </button>
+        }
     </div>
 </form>
 

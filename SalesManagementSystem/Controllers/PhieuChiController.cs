@@ -193,7 +193,23 @@ namespace SalesManagementSystem.Controllers
                 return Content("<div class='alert alert-warning'>Phiếu đã hủy, không thể chỉnh sửa.</div>");
 
             ViewBag.Title = "Cập nhật Phiếu Chi";
-            PopulateFormDropdowns(model.IDNhaCungCap);
+            PopulateFormDropdowns(model.IDNhaCungCap, model.IDPhieuNhap);
+            return PartialView("_Form", model);
+        }
+
+        // GET: /phieu-chi/chi-tiet?id=x
+        [HttpGet]
+        public ActionResult Details(int id)
+        {
+            if (!PermissionHelper.HasPermission("PhieuChi", LoaiPhanQuyen.Xem))
+                return Content("<div class='alert alert-danger'>Không có quyền xem chi tiết</div>");
+
+            var model = _repo.GetByID(id);
+            if (model == null) return HttpNotFound();
+
+            ViewBag.Title = "Chi tiết Phiếu Chi";
+            ViewBag.IsView = true;
+            PopulateFormDropdowns(model.IDNhaCungCap, model.IDPhieuNhap);
             return PartialView("_Form", model);
         }
 
@@ -212,7 +228,7 @@ namespace SalesManagementSystem.Controllers
 
             if (!ModelState.IsValid)
             {
-                PopulateFormDropdowns(model.IDNhaCungCap);
+                PopulateFormDropdowns(model.IDNhaCungCap, model.IDPhieuNhap);
                 return PartialView("_Form", model);
             }
 
@@ -375,7 +391,7 @@ namespace SalesManagementSystem.Controllers
             ViewBag.TaiKhoanList = new SelectList(taiKhoans.ToList(), "Value", "Text");
         }
 
-        private void PopulateFormDropdowns(int? idNhaCungCap = null)
+        private void PopulateFormDropdowns(int? idNhaCungCap = null, int? currentPhieuNhapId = null)
         {
             var khoanMucs = _repo.GetKhoanMucDropdown()
                 .Select(x => new SelectListItem { Value = ((int)x.ID).ToString(), Text = (string)x.TenHienThi });
@@ -393,7 +409,7 @@ namespace SalesManagementSystem.Controllers
                 .Select(x => new SelectListItem { Value = ((int)x.ID).ToString(), Text = (string)x.TenHienThi });
             ViewBag.NhanSuList = new SelectList(nhanSus.ToList(), "Value", "Text");
 
-            var phieuNhaps = _repo.GetPhieuNhapDropdown(idNhaCungCap)
+            var phieuNhaps = _repo.GetPhieuNhapDropdown(idNhaCungCap, currentPhieuNhapId)
                 .Select(x => new SelectListItem { Value = ((int)x.ID).ToString(), Text = (string)x.TenHienThi });
             ViewBag.PhieuNhapList = new SelectList(phieuNhaps.ToList(), "Value", "Text");
         }

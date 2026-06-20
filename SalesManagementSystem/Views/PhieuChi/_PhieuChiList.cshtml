@@ -25,6 +25,7 @@
                         <th width="60"  class="text-center fw-bold">Thao tác</th>
                         <th width="40"  class="text-center fw-bold">STT</th>
                         <th width="130" class="text-center fw-bold">Số phiếu chi</th>
+                        <th width="120" class="text-center fw-bold">Số đơn hàng</th>
                         <th width="100" class="text-center fw-bold">Ngày chi</th>
                         <th class="fw-bold">Khoản mục chi</th>
                         <th class="fw-bold">Tài khoản TT</th>
@@ -47,10 +48,28 @@
                             <tr>
                                 <td class="text-center align-middle">
                                     <div class="dropdown dropdown-hover">
-                                        <button class="btn btn-sm btn-light border-0 shadow-none" type="button" data-bs-toggle="dropdown">
-                                            <i class="bi bi-grid-3x3-gap-fill text-muted"></i>
+                                        <button class="btn btn-sm btn-light border dropdown-toggle-hide-arrow shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 2px 6px;">
+                                            <i class="bi bi-grid-3x3-gap-fill text-dark"></i>
                                         </button>
                                         <ul class="dropdown-menu shadow-sm">
+                                            <li>
+                                                <button type="button" class="dropdown-item py-2"
+                                                        onclick="openFormModal('@Url.Action("Details","PhieuChi",new{id=item.ID})')">
+                                                    <i class="bi bi-eye text-info me-2"></i>Xem chi tiết
+                                                </button>
+                                            </li>
+                                            @if (item.TrangThai == 1 && (canSua || canTuyChon || canXoa))
+                                            {
+                                                <li><hr class="dropdown-divider"></li>
+                                            }
+                                            else if (item.TrangThai == 2 && canTuyChon)
+                                            {
+                                                <li><hr class="dropdown-divider"></li>
+                                            }
+                                            else if (item.TrangThai == 3)
+                                            {
+                                                <li><hr class="dropdown-divider"></li>
+                                            }
                                             @if (item.TrangThai == 1)
                                             {
                                                 if (canSua)
@@ -103,6 +122,7 @@
                                 </td>
                                 <td class="text-center align-middle">@(stt++)</td>
                                 <td class="text-center align-middle fw-semibold text-primary">@item.SoPhieuChi</td>
+                                <td class="text-center align-middle">@item.SoPhieuNhap</td>
                                 <td class="text-center align-middle">@item.NgayChi.ToString("dd/MM/yyyy")</td>
                                 <td class="align-middle">@item.TenKhoanMuc</td>
                                 <td class="align-middle">@item.TenTaiKhoanThanhToan</td>
@@ -131,7 +151,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="10" class="text-center text-muted py-4">
+                            <td colspan="11" class="text-center text-muted py-4">
                                 <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
                                 Không có dữ liệu
                             </td>

@@ -25,7 +25,7 @@ namespace SalesManagementSystem.Repositories.Interfaces
         IEnumerable<dynamic> GetKhoanMucDropdown();
         IEnumerable<dynamic> GetTaiKhoanDropdown();
         IEnumerable<dynamic> GetNhaCungCapDropdown();
-        IEnumerable<dynamic> GetPhieuNhapDropdown(int? idNhaCungCap);
+        IEnumerable<dynamic> GetPhieuNhapDropdown(int? idNhaCungCap, int? currentPhieuNhapId = null);
         IEnumerable<dynamic> GetNhanSuDropdown();
         dynamic GetPhieuNhapDetail(int idPhieuNhap);
         IEnumerable<dynamic> GetLichSuChiTienPhieuNhap(int idPhieuNhap);

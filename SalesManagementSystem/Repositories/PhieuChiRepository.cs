@@ -162,14 +162,14 @@ namespace SalesManagementSystem.Repositories
             }
         }
 
-        public IEnumerable<dynamic> GetPhieuNhapDropdown(int? idNhaCungCap)
+        public IEnumerable<dynamic> GetPhieuNhapDropdown(int? idNhaCungCap, int? currentPhieuNhapId = null)
         {
             using (var conn = _db.CreateConnection())
             {
                 var sql = idNhaCungCap.HasValue
-                    ? "SELECT ID, SoChungTu AS TenHienThi FROM KHO_PhieuNhap WHERE IsDeleted = 0 AND TrangThai = 2 AND ISNULL(TrangThaiThanhToan, 0) < 2 AND IDNhaCungCap = @IDNhaCungCap ORDER BY NgayNhap DESC"
-                    : "SELECT ID, SoChungTu AS TenHienThi FROM KHO_PhieuNhap WHERE IsDeleted = 0 AND TrangThai = 2 AND ISNULL(TrangThaiThanhToan, 0) < 2 ORDER BY NgayNhap DESC";
-                return conn.Query<dynamic>(sql, new { IDNhaCungCap = idNhaCungCap }).ToList();
+                    ? "SELECT ID, SoChungTu AS TenHienThi FROM KHO_PhieuNhap WHERE IsDeleted = 0 AND TrangThai = 2 AND (ISNULL(TrangThaiThanhToan, 0) < 2 OR ID = @CurrentID) AND IDNhaCungCap = @IDNhaCungCap ORDER BY NgayNhap DESC"
+                    : "SELECT ID, SoChungTu AS TenHienThi FROM KHO_PhieuNhap WHERE IsDeleted = 0 AND TrangThai = 2 AND (ISNULL(TrangThaiThanhToan, 0) < 2 OR ID = @CurrentID) ORDER BY NgayNhap DESC";
+                return conn.Query<dynamic>(sql, new { IDNhaCungCap = idNhaCungCap, CurrentID = currentPhieuNhapId }).ToList();
             }
         }
 

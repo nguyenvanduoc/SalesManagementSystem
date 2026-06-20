@@ -109,12 +109,12 @@ BEGIN
     DECLARE @Nam   CHAR(2)  = RIGHT(CAST(YEAR(GETDATE()) AS VARCHAR(4)), 2);
     DECLARE @MaxSo INT;
 
-    SELECT @MaxSo = ISNULL(MAX(CAST(RIGHT(SoPhieuChi, 7) AS INT)), 0)
+    SELECT @MaxSo = ISNULL(MAX(CAST(RIGHT(SoPhieuChi, 6) AS INT)), 0)
     FROM KT_PhieuChi
     WHERE SoPhieuChi LIKE 'PC' + @Nam + '%'
-      AND ISNUMERIC(RIGHT(SoPhieuChi, 7)) = 1;
+      AND ISNUMERIC(RIGHT(SoPhieuChi, 6)) = 1;
 
-    SELECT 'PC' + @Nam + RIGHT('0000000' + CAST(@MaxSo + 1 AS VARCHAR(7)), 7) AS SoPhieuChi;
+    SELECT 'PC' + @Nam + RIGHT('000000' + CAST(@MaxSo + 1 AS VARCHAR(6)), 6) AS SoPhieuChi;
 END
 GO
 
