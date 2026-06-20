@@ -112,7 +112,7 @@ namespace SalesManagementSystem.Controllers
                         }
                     }
                 }
-                return Json(new { success = true, message = "Thêm mới tài khoản thành công! Mật khẩu mặc định là 1234." });
+                return Json(new { success = true, message = "Thêm mới tài khoản thành công! Mật khẩu mặc định là 1111." });
             }
             
             ModelState.AddModelError("", "Vui lòng chọn ít nhất một nhân sự.");

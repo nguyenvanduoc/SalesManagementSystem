@@ -1,4 +1,4 @@
-﻿@model SalesManagementSystem.Models.ViewModels.SidebarVM
+@model SalesManagementSystem.Models.ViewModels.SidebarVM
 @using SalesManagementSystem.Helpers
 @{
     // Active controller từ request hiện tại (truyền vào qua SidebarVM)
@@ -9,8 +9,8 @@
 <p class="nav-heading" style="margin-top: -15px;">Tổng quan</p>
 <ul style="padding:0;margin:0">
     <li class="nav-item">
-        <a href="javascript:void(0)" onclick="TabManager.setActiveTab('default-tab')"
-           class="nav-link @(activeCtrl == "Home" ? "active" : "")">
+        <a onclick="TabManager.setActiveTab('default-tab')"
+           class="nav-link @(activeCtrl == "Home" ? "active" : "")" style="cursor:pointer">
             <i class="bi bi-speedometer2"></i>
             <span>Dashboard</span>
         </a>
@@ -46,7 +46,7 @@
                     string fadedClass = (isGroupActive && !isActive) ? "text-faded" : "";
 
                     <li class="nav-item">
-                        <a href="javascript:void(0)" onclick="TabManager.openTab('@item.TenController', '@item.TenManHinh', '@href')" class="nav-link @(isActive ? "active" : "") @fadedClass">
+                        <a data-ctrl="@item.TenController" onclick="TabManager.openTab('@item.TenController', '@item.TenManHinh', '@href')" class="nav-link @(isActive ? "active" : "") @fadedClass" style="cursor:pointer">
                             <span>@item.TenManHinh</span>
                         </a>
                     </li>

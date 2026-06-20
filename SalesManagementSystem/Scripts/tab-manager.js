@@ -439,6 +439,8 @@ var TabManager = (function () {
                 //     window.history.replaceState(null, '', cleanUrlForHistory(url));
                 // }
             }
+            // Đồng bộ sidebar mỗi khi tab được switch (kể cả click trực tiếp vào button tab)
+            syncSidebarState(tabId);
             saveTabsState();
         });
 
@@ -447,6 +449,23 @@ var TabManager = (function () {
             e.stopPropagation();
             var tabId = $(this).closest('.nav-link').attr('id');
             closeTab(tabId);
+        });
+
+        // Xử lý reload tab khi double click vào tiêu đề tab
+        $(document).on('dblclick', '#mainTabHeader .nav-link', function (e) {
+            if ($(e.target).hasClass('close-tab-btn')) return; // Bỏ qua nếu double click trúng nút tắt
+            var tabId = $(this).attr('id');
+            var paneId = $(this).attr('data-bs-target') ? $(this).attr('data-bs-target').substring(1) : (tabId + '-pane');
+            var url = $('#' + paneId).attr('data-url');
+            
+            if (url) {
+                // Đảm bảo tab được chọn nếu chưa chọn
+                if (!$(this).hasClass('active')) {
+                    setActiveTab(tabId);
+                }
+                // Tải lại nội dung
+                loadTabContent(tabId, url);
+            }
         });
 
         // Nút cuộn ngang thanh Tab
@@ -588,6 +607,61 @@ var TabManager = (function () {
                     container.scrollBy({ left: liRect.right - containerRect.right + 30, behavior: 'smooth' });
                 }
             }, 50);
+
+            // Đồng bộ sidebar theo tab đang chọn
+            syncSidebarState(tabId);
+        }
+    }
+
+    function syncSidebarState(tabId) {
+        if (!tabId) return;
+        var tabKey = tabId.replace('tab-', '');
+        // Bỏ active và text-faded tất cả menu hiện tại
+        $('#sidebar .nav-link').removeClass('active text-faded');
+        // Thêm active cho menu tương ứng
+        if (tabKey === 'default') {
+            $('#sidebar .nav-link[onclick*="default-tab"]').addClass('active');
+        } else {
+            var activeSidebarLink = $('#sidebar .nav-link[data-ctrl="' + tabKey + '"]');
+            if (activeSidebarLink.length > 0) {
+                activeSidebarLink.addClass('active');
+                // Tự động xổ mở nhóm chứa menu này nếu nó đang bị đóng
+                var collapseGroup = activeSidebarLink.closest('.nav-group-collapse');
+                if (collapseGroup.length > 0) {
+                    // Thêm text-faded cho các menu khác trong cùng nhóm
+                    collapseGroup.find('.nav-link').not(activeSidebarLink).addClass('text-faded');
+                    
+                    // Xổ mở nhóm
+                    if (!collapseGroup.hasClass('show')) {
+                        var bsCollapse = bootstrap.Collapse.getOrCreateInstance(collapseGroup[0]);
+                        bsCollapse.show();
+                        var toggleBtn = collapseGroup.siblings('.nav-group-toggle');
+                        toggleBtn.removeClass('collapsed').attr('aria-expanded', 'true');
+                        
+                        // Đợi animation xổ xong rồi cuộn
+                        setTimeout(function() { scrollSidebarToActive(activeSidebarLink); }, 350);
+                    } else {
+                        setTimeout(function() { scrollSidebarToActive(activeSidebarLink); }, 50);
+                    }
+                } else {
+                    setTimeout(function() { scrollSidebarToActive(activeSidebarLink); }, 50);
+                }
+                
+                function scrollSidebarToActive(link) {
+                    var sidebar = $('#sidebar');
+                    if (sidebar.length > 0 && link.length > 0) {
+                        var sidebarRect = sidebar[0].getBoundingClientRect();
+                        var linkRect = link[0].getBoundingClientRect();
+                        
+                        // Nếu menu bị khuất phía trên hoặc phía dưới
+                        if (linkRect.top < sidebarRect.top || linkRect.bottom > sidebarRect.bottom) {
+                            var itemTop = link.offset().top - sidebar.offset().top + sidebar.scrollTop();
+                            var targetScroll = itemTop - (sidebar.height() / 2) + (link.height() / 2);
+                            sidebar.animate({ scrollTop: targetScroll }, 300);
+                        }
+                    }
+                }
+            }
         }
     }
 
