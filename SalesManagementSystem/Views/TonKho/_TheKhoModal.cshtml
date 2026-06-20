@@ -1,4 +1,4 @@
-﻿@model IEnumerable<SalesManagementSystem.Models.ViewModels.TheKhoListViewModel>
+@model IEnumerable<SalesManagementSystem.Models.ViewModels.TheKhoListViewModel>
 
 <div class="modal fade" id="theKhoModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
@@ -19,8 +19,11 @@
                                 <th class="text-right">Nhập</th>
                                 <th class="text-right">Xuất</th>
                                 <th class="text-right">Tồn lũy kế</th>
-                                <th class="text-right">Đơn giá</th>
-                                <th class="text-right">Thành tiền</th>
+                                @if (ViewBag.IsNhanVienKho != true)
+                                {
+                                    <th class="text-right">Đơn giá</th>
+                                    <th class="text-right">Thành tiền</th>
+                                }
                             </tr>
                         </thead>
                         <tbody>
@@ -49,8 +52,11 @@
                                     <td class="text-right text-success">@(item.Nhap > 0 ? item.Nhap.ToString("N0") : "")</td>
                                     <td class="text-right text-danger">@(item.Xuat > 0 ? item.Xuat.ToString("N0") : "")</td>
                                     <td class="text-right font-weight-bold">@item.TonLuyKe.ToString("N0")</td>
-                                    <td class="text-right">@item.DonGia.ToString("N0")</td>
-                                    <td class="text-right">@item.ThanhTien.ToString("N0")</td>
+                                    @if (ViewBag.IsNhanVienKho != true)
+                                    {
+                                        <td class="text-right">@item.DonGia.ToString("N0")</td>
+                                        <td class="text-right">@item.ThanhTien.ToString("N0")</td>
+                                    }
                                 </tr>
                             }
                         </tbody>

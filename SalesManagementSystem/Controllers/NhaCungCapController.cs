@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
@@ -103,6 +103,7 @@ namespace SalesManagementSystem.Controllers
                     SoDienThoai = model.DienThoai?.Trim(),
                     Email = model.Email?.Trim(),
                     DiaChi = model.DiaChi?.Trim(),
+                    MaSoThue = model.MaSoThue?.Trim(),
                     NguoiTao = userId
                 };
 
@@ -127,7 +128,8 @@ namespace SalesManagementSystem.Controllers
                 TenNhaCungCap = ncc.TenNhaCungCap,
                 DienThoai = ncc.SoDienThoai,
                 Email = ncc.Email,
-                DiaChi = ncc.DiaChi
+                DiaChi = ncc.DiaChi,
+                MaSoThue = ncc.MaSoThue
             };
             return PartialView("Edit", model);
         }
@@ -153,7 +155,8 @@ namespace SalesManagementSystem.Controllers
                     TenNhaCungCap = model.TenNhaCungCap?.Trim(),
                     SoDienThoai = model.DienThoai?.Trim(),
                     Email = model.Email?.Trim(),
-                    DiaChi = model.DiaChi?.Trim()
+                    DiaChi = model.DiaChi?.Trim(),
+                    MaSoThue = model.MaSoThue?.Trim()
                 };
 
                 _nhaCungCapRepo.Save(ncc);

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 namespace SalesManagementSystem.Models.ViewModels
 {
@@ -20,6 +20,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public string MaSanPham { get; set; }
         public string TenSanPham { get; set; }
         public string DVT { get; set; }
+        public decimal TonDauKy { get; set; }
         public decimal TongNhap { get; set; }
         public decimal TongXuat { get; set; }
         public decimal TonKho { get; set; }

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Dapper;
@@ -65,6 +65,7 @@ namespace SalesManagementSystem.Repositories
                     DiaChi = row.DiaChi,
                     SoDienThoai = row.DienThoai,
                     Email = row.Email,
+                    MaSoThue = row.MaSoThue,
                     NgayTao = row.NgayTao,
                     NguoiTao = row.NguoiTao
                 };
@@ -82,6 +83,7 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@DienThoai", ncc.SoDienThoai?.Trim());
                 p.Add("@Email", ncc.Email?.Trim());
                 p.Add("@DiaChi", ncc.DiaChi?.Trim());
+                p.Add("@MaSoThue", ncc.MaSoThue?.Trim());
                 p.Add("@NguoiTao", ncc.NguoiTao);
 
                 return conn.ExecuteScalar<int>(

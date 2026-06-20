@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace SalesManagementSystem.Models.ViewModels
 {
@@ -10,6 +10,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public string DienThoai { get; set; }
         public string Email { get; set; }
         public string DiaChi { get; set; }
+        public string MaSoThue { get; set; }
         public DateTime? NgayTao { get; set; }
         public int? NguoiTao { get; set; }
         public string TenNguoiTao { get; set; }

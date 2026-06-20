@@ -1,4 +1,4 @@
-﻿@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.NhaCungCapViewModel>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.NhaCungCapViewModel>
 
 <div class="card shadow-sm">
     <div class="card-body p-0">
@@ -13,6 +13,7 @@
                         <th>Tên nhà cung cấp</th>
                         <th>Điện thoại</th>
                         <th>Email</th>
+                        <th>Mã số thuế</th>
                         <th>Địa chỉ</th>
                         <th class="text-center">Ngày tạo</th>
                         <th>Người tạo</th>
@@ -61,6 +62,7 @@
                                 <td class="align-middle">@item.TenNhaCungCap</td>
                                 <td class="align-middle">@item.DienThoai</td>
                                 <td class="align-middle">@item.Email</td>
+                                <td class="align-middle">@item.MaSoThue</td>
                                 <td class="align-middle">@item.DiaChi</td>
                                 <td class="text-center align-middle">
                                     @(item.NgayTao.HasValue ? item.NgayTao.Value.ToString("dd/MM/yyyy HH") : "")
@@ -73,7 +75,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="10" class="text-center py-4 text-muted">Chưa có dữ liệu nhà cung cấp.</td>
+                            <td colspan="11" class="text-center py-4 text-muted">Chưa có dữ liệu nhà cung cấp.</td>
                         </tr>
                     }
                 </tbody>

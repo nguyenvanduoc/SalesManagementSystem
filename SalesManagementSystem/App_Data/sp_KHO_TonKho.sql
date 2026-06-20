@@ -17,40 +17,43 @@ BEGIN
         SELECT 
             gd.IDKho,
             gd.IDSanPham,
-            SUM(gd.SoLuongNhap) AS TongNhap,
-            SUM(gd.SoLuongXuat) AS TongXuat,
+            SUM(CASE WHEN @TuNgay IS NOT NULL AND gd.NgayChungTu < @TuNgay THEN gd.SoLuongNhap ELSE 0 END) - 
+            SUM(CASE WHEN @TuNgay IS NOT NULL AND gd.NgayChungTu < @TuNgay THEN gd.SoLuongXuat ELSE 0 END) AS TonDauKy,
+            SUM(CASE WHEN @TuNgay IS NULL OR gd.NgayChungTu >= @TuNgay THEN gd.SoLuongNhap ELSE 0 END) AS TongNhap,
+            SUM(CASE WHEN @TuNgay IS NULL OR gd.NgayChungTu >= @TuNgay THEN gd.SoLuongXuat ELSE 0 END) AS TongXuat,
             SUM(gd.SoLuongNhap) - SUM(gd.SoLuongXuat) AS TonKho,
-            MAX(CASE WHEN gd.SoLuongNhap > 0 THEN gd.NgayChungTu ELSE NULL END) AS NgayNhapCuoi,
-            MAX(CASE WHEN gd.SoLuongXuat > 0 THEN gd.NgayChungTu ELSE NULL END) AS NgayXuatCuoi,
+            MAX(CASE WHEN gd.SoLuongNhap > 0 AND (@TuNgay IS NULL OR gd.NgayChungTu >= @TuNgay) THEN gd.NgayChungTu ELSE NULL END) AS NgayNhapCuoi,
+            MAX(CASE WHEN gd.SoLuongXuat > 0 AND (@TuNgay IS NULL OR gd.NgayChungTu >= @TuNgay) THEN gd.NgayChungTu ELSE NULL END) AS NgayXuatCuoi,
             (SELECT TOP 1 DonGia FROM KHO_GiaoDichKho WHERE IDSanPham = gd.IDSanPham AND IDKho = gd.IDKho AND SoLuongNhap > 0 AND IsHuy = 0 ORDER BY NgayChungTu DESC, ID DESC) AS DonGiaCuoi
         FROM KHO_GiaoDichKho gd
         WHERE gd.IsHuy = 0
           AND (@IDKho IS NULL OR gd.IDKho = @IDKho)
           AND (@IDSanPham IS NULL OR gd.IDSanPham = @IDSanPham)
-          AND (@TuNgay IS NULL OR gd.NgayChungTu >= @TuNgay)
           AND (@DenNgay IS NULL OR gd.NgayChungTu <= @DenNgay)
         GROUP BY gd.IDKho, gd.IDSanPham
     )
     SELECT 
-        gd.IDKho,
+        ISNULL(gd.IDKho, @IDKho) AS IDKho,
         k.MaKhoHang AS MaKho,
         k.TenKhoHang AS TenKho,
-        gd.IDSanPham,
+        sp.ID AS IDSanPham,
         sp.MaSanPham,
         sp.TenSanPham,
         sp.DVT,
-        gd.TongNhap,
-        gd.TongXuat,
-        gd.TonKho,
+        ISNULL(gd.TonDauKy, 0) AS TonDauKy,
+        ISNULL(gd.TongNhap, 0) AS TongNhap,
+        ISNULL(gd.TongXuat, 0) AS TongXuat,
+        ISNULL(gd.TonKho, 0) AS TonKho,
         ISNULL(gd.DonGiaCuoi, 0) AS DonGiaTon,
-        gd.TonKho * ISNULL(gd.DonGiaCuoi, 0) AS GiaTriTon,
+        ISNULL(gd.TonKho, 0) * ISNULL(gd.DonGiaCuoi, 0) AS GiaTriTon,
         gd.NgayNhapCuoi,
         gd.NgayXuatCuoi,
         0 AS MucTonToiThieu
-    FROM CTE_GiaoDich gd
-    LEFT JOIN DM_KhoHang k ON gd.IDKho = k.ID
-    LEFT JOIN DM_SanPham sp ON gd.IDSanPham = sp.ID
-    WHERE (@ChiConTon = 0 OR gd.TonKho > 0)
+    FROM DM_SanPham sp
+    LEFT JOIN CTE_GiaoDich gd ON sp.ID = gd.IDSanPham
+    LEFT JOIN DM_KhoHang k ON ISNULL(gd.IDKho, @IDKho) = k.ID
+    WHERE (@IDSanPham IS NULL OR sp.ID = @IDSanPham)
+      AND (@ChiConTon = 0 OR ISNULL(gd.TonKho, 0) > 0)
     ORDER BY k.TenKhoHang, sp.TenSanPham;
 END
 GO

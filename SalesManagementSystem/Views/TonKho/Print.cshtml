@@ -1,4 +1,4 @@
-﻿@model IEnumerable<SalesManagementSystem.Models.ViewModels.TonKhoListViewModel>
+@model IEnumerable<SalesManagementSystem.Models.ViewModels.TonKhoListViewModel>
 @{
     Layout = null;
     var tuNgay = ViewBag.TuNgay as string;
@@ -24,7 +24,7 @@
     <title>Báo cáo tồn kho</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        @@media print {
+        @media print {
             .no-print { display: none; }
             body { font-size: 12pt; }
         }
@@ -54,11 +54,15 @@
                     <th>Mã SP</th>
                     <th>Tên sản phẩm</th>
                     <th class="text-center">ĐVT</th>
+                    <th class="text-right">Tồn đầu kỳ</th>
                     <th class="text-right">Tổng nhập</th>
                     <th class="text-right">Tổng xuất</th>
                     <th class="text-right">Tồn hiện tại</th>
-                    <th class="text-right">Đơn giá tồn</th>
-                    <th class="text-right">Giá trị tồn</th>
+                    @if (ViewBag.IsNhanVienKho != true)
+                    {
+                        <th class="text-right">Đơn giá tồn</th>
+                        <th class="text-right">Giá trị tồn</th>
+                    }
                 </tr>
             </thead>
             <tbody>
@@ -74,17 +78,24 @@
                         <td>@item.MaSanPham</td>
                         <td>@item.TenSanPham</td>
                         <td class="text-center">@item.DVT</td>
+                        <td class="text-right">@item.TonDauKy.ToString("N0")</td>
                         <td class="text-right">@item.TongNhap.ToString("N0")</td>
                         <td class="text-right">@item.TongXuat.ToString("N0")</td>
                         <td class="text-right">@item.TonKho.ToString("N0")</td>
-                        <td class="text-right">@item.DonGiaTon.ToString("N0")</td>
-                        <td class="text-right">@item.GiaTriTon.ToString("N0")</td>
+                        @if (ViewBag.IsNhanVienKho != true)
+                        {
+                            <td class="text-right">@item.DonGiaTon.ToString("N0")</td>
+                            <td class="text-right">@item.GiaTriTon.ToString("N0")</td>
+                        }
                     </tr>
                 }
-                <tr>
-                    <td colspan="8" class="text-right font-weight-bold">TỔNG CỘNG GIÁ TRỊ TỒN KHO:</td>
-                    <td class="text-right font-weight-bold text-primary">@tongGiaTri.ToString("N0")</td>
-                </tr>
+                @if (ViewBag.IsNhanVienKho != true)
+                {
+                    <tr>
+                        <td colspan="9" class="text-right font-weight-bold">TỔNG CỘNG GIÁ TRỊ TỒN KHO:</td>
+                        <td class="text-right font-weight-bold text-primary">@tongGiaTri.ToString("N0")</td>
+                    </tr>
+                }
             </tbody>
         </table>
         

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace SalesManagementSystem.Models.ViewModels
 {
@@ -24,5 +24,8 @@ namespace SalesManagementSystem.Models.ViewModels
 
         [StringLength(500, ErrorMessage = "Địa chỉ không được vượt quá 500 ký tự")]
         public string DiaChi { get; set; }
+
+        [StringLength(100, ErrorMessage = "Mã số thuế không được vượt quá 100 ký tự")]
+        public string MaSoThue { get; set; }
     }
 }

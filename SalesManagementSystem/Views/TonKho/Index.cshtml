@@ -4,107 +4,182 @@
 }
 
 <style>
-    .dashboard-card { border-radius: 10px; padding: 15px; color: #fff; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .bg-primary-grad { background: linear-gradient(45deg, #007bff, #0056b3); }
-    .bg-success-grad { background: linear-gradient(45deg, #28a745, #1e7e34); }
-    .bg-info-grad { background: linear-gradient(45deg, #17a2b8, #117a8b); }
-    .bg-danger-grad { background: linear-gradient(45deg, #dc3545, #bd2130); }
-    .bg-warning-grad { background: linear-gradient(45deg, #ffc107, #d39e00); color: #212529 !important; }
-    .dashboard-card h3 { font-size: 24px; margin: 10px 0 0; font-weight: bold; }
-    .dashboard-card p { margin: 0; font-size: 14px; opacity: 0.9; }
+    /* Style for Dashboard Cards */
+    .stat-card-custom {
+        background: #fff;
+        border-radius: 10px;
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.05);
+        border: 1px solid #eaf0f6;
+        transition: transform .2s, box-shadow .2s;
+        margin-bottom: 15px;
+    }
+    .stat-card-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    }
+    .stat-icon-custom {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        flex-shrink: 0;
+    }
+    .stat-icon-custom.blue { background: #eaf4fb; color: #2e86c1; }
+    .stat-icon-custom.green { background: #e8f8f5; color: #27ae60; }
+    .stat-icon-custom.red { background: #fdedec; color: #e74c3c; }
+    .stat-icon-custom.brown { background: #fef5e7; color: #d35400; }
+    .stat-icon-custom.orange { background: #fff5e6; color: #f39c12; }
+
+    .stat-body-custom .label { font-size: .78rem; color: #7f8c8d; font-weight: 600; text-transform: uppercase; margin-bottom: 2px; }
+    .stat-body-custom .value { font-size: 1.4rem; font-weight: 700; color: #2c3e50; line-height: 1.1; }
+    .stat-body-custom .unit { font-size: .75rem; color: #95a5a6; font-weight: 500; margin-left: 3px; }
+
+    /* Print styling */
+    @@media print {
+        .sidebar, .topbar, .tabs-wrapper, #searchForm, .no-print, .modal-footer, .custom-pagination, .btn, .breadcrumb-wrap {
+            display: none !important;
+        }
+        .main-wrapper {
+            margin-left: 0 !important;
+            margin-top: 0 !important;
+            padding: 0 !important;
+        }
+        .page-content {
+            padding: 0 !important;
+        }
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+        table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+        }
+        table th, table td {
+            border: 1px solid #000 !important;
+            padding: 6px !important;
+        }
+    }
 </style>
 
 <div id="tonkho-@uid">
-    <div class="d-flex justify-content-between align-items-center mb-3 mt-2">
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
         <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">
-            <i class="fas fa-boxes me-2"></i>@ViewBag.Title
+            BÁO CÁO TỒN KHO
         </h4>
         <div class="d-flex gap-2">
-            <button type="button" class="btn btn-info btn-print shadow-sm" style="background-color: #3498db; border-color: #3498db;">
-                <i class="fas fa-print me-1"></i> In báo cáo
+            <button type="button" class="btn btn-outline-secondary fw-semibold px-3 d-flex align-items-center gap-1 btn-print" style="border-color:#d0d7de;color:#24292f;background-color:#fff;">
+                <i class="bi bi-printer"></i> In báo cáo
             </button>
-            <button type="button" class="btn btn-primary btn-print-multi shadow-sm" style="background-color: #0d6efd; border-color: #0d6efd;">
-                <i class="fas fa-print me-1"></i> In chi tiết
+            <button type="button" class="btn btn-outline-secondary fw-semibold px-3 d-flex align-items-center gap-1 btn-print-multi" style="border-color:#d0d7de;color:#24292f;background-color:#fff;">
+                <i class="bi bi-printer"></i> In chi tiết (Thẻ kho)
             </button>
-            <button type="button" class="btn btn-success btn-export shadow-sm" style="background-color: #27ae60; border-color: #27ae60;">
-                <i class="fas fa-file-excel me-1"></i> Xuất Excel
+            <button type="button" class="btn text-white fw-bold px-3 d-flex align-items-center gap-1 btn-export" style="background:#2ecc71;border:none;">
+                <i class="bi bi-file-earmark-excel"></i> Xuất Excel (TK01)
             </button>
         </div>
     </div>
 
     <div class="row">
         <div class="col-md-12">
-            <div class="card shadow-sm mb-3">
+            <div class="card shadow-sm mb-4 no-print">
                 <div class="card-body">
-                    <form id="searchForm" method="get" action="@Url.Action("GetList")" class="row align-items-end">
-                        <div class="col-md-2 form-group mb-2">
-                            <label class="form-label text-muted mb-1">Từ ngày</label>
-                            <input type="date" class="form-control" name="TuNgay" />
+                    <form id="searchForm" method="get" action="@Url.Action("GetList")" class="row align-items-end g-3">
+                        <div class="col-md-2">
+                            <label class="form-label text-muted small mb-1 fw-semibold">Từ ngày (*)</label>
+                            <input type="date" class="form-control form-control-sm" name="TuNgay" id="tuNgay" value="@ViewBag.TuNgay" required />
                         </div>
-                        <div class="col-md-2 form-group mb-2">
-                            <label class="form-label text-muted mb-1">Đến ngày</label>
-                            <input type="date" class="form-control" name="DenNgay" />
+                        <div class="col-md-2">
+                            <label class="form-label text-muted small mb-1 fw-semibold">Đến ngày (*)</label>
+                            <input type="date" class="form-control form-control-sm" name="DenNgay" id="denNgay" value="@ViewBag.DenNgay" required />
                         </div>
-                        <div class="col-md-3 form-group mb-2">
-                            <label class="form-label text-muted mb-1">Kho hàng</label>
-                            <select class="form-control tk-kho" name="IDKho"></select>
+                        <div class="col-md-2">
+                            <label class="form-label text-muted small mb-1 fw-semibold">Kho hàng</label>
+                            <select class="form-select form-select-sm tk-kho select2" name="IDKho" id="idKho" style="width: 100%"></select>
                         </div>
-                        <div class="col-md-3 form-group mb-2">
-                            <label class="form-label text-muted mb-1">Sản phẩm</label>
-                            <select class="form-control tk-sp" name="IDSanPham"></select>
+                        <div class="col-md-2">
+                            <label class="form-label text-muted small mb-1 fw-semibold">Sản phẩm</label>
+                            <select class="form-select form-select-sm tk-sp select2" name="IDSanPham" id="idSanPham" style="width: 100%"></select>
                         </div>
-                        <div class="col-md-2 form-group mb-2 d-flex align-items-end">
-                            <div class="custom-control custom-checkbox w-100" style="margin-bottom: 0.5rem;">
-                                <input class="custom-control-input" type="checkbox" id="ChiConTon_@uid" name="ChiConTon" value="true">
-                                <label for="ChiConTon_@uid" class="custom-control-label" style="padding-top: 2px;">Chỉ hiển thị SP còn tồn</label>
+                        <div class="col-md-4 d-flex align-items-end mb-1">
+                            <div class="form-check w-100">
+                                <input class="form-check-input" type="checkbox" id="ChiConTon_@uid" name="ChiConTon" value="true">
+                                <label for="ChiConTon_@uid" class="form-check-label small fw-semibold text-muted">Chỉ hiển thị SP còn tồn</label>
                             </div>
                         </div>
-                        <div class="col-12 d-flex gap-2 mt-3 mb-3 justify-content-end">
-                            <button type="button" class="btn text-white px-4 btn-search" style="background-color: #2998e4; border: none;">
-                                <i class="fas fa-search"></i> Tìm kiếm
+                        <div class="col-12 d-flex gap-2 justify-content-end mt-2">
+                            <button type="button" class="btn text-white btn-search" style="background-color: #2998e4; border: none;">
+                                <i class="bi bi-search"></i> Tìm kiếm
                             </button>
-                            <button type="button" class="btn text-white px-4 btn-reset" style="background-color: #f1c40f; border: none;">
+                            <button type="button" class="btn text-white btn-reset" style="background-color: #f1c40f; border: none;">
                                 Làm mới
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
 
-                    <div class="row" id="dashboardContainer">
-                        <div class="col-md-2 col-sm-6">
-                            <div class="dashboard-card bg-primary-grad">
-                                <p>Tổng số sản phẩm</p>
-                                <h3 class="lblTongSP">0</h3>
-                            </div>
+            <!-- Dashboard Cards -->
+            <div class="row g-3 mb-4" id="dashboardContainer">
+                <div class="col-12 col-sm-6 @(ViewBag.IsNhanVienKho == true ? "col-xl-3" : "col-xl-2")">
+                    <div class="stat-card-custom">
+                        <div class="stat-icon-custom blue"><i class="bi bi-box-seam"></i></div>
+                        <div class="stat-body-custom">
+                            <div class="label">Tổng số sản phẩm</div>
+                            <div class="value text-primary"><span class="lblTongSP">0</span><span class="unit"> SP</span></div>
                         </div>
-                        <div class="col-md-2 col-sm-6">
-                            <div class="dashboard-card bg-success-grad">
-                                <p>Tổng số lượng tồn</p>
-                                <h3 class="lblTongTon">0</h3>
-                            </div>
-                        </div>
-                        <div class="col-md-4 col-sm-12">
-                            <div class="dashboard-card bg-info-grad">
-                                <p>Tổng giá trị tồn</p>
-                                <h3 class="lblTongGiaTri">0</h3>
-                            </div>
-                        </div>
-                        <div class="col-md-2 col-sm-6">
-                            <div class="dashboard-card bg-danger-grad">
-                                <p>Sản phẩm âm kho</p>
-                                <h3 class="lblAmKho">0</h3>
-                            </div>
-                        </div>
-                        <div class="col-md-2 col-sm-6">
-                            <div class="dashboard-card bg-warning-grad">
-                                <p>Sắp hết hàng</p>
-                                <h3 class="lblSapHet">0</h3>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="table-container" class="table-responsive">
                     </div>
                 </div>
+                <div class="col-12 col-sm-6 @(ViewBag.IsNhanVienKho == true ? "col-xl-3" : "col-xl-2")">
+                    <div class="stat-card-custom">
+                        <div class="stat-icon-custom green"><i class="bi bi-boxes"></i></div>
+                        <div class="stat-body-custom">
+                            <div class="label">Tổng số lượng tồn</div>
+                            <div class="value text-success"><span class="lblTongTon">0</span></div>
+                        </div>
+                    </div>
+                </div>
+                @if (ViewBag.IsNhanVienKho != true)
+                {
+                    <div class="col-12 col-sm-12 col-xl-4">
+                        <div class="stat-card-custom">
+                            <div class="stat-icon-custom brown"><i class="bi bi-cash-stack"></i></div>
+                            <div class="stat-body-custom">
+                                <div class="label">Tổng giá trị tồn</div>
+                                <div class="value" style="color:#d35400;"><span class="lblTongGiaTri">0</span><span class="unit"> VND</span></div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="col-12 col-sm-6 @(ViewBag.IsNhanVienKho == true ? "col-xl-3" : "col-xl-2")">
+                    <div class="stat-card-custom">
+                        <div class="stat-icon-custom red"><i class="bi bi-dash-circle"></i></div>
+                        <div class="stat-body-custom">
+                            <div class="label">Sản phẩm âm kho</div>
+                            <div class="value text-danger"><span class="lblAmKho">0</span><span class="unit"> SP</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 @(ViewBag.IsNhanVienKho == true ? "col-xl-3" : "col-xl-2")">
+                    <div class="stat-card-custom">
+                        <div class="stat-icon-custom orange"><i class="bi bi-exclamation-triangle"></i></div>
+                        <div class="stat-body-custom">
+                            <div class="label">Sắp hết hàng</div>
+                            <div class="value" style="color:#f39c12;"><span class="lblSapHet">0</span><span class="unit"> SP</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid dữ liệu -->
+            <div id="table-container">
             </div>
         </div>
     </div>
@@ -115,6 +190,7 @@
         (function() {
             var $container = $('#tonkho-@uid');
             var $form = $container.find('#searchForm');
+
             $form.on('submit', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -127,6 +203,15 @@
             }
 
             function loadData(urlOverride) {
+                var tu = $container.find('[name="TuNgay"]').val();
+                var den = $container.find('[name="DenNgay"]').val();
+                if (!tu || !den) {
+                    if (typeof showToast === 'function') {
+                        showToast('warning', 'Vui lòng chọn khoảng thời gian tra cứu.');
+                    }
+                    return;
+                }
+
                 var params = $form.serialize();
 
                 $.get('/TonKho/GetDashboard', params, function (res) {
@@ -168,6 +253,7 @@
                     placeholder: 'Chọn kho hàng',
                     allowClear: true,
                     dropdownParent: $container,
+                    width: '100%',
                     ajax: {
                         url: '/TonKho/SearchKhoHang',
                         dataType: 'json',
@@ -181,6 +267,7 @@
                     placeholder: 'Chọn sản phẩm',
                     allowClear: true,
                     dropdownParent: $container,
+                    width: '100%',
                     ajax: {
                         url: '/TonKho/SearchSanPham',
                         dataType: 'json',
@@ -198,7 +285,17 @@
             });
 
             $container.find('.btn-reset').on('click', function() {
-                $form[0].reset();
+                var now = new Date();
+                var y = now.getFullYear();
+                var m = now.getMonth();
+                var firstDay = new Date(y, m, 1);
+                var lastDay = new Date(y, m + 1, 0);
+
+                var pad = function(num) { return (num < 10 ? '0' : '') + num; };
+
+                $container.find('[name="TuNgay"]').val(y + '-' + pad(firstDay.getMonth() + 1) + '-' + pad(firstDay.getDate()));
+                $container.find('[name="DenNgay"]').val(y + '-' + pad(lastDay.getMonth() + 1) + '-' + pad(lastDay.getDate()));
+
                 $container.find('.tk-kho').val(null).trigger('change');
                 $container.find('.tk-sp').val(null).trigger('change');
                 $container.find('input[type="checkbox"]').prop('checked', false);
@@ -206,16 +303,40 @@
             });
 
             $container.find('.btn-export').on('click', function() {
+                var tu = $container.find('[name="TuNgay"]').val();
+                var den = $container.find('[name="DenNgay"]').val();
+                if (!tu || !den) {
+                    if (typeof showToast === 'function') {
+                        showToast('warning', 'Vui lòng chọn khoảng thời gian tra cứu.');
+                    }
+                    return;
+                }
                 var params = $form.serialize();
                 window.location.href = '/TonKho/ExportExcel?' + params;
             });
 
             $container.find('.btn-print').on('click', function() {
+                var tu = $container.find('[name="TuNgay"]').val();
+                var den = $container.find('[name="DenNgay"]').val();
+                if (!tu || !den) {
+                    if (typeof showToast === 'function') {
+                        showToast('warning', 'Vui lòng chọn khoảng thời gian tra cứu.');
+                    }
+                    return;
+                }
                 var params = $form.serialize();
                 window.open('/TonKho/Print?' + params, '_blank');
             });
 
             $container.find('.btn-print-multi').on('click', function() {
+                var tu = $container.find('[name="TuNgay"]').val();
+                var den = $container.find('[name="DenNgay"]').val();
+                if (!tu || !den) {
+                    if (typeof showToast === 'function') {
+                        showToast('warning', 'Vui lòng chọn khoảng thời gian tra cứu.');
+                    }
+                    return;
+                }
                 var params = $form.serialize();
                 window.open('/TonKho/PrintTheKhoMulti?' + params, '_blank');
             });
@@ -225,6 +346,12 @@
                 var idSanPham = $(this).data('idsp');
                 var tuNgay = $form.find('[name="TuNgay"]').val();
                 var denNgay = $form.find('[name="DenNgay"]').val();
+                if (!tuNgay || !denNgay) {
+                    if (typeof showToast === 'function') {
+                        showToast('warning', 'Vui lòng chọn khoảng thời gian tra cứu.');
+                    }
+                    return;
+                }
                 $.get('/TonKho/GetTheKho', { idKho: idKho, idSanPham: idSanPham, tuNgay: tuNgay, denNgay: denNgay }, function (html) {
                     $container.find('#modalContainer').html(html);
                     $container.find('#theKhoModal').modal('show');

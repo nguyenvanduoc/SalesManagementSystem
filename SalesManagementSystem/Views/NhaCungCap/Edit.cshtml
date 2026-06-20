@@ -1,4 +1,4 @@
-﻿@model SalesManagementSystem.Models.ViewModels.NhaCungCapCreateEditViewModel
+@model SalesManagementSystem.Models.ViewModels.NhaCungCapCreateEditViewModel
 
 @{
     Layout = null;
@@ -42,6 +42,11 @@
                 <label class="form-label text-muted fw-semibold">Email</label>
                 @Html.TextBoxFor(m => m.Email, new { @class = "form-control form-control-sm", placeholder = "Nhập email" })
                 @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Mã số thuế</label>
+                @Html.TextBoxFor(m => m.MaSoThue, new { @class = "form-control form-control-sm", placeholder = "Nhập mã số thuế" })
+                @Html.ValidationMessageFor(m => m.MaSoThue, "", new { @class = "text-danger small" })
             </div>
             <div class="col-md-12">
                 <label class="form-label text-muted fw-semibold">Địa chỉ</label>

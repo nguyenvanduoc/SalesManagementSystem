@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,6 +8,8 @@ using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories.Interfaces;
 using NPOI.XSSF.UserModel;
 using NPOI.SS.UserModel;
+using Dapper;
+using SalesManagementSystem.Data;
 
 namespace SalesManagementSystem.Controllers
 {
@@ -30,9 +32,27 @@ namespace SalesManagementSystem.Controllers
             _excelExportService = excelExportService;
         }
 
-        public ActionResult Index()
+        private bool CheckIsNhanVienKho()
+        {
+            // Nếu có Quyền phụ (Tùy chọn) thì được xem tất cả (không phải nhân viên kho -> false)
+            // Ngược lại nếu không có quyền phụ thì bị ẩn (là nhân viên kho -> true)
+            return !PermissionHelper.HasPermission("TonKho", LoaiPhanQuyen.TuyChon);
+        }
+
+        public ActionResult Index(string tuNgay = "", string denNgay = "")
         {
             if (!PermissionHelper.HasPermission("TonKho", LoaiPhanQuyen.Xem)) return View("AccessDenied");
+
+            if (string.IsNullOrEmpty(tuNgay) && string.IsNullOrEmpty(denNgay))
+            {
+                var now = DateTime.Now;
+                tuNgay = new DateTime(now.Year, now.Month, 1).ToString("yyyy-MM-dd");
+                denNgay = new DateTime(now.Year, now.Month, DateTime.DaysInMonth(now.Year, now.Month)).ToString("yyyy-MM-dd");
+            }
+
+            ViewBag.TuNgay = tuNgay;
+            ViewBag.DenNgay = denNgay;
+            ViewBag.IsNhanVienKho = CheckIsNhanVienKho();
             return View();
         }
 
@@ -41,9 +61,18 @@ namespace SalesManagementSystem.Controllers
         {
             if (!PermissionHelper.HasPermission("TonKho", LoaiPhanQuyen.Xem)) return Json(new { success = false }, JsonRequestBehavior.AllowGet);
 
+            if (string.IsNullOrEmpty(tuNgay) || string.IsNullOrEmpty(denNgay))
+            {
+                return Json(new { success = true, data = new { TongSoSanPham = 0, TongSoLuongTon = 0, TongGiaTriTon = 0, SoSanPhamAmKho = 0, SoSanPhamSapHetHang = 0 } }, JsonRequestBehavior.AllowGet);
+            }
+
             try
             {
                 var dashboard = _tonKhoRepo.GetDashboard(idKho, idSanPham, tuNgay, denNgay, chiConTon);
+                if (CheckIsNhanVienKho())
+                {
+                    dashboard.TongGiaTriTon = 0;
+                }
                 return Json(new { success = true, data = dashboard }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
@@ -56,6 +85,20 @@ namespace SalesManagementSystem.Controllers
         public ActionResult GetList(int? idKho = null, int? idSanPham = null, string tuNgay = "", string denNgay = "", bool chiConTon = false, int page = 1, int pageSize = 20)
         {
             if (!PermissionHelper.HasPermission("TonKho", LoaiPhanQuyen.Xem)) return Content("<div class='alert alert-danger'>Không có quyền truy cập</div>");
+
+            if (string.IsNullOrEmpty(tuNgay) || string.IsNullOrEmpty(denNgay))
+            {
+                var emptyModel = new PagedListViewModel<TonKhoListViewModel>
+                {
+                    Items = new List<TonKhoListViewModel>(),
+                    CurrentPage = 1,
+                    PageSize = pageSize,
+                    TotalRecords = 0,
+                    ActionName = "GetList"
+                };
+                ViewBag.IsNhanVienKho = CheckIsNhanVienKho();
+                return PartialView("_TonKhoList", emptyModel);
+            }
 
             try
             {
@@ -70,6 +113,7 @@ namespace SalesManagementSystem.Controllers
                     ActionName = "GetList"
                 };
 
+                ViewBag.IsNhanVienKho = CheckIsNhanVienKho();
                 return PartialView("_TonKhoList", pagedList);
             }
             catch (Exception ex)
@@ -83,6 +127,11 @@ namespace SalesManagementSystem.Controllers
         {
             if (!PermissionHelper.HasPermission("TonKho", LoaiPhanQuyen.Xem)) return Content("<div class='alert alert-danger'>Không có quyền truy cập</div>");
 
+            if (string.IsNullOrEmpty(tuNgay) || string.IsNullOrEmpty(denNgay))
+            {
+                return Content("<div class='alert alert-warning'>Vui lòng chọn khoảng thời gian tra cứu.</div>");
+            }
+
             try
             {
                 var list = _tonKhoRepo.GetTheKho(idKho, idSanPham, tuNgay, denNgay);
@@ -90,6 +139,7 @@ namespace SalesManagementSystem.Controllers
                 ViewBag.IdSanPham = idSanPham;
                 ViewBag.TuNgay = tuNgay;
                 ViewBag.DenNgay = denNgay;
+                ViewBag.IsNhanVienKho = CheckIsNhanVienKho();
                 return PartialView("_TheKhoModal", list);
             }
             catch (Exception ex)
@@ -102,8 +152,18 @@ namespace SalesManagementSystem.Controllers
         public ActionResult ExportExcel(int? idKho = null, int? idSanPham = null, string tuNgay = "", string denNgay = "", bool chiConTon = false)
         {
             if (!PermissionHelper.HasPermission("TonKho", LoaiPhanQuyen.Xem)) return Content("Không có quyền xuất Excel");
+            if (string.IsNullOrEmpty(tuNgay) || string.IsNullOrEmpty(denNgay)) return Content("Vui lòng chọn khoảng thời gian tra cứu.");
 
             var list = _tonKhoRepo.GetList(idKho, idSanPham, tuNgay, denNgay, chiConTon).ToList();
+            bool isNvk = CheckIsNhanVienKho();
+            if (isNvk)
+            {
+                foreach (var item in list)
+                {
+                    item.DonGiaTon = 0;
+                    item.GiaTriTon = 0;
+                }
+            }
 
             try
             {
@@ -128,10 +188,12 @@ namespace SalesManagementSystem.Controllers
         public ActionResult Print(int? idKho = null, int? idSanPham = null, string tuNgay = "", string denNgay = "", bool chiConTon = false)
         {
             if (!PermissionHelper.HasPermission("TonKho", LoaiPhanQuyen.Xem)) return Content("Không có quyền in");
+            if (string.IsNullOrEmpty(tuNgay) || string.IsNullOrEmpty(denNgay)) return Content("Vui lòng chọn khoảng thời gian tra cứu.");
 
             var list = _tonKhoRepo.GetList(idKho, idSanPham, tuNgay, denNgay, chiConTon);
             ViewBag.TuNgay = tuNgay;
             ViewBag.DenNgay = denNgay;
+            ViewBag.IsNhanVienKho = CheckIsNhanVienKho();
 
             string tenKho = "Tất cả kho";
             if (idKho.HasValue)
@@ -165,10 +227,12 @@ namespace SalesManagementSystem.Controllers
         public ActionResult PrintTheKho(int idKho, int idSanPham, string tuNgay = "", string denNgay = "")
         {
             if (!PermissionHelper.HasPermission("TonKho", LoaiPhanQuyen.Xem)) return Content("Không có quyền in");
+            if (string.IsNullOrEmpty(tuNgay) || string.IsNullOrEmpty(denNgay)) return Content("Vui lòng chọn khoảng thời gian tra cứu.");
 
             var list = _tonKhoRepo.GetTheKho(idKho, idSanPham, tuNgay, denNgay);
             ViewBag.TuNgay = tuNgay;
             ViewBag.DenNgay = denNgay;
+            ViewBag.IsNhanVienKho = CheckIsNhanVienKho();
 
             int totalKho;
             var kho = _khoHangRepo.GetPaged(1, 1, null, out totalKho).FirstOrDefault(x => x.ID == idKho);
@@ -185,11 +249,12 @@ namespace SalesManagementSystem.Controllers
         public ActionResult PrintTheKhoMulti(int? idKho = null, int? idSanPham = null, string tuNgay = "", string denNgay = "", bool chiConTon = false)
         {
             if (!PermissionHelper.HasPermission("TonKho", LoaiPhanQuyen.Xem)) return Content("Không có quyền in");
+            if (string.IsNullOrEmpty(tuNgay) || string.IsNullOrEmpty(denNgay)) return Content("Vui lòng chọn khoảng thời gian tra cứu.");
 
             var products = _tonKhoRepo.GetList(idKho, idSanPham, tuNgay, denNgay, chiConTon).ToList();
             var model = new List<PrintTheKhoMultiViewModel>();
 
-            foreach(var p in products)
+            foreach (var p in products)
             {
                 var cards = _tonKhoRepo.GetTheKho(p.IDKho, p.IDSanPham, tuNgay, denNgay);
                 model.Add(new PrintTheKhoMultiViewModel
@@ -202,6 +267,7 @@ namespace SalesManagementSystem.Controllers
 
             ViewBag.TuNgay = tuNgay;
             ViewBag.DenNgay = denNgay;
+            ViewBag.IsNhanVienKho = CheckIsNhanVienKho();
 
             return View(model);
         }
