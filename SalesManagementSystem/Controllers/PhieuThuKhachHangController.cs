@@ -167,10 +167,6 @@ namespace SalesManagementSystem.Controllers
             {
                 ModelState.AddModelError("IDTaiKhoanThanhToan", "Chưa chọn tài khoản nhận tiền.");
             }
-            if (!model.IDNguoiThu.HasValue || model.IDNguoiThu.Value <= 0)
-            {
-                ModelState.AddModelError("IDNguoiThu", "Chưa chọn người thu tiền.");
-            }
             if (model.SoTienThu <= 0)
             {
                 ModelState.AddModelError("SoTienThu", "Số tiền thu phải lớn hơn 0.");

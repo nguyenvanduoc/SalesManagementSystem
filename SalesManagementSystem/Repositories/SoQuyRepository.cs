@@ -37,5 +37,61 @@ namespace SalesManagementSystem.Repositories
                 ).ToList();
             }
         }
+
+        public IEnumerable<TaiKhoanSummaryViewModel> GetTaiKhoanSummary(
+            string tuNgay,
+            string denNgay,
+            int? idTaiKhoanThanhToan)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                var p = new DynamicParameters();
+                p.Add("@TuNgay", string.IsNullOrEmpty(tuNgay) ? (DateTime?)null : DateTime.Parse(tuNgay));
+                p.Add("@DenNgay", string.IsNullOrEmpty(denNgay) ? (DateTime?)null : DateTime.Parse(denNgay));
+                p.Add("@IDTaiKhoanThanhToan", idTaiKhoanThanhToan);
+
+                return conn.Query<TaiKhoanSummaryViewModel>(
+                    "sp_KT_SoQuy_GetTaiKhoanSummary",
+                    p,
+                    commandType: CommandType.StoredProcedure
+                ).ToList();
+            }
+        }
+
+        public decimal GetOpeningBalance(string tuNgay, int idTaiKhoanThanhToan)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                var p = new DynamicParameters();
+                p.Add("@TuNgay", string.IsNullOrEmpty(tuNgay) ? (DateTime?)null : DateTime.Parse(tuNgay));
+                p.Add("@IDTaiKhoanThanhToan", idTaiKhoanThanhToan);
+
+                return conn.ExecuteScalar<decimal>(
+                    "sp_KT_SoQuy_GetOpeningBalance",
+                    p,
+                    commandType: CommandType.StoredProcedure
+                );
+            }
+        }
+
+        public IEnumerable<GiaoDichChiTietViewModel> GetGiaoDichChiTiet(
+            string tuNgay,
+            string denNgay,
+            int idTaiKhoanThanhToan)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                var p = new DynamicParameters();
+                p.Add("@TuNgay", string.IsNullOrEmpty(tuNgay) ? (DateTime?)null : DateTime.Parse(tuNgay));
+                p.Add("@DenNgay", string.IsNullOrEmpty(denNgay) ? (DateTime?)null : DateTime.Parse(denNgay));
+                p.Add("@IDTaiKhoanThanhToan", idTaiKhoanThanhToan);
+
+                return conn.Query<GiaoDichChiTietViewModel>(
+                    "sp_KT_SoQuy_GetGiaoDichChiTiet",
+                    p,
+                    commandType: CommandType.StoredProcedure
+                ).ToList();
+            }
+        }
     }
 }

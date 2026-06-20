@@ -102,6 +102,9 @@ namespace SalesManagementSystem
             // Sổ Quỹ
             routes.MapRoute(name: "SoQuy_List",    url: "so-quy",           defaults: new { controller = "SoQuy", action = "Index" });
             routes.MapRoute(name: "SoQuy_GetList", url: "so-quy/danh-sach", defaults: new { controller = "SoQuy", action = "GetList" });
+            routes.MapRoute(name: "SoQuy_Details", url: "so-quy/chi-tiet",  defaults: new { controller = "SoQuy", action = "Details" });
+            routes.MapRoute(name: "SoQuy_ExportTongHop", url: "so-quy/xuat-excel-tong-hop", defaults: new { controller = "SoQuy", action = "ExportExcelTongHop" });
+            routes.MapRoute(name: "SoQuy_ExportChiTiet", url: "so-quy/xuat-excel-chi-tiet", defaults: new { controller = "SoQuy", action = "ExportExcelChiTiet" });
 
             // Công Nợ Phải Trả NCC
             routes.MapRoute(name: "CongNoNCC_List",    url: "cong-no-ncc",           defaults: new { controller = "CongNoNCC", action = "Index" });

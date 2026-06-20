@@ -1,4 +1,4 @@
-﻿namespace SalesManagementSystem.Helpers
+namespace SalesManagementSystem.Helpers
 {
     /// <summary>
     /// Lưu trữ các mã biểu mẫu được dùng chung toàn hệ thống để tránh hardcode string.
@@ -14,5 +14,6 @@
         public const string DS_CHI_TIET_DON_HANG = "DH01";
 
         // Thêm các mã biểu mẫu khác ở đây (Ví dụ nhóm Hàng Hoá, Kho, ...)
+        public const string DS_SO_QUY = "SQ01";
     }
 }

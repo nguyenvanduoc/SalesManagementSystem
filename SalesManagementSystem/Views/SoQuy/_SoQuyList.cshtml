@@ -1,9 +1,17 @@
-@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.SoQuyViewModel>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.TaiKhoanSummaryViewModel>
 
 @{
+    decimal tongDauKy = ViewBag.TongDauKy ?? 0M;
     decimal tongThu = ViewBag.TongThu ?? 0M;
     decimal tongChi = ViewBag.TongChi ?? 0M;
+    decimal tongCuoiKy = ViewBag.TongCuoiKy ?? 0M;
 }
+
+<!-- Hidden fields for updating index dashboard counters in AJAX calls -->
+<input type="hidden" id="table-tong-dau-ky" value="@tongDauKy" />
+<input type="hidden" id="table-tong-thu" value="@tongThu" />
+<input type="hidden" id="table-tong-chi" value="@tongChi" />
+<input type="hidden" id="table-tong-cuoi-ky" value="@tongCuoiKy" />
 
 <div class="card shadow-sm">
     <div class="card-body p-0">
@@ -11,14 +19,16 @@
             <table class="table table-custom table-bordered table-hover mb-0">
                 <thead>
                     <tr>
-                        <th width="40"  class="text-center fw-bold">STT</th>
-                        <th width="105" class="text-center fw-bold">Ngày</th>
-                        <th width="140" class="text-center fw-bold">Số chứng từ</th>
-                        <th width="80"  class="text-center fw-bold">Loại</th>
+                        <th width="70" class="text-center fw-bold">Thao tác</th>
+                        <th width="50"  class="text-center fw-bold">STT</th>
                         <th class="fw-bold">Tài khoản</th>
-                        <th class="fw-bold">Diễn giải</th>
-                        <th width="140" class="text-end fw-bold">Số tiền thu</th>
-                        <th width="140" class="text-end fw-bold">Số tiền chi</th>
+                        <th class="fw-bold">Ngân hàng</th>
+                        <th width="130" class="fw-bold">Số tài khoản</th>
+                        <th class="fw-bold">Chủ tài khoản</th>
+                        <th width="140" class="text-end fw-bold">Số dư đầu kỳ</th>
+                        <th width="130" class="text-end fw-bold">Thu trong kỳ</th>
+                        <th width="130" class="text-end fw-bold">Chi trong kỳ</th>
+                        <th width="140" class="text-end fw-bold">Số dư cuối kỳ</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -28,26 +38,36 @@
                         foreach (var item in Model.Items)
                         {
                             <tr>
-                                <td class="text-center align-middle">@(stt++)</td>
-                                <td class="text-center align-middle">@item.NgayChungTu.ToString("dd/MM/yyyy")</td>
-                                <td class="text-center align-middle fw-semibold text-primary">@item.SoChungTu</td>
                                 <td class="text-center align-middle">
-                                    @if (item.LoaiChungTu == "THU")
-                                    {
-                                        <span class="badge bg-success bg-opacity-10 text-success">Thu</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-danger bg-opacity-10 text-danger">Chi</span>
-                                    }
+                                    <div class="dropdown dropdown-hover">
+                                        <button class="btn btn-sm btn-link text-secondary dropdown-toggle dropdown-toggle-hide-arrow p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-grid-3x3-gap-fill" style="font-size: 1rem; color: #7f8c8d;"></i>
+                                        </button>
+                                        <ul class="dropdown-menu shadow border-0" style="font-size: 0.85rem;">
+                                            <li>
+                                                <a class="dropdown-item py-2 view-detail-btn" href="#" data-id="@item.ID">
+                                                    <i class="bi bi-eye text-primary me-2"></i> Xem chi tiết
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </td>
-                                <td class="align-middle">@item.TenTaiKhoanThanhToan</td>
-                                <td class="align-middle">@item.DienGiai</td>
-                                <td class="text-end align-middle fw-semibold @(item.SoTienThu > 0 ? "text-success" : "text-muted")">
-                                    @(item.SoTienThu > 0 ? item.SoTienThu.ToString("N0") : "-")
+                                <td class="text-center align-middle">@(stt++)</td>
+                                <td class="align-middle">@item.TenTaiKhoan</td>
+                                <td class="align-middle">@(string.IsNullOrEmpty(item.NganHang) ? "---" : item.NganHang)</td>
+                                <td class="align-middle">@(string.IsNullOrEmpty(item.SoTaiKhoan) ? "---" : item.SoTaiKhoan)</td>
+                                <td class="align-middle">@(string.IsNullOrEmpty(item.ChuTaiKhoan) ? "---" : item.ChuTaiKhoan)</td>
+                                <td class="text-end align-middle fw-semibold text-primary">
+                                    @item.SoDuDauKy.ToString("N0")
                                 </td>
-                                <td class="text-end align-middle fw-semibold @(item.SoTienChi > 0 ? "text-danger" : "text-muted")">
-                                    @(item.SoTienChi > 0 ? item.SoTienChi.ToString("N0") : "-")
+                                <td class="text-end align-middle fw-semibold text-success">
+                                    @item.ThuTrongKy.ToString("N0")
+                                </td>
+                                <td class="text-end align-middle fw-semibold text-danger">
+                                    @item.ChiTrongKy.ToString("N0")
+                                </td>
+                                <td class="text-end align-middle fw-semibold" style="color:#d35400;">
+                                    @item.SoDuCuoiKy.ToString("N0")
                                 </td>
                             </tr>
                         }
@@ -55,16 +75,18 @@
                         <!-- Dòng tổng cộng -->
                         <tr class="fw-bold" style="background:#f4f6f9;">
                             <td colspan="6" class="text-end align-middle">Tổng cộng:</td>
+                            <td class="text-end align-middle text-primary">@tongDauKy.ToString("N0")</td>
                             <td class="text-end align-middle text-success">@tongThu.ToString("N0")</td>
                             <td class="text-end align-middle text-danger">@tongChi.ToString("N0")</td>
+                            <td class="text-end align-middle" style="color:#d35400;">@tongCuoiKy.ToString("N0")</td>
                         </tr>
                     }
                     else
                     {
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-4">
+                            <td colspan="10" class="text-center text-muted py-4">
                                 <i class="bi bi-journal-x fs-2 d-block mb-2 text-secondary"></i>
-                                Không có giao dịch trong kỳ này
+                                Không có dữ liệu tài khoản
                             </td>
                         </tr>
                     }

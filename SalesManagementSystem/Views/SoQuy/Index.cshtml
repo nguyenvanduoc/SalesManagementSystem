@@ -1,35 +1,108 @@
-@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.SoQuyViewModel>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.TaiKhoanSummaryViewModel>
 
 @{
-    ViewBag.Title = "Sổ Quỹ";
+    ViewBag.Title = "Sổ Quỹ - Tài Khoản Thanh Toán";
+    decimal tongDauKy = ViewBag.TongDauKy ?? 0M;
     decimal tongThu = ViewBag.TongThu ?? 0M;
     decimal tongChi = ViewBag.TongChi ?? 0M;
-    decimal tonQuy  = tongThu - tongChi;
+    decimal tongCuoiKy = ViewBag.TongCuoiKy ?? 0M;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<style>
+    /* Style for Dashboard Cards */
+    .stat-card-custom {
+        background: #fff;
+        border-radius: 10px;
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.05);
+        border: 1px solid #eaf0f6;
+        transition: transform .2s, box-shadow .2s;
+    }
+    .stat-card-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    }
+    .stat-icon-custom {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        flex-shrink: 0;
+    }
+    .stat-icon-custom.blue { background: #eaf4fb; color: #2e86c1; }
+    .stat-icon-custom.green { background: #e8f8f5; color: #27ae60; }
+    .stat-icon-custom.red { background: #fdedec; color: #e74c3c; }
+    .stat-icon-custom.brown { background: #fef5e7; color: #d35400; }
+
+    .stat-body-custom .label { font-size: .78rem; color: #7f8c8d; font-weight: 600; text-transform: uppercase; margin-bottom: 2px; }
+    .stat-body-custom .value { font-size: 1.4rem; font-weight: 700; color: #2c3e50; line-height: 1.1; }
+    .stat-body-custom .unit { font-size: .75rem; color: #95a5a6; font-weight: 500; margin-left: 3px; }
+
+    /* Print styling */
+    @@media print {
+        .sidebar, .topbar, .tabs-wrapper, #searchForm, .no-print, .modal-footer, .custom-pagination, .btn, .breadcrumb-wrap {
+            display: none !important;
+        }
+        .main-wrapper {
+            margin-left: 0 !important;
+            margin-top: 0 !important;
+            padding: 0 !important;
+        }
+        .page-content {
+            padding: 0 !important;
+        }
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+        table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+        }
+        table th, table td {
+            border: 1px solid #000 !important;
+            padding: 6px !important;
+        }
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4 no-print">
     <h4 class="mb-0 fw-bold text-uppercase" style="color:#0b5b84;font-size:1.25rem;">
-        SỔ QUỸ
+        SỔ QUỸ - TÀI KHOẢN THANH TOÁN
     </h4>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn text-white fw-bold px-3 d-flex align-items-center gap-1 btn-export-excel" style="background:#2ecc71;border:none;">
+            <i class="bi bi-file-earmark-excel"></i> Xuất Excel (SQ01)
+        </button>
+        <button type="button" class="btn btn-outline-secondary fw-semibold px-3 d-flex align-items-center gap-1 btn-print-report" style="border-color:#d0d7de;color:#24292f;background-color:#fff;">
+            <i class="bi bi-printer"></i> In báo cáo
+        </button>
+    </div>
 </div>
 
 <!-- Bộ lọc tìm kiếm -->
-<div class="card shadow-sm mb-4">
+<div class="card shadow-sm mb-4 no-print">
     <div class="card-body">
         <form method="get" action="@Url.Action("GetList","SoQuy")" id="searchForm">
             <div class="row g-3 align-items-end">
                 <div class="col-md-3">
-                    <label class="form-label text-muted small mb-1 fw-semibold">Từ ngày</label>
-                    <input type="date" class="form-control form-control-sm" name="tuNgay" value="@ViewBag.TuNgay" />
+                    <label class="form-label text-muted small mb-1 fw-semibold">Từ ngày (*)</label>
+                    <input type="date" class="form-control form-control-sm" name="tuNgay" id="tuNgay" value="@ViewBag.TuNgay" required />
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label text-muted small mb-1 fw-semibold">Đến ngày</label>
-                    <input type="date" class="form-control form-control-sm" name="denNgay" value="@ViewBag.DenNgay" />
+                    <label class="form-label text-muted small mb-1 fw-semibold">Đến ngày (*)</label>
+                    <input type="date" class="form-control form-control-sm" name="denNgay" id="denNgay" value="@ViewBag.DenNgay" required />
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label text-muted small mb-1 fw-semibold">Tài khoản</label>
-                    <select class="form-select form-select-sm" name="idTaiKhoanThanhToan">
-                        <option value="">-- Tất cả tài khoản --</option>
+                    <label class="form-label text-muted small mb-1 fw-semibold">Tài khoản thanh toán</label>
+                    <select class="form-select form-select-sm select2" name="idTaiKhoanThanhToan" id="idTaiKhoanThanhToan">
+                        <option value="">-- Tất cả --</option>
                         @if (ViewBag.TaiKhoanList != null)
                         {
                             foreach (System.Web.Mvc.SelectListItem item in ViewBag.TaiKhoanList)
@@ -39,44 +112,54 @@
                         }
                     </select>
                 </div>
-                <div class="col-md-3 d-flex gap-2">
-                    <button type="submit" class="btn btn-sm text-white px-3" style="background-color:#2998e4;border:none;">
-                        <i class="bi bi-search me-1"></i>Tìm kiếm
+                <div class="col-md-3 d-flex gap-2 justify-content-end">
+                    <button type="submit" class="btn text-white" style="background:#2998e4">
+                        <i class="bi bi-search"></i> Tìm kiếm
                     </button>
-                    <button type="button" class="btn btn-sm text-white px-3 btn-reset" style="background-color:#f1c40f;border:none;">
+                    <a class="btn text-white btn-reset" style="background:#f1c40f">
                         Làm mới
-                    </button>
+                    </a>
                 </div>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Tổng hợp -->
-<div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm" style="border-left:4px solid #27ae60!important;">
-            <div class="card-body py-3">
-                <div class="text-muted small fw-semibold mb-1">TỔNG THU</div>
-                <div class="fw-bold fs-5 text-success">@tongThu.ToString("N0") <small class="fs-6 fw-normal">VND</small></div>
+<!-- Dashboard Cards -->
+<div class="row g-3 mb-4" id="dashboard-cards">
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="stat-card-custom">
+            <div class="stat-icon-custom blue"><i class="bi bi-bank"></i></div>
+            <div class="stat-body-custom">
+                <div class="label">Số dư đầu kỳ</div>
+                <div class="value text-primary">@tongDauKy.ToString("N0")<span class="unit">VND</span></div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm" style="border-left:4px solid #e74c3c!important;">
-            <div class="card-body py-3">
-                <div class="text-muted small fw-semibold mb-1">TỔNG CHI</div>
-                <div class="fw-bold fs-5 text-danger">@tongChi.ToString("N0") <small class="fs-6 fw-normal">VND</small></div>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="stat-card-custom">
+            <div class="stat-icon-custom green"><i class="bi bi-graph-up-arrow"></i></div>
+            <div class="stat-body-custom">
+                <div class="label">Thu trong kỳ</div>
+                <div class="value text-success">@tongThu.ToString("N0")<span class="unit">VND</span></div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm" style="border-left:4px solid #3498db!important;">
-            <div class="card-body py-3">
-                <div class="text-muted small fw-semibold mb-1">TỒN QUỸ</div>
-                <div class="fw-bold fs-5 @(tonQuy >= 0 ? "text-primary" : "text-danger")">
-                    @tonQuy.ToString("N0") <small class="fs-6 fw-normal">VND</small>
-                </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="stat-card-custom">
+            <div class="stat-icon-custom red"><i class="bi bi-graph-down-arrow"></i></div>
+            <div class="stat-body-custom">
+                <div class="label">Chi trong kỳ</div>
+                <div class="value text-danger">@tongChi.ToString("N0")<span class="unit">VND</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="stat-card-custom">
+            <div class="stat-icon-custom brown"><i class="bi bi-credit-card-2-back"></i></div>
+            <div class="stat-body-custom">
+                <div class="label">Số dư cuối kỳ</div>
+                <div class="value" style="color:#d35400;">@tongCuoiKy.ToString("N0")<span class="unit">VND</span></div>
             </div>
         </div>
     </div>
@@ -87,19 +170,156 @@
     @Html.Partial("_SoQuyList", Model)
 </div>
 
+<!-- Modal Popup Xem chi tiết -->
+<div class="modal fade" id="chiTietModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-scrollable" style="max-width: 95%; width: 95%;">
+        <div class="modal-content shadow-lg border-0" id="chiTietModalContent">
+            <!-- AJAX content will load here -->
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         (function () {
             var $pane = $('#searchForm').closest('.tab-pane');
             if ($pane.length === 0) $pane = $('body');
 
+            // Reset filters to defaults and reload
             $pane.off('click.soquy_reset', '.btn-reset');
             $pane.on('click.soquy_reset', '.btn-reset', function () {
-                $pane.find('input[name="tuNgay"]').val('');
-                $pane.find('input[name="denNgay"]').val('');
-                $pane.find('select[name="idTaiKhoanThanhToan"]').val('');
+                var now = new Date();
+                var y = now.getFullYear();
+                var m = now.getMonth(); // 0-indexed
+                var firstDay = new Date(y, m, 1);
+                var lastDay = new Date(y, m + 1, 0);
+
+                var pad = function(num) { return (num < 10 ? '0' : '') + num; };
+                
+                $pane.find('#tuNgay').val(y + '-' + pad(firstDay.getMonth() + 1) + '-' + pad(firstDay.getDate()));
+                $pane.find('#denNgay').val(y + '-' + pad(lastDay.getMonth() + 1) + '-' + pad(lastDay.getDate()));
+                $pane.find('#idTaiKhoanThanhToan').val('').trigger('change');
                 $pane.find('#searchForm').trigger('submit');
             });
+
+            // Client side validation on search
+            $pane.off('submit.soquy_search', '#searchForm');
+            $pane.on('submit.soquy_search', '#searchForm', function (e) {
+                var tu = $pane.find('#tuNgay').val();
+                var den = $pane.find('#denNgay').val();
+                if (!tu || !den) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    if (typeof showToast === 'function') {
+                        showToast('warning', 'Vui lòng chọn khoảng thời gian tra cứu.');
+                    }
+                    return false;
+                }
+            });
+
+            // Export Excel dynamic trigger
+            $pane.off('click.soquy_excel', '.btn-export-excel');
+            $pane.on('click.soquy_excel', '.btn-export-excel', function () {
+                var tu = $pane.find('#tuNgay').val();
+                var den = $pane.find('#denNgay').val();
+                var acc = $pane.find('#idTaiKhoanThanhToan').val();
+                if (!tu || !den) {
+                    if (typeof showToast === 'function') {
+                        showToast('warning', 'Vui lòng chọn khoảng thời gian tra cứu.');
+                    }
+                    return;
+                }
+                var url = '@Url.Action("ExportExcelTongHop", "SoQuy")' + '?tuNgay=' + tu + '&denNgay=' + den + '&idTaiKhoanThanhToan=' + acc;
+                window.location.href = url;
+            });
+
+            // Print report trigger
+            $pane.off('click.soquy_print', '.btn-print-report');
+            $pane.on('click.soquy_print', '.btn-print-report', function () {
+                var tu = $pane.find('#tuNgay').val();
+                var den = $pane.find('#denNgay').val();
+                if (!tu || !den) {
+                    if (typeof showToast === 'function') {
+                        showToast('warning', 'Vui lòng chọn khoảng thời gian tra cứu.');
+                    }
+                    return;
+                }
+                window.print();
+            });
+
+            // Modal detail action handler
+            $pane.off('click.soquy_view_detail', '.view-detail-btn');
+            $pane.on('click.soquy_view_detail', '.view-detail-btn', function (e) {
+                e.preventDefault();
+                var accId = $(this).attr('data-id');
+                var tu = $pane.find('#tuNgay').val();
+                var den = $pane.find('#denNgay').val();
+
+                if (!tu || !den) {
+                    if (typeof showToast === 'function') {
+                        showToast('warning', 'Vui lòng chọn khoảng thời gian tra cứu.');
+                    }
+                    return;
+                }
+
+                // Show loading
+                var modalEl = document.getElementById('chiTietModal');
+                var $modalContent = $('#chiTietModalContent');
+                $modalContent.html('<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+                
+                var myModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                myModal.show();
+
+                // Fetch details
+                $.ajax({
+                    url: '@Url.Action("Details", "SoQuy")',
+                    type: 'GET',
+                    data: {
+                        idTaiKhoanThanhToan: accId,
+                        tuNgay: tu,
+                        denNgay: den
+                    },
+                    success: function (html) {
+                        $modalContent.html(html);
+                    },
+                    error: function (xhr) {
+                        var msg = 'Lỗi tải chi tiết tài khoản';
+                        if (xhr.status === 403) msg = 'Không có quyền truy cập';
+                        $modalContent.html('<div class="modal-body p-4 text-center text-danger"><i class="bi bi-exclamation-triangle-fill fs-1"></i><p class="mt-2">' + msg + '</p><button class="btn btn-sm btn-secondary mt-3" data-bs-dismiss="modal">Đóng</button></div>');
+                    }
+                });
+            });
+
+            // Update stats when grid finishes loading via AJAX
+            $(document).off('tabContentLoaded.soquy');
+            $(document).on('tabContentLoaded.soquy', function (e, paneId) {
+                var currentPane = $('#' + paneId);
+                // Cập nhật lại số liệu dashboard khi search AJAX
+                if (paneId.indexOf('tab-so-quy') > -1 || currentPane.find('#dashboard-cards').length > 0) {
+                    var $list = currentPane.find('.table-custom tbody tr');
+                    if ($list.length > 0 && !$list.first().find('td').hasClass('text-muted')) {
+                        // Gọi lại endpoint lấy dashboard mới hoặc load từ DOM nếu có chứa thông tin
+                        // Chúng ta sẽ lấy từ server (nhẹ hơn) hoặc render kèm ViewBag ở list và copy lên Index
+                        var tongDauKy = currentPane.find('#table-tong-dau-ky').val();
+                        var tongThu = currentPane.find('#table-tong-thu').val();
+                        var tongChi = currentPane.find('#table-tong-chi').val();
+                        var tongCuoiKy = currentPane.find('#table-tong-cuoi-ky').val();
+
+                        if (tongDauKy !== undefined) {
+                            $pane.find('#dashboard-cards .blue .value').html(formatNumber(tongDauKy) + '<span class="unit">VND</span>');
+                            $pane.find('#dashboard-cards .green .value').html(formatNumber(tongThu) + '<span class="unit">VND</span>');
+                            $pane.find('#dashboard-cards .red .value').html(formatNumber(tongChi) + '<span class="unit">VND</span>');
+                            $pane.find('#dashboard-cards .brown .value').html(formatNumber(tongCuoiKy) + '<span class="unit">VND</span>');
+                        }
+                    }
+                }
+            });
+
+            function formatNumber(num) {
+                if (!num) return '0';
+                return parseFloat(num).toLocaleString('vi-VN');
+            }
         })();
     </script>
 }

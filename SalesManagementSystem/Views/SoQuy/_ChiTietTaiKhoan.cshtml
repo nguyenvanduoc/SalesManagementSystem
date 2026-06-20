@@ -1,0 +1,216 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.GiaoDichChiTietViewModel>
+
+@{
+    var taiKhoan = ViewBag.TaiKhoan as SalesManagementSystem.Models.ViewModels.TaiKhoanThanhToanViewModel;
+    var tuNgay = ViewBag.TuNgay as string;
+    var denNgay = ViewBag.DenNgay as string;
+    
+    decimal openingBalance = ViewBag.OpeningBalance ?? 0M;
+    decimal tongThu = ViewBag.TongThu ?? 0M;
+    decimal tongChi = ViewBag.TongChi ?? 0M;
+    decimal closingBalance = ViewBag.ClosingBalance ?? 0M;
+}
+
+<div class="modal-header border-bottom py-3" style="background-color: #f8fafc;">
+    <div>
+        <h5 class="modal-title fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.15rem;">
+            CHI TIẾT TÀI KHOẢN: @taiKhoan.TenTaiKhoan
+        </h5>
+        <div class="text-muted small mt-1">
+            <span class="me-3"><i class="bi bi-bank me-1"></i>Ngân hàng: <strong>@(string.IsNullOrEmpty(taiKhoan.NganHang) ? "---" : taiKhoan.NganHang)</strong></span>
+            <span class="me-3"><i class="bi bi-hash me-1"></i>Số tài khoản: <strong>@(string.IsNullOrEmpty(taiKhoan.SoTaiKhoan) ? "---" : taiKhoan.SoTaiKhoan)</strong></span>
+            <span><i class="bi bi-person me-1"></i>Chủ tài khoản: <strong>@(string.IsNullOrEmpty(taiKhoan.ChuTaiKhoan) ? "---" : taiKhoan.ChuTaiKhoan)</strong></span>
+        </div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <button type="button" class="btn btn-sm text-white btn-export-detail px-3" style="background-color: #2ecc71; border: none;" title="Xuất Excel chi tiết giao dịch">
+            <i class="bi bi-file-earmark-excel me-1"></i>Xuất Excel
+        </button>
+        <button type="button" class="btn btn-sm btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+</div>
+
+<div class="modal-body p-4" style="background-color: #f1f5f9;">
+    <!-- Popup Dashboard -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm" style="border-left: 4px solid #2e86c1!important;">
+                <div class="card-body py-3">
+                    <div class="text-muted small fw-semibold mb-1" style="font-size: 0.72rem;">SỐ DƯ ĐẦU KỲ</div>
+                    <div class="fw-bold text-primary" style="font-size: 1.15rem;">@openingBalance.ToString("N0") <small class="fw-normal" style="font-size: 0.75rem;">VND</small></div>
+                    <div class="text-muted" style="font-size: 0.65rem; margin-top: 2px;">Tính đến @(DateTime.Parse(tuNgay).ToString("dd/MM/yyyy"))</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm" style="border-left: 4px solid #27ae60!important;">
+                <div class="card-body py-3">
+                    <div class="text-muted small fw-semibold mb-1" style="font-size: 0.72rem;">THU TRONG KỲ</div>
+                    <div class="fw-bold text-success" style="font-size: 1.15rem;">@tongThu.ToString("N0") <small class="fw-normal" style="font-size: 0.75rem;">VND</small></div>
+                    <div class="text-muted" style="font-size: 0.65rem; margin-top: 2px;">BETWEEN date range</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm" style="border-left: 4px solid #e74c3c!important;">
+                <div class="card-body py-3">
+                    <div class="text-muted small fw-semibold mb-1" style="font-size: 0.72rem;">CHI TRONG KỲ</div>
+                    <div class="fw-bold text-danger" style="font-size: 1.15rem;">@tongChi.ToString("N0") <small class="fw-normal" style="font-size: 0.75rem;">VND</small></div>
+                    <div class="text-muted" style="font-size: 0.65rem; margin-top: 2px;">BETWEEN date range</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm" style="border-left: 4px solid #d35400!important;">
+                <div class="card-body py-3">
+                    <div class="text-muted small fw-semibold mb-1" style="font-size: 0.72rem;">SỐ DƯ CUỐI KỲ</div>
+                    <div class="fw-bold" style="color: #d35400; font-size: 1.15rem;">@closingBalance.ToString("N0") <small class="fw-normal" style="font-size: 0.75rem;">VND</small></div>
+                    <div class="text-muted" style="font-size: 0.65rem; margin-top: 2px;">Tính đến @(DateTime.Parse(denNgay).ToString("dd/MM/yyyy"))</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Layout Grid + Chart -->
+    <div class="row g-4">
+        <!-- Grid detailed transactions -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 border-0">
+                    <h6 class="mb-0 fw-bold" style="color: #2c3e50;"><i class="bi bi-clock-history me-2"></i>Lịch sử giao dịch</h6>
+                </div>
+                <div id="giao-dich-chi-tiet-container">
+                    @Html.Partial("_ChiTietGiaoDichList", Model)
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart representation -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 border-0">
+                    <h6 class="mb-0 fw-bold" style="color: #2c3e50;"><i class="bi bi-graph-up me-2"></i>Biến động số dư theo ngày</h6>
+                </div>
+                <div class="card-body d-flex flex-column justify-content-center" style="min-height: 300px;">
+                    <div style="position: relative; height: 280px; width: 100%;">
+                        <canvas id="balanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        var $modalContent = $('#chiTietModalContent');
+
+        // Excel export trigger for popup
+        $modalContent.off('click', '.btn-export-detail');
+        $modalContent.on('click', '.btn-export-detail', function() {
+            var url = '@Url.Action("ExportExcelChiTiet", "SoQuy")' + '?idTaiKhoanThanhToan=@taiKhoan.ID&tuNgay=@tuNgay&denNgay=@denNgay';
+            window.location.href = url;
+        });
+
+        // Intercept pagination clicks inside the modal to do AJAX loads instead of full navigations
+        $modalContent.off('click', '.modal-pagination .ajax-link');
+        $modalContent.on('click', '.modal-pagination .ajax-link', function(e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            var href = $(this).attr('href');
+            if (!href || href === '#') return;
+
+            var url = href;
+            // Append flag to only return table grid partial
+            if (url.indexOf('?') > -1) url += '&isGridOnly=true';
+            else url += '?isGridOnly=true';
+
+            // Maintain correct detail modal routing params
+            url = url.replace('/Details', '/chi-tiet').replace('Details?', 'chi-tiet?');
+
+            $('#giao-dich-chi-tiet-container').html('<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+            $('#giao-dich-chi-tiet-container').load(url);
+        });
+
+        // Intercept page size change inside the modal
+        $modalContent.off('change', '.modal-pagination .page-size-select');
+        $modalContent.on('change', '.modal-pagination .page-size-select', function(e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            var pageSize = $(this).val();
+            var url = '@Url.Action("Details", "SoQuy")' + '?idTaiKhoanThanhToan=@taiKhoan.ID&tuNgay=@tuNgay&denNgay=@denNgay&page=1&pageSize=' + pageSize + '&isGridOnly=true';
+            
+            $('#giao-dich-chi-tiet-container').html('<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+            $('#giao-dich-chi-tiet-container').load(url);
+        });
+
+        // Load Chart.js dynamically from CDN if not already loaded, then draw chart
+        if (typeof Chart === 'undefined') {
+            $.getScript('https://cdn.jsdelivr.net/npm/chart.js', initChart);
+        } else {
+            initChart();
+        }
+
+        function initChart() {
+            var ctx = document.getElementById('balanceChart').getContext('2d');
+            var labels = @Html.Raw(ViewBag.ChartLabels);
+            var data = @Html.Raw(ViewBag.ChartData);
+
+            // Clean previous chart instance if exists
+            if (window.myBalanceChart) {
+                window.myBalanceChart.destroy();
+            }
+
+            window.myBalanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Số dư (VND)',
+                        data: data,
+                        borderColor: '#2e86c1',
+                        backgroundColor: 'rgba(46, 134, 193, 0.08)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.2,
+                        pointRadius: labels.length > 31 ? 0 : 3,
+                        pointHoverRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Số dư: ' + context.raw.toLocaleString('vi-VN') + ' VND';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 10 } }
+                        },
+                        y: {
+                            ticks: {
+                                font: { size: 10 },
+                                callback: function(value) {
+                                    if (value >= 1000000 || value <= -1000000) {
+                                        return (value / 1000000).toLocaleString('vi-VN') + 'M';
+                                    }
+                                    return value.toLocaleString('vi-VN');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    })();
+</script>
