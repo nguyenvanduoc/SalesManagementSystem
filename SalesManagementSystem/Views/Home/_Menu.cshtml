@@ -5,17 +5,7 @@
     string activeCtrl = Model.ActiveController;
 }
 
-@* ── Dashboard (luôn hiện ở đầu, không phụ thuộc ACL) ── *@
-<p class="nav-heading" style="margin-top: -15px;">Tổng quan</p>
-<ul style="padding:0;margin:0">
-    <li class="nav-item">
-        <a onclick="TabManager.setActiveTab('default-tab')"
-           class="nav-link @(activeCtrl == "Home" ? "active" : "")" style="cursor:pointer">
-            <i class="bi bi-speedometer2"></i>
-            <span>Dashboard</span>
-        </a>
-    </li>
-</ul>
+
 
 @* ── Các nhóm menu động từ ACL_ManHinh ── *@
 @{ 

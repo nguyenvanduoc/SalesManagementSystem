@@ -1,4 +1,4 @@
-﻿using System.Web.Mvc;
+using System.Web.Mvc;
 using SalesManagementSystem.Helpers;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories.Interfaces;
@@ -57,6 +57,12 @@ namespace SalesManagementSystem.Controllers
                     });
                     Session["LoginSessionID"] = sessionId;
 
+                    // Kiểm tra quyền Dashboard
+                    bool hasDashboardPerm = SalesManagementSystem.Helpers.PermissionHelper.HasActionPermission("Dashboard", "Index");
+                    if (hasDashboardPerm)
+                    {
+                        return RedirectToAction("Index", "Dashboard");
+                    }
                     return RedirectToAction("Index", "Home");
                 }
                 else
