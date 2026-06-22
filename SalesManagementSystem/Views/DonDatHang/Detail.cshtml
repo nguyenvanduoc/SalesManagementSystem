@@ -1,4 +1,4 @@
-﻿@model SalesManagementSystem.Models.ViewModels.DonDatHangCreateEditViewModel
+@model SalesManagementSystem.Models.ViewModels.DonDatHangCreateEditViewModel
 
 @{
     ViewBag.Title = "Chi tiết đơn đặt hàng";
@@ -163,6 +163,10 @@
                         <span id="dispSoDong" class="fs-6 text-dark">0</span>
                     </div>
                     <div>
+                        <span class="text-muted small me-1">Tổng số lượng:</span>
+                        <span id="dispTongSoLuong" class="fs-6 text-dark">0</span>
+                    </div>
+                    <div>
                         <span class="text-muted small me-1">Cộng tiền hàng:</span>
                         <span id="dispTongTienHang" class="fs-6 text-dark">0</span>
                     </div>
@@ -188,7 +192,7 @@
 </form>
 
 @section Scripts {
-<script src="@Url.Content("~/Scripts/don-dat-hang.js?v=2.5")"></script>
+<script src="@Url.Content("~/Scripts/don-dat-hang.js?v=2.6")"></script>
 <script>
     $(document).ready(function () {
         var $form = $('#frmDonDatHang').last();

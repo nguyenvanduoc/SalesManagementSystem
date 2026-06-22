@@ -318,11 +318,14 @@ var DonDatHang = (function () {
         }
         var totalTienHang = 0;
         var totalTienThue = 0;
+        var totalSoLuong = 0;
         $form.find('#tbodyChiTiet tr').each(function () {
             var valThanhTien = $(this).find('.txt-thanhtien').val() || '0';
             var valTienThue = $(this).find('.txt-tien-thue').val() || '0';
+            var valSoLuong = $(this).find('.txt-soluong').val() || '0';
             totalTienHang += _parseMoney(valThanhTien);
             totalTienThue += _parseMoney(valTienThue);
+            totalSoLuong += _parseMoney(valSoLuong);
         });
         
         var phiBocXep = _parseMoney($form.find('#PhiBocXepDisplay').val() || '0');
@@ -330,6 +333,7 @@ var DonDatHang = (function () {
 
         $form.find('#dispTongTienHang').text(_formatNumber(Math.round(totalTienHang)));
         $form.find('#dispTongTienThue').text(_formatNumber(Math.round(totalTienThue)));
+        $form.find('#dispTongSoLuong').text(_formatNumber(Math.round(totalSoLuong)));
         $form.find('#dispTongTien, #dispTongTien2').text(_formatNumber(Math.round(totalThanhToan)));
         $form.find('#dispSoDong').text($form.find('#tbodyChiTiet tr').length);
     }

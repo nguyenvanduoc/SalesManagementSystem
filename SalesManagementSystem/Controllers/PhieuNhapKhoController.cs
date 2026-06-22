@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
@@ -182,7 +182,11 @@ namespace SalesManagementSystem.Controllers
                 TenNguoiNhan = entity.TenNguoiNhan,
                 GhiChu = entity.GhiChu,
                 TrangThai = entity.TrangThai,
-                IsReadOnly = isView || entity.TrangThai == 2 || entity.TrangThai == 3
+                IsReadOnly = isView || entity.TrangThai == 2 || entity.TrangThai == 3,
+                IDPhuongTien = entity.IDPhuongTien,
+                NgayGiaoHang = entity.NgayGiaoHang,
+                HoTenTaiXe = entity.HoTenTaiXe,
+                SoDienThoaiTaiXe = entity.SoDienThoaiTaiXe
             };
 
             int total;
@@ -192,6 +196,16 @@ namespace SalesManagementSystem.Controllers
             {
                 model.TenKho = item.TenKho;
                 model.TenNhaCungCap = item.TenNhaCungCap;
+            }
+
+            if (model.IDPhuongTien.HasValue && model.IDPhuongTien > 0)
+            {
+                var phuongTiens = _repo.GetPhuongTienForDropdown("");
+                var pt = phuongTiens.FirstOrDefault(x => (int)x.ID == model.IDPhuongTien);
+                if (pt != null)
+                {
+                    model.TenPhuongTien = (string)pt.MaPhuongTien + " - " + (string)pt.TenPhuongTien;
+                }
             }
 
             model.ChiTiets = _repo.GetChiTiet(id);
@@ -321,6 +335,13 @@ namespace SalesManagementSystem.Controllers
         {
             var data = _repo.GetSanPhamForDropdown(q);
             return Json(data.Select(x => new { id = (int)x.ID, text = (string)x.MaSanPham + " - " + (string)x.TenSanPham, dvt = (string)x.DVT }), JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public ActionResult SearchPhuongTien(string q)
+        {
+            var data = _repo.GetPhuongTienForDropdown(q);
+            return Json(data.Select(x => new { id = (int)x.ID, text = (string)x.MaPhuongTien + " - " + (string)x.TenPhuongTien }), JsonRequestBehavior.AllowGet);
         }
     }
 }

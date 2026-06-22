@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using SalesManagementSystem.Data;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories.Interfaces;
@@ -35,6 +35,20 @@ namespace SalesManagementSystem.Repositories
 
                 var list = conn.Query<PhieuXuatKhoListViewModel>("sp_KHO_PhieuXuat_GetList", p, commandType: CommandType.StoredProcedure).ToList();
                 totalRecords = p.Get<int>("@TotalRecords");
+
+                if (list.Any())
+                {
+                    var ids = list.Select(x => x.ID).ToList();
+                    var sqlSoLuong = @"SELECT IDPhieuXuat, SUM(SoLuong) as TongSoLuong FROM KHO_PhieuXuat_ChiTiet WHERE IDPhieuXuat IN @Ids GROUP BY IDPhieuXuat";
+                    var dapperResult = conn.Query(sqlSoLuong, new { Ids = ids });
+                    var dict = dapperResult.ToDictionary(row => (int)row.IDPhieuXuat, row => (decimal)(row.TongSoLuong ?? 0m));
+                    foreach (var item in list)
+                    {
+                        if (dict.TryGetValue(item.ID, out var sl))
+                            item.TongSoLuong = sl;
+                    }
+                }
+
                 return list;
             }
         }

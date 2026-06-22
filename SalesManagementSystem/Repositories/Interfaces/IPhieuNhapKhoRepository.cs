@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Models.ViewModels;
@@ -27,5 +27,6 @@ namespace SalesManagementSystem.Repositories.Interfaces
         IEnumerable<dynamic> GetNhaCungCapForDropdown(string keyword);
         IEnumerable<dynamic> GetNhanSuForDropdown(string keyword);
         IEnumerable<dynamic> GetSanPhamForDropdown(string keyword);
+        IEnumerable<dynamic> GetPhuongTienForDropdown(string keyword);
     }
 }

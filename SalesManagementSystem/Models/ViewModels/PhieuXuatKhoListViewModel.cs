@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace SalesManagementSystem.Models.ViewModels
 {
@@ -19,6 +19,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public string GhiChu { get; set; }
         
         public decimal TongCong { get; set; }
+        public decimal TongSoLuong { get; set; }
         public int TrangThai { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿@model SalesManagementSystem.Models.ViewModels.PhieuNhapKhoViewModel
+@model SalesManagementSystem.Models.ViewModels.PhieuNhapKhoViewModel
+@using System.Linq
 @{
     ViewBag.Title = Model.ID == 0 ? "Thêm mới Phiếu nhập kho" : "Cập nhật Phiếu nhập kho";
     var isView = ViewBag.IsView != null ? (bool)ViewBag.IsView : Model.IsReadOnly;
@@ -79,6 +80,29 @@
                 </div>
             </div>
 
+            <!-- Card: Thông tin vận chuyển -->
+            <div class="don-header-card">
+                <div class="don-section-title"><i class="bi bi-truck me-1"></i>Thông tin vận chuyển</div>
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Phương tiện</label>
+                        <select id="IDPhuongTien" class="form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Ngày giao hàng</label>
+                        <input type="date" id="NgayGiaoHang" class="form-control form-control-sm" value="@(Model.NgayGiaoHang?.ToString("yyyy-MM-dd"))" @(isView ? "disabled" : "") />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Tài xế</label>
+                        <input type="text" id="HoTenTaiXe" class="form-control form-control-sm" value="@Model.HoTenTaiXe" @(isView ? "disabled" : "") />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">SĐT Tài xế</label>
+                        <input type="text" id="SoDienThoaiTaiXe" class="form-control form-control-sm" value="@Model.SoDienThoaiTaiXe" @(isView ? "disabled" : "") />
+                    </div>
+                </div>
+            </div>
+
             <!-- Card: Thông tin chứng từ -->
             <div class="don-header-card">
                 <div class="don-section-title"><i class="bi bi-file-earmark-text me-1"></i>Thông tin chứng từ</div>
@@ -127,7 +151,7 @@
                                 <th style="width:90px;">Số lượng</th>
                                 <th style="width:110px;">Đơn giá</th>
                                 <th style="width:120px;">Ngày sản xuất</th>
-                                <th style="width:120px;">Hạn sữ dụng</th>
+                                <th style="width:120px;">Hạn sử dụng</th>
                                 <th style="width:120px;">Thành tiền</th>
                                 <th style="width:70px;" class="d-none">Thuế %</th>
                                 <th style="width:110px;" class="d-none">Tiền thuế</th>
@@ -155,6 +179,10 @@
                     
                     <div class="d-flex align-items-center gap-3">
                         <div>
+                            <span class="text-muted small me-1">Tổng số lượng:</span>
+                            <span class="fs-6 text-dark" id="dispTongSoLuong">@(Model.ChiTiets != null ? Model.ChiTiets.Sum(c => c.SoLuong).ToString("N0") : "0")</span>
+                        </div>
+                        <div>
                             <span class="text-muted small me-1">Cộng tiền hàng:</span>
                             <span class="fs-6 text-dark" id="dispTongTienHang">0</span>
                         </div>
@@ -176,7 +204,7 @@
 </form>
 
 @section Scripts {
-<script src="@Url.Content("~/Scripts/phieu-nhap-kho.js?v=1.4")"></script>
+<script src="@Url.Content("~/Scripts/phieu-nhap-kho.js?v=1.6")"></script>
 <script>
     var isViewMode = @(isView.ToString().ToLower());
 
@@ -185,11 +213,14 @@
             searchKhoUrl: '@Url.Action("SearchKhoHang")',
             searchNccUrl: '@Url.Action("SearchNhaCungCap")',
             searchSpUrl: '@Url.Action("SearchSanPham")',
+            searchPhuongTienUrl: '@Url.Action("SearchPhuongTien")',
             chiTietsJson: @Html.Raw(chiTietsJson),
             selectedKhoId: @(Model.IDKho.HasValue && Model.IDKho.Value > 0 ? Model.IDKho.Value.ToString() : "null"),
             selectedKhoText: '@Html.Raw(Model.TenKho)',
             selectedNccId: @(Model.IDNhaCungCap.HasValue && Model.IDNhaCungCap.Value > 0 ? Model.IDNhaCungCap.Value.ToString() : "null"),
-            selectedNccText: '@Html.Raw(Model.TenNhaCungCap)'
+            selectedNccText: '@Html.Raw(Model.TenNhaCungCap)',
+            selectedPhuongTienId: @(Model.IDPhuongTien.HasValue && Model.IDPhuongTien.Value > 0 ? Model.IDPhuongTien.Value.ToString() : "null"),
+            selectedPhuongTienText: '@Html.Raw(Model.TenPhuongTien)'
         });
 
         if (isViewMode) {

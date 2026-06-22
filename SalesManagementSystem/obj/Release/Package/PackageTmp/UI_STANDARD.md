@@ -700,7 +700,29 @@ container.RegisterType<
 
 ---
 
-# 16. CHECKLIST REVIEW UI
+# 16. NÚT XUẤT EXCEL
+
+## Bắt buộc
+
+Sử dụng định dạng thống nhất cho nút Xuất Excel:
+
+```html
+<button class="btn text-white"
+        style="background:#2ecc71">
+    <i class="bi bi-file-earmark-excel"></i>
+    Xuất Excel
+</button>
+```
+
+### Quy định
+
+* Màu nền: #2ecc71
+* Chữ trắng
+* Có icon biểu tượng file Excel
+
+---
+
+# 17. CHECKLIST REVIEW UI
 
 Trước khi hoàn thành màn hình phải kiểm tra:
 
@@ -737,6 +759,8 @@ Trước khi hoàn thành màn hình phải kiểm tra:
 □ Có cột STT
 
 □ Có cột Thao tác
+
+□ Có nút Xuất Excel đúng chuẩn
 
 □ Không dùng alert()
 

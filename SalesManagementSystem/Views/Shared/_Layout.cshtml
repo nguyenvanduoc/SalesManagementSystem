@@ -1119,5 +1119,71 @@
 <script src="~/Scripts/tab-manager.js?v=@DateTime.Now.Ticks"></script>
 <script src="~/Scripts/global-search.js?v=@DateTime.Now.Ticks"></script>
 @RenderSection("scripts", required: false)
+
+<script>
+    /* ================================================================
+       SESSION KEEP-ALIVE
+       - Ping /Home/KeepAlive mỗi 4 phút để giữ App Pool sống
+       - Tự động logout sau 8 tiếng (28800 giây)
+       - Hiện cảnh báo 2 phút trước khi hết hạn
+    ================================================================ */
+    (function () {
+        var SESSION_MAX_MS   = 8 * 60 * 60 * 1000;  // 8 tiếng
+        var WARN_BEFORE_MS   = 2 * 60 * 1000;        // cảnh báo trước 2 phút
+        var PING_INTERVAL_MS = 4 * 60 * 1000;        // ping mỗi 4 phút
+        var loginTime        = Date.now();
+        var warnShown        = false;
+        var keepAliveUrl     = '@Url.Action("KeepAlive", "Home")';
+        var logoutUrl        = '@Url.Action("Logout", "Login")';
+
+        function pingServer() {
+            $.ajax({
+                url: keepAliveUrl,
+                type: 'POST',
+                headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+                success: function (res) {
+                    if (!res.alive) {
+                        // Session đã mất → về trang đăng nhập
+                        window.location.href = logoutUrl;
+                    }
+                },
+                error: function () {
+                    // Không kết nối được server - không làm gì, thử lần sau
+                }
+            });
+        }
+
+        function checkTimeout() {
+            var elapsed = Date.now() - loginTime;
+            var remaining = SESSION_MAX_MS - elapsed;
+
+            if (remaining <= 0) {
+                // Hết 8 tiếng → logout
+                window.location.href = logoutUrl;
+                return;
+            }
+
+            if (remaining <= WARN_BEFORE_MS && !warnShown) {
+                warnShown = true;
+                // Hiện toast cảnh báo sắp hết hạn
+                var toast = $('<div style="position:fixed;bottom:24px;right:24px;z-index:99999;background:#e74c3c;color:#fff;padding:14px 20px;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.2);font-size:0.9rem;max-width:320px;">' +
+                    '<b><i class="bi bi-clock-history"></i> Phiên làm việc sắp hết hạn</b><br>' +
+                    'Còn khoảng 2 phút nữa hệ thống sẽ tự động đăng xuất.<br>' +
+                    '<small>Làm mới trang để gia hạn thêm 8 tiếng.</small></div>');
+                $('body').append(toast);
+                setTimeout(function () { toast.fadeOut(500, function () { toast.remove(); }); }, 90000);
+            }
+        }
+
+        // Ping ngay lần đầu sau 30 giây, rồi mỗi 4 phút
+        setTimeout(function () {
+            pingServer();
+            setInterval(pingServer, PING_INTERVAL_MS);
+        }, 30000);
+
+        // Kiểm tra 8 tiếng mỗi 30 giây
+        setInterval(checkTimeout, 30000);
+    })();
+</script>
 </body>
 </html>

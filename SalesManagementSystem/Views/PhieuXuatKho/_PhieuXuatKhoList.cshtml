@@ -1,4 +1,4 @@
-﻿@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.PhieuXuatKhoListViewModel>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.PhieuXuatKhoListViewModel>
 
 <div class="card shadow-sm border-0 mb-4">
     <div class="card-body p-0">
@@ -13,6 +13,7 @@
                         <th>Số đơn hàng</th>
                         <th>Khách hàng</th>
                         <th>Kho hàng</th>
+                        <th class="text-end">Tổng số lượng</th>
                         <th>Ghi chú</th>
                         <th class="text-center">Trạng thái</th>
                     </tr>
@@ -46,6 +47,7 @@
                                 <td class="align-middle">@item.SoDonHang</td>
                                 <td class="align-middle">@item.TenKhachHang</td>
                                 <td class="align-middle">@item.TenKhoHang</td>
+                                <td class="text-end align-middle">@item.TongSoLuong.ToString("N0")</td>
                                 <td class="align-middle">@item.GhiChu</td>
                                 <td class="text-center align-middle">
                                     @if (item.TrangThai == 1)
@@ -74,6 +76,16 @@
                         </tr>
                     }
                 </tbody>
+                @if (Model.Items != null && Model.Items.Any())
+                {
+                    <tfoot>
+                        <tr class="fw-bold" style="background-color: #f8f9fa;">
+                            <td colspan="7" class="text-end">Tổng cộng</td>
+                            <td class="text-end" style="font-size: 1.1em;">@(Model.Items.Sum(x => x.TongSoLuong).ToString("N0"))</td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </tfoot>
+                }
             </table>
         </div>
     </div>

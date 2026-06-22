@@ -9,9 +9,13 @@ var PhieuNhapKho = (function () {
         selectedKhoText: '',
         selectedNccId: null,
         selectedNccText: '',
+        selectedNccText: '',
+        selectedPhuongTienId: null,
+        selectedPhuongTienText: '',
         searchKhoUrl: '',
         searchNccUrl: '',
-        searchSpUrl: ''
+        searchSpUrl: '',
+        searchPhuongTienUrl: ''
     };
 
     function _formatNumber(n) {
@@ -65,11 +69,28 @@ var PhieuNhapKho = (function () {
             }
         });
 
+        $('#IDPhuongTien').select2({
+            placeholder: '-- Chọn phương tiện --',
+            allowClear: true,
+            minimumInputLength: 0,
+            ajax: {
+                url: config.searchPhuongTienUrl,
+                dataType: 'json',
+                delay: 250,
+                data: function (params) { return { q: params.term || '' }; },
+                processResults: function (data) { return { results: data }; },
+                cache: true
+            }
+        });
+
         if (config.selectedKhoId) {
             $('#IDKho').append(new Option(config.selectedKhoText, config.selectedKhoId, true, true)).trigger('change');
         }
         if (config.selectedNccId) {
             $('#IDNhaCungCap').append(new Option(config.selectedNccText, config.selectedNccId, true, true)).trigger('change');
+        }
+        if (config.selectedPhuongTienId) {
+            $('#IDPhuongTien').append(new Option(config.selectedPhuongTienText, config.selectedPhuongTienId, true, true)).trigger('change');
         }
     }
 
@@ -202,13 +223,16 @@ var PhieuNhapKho = (function () {
         var totalTienHang = 0;
         var totalTienThue = 0;
         var totalCong = 0;
+        var totalSoLuong = 0;
 
         $('#PNK_tblChiTiet tbody tr').each(function () {
+            totalSoLuong += _parseMoney($(this).find('.txt-soluong').val());
             totalTienHang += _parseMoney($(this).find('.txt-thanhtien').val());
             totalTienThue += _parseMoney($(this).find('.txt-tienthue').val());
             totalCong += _parseMoney($(this).find('.txt-tongsauthue').val());
         });
 
+        $('#dispTongSoLuong').text(_formatNumber(totalSoLuong));
         $('#dispTongTienHang').text(_formatNumber(totalTienHang));
         $('#dispTongTienThue').text(_formatNumber(totalTienThue));
         $('#dispTongCong').text(_formatNumber(totalCong));
@@ -288,6 +312,10 @@ var PhieuNhapKho = (function () {
             SoDienThoaiNguoiGiao: $('#SoDienThoaiNguoiGiao').val(),
             TenNguoiNhan: $('#TenNguoiNhan').val(),
             GhiChu: $('#GhiChu').val(),
+            IDPhuongTien: $('#IDPhuongTien').val(),
+            NgayGiaoHang: $('#NgayGiaoHang').val(),
+            HoTenTaiXe: $('#HoTenTaiXe').val(),
+            SoDienThoaiTaiXe: $('#SoDienThoaiTaiXe').val(),
             ChiTiets: chiTiets
         };
     }

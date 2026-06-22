@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace SalesManagementSystem.Models.ViewModels
@@ -20,6 +20,12 @@ namespace SalesManagementSystem.Models.ViewModels
         public string GhiChu { get; set; }
         public int TrangThai { get; set; }
         public bool IsReadOnly { get; set; } // Set to true if TrangThai == 2 or 3
+
+        public int? IDPhuongTien { get; set; }
+        public string TenPhuongTien { get; set; }
+        public DateTime? NgayGiaoHang { get; set; }
+        public string HoTenTaiXe { get; set; }
+        public string SoDienThoaiTaiXe { get; set; }
 
         public List<PhieuNhapKhoChiTietViewModel> ChiTiets { get; set; }
 

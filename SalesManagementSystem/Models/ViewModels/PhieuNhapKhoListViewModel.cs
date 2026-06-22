@@ -25,6 +25,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public decimal TongTienHang { get; set; }
         public decimal TongTienThue { get; set; }
         public decimal TongCong { get; set; }
+        public decimal TongSoLuong { get; set; }
         public DateTime? NgayTao { get; set; }
         public int? NguoiTao { get; set; }
         public string NguoiTaoText { get; set; }

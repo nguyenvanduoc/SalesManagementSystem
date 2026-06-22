@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace SalesManagementSystem.Models.Entities
 {
@@ -26,5 +26,9 @@ namespace SalesManagementSystem.Models.Entities
         public DateTime? NgayCapNhat { get; set; }
         public int? NguoiCapNhat { get; set; }
         public bool IsDeleted { get; set; }
+        public int? IDPhuongTien { get; set; }
+        public DateTime? NgayGiaoHang { get; set; }
+        public string HoTenTaiXe { get; set; }
+        public string SoDienThoaiTaiXe { get; set; }
     }
 }

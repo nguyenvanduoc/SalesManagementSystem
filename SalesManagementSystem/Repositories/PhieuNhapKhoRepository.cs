@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -47,6 +47,20 @@ namespace SalesManagementSystem.Repositories
                     commandType: CommandType.StoredProcedure).ToList();
                 
                 totalRecords = p.Get<int>("@TotalRecords");
+
+                if (list.Any())
+                {
+                    var ids = list.Select(x => x.ID).ToList();
+                    var sqlSoLuong = @"SELECT IDPhieuNhap, SUM(SoLuong) as TongSoLuong FROM KHO_PhieuNhap_ChiTiet WHERE IDPhieuNhap IN @Ids GROUP BY IDPhieuNhap";
+                    var dapperResult = conn.Query(sqlSoLuong, new { Ids = ids });
+                    var dict = dapperResult.ToDictionary(row => (int)row.IDPhieuNhap, row => (decimal)(row.TongSoLuong ?? 0m));
+                    foreach (var item in list)
+                    {
+                        if (dict.TryGetValue(item.ID, out var sl))
+                            item.TongSoLuong = sl;
+                    }
+                }
+
                 return list;
             }
         }
@@ -100,6 +114,10 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@TenNguoiNhan", model.TenNguoiNhan);
                 p.Add("@GhiChu", model.GhiChu);
                 p.Add("@NguoiTao", userId);
+                p.Add("@IDPhuongTien", model.IDPhuongTien);
+                p.Add("@NgayGiaoHang", model.NgayGiaoHang);
+                p.Add("@HoTenTaiXe", model.HoTenTaiXe);
+                p.Add("@SoDienThoaiTaiXe", model.SoDienThoaiTaiXe);
                 p.Add("@ChiTietJson", chiTietJson);
                 p.Add("@NewID", dbType: DbType.Int32, direction: ParameterDirection.Output);
                 p.Add("@SoChungTuOut", dbType: DbType.String, size: 50, direction: ParameterDirection.Output);
@@ -160,7 +178,11 @@ namespace SalesManagementSystem.Repositories
                         TenNguoiNhan = @TenNguoiNhan,
                         GhiChu = @GhiChu,
                         NguoiCapNhat = @NguoiTao,
-                        NgayCapNhat = GETDATE()
+                        NgayCapNhat = GETDATE(),
+                        IDPhuongTien = @IDPhuongTien,
+                        NgayGiaoHang = @NgayGiaoHang,
+                        HoTenTaiXe = @HoTenTaiXe,
+                        SoDienThoaiTaiXe = @SoDienThoaiTaiXe
                     WHERE ID = @ID AND TrangThai = 1; -- Chỉ cho phép sửa khi Nháp
                 ";
                 
@@ -176,6 +198,10 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@TenNguoiNhan", model.TenNguoiNhan);
                 p.Add("@GhiChu", model.GhiChu);
                 p.Add("@NguoiTao", userId);
+                p.Add("@IDPhuongTien", model.IDPhuongTien);
+                p.Add("@NgayGiaoHang", model.NgayGiaoHang);
+                p.Add("@HoTenTaiXe", model.HoTenTaiXe);
+                p.Add("@SoDienThoaiTaiXe", model.SoDienThoaiTaiXe);
 
                 conn.Execute(sql, p);
             }
@@ -257,6 +283,15 @@ namespace SalesManagementSystem.Repositories
             {
                 string kw = (keyword ?? "").Trim().ToLower();
                 return conn.Query("SELECT ID, MaSanPham, TenSanPham, DVT FROM DM_SanPham WHERE @KW = '' OR LOWER(TenSanPham) LIKE '%' + @KW + '%' ORDER BY TenSanPham", new { KW = kw });
+            }
+        }
+
+        public IEnumerable<dynamic> GetPhuongTienForDropdown(string keyword)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                string kw = (keyword ?? "").Trim().ToLower();
+                return conn.Query("SELECT ID, MaPhuongTien, TenPhuongTien FROM DM_PhuongTien WHERE @KW = '' OR LOWER(TenPhuongTien) LIKE '%' + @KW + '%' ORDER BY TenPhuongTien", new { KW = kw });
             }
         }
     }

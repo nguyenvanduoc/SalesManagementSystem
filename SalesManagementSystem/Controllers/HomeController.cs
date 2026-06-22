@@ -1,6 +1,7 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Web;
 using System.Web.Mvc;
+using SalesManagementSystem.Helpers;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories;
 using SalesManagementSystem.Repositories.Interfaces;
@@ -81,6 +82,21 @@ namespace SalesManagementSystem.Controllers
             {
                 return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
             }
+        }
+        [HttpPost]
+        public JsonResult KeepAlive()
+        {
+            // Refresh session để tránh app pool idle timeout
+            // Trả về trạng thái để client biết session còn sống
+            var userSession = Session[CommonConstants.USER_SESSION] as UserLoginViewModel;
+            if (userSession == null)
+            {
+                return Json(new { alive = false, message = "Session expired" });
+            }
+
+            // Cập nhật timestamp để session không bị coi là idle
+            Session["KeepAliveAt"] = System.DateTime.Now;
+            return Json(new { alive = true, user = userSession.UserName });
         }
     }
 }

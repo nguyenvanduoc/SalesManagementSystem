@@ -631,7 +631,7 @@
             <div class="tabs-container" id="tabsContainerScroll">
                 @{
                     string currentUrl = Request.Url != null ? Request.Url.AbsolutePath.ToLower() : "";
-                    bool isHome = currentUrl == "/" || currentUrl == "/home/index" || currentUrl == "/home" || string.IsNullOrEmpty(currentUrl);
+                    bool isHome = currentUrl == "/" || currentUrl == "/home/index" || currentUrl == "/home" || currentUrl == "/dashboard" || currentUrl == "/dashboard/index" || string.IsNullOrEmpty(currentUrl);
                     string tabTitle = ViewBag.Title;
                     if (!isHome)
                     {
@@ -679,7 +679,7 @@
         
         <!-- TAB CONTENT -->
         <div class="tab-content" id="mainTabContent">
-            <div class="tab-pane fade @(isHome ? "show active" : "")" id="default-tab-pane" role="tabpanel" aria-labelledby="default-tab" tabindex="0" data-url="@Url.Action("Index", "Home")">
+            <div class="tab-pane fade @(isHome ? "show active" : "")" id="default-tab-pane" role="tabpanel" aria-labelledby="default-tab" tabindex="0" data-url="@(currentUrl.Contains("/dashboard") ? Url.Action("Index", "Dashboard") : Url.Action("Index", "Home"))">
                 @if (isHome)
                 {
                     @RenderBody()
@@ -784,6 +784,7 @@
 <script src="@Url.Content("~/Scripts/jquery-3.7.0.min.js")"></script>
 <script src="@Url.Content("~/Scripts/bootstrap.bundle.min.js")"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // Sidebar toggle
     const toggleBtn   = document.getElementById('sidebarToggle');
