@@ -5,17 +5,14 @@ var PhieuNhapKho = (function () {
         selectedKhoText: '',
         selectedNccId: null,
         selectedNccText: '',
-        selectedKhoId: null,
-        selectedKhoText: '',
-        selectedNccId: null,
-        selectedNccText: '',
-        selectedNccText: '',
         selectedPhuongTienId: null,
         selectedPhuongTienText: '',
         searchKhoUrl: '',
         searchNccUrl: '',
         searchSpUrl: '',
-        searchPhuongTienUrl: ''
+        searchPhuongTienUrl: '',
+        isViewMode: false,
+        isInlineDetail: false
     };
 
     function _formatNumber(n) {
@@ -35,6 +32,15 @@ var PhieuNhapKho = (function () {
         return isNaN(val) ? 0 : val;
     }
 
+    function _formatDateText(dateStr) {
+        if (!dateStr) return '';
+        var parts = dateStr.split('-');
+        if (parts.length === 3) {
+            return parts[2] + '/' + parts[1] + '/' + parts[0];
+        }
+        return dateStr;
+    }
+
     function init(options) {
         $.extend(config, options);
         _initSelect2();
@@ -43,6 +49,8 @@ var PhieuNhapKho = (function () {
     }
 
     function _initSelect2() {
+        if (config.isInlineDetail) return;
+
         $('#IDKho').select2({
             placeholder: '-- Chọn kho --',
             minimumInputLength: 0,
@@ -143,6 +151,44 @@ var PhieuNhapKho = (function () {
         var ngaySanXuat = (ct && ct.NgaySanXuat) ? ct.NgaySanXuat.split('T')[0] : '';
         var hanSuDung = (ct && ct.HanSuDung) ? ct.HanSuDung.split('T')[0] : '';
 
+        if (config.isInlineDetail) {
+            var productName = (ct && ct.MaSanPham) ? (ct.MaSanPham + ' - ' + ct.TenSanPham) : '';
+            var actionTd = '';
+            if (!config.isViewMode) {
+                actionTd = '  <td class="text-center align-middle">' +
+                           '    <button type="button" class="btn btn-sm btn-outline-danger btn-remove-row"><i class="bi bi-trash"></i></button>' +
+                           '  </td>';
+            }
+            var html = '<tr data-id="' + id + '">' +
+                '  <td class="text-center align-middle row-stt"></td>' +
+                '  <td class="align-middle">' + productName + '</td>' +
+                '  <td class="text-center align-middle">' + dvt + '</td>' +
+                '  <td class="text-end align-middle txt-soluong" data-val="' + soLuong + '">' + _formatNumber(soLuong) + '</td>' +
+                '  <td class="text-end align-middle txt-dongia" data-val="' + donGia + '">' + _formatNumber(donGia) + '</td>' +
+                '  <td class="text-center align-middle">' + _formatDateText(ngaySanXuat) + '</td>' +
+                '  <td class="text-center align-middle">' + _formatDateText(hanSuDung) + '</td>' +
+                '  <td class="text-end align-middle txt-thanhtien">0</td>' +
+                '  <td class="d-none txt-thue" data-val="' + thue + '">' + thue + '</td>' +
+                '  <td class="d-none txt-tienthue">0</td>' +
+                '  <td class="text-end align-middle txt-tongsauthue">0</td>' +
+                '  <td class="align-middle">' + ghiChu + '</td>' +
+                actionTd +
+                '</tr>';
+
+            var $row = $(html);
+            $tbody.append($row);
+            calcRow($row);
+            _updateSTT();
+            return;
+        }
+
+        var actionTd = '';
+        if (!config.isViewMode) {
+            actionTd = '  <td class="text-center align-middle">' +
+                       '    <button type="button" class="btn btn-sm btn-outline-danger btn-remove-row"><i class="bi bi-trash"></i></button>' +
+                       '  </td>';
+        }
+
         var html = '<tr data-id="' + id + '">' +
             '  <td class="text-center align-middle row-stt"></td>' +
             '  <td><select class="form-control sel-sanpham" style="width:100%"></select></td>' +
@@ -156,9 +202,7 @@ var PhieuNhapKho = (function () {
             '  <td class="d-none"><input type="text" class="form-control readonly-cell txt-tienthue text-end" readonly value="0" /></td>' +
             '  <td><input type="text" class="form-control readonly-cell txt-tongsauthue text-end" readonly value="0" /></td>' +
             '  <td><input type="text" class="form-control txt-ghichu" value="' + ghiChu + '" /></td>' +
-            '  <td class="text-center align-middle">' +
-            '    <button type="button" class="btn btn-sm btn-outline-danger btn-remove-row"><i class="bi bi-trash"></i></button>' +
-            '  </td>' +
+            actionTd +
             '</tr>';
 
         var $row = $(html);
@@ -204,17 +248,39 @@ var PhieuNhapKho = (function () {
     }
 
     function calcRow($row) {
-        var sl = _parseMoney($row.find('.txt-soluong').val());
-        var dg = _parseMoney($row.find('.txt-dongia').val());
-        var thuePt = parseFloat($row.find('.txt-thue').val()) || 0;
+        var slInput = $row.find('.txt-soluong');
+        var sl = slInput.is('input') ? _parseMoney(slInput.val()) : _parseMoney(slInput.text() || slInput.attr('data-val'));
+
+        var dgInput = $row.find('.txt-dongia');
+        var dg = dgInput.is('input') ? _parseMoney(dgInput.val()) : _parseMoney(dgInput.text() || dgInput.attr('data-val'));
+
+        var thueInput = $row.find('.txt-thue');
+        var thuePt = thueInput.is('input') ? (parseFloat(thueInput.val()) || 0) : (parseFloat(thueInput.text() || thueInput.attr('data-val')) || 0);
 
         var thanhTien = sl * dg;
         var tienThue = thanhTien * thuePt / 100;
         var tong = thanhTien + tienThue;
 
-        $row.find('.txt-thanhtien').val(_formatNumber(thanhTien));
-        $row.find('.txt-tienthue').val(_formatNumber(tienThue));
-        $row.find('.txt-tongsauthue').val(_formatNumber(tong));
+        var ttInput = $row.find('.txt-thanhtien');
+        if (ttInput.is('input')) {
+            ttInput.val(_formatNumber(thanhTien));
+        } else {
+            ttInput.text(_formatNumber(thanhTien));
+        }
+
+        var tthInput = $row.find('.txt-tienthue');
+        if (tthInput.is('input')) {
+            tthInput.val(_formatNumber(tienThue));
+        } else {
+            tthInput.text(_formatNumber(tienThue));
+        }
+
+        var tstInput = $row.find('.txt-tongsauthue');
+        if (tstInput.is('input')) {
+            tstInput.val(_formatNumber(tong));
+        } else {
+            tstInput.text(_formatNumber(tong));
+        }
 
         _updateTotal();
     }
@@ -226,10 +292,22 @@ var PhieuNhapKho = (function () {
         var totalSoLuong = 0;
 
         $('#PNK_tblChiTiet tbody tr').each(function () {
-            totalSoLuong += _parseMoney($(this).find('.txt-soluong').val());
-            totalTienHang += _parseMoney($(this).find('.txt-thanhtien').val());
-            totalTienThue += _parseMoney($(this).find('.txt-tienthue').val());
-            totalCong += _parseMoney($(this).find('.txt-tongsauthue').val());
+            var slInput = $(this).find('.txt-soluong');
+            var sl = slInput.is('input') ? _parseMoney(slInput.val()) : _parseMoney(slInput.text() || slInput.attr('data-val'));
+
+            var ttInput = $(this).find('.txt-thanhtien');
+            var tt = ttInput.is('input') ? _parseMoney(ttInput.val()) : _parseMoney(ttInput.text());
+
+            var tthInput = $(this).find('.txt-tienthue');
+            var tth = tthInput.is('input') ? _parseMoney(tthInput.val()) : _parseMoney(tthInput.text());
+
+            var tstInput = $(this).find('.txt-tongsauthue');
+            var tst = tstInput.is('input') ? _parseMoney(tstInput.val()) : _parseMoney(tstInput.text());
+
+            totalSoLuong += sl;
+            totalTienHang += tt;
+            totalTienThue += tth;
+            totalCong += tst;
         });
 
         $('#dispTongSoLuong').text(_formatNumber(totalSoLuong));

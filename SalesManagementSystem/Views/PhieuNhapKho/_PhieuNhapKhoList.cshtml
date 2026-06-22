@@ -6,6 +6,7 @@
             <table class="table table-custom table-bordered table-hover align-middle mb-0">
                 <thead>
                     <tr>
+                        <th class="text-center" style="width: 35px;"></th>
                         <th class="text-center" style="width: 60px;">Thao tác</th>
                         <th class="text-center" style="width: 50px;">STT</th>
                         <th>Số chứng từ</th>
@@ -27,7 +28,10 @@
                         int stt = (Model.CurrentPage - 1) * Model.PageSize + 1;
                         foreach (var item in Model.Items)
                         {
-                            <tr>
+                            <tr class="pnk-row" data-id="@item.ID" style="cursor: pointer;">
+                                <td class="text-center align-middle">
+                                    <i class="bi bi-caret-right-fill text-muted toggle-icon" style="font-size: 0.95rem;"></i>
+                                </td>
                                 <td class="text-center align-middle">
                                     <div class="dropdown dropdown-hover">
                                         <button class="btn btn-sm btn-light border dropdown-toggle-hide-arrow shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 2px 6px;">
@@ -125,7 +129,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="12" class="text-center py-4 text-muted">
+                            <td colspan="14" class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox fs-2 d-block mb-2"></i>
                                 Không có dữ liệu
                             </td>
@@ -136,7 +140,7 @@
                 {
                     <tfoot>
                         <tr class="fw-bold" style="background-color: #f8f9fa;">
-                            <td colspan="6" class="text-end">Tổng cộng</td>
+                            <td colspan="7" class="text-end">Tổng cộng</td>
                             <td class="text-end">@(Model.Items.Sum(x => x.TongSoLuong).ToString("N0"))</td>
                             <td class="text-end">@(Model.Items.Sum(x => x.TongTienHang).ToString("N0"))</td>
                             <td class="text-end d-none">@(Model.Items.Sum(x => x.TongTienThue).ToString("N0"))</td>

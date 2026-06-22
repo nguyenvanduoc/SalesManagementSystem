@@ -1,4 +1,4 @@
-﻿@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.PhieuXuatKhoListViewModel>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.PhieuXuatKhoListViewModel>
 @{
     ViewBag.Title = "Phiếu Xuất Kho";
     var uid = Guid.NewGuid().ToString("N");
@@ -82,6 +82,59 @@
                             if (typeof showToast === 'function') {
                                 showToast('error', 'Lỗi khi tải dữ liệu.');
                             }
+                        }
+                    });
+                });
+
+                // Delegate row clicks for inline detail view
+                $container.on('click', '.pxk-row', function (e) {
+                    if ($(e.target).closest('a, button, select, input, .dropdown, .dropdown-menu').length) {
+                        return;
+                    }
+
+                    var $row = $(this);
+                    var id = $row.data('id');
+                    if (!id) return;
+
+                    var $nextRow = $row.next();
+                    var isAlreadyExpanded = $nextRow.hasClass('pxk-detail-row') && $nextRow.data('parent-id') == id;
+
+                    // Close any currently open detail rows in this container
+                    $container.find('.pxk-detail-row').remove();
+                    $container.find('.pxk-row').removeClass('active-row');
+                    $container.find('.toggle-icon').removeClass('bi-caret-down-fill text-primary').addClass('bi-caret-right-fill text-muted');
+
+                    if (isAlreadyExpanded) {
+                        return;
+                    }
+
+                    // Highlight active row
+                    $row.addClass('active-row');
+                    $row.find('.toggle-icon').removeClass('bi-caret-right-fill text-muted').addClass('bi-caret-down-fill text-primary');
+
+                    // Create placeholder detail row
+                    var $detailRow = $('<tr class="pxk-detail-row" data-parent-id="' + id + '">' +
+                        '<td colspan="11" class="p-3" style="background-color: #fcfdfd; border-left: 4px solid #2998e4;">' +
+                        '   <div class="text-center p-4 text-muted">' +
+                        '       <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>' +
+                        '       Đang tải chi tiết...' +
+                        '   </div>' +
+                        '</td>' +
+                        '</tr>');
+
+                    $row.after($detailRow);
+
+                    // Load content
+                    $.ajax({
+                        url: '@Url.Action("GetDetailInline", "PhieuXuatKho")',
+                        type: 'GET',
+                        data: { id: id },
+                        success: function (res) {
+                            $detailRow.find('td').html('<div class="detail-container p-2" style="display:none;">' + res + '</div>');
+                            $detailRow.find('.detail-container').slideDown(250);
+                        },
+                        error: function () {
+                            $detailRow.find('td').html('<div class="p-3 text-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i>Lỗi khi tải thông tin chi tiết</div>');
                         }
                     });
                 });

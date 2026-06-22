@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
@@ -237,6 +237,28 @@ namespace SalesManagementSystem.Controllers
             TempData["ToastType"]    = "success";
 
             return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public ActionResult GetDetailInline(int id)
+        {
+            if (!PermissionHelper.HasPermission("DonDatHang", LoaiPhanQuyen.Xem)) 
+                return Content("<div class='alert alert-danger p-2 mb-0'>Không có quyền xem chi tiết</div>");
+
+            var don = _repo.GetById(id);
+            if (don == null) return HttpNotFound();
+
+            var chiTiets = _repo.GetChiTietByDonId(id);
+
+            var model = new DonDatHangCreateEditViewModel
+            {
+                ID              = don.ID,
+                SoDonHang       = don.SoDonHang,
+                TongTien        = don.TongTien,
+                ChiTiets        = chiTiets
+            };
+
+            return PartialView("_DetailInline", model);
         }
 
         // â”€â”€ Edit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

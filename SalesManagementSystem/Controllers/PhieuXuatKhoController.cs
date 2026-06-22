@@ -1,4 +1,4 @@
-﻿using SalesManagementSystem.Helpers;
+using SalesManagementSystem.Helpers;
 using SalesManagementSystem.Helpers.Security;
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Models.ViewModels;
@@ -138,6 +138,23 @@ namespace SalesManagementSystem.Controllers
 
             ViewBag.IsReadOnly = true;
             return View(model);
+        }
+
+        public ActionResult GetDetailInline(int id)
+        {
+            if (!PermissionHelper.HasPermission("PhieuXuatKho", LoaiPhanQuyen.Xem)) return Content("<div class='text-danger p-3'>Không có quyền truy cập</div>");
+
+            try
+            {
+                var model = _repo.GetById(id);
+                if (model == null) return Content("<div class='text-danger p-3'>Không tìm thấy dữ liệu phiếu xuất kho</div>");
+
+                return PartialView("_DetailInline", model);
+            }
+            catch (Exception ex)
+            {
+                return Content($"<div class='text-danger p-3'>Lỗi: {ex.Message}</div>");
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DonDatHangViewModel>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DonDatHangViewModel>
 
 @using SalesManagementSystem.Helpers
 
@@ -10,6 +10,7 @@
             <table class="table table-custom table-bordered table-hover mb-0">
                 <thead>
                     <tr>
+                        <th class="text-center" style="width: 35px;"></th>
                         <th class="text-center" style="width:40px;">
                             <input type="checkbox" class="form-check-input" id="checkAll" />
                         </th>
@@ -32,7 +33,10 @@
                         int stt = (Model.CurrentPage - 1) * Model.PageSize + 1;
                         foreach (var item in Model.Items)
                         {
-                            <tr>
+                            <tr class="ddh-row" id="row_@item.ID" data-id="@item.ID" style="cursor: pointer;">
+                                <td class="text-center align-middle">
+                                    <i class="bi bi-caret-right-fill text-muted toggle-icon" style="font-size: 0.95rem;"></i>
+                                </td>
                                 <td class="text-center align-middle">
                                     <input type="checkbox" class="form-check-input row-checkbox" value="@item.ID" />
                                 </td>

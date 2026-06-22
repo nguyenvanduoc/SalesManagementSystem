@@ -1,4 +1,4 @@
-﻿@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DonHangChungTuViewModel>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DonHangChungTuViewModel>
 
 <div class="card shadow-sm border-0 mb-4">
     <div class="card-body p-0">
@@ -6,12 +6,15 @@
             <table class="table table-custom table-bordered table-hover align-middle mb-0">
                 <thead>
                     <tr style="background:#f4f6f9; font-weight:bold;">
+                        <th class="text-center" style="width: 35px;"></th>
                         <th class="text-center" style="width: 60px;">Thao tác</th>
                         <th class="text-center" style="width: 50px;">STT</th>
                         <th>Số đơn hàng</th>
                         <th class="text-center">Ngày lập đơn hàng</th>
                         <th>Khách hàng</th>
-                        <th class="text-end">Tổng tiền đơn hàng</th>
+                        <th class="text-end">Tổng tiền hàng</th>
+                        <th class="text-end">Phí bốc xếp</th>
+                        <th class="text-end">Tổng thanh toán</th>
                         <th>Số chứng từ</th>
                         <th class="text-center">Ngày chứng từ</th>
                         <th class="text-center">Trạng thái chứng từ</th>
@@ -23,7 +26,10 @@
                         int stt = (Model.CurrentPage - 1) * Model.PageSize + 1;
                         foreach (var item in Model.Items)
                         {
-                            <tr>
+                            <tr class="ctbh-row" data-id="@(item.IDChungTuBanHang ?? 0)" data-iddondathang="@item.IDDonDatHang" style="cursor: pointer;">
+                                <td class="text-center align-middle">
+                                    <i class="bi bi-caret-right-fill text-muted toggle-icon" style="font-size: 0.95rem;"></i>
+                                </td>
                                 <td class="text-center align-middle">
                                     <div class="dropdown dropdown-hover">
                                         <button class="btn btn-sm btn-light border dropdown-toggle-hide-arrow shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 2px 6px;">
@@ -85,7 +91,9 @@
                                 </td>
                                 <td class="text-center align-middle">@(item.NgayTaoDon?.ToString("dd/MM/yyyy"))</td>
                                 <td class="align-middle">@item.TenKhachHang</td>
-                                <td class="text-end align-middle fw-bold text-primary">@(item.TongTien.ToString("N0"))</td>
+                                <td class="text-end align-middle fw-bold text-primary">@(item.ThanhTienHang > 0 ? item.ThanhTienHang.ToString("N0") : "0")</td>
+                                <td class="text-end align-middle text-danger">@(item.PhiBocXep > 0 ? item.PhiBocXep.ToString("N0") : "0")</td>
+                                <td class="text-end align-middle fw-bold text-success">@(item.TongTien > 0 ? item.TongTien.ToString("N0") : "0")</td>
                                 <td class="align-middle">@item.SoChungTu</td>
                                 <td class="text-center align-middle">@(item.NgayChungTu?.ToString("dd/MM/yyyy"))</td>
                                 <td class="text-center align-middle">

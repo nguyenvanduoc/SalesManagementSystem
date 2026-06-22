@@ -1,0 +1,46 @@
+@model SalesManagementSystem.Models.ViewModels.PhieuXuatKhoViewModel
+
+<div class="table-responsive bg-white shadow-sm" style="border-radius: 4px; overflow: hidden; border: 1px solid #dee2e6;">
+    <table class="table table-custom table-bordered table-hover align-middle mb-0">
+        <thead>
+            <tr>
+                <th class="text-center" style="width:40px;">STT</th>
+                <th class="text-start">Mã SP</th>
+                <th class="text-start">Tên sản phẩm</th>
+                <th class="text-center" style="width:70px;">ĐVT</th>
+                <th class="text-end" style="width:120px;">Số lượng</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.ChiTiets != null && Model.ChiTiets.Any())
+            {
+                int stt = 1;
+                foreach (var item in Model.ChiTiets)
+                {
+                    <tr>
+                        <td class="text-center">@(stt++)</td>
+                        <td>@item.MaSanPham</td>
+                        <td>@item.TenSanPham</td>
+                        <td class="text-center">@item.DVT</td>
+                        <td class="text-end">@(item.SoLuong > 0 ? item.SoLuong.ToString("N0") : "0")</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">Không có dữ liệu chi tiết hàng hóa</td>
+                </tr>
+            }
+        </tbody>
+        @if (Model.ChiTiets != null && Model.ChiTiets.Any())
+        {
+            <tfoot style="background-color: #f8f9fa;">
+                <tr class="fw-bold" style="font-size: 1.05em;">
+                    <td colspan="4" class="text-end text-dark">Tổng số lượng</td>
+                    <td class="text-end text-dark">@(Model.ChiTiets.Sum(x => x.SoLuong).ToString("N0"))</td>
+                </tr>
+            </tfoot>
+        }
+    </table>
+</div>

@@ -1,12 +1,23 @@
-﻿@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DonDatHangViewModel>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DonDatHangViewModel>
 
 @{
     ViewBag.Title = "Danh sách đơn đặt hàng";
+    var uid = Guid.NewGuid().ToString("N");
 }
+
+<style>
+    .ddh-row.active-row td {
+        background-color: #e3f2fd !important;
+    }
+    .ddh-detail-row > td {
+        box-shadow: inset 0 3px 6px -3px rgba(0,0,0,0.1), inset 0 -3px 6px -3px rgba(0,0,0,0.1);
+    }
+</style>
 
 @using SalesManagementSystem.Helpers
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div id="ddh-@uid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">
         <i class="bi bi-cart3 me-2"></i>@ViewBag.Title
     </h4>
@@ -123,18 +134,76 @@
     </div>
 </div>
 
+</div>
+
 @section Scripts {
 <script>
-    $(document).ready(function () {
-        $(document).on('change', '#checkAll', function () {
-            $('.row-checkbox').prop('checked', $(this).prop('checked'));
+    (function() {
+        var $container = $('#ddh-@uid');
+        
+        $(document).ready(function () {
+            $container.on('change', '#checkAll', function () {
+                $container.find('.row-checkbox').prop('checked', $(this).prop('checked'));
+            });
+            $container.on('change', '.row-checkbox', function () {
+                var all = $container.find('.row-checkbox').length;
+                var checked = $container.find('.row-checkbox:checked').length;
+                $container.find('#checkAll').prop('checked', all > 0 && all === checked);
+            });
+
+            // Delegate row clicks for inline detail view
+            $container.on('click', '.ddh-row', function (e) {
+                if ($(e.target).closest('a, button, select, input, .dropdown, .dropdown-menu').length) {
+                    return;
+                }
+
+                var $row = $(this);
+                var id = $row.data('id');
+                if (!id) return;
+
+                var $nextRow = $row.next();
+                var isAlreadyExpanded = $nextRow.hasClass('ddh-detail-row') && $nextRow.data('parent-id') == id;
+
+                // Close any currently open detail rows in this container
+                $container.find('.ddh-detail-row').remove();
+                $container.find('.ddh-row').removeClass('active-row');
+                $container.find('.toggle-icon').removeClass('bi-caret-down-fill text-primary').addClass('bi-caret-right-fill text-muted');
+
+                if (isAlreadyExpanded) {
+                    return;
+                }
+
+                // Highlight active row
+                $row.addClass('active-row');
+                $row.find('.toggle-icon').removeClass('bi-caret-right-fill text-muted').addClass('bi-caret-down-fill text-primary');
+
+                // Create placeholder detail row
+                var $detailRow = $('<tr class="ddh-detail-row" data-parent-id="' + id + '">' +
+                    '<td colspan="13" class="p-3" style="background-color: #fcfdfd; border-left: 4px solid #2998e4;">' +
+                    '   <div class="text-center p-4 text-muted">' +
+                    '       <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>' +
+                    '       Đang tải chi tiết...' +
+                    '   </div>' +
+                    '</td>' +
+                    '</tr>');
+
+                $row.after($detailRow);
+
+                // Load view content via AJAX
+                $.ajax({
+                    url: '@Url.Action("GetDetailInline", "DonDatHang")',
+                    type: 'GET',
+                    data: { id: id },
+                    success: function (html) {
+                        $detailRow.find('td').html(html);
+                    },
+                    error: function () {
+                        $detailRow.find('td').html('<div class="text-danger text-center p-3"><i class="bi bi-exclamation-triangle-fill me-2"></i> Lỗi khi tải thông tin chi tiết.</div>');
+                    }
+                });
+            });
         });
-        $(document).on('change', '.row-checkbox', function () {
-            var all = $('.row-checkbox').length;
-            var checked = $('.row-checkbox:checked').length;
-            $('#checkAll').prop('checked', all > 0 && all === checked);
-        });
-    });
+    })();
 
     function resetSearchDonDatHang() {
         var $form = $('#searchForm');

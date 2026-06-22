@@ -1,4 +1,4 @@
-﻿using SalesManagementSystem.Helpers;
+using SalesManagementSystem.Helpers;
 using SalesManagementSystem.Helpers.Security;
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Models.ViewModels;
@@ -99,7 +99,60 @@ namespace SalesManagementSystem.Controllers
             }
         }
 
+        [HttpGet]
+        public ActionResult GetDetailInline(int? id, int? idDonDatHang)
+        {
+            if (!PermissionHelper.HasPermission("ChungTuBanHang", LoaiPhanQuyen.Xem)) return Content("<div class='alert alert-danger'>Không có quyền xem chi tiết</div>");
 
+            try
+            {
+                if (id.HasValue && id.Value > 0)
+                {
+                    var model = _repo.GetById(id.Value);
+                    if (model == null) return HttpNotFound("Không tìm thấy chứng từ");
+                    return PartialView("_DetailInline", model);
+                }
+                else if (idDonDatHang.HasValue && idDonDatHang.Value > 0)
+                {
+                    var chiTietsDon = _donDatHangRepo.GetChiTietByDonId(idDonDatHang.Value);
+                    var model = new ChungTuBanHangViewModel();
+                    int stt = 1;
+                    foreach (var ct in chiTietsDon)
+                    {
+                        model.ChiTiets.Add(new ChungTuBanHangChiTietViewModel
+                        {
+                            IDSanPham = ct.IDSanPham ?? 0,
+                            MaSanPham = ct.MaSanPham,
+                            TenSanPham = ct.TenSanPham,
+                            DVT = ct.DVT,
+                            STT = stt++,
+                            SoLuong = ct.SoLuong,
+                            DonGia = ct.DonGia,
+                            ThanhTien = ct.ThanhTien,
+                            ThueGTGT = ct.ThueGTGT,
+                            TienThue = ct.ThanhTienThue,
+                            TongSauThue = ct.ThanhTienSauThue
+                        });
+                    }
+                    var donHang = new SalesManagementSystem.Repositories.DonDatHangRepository(new Data.DbConnectionFactory()).GetById(idDonDatHang.Value);
+                    if (donHang != null)
+                    {
+                        model.TongTienHang = donHang.ThanhTienHang ?? 0m;
+                        model.TongTienThue = donHang.ThanhTienThue ?? 0m;
+                        model.PhiBocXep = donHang.PhiBocXep;
+                        model.TongCong = donHang.TongTien;
+                    }
+                    
+                    return PartialView("_DetailInline", model);
+                }
+
+                return HttpNotFound("Không tìm thấy dữ liệu");
+            }
+            catch (Exception ex)
+            {
+                return Content($"<div class='alert alert-danger'>Lỗi: {ex.Message}</div>");
+            }
+        }
 
         public ActionResult Create(int idDonDatHang)
         {
@@ -146,7 +199,7 @@ namespace SalesManagementSystem.Controllers
             model.TongTienHang = model.ChiTiets.Sum(x => x.ThanhTien);
             model.TongTienThue = model.ChiTiets.Sum(x => x.TienThue);
             model.PhiBocXep = donHang.PhiBocXep;
-            model.TongCong = model.ChiTiets.Sum(x => x.TongSauThue) + model.PhiBocXep;
+            model.TongCong = model.ChiTiets.Sum(x => x.TongSauThue) - model.PhiBocXep;
             model.ConLai = model.TongCong;
             model.DaThanhToan = 0;
 

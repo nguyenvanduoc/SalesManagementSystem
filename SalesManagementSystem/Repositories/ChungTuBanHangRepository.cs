@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dapper;
@@ -67,10 +67,12 @@ namespace SalesManagementSystem.Repositories
                         d.SoDonHang,
                         d.NgayTaoDon,
                         k.TenKhachHang,
-                        d.TongTien,
+                        ISNULL(c.TongCong, d.TongTien) AS TongTien,
+                        ISNULL(c.TongTienHang, d.ThanhTienHang) AS ThanhTienHang,
                         c.ID AS IDChungTuBanHang,
                         c.SoChungTu,
                         c.NgayChungTu,
+                        ISNULL(c.PhiBocXep, d.PhiBocXep) AS PhiBocXep,
                         CASE WHEN d.TrangThaiDon = 4 THEN 3 ELSE c.TrangThai END AS TrangThaiChungTu
                     FROM NS_DonDatHang d
                     LEFT JOIN NS_KhachHang k ON d.IDKhachHang = k.ID

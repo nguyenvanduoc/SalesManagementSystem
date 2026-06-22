@@ -308,6 +308,62 @@ namespace SalesManagementSystem.Controllers
             }
         }
 
+        [HttpGet]
+        public ActionResult GetDetailInline(int id)
+        {
+            if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.Xem)) 
+                return Content("<div class='alert alert-danger'>Không có quyền xem chi tiết</div>");
+
+            var entity = _repo.GetByID(id);
+            if (entity == null) return HttpNotFound();
+
+            var model = new PhieuNhapKhoViewModel
+            {
+                ID = entity.ID,
+                SoChungTu = entity.SoChungTu,
+                NgayNhap = entity.NgayNhap,
+                IDKho = entity.IDKho,
+                IDNhaCungCap = entity.IDNhaCungCap,
+                SoHoaDon = entity.SoHoaDon,
+                NgayHoaDon = entity.NgayHoaDon,
+                TenNguoiGiao = entity.TenNguoiGiao,
+                SoDienThoaiNguoiGiao = entity.SoDienThoaiNguoiGiao,
+                TenNguoiNhan = entity.TenNguoiNhan,
+                GhiChu = entity.GhiChu,
+                TrangThai = entity.TrangThai,
+                IsReadOnly = true,
+                IDPhuongTien = entity.IDPhuongTien,
+                NgayGiaoHang = entity.NgayGiaoHang,
+                HoTenTaiXe = entity.HoTenTaiXe,
+                SoDienThoaiTaiXe = entity.SoDienThoaiTaiXe
+            };
+
+            int total;
+            var list = _repo.GetPaged(1, 1, null, null, entity.SoChungTu, null, null, null, null, out total);
+            var item = list.FirstOrDefault();
+            if (item != null)
+            {
+                model.TenKho = item.TenKho;
+                model.TenNhaCungCap = item.TenNhaCungCap;
+            }
+
+            if (model.IDPhuongTien.HasValue && model.IDPhuongTien > 0)
+            {
+                var phuongTiens = _repo.GetPhuongTienForDropdown("");
+                var pt = phuongTiens.FirstOrDefault(x => (int)x.ID == model.IDPhuongTien);
+                if (pt != null)
+                {
+                    model.TenPhuongTien = (string)pt.MaPhuongTien + " - " + (string)pt.TenPhuongTien;
+                }
+            }
+
+            model.ChiTiets = _repo.GetChiTiet(id);
+            ViewBag.IsView = true;
+            ViewBag.IsInlineDetail = true;
+            
+            return PartialView("_DetailInline", model);
+        }
+
         // Dropdowns endpoints
         [HttpGet]
         public ActionResult SearchKhoHang(string q)
