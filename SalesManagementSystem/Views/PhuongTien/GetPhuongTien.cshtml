@@ -1,0 +1,93 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.Entities.PhuongTien>
+
+@{
+    ViewBag.Title = "Quản lý Phương Tiện";
+}
+
+@using SalesManagementSystem.Helpers
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">@ViewBag.Title</h4>
+    <div class="d-flex gap-2">
+        @if (PermissionHelper.HasPermission("PhuongTien", LoaiPhanQuyen.Them))
+        {
+            <button type="button" class="btn btn-primary" style="background-color: #3498db; border-color: #3498db;" onclick="openFormModal('@Url.Action("CreatePhuongTien", "PhuongTien")')">
+                <i class="bi bi-plus-lg fw-bold"></i> Thêm mới
+            </button>
+        }
+        @if (PermissionHelper.HasPermission("PhuongTien", LoaiPhanQuyen.Xoa))
+        {
+            <button type="button" class="btn btn-danger" style="background-color: #e74c3c; border-color: #e74c3c;" onclick="deleteSelectedPhuongTien()">
+                <i class="bi bi-trash"></i> Xóa
+            </button>
+        }
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form id="searchForm" method="get" action="@Url.Action("GetPhuongTien", "PhuongTien")">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-4">
+                    <input type="text" name="keyword" class="form-control" placeholder="Nhập tên hoặc mã phương tiện..." value="@ViewBag.Keyword">
+                </div>
+                <div class="col-md-auto d-flex gap-2">
+                    <button type="submit" class="btn text-white px-3" style="background-color: #2998e4; border: none;">
+                        <i class="bi bi-search"></i> Tìm kiếm
+                    </button>
+                    <button type="button" class="btn text-white px-3 btn-reset" style="background-color: #f1c40f; border: none;">
+                        Làm mới
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="table-container">
+    @Html.Partial("_PhuongTienList", Model)
+</div>
+
+@section Scripts {
+    <script>
+        (function() {
+            var $pane = $('#searchForm').closest('.tab-pane');
+            if ($pane.length === 0) $pane = $('body');
+
+            // Check/Uncheck all checkboxes
+            $pane.on('change', '#checkAll', function() {
+                $pane.find('.row-checkbox').prop('checked', $(this).prop('checked'));
+            });
+
+            // If any row checkbox is unchecked, uncheck the header checkbox
+            $pane.on('change', '.row-checkbox', function() {
+                if ($pane.find('.row-checkbox:checked').length === $pane.find('.row-checkbox').length && $pane.find('.row-checkbox').length > 0) {
+                    $pane.find('#checkAll').prop('checked', true);
+                } else {
+                    $pane.find('#checkAll').prop('checked', false);
+                }
+            });
+
+            $pane.on('click', '.btn-reset', function() {
+                $pane.find('input[name="keyword"]').val('');
+                $pane.find('#searchForm').trigger('submit');
+            });
+
+            window.deleteSelectedPhuongTien = function() {
+                var selectedIds = [];
+                $pane.find('.row-checkbox:checked').each(function() {
+                    selectedIds.push($(this).val());
+                });
+
+                if (selectedIds.length === 0) {
+                    showToast('warning', 'Vui lòng chọn ít nhất một phương tiện để thao tác.');
+                    return;
+                }
+
+                var url = '@Url.Action("DeletePhuongTien", "PhuongTien")';
+                var msg = "Bạn có chắc chắn muốn xóa " + selectedIds.length + " phương tiện đã chọn không?";
+                
+                confirmBatchDelete(url, selectedIds, msg);
+            };
+        })();
+    </script>
+}

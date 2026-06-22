@@ -53,6 +53,7 @@ namespace SalesManagementSystem.App_Start
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.ISoQuyRepository, SoQuyRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.ICongNoNCCRepository, CongNoNCCRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IDashboardRepository, DashboardRepository>(new HierarchicalLifetimeManager());
+            container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IPhuongTienRepository, PhuongTienRepository>(new HierarchicalLifetimeManager());
             // ── Services (logic nghiệp vụ) ────────────────────────────────────
             container.RegisterType<InventoryService>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Services.Interfaces.IExcelExportService, ExcelExportService>(new HierarchicalLifetimeManager());
