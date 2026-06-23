@@ -67,7 +67,7 @@ namespace SalesManagementSystem.Controllers
             {
                 _actionRepo.Insert(aclAction);
                 AuditLog.AddInsert("ACL_Action", aclAction.ID.ToString(), aclAction);
-                return Json(new { success = true, message = "ThÃªm má»›i Action thÃ nh cÃ´ng!" });
+                return Json(new { success = true, message = "Thêm dữ liệu thành công" });
             }
             ViewBag.ManHinhList = new SelectList(_manHinhRepo.GetAll().Where(m => m.IsSuDung == 1), "ID", "TenManHinh", aclAction.IDManHinh);
             return PartialView("CreateAction", aclAction);

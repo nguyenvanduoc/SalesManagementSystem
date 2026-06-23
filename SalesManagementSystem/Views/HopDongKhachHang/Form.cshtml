@@ -1,0 +1,236 @@
+@model SalesManagementSystem.Models.Entities.HopDongKhachHang
+
+@{
+    ViewBag.Title = Model.ID > 0 ? "Cập nhật Hợp đồng: " + Model.SoHopDong : "Thêm mới Hợp đồng";
+}
+
+<div class="modal-header">
+    <h5 class="modal-title fw-bold text-uppercase" style="color:#0b5b84;">@ViewBag.Title</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<div class="modal-body p-4">
+    <form id="frmHopDong">
+        <input type="hidden" name="ID" id="ID" value="@Model.ID" />
+        
+        <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small fw-bold">Số hợp đồng <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="SoHopDong" id="Form_SoHopDong" value="@Model.SoHopDong" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small fw-bold">Khách hàng <span class="text-danger">*</span></label>
+                        <select class="form-select" name="IDKhachHang" id="Form_IDKhachHang" required>
+                            <option value="">-- Chọn khách hàng --</option>
+                            @if (ViewBag.KhachHangList != null)
+                            {
+                                foreach (var kh in ViewBag.KhachHangList)
+                                {
+                                    <option value="@kh.ID" @(Model.IDKhachHang == kh.ID ? "selected" : "")>@kh.TenKhachHang</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label class="form-label text-muted small fw-bold">Tên hợp đồng</label>
+                        <input type="text" class="form-control" name="TenHopDong" id="Form_TenHopDong" value="@Model.TenHopDong" />
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small fw-bold">Ngày ký <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" name="NgayKy" id="Form_NgayKy" value="@(Model.NgayKy?.ToString("yyyy-MM-dd"))" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small fw-bold">Giá trị hợp đồng (VNĐ)</label>
+                        <input type="text" class="form-control text-end fw-bold text-danger" id="Form_GiaTriHopDong_Display" value="@Model.GiaTriHopDong.ToString("N0")" onkeyup="FormatCurrency(this)" />
+                        <input type="hidden" name="GiaTriHopDong" id="Form_GiaTriHopDong" value="@Model.GiaTriHopDong" />
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small fw-bold">Hiệu lực từ</label>
+                        <input type="date" class="form-control" name="TuNgay" id="Form_TuNgay" value="@(Model.TuNgay?.ToString("yyyy-MM-dd"))" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small fw-bold">Hiệu lực đến</label>
+                        <input type="date" class="form-control" name="DenNgay" id="Form_DenNgay" value="@(Model.DenNgay?.ToString("yyyy-MM-dd"))" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label text-muted small fw-bold">Người đại diện</label>
+                        <input type="text" class="form-control" name="NguoiDaiDien" id="NguoiDaiDien" value="@Model.NguoiDaiDien" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted small fw-bold">Số điện thoại</label>
+                        <input type="text" class="form-control" name="SoDienThoai" id="SoDienThoai" value="@Model.SoDienThoai" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted small fw-bold">Email</label>
+                        <input type="email" class="form-control" name="Email" id="Email" value="@Model.Email" />
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label class="form-label text-muted small fw-bold">Trạng thái</label>
+                        <div>
+                            @if (Model.TrangThai == 1) { <span class="badge bg-success">Đang hiệu lực</span> }
+                            else if (Model.TrangThai == 2) { <span class="badge bg-primary">Đã thanh lý</span> }
+                            else if (Model.TrangThai == 3) { <span class="badge bg-secondary">Đã hủy</span> }
+                            else { <span class="badge bg-success">Đang hiệu lực</span> }
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label text-muted small fw-bold">Nội dung tóm tắt</label>
+                        <textarea class="form-control" name="NoiDung" id="Form_NoiDung" rows="2">@Model.NoiDung</textarea>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label text-muted small fw-bold">Ghi chú</label>
+                        <textarea class="form-control" name="GhiChu" id="Form_GhiChu" rows="2">@Model.GhiChu</textarea>
+                    </div>
+
+                    <div class="col-md-12 mt-4 border-top pt-3">
+                        <label class="form-label text-muted small fw-bold"><i class="bi bi-paperclip"></i> Đính kèm hồ sơ (có thể chọn nhiều file)</label>
+                        <input type="file" class="form-control" name="uploadedFiles" id="Form_UploadedFiles" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" onchange="displaySelectedFiles(this)" />
+                        <div class="text-muted small mt-1 mb-2">Hỗ trợ PDF, DOCX, XLSX, JPG, PNG (tối đa 20MB/file).</div>
+                        <div id="selected-files-preview" class="d-flex flex-wrap gap-2"></div>
+                        
+                        @if (Model.ID > 0)
+                        {
+                            <div id="file-list-container" class="mt-3">
+                                <div class="text-center py-2">
+                                    <div class="spinner-border text-primary spinner-border-sm" role="status"></div> Đang tải danh sách file...
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </form>
+</div>
+
+<div class="modal-footer bg-light">
+    @if (Model.ID > 0)
+    {
+        <div class="text-muted small me-auto">
+            Người tạo: <span class="fw-bold text-dark">@Model.TenNguoiTao</span>
+            &nbsp;•&nbsp;
+            @(Model.NgayTao?.ToString("dd/MM/yyyy HH:mm"))
+        </div>
+    }
+    <button type="button" class="btn btn-secondary" style="background-color: #6c757d;" data-bs-dismiss="modal">Để sau</button>
+    <button type="button" class="btn btn-warning text-white" style="background-color: #f1c40f; border-color: #f1c40f;" onclick="SaveForm()">Đồng ý</button>
+</div>
+
+<script>
+    $(document).ready(function () {
+        @if (Model.ID > 0)
+        {
+            <text>
+            LoadFiles();
+            </text>
+        }
+    });
+
+    function FormatCurrency(input) {
+        let val = input.value.replace(/\D/g, '');
+        if (val === '') val = '0';
+        $('#Form_GiaTriHopDong').val(val);
+        input.value = parseFloat(val).toLocaleString('vi-VN');
+    }
+
+    function SaveForm() {
+        if (!$('#Form_SoHopDong').val().trim()) {
+            showToast('warning', 'Vui lòng nhập Số hợp đồng.');
+            $('#Form_SoHopDong').focus();
+            return;
+        }
+        if (!$('#Form_IDKhachHang').val()) {
+            showToast('warning', 'Vui lòng chọn Khách hàng.');
+            $('#Form_IDKhachHang').focus();
+            return;
+        }
+        if (!$('#Form_NgayKy').val()) {
+            showToast('warning', 'Vui lòng chọn Ngày ký.');
+            $('#Form_NgayKy').focus();
+            return;
+        }
+        
+        var tuNgay = $('#Form_TuNgay').val();
+        var denNgay = $('#Form_DenNgay').val();
+        if (tuNgay && denNgay && tuNgay > denNgay) {
+            showToast('warning', 'Từ ngày không được lớn hơn Đến ngày.');
+            return;
+        }
+
+        var formElement = document.getElementById('frmHopDong');
+        var formData = new FormData(formElement);
+        
+        // Disable save button during upload
+        var $btn = $(event.currentTarget || '.btn-warning');
+        var originalText = $btn.html();
+        $btn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang lưu...').prop('disabled', true);
+        
+        $.ajax({
+            url: '@Url.Action("Save", "HopDongKhachHang")',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (res) {
+                $btn.html(originalText).prop('disabled', false);
+                if (res.success) {
+                    showToast('success', res.message);
+                    if (typeof LoadData === "function") {
+                        LoadData(1);
+                    }
+                    $('.modal').modal('hide');
+                } else {
+                    showToast('error', res.message);
+                }
+            },
+            error: function () {
+                $btn.html(originalText).prop('disabled', false);
+                showToast('error', 'Có lỗi xảy ra khi lưu dữ liệu.');
+            }
+        });
+    }
+
+    function LoadFiles() {
+        var idHopDong = $('#ID').val();
+        if (idHopDong > 0) {
+            $.get('@Url.Action("GetFiles", "HopDongKhachHang")', { idHopDong: idHopDong }, function(res) {
+                $('#file-list-container').html(res);
+            });
+        }
+    }
+
+    function displaySelectedFiles(input) {
+        var container = $('#selected-files-preview');
+        container.empty();
+        
+        if (input.files && input.files.length > 0) {
+            for (var i = 0; i < input.files.length; i++) {
+                var file = input.files[i];
+                var icon = 'bi-file-earmark';
+                var ext = file.name.split('.').pop().toLowerCase();
+                
+                if(ext === 'pdf') icon = 'bi-file-earmark-pdf text-danger';
+                else if(['jpg', 'jpeg', 'png'].includes(ext)) icon = 'bi-file-image text-success';
+                else if(['doc', 'docx'].includes(ext)) icon = 'bi-file-earmark-word text-primary';
+                else if(['xls', 'xlsx'].includes(ext)) icon = 'bi-file-earmark-excel text-success';
+                
+                var size = (file.size / 1024).toFixed(1) + ' KB';
+                if(file.size > 1024 * 1024) size = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+                
+                var html = `
+                    <div class="border rounded p-2 d-flex align-items-center bg-light" style="font-size: 0.85rem;">
+                        <i class="bi ${icon} fs-5 me-2"></i>
+                        <div>
+                            <div class="fw-bold text-truncate" style="max-width: 150px;" title="${file.name}">${file.name}</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">${size}</div>
+                        </div>
+                    </div>
+                `;
+                container.append(html);
+            }
+        }
+    }
+</script>

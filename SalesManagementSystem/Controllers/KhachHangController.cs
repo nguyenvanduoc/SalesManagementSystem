@@ -143,7 +143,7 @@ namespace SalesManagementSystem.Controllers
             {
                 if (!string.IsNullOrEmpty(khachHang.MaKhachHang) && _khachHangRepo.IsDuplicateCode(khachHang.MaKhachHang, khachHang.ID))
                 {
-                    ModelState.AddModelError("MaKhachHang", "MÃ£ khÃ¡ch hÃ ng Ä‘Ã£ tá»“n táº¡i trong há»‡ thá»‘ng.");
+                    ModelState.AddModelError("MaKhachHang", "Mã khách hàng đã tồn tại trong hệ thống.");
                     PopulateDropdowns();
                     return PartialView("Edit", khachHang);
                 }

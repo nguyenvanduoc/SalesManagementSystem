@@ -474,6 +474,10 @@
     <Content Include="App_Data\create_phieuchi_soquy_congncc.sql" />
     <Content Include="Views\Dashboard\Index.cshtml" />
     <Content Include="Views\Dashboard\Blank.cshtml" />
+    <Content Include="Views\ChungTuBanHang\_DetailInline.cshtml" />
+    <Content Include="Views\DonDatHang\_DetailInline.cshtml" />
+    <Content Include="Views\PhieuNhapKho\_DetailInline.cshtml" />
+    <Content Include="Views\PhieuXuatKho\_DetailInline.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />
@@ -613,5 +617,15 @@
     <Content Include="Views\PhuongTien\_PhuongTienList.cshtml" />
     <Content Include="Views\PhuongTien\CreatePhuongTien.cshtml" />
     <Content Include="Views\PhuongTien\UpdatePhuongTien.cshtml" />
+    <Compile Include="Models\Entities\HopDongKhachHang.cs" />
+    <Compile Include="Models\Entities\HopDongKhachHangFile.cs" />
+    <Compile Include="Models\ViewModels\HopDongKhachHangVM.cs" />
+    <Compile Include="Repositories\Interfaces\IHopDongKhachHangRepository.cs" />
+    <Compile Include="Repositories\HopDongKhachHangRepository.cs" />
+    <Compile Include="Controllers\HopDongKhachHangController.cs" />
+    <Content Include="Views\HopDongKhachHang\Index.cshtml" />
+    <Content Include="Views\HopDongKhachHang\_HopDongList.cshtml" />
+    <Content Include="Views\HopDongKhachHang\Form.cshtml" />
+    <Content Include="Views\HopDongKhachHang\_FileList.cshtml" />
   </ItemGroup>
 </Project>

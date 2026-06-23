@@ -64,7 +64,7 @@ namespace SalesManagementSystem.Controllers
             {
                 if (_phongBanRepo.IsDuplicateCode(phongBan.MaPhongBan))
                 {
-                    ModelState.AddModelError("MaPhongBan", "MÃ£ phÃ²ng ban Ä‘Ã£ tá»“n táº¡i trong há»‡ thá»‘ng.");
+                    ModelState.AddModelError("MaPhongBan", "Mã phòng ban đã tồn tại");
                     return PartialView("CreatePhongBan", phongBan);
                 }
 
@@ -75,7 +75,7 @@ namespace SalesManagementSystem.Controllers
                 // AUDIT LOG
                 AuditLog.AddInsert("DM_PhongBan", phongBan.ID.ToString(), phongBan);
 
-                return Json(new { success = true, message = "ThÃªm má»›i phÃ²ng ban thÃ nh cÃ´ng!" });
+                return Json(new { success = true, message = "Them dữ liệu thành công" });
             }
             return PartialView("CreatePhongBan", phongBan);
         }
@@ -102,7 +102,7 @@ namespace SalesManagementSystem.Controllers
             {
                 if (_phongBanRepo.IsDuplicateCode(phongBan.MaPhongBan, phongBan.ID))
                 {
-                    ModelState.AddModelError("MaPhongBan", "MÃ£ phÃ²ng ban Ä‘Ã£ tá»“n táº¡i trong há»‡ thá»‘ng.");
+                    ModelState.AddModelError("MaPhongBan", "Mã phòng ban đã tồn tại");
                     return PartialView("UpdatePhongBan", phongBan);
                 }
 

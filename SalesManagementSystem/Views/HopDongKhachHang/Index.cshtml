@@ -1,0 +1,426 @@
+@{
+    ViewBag.Title = "Hợp đồng khách hàng";
+}
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+        <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">@ViewBag.Title</h4>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-primary" style="background-color: #3498db; border-color: #3498db;" onclick="openFormModal('@Url.Action("Form", "HopDongKhachHang")')">
+                <i class="bi bi-plus-lg fw-bold"></i> Thêm mới
+            </button>
+            <button class="btn text-white" style="background-color: #2ecc71;">
+                <i class="bi bi-file-earmark-excel"></i> Xuất Excel
+            </button>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="row g-3 mb-4" id="dashboard-container">
+        <!-- Tải Ajax Dashboard vào đây, hoặc gán ID cho card body và update qua AJAX -->
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body d-flex align-items-center p-3">
+                    <div class="rounded bg-primary bg-opacity-10 p-3 me-3 text-primary">
+                        <i class="bi bi-file-earmark-text fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">Tổng số hợp đồng</h6>
+                        <h3 class="mb-0 fw-bold text-primary" id="lblTongHopDong">0</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body d-flex align-items-center p-3">
+                    <div class="rounded bg-success bg-opacity-10 p-3 me-3 text-success">
+                        <i class="bi bi-check-circle fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">Đang hiệu lực</h6>
+                        <h3 class="mb-0 fw-bold text-success" id="lblDangHieuLuc">0</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body d-flex align-items-center p-3">
+                    <div class="rounded bg-warning bg-opacity-10 p-3 me-3 text-warning">
+                        <i class="bi bi-exclamation-triangle fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">Sắp hết hạn</h6>
+                        <h3 class="mb-0 fw-bold text-warning" id="lblSapHetHan">0</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body d-flex align-items-center p-3">
+                    <div class="rounded bg-secondary bg-opacity-10 p-3 me-3 text-secondary">
+                        <i class="bi bi-calendar-check fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">Đã thanh lý</h6>
+                        <h3 class="mb-0 fw-bold text-secondary" id="lblDaThanhLy">0</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card border-0 shadow-sm mb-4 rounded-3">
+        <div class="card-body p-4">
+            <div class="row g-3">
+                <div class="col-md-2">
+                    <label class="form-label text-muted small fw-bold">Từ ngày</label>
+                    <input type="date" id="TuNgay" class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small fw-bold">Đến ngày</label>
+                    <input type="date" id="DenNgay" class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small fw-bold">Số hợp đồng</label>
+                    <input type="text" id="SoHopDong" class="form-control form-control-sm" placeholder="HĐ/..." />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small fw-bold">Tên hợp đồng</label>
+                    <input type="text" id="TenHopDong" class="form-control form-control-sm" placeholder="Tìm tên..." />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small fw-bold">Khách hàng</label>
+                    <select id="IDKhachHang" class="form-select form-select-sm">
+                        <option value="">Tất cả khách hàng</option>
+                        @if (ViewBag.KhachHangList != null)
+                        {
+                            foreach (var kh in ViewBag.KhachHangList)
+                            {
+                                <option value="@kh.ID">@kh.TenKhachHang</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small fw-bold">Trạng thái</label>
+                    <select id="TrangThai" class="form-select form-select-sm">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="1">Đang hiệu lực</option>
+                        <option value="2">Đã thanh lý</option>
+                        <option value="3">Đã hủy</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row g-3 mt-2 align-items-center">
+                <div class="col-md-6">
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" id="ChiHienThiSapHetHan">
+                        <label class="form-check-label text-muted small" for="ChiHienThiSapHetHan">
+                            Chỉ hiển thị hợp đồng sắp hết hạn
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-6 text-end d-flex gap-2 justify-content-end">
+                    <button type="button" class="btn text-white px-4" style="background-color: #3498db; border: none;" onclick="LoadData(1)">
+                        <i class="bi bi-search me-1"></i> Tìm kiếm
+                    </button>
+                    <button type="button" class="btn text-white px-4" style="background-color: #f1c40f; border: none;" onclick="ResetFilters()">
+                        Làm mới
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid List -->
+    <div id="grid-container">
+        <!-- Ajax loads content here -->
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+<!-- Modal Xem file đính kèm -->
+<div class="modal fade" id="fileViewerModal" tabindex="-1" aria-labelledby="fileViewerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content shadow">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-uppercase" style="color: #0b5b84;" id="fileViewerModalLabel">
+                    <i class="bi bi-paperclip me-2"></i> Danh sách hồ sơ đính kèm
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4" id="fileViewerContent" style="min-height: 200px;">
+                <!-- Content loaded via AJAX -->
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            LoadData(1);
+
+            // Bind enter key on inputs
+            $('#SoHopDong, #TenHopDong').keypress(function (e) {
+                if (e.which == 13) LoadData(1);
+            });
+            $('#TuNgay, #DenNgay, #IDKhachHang, #TrangThai, #ChiHienThiSapHetHan').change(function() {
+                LoadData(1);
+            });
+
+            // Delegate row clicks for inline file view
+            $('#grid-container').on('click', '.hopdong-row', function (e) {
+                if ($(e.target).closest('a, button, select, input, .dropdown, .dropdown-menu').length) {
+                    return;
+                }
+
+                var $row = $(this);
+                var id = $row.data('id');
+                if (!id) return;
+
+                var $nextRow = $row.next();
+                var isAlreadyExpanded = $nextRow.hasClass('hopdong-detail-row') && $nextRow.data('parent-id') == id;
+
+                // Close any currently open detail rows in this container
+                $('#grid-container').find('.hopdong-detail-row').remove();
+                $('#grid-container').find('.hopdong-row').removeClass('active-row');
+                $('#grid-container').find('.toggle-icon').removeClass('bi-caret-down-fill text-primary').addClass('bi-caret-right-fill text-muted');
+
+                if (isAlreadyExpanded) {
+                    return;
+                }
+
+                // Highlight active row
+                $row.addClass('active-row');
+                $row.find('.toggle-icon').removeClass('bi-caret-right-fill text-muted').addClass('bi-caret-down-fill text-primary');
+
+                // Create placeholder detail row
+                var $detailRow = $('<tr class="hopdong-detail-row" data-parent-id="' + id + '">' +
+                    '<td colspan="14" class="p-3" style="background-color: #fcfdfd; border-left: 4px solid #2998e4;">' +
+                    '   <div class="text-center p-4 text-muted">' +
+                    '       <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>' +
+                    '       Đang tải danh sách file...' +
+                    '   </div>' +
+                    '</td>' +
+                    '</tr>');
+
+                $row.after($detailRow);
+
+                // Load content
+                $.ajax({
+                    url: '@Url.Action("GetFiles", "HopDongKhachHang")',
+                    type: 'GET',
+                    data: { idHopDong: id },
+                    success: function (res) {
+                        var headerHtml = '<div class="d-flex justify-content-between align-items-center mb-2">' +
+                                         '  <h6 class="fw-bold text-primary mb-0"><i class="bi bi-paperclip me-2"></i>Hồ sơ đính kèm</h6>' +
+                                         '  <button class="btn btn-sm btn-primary" onclick="UploadFileInline(' + id + ')"><i class="bi bi-upload me-1"></i> Tải file lên</button>' +
+                                         '</div>';
+                        $detailRow.find('td').html('<div class="detail-container p-2" style="display:none;">' + headerHtml + res + '</div>');
+                        $detailRow.find('.mt-3').removeClass('mt-3').addClass('mt-1');
+                        $detailRow.find('.detail-container').slideDown(250);
+                    },
+                    error: function () {
+                        $detailRow.find('td').html('<div class="p-3 text-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i>Lỗi khi tải thông tin file đính kèm</div>');
+                    }
+                });
+            });
+        });
+
+        function ResetFilters() {
+            $('#TuNgay').val('');
+            $('#DenNgay').val('');
+            $('#SoHopDong').val('');
+            $('#TenHopDong').val('');
+            $('#IDKhachHang').val('');
+            $('#TrangThai').val('');
+            $('#ChiHienThiSapHetHan').prop('checked', false);
+            $('#PageSize').val(20);
+            LoadData(1);
+        }
+
+        function LoadData(pageNumber) {
+            var filter = {
+                tuNgay: $('#TuNgay').val(),
+                denNgay: $('#DenNgay').val(),
+                soHopDong: $('#SoHopDong').val(),
+                tenHopDong: $('#TenHopDong').val(),
+                idKhachHang: $('#IDKhachHang').val(),
+                trangThai: $('#TrangThai').val(),
+                chiHienThiSapHetHan: $('#ChiHienThiSapHetHan').is(':checked'),
+                pageNumber: pageNumber,
+                pageSize: $('#PageSize').length > 0 ? $('#PageSize').val() : 20
+            };
+
+            $.ajax({
+                url: '@Url.Action("GetList", "HopDongKhachHang")',
+                type: 'POST',
+                data: filter,
+                success: function (res) {
+                    if (res.success === false) {
+                        $('#grid-container').html('<div class="text-center text-danger py-5"><i class="bi bi-exclamation-triangle fs-1"></i><br/>Có lỗi xảy ra khi tải dữ liệu: ' + res.message + '</div>');
+                        if (typeof toastr !== 'undefined') toastr.error(res.message);
+                    } else {
+                        $('#grid-container').html(res);
+                        
+                        // Update Dashboard counts from hidden inputs
+                        if ($('#hdnTongHopDong').length > 0) {
+                            $('#lblTongHopDong').text($('#hdnTongHopDong').val());
+                            $('#lblDangHieuLuc').text($('#hdnDangHieuLuc').val());
+                            $('#lblSapHetHan').text($('#hdnSapHetHan').val());
+                            $('#lblDaThanhLy').text($('#hdnDaThanhLy').val());
+                        }
+                    }
+                },
+                error: function (xhr, status, error) {
+                    $('#grid-container').html('<div class="text-center text-danger py-5"><i class="bi bi-exclamation-triangle fs-1"></i><br/>Có lỗi xảy ra khi tải dữ liệu: ' + error + '</div>');
+                    toastr.error('Có lỗi xảy ra khi tải dữ liệu.');
+                }
+            });
+        }
+
+        function ThanhLyHopDong(id) {
+            if (confirm('Bạn có chắc chắn muốn thanh lý hợp đồng này?')) {
+                $.post('@Url.Action("ThanhLy", "HopDongKhachHang")', { id: id }, function (res) {
+                    if (res.success) {
+                        toastr.success(res.message);
+                        LoadData(1);
+                    } else {
+                        toastr.error(res.message);
+                    }
+                });
+            }
+        }
+
+        function HuyHopDong(id) {
+            if (confirm('Bạn có chắc chắn muốn hủy hợp đồng này?')) {
+                $.post('@Url.Action("Huy", "HopDongKhachHang")', { id: id }, function (res) {
+                    if (res.success) {
+                        toastr.success(res.message);
+                        LoadData(1);
+                    } else {
+                        toastr.error(res.message);
+                    }
+                });
+            }
+        }
+
+        function ViewAttachedFiles(idHopDong) {
+            var modal = new bootstrap.Modal(document.getElementById('fileViewerModal'));
+            modal.show();
+            $('#fileViewerContent').html('<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><div class="mt-2 text-muted">Đang tải danh sách file...</div></div>');
+            
+            $.get('@Url.Action("GetFiles", "HopDongKhachHang")', { idHopDong: idHopDong }, function(res) {
+                $('#fileViewerContent').html(res);
+                $('#fileViewerContent .table-responsive').removeClass('mt-3').addClass('mt-0');
+            }).fail(function() {
+                $('#fileViewerContent').html('<div class="text-center text-danger py-4">Lỗi tải danh sách file đính kèm.</div>');
+            });
+        }
+
+        function DeleteFile(id, btn) {
+            if (confirm("Bạn có chắc chắn muốn xóa file đính kèm này?")) {
+                var url = '@Url.Action("DeleteFile", "HopDongKhachHang")?id=' + id;
+                $.post(url, function(res) {
+                    if (res.success) {
+                        if (typeof showToast === 'function') showToast('success', res.message);
+                        else if (typeof toastr !== 'undefined') toastr.success(res.message);
+                        
+                        // Remove the row instantly
+                        var $row = $(btn).closest('tr');
+                        var $tbody = $row.closest('tbody');
+                        $row.remove();
+                        
+                        // If no more rows, show the empty message
+                        if ($tbody.find('tr').length === 0) {
+                            $tbody.html('<tr><td colspan="7" class="text-center py-4 text-muted">Chưa có file đính kèm nào.</td></tr>');
+                        }
+                    } else {
+                        if (typeof showToast === 'function') showToast('error', res.message);
+                        else if (typeof toastr !== 'undefined') toastr.error(res.message);
+                    }
+                });
+            }
+        }
+
+        let currentUploadHopDongId = 0;
+
+        function UploadFileInline(id) {
+            currentUploadHopDongId = id;
+            $('#inlineFileInput').val('');
+            $('#inlineFileInput').click();
+        }
+
+        function HandleInlineUpload(input) {
+            if(!input.files || input.files.length === 0) return;
+            
+            var files = input.files;
+            var uploadCount = 0;
+            var totalFiles = files.length;
+            var hasError = false;
+            
+            // Show loading
+            if (typeof showToast === 'function') showToast('info', 'Đang tải lên ' + totalFiles + ' file...');
+            
+            for(var i = 0; i < totalFiles; i++) {
+                var formData = new FormData();
+                formData.append('idHopDong', currentUploadHopDongId);
+                formData.append('file', files[i]);
+                
+                $.ajax({
+                    url: '@Url.Action("UploadFile", "HopDongKhachHang")',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(res) {
+                        uploadCount++;
+                        if(!res.success) hasError = true;
+                        checkUploadComplete(uploadCount, totalFiles, hasError);
+                    },
+                    error: function() {
+                        uploadCount++;
+                        hasError = true;
+                        checkUploadComplete(uploadCount, totalFiles, hasError);
+                    }
+                });
+            }
+        }
+
+        function checkUploadComplete(uploadCount, totalFiles, hasError) {
+            if(uploadCount === totalFiles) {
+                if(!hasError) {
+                    if (typeof showToast === 'function') showToast('success', 'Tải lên thành công!');
+                } else {
+                    if (typeof showToast === 'function') showToast('warning', 'Một số file không thể tải lên do lỗi hoặc sai định dạng!');
+                }
+                ReloadInlineFiles(currentUploadHopDongId);
+            }
+        }
+
+        function ReloadInlineFiles(id) {
+            var $detailRow = $('.hopdong-detail-row[data-parent-id="' + id + '"]');
+            if($detailRow.length > 0) {
+                $.get('@Url.Action("GetFiles", "HopDongKhachHang")', { idHopDong: id }, function(res) {
+                    var headerHtml = '<div class="d-flex justify-content-between align-items-center mb-2">' +
+                                     '  <h6 class="fw-bold text-primary mb-0"><i class="bi bi-paperclip me-2"></i>Hồ sơ đính kèm</h6>' +
+                                     '  <button class="btn btn-sm btn-primary" onclick="UploadFileInline(' + id + ')"><i class="bi bi-upload me-1"></i> Tải file lên</button>' +
+                                     '</div>';
+                    $detailRow.find('.detail-container').html(headerHtml + res);
+                });
+            }
+        }
+    </script>
+    <input type="file" id="inlineFileInput" multiple style="display:none;" onchange="HandleInlineUpload(this)" />
+}

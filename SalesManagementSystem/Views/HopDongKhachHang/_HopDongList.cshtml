@@ -1,0 +1,189 @@
+@model SalesManagementSystem.Models.ViewModels.HopDongKhachHangListVM
+
+@if (ViewBag.Dashboard != null)
+    {
+        var dashboard = (SalesManagementSystem.Models.ViewModels.HopDongDashboardVM)ViewBag.Dashboard;
+        <input type="hidden" id="hdnTongHopDong" value="@dashboard.TongHopDong" />
+        <input type="hidden" id="hdnDangHieuLuc" value="@dashboard.DangHieuLuc" />
+        <input type="hidden" id="hdnSapHetHan" value="@dashboard.SapHetHan" />
+        <input type="hidden" id="hdnDaThanhLy" value="@dashboard.DaThanhLy" />
+    }
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-0">
+        <div class="table-responsive" style="min-height: 350px;">
+            <table class="table table-custom table-bordered table-hover align-middle mb-0">
+                <thead>
+            <tr style="background:#f4f6f9; font-weight:bold;">
+                        <th class="text-center" style="width: 35px;"></th>
+                        <th class="text-center" style="width: 60px;">Thao tác</th>
+                        <th class="text-center" style="width: 50px;">STT</th>
+                        <th>Số hợp đồng</th>
+                        <th>Tên hợp đồng</th>
+                        <th>Khách hàng</th>
+                        <th class="text-center">Ngày ký</th>
+                        <th class="text-center">Từ ngày</th>
+                        <th class="text-center">Đến ngày</th>
+                        <th class="text-end">Giá trị hợp đồng</th>
+                        <th class="text-center">Số ngày còn lại</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th>Người tạo</th>
+                        <th class="text-center">Ngày tạo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.DanhSachHopDong != null && Model.DanhSachHopDong.Any())
+                    {
+                        int stt = (Model.TrangHienTai - 1) * 20 + 1; // Assuming pageSize 20 for STT calculation, but we can just use loop index if we don't have pageSize in model
+                        foreach (var item in Model.DanhSachHopDong)
+                        {
+                            <tr class="hopdong-row" data-id="@item.ID" style="cursor: pointer;">
+                                <td class="text-center align-middle">
+                                    <i class="bi bi-caret-right-fill text-muted toggle-icon" style="font-size: 1.1rem;"></i>
+                                </td>
+                                <td class="text-center align-middle">
+                                    <div class="dropdown dropdown-hover">
+                                        <button class="btn btn-sm btn-light border dropdown-toggle-hide-arrow shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 2px 6px;">
+                                            <i class="bi bi-grid-3x3-gap-fill text-dark"></i>
+                                        </button>
+                                        <ul class="dropdown-menu shadow">
+                                            <li><h6 class="dropdown-header text-uppercase fw-bold text-dark">Thao tác</h6></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a href="javascript:void(0);" onclick="openFormModal('@Url.Action("Form", "HopDongKhachHang", new { id = item.ID })')" class="dropdown-item text-primary">
+                                                    <i class="bi bi-eye me-2 text-primary"></i> Xem chi tiết
+                                                </a>
+                                            </li>
+                                            @if (item.TrangThai == 1)
+                                            {
+                                                <li>
+                                                    <a href="javascript:void(0);" onclick="ThanhLyHopDong(@item.ID)" class="dropdown-item text-info">
+                                                        <i class="bi bi-check-circle me-2 text-info"></i> Thanh lý
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="javascript:void(0);" onclick="HuyHopDong(@item.ID)" class="dropdown-item text-danger">
+                                                        <i class="bi bi-x-circle me-2 text-danger"></i> Hủy hợp đồng
+                                                    </a>
+                                                </li>
+                                            }
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a href="javascript:void(0);" onclick="ViewAttachedFiles(@item.ID)" class="dropdown-item text-secondary">
+                                                    <i class="bi bi-paperclip me-2 text-secondary"></i> Xem file đính kèm
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                                <td class="text-center align-middle">@(stt++)</td>
+                                <td class="align-middle fw-bold text-primary">@item.SoHopDong</td>
+                                <td class="align-middle">@item.TenHopDong</td>
+                                <td class="align-middle">@item.TenKhachHang</td>
+                                <td class="text-center align-middle">@(item.NgayKy?.ToString("dd/MM/yyyy"))</td>
+                                <td class="text-center align-middle">@(item.TuNgay?.ToString("dd/MM/yyyy"))</td>
+                                <td class="text-center align-middle">@(item.DenNgay?.ToString("dd/MM/yyyy"))</td>
+                                <td class="text-end align-middle fw-bold text-danger">@item.GiaTriHopDong.ToString("N0")</td>
+                                <td class="text-center align-middle">
+                                    @if (item.TrangThai == 1 && item.SoNgayConLai.HasValue)
+                                    {
+                                        if (item.SoNgayConLai.Value >= 0)
+                                        {
+                                            <span>Còn @item.SoNgayConLai.Value ngày</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-danger">Quá hạn @Math.Abs(item.SoNgayConLai.Value) ngày</span>
+                                        }
+                                    }
+                                </td>
+                                <td class="text-center align-middle">
+                                    @if (item.TrangThai == 1)
+                                    {
+                                        if (item.SoNgayConLai.HasValue && item.SoNgayConLai.Value < 0)
+                                        {
+                                            <span class="badge" style="background-color: #dc3545; color: white;">Quá hạn</span>
+                                        }
+                                        else if (item.SoNgayConLai.HasValue && item.SoNgayConLai.Value <= 30)
+                                        {
+                                            <span class="badge" style="background-color: #fd7e14; color: white;">Sắp hết hạn</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge" style="background-color: #28a745; color: white;">Đang hiệu lực</span>
+                                        }
+                                    }
+                                    else if (item.TrangThai == 2)
+                                    {
+                                        <span class="badge" style="background-color: #007bff; color: white;">Đã thanh lý</span>
+                                    }
+                                    else if (item.TrangThai == 3)
+                                    {
+                                        <span class="badge" style="background-color: #6c757d; color: white;">Đã hủy</span>
+                                    }
+                                </td>
+                                <td class="align-middle">@item.TenNguoiTao</td>
+                                <td class="text-center align-middle">@(item.NgayTao?.ToString("dd/MM/yyyy HH:mm"))</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="14" class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                Không có dữ liệu hợp đồng
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer custom-pagination d-flex flex-wrap align-items-center justify-content-between" style="padding: 12px 16px;">
+        <div class="d-flex align-items-center gap-3">
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item @(Model.TrangHienTai == 1 ? "disabled" : "")">
+                        <a class="page-link" href="javascript:void(0);" onclick="LoadData(1)"><i class="bi bi-skip-start-fill"></i></a>
+                    </li>
+                    <li class="page-item @(Model.TrangHienTai == 1 ? "disabled" : "")">
+                        <a class="page-link" href="javascript:void(0);" onclick="LoadData(@(Model.TrangHienTai - 1))"><i class="bi bi-caret-left-fill"></i></a>
+                    </li>
+                    @for (int i = Math.Max(1, Model.TrangHienTai - 2); i <= Math.Min(Model.TongSoTrang == 0 ? 1 : Model.TongSoTrang, Model.TrangHienTai + 2); i++)
+                    {
+                        <li class="page-item @(Model.TrangHienTai == i ? "active" : "")">
+                            <a class="page-link" href="javascript:void(0);" onclick="LoadData(@i)">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(Model.TrangHienTai >= (Model.TongSoTrang == 0 ? 1 : Model.TongSoTrang) ? "disabled" : "")">
+                        <a class="page-link" href="javascript:void(0);" onclick="LoadData(@(Model.TrangHienTai + 1))"><i class="bi bi-caret-right-fill"></i></a>
+                    </li>
+                    <li class="page-item @(Model.TrangHienTai >= (Model.TongSoTrang == 0 ? 1 : Model.TongSoTrang) ? "disabled" : "")">
+                        <a class="page-link" href="javascript:void(0);" onclick="LoadData(@(Model.TongSoTrang == 0 ? 1 : Model.TongSoTrang))"><i class="bi bi-skip-end-fill"></i></a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="d-flex align-items-center">
+                @{
+                    int pageSize = ViewBag.PageSize != null ? (int)ViewBag.PageSize : 20;
+                }
+                <select id="PageSize" class="form-select form-select-sm page-size-select" style="width: 70px; cursor: pointer;" onchange="LoadData(1)">
+                    <option value="10" @(pageSize == 10 ? "selected" : "")>10</option>
+                    <option value="20" @(pageSize == 20 ? "selected" : "")>20</option>
+                    <option value="50" @(pageSize == 50 ? "selected" : "")>50</option>
+                    <option value="100" @(pageSize == 100 ? "selected" : "")>100</option>
+                </select>
+                <span class="ms-2 text-info-custom" style="font-size: 0.85rem;">mẫu tin/trang</span>
+            </div>
+        </div>
+        
+        <div class="text-info-custom" style="font-size: 0.85rem;">
+            @{
+                int startRecord = Model.TongSoBanGhi == 0 ? 0 : (Model.TrangHienTai - 1) * pageSize + 1;
+                int endRecord = Math.Min(Model.TrangHienTai * pageSize, Model.TongSoBanGhi);
+            }
+            @startRecord - @endRecord của @Model.TongSoBanGhi
+        </div>
+    </div>
+</div>

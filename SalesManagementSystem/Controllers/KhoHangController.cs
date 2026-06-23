@@ -87,13 +87,13 @@ namespace SalesManagementSystem.Controllers
 
                 if (string.IsNullOrEmpty(maKhoHang) || string.IsNullOrEmpty(tenKhoHang))
                 {
-                    ModelState.AddModelError("", "MÃ£ vÃ  TÃªn kho hÃ ng khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng.");
+                    ModelState.AddModelError("", "Mã kho và tên kho không được để trống");
                     return PartialView("Create", model);
                 }
 
                 if (_khoHangRepo.CheckDuplicateCode(maKhoHang, 0))
                 {
-                    ModelState.AddModelError("MaKhoHang", $"MÃ£ kho hÃ ng {maKhoHang} Ä‘Ã£ tá»“n táº¡i trong há»‡ thá»‘ng.");
+                    ModelState.AddModelError("MaKhoHang", $"Mã kho hàng {maKhoHang} đã tồn tại.");
                     return PartialView("Create", model);
                 }
 
@@ -112,7 +112,7 @@ namespace SalesManagementSystem.Controllers
                 };
 
                 _khoHangRepo.Insert(kh);
-                return Json(new { success = true, message = "ThÃªm má»›i thÃ nh cÃ´ng" });
+                return Json(new { success = true, message = "Thêm dữ liệu thành công" });
             }
             return PartialView("Create", model);
         }
@@ -149,13 +149,13 @@ namespace SalesManagementSystem.Controllers
 
                 if (string.IsNullOrEmpty(maKhoHang) || string.IsNullOrEmpty(tenKhoHang))
                 {
-                    ModelState.AddModelError("", "MÃ£ vÃ  TÃªn kho hÃ ng khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng.");
+                    ModelState.AddModelError("", "Mã kho và tên kho không được để trống.");
                     return PartialView("Edit", model);
                 }
 
                 if (_khoHangRepo.CheckDuplicateCode(maKhoHang, model.ID))
                 {
-                    ModelState.AddModelError("MaKhoHang", $"MÃ£ kho hÃ ng {maKhoHang} Ä‘Ã£ tá»“n táº¡i trong há»‡ thá»‘ng.");
+                    ModelState.AddModelError("MaKhoHang", $"Mã kho hàng {maKhoHang} đã tồn tại.");
                     return PartialView("Edit", model);
                 }
 
