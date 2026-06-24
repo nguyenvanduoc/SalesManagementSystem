@@ -246,7 +246,7 @@ namespace SalesManagementSystem.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ToastMessage"] = "Lá»—i xuáº¥t Excel: " + ex.Message;
+                TempData["ToastMessage"] = "Lỗi xuất excel: " + ex.Message;
                 TempData["ToastType"] = "error";
                 return RedirectToAction("Index");
             }

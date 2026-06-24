@@ -85,7 +85,19 @@ BEGIN
     END
 
     SELECT 
-        gd.ID,
+        CASE 
+            WHEN gd.LoaiChungTu = 1 THEN 
+                ISNULL(
+                    (SELECT TOP 1 IDPhieuNhap FROM KHO_PhieuNhap_ChiTiet WHERE ID = gd.IDChiTietKho),
+                    (SELECT TOP 1 ID FROM KHO_PhieuNhap WHERE SoChungTu = gd.SoChungTu)
+                )
+            WHEN gd.LoaiChungTu = 2 THEN 
+                ISNULL(
+                    (SELECT TOP 1 IDPhieuXuat FROM KHO_PhieuXuat_ChiTiet WHERE ID = gd.IDChiTietKho),
+                    (SELECT TOP 1 ID FROM KHO_PhieuXuat WHERE SoChungTu = gd.SoChungTu)
+                )
+            ELSE gd.ID
+        END AS ID,
         gd.NgayChungTu,
         gd.SoChungTu,
         gd.LoaiChungTu,

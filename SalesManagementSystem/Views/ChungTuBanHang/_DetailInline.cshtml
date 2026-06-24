@@ -54,12 +54,12 @@
                 </tr>
                 @if (Model.PhiBocXep > 0)
                 {
-                <tr class="fw-bold">
+                <tr class="fw-bold text-dark">
                     <td colspan="8" class="text-end">Phí bốc xếp</td>
-                    <td class="text-end text-danger">@(Model.PhiBocXep.ToString("N0"))</td>
+                    <td class="text-end">@(Model.PhiBocXep.ToString("N0"))</td>
                 </tr>
                 }
-                <tr class="fw-bold text-success" style="font-size: 1.1em;">
+                <tr class="fw-bold text-dark">
                     <td colspan="8" class="text-end">Tổng thanh toán</td>
                     <td class="text-end">@(Model.TongCong > 0 ? Model.TongCong.ToString("N0") : (Model.ChiTiets.Sum(x => x.TongSauThue) - Model.PhiBocXep).ToString("N0"))</td>
                 </tr>

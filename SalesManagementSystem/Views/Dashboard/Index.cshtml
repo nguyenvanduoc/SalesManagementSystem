@@ -18,15 +18,18 @@
         border: 1px solid #eef2f6;
     }
     
-    /* Responsive Grid for Stat Cards: 4+2 layout on desktop, 2 on tablet, 1 on mobile */
-    @@media (min-width: 768px) {
-        .col-stat { flex: 0 0 auto; width: 25%; }        /* 4 card/hàng → 2 hàng: 4+2 */
+    /* Responsive Grid for Stat Cards */
+    @@media (min-width: 1400px) {
+        .col-stat { flex: 0 0 auto; width: 25%; }        /* 4 cards per row */
     }
-    @@media (min-width: 576px) and (max-width: 767px) {
-        .col-stat { flex: 0 0 auto; width: 50%; }        /* 2 card/hàng → 3 hàng */
+    @@media (min-width: 992px) and (max-width: 1399px) {
+        .col-stat { flex: 0 0 auto; width: 33.3333%; }   /* 3 cards per row */
+    }
+    @@media (min-width: 576px) and (max-width: 991px) {
+        .col-stat { flex: 0 0 auto; width: 50%; }        /* 2 cards per row */
     }
     @@media (max-width: 575px) {
-        .col-stat { flex: 0 0 auto; width: 100%; }       /* 1 card/hàng - full mobile */
+        .col-stat { flex: 0 0 auto; width: 100%; }       /* 1 card per row */
     }
     
     /* Metric Cards - Premium Mockup Look */
@@ -61,10 +64,25 @@
     .stat-icon-new.teal { background: #e8f8f8; color: #1abc9c; }
     .stat-icon-new.indigo { background: #e8eaf6; color: #3f51b5; }
 
+    /* Responsive scaling for narrower viewports (e.g. 13-inch screens or scaled windows) */
+    @@media (max-width: 1200px) {
+        .stat-card-new {
+            padding: 12px 14px;
+            gap: 10px;
+        }
+        .stat-icon-new {
+            width: 40px; height: 40px;
+            font-size: 1.15rem;
+        }
+        .stat-value-new {
+            font-size: 1.2rem !important;
+        }
+    }
+
     /* Số dư mini rows inside card */
     .sodu-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; margin-top: 4px; }
     .sodu-label { color: #8a92a6; font-weight: 600; }
-    .sodu-value { font-weight: 700; color: #152530; font-size: 0.82rem; }
+    .sodu-value { font-weight: 700; color: #152530; font-size: 0.82rem; white-space: nowrap; }
 
     .stat-info-new {
         flex-grow: 1;
@@ -82,10 +100,13 @@
         overflow: hidden;
     }
     .stat-value-new {
-        font-size: 1.45rem;
+        font-size: 1.35rem;
         font-weight: 700;
         color: #152530;
         line-height: 1.2;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
     }
     .stat-trend-new {
         font-size: 0.72rem;

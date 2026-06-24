@@ -3,7 +3,7 @@
 <div class="card shadow-sm border-0 mb-4">
     <div class="card-body p-0">
         <div class="table-responsive" style="min-height: 350px;">
-            <table class="table table-custom table-bordered table-hover align-middle mb-0">
+            <table class="table table-custom table-bordered table-hover align-middle mb-0" style="width:100%; min-width:1350px;">
                 <thead>
                     <tr style="background:#f4f6f9; font-weight:bold;">
                         <th class="text-center" style="width: 35px;"></th>
@@ -91,27 +91,27 @@
                                 </td>
                                 <td class="text-center align-middle">@(item.NgayTaoDon?.ToString("dd/MM/yyyy"))</td>
                                 <td class="align-middle">@item.TenKhachHang</td>
-                                <td class="text-end align-middle fw-bold text-primary">@(item.ThanhTienHang > 0 ? item.ThanhTienHang.ToString("N0") : "0")</td>
-                                <td class="text-end align-middle text-danger">@(item.PhiBocXep > 0 ? item.PhiBocXep.ToString("N0") : "0")</td>
-                                <td class="text-end align-middle fw-bold text-success">@(item.TongTien > 0 ? item.TongTien.ToString("N0") : "0")</td>
+                                <td class="text-end align-middle text-dark">@(item.ThanhTienHang > 0 ? item.ThanhTienHang.ToString("N0") : "0")</td>
+                                <td class="text-end align-middle text-dark">@(item.PhiBocXep > 0 ? item.PhiBocXep.ToString("N0") : "0")</td>
+                                <td class="text-end align-middle text-dark">@(item.TongTien > 0 ? item.TongTien.ToString("N0") : "0")</td>
                                 <td class="align-middle">@item.SoChungTu</td>
                                 <td class="text-center align-middle">@(item.NgayChungTu?.ToString("dd/MM/yyyy"))</td>
                                 <td class="text-center align-middle">
                                     @if (item.TrangThaiChungTu == 1)
                                     {
-                                        <span class="badge bg-warning text-dark" style="font-size: 0.8rem; padding: 5px 8px;">Đề nghị ghi</span>
+                                        <span class="badge bg-warning text-dark">Đề nghị ghi</span>
                                     }
                                     else if (item.TrangThaiChungTu == 2)
                                     {
-                                        <span class="badge bg-success" style="font-size: 0.8rem; padding: 5px 8px;">Đã ghi</span>
+                                        <span class="badge bg-success">Đã ghi</span>
                                     }
                                     else if (item.TrangThaiChungTu == 3)
                                     {
-                                        <span class="badge bg-danger" style="font-size: 0.8rem; padding: 5px 8px;">Đã hủy</span>
+                                        <span class="badge bg-danger">Đã hủy</span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-secondary" style="font-size: 0.8rem; padding: 5px 8px;">Chưa lập</span>
+                                        <span class="badge bg-secondary">Chưa lập</span>
                                     }
                                 </td>
                             </tr>
@@ -120,7 +120,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="9" class="text-center py-4 text-muted">
+                            <td colspan="12" class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox fs-2 d-block mb-2"></i>
                                 Không có dữ liệu
                             </td>

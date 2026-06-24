@@ -326,11 +326,25 @@
         body.sidebar-collapsed .sidebar .nav-group-toggle i { width: auto; font-size: 1.2rem; margin: 0; }
         body.sidebar-collapsed .main-wrapper { margin-left: 60px; }
 
+        /* ─── Modal horizontal centering relative to main-wrapper ─── */
+        .modal {
+            left: var(--sidebar-width) !important;
+            width: calc(100% - var(--sidebar-width)) !important;
+        }
+        body.sidebar-collapsed .modal {
+            left: 60px !important;
+            width: calc(100% - 60px) !important;
+        }
+
         /* ─── Responsive ─────────────────────────────────── */
         @@media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); }
             body.sidebar-open .sidebar { transform: translateX(0); }
             .main-wrapper { margin-left: 0 !important; }
+            .modal {
+                left: 0 !important;
+                width: 100% !important;
+            }
         }
 
         /* ─── Table Standard ─────────────────────────────── */

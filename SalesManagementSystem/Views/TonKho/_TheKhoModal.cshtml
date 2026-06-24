@@ -3,8 +3,8 @@
 <div class="modal fade" id="theKhoModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-info">
-                <h5 class="modal-title text-white"><i class="fas fa-list-alt"></i> Chi tiết thẻ kho</h5>
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-uppercase" style="color: #0b5b84;"><i class="fas fa-list-alt"></i> Chi tiết thẻ kho</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -39,7 +39,7 @@
                                 else if (item.LoaiChungTu == 2) 
                                 { 
                                     loaiCTName = "Xuất kho"; 
-                                    linkCT = $"/PhieuXuatKho/Edit/{item.ID}?isView=true"; 
+                                    linkCT = $"/PhieuXuatKho/Details/{item.ID}"; 
                                 }
 
                                 <tr>

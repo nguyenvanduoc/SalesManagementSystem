@@ -73,28 +73,14 @@
                                     @(item.NgayTaoDon.HasValue ? item.NgayTaoDon.Value.ToString("dd/MM/yyyy") : "")
                                 </td>
                                 <td class="align-middle">@item.TenKhachHang</td>
-                                <td class="text-end align-middle fw-bold text-dark">
+                                <td class="text-end align-middle text-dark">
                                     @item.TongTien.ToString("N0")
                                 </td>
-                                <td class="text-end align-middle text-success fw-bold">
+                                <td class="text-end align-middle text-dark">
                                     @item.DaThanhToan.ToString("N0")
                                 </td>
-                                <td class="text-end align-middle">
-                                    @{
-                                        decimal congNo = item.CongNo;
-                                    }
-                                    @if (congNo < 0)
-                                    {
-                                        <span class="text-danger fw-bold">Khách trả dư: @(Math.Abs(congNo).ToString("N0"))</span>
-                                    }
-                                    else if (congNo > 0)
-                                    {
-                                        <span class="text-primary fw-bold">@(congNo.ToString("N0"))</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">Đã tất toán (0)</span>
-                                    }
+                                <td class="text-end align-middle text-dark">
+                                    @item.CongNo.ToString("N0")
                                 </td>
                                 <td class="text-center align-middle">
                                     @{
@@ -119,10 +105,10 @@
                                         <span class="text-muted">0</span>
                                     }
                                 </td>
-                                <td class="text-center align-middle small text-muted">
+                                <td class="text-center align-middle">
                                     @(item.NgayDieuChinh.HasValue ? item.NgayDieuChinh.Value.ToString("dd/MM/yyyy HH:mm") : "")
                                 </td>
-                                <td class="align-middle small fw-semibold text-dark">
+                                <td class="align-middle">
                                     @(item.NguoiDieuChinh ?? "")
                                 </td>
                             </tr>
