@@ -1,0 +1,257 @@
+@model SalesManagementSystem.Models.ViewModels.DonDatHangCreateEditViewModel
+
+@{
+    ViewBag.Title = "Điều chỉnh đơn đặt hàng";
+    string chiTietsJson = ViewBag.ChiTietsJson as string ?? "[]";
+}
+
+<style>
+    .don-header-card { background:#fff; border:1px solid #dce4ec; border-radius:6px; padding:16px; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+    .don-section-title { font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:#7f8c8d; margin-bottom:10px; }
+    .tong-tien-box { background:linear-gradient(135deg,#1a5276,#2980b9); border-radius:8px; padding:16px 20px; color:#fff; text-align:right; }
+    .tong-tien-box .label { font-size:.8rem; opacity:.85; margin-bottom:4px; }
+    .tong-tien-box .amount { font-size:1.8rem; font-weight:800; letter-spacing:.5px; }
+    .grid-detail thead th { background:#f4f6f9; font-size:.8rem; font-weight:700; color:#2c3e50; vertical-align:middle; white-space:nowrap; text-align:left !important; }
+    .grid-detail tbody td { vertical-align:middle; padding:5px 6px; }
+    .grid-detail input.form-control, .grid-detail select.form-select { font-size:.85rem; padding:3px 7px; height:30px; }
+    .btn-add-row { background:#2ecc71; color:#fff; border:none; border-radius:4px; padding:5px 14px; font-size:.85rem; }
+    .btn-add-row:hover { background:#27ae60; color:#fff; }
+    .readonly-cell { background:#f8f9fa; font-size:.85rem; color:#495057; }
+    .field-error { border-color:#dc3545 !important; }
+    .form-toolbar { background:#f8f9fa; border:1px solid #dce4ec; border-radius:6px; padding:10px 16px; margin-bottom:12px; display:flex; gap:8px; align-items:center; }
+    .select2-container--default .select2-selection--single { height: 38px; border: 1px solid #ced4da; border-radius: 0.375rem; }
+    .select2-container--default .select2-selection--single .select2-selection__rendered { font-size: .85rem; color: #495057; line-height: 36px; padding-left: 12px; }
+    .select2-container--default .select2-selection--single .select2-selection__arrow { height: 36px; }
+</style>
+
+<!-- Toolbar -->
+<div class="form-toolbar">
+    <a href="@Url.Action("Index","DonDieuChinhDonHang")" class="btn btn-secondary btn-sm">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+    <button type="button" id="btnSaveAdjustment" class="btn btn-sm text-white"
+            style="background-color:#2998e4;border:none;">
+        <i class="bi bi-check-lg me-1"></i> Lưu điều chỉnh
+    </button>
+    <span class="badge bg-secondary ms-2">Đơn hàng: @Model.SoDonHang</span>
+    <span class="text-muted small ms-auto">
+        <i class="bi bi-pencil-square me-1"></i>@ViewBag.Title
+    </span>
+</div>
+
+<form id="frmDonDatHang" method="post" action="@Url.Action("Adjust","DonDieuChinhDonHang")" autocomplete="off">
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="hdIDDonHang" name="IDDonHang" value="@Model.ID" />
+    <input type="hidden" id="hdChiTietsJson" name="chiTietsJson" value="" />
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger py-2 mb-3">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            @Html.ValidationSummary(false, "", new { @class = "mb-0" })
+        </div>
+    }
+
+    <div class="row g-3">
+        <div class="col-md-12">
+            
+            <!-- Card: Lý do điều chỉnh -->
+            <div class="don-header-card" style="border-left: 4px solid #e74c3c;">
+                <div class="don-section-title text-danger"><i class="bi bi-chat-left-dots-fill me-1"></i>Lý do điều chỉnh <span class="text-danger">*</span></div>
+                <div class="row g-2">
+                    <div class="col-md-12">
+                        <textarea id="txtLyDoDieuChinh" name="LyDoDieuChinh" class="form-control" rows="3" placeholder="Nhập lý do điều chỉnh bắt buộc (ví dụ: Khách trả lại hàng lỗi, thay đổi thỏa thuận thương mại...)" required></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Khách hàng -->
+            <div class="don-header-card">
+                <div class="don-section-title"><i class="bi bi-person-fill me-1"></i>Thông tin khách hàng</div>
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Mã khách hàng</label>
+                        <select id="selKhachHang" style="width:100%;" disabled></select>
+                        @Html.HiddenFor(m => m.IDKhachHang, new { id = "hdIDKhachHang" })
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted fw-semibold small">Tên khách hàng</label>
+                        <input type="text" id="txtTenKH" class="form-control readonly-cell"
+                               value="@Model.TenKhachHang" readonly />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Mã số thuế</label>
+                        <input type="text" id="txtMaSoThue" class="form-control readonly-cell"
+                               value="@Model.MaSoThue" readonly />
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label text-muted fw-semibold small">Địa chỉ</label>
+                        <input type="text" id="txtDiaChi" class="form-control readonly-cell"
+                               value="@Model.DiaChi" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted fw-semibold small">Số điện thoại</label>
+                        <input type="text" id="txtSDT" class="form-control readonly-cell"
+                               value="@Model.SoDienThoai" readonly />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Thông tin đơn hàng -->
+            <div class="don-header-card">
+                <div class="don-section-title"><i class="bi bi-file-earmark-text me-1"></i>Thông tin đơn hàng</div>
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <label class="form-label text-muted fw-semibold small">Số đơn hàng</label>
+                        @Html.TextBoxFor(m => m.SoDonHang, new { @class = "form-control readonly-cell", @readonly = "readonly" })
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted fw-semibold small">Ngày tạo đơn</label>
+                        @Html.TextBoxFor(m => m.NgayTaoDon, "{0:yyyy-MM-dd}", new { @class = "form-control readonly-cell", @readonly = "readonly", type = "date" })
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted fw-semibold small">Hạn giao hàng</label>
+                        @Html.TextBoxFor(m => m.ThoiHanGiaoHang, "{0:yyyy-MM-dd}", new { @class = "form-control readonly-cell", @readonly = "readonly", type = "date" })
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted fw-semibold small">Nhân sự phụ trách</label>
+                        @Html.DropDownListFor(m => m.IDNhanVien, Model.NhanVienList,
+                            "-- Chọn nhân viên --",
+                            new { @class = "form-select readonly-cell", id = "selNhanVien", @disabled = "disabled" })
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Trạng thái</label>
+                        @Html.DropDownListFor(m => m.TrangThaiDon, Model.TrangThaiList,
+                            new { @class = "form-select readonly-cell", @disabled = "disabled" })
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label text-muted fw-semibold small">Ghi chú</label>
+                        @Html.TextAreaFor(m => m.GhiChu, new { @class = "form-control readonly-cell", @readonly = "readonly", rows = 2 })
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Grid chi tiết sản phẩm -->
+            <div class="don-header-card">
+                <div class="d-flex align-items-center mb-2 gap-2">
+                    <div class="don-section-title mb-0"><i class="bi bi-table me-1"></i>Chi tiết sản phẩm</div>
+                    <button type="button" class="btn-add-row ms-auto" onclick="DonDatHang.addRow(this)">
+                        <i class="bi bi-plus-lg me-1"></i> Thêm dòng
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered grid-detail mb-0" id="tblChiTiet">
+                        <thead>
+                            <tr>
+                                <th style="width:35px;" class="text-center">#</th>
+                                <th style="min-width:200px;">Sản phẩm</th>
+                                <th style="width:65px;" class="text-center">ĐVT</th>
+                                <th style="width:95px;" class="text-end">Số lượng</th>
+                                <th style="width:110px;" class="text-end">Đơn giá</th>
+                                <th style="width:120px;" class="text-end">Thành tiền</th>
+                                <th style="width:80px;" class="text-center">Hàng KM</th>
+                                <th style="min-width:120px;">Ghi chú</th>
+                                <th style="width:38px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyChiTiet"></tbody>
+                    </table>
+                </div>
+                <div id="validChiTiet" class="text-danger small mt-1" style="display:none;">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    Vui lòng thêm ít nhất một sản phẩm.
+                </div>
+            </div>
+            <div class="don-header-card p-2 px-3 d-flex flex-wrap justify-content-between align-items-center fw-bold">
+                <div class="d-flex align-items-center gap-3">
+                    <div>
+                        <span class="text-muted small me-1">Số dòng:</span>
+                        <span id="dispSoDong" class="fs-6 text-dark">0</span>
+                    </div>
+                    <div>
+                        <span class="text-muted small me-1">Tổng số lượng:</span>
+                        <span id="dispTongSoLuong" class="fs-6 text-dark">0</span>
+                    </div>
+                    <div>
+                        <span class="text-muted small me-1">Cộng tiền hàng:</span>
+                        <span id="dispTongTienHang" class="fs-6 text-dark">0</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="text-muted small me-2">Phí bốc xếp:</span>
+                        <input type="text" id="PhiBocXepDisplay" class="form-control form-control-sm text-end input-number fw-bold" style="width: 100px;" value="@Model.PhiBocXep.ToString("N0")" />
+                        <input type="hidden" id="PhiBocXep" name="PhiBocXep" value="@Model.PhiBocXep" />
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="text-muted text-uppercase">Tổng thanh toán mới:</span>
+                    <span id="dispTongTien" class="fs-4 text-danger fw-bolder">0</span>
+                    <span class="text-danger fw-bolder">VNĐ</span>
+                    <span id="dispTongTien2" class="d-none">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+<script src="@Url.Content("~/Scripts/don-dat-hang.js?v=2.6")"></script>
+<script>
+    $(document).ready(function () {
+        var $form = $('#frmDonDatHang').last();
+        var $pane = $form.closest('.tab-pane');
+        if ($pane.length === 0) $pane = $(document);
+
+        DonDatHang.init({
+            searchKhUrl:      '@Url.Action("SearchKhachHang","DonDatHang")',
+            searchSpUrl:      '@Url.Action("SearchSanPham","DonDatHang")',
+            chiTietsJson:     @Html.Raw(chiTietsJson),
+            selectedKhId:     @(Model.IDKhachHang.HasValue ? Model.IDKhachHang.Value.ToString() : "null"),
+            selectedKhText:   '@Html.Raw((Model.MaKhachHang + " - " + Model.TenKhachHang).Replace("'", "\\'"))'
+        });
+
+        $pane.find('#btnSaveAdjustment').on('click', function () {
+            var lyDo = $pane.find('#txtLyDoDieuChinh').val().trim();
+            if (!lyDo) {
+                $pane.find('#txtLyDoDieuChinh').addClass('is-invalid');
+                showToast('warning', 'Vui lòng nhập lý do điều chỉnh.');
+                return;
+            } else {
+                $pane.find('#txtLyDoDieuChinh').removeClass('is-invalid');
+            }
+
+            if (!DonDatHang.validateAndSerialize($form)) return;
+            
+            var confirmModalId = 'confirmSaveModal_' + Math.random().toString(36).substr(2, 9);
+            var confirmHtml = '<div class="modal fade" id="' + confirmModalId + '" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">' +
+                '<div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">' +
+                    '<div class="modal-content shadow-lg" style="background-color: #ffffff; color: #333; border: none; border-top: 5px solid #ffc107; border-radius: 6px;">' +
+                        '<div class="modal-body p-4">' +
+                            '<div class="d-flex align-items-center mb-3">' +
+                                '<i class="bi bi-exclamation-triangle-fill text-warning me-3" style="font-size: 1.6rem;"></i>' +
+                                '<h5 class="mb-0" style="font-size: 1.3rem; font-weight: 600; color: #333;">Thông báo!</h5>' +
+                            '</div>' +
+                            '<p class="mb-4" style="font-size: 1rem; color: #555;">Bạn có chắc chắn muốn thực hiện điều chỉnh đơn hàng này không?</p>' +
+                            '<div class="d-flex justify-content-end gap-2">' +
+                                '<button type="button" class="btn" id="btnConfirmSaveAction" style="background-color: #ffc107; color: #fff; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem;">ĐỒNG Ý</button>' +
+                                '<button type="button" class="btn" data-bs-dismiss="modal" style="background-color: #e9ecef; color: #333; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem; border: none;">ĐỂ SAU</button>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+            
+            $('body').append(confirmHtml);
+            var $modal = $('#' + confirmModalId);
+            $modal.find('#btnConfirmSaveAction').on('click', function() {
+                $modal.modal('hide');
+                setTimeout(function() {
+                    $form.submit();
+                }, 150);
+            });
+            
+            var myModal = new bootstrap.Modal(document.getElementById(confirmModalId));
+            myModal.show();
+        });
+    });
+</script>
+}

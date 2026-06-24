@@ -59,6 +59,7 @@
     .stat-icon-new.red { background: #fdedec; color: #e74c3c; }
     .stat-icon-new.purple { background: #f4ecf7; color: #9b59b6; }
     .stat-icon-new.teal { background: #e8f8f8; color: #1abc9c; }
+    .stat-icon-new.indigo { background: #e8eaf6; color: #3f51b5; }
 
     /* Số dư mini rows inside card */
     .sodu-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; margin-top: 4px; }
@@ -290,7 +291,18 @@
                 </div>
             </div>
         </div>
-        <!-- Card 5: Công nợ NCC -->
+        <!-- Card 5: Công nợ khách hàng -->
+        <div class="col-stat">
+            <div class="stat-card-new">
+                <div class="stat-icon-new indigo"><i class="bi bi-people"></i></div>
+                <div class="stat-info-new">
+                    <div class="stat-label-new">Công nợ KH</div>
+                    <div class="stat-value-new text-primary" id="valCongNoKH">0₫</div>
+                    <div class="stat-trend-new text-muted"><i class="bi bi-info-circle"></i> Phải thu khách hàng</div>
+                </div>
+            </div>
+        </div>
+        <!-- Card 6: Công nợ NCC -->
         <div class="col-stat">
             <div class="stat-card-new">
                 <div class="stat-icon-new purple"><i class="bi bi-receipt"></i></div>
@@ -301,7 +313,7 @@
                 </div>
             </div>
         </div>
-        <!-- Card 6: Số dư -->
+        <!-- Card 7: Số dư -->
         <div class="col-stat">
             <div class="stat-card-new">
                 <div class="stat-icon-new teal"><i class="bi bi-wallet2"></i></div>
@@ -713,9 +725,10 @@
             var profitTrendIcon = data.Summary.TyLeTangGiamLoiNhuan >= 0 ? 'bi-arrow-up-right' : 'bi-arrow-down-right';
             $('#trendLoiNhuan').html(`<i class="bi ${profitTrendIcon}"></i> ${Math.abs(data.Summary.TyLeTangGiamLoiNhuan)}% so với kỳ trước`).attr('class', 'stat-trend-new ' + profitTrendClass);
             
+            $('#valCongNoKH').text(formatMoney(data.Summary.CongNoKhachHang));
             $('#valCongNoNCC').text(formatMoney(data.Summary.CongNoNhaCungCap));
 
-            // Card 6: Số dư
+            // Card 7: Số dư
             $('#valTienMat').text(formatMoney(data.Summary.TienMat));
             $('#valTongSoDu').text(formatMoney(data.Summary.TongSoDuTaiKhoan));
 

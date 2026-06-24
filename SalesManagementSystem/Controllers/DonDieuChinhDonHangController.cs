@@ -1,0 +1,278 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web.Mvc;
+using Dapper;
+using Newtonsoft.Json;
+using SalesManagementSystem.Data;
+using SalesManagementSystem.Helpers;
+using SalesManagementSystem.Models.Entities;
+using SalesManagementSystem.Models.ViewModels;
+using SalesManagementSystem.Repositories.Interfaces;
+
+namespace SalesManagementSystem.Controllers
+{
+    [CustomAuthorize(AuthorizeTypes.AuthorizedUsers)]
+    public class DonDieuChinhDonHangController : BaseController
+    {
+        private readonly IDonDieuChinhDonHangRepository _repo;
+        private readonly IDonDatHangRepository          _orderRepo;
+        private readonly DbConnectionFactory            _db;
+
+        public DonDieuChinhDonHangController(
+            IDonDieuChinhDonHangRepository repo,
+            IDonDatHangRepository orderRepo,
+            DbConnectionFactory db)
+        {
+            _repo = repo;
+            _orderRepo = orderRepo;
+            _db = db;
+        }
+
+        private class DropdownItem { public int ID { get; set; } public string Name { get; set; } }
+
+        private SelectList GetKhachHangList(int? selectedId = null)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                var items = conn.Query<DropdownItem>(
+                    "SELECT ID, ISNULL(MaKhachHang, '') + ' - ' + LTRIM(RTRIM(TenKhachHang)) AS Name FROM NS_KhachHang ORDER BY TenKhachHang").ToList();
+                return new SelectList(items, "ID", "Name", selectedId);
+            }
+        }
+
+        private SelectList GetNhanVienList(int? selectedId = null)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                var items = conn.Query<DropdownItem>(
+                    "SELECT ID, ISNULL(MaNhanSu, '') + ' - ' + LTRIM(RTRIM(ISNULL(HoDem, '') + ' ' + ISNULL(Ten, ''))) AS Name FROM NS_NhanSu ORDER BY Ten").ToList();
+                return new SelectList(items, "ID", "Name", selectedId);
+            }
+        }
+
+        private SelectList GetTrangThaiList(int? selectedId = null)
+        {
+            var items = _orderRepo.GetTrangThaiList().Select(x => new DropdownItem { ID = x.ID, Name = x.TenTrangThai }).ToList();
+            return new SelectList(items, "ID", "Name", selectedId);
+        }
+
+        private UserLoginViewModel GetCurrentUser()
+            => (UserLoginViewModel)Session[CommonConstants.USER_SESSION];
+
+        public ActionResult Index(
+            int page = 1, int pageSize = 20,
+            string tuNgay = "", string denNgay = "",
+            int? idKhachHang = null, string soDonHang = "",
+            bool chiDonDieuChinh = false)
+        {
+            int totalRecords;
+            var list = _repo.GetPaged(page, pageSize, tuNgay, denNgay, idKhachHang, soDonHang, chiDonDieuChinh, out totalRecords);
+
+            var model = new PagedListViewModel<DonDieuChinhListViewModel>
+            {
+                Items = list,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalRecords = totalRecords,
+                ActionName = "GetList"
+            };
+
+            ViewBag.Title = "Điều chỉnh đơn hàng sau bán hàng";
+            ViewBag.TuNgay = tuNgay;
+            ViewBag.DenNgay = denNgay;
+            ViewBag.SoDonHang = soDonHang;
+            ViewBag.KhachHangs = GetKhachHangList(idKhachHang);
+            ViewBag.ChiDonDieuChinh = chiDonDieuChinh;
+
+            if (Request.IsAjaxRequest())
+                return PartialView("_AdjustList", model);
+
+            return View(model);
+        }
+
+        public ActionResult GetList(
+            int page = 1, int pageSize = 20,
+            string tuNgay = "", string denNgay = "",
+            int? idKhachHang = null, string soDonHang = "",
+            bool chiDonDieuChinh = false)
+        {
+            int totalRecords;
+            var list = _repo.GetPaged(page, pageSize, tuNgay, denNgay, idKhachHang, soDonHang, chiDonDieuChinh, out totalRecords);
+
+            var model = new PagedListViewModel<DonDieuChinhListViewModel>
+            {
+                Items = list,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalRecords = totalRecords,
+                ActionName = "GetList"
+            };
+
+            return PartialView("_AdjustList", model);
+        }
+
+        // ── Adjust (GET) ──────────────────────────────────────────────────────
+
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
+        public ActionResult Adjust(int id)
+        {
+            var don = _orderRepo.GetById(id);
+            if (don == null) return HttpNotFound();
+
+            // Chỉ cho phép điều chỉnh các đơn: đã lập CTBH hoặc xuất kho hoặc đã thu tiền
+            using (var conn = _db.CreateConnection())
+            {
+                bool eligible = conn.ExecuteScalar<bool>(@"
+                    SELECT CASE WHEN EXISTS (SELECT 1 FROM BAN_ChungTuBanHang c WHERE c.IDDonDatHang = @ID AND c.IsDeleted = 0)
+                                  OR EXISTS (SELECT 1 FROM KHO_PhieuXuat px WHERE px.IDDonDatHang = @ID AND px.TrangThai = 2 AND px.IsDeleted = 0)
+                                  OR EXISTS (
+                                      SELECT 1 
+                                      FROM BAN_PhieuThuKhachHang pt 
+                                      INNER JOIN BAN_ChungTuBanHang c2 ON pt.IDChungTuBanHang = c2.ID 
+                                      WHERE c2.IDDonDatHang = @ID AND pt.TrangThai = 2 AND pt.IsDeleted = 0 AND c2.IsDeleted = 0
+                                  ) THEN 1 ELSE 0 END", new { ID = id });
+                if (!eligible)
+                {
+                    return new HttpStatusCodeResult(400, "Đơn hàng chưa đủ điều kiện để thực hiện điều chỉnh (Chưa có chứng từ, chưa xuất kho hoặc chưa thanh toán).");
+                }
+            }
+
+            var chiTiets = _orderRepo.GetChiTietByDonId(id);
+
+            string maKH = "", tenKH = "", maST = "", diaChi = "", sdT = "";
+            if (don.IDKhachHang.HasValue)
+            {
+                using (var conn = _db.CreateConnection())
+                {
+                    var kh = conn.QueryFirstOrDefault<dynamic>(
+                        "SELECT MaKhachHang, TenKhachHang AS HoTen, MaSoThue, DiaChi, SoDienThoai FROM NS_KhachHang WHERE ID = @ID",
+                        new { ID = don.IDKhachHang });
+                    if (kh != null)
+                    {
+                        maKH = kh.MaKhachHang ?? "";
+                        tenKH = kh.HoTen ?? "";
+                        maST = kh.MaSoThue ?? "";
+                        diaChi = kh.DiaChi ?? "";
+                        sdT = kh.SoDienThoai ?? "";
+                    }
+                }
+            }
+
+            var model = new DonDatHangCreateEditViewModel
+            {
+                ID = don.ID,
+                IDKhachHang = don.IDKhachHang,
+                MaKhachHang = maKH,
+                TenKhachHang = tenKH,
+                MaSoThue = maST,
+                DiaChi = diaChi,
+                SoDienThoai = sdT,
+                SoDonHang = don.SoDonHang,
+                NgayTaoDon = don.NgayTaoDon,
+                IDNhanVien = don.IDNhanVien,
+                ThoiHanGiaoHang = don.ThoiHanGiaoHang,
+                TrangThaiDon = don.TrangThaiDon,
+                TongTien = don.TongTien,
+                PhiBocXep = don.PhiBocXep,
+                ThanhTienHang = don.ThanhTienHang ?? 0,
+                ThanhTienThue = don.ThanhTienThue ?? 0,
+                GhiChu = don.GhiChu,
+                ChiTiets = chiTiets
+            };
+            model.NhanVienList = GetNhanVienList(don.IDNhanVien);
+            model.TrangThaiList = GetTrangThaiList(don.TrangThaiDon);
+
+            ViewBag.Title = "Điều chỉnh đơn đặt hàng";
+            ViewBag.ChiTietsJson = JsonConvert.SerializeObject(chiTiets);
+            
+            return View(model);
+        }
+
+        // ── Adjust (POST) ─────────────────────────────────────────────────────
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
+        public ActionResult Adjust(DonDieuChinhPostModel model)
+        {
+            if (string.IsNullOrWhiteSpace(model.LyDoDieuChinh))
+            {
+                ModelState.AddModelError("LyDoDieuChinh", "Vui lòng nhập lý do điều chỉnh");
+            }
+
+            var rawDetails = JsonConvert.DeserializeObject<List<DonDatHangChiTietViewModel>>(model.ChiTietsJson) ?? new List<DonDatHangChiTietViewModel>();
+            if (rawDetails.Count == 0)
+            {
+                ModelState.AddModelError("", "Vui lòng thêm ít nhất một sản phẩm vào đơn hàng");
+            }
+            else
+            {
+                for (int i = 0; i < rawDetails.Count; i++)
+                {
+                    if (!rawDetails[i].IDSanPham.HasValue || rawDetails[i].IDSanPham == 0)
+                        ModelState.AddModelError("", $"Dòng {i + 1}: Vui lòng chọn sản phẩm");
+                    if (rawDetails[i].DonGia < 0)
+                        ModelState.AddModelError("", $"Dòng {i + 1}: Đơn giá không được âm");
+                    if (rawDetails[i].SoLuong < 0)
+                        ModelState.AddModelError("", $"Dòng {i + 1}: Số lượng không được âm");
+                }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                if (Request.IsAjaxRequest() || Request.Headers["X-SPA-Load"] == "true")
+                {
+                    var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                    return Json(new { success = false, message = string.Join("<br/>", errors) });
+                }
+
+                TempData["ToastMessage"] = "Vui lòng nhập đầy đủ thông tin bắt buộc.";
+                TempData["ToastType"] = "error";
+                return RedirectToAction("Adjust", new { id = model.IDDonHang });
+            }
+
+            var session = GetCurrentUser();
+            int userId = session?.IDNhanSu ?? 0;
+
+            try
+            {
+                _repo.SaveAdjustment(model, userId);
+                
+                if (Request.IsAjaxRequest() || Request.Headers["X-SPA-Load"] == "true")
+                {
+                    return Json(new { success = true, message = "Điều chỉnh đơn hàng thành công!", closeTab = true });
+                }
+
+                TempData["ToastMessage"] = "Điều chỉnh đơn hàng thành công!";
+                TempData["ToastType"] = "success";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                if (Request.IsAjaxRequest() || Request.Headers["X-SPA-Load"] == "true")
+                {
+                    return Json(new { success = false, message = "Lỗi điều chỉnh đơn hàng: " + ex.Message });
+                }
+
+                TempData["ToastMessage"] = "Lỗi: " + ex.Message;
+                TempData["ToastType"] = "error";
+                return RedirectToAction("Adjust", new { id = model.IDDonHang });
+            }
+        }
+
+        // ── History (AJAX Modal) ──────────────────────────────────────────────
+
+        [HttpGet]
+        public ActionResult History(int id)
+        {
+            var order = _orderRepo.GetById(id);
+            if (order == null) return HttpNotFound();
+
+            var history = _repo.GetAdjustHistory(id);
+
+            ViewBag.SoDonHang = order.SoDonHang;
+            return PartialView("_HistoryModal", history);
+        }
+    }
+}

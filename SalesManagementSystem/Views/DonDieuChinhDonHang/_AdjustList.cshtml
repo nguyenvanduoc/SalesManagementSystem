@@ -1,0 +1,136 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DonDieuChinhListViewModel>
+
+@using SalesManagementSystem.Helpers
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive" style="min-height:300px; overflow-x:auto;">
+            <table class="table table-custom table-bordered table-hover mb-0" style="width:100%; min-width:1350px;">
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width:50px;"></th>
+                        <th class="text-center" style="width:45px;">STT</th>
+                        <th>Số đơn hàng</th>
+                        <th class="text-center">Ngày đơn hàng</th>
+                        <th>Khách hàng</th>
+                        <th class="text-end" style="min-width:120px;">Tổng tiền hiện tại</th>
+                        <th class="text-end" style="min-width:120px;">Đã thanh toán</th>
+                        <th class="text-end" style="min-width:120px;">Công nợ hiện tại</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th class="text-center" style="width:110px;">Đã điều chỉnh</th>
+                        <th class="text-center" style="width:120px;">Số lần điều chỉnh</th>
+                        <th class="text-center" style="min-width:130px;">Ngày điều chỉnh</th>
+                        <th style="min-width:140px;">Người điều chỉnh</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Items != null && Model.Items.Any())
+                    {
+                        int stt = (Model.CurrentPage - 1) * Model.PageSize + 1;
+                        foreach (var item in Model.Items)
+                        {
+                            <tr id="row_@item.ID" style="vertical-align: middle;">
+                                <td class="text-center align-middle">
+                                    <div class="dropdown dropdown-hover">
+                                        <button class="btn btn-sm btn-light border dropdown-toggle-hide-arrow shadow-sm"
+                                                type="button" data-bs-toggle="dropdown" data-bs-boundary="window" style="padding:2px 6px;">
+                                            <i class="bi bi-grid-3x3-gap-fill text-dark"></i>
+                                        </button>
+                                        <ul class="dropdown-menu shadow">
+                                            <li><h6 class="dropdown-header text-uppercase fw-bold text-dark">Thao tác</h6></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            @if (PermissionHelper.HasPermission("DonDieuChinhDonHang", LoaiPhanQuyen.CapNhat))
+                                            {
+                                                <li>
+                                                    <a class="dropdown-item" href="@Url.Action("Adjust", "DonDieuChinhDonHang", new { id = item.ID })">
+                                                        <i class="bi bi-sliders me-2 text-primary"></i> Điều chỉnh
+                                                    </a>
+                                                </li>
+                                            }
+                                            @if (PermissionHelper.HasPermission("DonDieuChinhDonHang", LoaiPhanQuyen.Xem))
+                                            {
+                                                <li>
+                                                    <button type="button" class="dropdown-item" onclick="openHistoryModal(@item.ID)">
+                                                        <i class="bi bi-clock-history me-2 text-success"></i> Xem lịch sử điều chỉnh
+                                                    </button>
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </td>
+                                <td class="text-center align-middle">@(stt++)</td>
+                                <td class="align-middle fw-bold text-dark">@item.SoDonHang</td>
+                                <td class="text-center align-middle">
+                                    @(item.NgayTaoDon.HasValue ? item.NgayTaoDon.Value.ToString("dd/MM/yyyy") : "")
+                                </td>
+                                <td class="align-middle">@item.TenKhachHang</td>
+                                <td class="text-end align-middle fw-bold text-dark">
+                                    @item.TongTien.ToString("N0")₫
+                                </td>
+                                <td class="text-end align-middle text-success">
+                                    @item.DaThanhToan.ToString("N0")₫
+                                </td>
+                                <td class="text-end align-middle">
+                                    @{
+                                        decimal congNo = item.CongNo;
+                                    }
+                                    @if (congNo < 0)
+                                    {
+                                        <span class="text-danger fw-bold">Khách trả dư: @(Math.Abs(congNo).ToString("N0"))₫</span>
+                                    }
+                                    else if (congNo > 0)
+                                    {
+                                        <span class="text-primary fw-bold">Còn phải thu: @(congNo.ToString("N0"))₫</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Đã tất toán (0₫)</span>
+                                    }
+                                </td>
+                                <td class="text-center align-middle">
+                                    @{
+                                        string badgeClass = item.TrangThaiDon == 1 ? "bg-danger"
+                                                          : item.TrangThaiDon == 2 ? "bg-warning text-dark"
+                                                          : item.TrangThaiDon == 3 ? "bg-success"
+                                                          : item.TrangThaiDon == 4 ? "bg-secondary"
+                                                          : "bg-secondary";
+                                    }
+                                    <span class="badge @badgeClass">@item.TenTrangThai</span>
+                                </td>
+                                <td class="text-center align-middle">
+                                    <input type="checkbox" class="form-check-input" @(item.DaDieuChinh ? "checked" : "") disabled />
+                                </td>
+                                <td class="text-center align-middle">
+                                    @if (item.SoLanDieuChinh > 0)
+                                    {
+                                        <span class="badge bg-info">@item.SoLanDieuChinh</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">0</span>
+                                    }
+                                </td>
+                                <td class="text-center align-middle small text-muted">
+                                    @(item.NgayDieuChinh.HasValue ? item.NgayDieuChinh.Value.ToString("dd/MM/yyyy HH:mm") : "")
+                                </td>
+                                <td class="align-middle small fw-semibold text-dark">
+                                    @(item.NguoiDieuChinh ?? "")
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="13" class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                Không tìm thấy đơn hàng nào thỏa mãn điều kiện điều chỉnh.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @Html.Partial("_Pagination", Model)
+</div>

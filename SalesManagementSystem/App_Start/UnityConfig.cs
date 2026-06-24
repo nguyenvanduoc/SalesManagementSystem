@@ -40,6 +40,7 @@ namespace SalesManagementSystem.App_Start
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IDmSanPhamRepository, DmSanPhamRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IDmKhoHangRepository, DmKhoHangRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IDonDatHangRepository, DonDatHangRepository>(new HierarchicalLifetimeManager());
+            container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IDonDieuChinhDonHangRepository, DonDieuChinhDonHangRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IPhieuNhapKhoRepository, SalesManagementSystem.Repositories.PhieuNhapKhoRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.INhaCungCapRepository, NhaCungCapRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.ITonKhoRepository, TonKhoRepository>(new HierarchicalLifetimeManager());

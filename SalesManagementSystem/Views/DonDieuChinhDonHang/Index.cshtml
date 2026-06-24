@@ -1,0 +1,129 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DonDieuChinhListViewModel>
+
+@{
+    ViewBag.Title = "Điều chỉnh đơn hàng sau bán hàng";
+    var uid = Guid.NewGuid().ToString("N");
+}
+
+@using SalesManagementSystem.Helpers
+
+<div id="ddh-@uid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">
+            <i class="bi bi-sliders me-2"></i>@ViewBag.Title
+        </h4>
+    </div>
+
+    <!-- Bộ lọc -->
+    <div class="card shadow-sm mb-3">
+        <div class="card-body py-2">
+            <form id="searchForm" action="@Url.Action("GetList","DonDieuChinhDonHang")" method="get">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Từ ngày</label>
+                        <input type="date" name="tuNgay" class="form-control form-control-sm"
+                               value="@ViewBag.TuNgay" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Đến ngày</label>
+                        <input type="date" name="denNgay" class="form-control form-control-sm"
+                               value="@ViewBag.DenNgay" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Khách hàng</label>
+                        @Html.DropDownList("idKhachHang",
+                            (SelectList)ViewBag.KhachHangs,
+                            "-- Tất cả --",
+                            new { @class = "form-select form-select-sm" })
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Số đơn hàng</label>
+                        <input type="text" name="soDonHang" class="form-control form-control-sm"
+                               placeholder="Tìm số đơn..." value="@ViewBag.SoDonHang" />
+                    </div>
+                    <div class="col-md-2 pb-1">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="chiDonDieuChinh" id="chkChiDonDieuChinh" value="true" @(ViewBag.ChiDonDieuChinh == true ? "checked" : "") />
+                            <label class="form-check-label small fw-bold text-muted" for="chkChiDonDieuChinh">Đã điều chỉnh</label>
+                        </div>
+                    </div>
+                    <div class="col-md-auto d-flex gap-2 ms-auto pb-1">
+                        <button type="submit" class="btn btn-sm text-white px-3"
+                                style="background-color:#2998e4;border:none;">
+                            <i class="bi bi-search"></i> Tìm kiếm
+                        </button>
+                        <button type="button" onclick="resetSearchDonDieuChinh()" class="btn btn-sm text-white px-3"
+                                style="background-color:#f1c40f;border:none;">
+                            Làm mới
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="table-container">
+        @Html.Partial("_AdjustList", Model)
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    $(document).ready(function () {
+        var $pane = $('.tab-pane.active');
+        if ($pane.length === 0) $pane = $(document);
+        
+        $pane.find('#searchForm').on('submit', function (e) {
+            e.preventDefault();
+            loadDataDonDieuChinh($(this).serialize());
+        });
+    });
+
+    function resetSearchDonDieuChinh() {
+        var $pane = $('.tab-pane.active');
+        if ($pane.length === 0) $pane = $(document);
+        var $form = $pane.find('#searchForm');
+        $form[0].reset();
+        $form.find('select').val('').trigger('change');
+        $form.find('#chkChiDonDieuChinh').prop('checked', false);
+        loadDataDonDieuChinh('');
+    }
+
+    function loadDataDonDieuChinh(urlOrData) {
+        var requestUrl = typeof urlOrData === 'string' && urlOrData.indexOf('/') !== -1 
+                         ? urlOrData 
+                         : '@Url.Action("GetList","DonDieuChinhDonHang")?' + urlOrData;
+        
+        var $container = $('.tab-pane.active #table-container');
+        if ($container.length === 0) $container = $('#table-container');
+
+        $.ajax({
+            url: requestUrl,
+            type: 'GET',
+            success: function(res) {
+                $container.html(res);
+            },
+            error: function() {
+                showToast('error', 'Có lỗi xảy ra khi tải dữ liệu.');
+            }
+        });
+    }
+
+    function openHistoryModal(id) {
+        $.ajax({
+            url: '@Url.Action("History", "DonDieuChinhDonHang")',
+            type: 'GET',
+            data: { id: id },
+            success: function(res) {
+                $('#globalFormModal .modal-dialog').removeClass('modal-lg modal-sm').addClass('modal-xl');
+                $('#globalFormModalContent').html(res);
+                var formModal = new bootstrap.Modal(document.getElementById('globalFormModal'));
+                formModal.show();
+            },
+            error: function() {
+                showToast('error', 'Không thể tải lịch sử điều chỉnh.');
+            }
+        });
+    }
+</script>
+}
