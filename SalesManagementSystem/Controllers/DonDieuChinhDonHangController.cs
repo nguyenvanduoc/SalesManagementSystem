@@ -183,6 +183,34 @@ namespace SalesManagementSystem.Controllers
             model.NhanVienList = GetNhanVienList(don.IDNhanVien);
             model.TrangThaiList = GetTrangThaiList(don.TrangThaiDon);
 
+            // Truy vấn kho hiện tại của đơn hàng
+            int currentKhoId = 0;
+            string currentTenKho = "";
+            using (var conn = _db.CreateConnection())
+            {
+                var khoInfo = conn.QueryFirstOrDefault<dynamic>(@"
+                    SELECT TOP 1 IDKho, TenKhoHang
+                    FROM (
+                        SELECT px.IDKho, kh.TenKhoHang, 1 AS Priority
+                        FROM KHO_PhieuXuat px
+                        INNER JOIN DM_KhoHang kh ON px.IDKho = kh.ID
+                        WHERE px.IDDonDatHang = @ID AND px.IsDeleted = 0
+                        UNION ALL
+                        SELECT c.IDKho, kh.TenKhoHang, 2 AS Priority
+                        FROM BAN_ChungTuBanHang c
+                        INNER JOIN DM_KhoHang kh ON c.IDKho = kh.ID
+                        WHERE c.IDDonDatHang = @ID AND c.IsDeleted = 0
+                    ) t
+                    ORDER BY Priority", new { ID = id });
+                if (khoInfo != null)
+                {
+                    currentKhoId = (int)khoInfo.IDKho;
+                    currentTenKho = (string)khoInfo.TenKhoHang;
+                }
+            }
+            ViewBag.IDKho = currentKhoId;
+            ViewBag.TenKhoHang = currentTenKho;
+
             ViewBag.Title = "Điều chỉnh đơn đặt hàng";
             ViewBag.ChiTietsJson = JsonConvert.SerializeObject(chiTiets);
             
@@ -199,6 +227,11 @@ namespace SalesManagementSystem.Controllers
             if (string.IsNullOrWhiteSpace(model.LyDoDieuChinh))
             {
                 ModelState.AddModelError("LyDoDieuChinh", "Vui lòng nhập lý do điều chỉnh");
+            }
+
+            if (model.IDKho <= 0)
+            {
+                ModelState.AddModelError("IDKho", "Vui lòng chọn kho xuất");
             }
 
             var rawDetails = JsonConvert.DeserializeObject<List<DonDatHangChiTietViewModel>>(model.ChiTietsJson) ?? new List<DonDatHangChiTietViewModel>();

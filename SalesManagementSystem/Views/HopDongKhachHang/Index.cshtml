@@ -291,29 +291,33 @@
         }
 
         function ThanhLyHopDong(id) {
-            if (confirm('Bạn có chắc chắn muốn thanh lý hợp đồng này?')) {
+            showConfirm('Bạn có chắc chắn muốn thanh lý hợp đồng này?', function () {
                 $.post('@Url.Action("ThanhLy", "HopDongKhachHang")', { id: id }, function (res) {
                     if (res.success) {
-                        toastr.success(res.message);
+                        if (typeof showToast === 'function') showToast('success', res.message);
+                        else if (typeof toastr !== 'undefined') toastr.success(res.message);
                         LoadData(1);
                     } else {
-                        toastr.error(res.message);
+                        if (typeof showToast === 'function') showToast('error', res.message);
+                        else if (typeof toastr !== 'undefined') toastr.error(res.message);
                     }
                 });
-            }
+            });
         }
 
         function HuyHopDong(id) {
-            if (confirm('Bạn có chắc chắn muốn hủy hợp đồng này?')) {
+            showConfirm('Bạn có chắc chắn muốn hủy hợp đồng này?', function () {
                 $.post('@Url.Action("Huy", "HopDongKhachHang")', { id: id }, function (res) {
                     if (res.success) {
-                        toastr.success(res.message);
+                        if (typeof showToast === 'function') showToast('success', res.message);
+                        else if (typeof toastr !== 'undefined') toastr.success(res.message);
                         LoadData(1);
                     } else {
-                        toastr.error(res.message);
+                        if (typeof showToast === 'function') showToast('error', res.message);
+                        else if (typeof toastr !== 'undefined') toastr.error(res.message);
                     }
                 });
-            }
+            });
         }
 
         function ViewAttachedFiles(idHopDong) {
@@ -330,7 +334,7 @@
         }
 
         function DeleteFile(id, btn) {
-            if (confirm("Bạn có chắc chắn muốn xóa file đính kèm này?")) {
+            showConfirm("Bạn có chắc chắn muốn xóa file đính kèm này?", function () {
                 var url = '@Url.Action("DeleteFile", "HopDongKhachHang")?id=' + id;
                 $.post(url, function(res) {
                     if (res.success) {
@@ -351,7 +355,7 @@
                         else if (typeof toastr !== 'undefined') toastr.error(res.message);
                     }
                 });
-            }
+            });
         }
 
         let currentUploadHopDongId = 0;

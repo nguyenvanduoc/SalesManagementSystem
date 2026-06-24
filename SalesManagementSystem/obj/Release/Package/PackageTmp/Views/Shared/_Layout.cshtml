@@ -383,13 +383,23 @@
         }
 
         /* Fix: 4 dòng cuối cùng sẽ hiển thị menu hướng lên trên (Dropup) đè ngược lên grid để không bị che bởi footer.
-           Tuy nhiên, nếu là 3 dòng đầu tiên thì KHÔNG dropup để tránh bị cắt bởi mép trên của bảng. */
-        .table-custom tbody tr:nth-last-child(-n+4):not(:nth-child(-n+3)) .dropdown-menu {
+           Tuy nhiên, nếu là dòng đầu tiên thì KHÔNG dropup để tránh bị cắt bởi mép trên của bảng. */
+        .table-custom tbody tr:nth-last-child(-n+4):not(:first-child) .dropdown-menu {
             top: auto !important;
             bottom: 100% !important;
             margin-top: 0 !important;
             margin-bottom: 0.125rem !important;
             box-shadow: 0 -0.5rem 1rem rgba(0, 0, 0, 0.15) !important; /* Đổi bóng đổ lên trên cho đẹp */
+        }
+
+        /* Đảm bảo nội dung tràn từ card-body (như dropdown menu) không bị đè bởi card-footer */
+        .card-body {
+            position: relative;
+            z-index: 2;
+        }
+        .card-footer {
+            position: relative;
+            z-index: 1;
         }
 
         /* ─── Custom Pagination (Light Theme) ─────────────────────────────── */
@@ -1106,14 +1116,11 @@
     });
 
     // Sửa lỗi dropdown "Thao tác" bị cắt ngang bởi table-responsive
-    $(document).ready(function() {
-        $('.table-responsive').on('mouseenter', '.dropdown-hover', function() {
-            // Khi hover vào dropdown, cho phép tràn viền
-            $(this).closest('.table-responsive').css('overflow', 'visible');
-        }).on('mouseleave', '.dropdown-hover', function() {
-            // Khi chuột rời đi, trả lại thuộc tính ban đầu
-            $(this).closest('.table-responsive').css('overflow', '');
-        });
+    // Dùng event delegation trên document để hoạt động được với cả bảng tải qua AJAX/SPA
+    $(document).on('mouseenter', '.table-responsive .dropdown-hover', function() {
+        $(this).closest('.table-responsive').css('overflow', 'visible');
+    }).on('mouseleave', '.table-responsive .dropdown-hover', function() {
+        $(this).closest('.table-responsive').css('overflow', '');
     });
 </script>
 <script src="~/Scripts/tab-manager.js?v=@DateTime.Now.Ticks"></script>

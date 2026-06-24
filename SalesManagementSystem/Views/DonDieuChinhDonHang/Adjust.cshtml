@@ -113,7 +113,7 @@
                         <label class="form-label text-muted fw-semibold small">Hạn giao hàng</label>
                         @Html.TextBoxFor(m => m.ThoiHanGiaoHang, "{0:yyyy-MM-dd}", new { @class = "form-control readonly-cell", @readonly = "readonly", type = "date" })
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label text-muted fw-semibold small">Nhân sự phụ trách</label>
                         @Html.DropDownListFor(m => m.IDNhanVien, Model.NhanVienList,
                             "-- Chọn nhân viên --",
@@ -123,6 +123,14 @@
                         <label class="form-label text-muted fw-semibold small">Trạng thái</label>
                         @Html.DropDownListFor(m => m.TrangThaiDon, Model.TrangThaiList,
                             new { @class = "form-select readonly-cell", @disabled = "disabled" })
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label text-muted fw-semibold small">Kho xuất <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="hidden" name="IDKho" id="CTBH_IDKho" value="@(ViewBag.IDKho > 0 ? ViewBag.IDKho.ToString() : "")" />
+                            <input type="text" class="form-control bg-white fw-bold text-primary" id="CTBH_TenKhoHang" value="@ViewBag.TenKhoHang" readonly placeholder="-- Chọn kho --" />
+                            <button class="btn btn-outline-secondary btn-sm" type="button" id="CTBH_btnShowKhoTonKho"><i class="bi bi-search"></i> Chọn kho</button>
+                        </div>
                     </div>
                     <div class="col-md-12">
                         <label class="form-label text-muted fw-semibold small">Ghi chú</label>
@@ -193,6 +201,38 @@
     </div>
 </form>
 
+<!-- Modal Kiểm tra tồn kho -->
+<div class="modal fade" id="modalTonKho" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content shadow-lg" style="border: none;">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-uppercase" style="color:#0b5b84;">CHỌN KHO XUẤT (KIỂM TRA TỒN)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="table-responsive" style="max-height: 400px;">
+                    <table class="table table-bordered mb-0" id="CTBH_tableTonKho">
+                        <thead style="background:#f4f6f9; font-weight:bold; position: sticky; top: 0; z-index: 1;">
+                            <tr>
+                                <th>Tên kho hàng</th>
+                                <th class="text-center" style="width:130px;">Tình trạng</th>
+                                <th>Chi tiết tồn kho (Tồn / Cần xuất)</th>
+                                <th class="text-center" style="width:100px;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Nội dung render qua JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary text-white" style="background:#6c757d; border:none;" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
 <script src="@Url.Content("~/Scripts/don-dat-hang.js?v=2.6")"></script>
 <script>
@@ -209,6 +249,92 @@
             selectedKhText:   '@Html.Raw((Model.MaKhachHang + " - " + Model.TenKhachHang).Replace("'", "\\'"))'
         });
 
+        // Xử lý sự kiện nhấn nút Chọn kho
+        $pane.find('#CTBH_btnShowKhoTonKho').on('click', function () {
+            var sanPhams = [];
+            $pane.find('#tbodyChiTiet tr').each(function () {
+                var idSp = $(this).find('.hd-idsp').val();
+                var soLuong = $(this).find('.txt-soluong').val();
+                if (idSp && soLuong) {
+                    sanPhams.push({
+                        IDSanPham: parseInt(idSp),
+                        SoLuongCanXuat: parseFloat(soLuong.replace(/[^\d-]/g, ''))
+                    });
+                }
+            });
+
+            if (sanPhams.length === 0) {
+                showToast('warning', 'Vui lòng thêm sản phẩm trước khi chọn kho!');
+                return;
+            }
+
+            $.ajax({
+                url: '/ChungTuBanHang/CheckTonKhoAllKho',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ sanPhams: sanPhams }),
+                success: function (res) {
+                    if (res.success) {
+                        var tbody = $pane.find('#CTBH_tableTonKho tbody');
+                        tbody.empty();
+                        
+                        res.data.forEach(function (kho) {
+                            var rowClass = !kho.IsDuTonAll ? 'table-warning' : '';
+                            var badgeHtml = kho.IsDuTonAll 
+                                ? '<span class="badge bg-success">Đủ tồn kho</span>' 
+                                : '<span class="badge bg-danger">Thiếu tồn kho</span>';
+                                
+                            var detailsHtml = '<ul class="mb-0 ps-3" style="font-size:0.85rem;">';
+                            kho.ChiTiets.forEach(function (ct) {
+                                var color = ct.IsDuTon ? 'text-success' : 'text-danger fw-bold';
+                                detailsHtml += '<li>' + ct.MaSanPham + ' - ' + ct.TenSanPham + ': <span class="' + color + '">Tồn ' + ct.SoLuongTon.toLocaleString('vi-VN') + ' / Cần ' + ct.SoLuongCanXuat.toLocaleString('vi-VN') + '</span></li>';
+                            });
+                            detailsHtml += '</ul>';
+
+                            var btnHtml = '';
+                            if (kho.IsDuTonAll) {
+                                btnHtml = '<button type="button" class="btn btn-sm btn-primary btn-select-kho-action" data-id="' + kho.IDKho + '" data-ten="' + kho.TenKhoHang + '">Chọn</button>';
+                            } else {
+                                btnHtml = '<button type="button" class="btn btn-sm btn-secondary" disabled title="Kho không đủ tồn">Chọn</button>';
+                            }
+
+                            var tr = '<tr class="' + rowClass + '">' +
+                                '<td class="align-middle fw-bold">' + kho.TenKhoHang + '</td>' +
+                                '<td class="align-middle text-center">' + badgeHtml + '</td>' +
+                                '<td class="align-middle">' + detailsHtml + '</td>' +
+                                '<td class="align-middle text-center">' + btnHtml + '</td>' +
+                                '</tr>';
+                            tbody.append(tr);
+                        });
+
+                        var modalEl = $pane.find('#modalTonKho')[0];
+                        var modalTonKho = new bootstrap.Modal(modalEl);
+                        modalTonKho.show();
+                    } else {
+                        showToast('error', res.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    showToast('error', 'Đã xảy ra lỗi kết nối: ' + error);
+                }
+            });
+        });
+
+        // Sự kiện click nút Chọn trong modal check tồn
+        $(document).off('click', '.btn-select-kho-action').on('click', '.btn-select-kho-action', function () {
+            var idKho = $(this).data('id');
+            var tenKho = $(this).data('ten');
+            $pane.find('#CTBH_IDKho').val(idKho);
+            $pane.find('#CTBH_TenKhoHang').val(tenKho).removeClass('is-invalid');
+            
+            var modalEl = $pane.find('#modalTonKho')[0];
+            var modalTonKho = bootstrap.Modal.getInstance(modalEl);
+            if (modalTonKho) {
+                modalTonKho.hide();
+            }
+        });
+
+        // Xử lý sự kiện nhấn nút Lưu điều chỉnh
         $pane.find('#btnSaveAdjustment').on('click', function () {
             var lyDo = $pane.find('#txtLyDoDieuChinh').val().trim();
             if (!lyDo) {
@@ -219,38 +345,87 @@
                 $pane.find('#txtLyDoDieuChinh').removeClass('is-invalid');
             }
 
+            var idKho = $pane.find('#CTBH_IDKho').val();
+            if (!idKho || parseInt(idKho) <= 0) {
+                $pane.find('#CTBH_TenKhoHang').addClass('is-invalid');
+                showToast('warning', 'Vui lòng chọn kho xuất.');
+                return;
+            } else {
+                $pane.find('#CTBH_TenKhoHang').removeClass('is-invalid');
+            }
+
             if (!DonDatHang.validateAndSerialize($form)) return;
-            
-            var confirmModalId = 'confirmSaveModal_' + Math.random().toString(36).substr(2, 9);
-            var confirmHtml = '<div class="modal fade" id="' + confirmModalId + '" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">' +
-                '<div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">' +
-                    '<div class="modal-content shadow-lg" style="background-color: #ffffff; color: #333; border: none; border-top: 5px solid #ffc107; border-radius: 6px;">' +
-                        '<div class="modal-body p-4">' +
-                            '<div class="d-flex align-items-center mb-3">' +
-                                '<i class="bi bi-exclamation-triangle-fill text-warning me-3" style="font-size: 1.6rem;"></i>' +
-                                '<h5 class="mb-0" style="font-size: 1.3rem; font-weight: 600; color: #333;">Thông báo!</h5>' +
-                            '</div>' +
-                            '<p class="mb-4" style="font-size: 1rem; color: #555;">Bạn có chắc chắn muốn thực hiện điều chỉnh đơn hàng này không?</p>' +
-                            '<div class="d-flex justify-content-end gap-2">' +
-                                '<button type="button" class="btn" id="btnConfirmSaveAction" style="background-color: #ffc107; color: #fff; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem;">ĐỒNG Ý</button>' +
-                                '<button type="button" class="btn" data-bs-dismiss="modal" style="background-color: #e9ecef; color: #333; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem; border: none;">ĐỂ SAU</button>' +
-                            '</div>' +
-                        '</div>' +
-                    '</div>' +
-                '</div>' +
-            '</div>';
-            
-            $('body').append(confirmHtml);
-            var $modal = $('#' + confirmModalId);
-            $modal.find('#btnConfirmSaveAction').on('click', function() {
-                $modal.modal('hide');
-                setTimeout(function() {
-                    $form.submit();
-                }, 150);
+
+            // Thu thập sản phẩm để check tồn kho tại kho đã chọn trước khi lưu
+            var sanPhams = [];
+            $pane.find('#tbodyChiTiet tr').each(function () {
+                var idSp = $(this).find('.hd-idsp').val();
+                var soLuong = $(this).find('.txt-soluong').val();
+                if (idSp && soLuong) {
+                    sanPhams.push({
+                        IDSanPham: parseInt(idSp),
+                        SoLuongCanXuat: parseFloat(soLuong.replace(/[^\d-]/g, ''))
+                    });
+                }
             });
-            
-            var myModal = new bootstrap.Modal(document.getElementById(confirmModalId));
-            myModal.show();
+
+            if (sanPhams.length === 0) {
+                showToast('warning', 'Vui lòng thêm ít nhất một sản phẩm.');
+                return;
+            }
+
+            $.ajax({
+                url: '/ChungTuBanHang/CheckTonKho',
+                type: 'POST',
+                data: {
+                    idKho: parseInt(idKho),
+                    sanPhams: sanPhams
+                },
+                success: function (res) {
+                    if (res.success) {
+                        if (res.hasError) {
+                            showToast('warning', 'Không thể lưu: Kho xuất không đủ tồn kho cho các sản phẩm đã chọn!');
+                            return;
+                        }
+
+                        var confirmModalId = 'confirmSaveModal_' + Math.random().toString(36).substr(2, 9);
+                        var confirmHtml = '<div class="modal fade" id="' + confirmModalId + '" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">' +
+                            '<div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">' +
+                                '<div class="modal-content shadow-lg" style="background-color: #ffffff; color: #333; border: none; border-top: 5px solid #ffc107; border-radius: 6px;">' +
+                                    '<div class="modal-body p-4">' +
+                                        '<div class="d-flex align-items-center mb-3">' +
+                                            '<i class="bi bi-exclamation-triangle-fill text-warning me-3" style="font-size: 1.6rem;"></i>' +
+                                            '<h5 class="mb-0" style="font-size: 1.3rem; font-weight: 600; color: #333;">Thông báo!</h5>' +
+                                        '</div>' +
+                                        '<p class="mb-4" style="font-size: 1rem; color: #555;">Bạn có chắc chắn muốn thực hiện điều chỉnh đơn hàng này không?</p>' +
+                                        '<div class="d-flex justify-content-end gap-2">' +
+                                            '<button type="button" class="btn" id="btnConfirmSaveAction" style="background-color: #ffc107; color: #fff; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem;">ĐỒNG Ý</button>' +
+                                            '<button type="button" class="btn" data-bs-dismiss="modal" style="background-color: #e9ecef; color: #333; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem; border: none;">ĐỂ SAU</button>' +
+                                        '</div>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>';
+                        
+                        $('body').append(confirmHtml);
+                        var $modal = $('#' + confirmModalId);
+                        $modal.find('#btnConfirmSaveAction').on('click', function() {
+                            $modal.modal('hide');
+                            setTimeout(function() {
+                                $form.submit();
+                            }, 150);
+                        });
+                        
+                        var myModal = new bootstrap.Modal(document.getElementById(confirmModalId));
+                        myModal.show();
+                    } else {
+                        showToast('error', 'Lỗi kiểm tra tồn kho: ' + res.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    showToast('error', 'Đã xảy ra lỗi kết nối: ' + error);
+                }
+            });
         });
     });
 </script>

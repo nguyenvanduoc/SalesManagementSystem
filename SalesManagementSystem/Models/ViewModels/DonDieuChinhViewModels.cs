@@ -56,5 +56,6 @@ namespace SalesManagementSystem.Models.ViewModels
         public string LyDoDieuChinh { get; set; }
         public string ChiTietsJson { get; set; }
         public decimal PhiBocXep { get; set; }
+        public int IDKho { get; set; }
     }
 }

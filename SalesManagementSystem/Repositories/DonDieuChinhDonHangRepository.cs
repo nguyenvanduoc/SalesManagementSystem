@@ -99,6 +99,7 @@ CREATE OR ALTER PROCEDURE sp_DON_DieuChinhDonHang_Save
     @LyDoDieuChinh NVARCHAR(1000),
     @ChiTietsJson NVARCHAR(MAX),
     @PhiBocXep DECIMAL(18,2),
+    @IDKho INT,
     @NguoiTao INT
 AS
 BEGIN
@@ -200,34 +201,24 @@ BEGIN
         SELECT DISTINCT IDSanPham FROM @ChiTietMoi WHERE IDSanPham IS NOT NULL;
 
         -- Kiểm tra xem đơn hàng đã xuất kho chưa
-        DECLARE @idKhoXuat INT;
-        SELECT TOP 1 @idKhoXuat = IDKho 
-        FROM KHO_PhieuXuat 
-        WHERE IDDonDatHang = @IDDonHang AND TrangThai = 2 AND IsDeleted = 0;
+        DECLARE @isDaXuatKho BIT = 0;
+        IF EXISTS (SELECT 1 FROM KHO_PhieuXuat WHERE IDDonDatHang = @IDDonHang AND TrangThai = 2 AND IsDeleted = 0)
+        BEGIN
+            SET @isDaXuatKho = 1;
+        END
 
         -- Duyệt qua từng sản phẩm để so sánh và ghi nhận điều chỉnh
         DECLARE @spId INT;
-        DECLARE @slCu DECIMAL(18,2);
-        DECLARE @slMoi DECIMAL(18,2);
-        DECLARE @dgCu DECIMAL(18,2);
-        DECLARE @dgMoi DECIMAL(18,2);
-        DECLARE @ttCu DECIMAL(18,2);
-        DECLARE @ttMoi DECIMAL(18,2);
-        DECLARE @itemGhiChu NVARCHAR(500);
-
         DECLARE db_cursor CURSOR LOCAL FOR SELECT IDSanPham FROM @allSpIds;
         OPEN db_cursor;
         FETCH NEXT FROM db_cursor INTO @spId;
 
         WHILE @@FETCH_STATUS = 0
         BEGIN
-            SET @slCu = NULL;
-            SET @slMoi = NULL;
-            SET @dgCu = NULL;
-            SET @dgMoi = NULL;
-            SET @ttCu = NULL;
-            SET @ttMoi = NULL;
-            SET @itemGhiChu = N'';
+            DECLARE @slCu DECIMAL(18,2) = NULL, @slMoi DECIMAL(18,2) = NULL;
+            DECLARE @dgCu DECIMAL(18,2) = NULL, @dgMoi DECIMAL(18,2) = NULL;
+            DECLARE @ttCu DECIMAL(18,2) = NULL, @ttMoi DECIMAL(18,2) = NULL;
+            DECLARE @itemGhiChu NVARCHAR(500) = N'';
 
             -- Lấy thông tin cũ
             SELECT 
@@ -242,7 +233,7 @@ BEGIN
                 @slMoi = SoLuong,
                 @dgMoi = DonGia,
                 @ttMoi = ThanhTienSauThue,
-                @itemGhiChu = ISNULL(GhiChu, N'')
+                @itemGhiChu = GhiChu
             FROM @ChiTietMoi
             WHERE IDSanPham = @spId;
 
@@ -255,7 +246,7 @@ BEGIN
                     (@idDieuChinh, @spId, @slCu, @slMoi, @dgCu, @dgMoi, @ttCu, @ttMoi, @itemGhiChu);
 
                 -- Xử lý chênh lệch tồn kho nếu đã xuất kho
-                IF @idKhoXuat IS NOT NULL
+                IF @isDaXuatKho = 1 AND @IDKho IS NOT NULL AND @IDKho > 0
                 BEGIN
                     DECLARE @qCu DECIMAL(18,2) = ISNULL(@slCu, 0);
                     DECLARE @qMoi DECIMAL(18,2) = ISNULL(@slMoi, 0);
@@ -268,7 +259,7 @@ BEGIN
                         INSERT INTO KHO_GiaoDichKho 
                             (NgayChungTu, SoChungTu, LoaiChungTu, IDChiTietKho, IDKho, IDSanPham, SoLuongNhap, SoLuongXuat, DonGia, ThanhTien, DienGiai, NgayTao, NguoiTao) 
                         VALUES 
-                            (CAST(GETDATE() AS DATE), @soDieuChinh, 2, 0, @idKhoXuat, @spId, 0, @delta, @dgMoiOrCu, @dgMoiOrCu * @delta, N'Xuất điều chỉnh tăng bán hàng theo phiếu ' + @soDieuChinh, GETDATE(), @NguoiTao);
+                            (CAST(GETDATE() AS DATE), @soDieuChinh, 2, 0, @IDKho, @spId, 0, @delta, @dgMoiOrCu, @dgMoiOrCu * @delta, N'Xuất điều chỉnh tăng bán hàng theo phiếu ' + @soDieuChinh, GETDATE(), @NguoiTao);
                     END
                     ELSE IF @delta < 0
                     BEGIN
@@ -278,7 +269,7 @@ BEGIN
                         INSERT INTO KHO_GiaoDichKho 
                             (NgayChungTu, SoChungTu, LoaiChungTu, IDChiTietKho, IDKho, IDSanPham, SoLuongNhap, SoLuongXuat, DonGia, ThanhTien, DienGiai, NgayTao, NguoiTao) 
                         VALUES 
-                            (CAST(GETDATE() AS DATE), @soDieuChinh, 1, 0, @idKhoXuat, @spId, @actualDelta, 0, @dgCuOrMoi, @dgCuOrMoi * @actualDelta, N'Nhập điều chỉnh giảm bán hàng theo phiếu ' + @soDieuChinh, GETDATE(), @NguoiTao);
+                            (CAST(GETDATE() AS DATE), @soDieuChinh, 1, 0, @IDKho, @spId, @actualDelta, 0, @dgCuOrMoi, @dgCuOrMoi * @actualDelta, N'Nhập điều chỉnh giảm bán hàng theo phiếu ' + @soDieuChinh, GETDATE(), @NguoiTao);
                     END
                 END
             END
@@ -324,6 +315,7 @@ BEGIN
             DECLARE @newConLai DECIMAL(18,2) = @newTongTien - @currentDaThanhToan;
             
             UPDATE BAN_ChungTuBanHang SET
+                IDKho = @IDKho,
                 TongTienHang = @newThanhTienHang,
                 TongTienThue = @newThanhTienThue,
                 PhiBocXep = @PhiBocXep,
@@ -349,6 +341,7 @@ BEGIN
         IF @shipId IS NOT NULL
         BEGIN
             UPDATE KHO_PhieuXuat SET
+                IDKho = @IDKho,
                 TongTienHang = @newThanhTienHang,
                 TongTienThue = @newThanhTienThue,
                 TongCong = @newTongTien,
@@ -363,6 +356,15 @@ BEGIN
             SELECT
                 @shipId, IDSanPham, ROW_NUMBER() OVER(ORDER BY IDSanPham), SoLuong, DonGia, ThanhTien, ThueGTGT, ThanhTienThue, ThanhTienSauThue
             FROM @ChiTietMoi;
+
+            -- Cập nhật IDKho của các giao dịch kho cũ
+            UPDATE KHO_GiaoDichKho
+            SET IDKho = @IDKho
+            WHERE IDChiTietKho IN (
+                SELECT pxct.ID
+                FROM KHO_PhieuXuat_ChiTiet pxct
+                WHERE pxct.IDPhieuXuat = @shipId
+            ) AND LoaiChungTu = 2; -- Xuất kho
         END
 
         COMMIT TRANSACTION;
@@ -511,6 +513,7 @@ END;
                 p.Add("@LyDoDieuChinh", model.LyDoDieuChinh);
                 p.Add("@ChiTietsJson", model.ChiTietsJson);
                 p.Add("@PhiBocXep", model.PhiBocXep);
+                p.Add("@IDKho", model.IDKho);
                 p.Add("@NguoiTao", userId);
 
                 conn.Execute("sp_DON_DieuChinhDonHang_Save", p, commandType: CommandType.StoredProcedure);
