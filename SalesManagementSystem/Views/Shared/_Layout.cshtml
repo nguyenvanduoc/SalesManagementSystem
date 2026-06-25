@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewBag.Title — Quản Lý Bán Hàng</title>
+    <title>@ViewBag.Title — Sài Gòn Cửu Long</title>
 
     <!-- Bootstrap 5 -->
     <link rel="stylesheet" href="@Url.Content("~/Content/bootstrap.min.css")" />
@@ -1149,7 +1149,7 @@
        - Hiện cảnh báo 2 phút trước khi hết hạn
     ================================================================ */
     (function () {
-        var SESSION_MAX_MS   = 8 * 60 * 60 * 1000;  // 8 tiếng
+        var SESSION_MAX_MS   = 40 * 60 * 60 * 1000;  // 40 tiếng
         var WARN_BEFORE_MS   = 2 * 60 * 1000;        // cảnh báo trước 2 phút
         var PING_INTERVAL_MS = 4 * 60 * 1000;        // ping mỗi 4 phút
         var loginTime        = Date.now();
@@ -1165,6 +1165,7 @@
                 success: function (res) {
                     if (!res.alive) {
                         // Session đã mất → về trang đăng nhập
+                        localStorage.removeItem('tabManagerState');
                         window.location.href = logoutUrl;
                     }
                 },
@@ -1180,6 +1181,7 @@
 
             if (remaining <= 0) {
                 // Hết 8 tiếng → logout
+                localStorage.removeItem('tabManagerState');
                 window.location.href = logoutUrl;
                 return;
             }
@@ -1190,7 +1192,7 @@
                 var toast = $('<div style="position:fixed;bottom:24px;right:24px;z-index:99999;background:#e74c3c;color:#fff;padding:14px 20px;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.2);font-size:0.9rem;max-width:320px;">' +
                     '<b><i class="bi bi-clock-history"></i> Phiên làm việc sắp hết hạn</b><br>' +
                     'Còn khoảng 2 phút nữa hệ thống sẽ tự động đăng xuất.<br>' +
-                    '<small>Làm mới trang để gia hạn thêm 8 tiếng.</small></div>');
+                    '<small>Làm mới trang để gia hạn thêm 40 tiếng.</small></div>');
                 $('body').append(toast);
                 setTimeout(function () { toast.fadeOut(500, function () { toast.remove(); }); }, 90000);
             }
@@ -1202,7 +1204,7 @@
             setInterval(pingServer, PING_INTERVAL_MS);
         }, 30000);
 
-        // Kiểm tra 8 tiếng mỗi 30 giây
+        // Kiểm tra 40 tiếng mỗi 30 giây
         setInterval(checkTimeout, 30000);
     })();
 </script>

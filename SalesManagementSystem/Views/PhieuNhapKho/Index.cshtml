@@ -1,4 +1,4 @@
-﻿@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.PhieuNhapKhoListViewModel>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.PhieuNhapKhoListViewModel>
 @{
     ViewBag.Title = "Quản lý Phiếu nhập kho";
     var uid = Guid.NewGuid().ToString("N");
@@ -154,7 +154,7 @@
 
                 // Create placeholder detail row
                 var $detailRow = $('<tr class="pnk-detail-row" data-parent-id="' + id + '">' +
-                    '<td colspan="14" class="p-3" style="background-color: #fcfdfd; border-left: 4px solid #2998e4;">' +
+                    '<td colspan="15" class="p-3" style="background-color: #fcfdfd; border-left: 4px solid #2998e4;">' +
                     '   <div class="text-center p-4 text-muted">' +
                     '       <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>' +
                     '       Đang tải chi tiết...' +

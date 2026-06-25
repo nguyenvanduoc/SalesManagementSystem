@@ -212,7 +212,7 @@
         DonDatHang.init({
             searchKhUrl:  '@Url.Action("SearchKhachHang","DonDatHang")',
             searchSpUrl:  '@Url.Action("SearchSanPham","DonDatHang")',
-            chiTietsJson: []
+            chiTietsJson: @Html.Raw(chiTietsJson)
         });
 
         $pane.find('#btnSaveDon').on('click', function () {

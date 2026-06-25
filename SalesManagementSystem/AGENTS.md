@@ -2,7 +2,7 @@
 
 # AI Coding Agent Instructions
 
-# Project: Hệ Thống Quản Lý Bán Hàng
+# Project: Hệ Thống Sài Gòn Cửu Long
 
 ## MISSION
 

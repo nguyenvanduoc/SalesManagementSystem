@@ -183,6 +183,29 @@ namespace SalesManagementSystem.Controllers
             model.NhanVienList = GetNhanVienList(don.IDNhanVien);
             model.TrangThaiList = GetTrangThaiList(don.TrangThaiDon);
 
+            // Truy vấn ngày giao hàng (ngày xuất kho hoặc ngày chứng từ bán hàng)
+            DateTime? ngayGiaoHang = null;
+            using (var conn = _db.CreateConnection())
+            {
+                var ngayInfo = conn.QueryFirstOrDefault<dynamic>(@"
+                    SELECT TOP 1 NgayGiao
+                    FROM (
+                        SELECT px.NgayXuat AS NgayGiao, 1 AS Priority
+                        FROM KHO_PhieuXuat px
+                        WHERE px.IDDonDatHang = @ID AND px.IsDeleted = 0
+                        UNION ALL
+                        SELECT c.NgayChungTu AS NgayGiao, 2 AS Priority
+                        FROM BAN_ChungTuBanHang c
+                        WHERE c.IDDonDatHang = @ID AND c.IsDeleted = 0
+                    ) t
+                    ORDER BY Priority", new { ID = id });
+                if (ngayInfo != null)
+                {
+                    ngayGiaoHang = (DateTime?)ngayInfo.NgayGiao;
+                }
+            }
+            model.NgayGiaoHang = ngayGiaoHang;
+
             // Truy vấn kho hiện tại của đơn hàng
             int currentKhoId = 0;
             string currentTenKho = "";
@@ -306,6 +329,185 @@ namespace SalesManagementSystem.Controllers
 
             ViewBag.SoDonHang = order.SoDonHang;
             return PartialView("_HistoryModal", history);
+        }
+
+        [HttpPost]
+        public ActionResult CheckTonKhoAllKho(int idDonHang, List<CheckTonKhoRequestItem> sanPhams)
+        {
+            try
+            {
+                if (sanPhams == null || !sanPhams.Any())
+                    return Json(new { success = false, message = "Không có sản phẩm nào để kiểm tra" });
+
+                // 1. Lấy kho hiện tại của đơn hàng
+                int currentKhoId = 0;
+                using (var conn = _db.CreateConnection())
+                {
+                    var khoInfo = conn.QueryFirstOrDefault<dynamic>(@"
+                        SELECT TOP 1 IDKho
+                        FROM (
+                            SELECT px.IDKho, 1 AS Priority
+                            FROM KHO_PhieuXuat px
+                            WHERE px.IDDonDatHang = @ID AND px.IsDeleted = 0
+                            UNION ALL
+                            SELECT c.IDKho, 2 AS Priority
+                            FROM BAN_ChungTuBanHang c
+                            WHERE c.IDDonDatHang = @ID AND c.IsDeleted = 0
+                        ) t
+                        ORDER BY Priority", new { ID = idDonHang });
+                    if (khoInfo != null)
+                    {
+                        currentKhoId = (int)khoInfo.IDKho;
+                    }
+                }
+
+                // 2. Lấy số lượng sản phẩm cũ trong đơn hàng chi tiết
+                var oldQuantities = new Dictionary<int, decimal>();
+                using (var conn = _db.CreateConnection())
+                {
+                    var details = conn.Query<dynamic>(
+                        "SELECT IDSanPham, ISNULL(SoLuong, 0) AS SoLuong FROM NS_DonDatHangChiTiet WHERE IDDonDatHang = @ID",
+                        new { ID = idDonHang }).ToList();
+                    foreach (var d in details)
+                    {
+                        if (d.IDSanPham != null)
+                        {
+                            int spId = (int)d.IDSanPham;
+                            decimal qty = (decimal)d.SoLuong;
+                            if (oldQuantities.ContainsKey(spId))
+                                oldQuantities[spId] += qty;
+                            else
+                                oldQuantities[spId] = qty;
+                        }
+                    }
+                }
+
+                // 3. Thực hiện kiểm tra tồn kho từ database (gọi SP)
+                List<CheckTonKhoResponseViewModel> result;
+                using (var conn = _db.CreateConnection())
+                {
+                    var p = new DynamicParameters();
+                    p.Add("@ListSanPham", Newtonsoft.Json.JsonConvert.SerializeObject(sanPhams));
+                    result = conn.Query<CheckTonKhoResponseViewModel>("sp_KHO_TonKho_CheckAllKho", p, commandType: System.Data.CommandType.StoredProcedure).ToList();
+                }
+
+                // 4. Cộng lại số lượng của đơn hàng cũ cho kho ban đầu
+                foreach (var item in result)
+                {
+                    if (item.IDKho == currentKhoId && oldQuantities.TryGetValue(item.IDSanPham, out decimal oldQty))
+                    {
+                        item.SoLuongTon += oldQty;
+                        item.ChenhLech = item.SoLuongTon - item.SoLuongCanXuat;
+                        item.IsDuTon = item.SoLuongTon >= item.SoLuongCanXuat;
+                    }
+                }
+
+                // 5. Nhóm theo Kho
+                var groupedByKho = result.GroupBy(x => new { x.IDKho, x.TenKhoHang })
+                    .Select(g => new
+                    {
+                        IDKho = g.Key.IDKho,
+                        TenKhoHang = g.Key.TenKhoHang,
+                        IsDuTonAll = g.All(x => x.IsDuTon),
+                        ChiTiets = g.Select(x => new
+                        {
+                            x.IDSanPham,
+                            x.MaSanPham,
+                            x.TenSanPham,
+                            x.SoLuongCanXuat,
+                            x.SoLuongTon,
+                            x.ChenhLech,
+                            x.IsDuTon
+                        }).ToList()
+                    }).ToList();
+
+                return Json(new { success = true, data = groupedByKho });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public ActionResult CheckTonKho(int idDonHang, int idKho, List<CheckTonKhoRequestItem> sanPhams)
+        {
+            try
+            {
+                if (sanPhams == null || !sanPhams.Any())
+                    return Json(new { success = false, hasError = false, message = "Không có sản phẩm nào để kiểm tra" });
+
+                // 1. Lấy kho hiện tại của đơn hàng
+                int currentKhoId = 0;
+                using (var conn = _db.CreateConnection())
+                {
+                    var khoInfo = conn.QueryFirstOrDefault<dynamic>(@"
+                        SELECT TOP 1 IDKho
+                        FROM (
+                            SELECT px.IDKho, 1 AS Priority
+                            FROM KHO_PhieuXuat px
+                            WHERE px.IDDonDatHang = @ID AND px.IsDeleted = 0
+                            UNION ALL
+                            SELECT c.IDKho, 2 AS Priority
+                            FROM BAN_ChungTuBanHang c
+                            WHERE c.IDDonDatHang = @ID AND c.IsDeleted = 0
+                        ) t
+                        ORDER BY Priority", new { ID = idDonHang });
+                    if (khoInfo != null)
+                    {
+                        currentKhoId = (int)khoInfo.IDKho;
+                    }
+                }
+
+                // 2. Lấy số lượng sản phẩm cũ trong đơn hàng chi tiết
+                var oldQuantities = new Dictionary<int, decimal>();
+                using (var conn = _db.CreateConnection())
+                {
+                    var details = conn.Query<dynamic>(
+                        "SELECT IDSanPham, ISNULL(SoLuong, 0) AS SoLuong FROM NS_DonDatHangChiTiet WHERE IDDonDatHang = @ID",
+                        new { ID = idDonHang }).ToList();
+                    foreach (var d in details)
+                    {
+                        if (d.IDSanPham != null)
+                        {
+                            int spId = (int)d.IDSanPham;
+                            decimal qty = (decimal)d.SoLuong;
+                            if (oldQuantities.ContainsKey(spId))
+                                oldQuantities[spId] += qty;
+                            else
+                                oldQuantities[spId] = qty;
+                        }
+                    }
+                }
+
+                // 3. Thực hiện kiểm tra tồn kho từ database cho kho được chọn (gọi SP)
+                List<CheckTonKhoResponseViewModel> result;
+                using (var conn = _db.CreateConnection())
+                {
+                    var p = new DynamicParameters();
+                    p.Add("@IDKho", idKho);
+                    p.Add("@ListSanPham", Newtonsoft.Json.JsonConvert.SerializeObject(sanPhams));
+                    result = conn.Query<CheckTonKhoResponseViewModel>("sp_KHO_TonKho_CheckByKho", p, commandType: System.Data.CommandType.StoredProcedure).ToList();
+                }
+
+                // 4. Cộng lại số lượng của đơn hàng cũ nếu kho được kiểm tra trùng với kho ban đầu
+                foreach (var item in result)
+                {
+                    if (item.IDKho == currentKhoId && oldQuantities.TryGetValue(item.IDSanPham, out decimal oldQty))
+                    {
+                        item.SoLuongTon += oldQty;
+                        item.ChenhLech = item.SoLuongTon - item.SoLuongCanXuat;
+                        item.IsDuTon = item.SoLuongTon >= item.SoLuongCanXuat;
+                    }
+                }
+
+                bool hasError = result.Any(x => !x.IsDuTon);
+                return Json(new { success = true, data = result, hasError = hasError });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, hasError = true, message = ex.Message });
+            }
         }
     }
 }

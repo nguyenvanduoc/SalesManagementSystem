@@ -412,6 +412,11 @@ var TabManager = (function () {
         initTabLinkInterceptor();
         initTabFormSubmitInterceptor();
 
+        // Xóa trạng thái tab khi người dùng chủ động bấm Đăng xuất
+        $(document).on('click', 'a[href*="Logout"]', function () {
+            localStorage.removeItem('tabManagerState');
+        });
+
         // Đóng toàn bộ Modal khi người dùng chuyển Tab
         $(document).on('show.bs.tab', 'button[data-bs-toggle="tab"]', function (e) {
             $('.modal').modal('hide');
@@ -811,11 +816,11 @@ var TabManager = (function () {
             tabs.push({ key: key, title: title, url: url });
         });
         var activeTabId = $('#mainTabHeader .nav-link.active').attr('id');
-        sessionStorage.setItem('tabManagerState', JSON.stringify({ tabs: tabs, activeTabId: activeTabId }));
+        localStorage.setItem('tabManagerState', JSON.stringify({ tabs: tabs, activeTabId: activeTabId }));
     }
 
     function restoreTabsState() {
-        var stateJson = sessionStorage.getItem('tabManagerState');
+        var stateJson = localStorage.getItem('tabManagerState');
         if (stateJson) {
             try {
                 var state = JSON.parse(stateJson);

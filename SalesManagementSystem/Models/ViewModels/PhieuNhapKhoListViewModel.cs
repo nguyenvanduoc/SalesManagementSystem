@@ -29,5 +29,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public DateTime? NgayTao { get; set; }
         public int? NguoiTao { get; set; }
         public string NguoiTaoText { get; set; }
+        public int? IDPhuongTien { get; set; }
+        public string TenPhuongTien { get; set; }
     }
 }

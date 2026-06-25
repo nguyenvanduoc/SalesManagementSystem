@@ -1,6 +1,6 @@
 # UI_STANDARD.md
 
-## Dự án Quản Lý Bán Hàng
+## Dự án Sài Gòn Cửu Long
 
 > Tài liệu quy chuẩn giao diện bắt buộc áp dụng cho toàn bộ màn hình trong hệ thống.
 

@@ -51,7 +51,9 @@ BEGIN
         NguoiTaoText = nsTao.HoDem + ' ' + ns.Ten,
         p.TrangThaiThanhToan,
         p.DaThanhToan,
-        p.ConLai
+        p.ConLai,
+        p.IDPhuongTien,
+        pt.TenPhuongTien AS TenPhuongTien
 		
     FROM [dbo].[KHO_PhieuNhap] p
     LEFT JOIN [dbo].[DM_KhoHang] k ON p.IDKho = k.ID
@@ -59,6 +61,7 @@ BEGIN
     LEFT JOIN [dbo].[NS_NhanSu] ns ON p.IDNhanSuNhan = ns.ID
     LEFT JOIN [dbo].[ACL_Login] u ON p.NguoiTao = u.ID
     LEFT JOIN [dbo].[NS_NhanSu] nsTao ON u.IDNhanSu = nsTao.ID
+    LEFT JOIN [dbo].[DM_PhuongTien] pt ON p.IDPhuongTien = pt.ID
     WHERE p.IsDeleted = 0
       AND (@TuNgay IS NULL OR p.NgayNhap >= @TuNgay)
       AND (@DenNgay IS NULL OR p.NgayNhap <= @DenNgay)

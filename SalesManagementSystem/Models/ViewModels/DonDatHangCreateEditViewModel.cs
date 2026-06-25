@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -31,6 +31,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public int? IDNhanVien { get; set; }
 
         public DateTime? ThoiHanGiaoHang { get; set; }
+        public DateTime? NgayGiaoHang { get; set; }
 
         public int TrangThaiDon { get; set; } = 1;
 

@@ -13,6 +13,7 @@
                         <th class="text-center">Ngày nhập</th>
                         <th>Kho nhập</th>
                         <th>Nhà cung cấp</th>
+                        <th>Phương tiện</th>
                         <th class="text-end">Số lượng</th>
                         <th class="text-end">Tiền hàng</th>
                         <th class="text-end d-none">Tiền thuế</th>
@@ -45,6 +46,14 @@
                                                 <li>
                                                     <a href="@Url.Action("Edit", "PhieuNhapKho", new { id = item.ID, isView = true })" class="dropdown-item">
                                                         <i class="bi bi-eye me-2 text-info"></i> Xem chi tiết
+                                                    </a>
+                                                </li>
+                                            }
+                                            @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuNhapKho", SalesManagementSystem.Helpers.LoaiPhanQuyen.Them))
+                                            {
+                                                <li>
+                                                    <a href="@Url.Action("Copy", "PhieuNhapKho", new { id = item.ID })" class="dropdown-item">
+                                                        <i class="bi bi-files me-2 text-secondary"></i> Sao chép
                                                     </a>
                                                 </li>
                                             }
@@ -88,6 +97,7 @@
                                 <td class="text-center align-middle">@(item.NgayNhap.ToString("dd/MM/yyyy"))</td>
                                 <td class="align-middle">@item.TenKho</td>
                                 <td class="align-middle">@item.TenNhaCungCap</td>
+                                <td class="align-middle">@item.TenPhuongTien</td>
                                 <td class="text-end align-middle">@(item.TongSoLuong.ToString("N0"))</td>
                                 <td class="text-end align-middle">@(item.TongTienHang.ToString("N0"))</td>
                                 <td class="text-end align-middle d-none">@(item.TongTienThue.ToString("N0"))</td>
@@ -129,7 +139,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="14" class="text-center py-4 text-muted">
+                            <td colspan="15" class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox fs-2 d-block mb-2"></i>
                                 Không có dữ liệu
                             </td>
@@ -140,7 +150,7 @@
                 {
                     <tfoot>
                         <tr class="fw-bold" style="background-color: #f8f9fa;">
-                            <td colspan="7" class="text-end">Tổng cộng</td>
+                            <td colspan="8" class="text-end">Tổng cộng</td>
                             <td class="text-end">@(Model.Items.Sum(x => x.TongSoLuong).ToString("N0"))</td>
                             <td class="text-end">@(Model.Items.Sum(x => x.TongTienHang).ToString("N0"))</td>
                             <td class="text-end d-none">@(Model.Items.Sum(x => x.TongTienThue).ToString("N0"))</td>

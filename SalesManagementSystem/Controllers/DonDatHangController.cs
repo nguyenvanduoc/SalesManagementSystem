@@ -140,6 +140,91 @@ namespace SalesManagementSystem.Controllers
             return View("Create", model);
         }
 
+        public ActionResult Copy(int id)
+        {
+            if (!PermissionHelper.HasPermission("DonDatHang", LoaiPhanQuyen.Them)) return View("AccessDenied");
+
+            var don = _repo.GetById(id);
+            if (don == null) return HttpNotFound();
+
+            var chiTiets = _repo.GetChiTietByDonId(id);
+
+            // Lấy thông tin KH để hiển thị
+            string maKH = "", tenKH = "", maST = "", diaChi = "", sdT = "";
+            if (don.IDKhachHang.HasValue)
+            {
+                using (var conn = _db.CreateConnection())
+                {
+                    var kh = conn.QueryFirstOrDefault<dynamic>(
+                        "SELECT MaKhachHang, TenKhachHang AS HoTen, MaSoThue, DiaChi, SoDienThoai FROM NS_KhachHang WHERE ID = @ID",
+                        new { ID = don.IDKhachHang });
+                    if (kh != null)
+                    {
+                        maKH   = kh.MaKhachHang ?? "";
+                        tenKH  = kh.HoTen       ?? "";
+                        maST   = kh.MaSoThue    ?? "";
+                        diaChi = kh.DiaChi      ?? "";
+                        sdT    = kh.SoDienThoai ?? "";
+                    }
+                }
+            }
+
+            var model = new DonDatHangCreateEditViewModel
+            {
+                ID              = 0,
+                IDKhachHang     = don.IDKhachHang,
+                MaKhachHang     = maKH,
+                TenKhachHang    = tenKH,
+                MaSoThue        = maST,
+                DiaChi          = diaChi,
+                SoDienThoai     = sdT,
+                SoDonHang       = _repo.GenerateSoDonHang(),
+                NgayTaoDon      = DateTime.Now,
+                IDNhanVien      = don.IDNhanVien,
+                ThoiHanGiaoHang = don.ThoiHanGiaoHang,
+                TrangThaiDon    = 1, // Reset default status to 1 (do not copy old business status)
+                TongTien        = don.TongTien,
+                PhiBocXep       = don.PhiBocXep,
+                ThanhTienHang   = don.ThanhTienHang ?? 0,
+                ThanhTienThue   = don.ThanhTienThue ?? 0,
+                GhiChu          = don.GhiChu
+            };
+
+            if (chiTiets != null)
+            {
+                model.ChiTiets = chiTiets.Select(c => new DonDatHangChiTietViewModel
+                {
+                    ID              = 0,
+                    IDDonDatHang    = 0,
+                    IDSanPham       = c.IDSanPham,
+                    MaSanPham       = c.MaSanPham,
+                    TenSanPham      = c.TenSanPham,
+                    DVT             = c.DVT,
+                    SoLuong         = c.SoLuong,
+                    DonGia          = c.DonGia,
+                    ThanhTien       = c.ThanhTien,
+                    ThueGTGT        = c.ThueGTGT,
+                    ThanhTienThue   = c.ThanhTienThue,
+                    ThanhTienSauThue= c.ThanhTienSauThue,
+                    IsHangKhuyenMai = c.IsHangKhuyenMai,
+                    GhiChu          = c.GhiChu
+                }).ToList();
+            }
+            else
+            {
+                model.ChiTiets = new List<DonDatHangChiTietViewModel>();
+            }
+
+            model.NhanVienList  = GetNhanVienList(don.IDNhanVien);
+            model.TrangThaiList = GetTrangThaiList(1); // Set default status (1) select list item selected
+
+            ViewBag.Title        = "Tạo đơn đặt hàng";
+            ViewBag.ChiTietsJson = JsonConvert.SerializeObject(model.ChiTiets);
+            ViewBag.IsView       = false;
+
+            return View("Create", model);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]

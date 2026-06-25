@@ -3,6 +3,7 @@
 @{
     ViewBag.Title = "Điều chỉnh đơn đặt hàng";
     string chiTietsJson = ViewBag.ChiTietsJson as string ?? "[]";
+    var uid = Guid.NewGuid().ToString("N");
 }
 
 <style>
@@ -23,6 +24,8 @@
     .select2-container--default .select2-selection--single .select2-selection__rendered { font-size: .85rem; color: #495057; line-height: 36px; padding-left: 12px; }
     .select2-container--default .select2-selection--single .select2-selection__arrow { height: 36px; }
 </style>
+
+<div id="adjust-container-@uid">
 
 <!-- Toolbar -->
 <div class="form-toolbar">
@@ -71,7 +74,7 @@
                 <div class="row g-2">
                     <div class="col-md-3">
                         <label class="form-label text-muted fw-semibold small">Mã khách hàng</label>
-                        <select id="selKhachHang" style="width:100%;" disabled></select>
+                        <select id="selKhachHang" style="width:100%;"></select>
                         @Html.HiddenFor(m => m.IDKhachHang, new { id = "hdIDKhachHang" })
                     </div>
                     <div class="col-md-6">
@@ -101,23 +104,27 @@
             <div class="don-header-card">
                 <div class="don-section-title"><i class="bi bi-file-earmark-text me-1"></i>Thông tin đơn hàng</div>
                 <div class="row g-2">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label text-muted fw-semibold small">Số đơn hàng</label>
                         @Html.TextBoxFor(m => m.SoDonHang, new { @class = "form-control readonly-cell", @readonly = "readonly" })
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label text-muted fw-semibold small">Ngày tạo đơn</label>
-                        @Html.TextBoxFor(m => m.NgayTaoDon, "{0:yyyy-MM-dd}", new { @class = "form-control readonly-cell", @readonly = "readonly", type = "date" })
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Ngày tạo đơn <span class="text-danger">*</span></label>
+                        @Html.TextBoxFor(m => m.NgayTaoDon, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", required = "required", id = "txtNgayTaoDon" })
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label text-muted fw-semibold small">Hạn giao hàng</label>
-                        @Html.TextBoxFor(m => m.ThoiHanGiaoHang, "{0:yyyy-MM-dd}", new { @class = "form-control readonly-cell", @readonly = "readonly", type = "date" })
+                        @Html.TextBoxFor(m => m.ThoiHanGiaoHang, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", id = "txtThoiHanGiaoHang" })
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Ngày giao hàng</label>
+                        @Html.TextBoxFor(m => m.NgayGiaoHang, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", id = "txtNgayGiaoHang" })
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label text-muted fw-semibold small">Nhân sự phụ trách</label>
+                        <label class="form-label text-muted fw-semibold small">Nhân sự phụ trách <span class="text-danger">*</span></label>
                         @Html.DropDownListFor(m => m.IDNhanVien, Model.NhanVienList,
                             "-- Chọn nhân viên --",
-                            new { @class = "form-select readonly-cell", id = "selNhanVien", @disabled = "disabled" })
+                            new { @class = "form-select", id = "selNhanVien" })
                     </div>
                     <div class="col-md-3">
                         <label class="form-label text-muted fw-semibold small">Trạng thái</label>
@@ -233,13 +240,14 @@
     </div>
 </div>
 
+</div>
+
 @section Scripts {
 <script src="@Url.Content("~/Scripts/don-dat-hang.js?v=2.6")"></script>
 <script>
     $(document).ready(function () {
-        var $form = $('#frmDonDatHang').last();
-        var $pane = $form.closest('.tab-pane');
-        if ($pane.length === 0) $pane = $(document);
+        var $container = $('#adjust-container-@uid');
+        var $form = $container.find('#frmDonDatHang');
 
         DonDatHang.init({
             searchKhUrl:      '@Url.Action("SearchKhachHang","DonDatHang")',
@@ -250,9 +258,9 @@
         });
 
         // Xử lý sự kiện nhấn nút Chọn kho
-        $pane.find('#CTBH_btnShowKhoTonKho').on('click', function () {
+        $container.find('#CTBH_btnShowKhoTonKho').on('click', function () {
             var sanPhams = [];
-            $pane.find('#tbodyChiTiet tr').each(function () {
+            $container.find('#tbodyChiTiet tr').each(function () {
                 var idSp = $(this).find('.hd-idsp').val();
                 var soLuong = $(this).find('.txt-soluong').val();
                 if (idSp && soLuong) {
@@ -269,13 +277,13 @@
             }
 
             $.ajax({
-                url: '/ChungTuBanHang/CheckTonKhoAllKho',
+                url: '/DonDieuChinhDonHang/CheckTonKhoAllKho',
                 type: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify({ sanPhams: sanPhams }),
+                data: JSON.stringify({ idDonHang: parseInt($container.find('#hdIDDonHang').val()), sanPhams: sanPhams }),
                 success: function (res) {
                     if (res.success) {
-                        var tbody = $pane.find('#CTBH_tableTonKho tbody');
+                        var tbody = $container.find('#CTBH_tableTonKho tbody');
                         tbody.empty();
                         
                         res.data.forEach(function (kho) {
@@ -307,7 +315,7 @@
                             tbody.append(tr);
                         });
 
-                        var modalEl = $pane.find('#modalTonKho')[0];
+                        var modalEl = $container.find('#modalTonKho')[0];
                         var modalTonKho = new bootstrap.Modal(modalEl);
                         modalTonKho.show();
                     } else {
@@ -321,13 +329,13 @@
         });
 
         // Sự kiện click nút Chọn trong modal check tồn
-        $(document).off('click', '.btn-select-kho-action').on('click', '.btn-select-kho-action', function () {
+        $container.find('#modalTonKho').on('click', '.btn-select-kho-action', function () {
             var idKho = $(this).data('id');
             var tenKho = $(this).data('ten');
-            $pane.find('#CTBH_IDKho').val(idKho);
-            $pane.find('#CTBH_TenKhoHang').val(tenKho).removeClass('is-invalid');
+            $container.find('#CTBH_IDKho').val(idKho);
+            $container.find('#CTBH_TenKhoHang').val(tenKho).removeClass('is-invalid');
             
-            var modalEl = $pane.find('#modalTonKho')[0];
+            var modalEl = $container.find('#modalTonKho')[0];
             var modalTonKho = bootstrap.Modal.getInstance(modalEl);
             if (modalTonKho) {
                 modalTonKho.hide();
@@ -335,30 +343,30 @@
         });
 
         // Xử lý sự kiện nhấn nút Lưu điều chỉnh
-        $pane.find('#btnSaveAdjustment').on('click', function () {
-            var lyDo = $pane.find('#txtLyDoDieuChinh').val().trim();
+        $container.find('#btnSaveAdjustment').on('click', function () {
+            var lyDo = $container.find('#txtLyDoDieuChinh').val().trim();
             if (!lyDo) {
-                $pane.find('#txtLyDoDieuChinh').addClass('is-invalid');
+                $container.find('#txtLyDoDieuChinh').addClass('is-invalid');
                 showToast('warning', 'Vui lòng nhập lý do điều chỉnh.');
                 return;
             } else {
-                $pane.find('#txtLyDoDieuChinh').removeClass('is-invalid');
+                $container.find('#txtLyDoDieuChinh').removeClass('is-invalid');
             }
 
-            var idKho = $pane.find('#CTBH_IDKho').val();
+            var idKho = $container.find('#CTBH_IDKho').val();
             if (!idKho || parseInt(idKho) <= 0) {
-                $pane.find('#CTBH_TenKhoHang').addClass('is-invalid');
+                $container.find('#CTBH_TenKhoHang').addClass('is-invalid');
                 showToast('warning', 'Vui lòng chọn kho xuất.');
                 return;
             } else {
-                $pane.find('#CTBH_TenKhoHang').removeClass('is-invalid');
+                $container.find('#CTBH_TenKhoHang').removeClass('is-invalid');
             }
 
             if (!DonDatHang.validateAndSerialize($form)) return;
 
             // Thu thập sản phẩm để check tồn kho tại kho đã chọn trước khi lưu
             var sanPhams = [];
-            $pane.find('#tbodyChiTiet tr').each(function () {
+            $container.find('#tbodyChiTiet tr').each(function () {
                 var idSp = $(this).find('.hd-idsp').val();
                 var soLuong = $(this).find('.txt-soluong').val();
                 if (idSp && soLuong) {
@@ -375,9 +383,10 @@
             }
 
             $.ajax({
-                url: '/ChungTuBanHang/CheckTonKho',
+                url: '/DonDieuChinhDonHang/CheckTonKho',
                 type: 'POST',
                 data: {
+                    idDonHang: parseInt($container.find('#hdIDDonHang').val()),
                     idKho: parseInt(idKho),
                     sanPhams: sanPhams
                 },

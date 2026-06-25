@@ -1,5 +1,13 @@
 @model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.TonKhoListViewModel>
 
+@{
+    decimal tongTonDauKy = Model.Items != null ? Model.Items.Sum(x => x.TonDauKy) : 0M;
+    decimal tongTongNhap = Model.Items != null ? Model.Items.Sum(x => x.TongNhap) : 0M;
+    decimal tongTongXuat = Model.Items != null ? Model.Items.Sum(x => x.TongXuat) : 0M;
+    decimal tongTonKho = Model.Items != null ? Model.Items.Sum(x => x.TonKho) : 0M;
+    decimal tongGiaTriTon = Model.Items != null ? Model.Items.Sum(x => x.GiaTriTon) : 0M;
+}
+
 <div class="card shadow-sm">
     <div class="card-body p-0">
         <div class="table-responsive" style="min-height:350px;">
@@ -79,6 +87,35 @@
                                 <td class="align-middle">@(item.NgayXuatCuoi.HasValue ? item.NgayXuatCuoi.Value.ToString("dd/MM/yyyy") : "")</td>
                             </tr>
                         }
+                        
+                        <!-- Dòng tổng cộng -->
+                        <tr class="fw-bold" style="background:#f4f6f9;">
+                            <td colspan="7" class="text-end align-middle">Tổng cộng:</td>
+                            <td class="text-end align-middle text-dark">@tongTonDauKy.ToString("N0")</td>
+                            <td class="text-end align-middle text-dark">@tongTongNhap.ToString("N0")</td>
+                            <td class="text-end align-middle text-dark">@tongTongXuat.ToString("N0")</td>
+                            <td class="text-end align-middle">
+                                @if (tongTonKho < 0)
+                                {
+                                    <span class="text-danger fw-bold">@tongTonKho.ToString("N0")</span>
+                                }
+                                else if (tongTonKho <= 10)
+                                {
+                                    <span class="text-warning fw-bold">@tongTonKho.ToString("N0")</span>
+                                }
+                                else
+                                {
+                                    <span class="text-success fw-bold">@tongTonKho.ToString("N0")</span>
+                                }
+                            </td>
+                            @if (ViewBag.IsNhanVienKho != true)
+                            {
+                                <td></td>
+                                <td class="text-end align-middle text-primary">@tongGiaTriTon.ToString("N0")</td>
+                            }
+                            <td></td>
+                            <td></td>
+                        </tr>
                     }
                     else
                     {

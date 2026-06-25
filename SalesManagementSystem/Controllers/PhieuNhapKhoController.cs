@@ -161,6 +161,80 @@ namespace SalesManagementSystem.Controllers
             return View("Edit", model);
         }
 
+        public ActionResult Copy(int id)
+        {
+            if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.Them)) return View("AccessDenied");
+
+            var entity = _repo.GetByID(id);
+            if (entity == null) return HttpNotFound();
+
+            var model = new PhieuNhapKhoViewModel
+            {
+                ID = 0,
+                SoChungTu = _repo.GenerateSoChungTu(),
+                NgayNhap = DateTime.Now,
+                IDKho = entity.IDKho,
+                IDNhaCungCap = entity.IDNhaCungCap,
+                SoHoaDon = entity.SoHoaDon,
+                NgayHoaDon = entity.NgayHoaDon,
+                TenNguoiGiao = entity.TenNguoiGiao,
+                SoDienThoaiNguoiGiao = entity.SoDienThoaiNguoiGiao,
+                TenNguoiNhan = entity.TenNguoiNhan,
+                GhiChu = entity.GhiChu,
+                TrangThai = 1, // Mặc định là Nháp
+                IsReadOnly = false,
+                IDPhuongTien = entity.IDPhuongTien,
+                NgayGiaoHang = entity.NgayGiaoHang,
+                HoTenTaiXe = entity.HoTenTaiXe,
+                SoDienThoaiTaiXe = entity.SoDienThoaiTaiXe
+            };
+
+            int total;
+            var list = _repo.GetPaged(1, 1, null, null, entity.SoChungTu, null, null, null, null, out total);
+            var item = list.FirstOrDefault();
+            if (item != null)
+            {
+                model.TenKho = item.TenKho;
+                model.TenNhaCungCap = item.TenNhaCungCap;
+            }
+
+            if (model.IDPhuongTien.HasValue && model.IDPhuongTien > 0)
+            {
+                var phuongTiens = _repo.GetPhuongTienForDropdown("");
+                var pt = phuongTiens.FirstOrDefault(x => (int)x.ID == model.IDPhuongTien);
+                if (pt != null)
+                {
+                    model.TenPhuongTien = (string)pt.MaPhuongTien + " - " + (string)pt.TenPhuongTien;
+                }
+            }
+
+            var chiTiets = _repo.GetChiTiet(id);
+            if (chiTiets != null)
+            {
+                model.ChiTiets = chiTiets.Select(x => new PhieuNhapKhoChiTietViewModel
+                {
+                    ID = 0,
+                    IDPhieuNhap = 0,
+                    IDSanPham = x.IDSanPham,
+                    MaSanPham = x.MaSanPham,
+                    TenSanPham = x.TenSanPham,
+                    DVT = x.DVT,
+                    SoLuong = x.SoLuong,
+                    DonGia = x.DonGia,
+                    ThanhTien = x.ThanhTien,
+                    ThueGTGT = x.ThueGTGT,
+                    TienThue = x.TienThue,
+                    TongSauThue = x.TongSauThue,
+                    GhiChu = x.GhiChu,
+                    NgaySanXuat = x.NgaySanXuat,
+                    HanSuDung = x.HanSuDung
+                }).ToList();
+            }
+
+            ViewBag.IsView = false;
+            return View("Edit", model);
+        }
+
         public ActionResult Edit(int id, bool isView = false)
         {
             if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.Xem)) return View("AccessDenied");

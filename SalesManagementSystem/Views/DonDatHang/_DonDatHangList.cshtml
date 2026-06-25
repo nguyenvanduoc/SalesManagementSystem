@@ -73,6 +73,15 @@
                                                     </a>
                                                 </li>
                                             }
+                                            @if (PermissionHelper.HasPermission("DonDatHang", LoaiPhanQuyen.Them))
+                                            {
+                                                <li>
+                                                    <a class="dropdown-item"
+                                                       href="@Url.Action("Copy", "DonDatHang", new { id = item.ID })">
+                                                        <i class="bi bi-files me-2 text-secondary"></i> Sao chép
+                                                    </a>
+                                                </li>
+                                            }
                                             @if (PermissionHelper.HasPermission("DonDatHang", LoaiPhanQuyen.Xoa) && item.TrangThaiDon != 3)
                                             {
                                                 <li>

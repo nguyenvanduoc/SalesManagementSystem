@@ -96,7 +96,12 @@ CREATE OR ALTER PROCEDURE sp_DON_DieuChinhDonHang_Save
     @ChiTietsJson NVARCHAR(MAX),
     @PhiBocXep DECIMAL(18,2),
     @IDKho INT,
-    @NguoiTao INT
+    @NguoiTao INT,
+    @IDKhachHang INT = NULL,
+    @IDNhanVien INT = NULL,
+    @NgayTaoDon DATETIME = NULL,
+    @NgayGiaoHang DATETIME = NULL,
+    @ThoiHanGiaoHang DATETIME = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -104,17 +109,20 @@ BEGIN
 
     -- 1. Lấy thông tin đơn hàng hiện tại
     DECLARE @SoDonHang NVARCHAR(50);
-    DECLARE @NgayTaoDon DATETIME;
-    DECLARE @IDNhanVien INT;
-    DECLARE @ThoiHanGiaoHang DATETIME;
     DECLARE @TrangThaiDon INT;
     DECLARE @TongTienCu DECIMAL(18,2);
 
+    DECLARE @currentNgayTaoDon DATETIME;
+    DECLARE @currentIDNhanVien INT;
+    DECLARE @currentThoiHanGiaoHang DATETIME;
+    DECLARE @currentIDKhachHang INT;
+
     SELECT 
         @SoDonHang = SoDonHang,
-        @NgayTaoDon = NgayTaoDon,
-        @IDNhanVien = IDNhanVien,
-        @ThoiHanGiaoHang = ThoiHanGiaoHang,
+        @currentNgayTaoDon = NgayTaoDon,
+        @currentIDNhanVien = IDNhanVien,
+        @currentThoiHanGiaoHang = ThoiHanGiaoHang,
+        @currentIDKhachHang = IDKhachHang,
         @TrangThaiDon = TrangThaiDon,
         @TongTienCu = TongTien
     FROM NS_DonDatHang
@@ -124,6 +132,12 @@ BEGIN
     BEGIN
         THROW 50001, N'Không tìm thấy đơn hàng gốc.', 1;
     END
+
+    -- Fallback to current values if inputs are null
+    SET @IDKhachHang = ISNULL(@IDKhachHang, @currentIDKhachHang);
+    SET @IDNhanVien = ISNULL(@IDNhanVien, @currentIDNhanVien);
+    SET @NgayTaoDon = ISNULL(@NgayTaoDon, @currentNgayTaoDon);
+    SET @ThoiHanGiaoHang = ISNULL(@ThoiHanGiaoHang, @currentThoiHanGiaoHang);
 
     -- 2. Parse chi tiết mới từ JSON
     DECLARE @ChiTietMoi TABLE (
@@ -283,7 +297,11 @@ BEGIN
             ThanhTienHang = @newThanhTienHang,
             ThanhTienThue = @newThanhTienThue,
             NgayCapNhat = GETDATE(),
-            NguoiCapNhat = @NguoiTao
+            NguoiCapNhat = @NguoiTao,
+            IDKhachHang = @IDKhachHang,
+            IDNhanVien = @IDNhanVien,
+            NgayTaoDon = @NgayTaoDon,
+            ThoiHanGiaoHang = @ThoiHanGiaoHang
         WHERE ID = @IDDonHang;
 
         DELETE FROM NS_DonDatHangChiTiet WHERE IDDonDatHang = @IDDonHang;
@@ -312,6 +330,8 @@ BEGIN
             
             UPDATE BAN_ChungTuBanHang SET
                 IDKho = @IDKho,
+                IDKhachHang = @IDKhachHang,
+                NgayChungTu = ISNULL(@NgayGiaoHang, NgayChungTu),
                 TongTienHang = @newThanhTienHang,
                 TongTienThue = @newThanhTienThue,
                 PhiBocXep = @PhiBocXep,
@@ -328,6 +348,14 @@ BEGIN
             SELECT
                 @invoiceId, IDSanPham, ROW_NUMBER() OVER(ORDER BY IDSanPham), SoLuong, DonGia, ThanhTien, ThueGTGT, ThanhTienThue, ThanhTienSauThue, GhiChu
             FROM @ChiTietMoi;
+
+            -- Cập nhật ngày chứng từ trong KT_NhatKyChung nếu có
+            IF @NgayGiaoHang IS NOT NULL
+            BEGIN
+                UPDATE KT_NhatKyChung
+                SET NgayChungTu = CAST(@NgayGiaoHang AS DATE)
+                WHERE LoaiChungTu = 'BAN' AND IDChungTu = @invoiceId;
+            END
         END
 
         -- 8. Cập nhật bảng KHO_PhieuXuat & KHO_PhieuXuat_ChiTiet (nếu có)
@@ -338,6 +366,7 @@ BEGIN
         BEGIN
             UPDATE KHO_PhieuXuat SET
                 IDKho = @IDKho,
+                NgayXuat = ISNULL(@NgayGiaoHang, NgayXuat),
                 TongTienHang = @newThanhTienHang,
                 TongTienThue = @newThanhTienThue,
                 TongCong = @newTongTien,
@@ -353,9 +382,10 @@ BEGIN
                 @shipId, IDSanPham, ROW_NUMBER() OVER(ORDER BY IDSanPham), SoLuong, DonGia, ThanhTien, ThueGTGT, ThanhTienThue, ThanhTienSauThue
             FROM @ChiTietMoi;
 
-            -- Cập nhật IDKho của các giao dịch kho cũ
+            -- Cập nhật IDKho và NgayChungTu của các giao dịch kho cũ
             UPDATE KHO_GiaoDichKho
-            SET IDKho = @IDKho
+            SET IDKho = @IDKho,
+                NgayChungTu = ISNULL(CAST(@NgayGiaoHang AS DATE), NgayChungTu)
             WHERE IDChiTietKho IN (
                 SELECT pxct.ID
                 FROM KHO_PhieuXuat_ChiTiet pxct
