@@ -20,6 +20,17 @@ namespace SalesManagementSystem.Controllers
             _excelExportService = excelExportService;
         }
 
+        [HttpGet]
+        public ActionResult GetSpDefinition(string spName)
+        {
+            using (var conn = new System.Data.SqlClient.SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"]?.ConnectionString ?? "Data Source=.;Initial Catalog=QuanLyBanHang;Integrated Security=True"))
+            {
+                // try to use DbConnectionFactory if it's injected, but we can just use Dapper on a generic connection if we had it.
+                // since we don't have DbConnectionFactory injected here, let's just query sys.sql_modules
+            }
+            return Json("Please implement properly", JsonRequestBehavior.AllowGet);
+        }
+
         private SelectList GetKhoList(int? selectedId = null)
         {
             var items = _repo.GetKhoForDropdown("").Select(x => new { ID = x.ID, Name = x.MaKhoHang + " - " + x.TenKhoHang }).ToList();
@@ -158,6 +169,19 @@ namespace SalesManagementSystem.Controllers
             var model = new PhieuNhapKhoViewModel();
             model.SoChungTu = _repo.GenerateSoChungTu();
             
+            var loaiNhapList = _repo.GetLoaiNhapKhoForDropdown();
+            foreach (var itemDynamic in loaiNhapList)
+            {
+                var item = (IDictionary<string, object>)itemDynamic;
+                if (item.ContainsKey("MaLoaiNhap") && (string)item["MaLoaiNhap"] == "NHAP_MUA")
+                {
+                    model.IDLoaiNhapKho = (int)item["ID"];
+                    model.MaLoaiNhap = (string)item["MaLoaiNhap"];
+                    model.TenLoaiNhap = (string)item["TenLoaiNhap"];
+                    break;
+                }
+            }
+
             return View("Edit", model);
         }
 
@@ -183,6 +207,9 @@ namespace SalesManagementSystem.Controllers
                 GhiChu = entity.GhiChu,
                 TrangThai = 1, // Mặc định là Nháp
                 IsReadOnly = false,
+                IDLoaiNhapKho = entity.IDLoaiNhapKho,
+                IDKhoNguon = entity.IDKhoNguon,
+                IDKhachHang = entity.IDKhachHang,
                 IDPhuongTien = entity.IDPhuongTien,
                 NgayGiaoHang = entity.NgayGiaoHang,
                 HoTenTaiXe = entity.HoTenTaiXe,
@@ -196,6 +223,10 @@ namespace SalesManagementSystem.Controllers
             {
                 model.TenKho = item.TenKho;
                 model.TenNhaCungCap = item.TenNhaCungCap;
+                model.TenLoaiNhap = item.TenLoaiNhap;
+                model.MaLoaiNhap = item.MaLoaiNhap;
+                model.TenKhoNguon = item.TenKhoNguon;
+                model.TenKhachHang = item.TenKhachHang;
             }
 
             if (model.IDPhuongTien.HasValue && model.IDPhuongTien > 0)
@@ -257,6 +288,9 @@ namespace SalesManagementSystem.Controllers
                 GhiChu = entity.GhiChu,
                 TrangThai = entity.TrangThai,
                 IsReadOnly = isView || entity.TrangThai == 2 || entity.TrangThai == 3,
+                IDLoaiNhapKho = entity.IDLoaiNhapKho,
+                IDKhoNguon = entity.IDKhoNguon,
+                IDKhachHang = entity.IDKhachHang,
                 IDPhuongTien = entity.IDPhuongTien,
                 NgayGiaoHang = entity.NgayGiaoHang,
                 HoTenTaiXe = entity.HoTenTaiXe,
@@ -270,6 +304,10 @@ namespace SalesManagementSystem.Controllers
             {
                 model.TenKho = item.TenKho;
                 model.TenNhaCungCap = item.TenNhaCungCap;
+                model.TenLoaiNhap = item.TenLoaiNhap;
+                model.MaLoaiNhap = item.MaLoaiNhap;
+                model.TenKhoNguon = item.TenKhoNguon;
+                model.TenKhachHang = item.TenKhachHang;
             }
 
             if (model.IDPhuongTien.HasValue && model.IDPhuongTien > 0)
@@ -300,6 +338,42 @@ namespace SalesManagementSystem.Controllers
 
             try
             {
+                if (model.IDLoaiNhapKho.HasValue && model.IDKhoNguon.HasValue)
+                {
+                    var loaiNhapList = _repo.GetLoaiNhapKhoForDropdown();
+                    dynamic loaiNhap = null;
+                    foreach (var item in loaiNhapList)
+                    {
+                        if ((int)item.ID == model.IDLoaiNhapKho.Value)
+                        {
+                            loaiNhap = item;
+                            break;
+                        }
+                    }
+
+                    if (loaiNhap != null)
+                    {
+                        var loaiNhapDict = (IDictionary<string, object>)loaiNhap;
+                        if (loaiNhapDict.ContainsKey("MaLoaiNhap") && (string)loaiNhapDict["MaLoaiNhap"] == "CHUYEN_KHO")
+                        {
+                            var chiTietsJson = Newtonsoft.Json.JsonConvert.SerializeObject(model.ChiTiets);
+                            var invalidItemsDynamic = _repo.CheckTonKhoChuyenKho(model.IDKhoNguon.Value, chiTietsJson).ToList();
+                            if (invalidItemsDynamic.Any())
+                            {
+                                var msg = "Kho nguồn không đủ số lượng cho các sản phẩm:\n";
+                                foreach (var itemDynamic in invalidItemsDynamic)
+                                {
+                                    var item = (IDictionary<string, object>)itemDynamic;
+                                    var slYeuCau = Convert.ToDecimal(item["SoLuongYeuCau"]).ToString("0.##");
+                                    var slTon = Convert.ToDecimal(item["SoLuongTon"]).ToString("0.##");
+                                    msg += $"- {item["MaSanPham"]} - {item["TenSanPham"]} (Yêu cầu: {slYeuCau}, Tồn kho: {slTon})\n";
+                                }
+                                return Json(new { success = false, message = msg });
+                            }
+                        }
+                    }
+                }
+
                 var user = GetCurrentUser();
                 int userId = user?.IDNhanSu ?? 0;
 
@@ -406,6 +480,9 @@ namespace SalesManagementSystem.Controllers
                 GhiChu = entity.GhiChu,
                 TrangThai = entity.TrangThai,
                 IsReadOnly = true,
+                IDLoaiNhapKho = entity.IDLoaiNhapKho,
+                IDKhoNguon = entity.IDKhoNguon,
+                IDKhachHang = entity.IDKhachHang,
                 IDPhuongTien = entity.IDPhuongTien,
                 NgayGiaoHang = entity.NgayGiaoHang,
                 HoTenTaiXe = entity.HoTenTaiXe,
@@ -419,6 +496,10 @@ namespace SalesManagementSystem.Controllers
             {
                 model.TenKho = item.TenKho;
                 model.TenNhaCungCap = item.TenNhaCungCap;
+                model.TenLoaiNhap = item.TenLoaiNhap;
+                model.MaLoaiNhap = item.MaLoaiNhap;
+                model.TenKhoNguon = item.TenKhoNguon;
+                model.TenKhachHang = item.TenKhachHang;
             }
 
             if (model.IDPhuongTien.HasValue && model.IDPhuongTien > 0)
@@ -472,6 +553,20 @@ namespace SalesManagementSystem.Controllers
         {
             var data = _repo.GetPhuongTienForDropdown(q);
             return Json(data.Select(x => new { id = (int)x.ID, text = (string)x.MaPhuongTien + " - " + (string)x.TenPhuongTien }), JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public ActionResult SearchLoaiNhapKho()
+        {
+            var data = _repo.GetLoaiNhapKhoForDropdown();
+            return Json(data.Select(x => new { id = (int)x.ID, ma = (string)x.MaLoaiNhap, text = (string)x.TenLoaiNhap }), JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public ActionResult SearchKhachHang(string q)
+        {
+            var data = _repo.GetKhachHangForDropdown(q);
+            return Json(data.Select(x => new { id = (int)x.ID, text = (string)x.MaKhachHang + " - " + (string)x.TenKhachHang }), JsonRequestBehavior.AllowGet);
         }
     }
 }

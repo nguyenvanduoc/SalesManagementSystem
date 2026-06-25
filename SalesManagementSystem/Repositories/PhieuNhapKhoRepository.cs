@@ -118,6 +118,12 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@NgayGiaoHang", model.NgayGiaoHang);
                 p.Add("@HoTenTaiXe", model.HoTenTaiXe);
                 p.Add("@SoDienThoaiTaiXe", model.SoDienThoaiTaiXe);
+                
+                // Các tham số mới
+                p.Add("@IDLoaiNhapKho", model.IDLoaiNhapKho);
+                p.Add("@IDKhoNguon", model.IDKhoNguon);
+                p.Add("@IDKhachHang", model.IDKhachHang);
+                
                 p.Add("@ChiTietJson", chiTietJson);
                 p.Add("@NewID", dbType: DbType.Int32, direction: ParameterDirection.Output);
                 p.Add("@SoChungTuOut", dbType: DbType.String, size: 50, direction: ParameterDirection.Output);
@@ -182,7 +188,10 @@ namespace SalesManagementSystem.Repositories
                         IDPhuongTien = @IDPhuongTien,
                         NgayGiaoHang = @NgayGiaoHang,
                         HoTenTaiXe = @HoTenTaiXe,
-                        SoDienThoaiTaiXe = @SoDienThoaiTaiXe
+                        SoDienThoaiTaiXe = @SoDienThoaiTaiXe,
+                        IDLoaiNhapKho = @IDLoaiNhapKho,
+                        IDKhoNguon = @IDKhoNguon,
+                        IDKhachHang = @IDKhachHang
                     WHERE ID = @ID AND TrangThai = 1; -- Chỉ cho phép sửa khi Nháp
                 ";
                 
@@ -202,7 +211,10 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@NgayGiaoHang", model.NgayGiaoHang);
                 p.Add("@HoTenTaiXe", model.HoTenTaiXe);
                 p.Add("@SoDienThoaiTaiXe", model.SoDienThoaiTaiXe);
-
+                p.Add("@IDLoaiNhapKho", model.IDLoaiNhapKho);
+                p.Add("@IDKhoNguon", model.IDKhoNguon);
+                p.Add("@IDKhachHang", model.IDKhachHang);
+                
                 conn.Execute(sql, p);
             }
         }
@@ -290,8 +302,45 @@ namespace SalesManagementSystem.Repositories
         {
             using (var conn = _db.CreateConnection())
             {
-                string kw = (keyword ?? "").Trim().ToLower();
-                return conn.Query("SELECT ID, MaPhuongTien, TenPhuongTien FROM DM_PhuongTien WHERE @KW = '' OR LOWER(TenPhuongTien) LIKE '%' + @KW + '%' ORDER BY TenPhuongTien", new { KW = kw });
+                string sql = @"
+                    SELECT TOP 20 ID, MaPhuongTien, TenPhuongTien
+                    FROM DM_PhuongTien 
+                    WHERE  (MaPhuongTien LIKE '%' + @Keyword + '%' OR TenPhuongTien LIKE N'%' + @Keyword + '%')
+                    ORDER BY STT, TenPhuongTien";
+                return conn.Query(sql, new { Keyword = keyword ?? "" });
+            }
+        }
+
+        public IEnumerable<dynamic> GetLoaiNhapKhoForDropdown()
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                return conn.Query("sp_DM_LoaiNhapKho_GetDropdown", commandType: CommandType.StoredProcedure);
+            }
+        }
+
+        public IEnumerable<dynamic> GetKhachHangForDropdown(string keyword)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                string sql = @"
+                    SELECT TOP 20 ID, MaKhachHang, TenKhachHang
+                    FROM NS_KhachHang 
+                    WHERE  (MaKhachHang LIKE '%' + @Keyword + '%' OR TenKhachHang LIKE N'%' + @Keyword + '%')
+                    ORDER BY TenKhachHang";
+                return conn.Query(sql, new { Keyword = keyword ?? "" });
+            }
+        }
+
+        public IEnumerable<dynamic> CheckTonKhoChuyenKho(int idKhoNguon, string chiTietsJson)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                var p = new DynamicParameters();
+                p.Add("@IDKhoNguon", idKhoNguon);
+                p.Add("@ChiTietsJson", chiTietsJson);
+
+                return conn.Query("sp_KHO_TonKho_CheckChuyenKho", p, commandType: CommandType.StoredProcedure);
             }
         }
     }

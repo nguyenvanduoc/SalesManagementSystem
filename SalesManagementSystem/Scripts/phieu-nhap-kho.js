@@ -12,7 +12,15 @@ var PhieuNhapKho = (function () {
         searchSpUrl: '',
         searchPhuongTienUrl: '',
         isViewMode: false,
-        isInlineDetail: false
+        isInlineDetail: false,
+        searchLoaiNhapKhoUrl: '',
+        searchKhachHangUrl: '',
+        selectedLoaiNhapKhoId: null,
+        selectedLoaiNhapKhoText: '',
+        selectedKhoNguonId: null,
+        selectedKhoNguonText: '',
+        selectedKhachHangId: null,
+        selectedKhachHangText: ''
     };
 
     function _formatNumber(n) {
@@ -50,6 +58,44 @@ var PhieuNhapKho = (function () {
 
     function _initSelect2() {
         if (config.isInlineDetail) return;
+
+        $('#IDLoaiNhapKho').select2({
+            placeholder: '-- Chọn loại nhập --',
+            minimumInputLength: 0,
+            ajax: {
+                url: config.searchLoaiNhapKhoUrl,
+                dataType: 'json',
+                delay: 250,
+                processResults: function (data) { return { results: data }; },
+                cache: true
+            }
+        });
+
+        $('#IDKhoNguon').select2({
+            placeholder: '-- Chọn kho nguồn --',
+            minimumInputLength: 0,
+            ajax: {
+                url: config.searchKhoUrl,
+                dataType: 'json',
+                delay: 250,
+                data: function (params) { return { q: params.term || '' }; },
+                processResults: function (data) { return { results: data }; },
+                cache: true
+            }
+        });
+
+        $('#IDKhachHang').select2({
+            placeholder: '-- Chọn khách hàng --',
+            minimumInputLength: 0,
+            ajax: {
+                url: config.searchKhachHangUrl,
+                dataType: 'json',
+                delay: 250,
+                data: function (params) { return { q: params.term || '' }; },
+                processResults: function (data) { return { results: data }; },
+                cache: true
+            }
+        });
 
         $('#IDKho').select2({
             placeholder: '-- Chọn kho --',
@@ -100,6 +146,37 @@ var PhieuNhapKho = (function () {
         if (config.selectedPhuongTienId) {
             $('#IDPhuongTien').append(new Option(config.selectedPhuongTienText, config.selectedPhuongTienId, true, true)).trigger('change');
         }
+
+        if (config.selectedLoaiNhapKhoId) {
+            $('#IDLoaiNhapKho').append(new Option(config.selectedLoaiNhapKhoText, config.selectedLoaiNhapKhoId, true, true)).trigger('change');
+        }
+        if (config.selectedKhoNguonId) {
+            $('#IDKhoNguon').append(new Option(config.selectedKhoNguonText, config.selectedKhoNguonId, true, true)).trigger('change');
+        }
+        if (config.selectedKhachHangId) {
+            $('#IDKhachHang').append(new Option(config.selectedKhachHangText, config.selectedKhachHangId, true, true)).trigger('change');
+        }
+
+        $('#IDLoaiNhapKho').on('change', function () {
+            var data = $(this).select2('data');
+            var maLoai = data && data.length > 0 ? data[0].ma : '';
+            if (!maLoai && config.selectedLoaiNhapKhoMa) {
+                maLoai = config.selectedLoaiNhapKhoMa;
+            }
+            
+            $('#colKhoNguon, #colKhachHang, #colNhaCungCap').hide();
+            
+            if (maLoai === 'CHUYEN_KHO') {
+                $('#colKhoNguon').show();
+            } else if (maLoai === 'TRA_HANG') {
+                $('#colKhachHang').show();
+            } else {
+                $('#colNhaCungCap').show();
+            }
+        });
+        
+        // Trigger change to set correct visibility on load
+        setTimeout(function() { $('#IDLoaiNhapKho').trigger('change'); }, 100);
     }
 
     function _initSanPhamSelect2($row, ctData) {
@@ -322,8 +399,27 @@ var PhieuNhapKho = (function () {
         var errorMsg = '';
 
         if (!$('#NgayNhap').val()) { errorMsg += 'Ngày nhập không được để trống.\n'; isValid = false; }
+        if (!$('#IDLoaiNhapKho').val()) { errorMsg += 'Vui lòng chọn Loại nhập kho.\n'; isValid = false; }
         if (!$('#IDKho').val()) { errorMsg += 'Vui lòng chọn Kho.\n'; isValid = false; }
-        if (!$('#IDNhaCungCap').val()) { errorMsg += 'Vui lòng chọn Nhà cung cấp.\n'; isValid = false; }
+        
+        var maLoai = '';
+        var loaiData = $('#IDLoaiNhapKho').select2('data');
+        if (loaiData && loaiData.length > 0) {
+            maLoai = loaiData[0].ma || '';
+        } 
+        
+        if (!maLoai && config.selectedLoaiNhapKhoMa) {
+            maLoai = config.selectedLoaiNhapKhoMa;
+        }
+
+        if (maLoai === 'CHUYEN_KHO') {
+            if (!$('#IDKhoNguon').val()) { errorMsg += 'Vui lòng chọn Kho nguồn.\n'; isValid = false; }
+            if ($('#IDKhoNguon').val() === $('#IDKho').val()) { errorMsg += 'Kho nguồn và Kho nhập không được trùng nhau.\n'; isValid = false; }
+        } else if (maLoai === 'TRA_HANG') {
+            if (!$('#IDKhachHang').val()) { errorMsg += 'Vui lòng chọn Khách hàng.\n'; isValid = false; }
+        } else {
+            if (!$('#IDNhaCungCap').val()) { errorMsg += 'Vui lòng chọn Nhà cung cấp.\n'; isValid = false; }
+        }
 
         var chiTiets = [];
         var rows = $('#PNK_tblChiTiet tbody tr');
@@ -394,6 +490,9 @@ var PhieuNhapKho = (function () {
             NgayGiaoHang: $('#NgayGiaoHang').val(),
             HoTenTaiXe: $('#HoTenTaiXe').val(),
             SoDienThoaiTaiXe: $('#SoDienThoaiTaiXe').val(),
+            IDLoaiNhapKho: $('#IDLoaiNhapKho').val(),
+            IDKhoNguon: $('#IDKhoNguon').val(),
+            IDKhachHang: $('#IDKhachHang').val(),
             ChiTiets: chiTiets
         };
     }

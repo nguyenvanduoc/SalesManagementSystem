@@ -482,6 +482,8 @@
     <Content Include="Views\DonDatHang\_DetailInline.cshtml" />
     <Content Include="Views\PhieuNhapKho\_DetailInline.cshtml" />
     <Content Include="Views\PhieuXuatKho\_DetailInline.cshtml" />
+    <Content Include="Views\SoQuy\_ChiTietGiaoDichList.cshtml" />
+    <Content Include="Views\SoQuy\_ChiTietTaiKhoan.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />

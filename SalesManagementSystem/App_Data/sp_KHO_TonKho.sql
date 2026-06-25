@@ -86,12 +86,12 @@ BEGIN
 
     SELECT 
         CASE 
-            WHEN gd.LoaiChungTu = 1 THEN 
+            WHEN EXISTS (SELECT 1 FROM KHO_PhieuNhap WHERE SoChungTu = gd.SoChungTu) THEN 
                 ISNULL(
                     (SELECT TOP 1 IDPhieuNhap FROM KHO_PhieuNhap_ChiTiet WHERE ID = gd.IDChiTietKho),
                     (SELECT TOP 1 ID FROM KHO_PhieuNhap WHERE SoChungTu = gd.SoChungTu)
                 )
-            WHEN gd.LoaiChungTu = 2 THEN 
+            WHEN EXISTS (SELECT 1 FROM KHO_PhieuXuat WHERE SoChungTu = gd.SoChungTu) THEN 
                 ISNULL(
                     (SELECT TOP 1 IDPhieuXuat FROM KHO_PhieuXuat_ChiTiet WHERE ID = gd.IDChiTietKho),
                     (SELECT TOP 1 ID FROM KHO_PhieuXuat WHERE SoChungTu = gd.SoChungTu)
@@ -100,7 +100,11 @@ BEGIN
         END AS ID,
         gd.NgayChungTu,
         gd.SoChungTu,
-        gd.LoaiChungTu,
+        CASE 
+            WHEN EXISTS (SELECT 1 FROM KHO_PhieuNhap WHERE SoChungTu = gd.SoChungTu) THEN 1
+            WHEN EXISTS (SELECT 1 FROM KHO_PhieuXuat WHERE SoChungTu = gd.SoChungTu) THEN 2
+            ELSE gd.LoaiChungTu
+        END AS LoaiChungTu,
         gd.DienGiai,
         gd.SoLuongNhap AS Nhap,
         gd.SoLuongXuat AS Xuat,

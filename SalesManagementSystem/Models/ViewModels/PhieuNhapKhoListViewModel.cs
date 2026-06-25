@@ -10,6 +10,10 @@ namespace SalesManagementSystem.Models.ViewModels
         public int IDKho { get; set; }
         public string TenKho { get; set; }
         public string MaKhoHang { get; set; }
+        public string TenLoaiNhap { get; set; }
+        public string MaLoaiNhap { get; set; }
+        public string TenKhoNguon { get; set; }
+        public string TenKhachHang { get; set; }
         public int IDNhaCungCap { get; set; }
         public string TenNhaCungCap { get; set; }
         public string MaNhaCungCap { get; set; }

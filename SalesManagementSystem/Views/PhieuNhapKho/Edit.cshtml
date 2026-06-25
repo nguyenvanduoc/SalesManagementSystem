@@ -62,11 +62,23 @@
                 <div class="don-header-card">
                     <div class="don-section-title"><i class="bi bi-building me-1"></i>Thông tin đối tác & Kho</div>
                     <div class="row g-2">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <label class="form-label text-muted fw-semibold small">Loại nhập kho <span class="text-danger">*</span></label>
+                            <select id="IDLoaiNhapKho" class="form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label text-muted fw-semibold small">Kho nhập <span class="text-danger">*</span></label>
                             <select id="IDKho" class="form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3" id="colKhoNguon" style="display:none;">
+                            <label class="form-label text-muted fw-semibold small">Kho xuất <span class="text-danger">*</span></label>
+                            <select id="IDKhoNguon" class="form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
+                        </div>
+                        <div class="col-md-3" id="colKhachHang" style="display:none;">
+                            <label class="form-label text-muted fw-semibold small">Khách hàng <span class="text-danger">*</span></label>
+                            <select id="IDKhachHang" class="form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
+                        </div>
+                        <div class="col-md-3" id="colNhaCungCap">
                             <label class="form-label text-muted fw-semibold small">Nhà cung cấp <span class="text-danger">*</span></label>
                             <select id="IDNhaCungCap" class="form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
                         </div>
@@ -220,11 +232,20 @@
 
         $(document).ready(function () {
             PhieuNhapKho.init({
+                searchLoaiNhapKhoUrl: '@Url.Action("SearchLoaiNhapKho")',
+                searchKhachHangUrl: '@Url.Action("SearchKhachHang")',
                 searchKhoUrl: '@Url.Action("SearchKhoHang")',
                 searchNccUrl: '@Url.Action("SearchNhaCungCap")',
                 searchSpUrl: '@Url.Action("SearchSanPham")',
                 searchPhuongTienUrl: '@Url.Action("SearchPhuongTien")',
                 chiTietsJson: @Html.Raw(chiTietsJson),
+                selectedLoaiNhapKhoId: @(Model.IDLoaiNhapKho.HasValue && Model.IDLoaiNhapKho.Value > 0 ? Model.IDLoaiNhapKho.Value.ToString() : "null"),
+                selectedLoaiNhapKhoMa: '@Html.Raw(Model.MaLoaiNhap)',
+                selectedLoaiNhapKhoText: '@Html.Raw(Model.TenLoaiNhap)',
+                selectedKhoNguonId: @(Model.IDKhoNguon.HasValue && Model.IDKhoNguon.Value > 0 ? Model.IDKhoNguon.Value.ToString() : "null"),
+                selectedKhoNguonText: '@Html.Raw(Model.TenKhoNguon)',
+                selectedKhachHangId: @(Model.IDKhachHang.HasValue && Model.IDKhachHang.Value > 0 ? Model.IDKhachHang.Value.ToString() : "null"),
+                selectedKhachHangText: '@Html.Raw(Model.TenKhachHang)',
                 selectedKhoId: @(Model.IDKho.HasValue && Model.IDKho.Value > 0 ? Model.IDKho.Value.ToString() : "null"),
                 selectedKhoText: '@Html.Raw(Model.TenKho)',
                 selectedNccId: @(Model.IDNhaCungCap.HasValue && Model.IDNhaCungCap.Value > 0 ? Model.IDNhaCungCap.Value.ToString() : "null"),
@@ -258,11 +279,20 @@ else
 
         $(document).ready(function () {
             PhieuNhapKho.init({
+                searchLoaiNhapKhoUrl: '@Url.Action("SearchLoaiNhapKho")',
+                searchKhachHangUrl: '@Url.Action("SearchKhachHang")',
                 searchKhoUrl: '@Url.Action("SearchKhoHang")',
                 searchNccUrl: '@Url.Action("SearchNhaCungCap")',
                 searchSpUrl: '@Url.Action("SearchSanPham")',
                 searchPhuongTienUrl: '@Url.Action("SearchPhuongTien")',
                 chiTietsJson: @Html.Raw(chiTietsJson),
+                selectedLoaiNhapKhoId: @(Model.IDLoaiNhapKho.HasValue && Model.IDLoaiNhapKho.Value > 0 ? Model.IDLoaiNhapKho.Value.ToString() : "null"),
+                selectedLoaiNhapKhoMa: '@Html.Raw(Model.MaLoaiNhap)',
+                selectedLoaiNhapKhoText: '@Html.Raw(Model.TenLoaiNhap)',
+                selectedKhoNguonId: @(Model.IDKhoNguon.HasValue && Model.IDKhoNguon.Value > 0 ? Model.IDKhoNguon.Value.ToString() : "null"),
+                selectedKhoNguonText: '@Html.Raw(Model.TenKhoNguon)',
+                selectedKhachHangId: @(Model.IDKhachHang.HasValue && Model.IDKhachHang.Value > 0 ? Model.IDKhachHang.Value.ToString() : "null"),
+                selectedKhachHangText: '@Html.Raw(Model.TenKhachHang)',
                 selectedKhoId: @(Model.IDKho.HasValue && Model.IDKho.Value > 0 ? Model.IDKho.Value.ToString() : "null"),
                 selectedKhoText: '@Html.Raw(Model.TenKho)',
                 selectedNccId: @(Model.IDNhaCungCap.HasValue && Model.IDNhaCungCap.Value > 0 ? Model.IDNhaCungCap.Value.ToString() : "null"),

@@ -28,5 +28,8 @@ namespace SalesManagementSystem.Repositories.Interfaces
         IEnumerable<dynamic> GetNhanSuForDropdown(string keyword);
         IEnumerable<dynamic> GetSanPhamForDropdown(string keyword);
         IEnumerable<dynamic> GetPhuongTienForDropdown(string keyword);
+        IEnumerable<dynamic> GetLoaiNhapKhoForDropdown();
+        IEnumerable<dynamic> GetKhachHangForDropdown(string keyword);
+        IEnumerable<dynamic> CheckTonKhoChuyenKho(int idKhoNguon, string chiTietsJson);
     }
 }

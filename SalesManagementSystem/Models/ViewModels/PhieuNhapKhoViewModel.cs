@@ -10,8 +10,15 @@ namespace SalesManagementSystem.Models.ViewModels
         public DateTime NgayNhap { get; set; }
         public int? IDKho { get; set; }
         public string TenKho { get; set; }
+        public int? IDLoaiNhapKho { get; set; }
+        public string MaLoaiNhap { get; set; }
+        public string TenLoaiNhap { get; set; }
+        public int? IDKhoNguon { get; set; }
+        public string TenKhoNguon { get; set; }
         public int? IDNhaCungCap { get; set; }
         public string TenNhaCungCap { get; set; }
+        public int? IDKhachHang { get; set; }
+        public string TenKhachHang { get; set; }
         public string SoHoaDon { get; set; }
         public DateTime? NgayHoaDon { get; set; }
         public string TenNguoiGiao { get; set; }
