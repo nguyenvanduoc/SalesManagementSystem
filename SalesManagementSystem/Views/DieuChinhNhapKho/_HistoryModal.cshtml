@@ -1,0 +1,138 @@
+@model IEnumerable<SalesManagementSystem.Models.ViewModels.DieuChinhNhapKhoHistoryViewModel>
+
+<div class="modal-header bg-light">
+    <h5 class="modal-title fw-bold text-dark" style="font-size: 1.15rem;">
+        <i class="bi bi-clock-history me-2 text-success"></i>Lịch sử điều chỉnh phiếu nhập
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<div class="modal-body p-4" style="max-height: 550px; overflow-y: auto;">
+    @if (Model != null && Model.Any())
+    {
+        <div class="timeline">
+            @foreach (var item in Model)
+            {
+                <div class="timeline-item mb-4 pb-3 border-bottom">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="fw-bold text-primary fs-6">
+                            <i class="bi bi-person-circle me-1 text-muted"></i>@item.TenNguoiTao
+                        </span>
+                        <span class="timeline-date fw-bold">
+                            <i class="bi bi-calendar3 me-1"></i>@item.NgayDieuChinh.ToString("dd/MM/yyyy HH:mm:ss")
+                        </span>
+                    </div>
+                    <div class="mb-2">
+                        <span class="badge bg-danger p-1.5 mb-2" style="font-size: 0.8rem;">Số điều chỉnh: @item.SoDieuChinh</span>
+                        <div class="bg-light p-2.5 rounded border small mb-3">
+                            <strong><i class="bi bi-chat-right-text me-1 text-secondary"></i>Lý do điều chỉnh:</strong> 
+                            <span class="text-dark">@item.LyDoDieuChinh</span>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered table-hover align-middle mb-0" style="font-size: 0.82rem;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Mã SP</th>
+                                    <th>Tên sản phẩm</th>
+                                    <th class="text-center" style="width: 110px;">Trạng thái</th>
+                                    <th class="text-center" style="width: 50px;">ĐVT</th>
+                                    <th class="text-center" style="width: 140px;">Số lượng</th>
+                                    <th class="text-end" style="width: 160px;">Đơn giá</th>
+                                    <th class="text-end" style="width: 180px;">Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (item.ChiTiets != null && item.ChiTiets.Any())
+                                {
+                                    foreach (var ct in item.ChiTiets)
+                                    {
+                                        <tr>
+                                            <td class="fw-semibold text-secondary">@ct.MaSanPham</td>
+                                            <td class="fw-semibold text-dark">@ct.TenSanPham</td>
+                                            <td class="text-center align-middle">
+                                                @if (ct.SoLuongCu == null || ct.SoLuongCu == 0)
+                                                {
+                                                    <span class="badge bg-success"><i class="bi bi-plus-lg me-1"></i>Thêm mới</span>
+                                                }
+                                                else if (ct.SoLuongMoi == null || ct.SoLuongMoi == 0)
+                                                {
+                                                    <span class="badge bg-danger"><i class="bi bi-trash-fill me-1"></i>Xóa bỏ</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning text-dark"><i class="bi bi-pencil-fill me-1"></i>Thay đổi</span>
+                                                }
+                                            </td>
+                                            <td class="text-center">@ct.DVT</td>
+                                            <td class="text-center">
+                                                @if (ct.SoLuongCu == null || ct.SoLuongCu == 0)
+                                                {
+                                                    <span class="text-success"><i class="bi bi-plus-lg me-1"></i>Thêm mới (@(Math.Round(ct.SoLuongMoi ?? 0, 2)))</span>
+                                                }
+                                                else if (ct.SoLuongMoi == null || ct.SoLuongMoi == 0)
+                                                {
+                                                    <span class="text-danger"><i class="bi bi-trash-fill me-1"></i>Xóa bỏ (@(Math.Round(ct.SoLuongCu ?? 0, 2)))</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>@(Math.Round(ct.SoLuongCu ?? 0, 2)) <i class="bi bi-arrow-right mx-1 text-muted"></i> <strong class="@(ct.SoLuongMoi > ct.SoLuongCu ? "text-success" : "text-danger")">@(Math.Round(ct.SoLuongMoi ?? 0, 2))</strong></span>
+                                                }
+                                            </td>
+                                            <td class="text-end">
+                                                @if (ct.DonGiaCu == null || ct.DonGiaCu == 0)
+                                                {
+                                                    <span>@((ct.DonGiaMoi ?? 0).ToString("N0"))</span>
+                                                }
+                                                else if (ct.DonGiaMoi == null || ct.DonGiaMoi == 0)
+                                                {
+                                                    <span class="text-muted text-decoration-line-through">@((ct.DonGiaCu ?? 0).ToString("N0"))</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>@((ct.DonGiaCu ?? 0).ToString("N0")) <i class="bi bi-arrow-right mx-1 text-muted"></i> <strong>@((ct.DonGiaMoi ?? 0).ToString("N0"))</strong></span>
+                                                }
+                                            </td>
+                                            <td class="text-end fw-semibold">
+                                                @if (ct.ThanhTienCu == null || ct.ThanhTienCu == 0)
+                                                {
+                                                    <span class="text-success">+@((ct.ThanhTienMoi ?? 0).ToString("N0"))</span>
+                                                }
+                                                else if (ct.ThanhTienMoi == null || ct.ThanhTienMoi == 0)
+                                                {
+                                                    <span class="text-danger">-@((ct.ThanhTienCu ?? 0).ToString("N0"))</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>@((ct.ThanhTienCu ?? 0).ToString("N0")) <i class="bi bi-arrow-right mx-1 text-muted"></i> <strong class="@(ct.ThanhTienMoi > ct.ThanhTienCu ? "text-success" : "text-danger")">@((ct.ThanhTienMoi ?? 0).ToString("N0"))</strong></span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted py-3">Không có chi tiết thay đổi</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-info-circle fs-2 d-block mb-2"></i>
+            Chưa phát sinh lần điều chỉnh nào cho phiếu nhập này.
+        </div>
+    }
+</div>
+
+<div class="modal-footer bg-light">
+    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+</div>

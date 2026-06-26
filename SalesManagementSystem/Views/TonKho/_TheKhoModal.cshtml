@@ -31,7 +31,12 @@
                             {
                                 string loaiCTName = "";
                                 string linkCT = "javascript:void(0);";
-                                if (item.LoaiChungTu == 1) 
+                                if (item.SoChungTu != null && item.SoChungTu.StartsWith("DC-"))
+                                {
+                                    loaiCTName = "Điều chỉnh ĐH";
+                                    linkCT = "/DonDieuChinhDonHang/Index?soDonHang=" + item.SoChungTu.Substring(3, item.SoChungTu.LastIndexOf('-') - 3);
+                                }
+                                else if (item.LoaiChungTu == 1) 
                                 { 
                                     loaiCTName = "Nhập kho"; 
                                     linkCT = $"/PhieuNhapKho/Edit/{item.ID}?isView=true"; 

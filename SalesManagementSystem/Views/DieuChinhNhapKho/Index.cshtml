@@ -1,0 +1,145 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DieuChinhNhapKhoListViewModel>
+@{
+    ViewBag.Title = "Điều chỉnh phiếu nhập kho";
+}
+
+<style>
+    .select2-container--default .select2-selection--single { height: 31px; border: 1px solid #ced4da; border-radius: 0.25rem; }
+    .select2-container--default .select2-selection--single .select2-selection__rendered { font-size: 0.875rem; color: #495057; line-height: 29px; padding-left: 8px; }
+    .select2-container--default .select2-selection--single .select2-selection__arrow { height: 29px; }
+</style>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Danh sách phiếu nhập kho</h5>
+    </div>
+    <div class="card-body">
+        <form id="searchForm" class="mb-3">
+            <div class="row g-3">
+                <div class="col-md-2">
+                    <label class="form-label text-muted small fw-bold">Từ ngày</label>
+                    <input type="date" class="form-control form-control-sm" name="tuNgay" value="@ViewBag.TuNgay">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small fw-bold">Đến ngày</label>
+                    <input type="date" class="form-control form-control-sm" name="denNgay" value="@ViewBag.DenNgay">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small fw-bold">Số chứng từ</label>
+                    <input type="text" class="form-control form-control-sm" name="soChungTu" value="@ViewBag.SoChungTu" placeholder="Số phiếu...">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small fw-bold">Loại nhập kho</label>
+                    <select class="form-select form-select-sm select2-ajax" name="idLoaiNhap" data-url="/PhieuNhapKho/SearchLoaiNhapKho" data-placeholder="Chọn loại nhập">
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small fw-bold">Kho hàng</label>
+                    <select class="form-select form-select-sm select2-ajax" name="idKho" data-url="/PhieuNhapKho/SearchKhoHang" data-placeholder="Chọn kho">
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small fw-bold">Nhà cung cấp</label>
+                    <select class="form-select form-select-sm select2-ajax" name="idNhaCungCap" data-url="/PhieuNhapKho/SearchNhaCungCap" data-placeholder="Chọn nhà cung cấp">
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small fw-bold">Khách hàng</label>
+                    <select class="form-select form-select-sm select2-ajax" name="idKhachHang" data-url="/PhieuNhapKho/SearchKhachHang" data-placeholder="Chọn khách hàng">
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end pb-1">
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" name="chiDonDieuChinh" id="chkChiDonDieuChinh" value="true" @(ViewBag.ChiDonDieuChinh == true ? "checked" : "") />
+                        <label class="form-check-label small fw-bold text-muted" for="chkChiDonDieuChinh">Đã điều chỉnh</label>
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex align-items-end pb-1">
+                    <button type="button" class="btn btn-primary btn-sm mb-1 px-3" onclick="searchData()" style="background-color:#3498db;border:none;"><i class="bx bx-search"></i> Tìm kiếm</button>
+                </div>
+            </div>
+        </form>
+
+        <div id="listContainer">
+            @Html.Partial("_AdjustList", Model)
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Lịch sử điều chỉnh</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="historyModalBody">
+                <div class="text-center"><div class="spinner-border text-primary" role="status"></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function initSelect2Ajax(selector) {
+            if (!$.fn.select2) return;
+            $(selector).each(function () {
+                var $el = $(this);
+                var url = $el.data('url');
+                var placeholder = $el.data('placeholder') || 'Chọn...';
+                
+                $el.select2({
+                    placeholder: placeholder,
+                    allowClear: true,
+                    ajax: {
+                        url: url,
+                        dataType: 'json',
+                        delay: 250,
+                        data: function (params) {
+                            return { q: params.term || '' };
+                        },
+                        processResults: function (data) {
+                            return { results: data };
+                        },
+                        cache: true
+                    }
+                });
+            });
+        }
+
+        $(document).ready(function () {
+            initSelect2Ajax('.select2-ajax');
+        });
+
+        function searchData(page = 1) {
+            var data = $('#searchForm').serialize() + '&page=' + page;
+            $.ajax({
+                url: '/DieuChinhNhapKho/Index',
+                type: 'GET',
+                data: data,
+                success: function (res) {
+                    $('#listContainer').html(res);
+                },
+                error: function () {
+                    toastr.error('Có lỗi xảy ra khi tìm kiếm');
+                }
+            });
+        }
+
+        function viewHistory(id) {
+            $('#historyModal').modal('show');
+            $('#historyModalBody').html('<div class="text-center"><div class="spinner-border text-primary" role="status"></div></div>');
+            $.ajax({
+                url: '/DieuChinhNhapKho/History/' + id,
+                type: 'GET',
+                success: function (res) {
+                    $('#historyModalBody').html(res);
+                },
+                error: function () {
+                    $('#historyModalBody').html('<div class="alert alert-danger">Có lỗi xảy ra khi tải lịch sử.</div>');
+                }
+            });
+        }
+    </script>
+}

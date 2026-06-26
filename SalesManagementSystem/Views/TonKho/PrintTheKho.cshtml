@@ -76,7 +76,11 @@
                 @foreach (var item in Model)
                 {
                     string loaiCTName = "";
-                    if (item.LoaiChungTu == 1) 
+                    if (item.SoChungTu != null && item.SoChungTu.StartsWith("DC-"))
+                    {
+                        loaiCTName = "Điều chỉnh ĐH";
+                    }
+                    else if (item.LoaiChungTu == 1) 
                     { 
                         loaiCTName = "Nhập kho"; 
                     }

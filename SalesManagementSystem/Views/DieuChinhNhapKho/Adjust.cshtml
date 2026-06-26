@@ -1,0 +1,291 @@
+@model SalesManagementSystem.Models.ViewModels.PhieuNhapKhoViewModel
+@using System.Linq
+@{
+    ViewBag.Title = "Điều chỉnh Phiếu nhập kho";
+    var isView = false;
+    string chiTietsJson = Newtonsoft.Json.JsonConvert.SerializeObject(Model.ChiTiets);
+}
+
+<style>
+    .don-header-card { background:#fff; border:1px solid #dce4ec; border-radius:6px; padding:16px; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+    .don-section-title { font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:#7f8c8d; margin-bottom:10px; }
+    .tong-tien-box { background:linear-gradient(135deg,#1a5276,#2980b9); border-radius:8px; padding:16px 20px; color:#fff; text-align:right; }
+    .tong-tien-box .label { font-size:.8rem; opacity:.85; margin-bottom:4px; }
+    .tong-tien-box .amount { font-size:1.8rem; font-weight:800; letter-spacing:.5px; }
+    .grid-detail thead th { background:#f4f6f9; font-size:.8rem; font-weight:700; color:#2c3e50; vertical-align:middle; white-space:nowrap; text-align:center !important; }
+    .grid-detail tbody td { vertical-align:middle; padding:5px 6px; }
+    .grid-detail input.form-control, .grid-detail select.form-select { font-size:.85rem; padding:3px 7px; height:30px; }
+    .btn-add-row { background:#2ecc71; color:#fff; border:none; border-radius:4px; padding:5px 14px; font-size:.85rem; }
+    .btn-add-row:hover { background:#27ae60; color:#fff; }
+    .readonly-cell { background:#f8f9fa; font-size:.85rem; color:#495057; border: 1px solid #ced4da; }
+    .form-toolbar { background:#f8f9fa; border:1px solid #dce4ec; border-radius:6px; padding:10px 16px; margin-bottom:12px; display:flex; gap:8px; align-items:center; }
+    .select2-container--default .select2-selection--single { height: 38px; border: 1px solid #ced4da; border-radius: 0.375rem; }
+    .select2-container--default .select2-selection--single .select2-selection__rendered { font-size: .85rem; color: #495057; line-height: 36px; padding-left: 12px; }
+    .select2-container--default .select2-selection--single .select2-selection__arrow { height: 36px; }
+</style>
+
+<!-- Toolbar -->
+<div class="form-toolbar">
+    <a href="@Url.Action("Index")" class="btn btn-secondary btn-sm">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+    <button type="button" id="btnSaveAdjust" class="btn btn-sm text-white" style="background-color:#2998e4;border:none;">
+        <i class="bi bi-check-lg me-1"></i> Lưu điều chỉnh
+    </button>
+    <span class="badge bg-secondary ms-2">Phiếu nhập: @Model.SoChungTu</span>
+    <span class="text-muted small ms-auto">
+        <i class="bi bi-pencil-square me-1"></i>@ViewBag.Title
+    </span>
+</div>
+
+<form id="frmPhieuNhapKho" autocomplete="off">
+    <input type="hidden" id="IDPhieuNhap" value="@Model.ID" />
+    
+    <div class="row g-3">
+        <div class="col-md-12">
+
+            <!-- Card: Lý do điều chỉnh -->
+            <div class="don-header-card" style="border-left: 4px solid #e74c3c;">
+                <div class="don-section-title text-danger"><i class="bi bi-chat-left-dots-fill me-1"></i>Lý do điều chỉnh <span class="text-danger">*</span></div>
+                <div class="row g-2">
+                    <div class="col-md-12">
+                        <textarea id="LyDoDieuChinh" name="LyDoDieuChinh" class="form-control" rows="3" placeholder="Nhập lý do điều chỉnh bắt buộc (ví dụ: Thay đổi số lượng thực nhập, điều chỉnh giá...)" required></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Thông tin đối tác -->
+            <div class="don-header-card">
+                <div class="don-section-title"><i class="bi bi-building me-1"></i>Thông tin đối tác & Kho</div>
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Loại nhập kho <span class="text-danger">*</span></label>
+                        <select id="IDLoaiNhapKho" class="form-control" style="width:100%;"><option value=""></option></select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Kho nhập <span class="text-danger">*</span></label>
+                        <select id="IDKho" class="form-control" style="width:100%;"><option value=""></option></select>
+                    </div>
+                    <div class="col-md-3" id="colKhoNguon" style="display:none;">
+                        <label class="form-label text-muted fw-semibold small">Kho xuất <span class="text-danger">*</span></label>
+                        <select id="IDKhoNguon" class="form-control" style="width:100%;"><option value=""></option></select>
+                    </div>
+                    <div class="col-md-3" id="colKhachHang" style="display:none;">
+                        <label class="form-label text-muted fw-semibold small">Khách hàng <span class="text-danger">*</span></label>
+                        <select id="IDKhachHang" class="form-control" style="width:100%;"><option value=""></option></select>
+                    </div>
+                    <div class="col-md-3" id="colNhaCungCap">
+                        <label class="form-label text-muted fw-semibold small">Nhà cung cấp <span class="text-danger">*</span></label>
+                        <select id="IDNhaCungCap" class="form-control" style="width:100%;"><option value=""></option></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted fw-semibold small">Người nhận</label>
+                        <input type="text" id="TenNguoiNhan" class="form-control form-control-sm" value="@Model.TenNguoiNhan" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted fw-semibold small">Người giao hàng</label>
+                        <input type="text" id="TenNguoiGiao" class="form-control form-control-sm" value="@Model.TenNguoiGiao" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted fw-semibold small">SĐT người giao</label>
+                        <input type="text" id="SoDienThoaiNguoiGiao" class="form-control form-control-sm" value="@Model.SoDienThoaiNguoiGiao" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Thông tin vận chuyển -->
+            <div class="don-header-card">
+                <div class="don-section-title"><i class="bi bi-truck me-1"></i>Thông tin vận chuyển</div>
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Phương tiện</label>
+                        <select id="IDPhuongTien" class="form-control" style="width:100%;"><option value=""></option></select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Ngày giao hàng</label>
+                        <input type="date" id="NgayGiaoHang" class="form-control form-control-sm" value="@(Model.NgayGiaoHang?.ToString("yyyy-MM-dd"))" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Tài xế</label>
+                        <input type="text" id="HoTenTaiXe" class="form-control form-control-sm" value="@Model.HoTenTaiXe" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">SĐT Tài xế</label>
+                        <input type="text" id="SoDienThoaiTaiXe" class="form-control form-control-sm" value="@Model.SoDienThoaiTaiXe" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Thông tin chứng từ -->
+            <div class="don-header-card">
+                <div class="don-section-title"><i class="bi bi-file-earmark-text me-1"></i>Thông tin chứng từ</div>
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Số chứng từ (Gốc)</label>
+                        <input type="text" id="SoChungTu" class="form-control form-control-sm readonly-cell fw-bold text-primary" value="@Model.SoChungTu" readonly />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Ngày nhập <span class="text-danger">*</span></label>
+                        <input type="date" id="NgayNhap" class="form-control form-control-sm" value="@Model.NgayNhap.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Số hóa đơn</label>
+                        <input type="text" id="SoHoaDon" class="form-control form-control-sm" value="@Model.SoHoaDon" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Ngày hóa đơn</label>
+                        <input type="date" id="NgayHoaDon" class="form-control form-control-sm" value="@(Model.NgayHoaDon?.ToString("yyyy-MM-dd"))" />
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label text-muted fw-semibold small">Ghi chú</label>
+                        <textarea id="GhiChu" class="form-control form-control-sm" rows="1" placeholder="Nhập ghi chú...">@Model.GhiChu</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Grid chi tiết sản phẩm -->
+            <div class="don-header-card mb-0">
+                <div class="d-flex align-items-center mb-2 gap-2">
+                    <div class="don-section-title mb-0"><i class="bi bi-table me-1"></i>Chi tiết hàng hóa</div>
+                    <button type="button" class="btn-add-row ms-auto" id="PNK_btnAddRow">
+                        <i class="bi bi-plus-lg me-1"></i> Thêm mặt hàng
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered grid-detail mb-0" id="PNK_tblChiTiet" style="min-width:900px;">
+                        <thead>
+                            <tr>
+                                <th style="width:40px;">STT</th>
+                                <th style="min-width:220px;" class="text-start">Sản phẩm</th>
+                                <th style="width:70px;">ĐVT</th>
+                                <th style="width:90px;">Số lượng</th>
+                                <th style="width:110px;">Đơn giá</th>
+                                <th style="width:120px;">Ngày sản xuất</th>
+                                <th style="width:120px;">Hạn sử dụng</th>
+                                <th style="width:120px;">Thành tiền</th>
+                                <th style="width:70px;" class="d-none">Thuế %</th>
+                                <th style="width:110px;" class="d-none">Tiền thuế</th>
+                                <th style="width:120px;">Tổng cộng</th>
+                                <th style="min-width:120px;">Ghi chú</th>
+                                <th style="width:40px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Card: Tổng tiền -->
+            <div class="don-header-card mt-3 mb-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small me-2">Trạng thái:</span>
+                        <span class="badge bg-warning text-dark" id="badgeTrangThai">Đang điều chỉnh</span>
+                    </div>
+                    
+                    <div class="d-flex align-items-center gap-3">
+                        <div>
+                            <span class="text-muted small me-1">Tổng số lượng:</span>
+                            <span class="fs-6 text-dark" id="dispTongSoLuong">@(Model.ChiTiets != null ? Model.ChiTiets.Sum(c => c.SoLuong).ToString("N0") : "0")</span>
+                        </div>
+                        <div>
+                            <span class="text-muted small me-1">Cộng tiền hàng:</span>
+                            <span class="fs-6 text-dark" id="dispTongTienHang">0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted text-uppercase fw-bold">Tổng thanh toán:</span>
+                        <span class="fs-4 fw-bold" style="color:#1a5276;" id="dispTongCong">0</span>
+                        <span class="text-muted small">VNĐ</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="@Url.Content("~/Scripts/phieu-nhap-kho.js?v=2.0")"></script>
+    <script>
+        $(document).ready(function () {
+            PhieuNhapKho.init({
+                searchLoaiNhapKhoUrl: '@Url.Action("SearchLoaiNhapKho", "PhieuNhapKho")',
+                searchKhachHangUrl: '@Url.Action("SearchKhachHang", "PhieuNhapKho")',
+                searchKhoUrl: '@Url.Action("SearchKhoHang", "PhieuNhapKho")',
+                searchNccUrl: '@Url.Action("SearchNhaCungCap", "PhieuNhapKho")',
+                searchSpUrl: '@Url.Action("SearchSanPham", "PhieuNhapKho")',
+                searchPhuongTienUrl: '@Url.Action("SearchPhuongTien", "PhieuNhapKho")',
+                chiTietsJson: @Html.Raw(chiTietsJson),
+                selectedLoaiNhapKhoId: @(Model.IDLoaiNhapKho.HasValue && Model.IDLoaiNhapKho.Value > 0 ? Model.IDLoaiNhapKho.Value.ToString() : "null"),
+                selectedLoaiNhapKhoMa: '@Html.Raw(Model.MaLoaiNhap)',
+                selectedLoaiNhapKhoText: '@Html.Raw(Model.TenLoaiNhap)',
+                selectedKhoNguonId: @(Model.IDKhoNguon.HasValue && Model.IDKhoNguon.Value > 0 ? Model.IDKhoNguon.Value.ToString() : "null"),
+                selectedKhoNguonText: '@Html.Raw(Model.TenKhoNguon)',
+                selectedKhachHangId: @(Model.IDKhachHang.HasValue && Model.IDKhachHang.Value > 0 ? Model.IDKhachHang.Value.ToString() : "null"),
+                selectedKhachHangText: '@Html.Raw(Model.TenKhachHang)',
+                selectedKhoId: @(Model.IDKho.HasValue && Model.IDKho.Value > 0 ? Model.IDKho.Value.ToString() : "null"),
+                selectedKhoText: '@Html.Raw(Model.TenKho)',
+                selectedNccId: @(Model.IDNhaCungCap.HasValue && Model.IDNhaCungCap.Value > 0 ? Model.IDNhaCungCap.Value.ToString() : "null"),
+                selectedNccText: '@Html.Raw(Model.TenNhaCungCap)',
+                selectedPhuongTienId: @(Model.IDPhuongTien.HasValue && Model.IDPhuongTien.Value > 0 ? Model.IDPhuongTien.Value.ToString() : "null"),
+                selectedPhuongTienText: '@Html.Raw(Model.TenPhuongTien)',
+                isViewMode: false,
+                isInlineDetail: false
+            });
+
+            $('#btnSaveAdjust').on('click', function () {
+                var reason = $('#LyDoDieuChinh').val();
+                if (!reason) {
+                    showToast('error', 'Vui lòng nhập lý do điều chỉnh');
+                    $('#LyDoDieuChinh').focus();
+                    return;
+                }
+
+                var baseData = PhieuNhapKho.validateAndSerialize();
+                if (!baseData) return;
+
+                var data = {
+                    IDPhieuNhap: $('#IDPhieuNhap').val(),
+                    LyDoDieuChinh: reason,
+                    ChiTietsJson: JSON.stringify(baseData.ChiTiets),
+                    IDLoaiNhapKho: baseData.IDLoaiNhapKho,
+                    IDKho: baseData.IDKho,
+                    IDKhoNguon: baseData.IDKhoNguon,
+                    IDNhaCungCap: baseData.IDNhaCungCap,
+                    IDKhachHang: baseData.IDKhachHang,
+                    IDPhuongTien: baseData.IDPhuongTien,
+                    NgayNhap: baseData.NgayNhap,
+                    NgayGiaoHang: baseData.NgayGiaoHang,
+                    HoTenTaiXe: baseData.HoTenTaiXe,
+                    SoDienThoaiTaiXe: baseData.SoDienThoaiTaiXe,
+                    SoHoaDon: baseData.SoHoaDon,
+                    NgayHoaDon: baseData.NgayHoaDon,
+                    GhiChu: baseData.GhiChu
+                };
+
+                showConfirm("Bạn có chắc chắn muốn lưu điều chỉnh phiếu nhập này?", function() {
+                    $.ajax({
+                        url: '@Url.Action("SaveAdjust")',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(data),
+                        success: function (res) {
+                            if (res.success) {
+                                showToast('success', res.message);
+                                setTimeout(function() {
+                                    window.location.href = '@Url.Action("Index")';
+                                }, 1000);
+                            } else {
+                                showToast('error', res.message);
+                            }
+                        },
+                        error: function () { showToast('error', 'Đã xảy ra lỗi hệ thống'); }
+                    });
+                });
+            });
+        });
+    </script>
+}

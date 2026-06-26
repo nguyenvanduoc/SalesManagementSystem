@@ -636,13 +636,22 @@
     <Compile Include="Models\Entities\DON_DieuChinhDonHang.cs" />
     <Compile Include="Models\Entities\DON_DieuChinhDonHang_ChiTiet.cs" />
     <Compile Include="Models\ViewModels\DonDieuChinhViewModels.cs" />
+    <Compile Include="Models\ViewModels\DieuChinhNhapKhoViewModels.cs" />
     <Compile Include="Repositories\Interfaces\IDonDieuChinhDonHangRepository.cs" />
     <Compile Include="Repositories\DonDieuChinhDonHangRepository.cs" />
+    <Compile Include="Repositories\Interfaces\IDieuChinhNhapKhoRepository.cs" />
+    <Compile Include="Repositories\DieuChinhNhapKhoRepository.cs" />
     <Compile Include="Controllers\DonDieuChinhDonHangController.cs" />
+    <Compile Include="Controllers\DieuChinhNhapKhoController.cs" />
     <Content Include="Views\DonDieuChinhDonHang\Index.cshtml" />
     <Content Include="Views\DonDieuChinhDonHang\_AdjustList.cshtml" />
     <Content Include="Views\DonDieuChinhDonHang\Adjust.cshtml" />
     <Content Include="Views\DonDieuChinhDonHang\_HistoryModal.cshtml" />
+    <Content Include="Views\DieuChinhNhapKho\Index.cshtml" />
+    <Content Include="Views\DieuChinhNhapKho\_AdjustList.cshtml" />
+    <Content Include="Views\DieuChinhNhapKho\Adjust.cshtml" />
+    <Content Include="Views\DieuChinhNhapKho\_HistoryModal.cshtml" />
     <Content Include="App_Data\create_dieu_chinh_don_hang.sql" />
+    <Content Include="App_Data\create_dieu_chinh_phieu_nhap.sql" />
   </ItemGroup>
 </Project>
