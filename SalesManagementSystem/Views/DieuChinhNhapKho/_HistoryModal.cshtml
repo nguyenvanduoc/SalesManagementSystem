@@ -69,15 +69,15 @@
                                             <td class="text-center">
                                                 @if (ct.SoLuongCu == null || ct.SoLuongCu == 0)
                                                 {
-                                                    <span class="text-success"><i class="bi bi-plus-lg me-1"></i>Thêm mới (@(Math.Round(ct.SoLuongMoi ?? 0, 2)))</span>
+                                                    <span class="text-success"><i class="bi bi-plus-lg me-1"></i>Thêm mới (@((ct.SoLuongMoi ?? 0).ToString("0.##")))</span>
                                                 }
                                                 else if (ct.SoLuongMoi == null || ct.SoLuongMoi == 0)
                                                 {
-                                                    <span class="text-danger"><i class="bi bi-trash-fill me-1"></i>Xóa bỏ (@(Math.Round(ct.SoLuongCu ?? 0, 2)))</span>
+                                                    <span class="text-danger"><i class="bi bi-trash-fill me-1"></i>Xóa bỏ (@((ct.SoLuongCu ?? 0).ToString("0.##")))</span>
                                                 }
                                                 else
                                                 {
-                                                    <span>@(Math.Round(ct.SoLuongCu ?? 0, 2)) <i class="bi bi-arrow-right mx-1 text-muted"></i> <strong class="@(ct.SoLuongMoi > ct.SoLuongCu ? "text-success" : "text-danger")">@(Math.Round(ct.SoLuongMoi ?? 0, 2))</strong></span>
+                                                    <span>@((ct.SoLuongCu ?? 0).ToString("0.##")) <i class="bi bi-arrow-right mx-1 text-muted"></i> <strong class="@(ct.SoLuongMoi > ct.SoLuongCu ? "text-success" : "text-danger")">@((ct.SoLuongMoi ?? 0).ToString("0.##"))</strong></span>
                                                 }
                                             </td>
                                             <td class="text-end">

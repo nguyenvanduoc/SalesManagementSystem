@@ -276,7 +276,8 @@
                             if (res.success) {
                                 showToast('success', res.message);
                                 setTimeout(function() {
-                                    window.location.href = '@Url.Action("Index")';
+                                    // Không tự động đóng tab nữa theo yêu cầu của user
+                                    // Nhưng ta có thể load lại lưới của tab cha nếu cần (mặc dù hiện tại tab Adjust đang active)
                                 }, 1000);
                             } else {
                                 showToast('error', res.message);

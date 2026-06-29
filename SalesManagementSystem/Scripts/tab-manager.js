@@ -10,7 +10,7 @@
  * toàn cục như $('#gridData') hay $('#table-container').
  */
 var TabManager = (function () {
-    var MAX_TABS = 20;
+    var MAX_TABS = 30;
 
     // ─── Helpers ────────────────────────────────────────────────────────────
 

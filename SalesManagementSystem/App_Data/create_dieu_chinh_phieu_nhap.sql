@@ -213,6 +213,8 @@ BEGIN
         UNION
         SELECT DISTINCT IDSanPham FROM @ChiTietMoi WHERE IDSanPham IS NOT NULL;
 
+        -- Bảng tạm để lưu trữ chi tiết mới đã được xử lý ở trên
+
         -- Duyệt qua từng sản phẩm để so sánh và ghi nhận điều chỉnh
         DECLARE @spId INT;
         DECLARE db_cursor CURSOR LOCAL FOR SELECT IDSanPham FROM @allSpIds;
@@ -247,78 +249,21 @@ BEGIN
             ELSE IF ISNULL(@slCu, 0) <> ISNULL(@slMoi, 0) OR ISNULL(@dgCu, 0) <> ISNULL(@dgMoi, 0) OR ISNULL(@ttCu, 0) <> ISNULL(@ttMoi, 0)
                 SET @itemLoaiThayDoi = N'CapNhat';
 
-            -- Chỉ ghi nhận dòng có thay đổi
-            IF @itemLoaiThayDoi <> N'KhongDoi'
+            -- Kiểm tra xem kho có bị thay đổi không
+            DECLARE @isKhoChanged BIT = 0;
+            IF ISNULL(@OldIDKho, 0) <> ISNULL(@IDKho, 0) OR ISNULL(@OldIDKhoNguon, 0) <> ISNULL(@IDKhoNguon, 0)
+                SET @isKhoChanged = 1;
+
+            -- Chỉ ghi nhận dòng có thay đổi hoặc nếu kho bị thay đổi (để lưu lịch sử)
+            IF @itemLoaiThayDoi <> N'KhongDoi' OR @isKhoChanged = 1
             BEGIN
+                IF @isKhoChanged = 1 AND @itemLoaiThayDoi = N'KhongDoi'
+                    SET @itemLoaiThayDoi = N'DoiKho';
+
                 INSERT INTO KHO_DieuChinhPhieuNhapChiTiet
                     (IDDieuChinh, IDPhieuNhapChiTiet, IDSanPhamCu, IDSanPhamMoi, SoLuongCu, SoLuongMoi, DonGiaCu, DonGiaMoi, ThanhTienCu, ThanhTienMoi, LoaiThayDoi, NgayTao, NguoiTao)
                 VALUES
                     (@idDieuChinh, 0, CASE WHEN @slCu IS NOT NULL THEN @spId ELSE NULL END, CASE WHEN @slMoi IS NOT NULL THEN @spId ELSE NULL END, @slCu, @slMoi, @dgCu, @dgMoi, @ttCu, @ttMoi, @itemLoaiThayDoi, GETDATE(), @NguoiTao);
-
-                -- Xử lý chênh lệch tồn kho
-                DECLARE @qCu DECIMAL(18,2) = ISNULL(@slCu, 0);
-                DECLARE @qMoi DECIMAL(18,2) = ISNULL(@slMoi, 0);
-                DECLARE @delta DECIMAL(18,2) = @qMoi - @qCu;
-
-                IF @delta <> 0
-                BEGIN
-                    DECLARE @dgToUse DECIMAL(18,2) = COALESCE(@dgMoi, @dgCu, 0);
-                    
-                    -- Nếu chuyển kho, phải điều chỉnh cả kho nguồn
-                    IF @MaLoaiNhap = 'CHUYEN_KHO' AND @IDKhoNguon IS NOT NULL
-                    BEGIN
-                        IF @delta > 0
-                        BEGIN
-                            -- Nhập thêm vào kho nhập (LoaiChungTu = 4 - Điều chỉnh tăng) -> Nhập
-                            INSERT INTO KHO_GiaoDichKho 
-                                (NgayChungTu, SoChungTu, LoaiChungTu, IDChiTietKho, IDKho, IDSanPham, SoLuongNhap, SoLuongXuat, DonGia, ThanhTien, DienGiai, NgayTao, NguoiTao) 
-                            VALUES 
-                                (CAST(GETDATE() AS DATE), @soDieuChinh, 4, 0, @IDKho, @spId, @delta, 0, @dgToUse, @dgToUse * @delta, N'Nhập điều chỉnh tăng nhận chuyển kho theo phiếu ' + @soDieuChinh, GETDATE(), @NguoiTao);
-                            
-                            -- Xuất thêm từ kho nguồn (LoaiChungTu = 4 - Điều chỉnh giảm) -> Xuất
-                            INSERT INTO KHO_GiaoDichKho 
-                                (NgayChungTu, SoChungTu, LoaiChungTu, IDChiTietKho, IDKho, IDSanPham, SoLuongNhap, SoLuongXuat, DonGia, ThanhTien, DienGiai, NgayTao, NguoiTao) 
-                            VALUES 
-                                (CAST(GETDATE() AS DATE), @soDieuChinh, 4, 0, @IDKhoNguon, @spId, 0, @delta, @dgToUse, @dgToUse * @delta, N'Xuất điều chỉnh tăng xuất chuyển kho theo phiếu ' + @soDieuChinh, GETDATE(), @NguoiTao);
-                        END
-                        ELSE IF @delta < 0
-                        BEGIN
-                            DECLARE @actualDelta DECIMAL(18,2) = ABS(@delta);
-                            -- Xuất bớt khỏi kho nhập
-                            INSERT INTO KHO_GiaoDichKho 
-                                (NgayChungTu, SoChungTu, LoaiChungTu, IDChiTietKho, IDKho, IDSanPham, SoLuongNhap, SoLuongXuat, DonGia, ThanhTien, DienGiai, NgayTao, NguoiTao) 
-                            VALUES 
-                                (CAST(GETDATE() AS DATE), @soDieuChinh, 4, 0, @IDKho, @spId, 0, @actualDelta, @dgToUse, @dgToUse * @actualDelta, N'Xuất điều chỉnh giảm nhận chuyển kho theo phiếu ' + @soDieuChinh, GETDATE(), @NguoiTao);
-                            
-                            -- Nhập lại vào kho nguồn
-                            INSERT INTO KHO_GiaoDichKho 
-                                (NgayChungTu, SoChungTu, LoaiChungTu, IDChiTietKho, IDKho, IDSanPham, SoLuongNhap, SoLuongXuat, DonGia, ThanhTien, DienGiai, NgayTao, NguoiTao) 
-                            VALUES 
-                                (CAST(GETDATE() AS DATE), @soDieuChinh, 4, 0, @IDKhoNguon, @spId, @actualDelta, 0, @dgToUse, @dgToUse * @actualDelta, N'Nhập điều chỉnh giảm xuất chuyển kho theo phiếu ' + @soDieuChinh, GETDATE(), @NguoiTao);
-                        END
-                    END
-                    ELSE
-                    BEGIN
-                        -- Các loại phiếu nhập khác (Nhập mua, Khách hàng trả hàng, ...)
-                        IF @delta > 0
-                        BEGIN
-                            -- Nhập thêm
-                            INSERT INTO KHO_GiaoDichKho 
-                                (NgayChungTu, SoChungTu, LoaiChungTu, IDChiTietKho, IDKho, IDSanPham, SoLuongNhap, SoLuongXuat, DonGia, ThanhTien, DienGiai, NgayTao, NguoiTao) 
-                            VALUES 
-                                (CAST(GETDATE() AS DATE), @soDieuChinh, 4, 0, @IDKho, @spId, @delta, 0, @dgToUse, @dgToUse * @delta, N'Nhập điều chỉnh tăng phiếu nhập theo phiếu ' + @soDieuChinh, GETDATE(), @NguoiTao);
-                        END
-                        ELSE IF @delta < 0
-                        BEGIN
-                            -- Xuất bớt
-                            DECLARE @absDelta DECIMAL(18,2) = ABS(@delta);
-                            INSERT INTO KHO_GiaoDichKho 
-                                (NgayChungTu, SoChungTu, LoaiChungTu, IDChiTietKho, IDKho, IDSanPham, SoLuongNhap, SoLuongXuat, DonGia, ThanhTien, DienGiai, NgayTao, NguoiTao) 
-                            VALUES 
-                                (CAST(GETDATE() AS DATE), @soDieuChinh, 4, 0, @IDKho, @spId, 0, @absDelta, @dgToUse, @dgToUse * @absDelta, N'Xuất điều chỉnh giảm phiếu nhập theo phiếu ' + @soDieuChinh, GETDATE(), @NguoiTao);
-                        END
-                    END
-                END
             END
 
             FETCH NEXT FROM db_cursor INTO @spId;
@@ -353,6 +298,33 @@ BEGIN
         SELECT 
             @IDPhieuNhap, IDSanPham, SoLuong, DonGia, ThanhTien, ThueGTGT, TienThue, TongSauThue, GhiChu, NgaySanXuat, HanSuDung
         FROM @ChiTietMoi;
+
+        -- 7. Cập nhật lại sổ kho KHO_GiaoDichKho theo đúng dữ liệu cuối cùng (Clean Ledger)
+        DECLARE @SoChungTuGoc NVARCHAR(50);
+        SELECT @SoChungTuGoc = SoChungTu FROM KHO_PhieuNhap WHERE ID = @IDPhieuNhap;
+
+        DECLARE @LoaiChungTuGoc INT;
+        SELECT TOP 1 @LoaiChungTuGoc = LoaiChungTu FROM KHO_GiaoDichKho WHERE SoChungTu = @SoChungTuGoc;
+        IF @LoaiChungTuGoc IS NULL SET @LoaiChungTuGoc = 2;
+
+        DELETE FROM KHO_GiaoDichKho WHERE SoChungTu = @SoChungTuGoc;
+
+        -- Thêm lại Nhập cho Kho nhận
+        INSERT INTO KHO_GiaoDichKho 
+            (NgayChungTu, SoChungTu, LoaiChungTu, IDChiTietKho, IDKho, IDSanPham, SoLuongNhap, SoLuongXuat, DonGia, ThanhTien, DienGiai, NgayTao, NguoiTao)
+        SELECT 
+            @NgayNhap, @SoChungTuGoc, @LoaiChungTuGoc, 0, @IDKho, IDSanPham, SoLuong, 0, DonGia, TongSauThue, N'Điều chỉnh phiếu ' + @SoChungTuGoc, GETDATE(), @NguoiTao
+        FROM @ChiTietMoi WHERE SoLuong > 0;
+
+        -- Thêm lại Xuất cho Kho nguồn (nếu là chuyển kho)
+        IF @MaLoaiNhap = 'CHUYEN_KHO' AND @IDKhoNguon IS NOT NULL
+        BEGIN
+            INSERT INTO KHO_GiaoDichKho 
+                (NgayChungTu, SoChungTu, LoaiChungTu, IDChiTietKho, IDKho, IDSanPham, SoLuongNhap, SoLuongXuat, DonGia, ThanhTien, DienGiai, NgayTao, NguoiTao)
+            SELECT 
+                @NgayNhap, @SoChungTuGoc, @LoaiChungTuGoc, 0, @IDKhoNguon, IDSanPham, 0, SoLuong, DonGia, TongSauThue, N'Điều chỉnh phiếu ' + @SoChungTuGoc, GETDATE(), @NguoiTao
+            FROM @ChiTietMoi WHERE SoLuong > 0;
+        END
 
         COMMIT TRANSACTION;
     END TRY

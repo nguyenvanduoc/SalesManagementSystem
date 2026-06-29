@@ -177,6 +177,8 @@
     <Compile Include="Helpers\NumberToTextHelper.cs" />
     <Compile Include="Helpers\PermissionHelper.cs" />
     <Compile Include="Models\Entities\AclPhanQuyen.cs" />
+    <Compile Include="Models\Entities\KHO_DieuChinhPhieuNhap.cs" />
+    <Compile Include="Models\Entities\KHO_DieuChinhPhieuNhapChiTiet.cs" />
     <Compile Include="Models\ViewModels\DmSanPhamViewModel.cs" />
     <Compile Include="Models\ViewModels\DmSanPhamCreateEditViewModel.cs" />
     <Compile Include="Models\ViewModels\DmKhoHangViewModel.cs" />
@@ -372,6 +374,7 @@
     <Content Include="obj\Release\Package\PackageTmp\Views\DonDatHang\_DetailInline.cshtml" />
     <Content Include="obj\Release\Package\PackageTmp\Views\PhieuNhapKho\_DetailInline.cshtml" />
     <Content Include="obj\Release\Package\PackageTmp\Views\PhieuXuatKho\_DetailInline.cshtml" />
+    <Content Include="obj\Release\Package\PackageTmp\Views\CongNoNCC\_CongNoNCCList.cshtml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
