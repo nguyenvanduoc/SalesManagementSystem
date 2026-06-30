@@ -1,41 +1,32 @@
-<!-- Modal chọn đơn đặt hàng -->
-<div class="modal fade" id="modalChonDonDatHang" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content shadow-lg border-0">
-            <div class="modal-header bg-light">
-                <h5 class="modal-title fw-bold text-uppercase" style="color: #0b5b84;"><i class="bi bi-cart"></i> Chọn Đơn Đặt Hàng Cần Xuất Kho</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="table-responsive">
-                    <table id="tblChonDonDatHangModal" class="table table-bordered table-hover dt-responsive nowrap w-100 table-custom" style="width:100%; min-width:1000px;">
-                        <thead>
-                            <tr>
-                                <th>Số ĐH</th>
-                                <th>Ngày đặt</th>
-                                <th>Khách hàng</th>
-                                <th>Kho hàng</th>
-                                <th>Tổng tiền</th>
-                                <th>Trạng thái</th>
-                                <th>Chọn</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Data loaded via JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+---
+name: "Table Grid Development Convention"
+description: "Quy tắc khi tạo mới các màn hình dạng lưới (grid/table) để có chức năng kéo thả độ rộng cột."
+---
 
+# Quy tắc tạo màn hình danh sách (Grid/Table)
+
+Khi tạo mới bất kỳ màn hình nào có chứa bảng dữ liệu (grid/table), BẮT BUỘC phải tuân thủ quy tắc sau để hỗ trợ tính năng kéo thả thay đổi kích thước độ rộng cột (resize column).
+
+## 1. Cấu trúc Table
+- Thẻ `<table>` phải có class `table-custom`.
+- BẮT BUỘC phải cung cấp một `id` duy nhất cho table, ví dụ `id="tblTenManHinh"`.
+- Nên cung cấp style `min-width` phù hợp (ví dụ: `style="width:100%; min-width:1000px;"`).
+
+Ví dụ:
+```html
+<table id="tblDanhMuc" class="table table-custom table-bordered table-hover mb-0" style="width:100%; min-width:1000px;">
+```
+
+## 2. Bổ sung Style và Script Resizer
+Ở cuối file view (thường là `_List.cshtml`), BẮT BUỘC chèn đoạn style và script dưới đây để kích hoạt tính năng resize cột. Cần thay thế `#tblTenManHinh` và `tblTenManHinh` bằng `id` thực tế của bảng.
+
+```html
 <style>
-    #tblChonDonDatHangModal th {
+    #tblTenManHinh th {
         position: relative;
         background-clip: padding-box;
     }
-    #tblChonDonDatHangModal th .resizer {
+    #tblTenManHinh th .resizer {
         position: absolute;
         top: 0;
         right: -3px;
@@ -46,20 +37,23 @@
         z-index: 10;
         background-color: transparent;
     }
-    #tblChonDonDatHangModal th .resizer:hover, #tblChonDonDatHangModal th .resizer.resizing {
+    #tblTenManHinh th .resizer:hover, #tblTenManHinh th .resizer.resizing {
         background-color: rgba(11, 91, 132, 0.5);
     }
 </style>
 <script>
     (function() {
-        var table = document.getElementById('tblChonDonDatHangModal');
+        var table = document.getElementById('tblTenManHinh');
         if (!table) return;
         
         var ths = table.querySelectorAll('th');
         ths.forEach(function(th) {
+            // Bỏ qua các cột chứa icon, checkbox (chiều rộng nhỏ hơn 50px)
             if(th.innerText.trim() === '' && (th.style.width === '35px' || th.style.width === '40px' || th.style.width === '50px')) return;
+            // Bỏ qua cột Thao tác và STT
             if(th.innerText.trim() === 'Thao tác' || th.innerText.trim() === 'STT') return;
             
+            // Tránh add trùng resizer nếu đã có
             if(th.querySelector('.resizer')) return;
 
             var resizer = document.createElement('div');
@@ -96,3 +90,6 @@
         });
     })();
 </script>
+```
+
+**Lưu ý:** Chắc chắn rằng biến chuỗi cho ID truyền vào trong đoạn script trùng khớp với thẻ HTML `table` id.

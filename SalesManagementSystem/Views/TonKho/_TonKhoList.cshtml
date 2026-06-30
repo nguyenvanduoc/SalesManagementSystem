@@ -132,3 +132,70 @@
     </div>
     @Html.Partial("_Pagination", Model)
 </div>
+
+<style>
+    #tblTonKho th {
+        position: relative;
+        background-clip: padding-box;
+    }
+    #tblTonKho th .resizer {
+        position: absolute;
+        top: 0;
+        right: -3px;
+        width: 6px;
+        height: 100%;
+        cursor: col-resize;
+        user-select: none;
+        z-index: 10;
+        background-color: transparent;
+    }
+    #tblTonKho th .resizer:hover, #tblTonKho th .resizer.resizing {
+        background-color: rgba(11, 91, 132, 0.5);
+    }
+</style>
+<script>
+    (function() {
+        var table = document.getElementById('tblTonKho');
+        if (!table) return;
+        
+        var ths = table.querySelectorAll('th');
+        ths.forEach(function(th) {
+            // Không áp dụng cho cột thao tác (cột đầu tiên không có chữ)
+            if(th.innerText.trim() === 'Thao tác' && th.style.width === '70px') return;
+            
+            if(th.querySelector('.resizer')) return;
+
+            var resizer = document.createElement('div');
+            resizer.classList.add('resizer');
+            th.appendChild(resizer);
+
+            var startX, startWidth;
+            
+            resizer.addEventListener('mousedown', function(e) {
+                startX = e.pageX;
+                startWidth = th.offsetWidth;
+                resizer.classList.add('resizing');
+
+                var doDrag = function(e) {
+                    var newWidth = startWidth + (e.pageX - startX);
+                    if(newWidth > 30) {
+                        th.style.width = newWidth + 'px';
+                        th.style.minWidth = newWidth + 'px';
+                        th.style.maxWidth = newWidth + 'px';
+                    }
+                };
+
+                var stopDrag = function(e) {
+                    resizer.classList.remove('resizing');
+                    document.removeEventListener('mousemove', doDrag);
+                    document.removeEventListener('mouseup', stopDrag);
+                };
+
+                document.addEventListener('mousemove', doDrag);
+                document.addEventListener('mouseup', stopDrag);
+                
+                e.preventDefault();
+            });
+        });
+    })();
+</script>
