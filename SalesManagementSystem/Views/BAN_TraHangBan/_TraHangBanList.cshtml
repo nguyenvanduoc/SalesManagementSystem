@@ -1,0 +1,105 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.TraHangBanViewModel>
+@using SalesManagementSystem.Helpers
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive" style="min-height:300px;">
+            <table class="table table-custom table-bordered table-hover mb-0" style="width:100%; min-width:1350px;">
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width:50px;"></th>
+                        <th class="text-center" style="width:45px;">STT</th>
+                        <th>Số chứng từ</th>
+                        <th class="text-center">Ngày chứng từ</th>
+                        <th>Số đơn hàng</th>
+                        <th>Khách hàng</th>
+                        <th>Kho nhập</th>
+                        <th class="text-end">Tổng SL trả</th>
+                        <th class="text-end">Tổng tiền trả</th>
+                        <th class="text-end">Đã hoàn</th>
+                        <th class="text-end">Còn phải hoàn</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th>Người tạo</th>
+                        <th class="text-center">Ngày tạo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Items != null && Model.Items.Any())
+                    {
+                        int stt = (Model.CurrentPage - 1) * Model.PageSize + 1;
+                        foreach (var item in Model.Items)
+                        {
+                            <tr class="ddh-row" data-id="@item.ID">
+                                <td class="text-center align-middle">
+                                    <div class="dropdown dropdown-hover">
+                                        <button class="btn btn-sm btn-light border dropdown-toggle-hide-arrow shadow-sm"
+                                                type="button" data-bs-toggle="dropdown" data-bs-boundary="window" style="padding:2px 6px;">
+                                            <i class="bi bi-grid-3x3-gap-fill text-dark"></i>
+                                        </button>
+                                        <ul class="dropdown-menu shadow">
+                                            <li><h6 class="dropdown-header text-uppercase fw-bold text-dark">Thao tác</h6></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            @if (PermissionHelper.HasPermission("BAN_TraHangBan", LoaiPhanQuyen.CapNhat))
+                                            {
+                                                <li>
+                                                    <a class="dropdown-item" href="@Url.Action("Edit","BAN_TraHangBan", new { id = item.ID })">
+                                                        <i class="bi bi-pencil me-2 text-warning"></i> @(item.TrangThai == 1 ? "Cập nhật" : "Xem chi tiết")
+                                                    </a>
+                                                </li>
+                                            }
+                                            @if (PermissionHelper.HasPermission("BAN_TraHangBan", LoaiPhanQuyen.Xoa) && item.TrangThai == 1)
+                                            {
+                                                <li>
+                                                    <button type="button" class="dropdown-item text-danger"
+                                                            onclick="confirmDelete('@Url.Action("Delete","BAN_TraHangBan",new{id=item.ID})','Xóa phiếu @item.SoChungTu?')">
+                                                        <i class="bi bi-trash-fill me-2 text-danger"></i> Xóa
+                                                    </button>
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </td>
+                                <td class="text-center align-middle">@(stt++)</td>
+                                <td class="align-middle fw-bold text-primary">
+                                    <a href="@Url.Action("Edit", "BAN_TraHangBan", new { id = item.ID })" class="text-decoration-none text-primary">@item.SoChungTu</a>
+                                </td>
+                                <td class="text-center align-middle">@(item.NgayChungTu.HasValue ? item.NgayChungTu.Value.ToString("dd/MM/yyyy HH:mm") : "")</td>
+                                <td class="align-middle text-primary">@item.SoDonHang</td>
+                                <td class="align-middle">@item.TenKhachHang</td>
+                                <td class="align-middle">@item.TenKho</td>
+                                <td class="text-end align-middle fw-bold">@(item.TongSoLuong?.ToString("#,##0.##"))</td>
+                                <td class="text-end align-middle fw-bold text-danger">@(item.TongTienHang?.ToString("N0"))</td>
+                                <td class="text-end align-middle text-success">@(item.TongTienDaHoan?.ToString("N0"))</td>
+                                <td class="text-end align-middle @(item.ConPhaiHoan > 0 ? "text-warning fw-bold" : "")">@(item.ConPhaiHoan?.ToString("N0"))</td>
+                                <td class="text-center align-middle">
+                                    @{
+                                        string badgeClass = item.TrangThai == 1 ? "bg-secondary" // Lưu nháp (Màu xám)
+                                                          : item.TrangThai == 2 ? "bg-success"   // Đã ghi (Màu xanh lá)
+                                                          : item.TrangThai == 3 ? "bg-danger"    // Đã hủy (Màu đỏ)
+                                                          : "bg-secondary";
+                                        string statusText = item.TrangThai == 1 ? "Lưu nháp"
+                                                          : item.TrangThai == 2 ? "Đã ghi"
+                                                          : item.TrangThai == 3 ? "Đã hủy" : "";
+                                    }
+                                    <span class="badge @badgeClass">@statusText</span>
+                                </td>
+                                <td class="align-middle">@item.NguoiTaoName</td>
+                                <td class="text-center align-middle">@(item.NgayTao.HasValue ? item.NgayTao.Value.ToString("dd/MM/yyyy") : "")</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="14" class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                Chưa có phiếu trả hàng nào.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @Html.Partial("_Pagination", Model)
+</div>

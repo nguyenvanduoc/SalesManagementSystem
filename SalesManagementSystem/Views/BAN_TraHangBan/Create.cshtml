@@ -1,0 +1,420 @@
+@model SalesManagementSystem.Models.ViewModels.TraHangBanCreateEditViewModel
+
+@{
+    ViewBag.Title = "Lập phiếu trả hàng bán";
+}
+
+<style>
+    .don-header-card { background:#fff; border:1px solid #dce4ec; border-radius:6px; padding:16px; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+    .don-section-title { font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:#7f8c8d; margin-bottom:10px; }
+    .tong-tien-box { background:linear-gradient(135deg,#1a5276,#2980b9); border-radius:8px; padding:16px 20px; color:#fff; text-align:right; }
+    .tong-tien-box .label { font-size:.8rem; opacity:.85; margin-bottom:4px; }
+    .tong-tien-box .amount { font-size:1.8rem; font-weight:800; letter-spacing:.5px; }
+    .hoan-tien-box { background:linear-gradient(135deg,#e67e22,#d35400); border-radius:8px; padding:16px 20px; color:#fff; text-align:right; }
+    .hoan-tien-box .amount { font-size:1.8rem; font-weight:800; letter-spacing:.5px; }
+    .grid-detail thead th { background:#f4f6f9; font-size:.8rem; font-weight:700; color:#2c3e50; vertical-align:middle; white-space:nowrap; text-align:left !important; }
+    .grid-detail tbody td { vertical-align:middle; padding:5px 6px; }
+    .grid-detail input.form-control, .grid-detail select.form-select { font-size:.85rem; padding:3px 7px; height:30px; }
+    .readonly-cell { background:#f8f9fa; font-size:.85rem; color:#495057; }
+    .field-error { border-color:#dc3545 !important; }
+    .form-toolbar { background:#f8f9fa; border:1px solid #dce4ec; border-radius:6px; padding:10px 16px; margin-bottom:12px; display:flex; gap:8px; align-items:center; }
+</style>
+
+<!-- Toolbar -->
+<div class="form-toolbar">
+    <a href="@Url.Action("Index","BAN_TraHangBan")" class="btn btn-secondary btn-sm">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+    <button type="button" id="btnSave" class="btn btn-sm text-white" style="background-color:#2998e4;border:none;">
+        <i class="bi bi-save me-1"></i> Lưu nháp
+    </button> 
+    @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("BAN_TraHangBan", SalesManagementSystem.Helpers.LoaiPhanQuyen.CapNhat))
+    {
+        <button type="button" id="btnGhiSo" class="btn btn-sm text-white" style="background-color:#2ecc71;border:none;" onclick="confirmGhiSo()">
+            <i class="bi bi-check-circle me-1"></i> Ghi nhận trả hàng
+        </button>
+    }
+    <span class="text-muted small ms-auto">
+        <i class="bi bi-info-circle me-1"></i>@ViewBag.Title
+    </span>
+</div>
+
+<form id="frmTraHang" method="post">
+    @Html.AntiForgeryToken()
+    <div class="row g-3">
+        <div class="col-md-12">
+            <!-- Card: Thông tin chung -->
+            <div class="don-header-card">
+                <div class="don-section-title"><i class="bi bi-file-earmark-text me-1"></i>Thông tin chung</div>
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">
+                            Số chứng từ <span class="text-danger">*</span>
+                        </label>
+                        @Html.TextBoxFor(m => m.SoChungTu, new { @class = "form-control readonly-cell", @readonly = "readonly" })
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Ngày chứng từ</label>
+                        @Html.TextBoxFor(m => m.NgayChungTu, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted fw-semibold small">
+                            Kho nhập <span class="text-danger">*</span>
+                        </label>
+                        @Html.DropDownListFor(m => m.IDKho, Model.KhoList, "-- Chọn kho nhập --", new { @class = "form-select" })
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label text-muted fw-semibold small">Lý do trả hàng</label>
+                        @Html.TextBoxFor(m => m.LyDoTraHang, new { @class = "form-control", placeholder = "Nhập lý do trả hàng..." })
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Chọn đơn hàng -->
+            <div class="don-header-card">
+                <div class="d-flex align-items-center mb-2 gap-2">
+                    <div class="don-section-title mb-0"><i class="bi bi-cart me-1"></i>Đơn hàng</div>
+                    <button type="button" class="btn btn-sm btn-outline-primary ms-auto" onclick="openChonDonHangModal()">
+                        <i class="bi bi-search me-1"></i> Chọn đơn hàng
+                    </button>
+                </div>
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Số đơn hàng</label>
+                        @Html.HiddenFor(m => m.IDDonDatHang, new { id = "hdIDDonDatHang" })
+                        @Html.HiddenFor(m => m.IDKhachHang, new { id = "hdIDKhachHang" })
+                        <input type="text" id="txtSoDonHang" class="form-control readonly-cell" value="@Model.SoDonHang" readonly placeholder="Chọn đơn hàng..." />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted fw-semibold small">Khách hàng</label>
+                        <input type="text" id="txtTenKH" class="form-control readonly-cell" value="@Model.TenKhachHang" readonly />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Đã thanh toán (Đơn hàng)</label>
+                        @Html.HiddenFor(m => m.DaThanhToan, new { id = "hdDaThanhToan" })
+                        @Html.HiddenFor(m => m.TongTienDonHang, new { id = "hdTongTienDonHang" })
+                        <input type="text" id="txtDaThanhToan" class="form-control readonly-cell text-end text-success fw-bold" value="@Model.DaThanhToan.ToString("N0")" readonly />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Chi tiết sản phẩm -->
+            <div class="don-header-card">
+                <div class="don-section-title mb-2"><i class="bi bi-table me-1"></i>Chi tiết sản phẩm</div>
+                <div class="table-responsive">
+                    <table class="table table-bordered grid-detail mb-0" id="tblChiTiet">
+                        <thead>
+                            <tr>
+                                <th style="width:35px;" class="text-center">STT</th>
+                                <th style="width:120px;">Mã SP</th>
+                                <th>Tên sản phẩm</th>
+                                <th style="width:80px;" class="text-center">ĐVT</th>
+                                <th style="width:80px;" class="text-end">SL bán</th>
+                                <th style="width:80px;" class="text-end">Đã trả</th>
+                                <th style="width:90px;" class="text-end">Còn được trả</th>
+                                <th style="width:100px;" class="text-end">SL trả</th>
+                                <th style="width:120px;" class="text-end">Đơn giá</th>
+                                <th style="width:140px;" class="text-end">Thành tiền</th>
+                                <th>Ghi chú</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbChiTietBody">
+                            <tr>
+                                <td colspan="11" class="text-center text-muted py-3">Vui lòng chọn đơn hàng để hiển thị chi tiết</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Card: Tổng hợp -->
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <div class="don-header-card p-2 px-3 d-flex flex-wrap justify-content-between align-items-center fw-bold mb-0">
+                        <div class="d-flex align-items-center gap-3">
+                            <div>
+                                <span class="text-muted small me-1">Tổng số lượng:</span>
+                                <span id="dispTongSoLuong" class="fs-6 text-dark">0</span>
+                                <input type="hidden" id="hdTongSoLuong" name="TongSoLuong" value="0" />
+                            </div>
+                            <div>
+                                <span class="text-muted small me-1">Cộng tiền hàng trả:</span>
+                                <span id="dispTongTienHang" class="fs-6 text-dark">0</span>
+                                <input type="hidden" id="hdTongTienHang" name="TongTienHang" value="0" />
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="text-muted small me-2">Phí bốc xếp:</span>
+                                <input type="text" id="PhiBocXepDisplay" class="form-control form-control-sm text-end fw-bold" style="width: 120px;" value="0" oninput="formatAndCalc()" />
+                                <input type="hidden" id="PhiBocXep" name="PhiBocXep" value="0" />
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-muted text-uppercase">Cần phải hoàn khách:</span>
+                            <span id="dispConPhaiHoan" class="fs-4 text-danger fw-bolder">0</span>
+                            <span class="text-danger fw-bolder">VNĐ</span>
+                            <input type="hidden" id="hdConPhaiHoan" name="ConPhaiHoan" value="0" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>
+
+<!-- Modal Chọn Đơn Hàng -->
+<div class="modal fade" id="modalChonDonHang" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header py-2 bg-light">
+                <h5 class="modal-title fw-bold text-primary fs-6"><i class="bi bi-search me-1"></i>Chọn đơn hàng để trả</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="p-3 bg-white border-bottom">
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <input type="text" id="txtSearchSoDon" class="form-control form-control-sm" placeholder="Số đơn hàng..." />
+                        </div>
+                        <div class="col-md-3">
+                            <input type="date" id="txtSearchTuNgay" class="form-control form-control-sm" />
+                        </div>
+                        <div class="col-md-3">
+                            <input type="date" id="txtSearchDenNgay" class="form-control form-control-sm" />
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-sm btn-primary w-100" onclick="loadDonHang()">Tìm kiếm</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="donHangContainer" class="p-3" style="max-height:400px; overflow-y:auto;">
+                    <!-- Content loaded via ajax -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Module Logic
+        function openChonDonHangModal() {
+            $('#modalChonDonHang').modal('show');
+            loadDonHang();
+        }
+
+        function loadDonHang() {
+            $.get('@Url.Action("LoadDonHangTra", "BAN_TraHangBan")', {
+                soDonHang: $('#txtSearchSoDon').val(),
+                tuNgay: $('#txtSearchTuNgay').val(),
+                denNgay: $('#txtSearchDenNgay').val()
+            }, function(res) {
+                $('#donHangContainer').html(res);
+            });
+        }
+
+        function selectDonHang(id, soDon, idKh, tenKh, maKh, idKho, daThanhToan, tongTienDonHang) {
+            $('#hdIDDonDatHang').val(id);
+            $('#txtSoDonHang').val(soDon);
+            $('#hdIDKhachHang').val(idKh);
+            $('#txtTenKH').val(maKh + ' - ' + tenKh);
+            if(idKho > 0) $('#IDKho').val(idKho);
+            $('#hdDaThanhToan').val(daThanhToan);
+            $('#hdTongTienDonHang').val(tongTienDonHang);
+            $('#txtDaThanhToan').val(formatNumber(daThanhToan));
+            
+            $('#modalChonDonHang').modal('hide');
+            loadChiTiet(id);
+        }
+
+        function loadChiTiet(idDon) {
+            $.get('@Url.Action("LoadChiTietDonHang", "BAN_TraHangBan")', { idDonDatHang: idDon }, function(res) {
+                if(res.success) {
+                    var html = '';
+                    if(res.data.length === 0) {
+                        html = '<tr><td colspan="11" class="text-center">Đơn hàng không có sản phẩm nào có thể trả.</td></tr>';
+                    } else {
+                        res.data.forEach(function(item, index) {
+                            html += `<tr data-idsp="${item.IDSanPham}">
+                                <td class="text-center">${index + 1}</td>
+                                <td>${item.MaSanPham}</td>
+                                <td>${item.TenSanPham}</td>
+                                <td class="text-center">${item.DonViTinh || ''}</td>
+                                 <td class="text-end row-sl-ban" data-val="${item.SoLuongBan}">${formatNumber(item.SoLuongBan)}</td>
+                                 <td class="text-end row-sl-da-tra" data-val="${item.SoLuongDaTra}">${formatNumber(item.SoLuongDaTra)}</td>
+                                 <td class="text-end fw-bold text-primary row-con-duoc-tra" data-val="${item.SoLuongConLai}">${formatNumber(item.SoLuongConLai)}</td>
+                                 <td><input type="number" class="form-control form-control-sm text-end row-sl-tra" value="0" min="0" max="${item.SoLuongConLai}" oninput="calcRow(this)" /></td>
+                                 <td class="text-end row-don-gia" data-val="${item.DonGia}">${formatNumber(item.DonGia)}</td>
+                                 <td class="text-end row-thanh-tien fw-bold" data-val="0">0</td>
+                                <td><input type="text" class="form-control form-control-sm row-ghi-chu" /></td>
+                            </tr>`;
+                        });
+                    }
+                    $('#tbChiTietBody').html(html);
+                    calcTotal();
+                } else {
+                    showToast('error', res.message || "Lỗi khi tải chi tiết");
+                }
+            });
+        }
+
+        function calcRow(inp) {
+            var $tr = $(inp).closest('tr');
+            var slTra = parseFloat($(inp).val()) || 0;
+            var conDuocTra = parseFloat($tr.find('.row-con-duoc-tra').attr('data-val')) || 0;
+            
+            if(slTra > conDuocTra) {
+                showToast('warning', "Số lượng trả vượt số lượng còn được trả.");
+                $(inp).val(conDuocTra);
+                slTra = conDuocTra;
+            }
+            
+            var donGia = parseFloat($tr.find('.row-don-gia').attr('data-val')) || 0;
+            var thanhTien = slTra * donGia;
+            $tr.find('.row-thanh-tien').attr('data-val', thanhTien).text(formatNumber(thanhTien));
+            calcTotal();
+        }
+
+        function calcTotal() {
+            var tongSl = 0, tongTien = 0;
+            $('#tbChiTietBody tr').each(function() {
+                var sl = parseFloat($(this).find('.row-sl-tra').val()) || 0;
+                var tt = parseFloat($(this).find('.row-thanh-tien').text().replace(/,/g, '')) || 0;
+                tongSl += sl;
+                tongTien += tt;
+            });
+            
+            var phiBocXep = parseFloat($('#PhiBocXep').val()) || 0;
+            var tongCong = tongTien + phiBocXep;
+            
+            $('#dispTongSoLuong').text(formatNumber(tongSl));
+            $('#hdTongSoLuong').val(tongSl);
+
+            $('#dispTongTienHang').text(formatNumber(tongTien));
+            $('#hdTongTienHang').val(tongTien);
+            
+            var conPhaiHoan = tongCong;
+            
+            $('#dispConPhaiHoan').text(formatNumber(conPhaiHoan));
+            $('#hdConPhaiHoan').val(conPhaiHoan);
+        }
+
+        function formatAndCalc() {
+            var valStr = $('#PhiBocXepDisplay').val().replace(/[^0-9]/g, '');
+            var val = parseFloat(valStr) || 0;
+            $('#PhiBocXepDisplay').val(formatNumber(val));
+            $('#PhiBocXep').val(val);
+            calcTotal();
+        }
+        
+        function formatNumber(num) {
+            return num.toLocaleString('en-US');
+        }
+
+        $('#btnSave').click(function() {
+            var idKho = $('#IDKho').val();
+            if (!idKho || idKho === "" || idKho === "0") {
+                showToast('warning', "Vui lòng chọn Kho nhập trước khi lưu!");
+                $('#IDKho').focus();
+                return;
+            }
+            
+            var data = getFormData();
+            if(data.ChiTiets.length === 0) {
+                showToast('warning', "Vui lòng nhập số lượng trả cho ít nhất 1 sản phẩm!");
+                return;
+            }
+            
+            showConfirm("Bạn có muốn lưu thông tin phiếu trả hàng này không?", function() {
+                $.ajax({
+                    url: '@Url.Action("Create", "BAN_TraHangBan")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function(res) {
+                        if (res.success) {
+                            showToast('success', "Lưu phiếu trả hàng thành công!");
+                        } else {
+                            showToast('error', res.message || "Lỗi khi lưu");
+                        }
+                    }
+                });
+            });
+        });
+
+        function getFormData() {
+            var chiTiets = [];
+            $('#tbChiTietBody tr').each(function() {
+                var sl = parseFloat($(this).find('.row-sl-tra').val()) || 0;
+                if(sl > 0) {
+                    chiTiets.push({
+                        IDSanPham: $(this).data('idsp'),
+                        SoLuongBan: parseFloat($(this).find('.row-sl-ban').attr('data-val')) || 0,
+                        SoLuongDaTra: parseFloat($(this).find('.row-sl-da-tra').attr('data-val')) || 0,
+                        SoLuongConLai: parseFloat($(this).find('.row-con-duoc-tra').attr('data-val')) || 0,
+                        SoLuongTra: sl,
+                        DonGia: parseFloat($(this).find('.row-don-gia').attr('data-val')) || 0,
+                        ThanhTien: parseFloat($(this).find('.row-thanh-tien').attr('data-val')) || 0,
+                        GhiChu: $(this).find('.row-ghi-chu').val()
+                    });
+                }
+            });
+            
+            return {
+                SoChungTu: $('#SoChungTu').val(),
+                NgayChungTu: $('#NgayChungTu').val(),
+                IDDonDatHang: $('#hdIDDonDatHang').val(),
+                IDKhachHang: $('#hdIDKhachHang').val(),
+                IDKho: $('#IDKho').val(),
+                LyDoTraHang: $('#LyDoTraHang').val(),
+                TongSoLuong: $('#hdTongSoLuong').val(),
+                TongTienHang: $('#hdTongTienHang').val(),
+                TongTienDaHoan: 0,
+                ConPhaiHoan: $('#hdConPhaiHoan').val(),
+                PhiBocXep: $('#PhiBocXep').val(),
+                ChiTiets: chiTiets
+            };
+        }
+
+        function confirmGhiSo() {
+            var idKho = $('#IDKho').val();
+            if (!idKho || idKho === "" || idKho === "0") {
+                showToast('warning', "Vui lòng chọn Kho nhập trước khi ghi sổ!");
+                $('#IDKho').focus();
+                return;
+            }
+            
+            var data = getFormData();
+            if(data.ChiTiets.length === 0) {
+                showToast('warning', "Vui lòng nhập số lượng trả cho ít nhất 1 sản phẩm!");
+                return;
+            }
+            
+            showConfirm("Ghi nhận phiếu trả hàng? Bạn vẫn có thể sửa phiếu sau khi ghi, hệ thống sẽ tự động cập nhật lại tồn kho.", function() {
+                $.ajax({
+                    url: '@Url.Action("Create", "BAN_TraHangBan")?ghiSo=true',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function(res) {
+                        if (res.success) {
+                            showToast('success', "Ghi sổ thành công!");
+                            if (typeof TabManager !== 'undefined') {
+                                var paneId = $('#IDKho').closest('.tab-pane').attr('id');
+                                var key = paneId ? paneId.replace('-pane', '').replace('tab-', '') : 'BAN_TraHangBan';
+                                if (paneId) $('#' + paneId).attr('data-url', '');
+                                setTimeout(function() {
+                                    TabManager.openTab(key, 'Chi tiết trả hàng bán', '@Url.Action("Edit", "BAN_TraHangBan")/' + res.id);
+                                }, 1500);
+                            } else {
+                                setTimeout(() => window.location.href = '@Url.Action("Edit", "BAN_TraHangBan")/' + res.id, 1500);
+                            }
+                        } else {
+                            showToast('error', res.message || "Lỗi ghi sổ");
+                        }
+                    }
+                });
+            });
+        }
+    </script>
+}

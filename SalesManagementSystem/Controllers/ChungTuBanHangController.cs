@@ -407,6 +407,27 @@ namespace SalesManagementSystem.Controllers
         }
 
         [HttpPost]
+        public ActionResult BoGhi(int id)
+        {
+            if (!PermissionHelper.HasPermission("ChungTuBanHang", LoaiPhanQuyen.TuyChon)) 
+                return Json(new { success = false, message = "Không có quyền thực hiện chức năng bỏ ghi" });
+
+            try
+            {
+                var user = GetCurrentUser();
+                int userId = user?.IDNhanSu ?? 0;
+
+                _repo.BoGhi(id, userId);
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
         public ActionResult CheckTonKho(int idKho, List<CheckTonKhoRequestItem> sanPhams)
         {
             try

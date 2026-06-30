@@ -1,4 +1,4 @@
-﻿using SalesManagementSystem.Models.Entities;
+using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Models.ViewModels;
 using System.Collections.Generic;
 
@@ -15,6 +15,7 @@ namespace SalesManagementSystem.Repositories.Interfaces
         void UpdateStatus(int id, int trangThai, int nguoiCapNhat);
         void GhiSo(int id, int nguoiGhi);
         void Cancel(int id, int? idDonDatHang, int nguoiHuy, string lyDo);
+        void BoGhi(int id, int nguoiBoGhi);
         IEnumerable<CheckTonKhoResponseViewModel> CheckTonKhoByKho(int idKho, List<CheckTonKhoRequestItem> sanPhams);
         IEnumerable<CheckTonKhoResponseViewModel> CheckTonKhoAllKho(List<CheckTonKhoRequestItem> sanPhams);
     }

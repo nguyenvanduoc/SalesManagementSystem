@@ -64,6 +64,14 @@
                                                     </button>
                                                 </li>
                                             }
+                                            @if (item.IDChungTuBanHang.HasValue && (item.TrangThaiChungTu == 2 || item.TrangThaiChungTu == 3) && SalesManagementSystem.Helpers.PermissionHelper.HasPermission("ChungTuBanHang", SalesManagementSystem.Helpers.LoaiPhanQuyen.TuyChon))
+                                            {
+                                                <li>
+                                                    <button type="button" class="dropdown-item text-warning" onclick="boGhiChungTu(this, @item.IDChungTuBanHang)">
+                                                        <i class="bi bi-arrow-counterclockwise me-2 text-warning"></i> Bỏ ghi
+                                                    </button>
+                                                </li>
+                                            }
                                                 @if (!item.IDChungTuBanHang.HasValue)
                                                 {
                                                     <li><span class="dropdown-item text-muted small">Không có thao tác</span></li>

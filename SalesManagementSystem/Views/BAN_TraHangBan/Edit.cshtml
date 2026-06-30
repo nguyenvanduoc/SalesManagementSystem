@@ -1,0 +1,387 @@
+@model SalesManagementSystem.Models.ViewModels.TraHangBanCreateEditViewModel
+
+@{
+    ViewBag.Title = Model.TrangThai != 3 ? "Cập nhật phiếu trả hàng bán" : "Xem chi tiết phiếu trả hàng bán";
+    bool isReadonly = Model.TrangThai == 3; // Cho phép sửa khi nháp (1) hoặc đã ghi (2). Hủy (3) thì readonly.
+}
+
+<style>
+    .don-header-card { background:#fff; border:1px solid #dce4ec; border-radius:6px; padding:16px; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+    .don-section-title { font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:#7f8c8d; margin-bottom:10px; }
+    .tong-tien-box { background:linear-gradient(135deg,#1a5276,#2980b9); border-radius:8px; padding:16px 20px; color:#fff; text-align:right; }
+    .tong-tien-box .label { font-size:.8rem; opacity:.85; margin-bottom:4px; }
+    .tong-tien-box .amount { font-size:1.8rem; font-weight:800; letter-spacing:.5px; }
+    .hoan-tien-box { background:linear-gradient(135deg,#e67e22,#d35400); border-radius:8px; padding:16px 20px; color:#fff; text-align:right; }
+    .hoan-tien-box .amount { font-size:1.8rem; font-weight:800; letter-spacing:.5px; }
+    .grid-detail thead th { background:#f4f6f9; font-size:.8rem; font-weight:700; color:#2c3e50; vertical-align:middle; white-space:nowrap; text-align:left !important; }
+    .grid-detail tbody td { vertical-align:middle; padding:5px 6px; }
+    .grid-detail input.form-control, .grid-detail select.form-select { font-size:.85rem; padding:3px 7px; height:30px; }
+    .readonly-cell { background:#f8f9fa; font-size:.85rem; color:#495057; }
+    .form-toolbar { background:#f8f9fa; border:1px solid #dce4ec; border-radius:6px; padding:10px 16px; margin-bottom:12px; display:flex; gap:8px; align-items:center; }
+</style>
+
+<!-- Toolbar -->
+<div class="form-toolbar">
+    <a href="@Url.Action("Index","BAN_TraHangBan")" class="btn btn-secondary btn-sm">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+    @if (!isReadonly)
+    {
+        <button type="button" id="btnSave" class="btn btn-sm text-white" style="background-color:#2998e4;border:none;">
+            <i class="bi bi-save me-1"></i> @(Model.TrangThai == 2 ? "Lưu thay đổi" : "Lưu nháp")
+        </button>
+        if (Model.TrangThai == 1 && SalesManagementSystem.Helpers.PermissionHelper.HasPermission("BAN_TraHangBan", SalesManagementSystem.Helpers.LoaiPhanQuyen.CapNhat))
+        {
+            <button type="button" id="btnGhiSo" class="btn btn-sm text-white" style="background-color:#2ecc71;border:none;" onclick="confirmGhiSo()">
+                <i class="bi bi-check-circle me-1"></i> Ghi nhận trả hàng
+            </button>
+        }
+    }
+    @if (Model.TrangThai == 2 && Model.ConPhaiHoan > 0)
+    {
+        <a href="@Url.Action("Create", "PhieuChi", new { loaiChi = "HOAN_TIEN", idTraHang = Model.ID, idKhachHang = Model.IDKhachHang, soTien = Model.ConPhaiHoan })" class="btn btn-sm btn-warning fw-bold text-dark">
+            <i class="bi bi-cash-coin me-1"></i> Lập phiếu chi hoàn tiền
+        </a>
+    }
+    @if (Model.TrangThai == 2 && SalesManagementSystem.Helpers.PermissionHelper.HasPermission("BAN_TraHangBan", SalesManagementSystem.Helpers.LoaiPhanQuyen.Xoa))
+    {
+        <button type="button" class="btn btn-sm btn-danger ms-auto" onclick="confirmHuy()">
+            <i class="bi bi-x-circle me-1"></i> Hủy phiếu
+        </button>
+    }
+    <span class="text-muted small @(Model.TrangThai == 2 ? "" : "ms-auto")">
+        <i class="bi bi-info-circle me-1"></i>
+        Trạng thái: 
+        <span class="badge @(Model.TrangThai == 1 ? "bg-secondary" : Model.TrangThai == 2 ? "bg-success" : "bg-danger")">
+            @(Model.TrangThai == 1 ? "Lưu nháp" : Model.TrangThai == 2 ? "Đã ghi" : "Đã hủy")
+        </span>
+    </span>
+</div>
+
+<form id="frmTraHang" method="post">
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.ID)
+    <div class="row g-3">
+        <div class="col-md-12">
+            <!-- Card: Thông tin chung -->
+            <div class="don-header-card">
+                <div class="don-section-title"><i class="bi bi-file-earmark-text me-1"></i>Thông tin chung</div>
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Số chứng từ</label>
+                        @Html.TextBoxFor(m => m.SoChungTu, new { @class = "form-control readonly-cell", @readonly = "readonly" })
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Ngày chứng từ</label>
+                        @Html.TextBoxFor(m => m.NgayChungTu, "{0:yyyy-MM-dd}", new { @class = isReadonly ? "form-control readonly-cell" : "form-control", type = "date", @readonly = isReadonly ? "readonly" : null })
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted fw-semibold small">Kho nhập</label>
+                        @if(isReadonly) {
+                            @Html.DropDownListFor(m => m.IDKho, Model.KhoList, new { @class = "form-select", disabled = "disabled" })
+                        } else {
+                            @Html.DropDownListFor(m => m.IDKho, Model.KhoList, "-- Chọn kho nhập --", new { @class = "form-select" })
+                        }
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label text-muted fw-semibold small">Lý do trả hàng</label>
+                        @Html.TextBoxFor(m => m.LyDoTraHang, new { @class = isReadonly ? "form-control readonly-cell" : "form-control", @readonly = isReadonly ? "readonly" : null })
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Chọn đơn hàng -->
+            <div class="don-header-card">
+                <div class="don-section-title mb-2"><i class="bi bi-cart me-1"></i>Đơn hàng</div>
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Số đơn hàng</label>
+                        @Html.HiddenFor(m => m.IDDonDatHang)
+                        @Html.HiddenFor(m => m.IDKhachHang)
+                        <input type="text" id="txtSoDonHang" class="form-control readonly-cell" value="@Model.SoDonHang" readonly />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted fw-semibold small">Khách hàng</label>
+                        <input type="text" id="txtTenKH" class="form-control readonly-cell" value="@Model.MaKhachHang - @Model.TenKhachHang" readonly />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Đã thanh toán (Đơn hàng)</label>
+                        @Html.HiddenFor(m => m.DaThanhToan)
+                        @Html.HiddenFor(m => m.TongTienDonHang)
+                        <input type="text" id="txtDaThanhToan" class="form-control readonly-cell text-end text-success fw-bold" value="@Model.DaThanhToan.ToString("N0")" readonly />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Chi tiết sản phẩm -->
+            <div class="don-header-card">
+                <div class="don-section-title mb-2"><i class="bi bi-table me-1"></i>Chi tiết sản phẩm</div>
+                <div class="table-responsive">
+                    <table class="table table-bordered grid-detail mb-0" id="tblChiTiet">
+                        <thead>
+                            <tr>
+                                <th style="width:35px;" class="text-center">STT</th>
+                                <th style="width:120px;">Mã SP</th>
+                                <th>Tên sản phẩm</th>
+                                <th style="width:80px;" class="text-center">ĐVT</th>
+                                <th style="width:80px;" class="text-end">SL bán</th>
+                                <th style="width:80px;" class="text-end">Đã trả</th>
+                                <th style="width:90px;" class="text-end">Còn được trả</th>
+                                <th style="width:100px;" class="text-end">SL trả</th>
+                                <th style="width:120px;" class="text-end">Đơn giá</th>
+                                <th style="width:140px;" class="text-end">Thành tiền</th>
+                                <th>Ghi chú</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbChiTietBody">
+                            @if(Model.ChiTiets != null)
+                            {
+                                int idx = 1;
+                                foreach(var item in Model.ChiTiets)
+                                {
+                                    <tr data-idsp="@item.IDSanPham">
+                                        <td class="text-center">@(idx++)</td>
+                                        <td>@item.MaSanPham</td>
+                                        <td>@item.TenSanPham</td>
+                                        <td class="text-center">@item.DonViTinh</td>
+                                        <td class="text-end row-sl-ban" data-val="@(item.SoLuongBan?.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))">@(item.SoLuongBan?.ToString("#,##0.##"))</td>
+                                        <td class="text-end row-sl-da-tra" data-val="@(item.SoLuongDaTra?.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))">@(item.SoLuongDaTra?.ToString("#,##0.##"))</td>
+                                        <td class="text-end fw-bold text-primary row-con-duoc-tra" data-val="@(item.SoLuongConLai?.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))">@(item.SoLuongConLai?.ToString("#,##0.##"))</td>
+                                        <td>
+                                            @if(isReadonly) {
+                                                <input type="text" class="form-control form-control-sm text-end row-sl-tra readonly-cell" value="@item.SoLuongTra" readonly />
+                                            } else {
+                                                decimal max = (item.SoLuongConLai ?? 0) + (item.SoLuongTra ?? 0);
+                                                <input type="number" class="form-control form-control-sm text-end row-sl-tra" value="@(item.SoLuongTra?.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))" min="0" max="@(max.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))" oninput="calcRow(this)" />
+                                            }
+                                        </td>
+                                        <td class="text-end row-don-gia" data-val="@(item.DonGia?.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))">@(item.DonGia?.ToString("N0"))</td>
+                                        <td class="text-end row-thanh-tien fw-bold" data-val="@(item.ThanhTien?.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))">@(item.ThanhTien?.ToString("N0"))</td>
+                                        <td>
+                                            @if(isReadonly) {
+                                                <input type="text" class="form-control form-control-sm row-ghi-chu readonly-cell" value="@item.GhiChu" readonly />
+                                            } else {
+                                                <input type="text" class="form-control form-control-sm row-ghi-chu" value="@item.GhiChu" />
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Card: Tổng hợp -->
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <div class="don-header-card p-2 px-3 d-flex flex-wrap justify-content-between align-items-center fw-bold mb-0">
+                        <div class="d-flex align-items-center gap-3">
+                            <div>
+                                <span class="text-muted small me-1">Tổng số lượng:</span>
+                                <span id="dispTongSoLuong" class="fs-6 text-dark">@(Model.TongSoLuong?.ToString("#,##0.##") ?? "0")</span>
+                                @Html.HiddenFor(m => m.TongSoLuong)
+                            </div>
+                            <div>
+                                <span class="text-muted small me-1">Cộng tiền hàng trả:</span>
+                                <span id="dispTongTienHang" class="fs-6 text-dark">@(Model.TongTienHang?.ToString("N0") ?? "0")</span>
+                                @Html.HiddenFor(m => m.TongTienHang)
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="text-muted small me-2">Phí bốc xếp:</span>
+                                @if (isReadonly) {
+                                    <input type="text" id="PhiBocXepDisplay" class="form-control form-control-sm text-end readonly-cell fw-bold" style="width: 120px;" value="@(Model.PhiBocXep?.ToString("N0") ?? "0")" readonly />
+                                    @Html.HiddenFor(m => m.PhiBocXep)
+                                } else {
+                                    <input type="text" id="PhiBocXepDisplay" class="form-control form-control-sm text-end fw-bold" style="width: 120px;" value="@(Model.PhiBocXep?.ToString("N0") ?? "0")" oninput="formatAndCalc()" />
+                                    @Html.HiddenFor(m => m.PhiBocXep)
+                                }
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-muted text-uppercase">Cần phải hoàn khách:</span>
+                            <span id="dispConPhaiHoan" class="fs-4 text-danger fw-bolder">@(Model.ConPhaiHoan?.ToString("N0") ?? "0")</span>
+                            <span class="text-danger fw-bolder">VNĐ</span>
+                            @Html.HiddenFor(m => m.ConPhaiHoan)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        function formatNumber(num) {
+            return num.toLocaleString('en-US');
+        }
+
+        function calcRow(inp) {
+            var $tr = $(inp).closest('tr');
+            var slTra = parseFloat($(inp).val()) || 0;
+            var max = parseFloat($tr.find('.row-sl-tra').attr('max')) || 0;
+            
+            if(slTra > max) {
+                showToast('warning', "Số lượng trả vượt quá số lượng tối đa (" + max + ").");
+                $(inp).val(max);
+                slTra = max;
+            }
+            
+            var donGia = parseFloat($tr.find('.row-don-gia').attr('data-val')) || 0;
+            var thanhTien = slTra * donGia;
+            $tr.find('.row-thanh-tien').attr('data-val', thanhTien).text(formatNumber(thanhTien));
+            calcTotal();
+        }
+
+        function calcTotal() {
+            var tongSl = 0, tongTien = 0;
+            $('#tbChiTietBody tr').each(function() {
+                var sl = parseFloat($(this).find('.row-sl-tra').val()) || 0;
+                var tt = parseFloat($(this).find('.row-thanh-tien').attr('data-val')) || 0;
+                tongSl += sl;
+                tongTien += tt;
+            });
+            
+            var phiBocXep = parseFloat($('#PhiBocXep').val()) || 0;
+            var tongCong = tongTien + phiBocXep;
+            
+            $('#dispTongSoLuong').text(formatNumber(tongSl));
+            $('#TongSoLuong').val(tongSl);
+
+            $('#dispTongTienHang').text(formatNumber(tongTien));
+            $('#TongTienHang').val(tongTien);
+            
+            var conPhaiHoan = tongCong;
+            
+            $('#dispConPhaiHoan').text(formatNumber(conPhaiHoan));
+            $('#ConPhaiHoan').val(conPhaiHoan);
+        }
+        
+        function formatAndCalc() {
+            var valStr = $('#PhiBocXepDisplay').val().replace(/[^0-9]/g, '');
+            var val = parseFloat(valStr) || 0;
+            $('#PhiBocXepDisplay').val(formatNumber(val));
+            $('#PhiBocXep').val(val);
+            calcTotal();
+        }
+
+        $('#btnSave').click(function() {
+            var idKho = $('#IDKho').val();
+            if (!idKho || idKho === "" || idKho === "0") {
+                showToast('warning', "Vui lòng chọn Kho nhập trước khi lưu!");
+                $('#IDKho').focus();
+                return;
+            }
+            
+            var data = getFormData();
+            
+            showConfirm("Bạn có muốn lưu thông tin phiếu trả hàng này không?", function() {
+                $.ajax({
+                    url: '@Url.Action("Edit", "BAN_TraHangBan")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function(res) {
+                        if (res.success) {
+                            showToast('success', "Lưu phiếu trả hàng thành công!");
+                        } else {
+                            showToast('error', res.message || "Lỗi khi lưu");
+                        }
+                    }
+                });
+            });
+        });
+
+        function getFormData() {
+            var chiTiets = [];
+            $('#tbChiTietBody tr').each(function() {
+                var sl = parseFloat($(this).find('.row-sl-tra').val()) || 0;
+                if(sl > 0) {
+                    chiTiets.push({
+                        IDSanPham: $(this).data('idsp'),
+                        SoLuongBan: parseFloat($(this).find('.row-sl-ban').attr('data-val')) || 0,
+                        SoLuongDaTra: parseFloat($(this).find('.row-sl-da-tra').attr('data-val')) || 0,
+                        SoLuongConLai: parseFloat($(this).find('.row-con-duoc-tra').attr('data-val')) || 0,
+                        SoLuongTra: sl,
+                        DonGia: parseFloat($(this).find('.row-don-gia').attr('data-val')) || 0,
+                        ThanhTien: parseFloat($(this).find('.row-thanh-tien').attr('data-val')) || 0,
+                        GhiChu: $(this).find('.row-ghi-chu').val()
+                    });
+                }
+            });
+            
+            return {
+                ID: $('#ID').val(),
+                SoChungTu: $('#SoChungTu').val(),
+                NgayChungTu: $('#NgayChungTu').val(),
+                IDDonDatHang: $('#IDDonDatHang').val(),
+                IDKhachHang: $('#IDKhachHang').val(),
+                IDKho: $('#IDKho').val(),
+                LyDoTraHang: $('#LyDoTraHang').val(),
+                TongSoLuong: $('#TongSoLuong').val(),
+                TongTienHang: $('#TongTienHang').val(),
+                ConPhaiHoan: $('#ConPhaiHoan').val(),
+                PhiBocXep: $('#PhiBocXep').val(),
+                ChiTiets: chiTiets
+            };
+        }
+        
+        function confirmGhiSo() {
+            var idKho = $('#IDKho').val();
+            if (!idKho || idKho === "" || idKho === "0") {
+                showToast('warning', "Vui lòng chọn Kho nhập trước khi ghi sổ!");
+                $('#IDKho').focus();
+                return;
+            }
+            showConfirm("Ghi nhận phiếu trả hàng? Bạn vẫn có thể sửa phiếu sau khi ghi, hệ thống sẽ tự động cập nhật lại tồn kho.", function() {
+                var data = getFormData();
+                $.ajax({
+                    url: '@Url.Action("Edit", "BAN_TraHangBan")?ghiSo=true',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function(res) {
+                        if (res.success) {
+                            showToast('success', "Ghi sổ thành công!");
+                            if (typeof TabManager !== 'undefined') {
+                                var paneId = $('#ID').closest('.tab-pane').attr('id');
+                                var key = paneId ? paneId.replace('-pane', '').replace('tab-', '') : 'BAN_TraHangBan';
+                                if (paneId) $('#' + paneId).attr('data-url', '');
+                                setTimeout(function() {
+                                    TabManager.openTab(key, 'Chi tiết trả hàng bán', '@Url.Action("Edit", "BAN_TraHangBan")/' + $('#ID').val());
+                                }, 1500);
+                            } else {
+                                setTimeout(() => location.reload(), 1500);
+                            }
+                        } else {
+                            showToast('error', res.message || "Lỗi ghi sổ");
+                        }
+                    }
+                });
+            });
+        }
+        
+        function confirmHuy() {
+            showConfirm("Xác nhận hủy phiếu trả hàng này?", function() {
+                $.post('@Url.Action("Huy", "BAN_TraHangBan")', { id: $('#ID').val() }, function(res) {
+                    if (res.success) {
+                        showToast('success', "Đã hủy phiếu!");
+                        if (typeof TabManager !== 'undefined') {
+                            var paneId = $('#ID').closest('.tab-pane').attr('id');
+                            var key = paneId ? paneId.replace('-pane', '').replace('tab-', '') : 'BAN_TraHangBan';
+                            if (paneId) $('#' + paneId).attr('data-url', '');
+                            setTimeout(function() {
+                                TabManager.openTab(key, 'Chi tiết trả hàng bán', '@Url.Action("Edit", "BAN_TraHangBan")/' + $('#ID').val());
+                            }, 1500);
+                        } else {
+                            setTimeout(() => location.reload(), 1500);
+                        }
+                    } else {
+                        showToast('error', res.message || "Lỗi hủy phiếu");
+                    }
+                });
+            });
+        }
+    </script>
+}

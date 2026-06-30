@@ -1,0 +1,116 @@
+@model IEnumerable<SalesManagementSystem.Models.ViewModels.TraHangBanViewModel>
+
+<div class="table-responsive">
+    <table class="table table-custom table-bordered table-hover mb-0" id="tblChonDonHang" style="width:100%; min-width:800px;">
+        <thead class="table-light">
+            <tr>
+                <th class="text-center" style="width:40px;">#</th>
+                <th>Số đơn hàng</th>
+                <th class="text-center">Ngày lên đơn</th>
+                <th>Khách hàng</th>
+                <th class="text-end">Tổng tiền</th>
+                <th class="text-end">Đã thanh toán</th>
+                <th class="text-end">Đã trả</th>
+                <th class="text-end">Còn được trả</th>
+                <th class="text-center">Trạng thái</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    decimal conDuocTra = item.TongSoLuong.GetValueOrDefault() - item.DaTraHang;
+                    <tr style="cursor:pointer;" onclick="selectDonHang(@item.ID, '@item.SoDonHang', @item.IDKhachHang, '@item.TenKhachHang', '@item.MaKhachHang', @(item.IDKho ?? 0), @item.DaThanhToan, @item.TongTien)">
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-primary py-0 px-2">Chọn</button>
+                        </td>
+                        <td class="fw-bold text-primary">@item.SoDonHang</td>
+                        <td class="text-center">@(item.NgayTao?.ToString("dd/MM/yyyy"))</td>
+                        <td>@item.TenKhachHang</td>
+                        <td class="text-end fw-bold">@item.TongTien.ToString("N0")</td>
+                        <td class="text-end text-success">@item.DaThanhToan.ToString("N0")</td>
+                        <td class="text-end text-danger">@item.DaTraHang.ToString("N0")</td>
+                        <td class="text-end fw-bold text-primary">@conDuocTra.ToString("N0")</td>
+                        <td class="text-center">
+                            <span class="badge bg-success">Đã ghi</span>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="9" class="text-center py-3 text-muted">Không tìm thấy đơn hàng nào có thể trả.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<style>
+    #tblChonDonHang th {
+        position: relative;
+        background-clip: padding-box;
+    }
+    #tblChonDonHang th .resizer {
+        position: absolute;
+        top: 0;
+        right: -3px;
+        width: 6px;
+        height: 100%;
+        cursor: col-resize;
+        user-select: none;
+        z-index: 10;
+        background-color: transparent;
+    }
+    #tblChonDonHang th .resizer:hover, #tblChonDonHang th .resizer.resizing {
+        background-color: rgba(11, 91, 132, 0.5);
+    }
+</style>
+<script>
+    (function() {
+        var table = document.getElementById('tblChonDonHang');
+        if (!table) return;
+        
+        var ths = table.querySelectorAll('th');
+        ths.forEach(function(th) {
+            if(th.innerText.trim() === '' && (th.style.width === '35px' || th.style.width === '40px' || th.style.width === '50px')) return;
+            if(th.innerText.trim() === 'Thao tác' || th.innerText.trim() === 'STT' || th.innerText.trim() === '#') return;
+            
+            if(th.querySelector('.resizer')) return;
+
+            var resizer = document.createElement('div');
+            resizer.classList.add('resizer');
+            th.appendChild(resizer);
+
+            var startX, startWidth;
+            
+            resizer.addEventListener('mousedown', function(e) {
+                startX = e.pageX;
+                startWidth = th.offsetWidth;
+                resizer.classList.add('resizing');
+
+                var doDrag = function(e) {
+                    var newWidth = startWidth + (e.pageX - startX);
+                    if(newWidth > 30) {
+                        th.style.width = newWidth + 'px';
+                        th.style.minWidth = newWidth + 'px';
+                        th.style.maxWidth = newWidth + 'px';
+                    }
+                };
+
+                var stopDrag = function(e) {
+                    resizer.classList.remove('resizing');
+                    document.removeEventListener('mousemove', doDrag);
+                    document.removeEventListener('mouseup', stopDrag);
+                };
+
+                document.addEventListener('mousemove', doDrag);
+                document.addEventListener('mouseup', stopDrag);
+                
+                e.preventDefault();
+            });
+        });
+    })();
+</script>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -331,6 +331,14 @@
     <Compile Include="Models\ViewModels\DashboardViewModel.cs" />
     <Compile Include="Repositories\Interfaces\IDashboardRepository.cs" />
     <Compile Include="Repositories\DashboardRepository.cs" />
+    <Compile Include="Models\Entities\TraHangBan.cs" />
+    <Compile Include="Models\Entities\TraHangBanChiTiet.cs" />
+    <Compile Include="Models\ViewModels\TraHangBanViewModel.cs" />
+    <Compile Include="Models\ViewModels\TraHangBanCreateEditViewModel.cs" />
+    <Compile Include="Models\ViewModels\TraHangBanChiTietViewModel.cs" />
+    <Compile Include="Repositories\Interfaces\ITraHangBanRepository.cs" />
+    <Compile Include="Repositories\TraHangBanRepository.cs" />
+    <Compile Include="Controllers\BAN_TraHangBanController.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-grid.css" />
@@ -487,6 +495,11 @@
     <Content Include="Views\PhieuXuatKho\_DetailInline.cshtml" />
     <Content Include="Views\SoQuy\_ChiTietGiaoDichList.cshtml" />
     <Content Include="Views\SoQuy\_ChiTietTaiKhoan.cshtml" />
+    <Content Include="Views\BAN_TraHangBan\Index.cshtml" />
+    <Content Include="Views\BAN_TraHangBan\_TraHangBanList.cshtml" />
+    <Content Include="Views\BAN_TraHangBan\Create.cshtml" />
+    <Content Include="Views\BAN_TraHangBan\Edit.cshtml" />
+    <Content Include="Views\BAN_TraHangBan\_ChonDonHangPopup.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />

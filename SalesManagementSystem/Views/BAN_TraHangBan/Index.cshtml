@@ -1,0 +1,136 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.TraHangBanViewModel>
+
+@{
+    ViewBag.Title = "Trả hàng bán";
+    var uid = Guid.NewGuid().ToString("N");
+}
+
+<style>
+    .ddh-row.active-row td { background-color: #e3f2fd !important; }
+    .ddh-detail-row > td { box-shadow: inset 0 3px 6px -3px rgba(0,0,0,0.1), inset 0 -3px 6px -3px rgba(0,0,0,0.1); }
+    .dashboard-card { border-radius: 8px; border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: transform 0.2s; }
+    .dashboard-card:hover { transform: translateY(-3px); }
+</style>
+
+@using SalesManagementSystem.Helpers
+
+<div id="thb-@uid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">
+            <i class="bi bi-arrow-return-left me-2"></i>@ViewBag.Title
+        </h4>
+        <div class="d-flex gap-2">
+            @if (PermissionHelper.HasPermission("BAN_TraHangBan", LoaiPhanQuyen.Them))
+            {
+                <a href="@Url.Action("Create","BAN_TraHangBan")" class="btn btn-primary"
+                   style="background-color:#3498db;border-color:#3498db;">
+                    <i class="bi bi-plus-lg fw-bold"></i> Lập phiếu trả hàng
+                </a>
+            }
+        </div>
+    </div>
+    
+    <!-- Dashboard -->
+    <div class="row g-3 mb-3">
+        <div class="col-md-3">
+            <div class="card dashboard-card bg-primary text-white">
+                <div class="card-body">
+                    <h6 class="card-title text-uppercase fw-bold"><i class="bi bi-file-earmark-text me-2"></i>Tổng phiếu</h6>
+                    <h3 class="mb-0">@ViewBag.TotalRecords</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card dashboard-card bg-warning text-dark">
+                <div class="card-body">
+                    <h6 class="card-title text-uppercase fw-bold"><i class="bi bi-hourglass-split me-2"></i>Lưu nháp</h6>
+                    <h3 class="mb-0">@ViewBag.ChoGhi</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card dashboard-card bg-success text-white">
+                <div class="card-body">
+                    <h6 class="card-title text-uppercase fw-bold"><i class="bi bi-check-circle me-2"></i>Đã ghi</h6>
+                    <h3 class="mb-0">@ViewBag.DaGhi</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card dashboard-card bg-danger text-white">
+                <div class="card-body">
+                    <h6 class="card-title text-uppercase fw-bold"><i class="bi bi-x-circle me-2"></i>Đã hủy</h6>
+                    <h3 class="mb-0">@ViewBag.DaHuy</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bộ lọc -->
+    <div class="card shadow-sm mb-3">
+        <div class="card-body py-2">
+            <form id="searchForm" action="@Url.Action("GetList","BAN_TraHangBan")" method="get">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Từ ngày</label>
+                        <input type="date" name="tuNgay" class="form-control form-control-sm" value="@ViewBag.TuNgay" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Đến ngày</label>
+                        <input type="date" name="denNgay" class="form-control form-control-sm" value="@ViewBag.DenNgay" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Khách hàng</label>
+                        @Html.DropDownList("idKhachHang", (SelectList)ViewBag.KhachHangs, "-- Tất cả --", new { @class = "form-select form-select-sm" })
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Trạng thái</label>
+                        @Html.DropDownList("trangThai", (SelectList)ViewBag.TrangThais, "-- Tất cả --", new { @class = "form-select form-select-sm" })
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Số chứng từ</label>
+                        <input type="text" name="soChungTu" class="form-control form-control-sm" placeholder="Tìm số phiếu..." value="@ViewBag.SoChungTu" />
+                    </div>
+                    <div class="col-md-auto d-flex gap-2">
+                        <button type="submit" class="btn btn-sm text-white px-3" style="background-color:#2998e4;border:none;">
+                            <i class="bi bi-search"></i> Tìm kiếm
+                        </button>
+                        <a href="@Url.Action("Index","BAN_TraHangBan")" class="btn btn-sm text-white px-3 no-ajax" style="background-color:#f1c40f;border:none;">
+                            Làm mới
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="table-container">
+        @Html.Partial("_TraHangBanList", Model)
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#searchForm').submit(function (e) {
+                e.preventDefault();
+                var url = $(this).attr('action') + '?' + $(this).serialize();
+                $.get(url, function (res) {
+                    $('#table-container').html(res);
+                });
+            });
+        });
+        
+        function confirmDelete(url, title) {
+            showConfirm(title, function() {
+                $.post(url, function(res) {
+                    if(res.success) {
+                        $('#searchForm').submit();
+                    } else {
+                        showToast('error', res.message);
+                    }
+                });
+            });
+        }
+    </script>
+}

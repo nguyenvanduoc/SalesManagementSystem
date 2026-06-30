@@ -115,6 +115,20 @@
             });
         };
 
+        window.boGhiChungTu = function(btn, id) {
+            var $form = getCtbhContainer(btn).find('#searchForm');
+            showConfirm('Bạn có chắc muốn bỏ ghi dữ liệu chứng từ này? Trạng thái sẽ chuyển về Đề nghị ghi và các giao dịch liên quan sẽ được xử lý tương ứng.', function() {
+                $.post('@Url.Action("BoGhi")', { id: id }, function (res) {
+                    if (res.success) {
+                        if (typeof showToast === 'function') showToast('success', 'Bỏ ghi thành công!');
+                        $form.trigger('submit');
+                    } else {
+                        if (typeof showToast === 'function') showToast('error', res.message);
+                    }
+                });
+            });
+        };
+
 
         $(document).ready(function() {
             var $container = $('#ctbh-@uid');

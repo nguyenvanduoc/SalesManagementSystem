@@ -615,6 +615,72 @@ namespace SalesManagementSystem.Repositories
             }
         }
 
+        public void BoGhi(int id, int nguoiBoGhi)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                conn.Open();
+                using (var tr = conn.BeginTransaction())
+                {
+                    try
+                    {
+                        var p = new DynamicParameters();
+                        p.Add("@ID", id);
+                        var master = conn.QueryFirstOrDefault<BAN_ChungTuBanHang>("sp_BAN_ChungTuBanHang_GetById", p, transaction: tr, commandType: System.Data.CommandType.StoredProcedure);
+                        if (master == null) throw new Exception("Chứng từ không tồn tại.");
+                        if (master.TrangThai != 2 && master.TrangThai != 3) throw new Exception("Chứng từ phải ở trạng thái đã ghi hoặc đã hủy mới có thể bỏ ghi.");
+
+                        // 1. Cập nhật trạng thái chứng từ thành 1 (Đề nghị ghi)
+                        conn.Execute("UPDATE BAN_ChungTuBanHang SET TrangThai = 1, NguoiCapNhat = @NguoiBoGhi, NgayCapNhat = GETDATE() WHERE ID = @ID", new { NguoiBoGhi = nguoiBoGhi, ID = id }, transaction: tr);
+
+                        // 2. Cập nhật trạng thái phiếu xuất tương ứng thành 1 (Đề nghị ghi)
+                        int? idPhieuXuat = conn.ExecuteScalar<int?>("SELECT ID FROM KHO_PhieuXuat WHERE IDChungTuBanHang = @ID", new { ID = id }, transaction: tr);
+                        if (idPhieuXuat.HasValue)
+                        {
+                            conn.Execute("UPDATE KHO_PhieuXuat SET TrangThai = 1, NguoiCapNhat = @NguoiBoGhi, NgayCapNhat = GETDATE() WHERE ID = @IDPhieuXuat", new { NguoiBoGhi = nguoiBoGhi, IDPhieuXuat = idPhieuXuat.Value }, transaction: tr);
+
+                            // 3. Xử lý giao dịch kho (KHO_GiaoDichKho)
+                            // Trường hợp đã ghi và thanh toán (DaThanhToan > 0)
+                            if (master.DaThanhToan > 0)
+                            {
+                                conn.Execute(@"
+                                    UPDATE KHO_GiaoDichKho 
+                                    SET IsHuy = 1, NgayHuy = GETDATE(), NguoiHuy = @NguoiBoGhi 
+                                    WHERE LoaiChungTu = 2 
+                                      AND SoChungTu = (SELECT SoChungTu FROM KHO_PhieuXuat WHERE ID = @IDPhieuXuat)", 
+                                    new { NguoiBoGhi = nguoiBoGhi, IDPhieuXuat = idPhieuXuat.Value }, transaction: tr);
+                            }
+                            else
+                            {
+                                // Chưa thanh toán: xóa hẳn giao dịch kho
+                                conn.Execute(@"
+                                    DELETE FROM KHO_GiaoDichKho 
+                                    WHERE LoaiChungTu = 2 
+                                      AND SoChungTu = (SELECT SoChungTu FROM KHO_PhieuXuat WHERE ID = @IDPhieuXuat)", 
+                                    new { IDPhieuXuat = idPhieuXuat.Value }, transaction: tr);
+                            }
+                        }
+
+                        // 4. Xóa bút toán nhật ký chung (KT_NhatKyChung)
+                        conn.Execute("DELETE FROM KT_NhatKyChung WHERE LoaiChungTu = 'BAN' AND IDChungTu = @ID", new { ID = id }, transaction: tr);
+
+                        // 5. Cập nhật trạng thái đơn hàng gốc thành 2 (Đang lập chứng từ)
+                        if (master.IDDonDatHang.HasValue && master.IDDonDatHang.Value > 0)
+                        {
+                            conn.Execute("UPDATE NS_DonDatHang SET TrangThaiDon = 2, NguoiCapNhat = @NguoiBoGhi, NgayCapNhat = GETDATE() WHERE ID = @ID", new { NguoiBoGhi = nguoiBoGhi, ID = master.IDDonDatHang.Value }, transaction: tr);
+                        }
+
+                        tr.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        tr.Rollback();
+                        throw;
+                    }
+                }
+            }
+        }
+
         public IEnumerable<CheckTonKhoResponseViewModel> CheckTonKhoByKho(int idKho, List<CheckTonKhoRequestItem> sanPhams)
         {
             using (var conn = _db.CreateConnection())
