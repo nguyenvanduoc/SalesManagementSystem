@@ -21,8 +21,21 @@ namespace SalesManagementSystem.Repositories
 
         public IEnumerable<TraHangBanViewModel> GetPaged(int page, int pageSize, string tuNgay, string denNgay, int? idKhachHang, int? trangThai, string soChungTu, out int totalRecords)
         {
-            DateTime? tn = string.IsNullOrEmpty(tuNgay) ? (DateTime?)null : DateTime.ParseExact(tuNgay, "dd/MM/yyyy", null);
-            DateTime? dn = string.IsNullOrEmpty(denNgay) ? (DateTime?)null : DateTime.ParseExact(denNgay, "dd/MM/yyyy", null);
+            DateTime? tn = null;
+            if (!string.IsNullOrEmpty(tuNgay))
+            {
+                if (DateTime.TryParseExact(tuNgay, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out var d1)) tn = d1;
+                else if (DateTime.TryParseExact(tuNgay, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None, out var d2)) tn = d2;
+                else tn = DateTime.Parse(tuNgay);
+            }
+
+            DateTime? dn = null;
+            if (!string.IsNullOrEmpty(denNgay))
+            {
+                if (DateTime.TryParseExact(denNgay, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out var d1)) dn = d1;
+                else if (DateTime.TryParseExact(denNgay, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None, out var d2)) dn = d2;
+                else dn = DateTime.Parse(denNgay);
+            }
 
             using (var conn = _db.CreateConnection())
             {
@@ -74,8 +87,22 @@ namespace SalesManagementSystem.Repositories
         {
             using (var conn = _db.CreateConnection())
             {
-                var count = conn.ExecuteScalar<int>("SELECT COUNT(*) FROM BAN_TraHangBan WHERE MONTH(NgayTao) = MONTH(GETDATE()) AND YEAR(NgayTao) = YEAR(GETDATE())");
-                return $"THB{DateTime.Now.ToString("yyMM")}{(count + 1).ToString("D4")}";
+                string sql = @"
+                    DECLARE @YearSuffix VARCHAR(2) = RIGHT(CAST(YEAR(GETDATE()) AS VARCHAR(4)), 2);
+                    DECLARE @Prefix VARCHAR(4) = 'TH' + @YearSuffix;
+                    DECLARE @MaxSo VARCHAR(20) = (
+                        SELECT TOP 1 SoChungTu 
+                        FROM BAN_TraHangBan 
+                        WHERE SoChungTu LIKE @Prefix + '%' 
+                        ORDER BY SoChungTu DESC
+                    );
+                    DECLARE @NextNum INT = 1;
+                    IF @MaxSo IS NOT NULL
+                    BEGIN
+                        SET @NextNum = CAST(SUBSTRING(@MaxSo, 5, 6) AS INT) + 1;
+                    END
+                    SELECT @Prefix + RIGHT('000000' + CAST(@NextNum AS VARCHAR(6)), 6);";
+                return conn.ExecuteScalar<string>(sql);
             }
         }
 
@@ -257,8 +284,21 @@ namespace SalesManagementSystem.Repositories
         
         public IEnumerable<TraHangBanViewModel> LoadDonHangTra(string tuNgay, string denNgay, string soDonHang)
         {
-            DateTime? tn = string.IsNullOrEmpty(tuNgay) ? (DateTime?)null : DateTime.ParseExact(tuNgay, "dd/MM/yyyy", null);
-            DateTime? dn = string.IsNullOrEmpty(denNgay) ? (DateTime?)null : DateTime.ParseExact(denNgay, "dd/MM/yyyy", null);
+            DateTime? tn = null;
+            if (!string.IsNullOrEmpty(tuNgay))
+            {
+                if (DateTime.TryParseExact(tuNgay, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out var d1)) tn = d1;
+                else if (DateTime.TryParseExact(tuNgay, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None, out var d2)) tn = d2;
+                else tn = DateTime.Parse(tuNgay);
+            }
+
+            DateTime? dn = null;
+            if (!string.IsNullOrEmpty(denNgay))
+            {
+                if (DateTime.TryParseExact(denNgay, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out var d1)) dn = d1;
+                else if (DateTime.TryParseExact(denNgay, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None, out var d2)) dn = d2;
+                else dn = DateTime.Parse(denNgay);
+            }
 
             using (var conn = _db.CreateConnection())
             {

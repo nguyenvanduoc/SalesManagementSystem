@@ -86,16 +86,6 @@ namespace SalesManagementSystem.Controllers
             ViewBag.KhachHangs = GetKhachHangList(idKhachHang);
             ViewBag.TrangThais = GetTrangThaiList(trangThai);
             
-            // Tinh dashboard
-            using(var conn = _db.CreateConnection())
-            {
-                ViewBag.TotalRecords = totalRecords;
-                ViewBag.ChoGhi = conn.ExecuteScalar<int>("SELECT COUNT(*) FROM BAN_TraHangBan WHERE TrangThai = 1");
-                ViewBag.DaGhi = conn.ExecuteScalar<int>("SELECT COUNT(*) FROM BAN_TraHangBan WHERE TrangThai = 2");
-                ViewBag.DaHuy = conn.ExecuteScalar<int>("SELECT COUNT(*) FROM BAN_TraHangBan WHERE TrangThai = 3");
-                ViewBag.ConPhaiHoan = conn.ExecuteScalar<int>("SELECT COUNT(*) FROM BAN_TraHangBan WHERE TrangThai = 2 AND ConPhaiHoan > 0");
-            }
-
             if (Request.IsAjaxRequest())
                 return PartialView("_TraHangBanList", model);
 

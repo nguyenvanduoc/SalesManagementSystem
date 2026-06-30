@@ -1,0 +1,50 @@
+@model SalesManagementSystem.Models.ViewModels.DmKhoanMucChiCreateEditViewModel
+
+@{
+    Layout = null;
+    ViewBag.Title = "Cập nhật khoản mục chi";
+}
+
+<div class="modal-header bg-light">
+    <h5 class="modal-title fw-bold text-uppercase" style="color: #0b5b84;">@ViewBag.Title</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+@using (Html.BeginForm("Edit", "DmKhoanMucChi", FormMethod.Post, new { id = "globalForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.ID)
+
+    <div class="modal-body p-4">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger mb-3">
+                @Html.ValidationSummary(false, "")
+            </div>
+        }
+        <div class="row g-3">
+            <div class="col-md-12">
+                <label class="form-label text-muted fw-semibold">Mã khoản mục chi <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.MaKhoanMuc, new { @class = "form-control", placeholder = "Nhập mã khoản mục chi" })
+                @Html.ValidationMessageFor(m => m.MaKhoanMuc, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-md-12">
+                <label class="form-label text-muted fw-semibold">Tên khoản mục chi <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.TenKhoanMuc, new { @class = "form-control", placeholder = "Nhập tên khoản mục chi" })
+                @Html.ValidationMessageFor(m => m.TenKhoanMuc, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-md-12">
+                <div class="form-check form-switch mt-2">
+                    @Html.CheckBoxFor(m => m.IsHoatDong, new { @class = "form-check-input", id = "IsHoatDong" })
+                    <label class="form-check-label fw-semibold text-muted" for="IsHoatDong">Đang hoạt động</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Hủy</button>
+        <button type="submit" class="btn text-white px-4" style="background-color: #2998e4; border: none;">
+            <i class="bi bi-save me-1"></i> Lưu thông tin
+        </button>
+    </div>
+}

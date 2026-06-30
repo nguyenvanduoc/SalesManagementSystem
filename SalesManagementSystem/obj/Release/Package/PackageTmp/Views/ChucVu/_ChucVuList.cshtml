@@ -3,7 +3,7 @@
 <div class="card shadow-sm">
     <div class="card-body p-0">
         <div class="table-responsive" style="min-height: 350px;">
-            <table class="table table-custom table-bordered table-hover mb-0">
+            <table id="tblChucVuList" class="table table-custom table-bordered table-hover mb-0" style="width:100%; min-width:1000px;">
                 <thead>
                     <tr>
                         <th class="text-center" style="width: 40px;"><input type="checkbox" class="form-check-input" id="checkAll"></th>
@@ -78,3 +78,70 @@
     
     @Html.Partial("_Pagination", Model)
 </div>
+
+<style>
+    #tblChucVuList th {
+        position: relative;
+        background-clip: padding-box;
+    }
+    #tblChucVuList th .resizer {
+        position: absolute;
+        top: 0;
+        right: -3px;
+        width: 6px;
+        height: 100%;
+        cursor: col-resize;
+        user-select: none;
+        z-index: 10;
+        background-color: transparent;
+    }
+    #tblChucVuList th .resizer:hover, #tblChucVuList th .resizer.resizing {
+        background-color: rgba(11, 91, 132, 0.5);
+    }
+</style>
+<script>
+    (function() {
+        var table = document.getElementById('tblChucVuList');
+        if (!table) return;
+        
+        var ths = table.querySelectorAll('th');
+        ths.forEach(function(th) {
+            if(th.innerText.trim() === '' && (th.style.width === '35px' || th.style.width === '40px' || th.style.width === '50px')) return;
+            if(th.innerText.trim() === 'Thao tác' || th.innerText.trim() === 'STT') return;
+            
+            if(th.querySelector('.resizer')) return;
+
+            var resizer = document.createElement('div');
+            resizer.classList.add('resizer');
+            th.appendChild(resizer);
+
+            var startX, startWidth;
+            
+            resizer.addEventListener('mousedown', function(e) {
+                startX = e.pageX;
+                startWidth = th.offsetWidth;
+                resizer.classList.add('resizing');
+
+                var doDrag = function(e) {
+                    var newWidth = startWidth + (e.pageX - startX);
+                    if(newWidth > 30) {
+                        th.style.width = newWidth + 'px';
+                        th.style.minWidth = newWidth + 'px';
+                        th.style.maxWidth = newWidth + 'px';
+                    }
+                };
+
+                var stopDrag = function(e) {
+                    resizer.classList.remove('resizing');
+                    document.removeEventListener('mousemove', doDrag);
+                    document.removeEventListener('mouseup', stopDrag);
+                };
+
+                document.addEventListener('mousemove', doDrag);
+                document.addEventListener('mouseup', stopDrag);
+                
+                e.preventDefault();
+            });
+        });
+    })();
+</script>

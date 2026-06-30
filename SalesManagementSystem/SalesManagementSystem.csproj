@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -211,6 +211,7 @@
     <Compile Include="Models\Entities\PhongBan.cs" />
     <Compile Include="Models\Entities\DM_SanPham.cs" />
     <Compile Include="Models\Entities\DM_KhoHang.cs" />
+    <Compile Include="Models\Entities\DM_KhoanMucChi.cs" />
     <Compile Include="Models\Entities\Product.cs" />
     <Compile Include="Models\Entities\Inventory.cs" />
     <Compile Include="Models\Entities\InventoryTransaction.cs" />
@@ -237,10 +238,13 @@
     <Compile Include="Models\ViewModels\UserLoginViewModel.cs" />
     <Compile Include="Models\ViewModels\DMBieuMauViewModel.cs" />
     <Compile Include="Models\ViewModels\DMBieuMauCreateEditViewModel.cs" />
+    <Compile Include="Models\ViewModels\DmKhoanMucChiViewModel.cs" />
+    <Compile Include="Models\ViewModels\DmKhoanMucChiCreateEditViewModel.cs" />
     <!-- Repositories -->
     <Compile Include="Repositories\MenuRepository.cs" />
     <Compile Include="Repositories\DmSanPhamRepository.cs" />
     <Compile Include="Repositories\DmKhoHangRepository.cs" />
+    <Compile Include="Repositories\DmKhoanMucChiRepository.cs" />
     <Compile Include="Repositories\NhanSuRepository.cs" />
     <Compile Include="Repositories\PhongBanRepository.cs" />
     <Compile Include="Repositories\ChucVuRepository.cs" />
@@ -250,6 +254,7 @@
     <Compile Include="Repositories\Interfaces\IPhongBanRepository.cs" />
     <Compile Include="Repositories\Interfaces\IDmSanPhamRepository.cs" />
     <Compile Include="Repositories\Interfaces\IDmKhoHangRepository.cs" />
+    <Compile Include="Repositories\Interfaces\IDmKhoanMucChiRepository.cs" />
     <Compile Include="Repositories\Interfaces\INhanSuRepository.cs" />
     <Compile Include="Repositories\Interfaces\IAclLoginRepository.cs" />
     <Compile Include="Repositories\Interfaces\INKTongHopRepository.cs" />
@@ -270,6 +275,7 @@
     <Compile Include="Repositories\AclLoginSessionRepository.cs" />
     <Compile Include="Controllers\SanPhamController.cs" />
     <Compile Include="Controllers\KhoHangController.cs" />
+    <Compile Include="Controllers\DmKhoanMucChiController.cs" />
     <Compile Include="Controllers\LoginSessionController.cs" />
     <Compile Include="Models\ViewModels\ExportResult.cs" />
     <Compile Include="Services\Interfaces\IWordExportService.cs" />
@@ -486,6 +492,10 @@
     <Content Include="Views\SoQuy\_SoQuyList.cshtml" />
     <Content Include="Views\CongNoNCC\Index.cshtml" />
     <Content Include="Views\CongNoNCC\_CongNoNCCList.cshtml" />
+    <Content Include="Views\DmKhoanMucChi\Index.cshtml" />
+    <Content Include="Views\DmKhoanMucChi\_List.cshtml" />
+    <Content Include="Views\DmKhoanMucChi\Create.cshtml" />
+    <Content Include="Views\DmKhoanMucChi\Edit.cshtml" />
     <Content Include="App_Data\create_phieuchi_soquy_congncc.sql" />
     <Content Include="Views\Dashboard\Index.cshtml" />
     <Content Include="Views\Dashboard\Blank.cshtml" />

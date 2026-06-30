@@ -1,19 +1,19 @@
-@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.Entities.AclAction>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DmKhoanMucChiViewModel>
 
 <div class="card shadow-sm">
     <div class="card-body p-0">
         <div class="table-responsive" style="min-height: 350px;">
-            <table id="tblActionList" class="table table-custom table-bordered table-hover mb-0" style="width:100%; min-width:1000px;">
+            <table id="tblKhoanMucChiList" class="table table-custom table-bordered table-hover mb-0" style="width:100%; min-width:1000px;">
                 <thead>
                     <tr>
                         <th class="text-center" style="width: 40px;"><input type="checkbox" class="form-check-input" id="checkAll"></th>
                         <th class="text-center" style="width: 50px;"></th>
-                        <th class="text-center" style="width: 50px;"></th>
-                        <th>Màn hình</th>
-                        <th>Controller</th>
-                        <th>Action</th>
-                        <th>Loại quyền</th>
-                        <th>Ghi chú</th>
+                        <th class="text-center" style="width: 50px;">STT</th>
+                        <th>Mã khoản mục</th>
+                        <th>Tên khoản mục chi</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th class="text-center">Người tạo</th>
+                        <th class="text-center">Ngày tạo</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -34,18 +34,18 @@
                                         <ul class="dropdown-menu shadow">
                                             <li><h6 class="dropdown-header text-uppercase fw-bold text-dark">Thao tác</h6></li>
                                             <li><hr class="dropdown-divider"></li>
-                                            @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("AclAction", SalesManagementSystem.Helpers.LoaiPhanQuyen.CapNhat))
+                                            @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("DmKhoanMucChi", SalesManagementSystem.Helpers.LoaiPhanQuyen.CapNhat))
                                             {
                                                 <li>
-                                                    <button type="button" class="dropdown-item" onclick="openFormModal('@Url.Action("UpdateAction", "AclAction", new { id = item.ID })')">
+                                                    <button type="button" class="dropdown-item" onclick="openFormModal('@Url.Action("Edit", "DmKhoanMucChi", new { id = item.ID })')">
                                                         <i class="bi bi-pencil-square me-2 text-primary"></i> Chỉnh sửa
                                                     </button>
                                                 </li>
                                             }
-                                            @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("AclAction", SalesManagementSystem.Helpers.LoaiPhanQuyen.Xoa))
+                                            @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("DmKhoanMucChi", SalesManagementSystem.Helpers.LoaiPhanQuyen.Xoa))
                                             {
                                                 <li>
-                                                    <button type="button" class="dropdown-item text-danger" onclick="confirmDelete('@Url.Action("DeleteAction", "AclAction", new { id = item.ID })', 'Bạn có chắc chắn muốn xóa action này không?')">
+                                                    <button type="button" class="dropdown-item text-danger" onclick="confirmDelete('@Url.Action("Delete", "DmKhoanMucChi", new { id = item.ID })', 'Bạn có chắc chắn muốn xóa khoản mục chi này không?')">
                                                         <i class="bi bi-trash-fill me-2 text-danger"></i> Xóa
                                                     </button>
                                                 </li>
@@ -54,27 +54,29 @@
                                     </div>
                                 </td>
                                 <td class="text-center align-middle">@(stt++)</td>
-                                <td class="align-middle fw-medium">@item.TenManHinh</td>
-                                <td class="align-middle">@item.TenController</td>
-                                <td class="align-middle">@item.TenAction</td>
-                                <td class="align-middle">
-                                    @{
-                                        var loaiQuyen = (SalesManagementSystem.Helpers.LoaiPhanQuyen)item.LoaiPhanQuyen;
-                                        var badgeClass = SalesManagementSystem.Helpers.PermissionHelper.GetLoaiPhanQuyenColorClass(loaiQuyen);
-                                        var displayName = SalesManagementSystem.Helpers.PermissionHelper.GetLoaiPhanQuyenDisplayName(loaiQuyen);
+                                <td class="align-middle text-center">@item.MaKhoanMuc</td>
+                                <td class="align-middle">@item.TenKhoanMuc</td>
+                                <td class="text-center align-middle">
+                                    @if (item.IsHoatDong)
+                                    {
+                                        <span class="badge bg-success">Hoạt động</span>
                                     }
-                                    <span class="badge @badgeClass">@displayName</span>
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Ngừng hoạt động</span>
+                                    }
                                 </td>
-                                <td class="align-middle text-muted">@item.GhiChu</td>
+                                <td class="text-center align-middle">@item.TenNguoiTao</td>
+                                <td class="text-center align-middle">@(item.NgayTao.HasValue ? item.NgayTao.Value.ToString("dd/MM/yyyy HH:mm") : "")</td>
                             </tr>
                         }
                     }
                     else
                     {
                         <tr>
-                            <td colspan="7" class="text-center py-4 text-muted">
+                            <td colspan="8" class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox fs-2 d-block mb-2"></i>
-                                Chưa có dữ liệu Action.
+                                Chưa có dữ liệu khoản mục chi.
                             </td>
                         </tr>
                     }
@@ -82,16 +84,15 @@
             </table>
         </div>
     </div>
-    
     @Html.Partial("_Pagination", Model)
 </div>
 
 <style>
-    #tblActionList th {
+    #tblKhoanMucChiList th {
         position: relative;
         background-clip: padding-box;
     }
-    #tblActionList th .resizer {
+    #tblKhoanMucChiList th .resizer {
         position: absolute;
         top: 0;
         right: -3px;
@@ -102,20 +103,19 @@
         z-index: 10;
         background-color: transparent;
     }
-    #tblActionList th .resizer:hover, #tblActionList th .resizer.resizing {
+    #tblKhoanMucChiList th .resizer:hover, #tblKhoanMucChiList th .resizer.resizing {
         background-color: rgba(11, 91, 132, 0.5);
     }
 </style>
 <script>
     (function() {
-        var table = document.getElementById('tblActionList');
+        var table = document.getElementById('tblKhoanMucChiList');
         if (!table) return;
         
         var ths = table.querySelectorAll('th');
         ths.forEach(function(th) {
-            // Skip for icon columns, checkbox columns and action columns
             if(th.innerText.trim() === '' && (th.style.width === '35px' || th.style.width === '40px' || th.style.width === '50px')) return;
-            if(th.innerText.trim() === 'Thao tác') return;
+            if(th.innerText.trim() === 'Thao tác' || th.innerText.trim() === 'STT') return;
             
             if(th.querySelector('.resizer')) return;
 

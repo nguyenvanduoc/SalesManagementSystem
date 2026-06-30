@@ -1,4 +1,4 @@
-﻿@model IEnumerable<SalesManagementSystem.Models.ViewModels.PhanQuyenMatrixViewModel>
+@model IEnumerable<SalesManagementSystem.Models.ViewModels.PhanQuyenMatrixViewModel>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div class="d-flex gap-2">
@@ -20,7 +20,7 @@
 </div>
 
 <div class="table-responsive" style="border: 1px solid #dee2e6;">
-    <table class="table table-custom table-bordered table-hover mb-0">
+    <table id="tblMatrixGrid" class="table table-custom table-bordered table-hover mb-0" style="width:100%; min-width:1000px;">
         <thead>
             <tr>
                 <th class="align-middle" style="width: 40%">Chức năng</th>
@@ -155,4 +155,72 @@
         
         // Setup initial partial states if needed (not strictly required if server state matches)
     });
+</script>
+
+<style>
+    #tblMatrixGrid th {
+        position: relative;
+        background-clip: padding-box;
+    }
+    #tblMatrixGrid th .resizer {
+        position: absolute;
+        top: 0;
+        right: -3px;
+        width: 6px;
+        height: 100%;
+        cursor: col-resize;
+        user-select: none;
+        z-index: 10;
+        background-color: transparent;
+    }
+    #tblMatrixGrid th .resizer:hover, #tblMatrixGrid th .resizer.resizing {
+        background-color: rgba(11, 91, 132, 0.5);
+    }
+</style>
+<script>
+    (function() {
+        var table = document.getElementById('tblMatrixGrid');
+        if (!table) return;
+        
+        var ths = table.querySelectorAll('th');
+        ths.forEach(function(th) {
+            // Skip for icon columns, checkbox columns and action columns
+            if(th.innerText.trim() === '' && (th.style.width === '35px' || th.style.width === '40px' || th.style.width === '50px')) return;
+            if(th.innerText.trim() === 'Thao tác' || th.innerText.trim() === 'STT') return;
+            
+            if(th.querySelector('.resizer')) return;
+
+            var resizer = document.createElement('div');
+            resizer.classList.add('resizer');
+            th.appendChild(resizer);
+
+            var startX, startWidth;
+            
+            resizer.addEventListener('mousedown', function(e) {
+                startX = e.pageX;
+                startWidth = th.offsetWidth;
+                resizer.classList.add('resizing');
+
+                var doDrag = function(e) {
+                    var newWidth = startWidth + (e.pageX - startX);
+                    if(newWidth > 30) {
+                        th.style.width = newWidth + 'px';
+                        th.style.minWidth = newWidth + 'px';
+                        th.style.maxWidth = newWidth + 'px';
+                    }
+                };
+
+                var stopDrag = function(e) {
+                    resizer.classList.remove('resizing');
+                    document.removeEventListener('mousemove', doDrag);
+                    document.removeEventListener('mouseup', stopDrag);
+                };
+
+                document.addEventListener('mousemove', doDrag);
+                document.addEventListener('mouseup', stopDrag);
+                
+                e.preventDefault();
+            });
+        });
+    })();
 </script>

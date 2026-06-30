@@ -18,6 +18,21 @@ namespace SalesManagementSystem.Repositories
             _db = db;
         }
 
+        private DateTime? ParseDate(string dateStr)
+        {
+            if (string.IsNullOrEmpty(dateStr)) return null;
+            string[] formats = { "yyyy-MM-dd", "dd/MM/yyyy", "yyyy/MM/dd", "d/M/yyyy", "yyyy-M-d" };
+            if (DateTime.TryParseExact(dateStr.Trim(), formats, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var result))
+            {
+                return result;
+            }
+            if (DateTime.TryParse(dateStr, out result))
+            {
+                return result;
+            }
+            return null;
+        }
+
         public IEnumerable<SoQuyViewModel> GetList(
             string tuNgay,
             string denNgay,
@@ -26,8 +41,8 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
             {
                 var p = new DynamicParameters();
-                p.Add("@TuNgay",               string.IsNullOrEmpty(tuNgay)  ? (DateTime?)null : DateTime.Parse(tuNgay));
-                p.Add("@DenNgay",              string.IsNullOrEmpty(denNgay) ? (DateTime?)null : DateTime.Parse(denNgay));
+                p.Add("@TuNgay",               ParseDate(tuNgay));
+                p.Add("@DenNgay",              ParseDate(denNgay));
                 p.Add("@IDTaiKhoanThanhToan",  idTaiKhoanThanhToan);
 
                 return conn.Query<SoQuyViewModel>(
@@ -46,8 +61,8 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
             {
                 var p = new DynamicParameters();
-                p.Add("@TuNgay", string.IsNullOrEmpty(tuNgay) ? (DateTime?)null : DateTime.Parse(tuNgay));
-                p.Add("@DenNgay", string.IsNullOrEmpty(denNgay) ? (DateTime?)null : DateTime.Parse(denNgay));
+                p.Add("@TuNgay", ParseDate(tuNgay));
+                p.Add("@DenNgay", ParseDate(denNgay));
                 p.Add("@IDTaiKhoanThanhToan", idTaiKhoanThanhToan);
 
                 return conn.Query<TaiKhoanSummaryViewModel>(
@@ -63,14 +78,14 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
             {
                 var p = new DynamicParameters();
-                p.Add("@TuNgay", string.IsNullOrEmpty(tuNgay) ? (DateTime?)null : DateTime.Parse(tuNgay));
+                p.Add("@TuNgay", ParseDate(tuNgay));
                 p.Add("@IDTaiKhoanThanhToan", idTaiKhoanThanhToan);
 
-                return conn.ExecuteScalar<decimal>(
+                return conn.ExecuteScalar<decimal?>(
                     "sp_KT_SoQuy_GetOpeningBalance",
                     p,
                     commandType: CommandType.StoredProcedure
-                );
+                ) ?? 0M;
             }
         }
 
@@ -82,8 +97,8 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
             {
                 var p = new DynamicParameters();
-                p.Add("@TuNgay", string.IsNullOrEmpty(tuNgay) ? (DateTime?)null : DateTime.Parse(tuNgay));
-                p.Add("@DenNgay", string.IsNullOrEmpty(denNgay) ? (DateTime?)null : DateTime.Parse(denNgay));
+                p.Add("@TuNgay", ParseDate(tuNgay));
+                p.Add("@DenNgay", ParseDate(denNgay));
                 p.Add("@IDTaiKhoanThanhToan", idTaiKhoanThanhToan);
 
                 return conn.Query<GiaoDichChiTietViewModel>(

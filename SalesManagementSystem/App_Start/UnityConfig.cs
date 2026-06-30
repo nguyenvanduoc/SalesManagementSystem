@@ -58,6 +58,7 @@ namespace SalesManagementSystem.App_Start
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IPhuongTienRepository, PhuongTienRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IHopDongKhachHangRepository, HopDongKhachHangRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.ITraHangBanRepository, TraHangBanRepository>(new HierarchicalLifetimeManager());
+            container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IDmKhoanMucChiRepository, DmKhoanMucChiRepository>(new HierarchicalLifetimeManager());
             // ── Services (logic nghiệp vụ) ────────────────────────────────────
             container.RegisterType<InventoryService>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Services.Interfaces.IExcelExportService, ExcelExportService>(new HierarchicalLifetimeManager());

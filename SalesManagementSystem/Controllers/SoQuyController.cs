@@ -164,6 +164,21 @@ namespace SalesManagementSystem.Controllers
             }
         }
 
+        private DateTime ParseDate(string dateStr, DateTime defaultDate)
+        {
+            if (string.IsNullOrEmpty(dateStr)) return defaultDate;
+            string[] formats = { "yyyy-MM-dd", "dd/MM/yyyy", "yyyy/MM/dd", "d/M/yyyy", "yyyy-M-d" };
+            if (DateTime.TryParseExact(dateStr.Trim(), formats, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var result))
+            {
+                return result;
+            }
+            if (DateTime.TryParse(dateStr, out result))
+            {
+                return result;
+            }
+            return defaultDate;
+        }
+
         // GET: /so-quy/chi-tiet
         public ActionResult Details(
             int idTaiKhoanThanhToan,
@@ -205,13 +220,18 @@ namespace SalesManagementSystem.Controllers
             decimal tongChi = allTransactions.Sum(x => x.SoTienChi);
             decimal closingBalance = openingBalance + tongThu - tongChi;
 
+            DateTime start = ParseDate(tuNgay, DateTime.Today.AddMonths(-1));
+            DateTime end   = ParseDate(denNgay, DateTime.Today);
+
             ViewBag.OpeningBalance  = openingBalance;
             ViewBag.TongThu         = tongThu;
             ViewBag.TongChi         = tongChi;
             ViewBag.ClosingBalance  = closingBalance;
             ViewBag.TaiKhoan        = taiKhoan;
-            ViewBag.TuNgay          = tuNgay;
-            ViewBag.DenNgay         = denNgay;
+            ViewBag.TuNgay          = start.ToString("yyyy-MM-dd");
+            ViewBag.DenNgay         = end.ToString("yyyy-MM-dd");
+            ViewBag.TuNgayFormatted  = start.ToString("dd/MM/yyyy");
+            ViewBag.DenNgayFormatted = end.ToString("dd/MM/yyyy");
 
             // Generate daily balance details for Chart.js
             var dailyGroups = allTransactions
@@ -221,16 +241,13 @@ namespace SalesManagementSystem.Controllers
             var chartLabels = new List<string>();
             var chartData   = new List<decimal>();
 
-            DateTime start = DateTime.Parse(tuNgay).Date;
-            DateTime end   = DateTime.Parse(denNgay).Date;
-
             decimal tempBalance = openingBalance;
             
             // Initial point at start of period
             chartLabels.Add(start.AddDays(-1).ToString("dd/MM"));
             chartData.Add(tempBalance);
 
-            for (DateTime date = start; date <= end; date = date.AddDays(1))
+            for (DateTime date = start.Date; date <= end.Date; date = date.AddDays(1))
             {
                 if (dailyGroups.TryGetValue(date, out var dayTxs))
                 {

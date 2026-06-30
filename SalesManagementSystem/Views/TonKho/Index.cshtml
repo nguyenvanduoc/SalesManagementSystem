@@ -206,7 +206,16 @@
         </div>
     </div>
 
-    <div id="modalContainer"></div>
+    <div id="modalContainer">
+        <!-- Static Modal for Thẻ kho -->
+        <div class="modal fade" id="theKhoModal" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content" id="theKhoModalContent">
+                    <!-- Content loaded via AJAX -->
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         (function() {
@@ -374,10 +383,33 @@
                     }
                     return;
                 }
+
+                // Show loading spinner instantly inside static modal
+                var modalEl = document.getElementById('theKhoModal');
+                var $modalContent = $container.find('#theKhoModalContent');
+                $modalContent.html(
+                    '<div class="modal-header bg-light">' +
+                    '    <h5 class="modal-title fw-bold text-uppercase" style="color: #0b5b84;"><i class="fas fa-list-alt"></i> Chi tiết thẻ kho</h5>' +
+                    '    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>' +
+                    '</div>' +
+                    '<div class="modal-body text-center py-5">' +
+                    '    <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>' +
+                    '    <p class="text-muted mt-2">Đang tải dữ liệu thẻ kho, vui lòng đợi...</p>' +
+                    '</div>'
+                );
+
+                var myModal = bootstrap.Modal.getInstance(modalEl);
+                if (!myModal) {
+                    myModal = new bootstrap.Modal(modalEl);
+                }
+                myModal.show();
+
                 $.get('/TonKho/GetTheKho', { idKho: idKho, idSanPham: idSanPham, tuNgay: tuNgay, denNgay: denNgay }, function (html) {
-                    $container.find('#modalContainer').html(html);
-                    $container.find('#theKhoModal').modal('show');
-                    $container.find('#tblTheKho').DataTable({
+                    var tempDiv = $('<div>').html(html);
+                    var modalInnerContent = tempDiv.find('.modal-content').html();
+                    $modalContent.html(modalInnerContent);
+
+                    $modalContent.find('#tblTheKho').DataTable({
                         "language": { "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/Vietnamese.json" },
                         "paging": false,
                         "ordering": false,

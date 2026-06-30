@@ -4,6 +4,8 @@
     var taiKhoan = ViewBag.TaiKhoan as SalesManagementSystem.Models.ViewModels.TaiKhoanThanhToanViewModel;
     var tuNgay = ViewBag.TuNgay as string;
     var denNgay = ViewBag.DenNgay as string;
+    var tuNgayFormatted = ViewBag.TuNgayFormatted as string;
+    var denNgayFormatted = ViewBag.DenNgayFormatted as string;
     
     decimal openingBalance = ViewBag.OpeningBalance ?? 0M;
     decimal tongThu = ViewBag.TongThu ?? 0M;
@@ -38,7 +40,7 @@
                 <div class="card-body py-3">
                     <div class="text-muted small fw-semibold mb-1" style="font-size: 0.72rem;">SỐ DƯ ĐẦU KỲ</div>
                     <div class="fw-bold text-primary" style="font-size: 1.15rem;">@openingBalance.ToString("N0") <small class="fw-normal" style="font-size: 0.75rem;">VND</small></div>
-                    <div class="text-muted" style="font-size: 0.65rem; margin-top: 2px;">Tính đến @(DateTime.Parse(tuNgay).ToString("dd/MM/yyyy"))</div>
+                    <div class="text-muted" style="font-size: 0.65rem; margin-top: 2px;">Tính đến @tuNgayFormatted</div>
                 </div>
             </div>
         </div>
@@ -47,7 +49,7 @@
                 <div class="card-body py-3">
                     <div class="text-muted small fw-semibold mb-1" style="font-size: 0.72rem;">THU TRONG KỲ</div>
                     <div class="fw-bold text-success" style="font-size: 1.15rem;">@tongThu.ToString("N0") <small class="fw-normal" style="font-size: 0.75rem;">VND</small></div>
-                    <div class="text-muted" style="font-size: 0.65rem; margin-top: 2px;">BETWEEN date range</div>
+                    <div class="text-muted" style="font-size: 0.65rem; margin-top: 2px;">Từ ngày @tuNgayFormatted đến @denNgayFormatted</div>
                 </div>
             </div>
         </div>
@@ -56,7 +58,7 @@
                 <div class="card-body py-3">
                     <div class="text-muted small fw-semibold mb-1" style="font-size: 0.72rem;">CHI TRONG KỲ</div>
                     <div class="fw-bold text-danger" style="font-size: 1.15rem;">@tongChi.ToString("N0") <small class="fw-normal" style="font-size: 0.75rem;">VND</small></div>
-                    <div class="text-muted" style="font-size: 0.65rem; margin-top: 2px;">BETWEEN date range</div>
+                    <div class="text-muted" style="font-size: 0.65rem; margin-top: 2px;">Từ ngày @tuNgayFormatted đến @denNgayFormatted</div>
                 </div>
             </div>
         </div>
@@ -65,7 +67,7 @@
                 <div class="card-body py-3">
                     <div class="text-muted small fw-semibold mb-1" style="font-size: 0.72rem;">SỐ DƯ CUỐI KỲ</div>
                     <div class="fw-bold" style="color: #d35400; font-size: 1.15rem;">@closingBalance.ToString("N0") <small class="fw-normal" style="font-size: 0.75rem;">VND</small></div>
-                    <div class="text-muted" style="font-size: 0.65rem; margin-top: 2px;">Tính đến @(DateTime.Parse(denNgay).ToString("dd/MM/yyyy"))</div>
+                    <div class="text-muted" style="font-size: 0.65rem; margin-top: 2px;">Tính đến @denNgayFormatted</div>
                 </div>
             </div>
         </div>
@@ -121,13 +123,12 @@
             var href = $(this).attr('href');
             if (!href || href === '#') return;
 
-            var url = href;
-            // Append flag to only return table grid partial
-            if (url.indexOf('?') > -1) url += '&isGridOnly=true';
-            else url += '?isGridOnly=true';
+            var page = 1;
+            var matchPage = href.match(/[?&]page=(\d+)/);
+            if (matchPage) page = parseInt(matchPage[1], 10);
 
-            // Maintain correct detail modal routing params
-            url = url.replace('/Details', '/chi-tiet').replace('Details?', 'chi-tiet?');
+            var pageSize = $modalContent.find('.page-size-select').val() || 20;
+            var url = '@Url.Action("Details", "SoQuy")' + '?idTaiKhoanThanhToan=@taiKhoan.ID&tuNgay=@tuNgay&denNgay=@denNgay&page=' + page + '&pageSize=' + pageSize + '&isGridOnly=true';
 
             $('#giao-dich-chi-tiet-container').html('<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
             $('#giao-dich-chi-tiet-container').load(url);

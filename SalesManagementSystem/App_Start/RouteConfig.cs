@@ -110,6 +110,13 @@ namespace SalesManagementSystem
             routes.MapRoute(name: "CongNoNCC_List",    url: "cong-no-ncc",           defaults: new { controller = "CongNoNCC", action = "Index" });
             routes.MapRoute(name: "CongNoNCC_GetList", url: "cong-no-ncc/danh-sach", defaults: new { controller = "CongNoNCC", action = "GetList" });
 
+            // Danh mục khoản mục chi
+            routes.MapRoute(name: "DmKhoanMucChi_List", url: "danh-muc-khoan-muc-chi", defaults: new { controller = "DmKhoanMucChi", action = "Index" });
+            routes.MapRoute(name: "DmKhoanMucChi_GetList", url: "danh-muc-khoan-muc-chi/danh-sach", defaults: new { controller = "DmKhoanMucChi", action = "GetList" });
+            routes.MapRoute(name: "DmKhoanMucChi_Create", url: "danh-muc-khoan-muc-chi/them-moi", defaults: new { controller = "DmKhoanMucChi", action = "Create" });
+            routes.MapRoute(name: "DmKhoanMucChi_Update", url: "danh-muc-khoan-muc-chi/cap-nhat", defaults: new { controller = "DmKhoanMucChi", action = "Edit" });
+            routes.MapRoute(name: "DmKhoanMucChi_Delete", url: "danh-muc-khoan-muc-chi/xoa", defaults: new { controller = "DmKhoanMucChi", action = "Delete" });
+
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
