@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace SalesManagementSystem.Models.Entities
 {
@@ -15,6 +15,9 @@ namespace SalesManagementSystem.Models.Entities
         public decimal ThueGTGT { get; set; }
         public bool IsHangKhuyenMai { get; set; }
         public string GhiChu { get; set; }
+        public decimal? DonGiaBocXep { get; set; }
+        public decimal? ThanhTienBocXep { get; set; }
+        public decimal? ThanhTienHang { get; set; }
 
         // Denorm từ header
         public DateTime? NgayTaoDon { get; set; }

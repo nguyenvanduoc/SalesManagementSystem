@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -60,6 +60,11 @@ namespace SalesManagementSystem.Services
             var bieuMau = _bieuMauRepo.GetByMa(maBieuMau);
             if (bieuMau == null || bieuMau.NoiDung == null || bieuMau.NoiDung.Length == 0)
                 throw new Exception($"Không tìm thấy biểu mẫu '{maBieuMau}'.");
+
+            if (!string.IsNullOrEmpty(bieuMau.DuoiFile))
+                fileExtension = bieuMau.DuoiFile.ToLower();
+            else if (!string.IsNullOrEmpty(bieuMau.TenFile))
+                fileExtension = Path.GetExtension(bieuMau.TenFile).Replace(".", "").ToLower();
 
             using (var stream = new MemoryStream(bieuMau.NoiDung))
             {
@@ -374,6 +379,8 @@ namespace SalesManagementSystem.Services
             var properties = type.GetProperties();
             var dateStyleCache = new Dictionary<short, ICellStyle>();
 
+            int originalLastRow = worksheet.LastRowNum;
+
             int groupTemplateRowIndex = -1;
             int itemTemplateRowIndex = -1;
             int tmpTemplateRowIndex = -1;
@@ -395,7 +402,7 @@ namespace SalesManagementSystem.Services
                         var cellText = cell.StringCellValue;
                         if (!string.IsNullOrEmpty(cellText))
                         {
-                            if (cellText.Contains("%P_Group")) groupTemplateRowIndex = rowIdx;
+                            if (cellText.Contains("%P_Group") || cellText.Contains("%TenGroup")) groupTemplateRowIndex = rowIdx;
                             else if (cellText.Contains(itemPrefix)) itemTemplateRowIndex = rowIdx;
                             else if (cellText.Contains(tmpMarker)) tmpTemplateRowIndex = rowIdx;
                         }
@@ -454,6 +461,9 @@ namespace SalesManagementSystem.Services
 
                 if (groupRow != null)
                 {
+                    var firstItem = items.FirstOrDefault();
+                    var itemProps = firstItem != null ? firstItem.GetType().GetProperties() : null;
+
                     for (int col = groupRow.FirstCellNum; col < groupRow.LastCellNum; col++)
                     {
                         if (col < 0) continue;
@@ -461,8 +471,37 @@ namespace SalesManagementSystem.Services
                         if (cell != null && cell.CellType == CellType.String)
                         {
                             var text = cell.StringCellValue;
+                            bool changed = false;
+
                             if (text.Contains("%P_Group"))
-                                cell.SetCellValue(Regex.Replace(text, @"%P_Group.*?%", group.Key?.ToString() ?? ""));
+                            {
+                                text = Regex.Replace(text, @"%P_Group.*?%", group.Key?.ToString() ?? "");
+                                changed = true;
+                            }
+                            else if (text.Contains("%TenGroup"))
+                            {
+                                text = text.Replace("%TenGroup", group.Key?.ToString() ?? "");
+                                changed = true;
+                            }
+
+                            if (itemProps != null && text.Contains("%"))
+                            {
+                                foreach (var prop in itemProps)
+                                {
+                                    var propPlaceholder = $"%{prop.Name}";
+                                    if (text.Contains(propPlaceholder))
+                                    {
+                                        var value = prop.GetValue(firstItem);
+                                        text = text.Replace(propPlaceholder, FormatForString(value));
+                                        changed = true;
+                                    }
+                                }
+                            }
+
+                            if (changed)
+                            {
+                                cell.SetCellValue(text);
+                            }
                         }
                     }
                 }
@@ -564,6 +603,12 @@ namespace SalesManagementSystem.Services
                     }
                 }
             }
+
+            int netRowsAdded = worksheet.LastRowNum - originalLastRow;
+            if (netRowsAdded > 0)
+            {
+                ExpandPrintArea(worksheet.Workbook, worksheet, startTemplateRow, netRowsAdded);
+            }
         }
 
         private void CopyRowDataExact(IRow sourceRow, IRow targetRow, int firstCol, int lastCol)
@@ -651,6 +696,24 @@ namespace SalesManagementSystem.Services
             if (n > 0)
             {
                 for (int i = endRow; i >= startRow; i--)
+                {
+                    var sourceRow = sheet.GetRow(i);
+                    if (sourceRow != null)
+                    {
+                        var targetRow = sheet.GetRow(i + n) ?? sheet.CreateRow(i + n);
+                        CopyRowDataExact(sourceRow, targetRow, 0, sourceRow.LastCellNum);
+                        sheet.RemoveRow(sourceRow);
+                    }
+                    else
+                    {
+                        var targetRow = sheet.GetRow(i + n);
+                        if (targetRow != null) sheet.RemoveRow(targetRow);
+                    }
+                }
+            }
+            else if (n < 0)
+            {
+                for (int i = startRow; i <= endRow; i++)
                 {
                     var sourceRow = sheet.GetRow(i);
                     if (sourceRow != null)

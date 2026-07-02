@@ -16,6 +16,16 @@ namespace SalesManagementSystem.Repositories
         public ChungTuBanHangRepository(DbConnectionFactory db)
         {
             _db = db;
+            try
+            {
+                using (var conn = _db.CreateConnection())
+                {
+                    conn.Execute("IF COL_LENGTH('BAN_ChungTuBanHang_ChiTiet', 'DonGiaBocXep') IS NULL ALTER TABLE BAN_ChungTuBanHang_ChiTiet ADD DonGiaBocXep DECIMAL(18,2) NULL");
+                    conn.Execute("IF COL_LENGTH('BAN_ChungTuBanHang_ChiTiet', 'ThanhTienBocXep') IS NULL ALTER TABLE BAN_ChungTuBanHang_ChiTiet ADD ThanhTienBocXep DECIMAL(18,2) NULL");
+                    conn.Execute("IF COL_LENGTH('BAN_ChungTuBanHang_ChiTiet', 'ThanhTienHang') IS NULL ALTER TABLE BAN_ChungTuBanHang_ChiTiet ADD ThanhTienHang DECIMAL(18,2) NULL");
+                }
+            }
+            catch { }
         }
 
         public string GenerateSoChungTu()
@@ -97,7 +107,19 @@ namespace SalesManagementSystem.Repositories
                 var master = conn.QueryFirstOrDefault<BAN_ChungTuBanHang>("sp_BAN_ChungTuBanHang_GetById", p, commandType: System.Data.CommandType.StoredProcedure);
                 if (master == null) return null;
 
-                var details = conn.Query<ChungTuBanHangChiTietViewModel>("sp_BAN_ChungTuBanHang_ChiTiet_GetList", new { IDChungTuBanHang = id }, commandType: System.Data.CommandType.StoredProcedure).ToList();
+                string sqlChiTiet = @"
+                    SELECT 
+                        c.ID, c.IDChungTuBanHang, c.IDSanPham,
+                        s.MaSanPham, s.TenSanPham, s.DVT,
+                        c.STT, c.SoLuong, c.DonGia,
+                        c.DonGiaBocXep, c.ThanhTienBocXep, c.ThanhTienHang,
+                        c.ThanhTien, c.ThueGTGT, c.TienThue, c.TongSauThue, c.GhiChu
+                    FROM BAN_ChungTuBanHang_ChiTiet c
+                    JOIN DM_SanPham s ON c.IDSanPham = s.ID
+                    WHERE c.IDChungTuBanHang = @IDChungTuBanHang
+                    ORDER BY c.STT;
+                ";
+                var details = conn.Query<ChungTuBanHangChiTietViewModel>(sqlChiTiet, new { IDChungTuBanHang = id }).ToList();
 
                 var vm = new ChungTuBanHangViewModel
                 {
@@ -183,13 +205,22 @@ namespace SalesManagementSystem.Repositories
                             pCt.Add("@STT", ct.STT);
                             pCt.Add("@SoLuong", ct.SoLuong);
                             pCt.Add("@DonGia", ct.DonGia);
+                            pCt.Add("@DonGiaBocXep", ct.DonGiaBocXep);
+                            pCt.Add("@ThanhTienBocXep", ct.ThanhTienBocXep);
+                            pCt.Add("@ThanhTienHang", ct.ThanhTienHang);
                             pCt.Add("@ThanhTien", ct.ThanhTien);
                             pCt.Add("@ThueGTGT", ct.ThueGTGT);
                             pCt.Add("@TienThue", ct.TienThue);
                             pCt.Add("@TongSauThue", ct.TongSauThue);
                             pCt.Add("@GhiChu", ct.GhiChu);
 
-                            conn.Execute("sp_BAN_ChungTuBanHang_ChiTiet_Insert", pCt, transaction: tr, commandType: System.Data.CommandType.StoredProcedure);
+                            string sqlInsertCt = @"
+                                INSERT INTO BAN_ChungTuBanHang_ChiTiet 
+                                (IDChungTuBanHang, IDSanPham, STT, SoLuong, DonGia, DonGiaBocXep, ThanhTienBocXep, ThanhTienHang, ThanhTien, ThueGTGT, TienThue, TongSauThue, GhiChu)
+                                VALUES 
+                                (@IDChungTuBanHang, @IDSanPham, @STT, @SoLuong, @DonGia, @DonGiaBocXep, @ThanhTienBocXep, @ThanhTienHang, @ThanhTien, @ThueGTGT, @TienThue, @TongSauThue, @GhiChu);
+                            ";
+                            conn.Execute(sqlInsertCt, pCt, transaction: tr);
                         }
 
                         // 3. KHO_PhieuXuat

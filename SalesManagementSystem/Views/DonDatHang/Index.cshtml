@@ -29,9 +29,15 @@
                 <i class="bi bi-plus-lg fw-bold"></i> Thêm đơn
             </a>
         }
-        <button type="button" class="btn btn-success no-ajax" onclick="exportExcelList()" style="background-color:#28a745;border-color:#28a745;">
-            <i class="bi bi-file-earmark-excel"></i> Xuất excel
-        </button>
+        <div class="dropdown d-inline-block">
+            <button class="btn btn-success dropdown-toggle no-ajax" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background-color:#28a745;border-color:#28a745;">
+                <i class="bi bi-file-earmark-excel"></i> Xuất excel
+            </button>
+            <ul class="dropdown-menu shadow-sm">
+                <li><a class="dropdown-item" href="javascript:void(0)" onclick="exportExcelList()"><i class="bi bi-list-task me-2 text-muted"></i>Xuất danh sách (DH02)</a></li>
+                <li><a class="dropdown-item" href="javascript:void(0)" onclick="exportExcelDH03()"><i class="bi bi-list-nested me-2 text-muted"></i>Xuất chi tiết (DH03)</a></li>
+            </ul>
+        </div>
         @if (PermissionHelper.HasPermission("DonDatHang", LoaiPhanQuyen.Xoa))
         {
             <button type="button" class="btn btn-danger"
@@ -272,6 +278,11 @@
     function exportExcelList() {
         var params = $('#searchForm').serialize();
         window.location.href = '@Url.Action("ExportExcelList", "DonDatHang")?' + params;
+    }
+
+    function exportExcelDH03() {
+        var params = $('#searchForm').serialize();
+        window.location.href = '@Url.Action("ExportExcelDH03", "DonDatHang")?' + params;
     }
 </script>
 }

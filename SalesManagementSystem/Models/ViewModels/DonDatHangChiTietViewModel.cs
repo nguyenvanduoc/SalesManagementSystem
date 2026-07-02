@@ -1,4 +1,4 @@
-﻿namespace SalesManagementSystem.Models.ViewModels
+namespace SalesManagementSystem.Models.ViewModels
 {
     /// <summary>ViewModel cho từng dòng chi tiết trong form đơn hàng.</summary>
     public class DonDatHangChiTietViewModel
@@ -19,6 +19,10 @@
         public decimal ThanhTien { get; set; }
         public decimal ThanhTienThue { get; set; }
         public decimal ThanhTienSauThue { get; set; }
+
+        public decimal? DonGiaBocXep { get; set; }
+        public decimal? ThanhTienBocXep { get; set; }
+        public decimal? ThanhTienHang { get; set; }
 
         public bool IsHangKhuyenMai { get; set; }
         public string GhiChu { get; set; }

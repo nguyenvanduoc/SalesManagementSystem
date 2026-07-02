@@ -148,8 +148,10 @@
                                 <th>Sản phẩm</th>
                                 <th style="width:70px;" class="text-center">ĐVT</th>
                                 <th style="width:100px;" class="text-end">Số lượng</th>
-                                <th style="width:120px;" class="text-end">Đơn giá</th>
-                                <th style="width:130px;" class="text-end">Thành tiền</th>
+                                <th style="width:110px;" class="text-end">Đơn giá</th>
+                                <th style="width:110px;" class="text-end">ĐG bốc xếp</th>
+                                <th style="width:120px;" class="text-end">TT bốc xếp</th>
+                                <th style="width:120px;" class="text-end">Thành tiền</th>
                                 <th style="width:90px;" class="text-center d-none">Thuế GTGT %</th>
                                 <th style="width:120px;" class="text-end d-none">Tiền thuế</th>
                                 <th style="width:130px;" class="text-end">Tổng tiền</th>
@@ -175,8 +177,17 @@
                                         <input type="hidden" name="ChiTiets[@i].DonGia" value="@Model.ChiTiets[i].DonGia" />
                                     </td>
                                     <td class="text-end">
+                                        @(Model.ChiTiets[i].DonGiaBocXep.HasValue ? Model.ChiTiets[i].DonGiaBocXep.Value.ToString("N0") : "0")
+                                        <input type="hidden" name="ChiTiets[@i].DonGiaBocXep" value="@Model.ChiTiets[i].DonGiaBocXep" />
+                                    </td>
+                                    <td class="text-end">
+                                        @(Model.ChiTiets[i].ThanhTienBocXep.HasValue ? Model.ChiTiets[i].ThanhTienBocXep.Value.ToString("N0") : "0")
+                                        <input type="hidden" name="ChiTiets[@i].ThanhTienBocXep" value="@Model.ChiTiets[i].ThanhTienBocXep" />
+                                    </td>
+                                    <td class="text-end">
                                         @Model.ChiTiets[i].ThanhTien.ToString("N0")
                                         <input type="hidden" name="ChiTiets[@i].ThanhTien" value="@Model.ChiTiets[i].ThanhTien" />
+                                        <input type="hidden" name="ChiTiets[@i].ThanhTienHang" value="@Model.ChiTiets[i].ThanhTienHang" />
                                     </td>
                                     <td class="text-center d-none">
                                         @Model.ChiTiets[i].ThueGTGT
@@ -206,8 +217,8 @@
                     </div>
                     <div>
                         <span class="text-muted small me-1">Cộng tiền hàng:</span>
-                        <span class="fs-6 text-dark">@Model.TongTienHang.ToString("N0")</span>
-                        <input type="hidden" name="TongTienHang" value="@Model.TongTienHang" />
+                        <span class="fs-6 text-dark" id="dispTongTienHang">@(Model.ChiTiets != null ? Model.ChiTiets.Sum(c => c.ThanhTien).ToString("N0") : "0")</span>
+                        <input type="hidden" id="TongTienHang" name="TongTienHang" value="@Model.TongTienHang" />
                     </div>
                     <div class="d-none">
                         <span class="text-muted small me-1">Tiền thuế GTGT:</span>

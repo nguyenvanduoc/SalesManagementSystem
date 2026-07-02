@@ -116,72 +116,54 @@ GO
 CREATE OR ALTER PROCEDURE sp_BAN_PhieuThuKhachHang_GetList
     @TuNgay DATE = NULL,
     @DenNgay DATE = NULL,
-    @SoPhieuThu NVARCHAR(50) = NULL,
+    @SoChungTu NVARCHAR(50) = NULL,
     @IDKhachHang INT = NULL,
-    @IDChungTuBanHang INT = NULL,
-    @IDTaiKhoanThanhToan INT = NULL,
-    @TrangThai INT = NULL
+    @TrangThaiCongNo INT = NULL -- 1: Chưa thanh toán, 2: Thanh toán một phần, 3: Đã thanh toán
 AS
 BEGIN
     SET NOCOUNT ON;
 
     SELECT 
-        pt.ID,
-        pt.SoPhieuThu,
-        pt.NgayThu,
-        pt.IDChungTuBanHang,
-        ct.SoChungTu AS SoChungTuBanHang,
-        pt.IDKhachHang,
+        c.ID,
+        ISNULL(d.SoDonHang, c.SoChungTu) AS SoChungTu,
+        c.NgayChungTu,
+        c.IDKhachHang,
         kh.TenKhachHang,
-        pt.IDTaiKhoanThanhToan,
-        tk.SoTaiKhoan,
-        tk.TenTaiKhoan,
-        pt.SoTienThu,
-        pt.GhiChu,
-        pt.TrangThai,
-        pt.NgayTao,
-        pt.NguoiTao,
-        pt.NgayCapNhat,
-        pt.NguoiCapNhat,
-        pt.NgayGhi,
-        pt.NguoiGhi,
-        pt.NgayHuy,
-        pt.NguoiHuy,
-        pt.LyDoHuy,
-        ct.TongCong AS TongChungTu,
-        -- Đã thanh toán trước đó (tổng các phiếu thu đã ghi khác phiếu này)
-        ISNULL((
-            SELECT SUM(p.SoTienThu) 
-            FROM BAN_PhieuThuKhachHang p 
-            WHERE p.IDChungTuBanHang = pt.IDChungTuBanHang 
-              AND p.TrangThai = 2 
-              AND p.IsDeleted = 0 
-              AND p.ID <> pt.ID
-        ), 0) AS DaThanhToanTruoc,
-        -- Còn lại sau thu
-        (ct.TongCong - ISNULL((
-            SELECT SUM(p.SoTienThu) 
-            FROM BAN_PhieuThuKhachHang p 
-            WHERE p.IDChungTuBanHang = pt.IDChungTuBanHang 
-              AND p.TrangThai = 2 
-              AND p.IsDeleted = 0 
-              AND p.ID <> pt.ID
-        ), 0) - pt.SoTienThu) AS ConLaiSauThu,
-        ns.HoDem + ' ' + ns.Ten AS TenNguoiTao
-    FROM BAN_PhieuThuKhachHang pt
-    JOIN BAN_ChungTuBanHang ct ON pt.IDChungTuBanHang = ct.ID
-    JOIN NS_KhachHang kh ON pt.IDKhachHang = kh.ID
-    JOIN KT_TaiKhoanKeToan tk ON pt.IDTaiKhoanThanhToan = tk.ID
-    LEFT JOIN NhanSu ns ON pt.NguoiTao = ns.ID
-    WHERE pt.IsDeleted = 0
-      AND (@TuNgay IS NULL OR pt.NgayThu >= @TuNgay)
-      AND (@DenNgay IS NULL OR pt.NgayThu <= @DenNgay)
-      AND (@SoPhieuThu IS NULL OR pt.SoPhieuThu LIKE '%' + @SoPhieuThu + '%')
-      AND (@IDKhachHang IS NULL OR pt.IDKhachHang = @IDKhachHang)
-      AND (@IDChungTuBanHang IS NULL OR pt.IDChungTuBanHang = @IDChungTuBanHang)
-      AND (@IDTaiKhoanThanhToan IS NULL OR pt.IDTaiKhoanThanhToan = @IDTaiKhoanThanhToan)
-      AND (@TrangThai IS NULL OR pt.TrangThai = @TrangThai)
-    ORDER BY pt.NgayThu DESC, pt.ID DESC;
+        c.TongCong,
+        ISNULL(pt.DaThanhToan, 0) AS DaThanhToan,
+        (c.TongCong - ISNULL(pt.DaThanhToan, 0)) AS ConLai,
+        CASE 
+            WHEN ISNULL(pt.DaThanhToan, 0) = 0 THEN 1 -- Chưa thanh toán
+            WHEN c.TongCong - ISNULL(pt.DaThanhToan, 0) <= 0 THEN 3 -- Đã thanh toán
+            ELSE 2 -- Thanh toán một phần
+        END AS TrangThaiCongNo,
+        ns.HoDem + ' ' + ns.Ten AS TenNguoiTao,
+        c.NgayTao
+    FROM BAN_ChungTuBanHang c
+    JOIN NS_KhachHang kh ON c.IDKhachHang = kh.ID
+    LEFT JOIN NS_NhanSu ns ON c.NguoiTao = ns.ID
+    LEFT JOIN NS_DonDatHang d ON c.IDDonDatHang = d.ID
+    OUTER APPLY (
+        SELECT SUM(p.SoTienThu) AS DaThanhToan
+        FROM BAN_PhieuThuKhachHang p
+        WHERE p.IDChungTuBanHang = c.ID 
+          AND p.TrangThai = 2 -- Đã ghi
+          AND p.IsDeleted = 0
+    ) pt
+    WHERE c.IsDeleted = 0
+      AND c.TrangThai = 2 -- Chỉ hiển thị chứng từ bán hàng đã ghi sổ
+      AND (@TuNgay IS NULL OR c.NgayChungTu >= @TuNgay)
+      AND (@DenNgay IS NULL OR c.NgayChungTu <= @DenNgay)
+      AND (@SoChungTu IS NULL OR c.SoChungTu LIKE '%' + @SoChungTu + '%' OR d.SoDonHang LIKE '%' + @SoChungTu + '%')
+      AND (@IDKhachHang IS NULL OR c.IDKhachHang = @IDKhachHang)
+      AND (@TrangThaiCongNo IS NULL OR @TrangThaiCongNo = 0 OR (
+            CASE 
+                WHEN ISNULL(pt.DaThanhToan, 0) = 0 THEN 1
+                WHEN c.TongCong - ISNULL(pt.DaThanhToan, 0) <= 0 THEN 3
+                ELSE 2
+            END = @TrangThaiCongNo
+      ))
+    ORDER BY c.NgayChungTu DESC, c.ID DESC;
 END
 GO
 
@@ -557,7 +539,7 @@ BEGIN
 
     SELECT 
         c.ID, 
-        c.SoChungTu, 
+        ISNULL(d.SoDonHang, c.SoChungTu) AS SoChungTu, 
         c.NgayChungTu, 
         c.IDKhachHang, 
         kh.TenKhachHang, 
@@ -566,6 +548,7 @@ BEGIN
         c.ConLai
     FROM BAN_ChungTuBanHang c
     JOIN NS_KhachHang kh ON c.IDKhachHang = kh.ID
+    LEFT JOIN NS_DonDatHang d ON c.IDDonDatHang = d.ID
     WHERE c.TrangThai = 2 
       AND c.IsDeleted = 0
       AND c.ConLai > 0
@@ -582,7 +565,7 @@ BEGIN
 
     SELECT 
         c.ID, 
-        c.SoChungTu, 
+        ISNULL(d.SoDonHang, c.SoChungTu) AS SoChungTu, 
         c.NgayChungTu, 
         c.IDKhachHang, 
         kh.TenKhachHang, 
@@ -591,6 +574,7 @@ BEGIN
         c.ConLai
     FROM BAN_ChungTuBanHang c
     JOIN NS_KhachHang kh ON c.IDKhachHang = kh.ID
+    LEFT JOIN NS_DonDatHang d ON c.IDDonDatHang = d.ID
     WHERE c.ID = @ID 
       AND c.IsDeleted = 0;
 END

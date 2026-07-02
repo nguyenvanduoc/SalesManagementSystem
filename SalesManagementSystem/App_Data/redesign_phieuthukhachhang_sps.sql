@@ -13,7 +13,7 @@ BEGIN
 
     SELECT 
         c.ID,
-        c.SoChungTu,
+        ISNULL(d.SoDonHang, c.SoChungTu) AS SoChungTu,
         c.NgayChungTu,
         c.IDKhachHang,
         kh.TenKhachHang,
@@ -30,6 +30,7 @@ BEGIN
     FROM BAN_ChungTuBanHang c
     JOIN NS_KhachHang kh ON c.IDKhachHang = kh.ID
     LEFT JOIN NS_NhanSu ns ON c.NguoiTao = ns.ID
+    LEFT JOIN NS_DonDatHang d ON c.IDDonDatHang = d.ID
     OUTER APPLY (
         SELECT SUM(p.SoTienThu) AS DaThanhToan
         FROM BAN_PhieuThuKhachHang p
@@ -41,7 +42,7 @@ BEGIN
       AND c.TrangThai = 2 -- Chỉ hiển thị chứng từ bán hàng đã ghi sổ
       AND (@TuNgay IS NULL OR c.NgayChungTu >= @TuNgay)
       AND (@DenNgay IS NULL OR c.NgayChungTu <= @DenNgay)
-      AND (@SoChungTu IS NULL OR c.SoChungTu LIKE '%' + @SoChungTu + '%')
+      AND (@SoChungTu IS NULL OR c.SoChungTu LIKE '%' + @SoChungTu + '%' OR d.SoDonHang LIKE '%' + @SoChungTu + '%')
       AND (@IDKhachHang IS NULL OR c.IDKhachHang = @IDKhachHang)
       AND (@TrangThaiCongNo IS NULL OR @TrangThaiCongNo = 0 OR (
             CASE 
@@ -65,7 +66,7 @@ BEGIN
 
     SELECT 
         c.ID, 
-        c.SoChungTu, 
+        ISNULL(d.SoDonHang, c.SoChungTu) AS SoChungTu, 
         c.NgayChungTu, 
         c.IDKhachHang, 
         kh.TenKhachHang, 
@@ -74,6 +75,7 @@ BEGIN
         (c.TongCong - ISNULL(pt.DaThanhToan, 0)) AS ConLai
     FROM BAN_ChungTuBanHang c
     JOIN NS_KhachHang kh ON c.IDKhachHang = kh.ID
+    LEFT JOIN NS_DonDatHang d ON c.IDDonDatHang = d.ID
     OUTER APPLY (
         SELECT SUM(p.SoTienThu) AS DaThanhToan
         FROM BAN_PhieuThuKhachHang p

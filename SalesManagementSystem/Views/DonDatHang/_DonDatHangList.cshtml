@@ -104,7 +104,16 @@
                                     </div>
                                 </td>
                                 <td class="text-center align-middle">@(stt++)</td>
-                                <td class="align-middle">@item.SoDonHang</td>
+                                <td class="align-middle fw-bold">
+                                    @if (item.TrangThaiDon == 1)
+                                    {
+                                        <a href="@Url.Action("Edit", "DonDatHang", new { id = item.ID })" class="text-decoration-none">@item.SoDonHang</a>
+                                    }
+                                    else
+                                    {
+                                        <a href="@Url.Action("Edit", "DonDatHang", new { id = item.ID, isView = true })" class="text-decoration-none">@item.SoDonHang</a>
+                                    }
+                                </td>
                                 <td class="text-center align-middle">
                                     @(item.NgayTaoDon.HasValue ? item.NgayTaoDon.Value.ToString("dd/MM/yyyy") : "")
                                 </td>

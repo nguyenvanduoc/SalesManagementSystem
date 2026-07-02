@@ -278,9 +278,10 @@ namespace SalesManagementSystem.Controllers
             var session  = GetCurrentUser();
             int userId   = session?.IDNhanSu ?? 0;
             NormalizeChiTiets(chiTiets);
-            decimal thanhTienHang = chiTiets.Sum(x => x.ThanhTien);
+            decimal thanhTienHang = chiTiets.Sum(x => x.ThanhTienHang ?? 0m);
+            decimal phiBocXep = chiTiets.Sum(x => x.ThanhTienBocXep ?? 0m);
             decimal thanhTienThue = chiTiets.Sum(x => x.ThanhTienThue);
-            decimal tong = thanhTienHang + thanhTienThue - model.PhiBocXep;
+            decimal tong = chiTiets.Sum(x => x.ThanhTienSauThue);
 
             var header = new NS_DonDatHang
             {
@@ -291,7 +292,7 @@ namespace SalesManagementSystem.Controllers
                 ThoiHanGiaoHang = model.ThoiHanGiaoHang,
                 TrangThaiDon    = model.TrangThaiDon,
                 TongTien        = tong,
-                PhiBocXep       = model.PhiBocXep,
+                PhiBocXep       = phiBocXep,
                 ThanhTienHang   = thanhTienHang,
                 ThanhTienThue   = thanhTienThue,
                 GhiChu          = model.GhiChu,
@@ -309,7 +310,10 @@ namespace SalesManagementSystem.Controllers
                 ThanhTienSauThue= c.ThanhTienSauThue,
                 ThueGTGT        = c.ThueGTGT,
                 IsHangKhuyenMai = c.IsHangKhuyenMai,
-                GhiChu          = c.GhiChu
+                GhiChu          = c.GhiChu,
+                DonGiaBocXep    = c.DonGiaBocXep,
+                ThanhTienBocXep = c.ThanhTienBocXep,
+                ThanhTienHang   = c.ThanhTienHang
             }).ToList();
 
             _repo.Insert(header, details);
@@ -458,9 +462,10 @@ namespace SalesManagementSystem.Controllers
             var session = GetCurrentUser();
             int userId  = session?.IDNhanSu ?? 0;
             NormalizeChiTiets(chiTiets);
-            decimal thanhTienHang = chiTiets.Sum(x => x.ThanhTien);
+            decimal thanhTienHang = chiTiets.Sum(x => x.ThanhTienHang ?? 0m);
+            decimal phiBocXep = chiTiets.Sum(x => x.ThanhTienBocXep ?? 0m);
             decimal thanhTienThue = chiTiets.Sum(x => x.ThanhTienThue);
-            decimal tong = thanhTienHang + thanhTienThue - model.PhiBocXep;
+            decimal tong = chiTiets.Sum(x => x.ThanhTienSauThue);
 
             var header = new NS_DonDatHang
             {
@@ -472,7 +477,7 @@ namespace SalesManagementSystem.Controllers
                 ThoiHanGiaoHang = model.ThoiHanGiaoHang,
                 TrangThaiDon    = model.TrangThaiDon,
                 TongTien        = tong,
-                PhiBocXep       = model.PhiBocXep,
+                PhiBocXep       = phiBocXep,
                 ThanhTienHang   = thanhTienHang,
                 ThanhTienThue   = thanhTienThue,
                 GhiChu          = model.GhiChu,
@@ -491,7 +496,10 @@ namespace SalesManagementSystem.Controllers
                 ThanhTienSauThue= c.ThanhTienSauThue,
                 ThueGTGT        = c.ThueGTGT,
                 IsHangKhuyenMai = c.IsHangKhuyenMai,
-                GhiChu          = c.GhiChu
+                GhiChu          = c.GhiChu,
+                DonGiaBocXep    = c.DonGiaBocXep,
+                ThanhTienBocXep = c.ThanhTienBocXep,
+                ThanhTienHang   = c.ThanhTienHang
             }).ToList();
 
             _repo.Update(header, details);
@@ -700,6 +708,115 @@ namespace SalesManagementSystem.Controllers
             }
         }
 
+        public ActionResult ExportExcelDH03(
+            string tuNgay = "", string denNgay = "",
+            int? idKhachHang = null, int? idNhanVien = null,
+            int? trangThai = null, string soDonHang = "")
+        {
+            try
+            {
+                int totalRecords;
+                var list = _repo.GetPaged(1, int.MaxValue, tuNgay, denNgay, idKhachHang, idNhanVien, trangThai, soDonHang, out totalRecords);
+
+                decimal totalTongTien = list.Sum(x => x.TongTien);
+                decimal totalPhiBocXep = 0m;
+
+                List<SalesManagementSystem.Models.ViewModels.DonDatHangChiTietViewModel> allDetails = new List<SalesManagementSystem.Models.ViewModels.DonDatHangChiTietViewModel>();
+                var orderIds = list.Select(x => x.ID).ToList();
+                Dictionary<int, decimal> orderPhiBocXepDict = new Dictionary<int, decimal>();
+
+                if (orderIds.Count > 0)
+                {
+                    using (var conn = _db.CreateConnection())
+                    {
+                        string sql = @"
+                            SELECT
+                                ct.ID, ct.IDDonDatHang, ct.IDSanPham,
+                                sp.MaSanPham, sp.TenSanPham, sp.DVT,
+                                ct.SoLuong, ct.DonGia, ct.ThueGTGT, ct.ThanhTien, ct.ThanhTienThue, ct.ThanhTienSauThue,
+                                ct.IsHangKhuyenMai, ct.GhiChu
+                            FROM NS_DonDatHangChiTiet ct
+                            LEFT JOIN DM_SanPham sp ON ct.IDSanPham = sp.ID
+                            WHERE ct.IDDonDatHang IN @IDs
+                            ORDER BY ct.ID";
+                        allDetails = conn.Query<SalesManagementSystem.Models.ViewModels.DonDatHangChiTietViewModel>(sql, new { IDs = orderIds }).ToList();
+
+                        totalPhiBocXep = conn.ExecuteScalar<decimal?>("SELECT SUM(PhiBocXep) FROM NS_DonDatHang WHERE ID IN @IDs", new { IDs = orderIds }) ?? 0m;
+                        
+                        var phiBocXeps = conn.Query("SELECT ID, PhiBocXep FROM NS_DonDatHang WHERE ID IN @IDs", new { IDs = orderIds });
+                        foreach (var row in phiBocXeps)
+                        {
+                            orderPhiBocXepDict[(int)row.ID] = (decimal?)row.PhiBocXep ?? 0m;
+                        }
+                    }
+                }
+
+                var variables = new Dictionary<string, object>
+                {
+                    { "TuNgay", tuNgay },
+                    { "DenNgay", denNgay },
+                    { "Ngay", DateTime.Now.ToString("dd") },
+                    { "Thang", DateTime.Now.ToString("MM") },
+                    { "Nam", DateTime.Now.ToString("yyyy") },
+                    { "TongTien", totalTongTien },
+                    { "PhiBocXep", totalPhiBocXep },
+                    { "TongTienBangChu", SalesManagementSystem.Helpers.NumberToTextHelper.DocTienBangChu(totalTongTien) }
+                };
+
+                var flatData = list.SelectMany(order =>
+                {
+                    var details = allDetails.Where(d => d.IDDonDatHang == order.ID).ToList();
+                    string tenGroup = $"{order.SoDonHang} - {order.TenKhachHang}";
+                    decimal phiBocXep = orderPhiBocXepDict.ContainsKey(order.ID) ? orderPhiBocXepDict[order.ID] : 0m;
+
+                    if (details.Count == 0)
+                    {
+                        return new[] { new {
+                            TenGroup = tenGroup,
+                            STT = 1,
+                            TenSanPham = "",
+                            MaDonHang = "",
+                            DVT = "",
+                            SoLuong = 0m,
+                            DonGia = 0m,
+                            ThanhTienHang = 0m,
+                            GhiChu = "",
+                            TongTienTungGroup = order.TongTien,
+                            PhiBocXepTungGroup = phiBocXep
+                        } }.AsEnumerable();
+                    }
+                    return details.Select((d, i) => new {
+                        TenGroup = tenGroup,
+                        STT = i + 1,
+                        TenSanPham = d.TenSanPham ?? "",
+                        MaDonHang = d.TenSanPham ?? "",
+                        DVT = d.DVT ?? "",
+                        SoLuong = d.SoLuong,
+                        DonGia = d.DonGia,
+                        ThanhTienHang = d.ThanhTien,
+                        GhiChu = d.GhiChu ?? "",
+                        TongTienTungGroup = order.TongTien,
+                        PhiBocXepTungGroup = phiBocXep
+                    });
+                }).ToList();
+
+                var groupedData = flatData.GroupBy(x => x.TenGroup);
+
+                string ext;
+                var fileBytes = _excelExportService.ExportGrouped("DH03", groupedData, out ext, variables);
+
+                string contentType = ext == "xls" 
+                    ? "application/vnd.ms-excel" 
+                    : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                return File(fileBytes, contentType, $"DanhSachDonHangChiTiet_{DateTime.Now:yyyyMMddHHmmss}.{ext}");
+            }
+            catch (Exception ex)
+            {
+                return Content($"Lỗi xuất Excel: {ex.ToString()}");
+            }
+        }
+
         public ActionResult SearchKhachHang(string q)
         {
             using (var conn = _db.CreateConnection())
@@ -783,7 +900,11 @@ namespace SalesManagementSystem.Controllers
             foreach (var ct in chiTiets)
             {
                 if (ct.SoLuong < 0) ct.SoLuong = 1;
-                ct.ThanhTien = Math.Round(ct.DonGia * ct.SoLuong, 0);
+                
+                ct.ThanhTienHang = Math.Round(ct.DonGia * ct.SoLuong, 0);
+                ct.ThanhTienBocXep = Math.Round((ct.DonGiaBocXep ?? 0m) * ct.SoLuong, 0);
+                ct.ThanhTien = Math.Round((ct.ThanhTienHang ?? 0m) - (ct.ThanhTienBocXep ?? 0m), 0);
+                
                 ct.ThanhTienThue = Math.Round(ct.ThanhTien * ct.ThueGTGT / 100, 0);
                 ct.ThanhTienSauThue = Math.Round(ct.ThanhTien + ct.ThanhTienThue, 0);
             }
