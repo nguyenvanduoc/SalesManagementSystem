@@ -196,9 +196,32 @@ namespace SalesManagementSystem.Repositories
 
                         conn.Execute("sp_BAN_ChungTuBanHang_Insert", p, transaction: tr, commandType: System.Data.CommandType.StoredProcedure);
                         int newId = p.Get<int>("@NewID");
+                        decimal tongGiaVonThucTe = 0;
 
                         foreach (var ct in model.ChiTiets)
                         {
+                            decimal donGiaVon = 0;
+                            if (ghiSo)
+                            {
+                                string sqlAvg = @"
+                                    DECLARE @TongSoLuong DECIMAL(18,2) = 0;
+                                    DECLARE @TongGiaTri DECIMAL(18,2) = 0;
+                                    SELECT 
+                                        @TongSoLuong = ISNULL(SUM(SoLuongNhap),0) - ISNULL(SUM(SoLuongXuat),0),
+                                        @TongGiaTri = ISNULL(SUM(SoLuongNhap * DonGia),0) - ISNULL(SUM(SoLuongXuat * ISNULL(DonGiaVon, 0)),0)
+                                    FROM KHO_GiaoDichKho
+                                    WHERE IDSanPham = @IDSanPham AND NgayChungTu <= @NgayChungTu;
+                                    
+                                    IF @TongSoLuong > 0
+                                        SELECT CAST(@TongGiaTri / @TongSoLuong AS DECIMAL(18,2));
+                                    ELSE
+                                        SELECT CAST(0 AS DECIMAL(18,2));
+                                ";
+                                donGiaVon = conn.ExecuteScalar<decimal>(sqlAvg, new { IDSanPham = ct.IDSanPham, NgayChungTu = model.NgayChungTu }, transaction: tr);
+                            }
+                            decimal thanhTienVon = ct.SoLuong * donGiaVon;
+                            if (ghiSo) tongGiaVonThucTe += thanhTienVon;
+
                             var pCt = new DynamicParameters();
                             pCt.Add("@IDChungTuBanHang", newId);
                             pCt.Add("@IDSanPham", ct.IDSanPham);
@@ -207,6 +230,8 @@ namespace SalesManagementSystem.Repositories
                             pCt.Add("@DonGia", ct.DonGia);
                             pCt.Add("@DonGiaBocXep", ct.DonGiaBocXep);
                             pCt.Add("@ThanhTienBocXep", ct.ThanhTienBocXep);
+                            pCt.Add("@DonGiaVon", ghiSo ? (decimal?)donGiaVon : null);
+                            pCt.Add("@ThanhTienVon", ghiSo ? (decimal?)thanhTienVon : null);
                             pCt.Add("@ThanhTienHang", ct.ThanhTienHang);
                             pCt.Add("@ThanhTien", ct.ThanhTien);
                             pCt.Add("@ThueGTGT", ct.ThueGTGT);
@@ -216,9 +241,9 @@ namespace SalesManagementSystem.Repositories
 
                             string sqlInsertCt = @"
                                 INSERT INTO BAN_ChungTuBanHang_ChiTiet 
-                                (IDChungTuBanHang, IDSanPham, STT, SoLuong, DonGia, DonGiaBocXep, ThanhTienBocXep, ThanhTienHang, ThanhTien, ThueGTGT, TienThue, TongSauThue, GhiChu)
+                                (IDChungTuBanHang, IDSanPham, STT, SoLuong, DonGia, DonGiaBocXep, ThanhTienBocXep, DonGiaVon, ThanhTienVon, ThanhTienHang, ThanhTien, ThueGTGT, TienThue, TongSauThue, GhiChu)
                                 VALUES 
-                                (@IDChungTuBanHang, @IDSanPham, @STT, @SoLuong, @DonGia, @DonGiaBocXep, @ThanhTienBocXep, @ThanhTienHang, @ThanhTien, @ThueGTGT, @TienThue, @TongSauThue, @GhiChu);
+                                (@IDChungTuBanHang, @IDSanPham, @STT, @SoLuong, @DonGia, @DonGiaBocXep, @ThanhTienBocXep, @DonGiaVon, @ThanhTienVon, @ThanhTienHang, @ThanhTien, @ThueGTGT, @TienThue, @TongSauThue, @GhiChu);
                             ";
                             conn.Execute(sqlInsertCt, pCt, transaction: tr);
                         }
@@ -265,12 +290,35 @@ namespace SalesManagementSystem.Repositories
                             pPxCt.Add("@SoLuong", ct.SoLuong);
                             pPxCt.Add("@DonGia", ct.DonGia);
                             pPxCt.Add("@ThanhTien", ct.ThanhTien);
+                            decimal donGiaVonPx = 0;
+                            if (ghiSo)
+                            {
+                                string sqlAvg = @"
+                                    DECLARE @TongSoLuong DECIMAL(18,2) = 0;
+                                    DECLARE @TongGiaTri DECIMAL(18,2) = 0;
+                                    SELECT 
+                                        @TongSoLuong = ISNULL(SUM(SoLuongNhap),0) - ISNULL(SUM(SoLuongXuat),0),
+                                        @TongGiaTri = ISNULL(SUM(SoLuongNhap * DonGia),0) - ISNULL(SUM(SoLuongXuat * ISNULL(DonGiaVon, 0)),0)
+                                    FROM KHO_GiaoDichKho
+                                    WHERE IDSanPham = @IDSanPham AND NgayChungTu <= @NgayChungTu;
+                                    
+                                    IF @TongSoLuong > 0
+                                        SELECT CAST(@TongGiaTri / @TongSoLuong AS DECIMAL(18,2));
+                                    ELSE
+                                        SELECT CAST(0 AS DECIMAL(18,2));
+                                ";
+                                donGiaVonPx = conn.ExecuteScalar<decimal>(sqlAvg, new { IDSanPham = ct.IDSanPham, NgayChungTu = model.NgayChungTu }, transaction: tr);
+                            }
+                            decimal thanhTienVonPx = ct.SoLuong * donGiaVonPx;
+
+                            pPxCt.Add("@DonGiaVon", ghiSo ? (decimal?)donGiaVonPx : null);
+                            pPxCt.Add("@ThanhTienVon", ghiSo ? (decimal?)thanhTienVonPx : null);
                             pPxCt.Add("@ThueGTGT", ct.ThueGTGT);
                             pPxCt.Add("@TienThue", ct.TienThue);
                             pPxCt.Add("@TongSauThue", ct.TongSauThue);
                             pPxCt.Add("@NewID", dbType: System.Data.DbType.Int32, direction: System.Data.ParameterDirection.Output);
 
-                            conn.Execute("INSERT INTO KHO_PhieuXuat_ChiTiet (IDPhieuXuat, IDSanPham, STT, SoLuong, DonGia, ThanhTien, ThueGTGT, TienThue, TongSauThue) VALUES (@IDPhieuXuat, @IDSanPham, @STT, @SoLuong, @DonGia, @ThanhTien, @ThueGTGT, @TienThue, @TongSauThue); SELECT @NewID = SCOPE_IDENTITY();", pPxCt, transaction: tr);
+                            conn.Execute("INSERT INTO KHO_PhieuXuat_ChiTiet (IDPhieuXuat, IDSanPham, STT, SoLuong, DonGia, ThanhTien, DonGiaVon, ThanhTienVon, ThueGTGT, TienThue, TongSauThue) VALUES (@IDPhieuXuat, @IDSanPham, @STT, @SoLuong, @DonGia, @ThanhTien, @DonGiaVon, @ThanhTienVon, @ThueGTGT, @TienThue, @TongSauThue); SELECT @NewID = SCOPE_IDENTITY();", pPxCt, transaction: tr);
                             int idChiTietKho = pPxCt.Get<int>("@NewID");
 
                             if (ghiSo)
@@ -286,10 +334,12 @@ namespace SalesManagementSystem.Repositories
                                 pGd.Add("@SoLuongXuat", ct.SoLuong);
                                 pGd.Add("@DonGia", ct.DonGia);
                                 pGd.Add("@ThanhTien", ct.ThanhTien);
+                                pGd.Add("@DonGiaVon", donGiaVonPx);
+                                pGd.Add("@ThanhTienVon", thanhTienVonPx);
                                 pGd.Add("@DienGiai", "Xuất kho tự động từ CTBH " + model.SoChungTu);
                                 pGd.Add("@NguoiTao", nguoiTao);
 
-                                conn.Execute("INSERT INTO KHO_GiaoDichKho (NgayChungTu, SoChungTu, LoaiChungTu, IDChiTietKho, IDKho, IDSanPham, SoLuongNhap, SoLuongXuat, DonGia, ThanhTien, DienGiai, NgayTao, NguoiTao) VALUES (@NgayChungTu, @SoChungTu, @LoaiChungTu, @IDChiTietKho, @IDKho, @IDSanPham, @SoLuongNhap, @SoLuongXuat, @DonGia, @ThanhTien, @DienGiai, GETDATE(), @NguoiTao)", pGd, transaction: tr);
+                                conn.Execute("INSERT INTO KHO_GiaoDichKho (NgayChungTu, SoChungTu, LoaiChungTu, IDChiTietKho, IDKho, IDSanPham, SoLuongNhap, SoLuongXuat, DonGia, ThanhTien, DonGiaVon, ThanhTienVon, DienGiai, NgayTao, NguoiTao) VALUES (@NgayChungTu, @SoChungTu, @LoaiChungTu, @IDChiTietKho, @IDKho, @IDSanPham, @SoLuongNhap, @SoLuongXuat, @DonGia, @ThanhTien, @DonGiaVon, @ThanhTienVon, @DienGiai, GETDATE(), @NguoiTao)", pGd, transaction: tr);
                             }
                         }
 
@@ -314,11 +364,10 @@ namespace SalesManagementSystem.Repositories
                                     new { NgayChungTu = model.NgayChungTu, SoChungTu = model.SoChungTu, LoaiChungTu = "BAN", IDChungTu = newId, TaiKhoanNo = taiKhoanNo, TaiKhoanCo = "33311", SoTien = model.TongTienThue, DienGiai = "Thuế GTGT đầu ra CT " + model.SoChungTu, NguoiTao = nguoiTao }, transaction: tr);
                             }
 
-                            decimal tongGiaVon = model.ChiTiets.Sum(x => x.DonGia * (decimal)x.SoLuong);
-                            if (tongGiaVon > 0)
+                            if (tongGiaVonThucTe > 0)
                             {
                                 conn.Execute("INSERT INTO KT_NhatKyChung (NgayChungTu, SoChungTu, LoaiChungTu, IDChungTu, TaiKhoanNo, TaiKhoanCo, SoTien, DienGiai, NgayTao, NguoiTao, IsHuy) VALUES (@NgayChungTu, @SoChungTu, @LoaiChungTu, @IDChungTu, @TaiKhoanNo, @TaiKhoanCo, @SoTien, @DienGiai, GETDATE(), @NguoiTao, 0)",
-                                    new { NgayChungTu = model.NgayChungTu, SoChungTu = model.SoChungTu, LoaiChungTu = "BAN", IDChungTu = newId, TaiKhoanNo = "632", TaiKhoanCo = "156", SoTien = tongGiaVon, DienGiai = "Giá vốn hàng bán CT " + model.SoChungTu, NguoiTao = nguoiTao }, transaction: tr);
+                                    new { NgayChungTu = model.NgayChungTu, SoChungTu = model.SoChungTu, LoaiChungTu = "BAN", IDChungTu = newId, TaiKhoanNo = "632", TaiKhoanCo = "156", SoTien = tongGiaVonThucTe, DienGiai = "Giá vốn hàng bán CT " + model.SoChungTu, NguoiTao = nguoiTao }, transaction: tr);
                             }
                         }
 
@@ -405,11 +454,30 @@ namespace SalesManagementSystem.Repositories
 
                             // Xóa giao dịch cũ nếu có (để an toàn, tránh trùng)
                             conn.Execute("DELETE FROM KHO_GiaoDichKho WHERE LoaiChungTu = 2 AND SoChungTu = @SoPx", new { SoPx = soPx }, transaction: tr);
+                            decimal tongGiaVonThucTe = 0;
 
                             foreach (var ct in model.ChiTiets)
                             {
                                 var pxCt = pxChiTiets.FirstOrDefault(x => x.IDSanPham == ct.IDSanPham);
                                 int idChiTietKho = pxCt != null ? (int)pxCt.ID : 0;
+
+                                string sqlAvg = @"
+                                    DECLARE @TongSoLuong DECIMAL(18,2) = 0;
+                                    DECLARE @TongGiaTri DECIMAL(18,2) = 0;
+                                    SELECT 
+                                        @TongSoLuong = ISNULL(SUM(SoLuongNhap),0) - ISNULL(SUM(SoLuongXuat),0),
+                                        @TongGiaTri = ISNULL(SUM(SoLuongNhap * DonGia),0) - ISNULL(SUM(SoLuongXuat * ISNULL(DonGiaVon, 0)),0)
+                                    FROM KHO_GiaoDichKho
+                                    WHERE IDSanPham = @IDSanPham AND NgayChungTu <= @NgayChungTu;
+                                    
+                                    IF @TongSoLuong > 0
+                                        SELECT CAST(@TongGiaTri / @TongSoLuong AS DECIMAL(18,2));
+                                    ELSE
+                                        SELECT CAST(0 AS DECIMAL(18,2));
+                                ";
+                                decimal donGiaVon = conn.ExecuteScalar<decimal>(sqlAvg, new { IDSanPham = ct.IDSanPham, NgayChungTu = model.NgayChungTu }, transaction: tr);
+                                decimal thanhTienVon = ct.SoLuong * donGiaVon;
+                                tongGiaVonThucTe += thanhTienVon;
 
                                 var pGd = new DynamicParameters();
                                 pGd.Add("@NgayChungTu", model.NgayChungTu);
@@ -422,10 +490,22 @@ namespace SalesManagementSystem.Repositories
                                 pGd.Add("@SoLuongXuat", ct.SoLuong);
                                 pGd.Add("@DonGia", ct.DonGia);
                                 pGd.Add("@ThanhTien", ct.ThanhTien);
+                                pGd.Add("@DonGiaVon", donGiaVon);
+                                pGd.Add("@ThanhTienVon", thanhTienVon);
                                 pGd.Add("@DienGiai", "Xuất kho tự động từ CTBH " + model.SoChungTu);
                                 pGd.Add("@NguoiTao", nguoiCapNhat);
 
-                                conn.Execute("INSERT INTO KHO_GiaoDichKho (NgayChungTu, SoChungTu, LoaiChungTu, IDChiTietKho, IDKho, IDSanPham, SoLuongNhap, SoLuongXuat, DonGia, ThanhTien, DienGiai, NgayTao, NguoiTao) VALUES (@NgayChungTu, @SoChungTu, @LoaiChungTu, @IDChiTietKho, @IDKho, @IDSanPham, @SoLuongNhap, @SoLuongXuat, @DonGia, @ThanhTien, @DienGiai, GETDATE(), @NguoiTao)", pGd, transaction: tr);
+                                conn.Execute("INSERT INTO KHO_GiaoDichKho (NgayChungTu, SoChungTu, LoaiChungTu, IDChiTietKho, IDKho, IDSanPham, SoLuongNhap, SoLuongXuat, DonGia, ThanhTien, DonGiaVon, ThanhTienVon, DienGiai, NgayTao, NguoiTao) VALUES (@NgayChungTu, @SoChungTu, @LoaiChungTu, @IDChiTietKho, @IDKho, @IDSanPham, @SoLuongNhap, @SoLuongXuat, @DonGia, @ThanhTien, @DonGiaVon, @ThanhTienVon, @DienGiai, GETDATE(), @NguoiTao)", pGd, transaction: tr);
+
+                                // Cập nhật lại giá vốn vào chứng từ chi tiết
+                                conn.Execute("UPDATE BAN_ChungTuBanHang_ChiTiet SET DonGiaVon = @DonGiaVon, ThanhTienVon = @ThanhTienVon WHERE IDChungTuBanHang = @IDChungTu AND IDSanPham = @IDSanPham", 
+                                    new { DonGiaVon = donGiaVon, ThanhTienVon = thanhTienVon, IDChungTu = model.ID, IDSanPham = ct.IDSanPham }, transaction: tr);
+
+                                if (idChiTietKho > 0)
+                                {
+                                    conn.Execute("UPDATE KHO_PhieuXuat_ChiTiet SET DonGiaVon = @DonGiaVon, ThanhTienVon = @ThanhTienVon WHERE ID = @IDChiTietKho",
+                                        new { DonGiaVon = donGiaVon, ThanhTienVon = thanhTienVon, IDChiTietKho = idChiTietKho }, transaction: tr);
+                                }
                             }
 
                             // 5. KT_NhatKyChung (Xóa cũ nếu có để tránh ghi trùng)
@@ -449,11 +529,10 @@ namespace SalesManagementSystem.Repositories
                                     new { NgayChungTu = model.NgayChungTu, SoChungTu = model.SoChungTu, LoaiChungTu = "BAN", IDChungTu = model.ID, TaiKhoanNo = taiKhoanNo, TaiKhoanCo = "33311", SoTien = model.TongTienThue, DienGiai = "Thuế GTGT đầu ra CT " + model.SoChungTu, NguoiTao = nguoiCapNhat }, transaction: tr);
                             }
 
-                            decimal tongGiaVon = model.ChiTiets.Sum(x => x.DonGia * (decimal)x.SoLuong);
-                            if (tongGiaVon > 0)
+                            if (tongGiaVonThucTe > 0)
                             {
                                 conn.Execute("INSERT INTO KT_NhatKyChung (NgayChungTu, SoChungTu, LoaiChungTu, IDChungTu, TaiKhoanNo, TaiKhoanCo, SoTien, DienGiai, NgayTao, NguoiTao, IsHuy) VALUES (@NgayChungTu, @SoChungTu, @LoaiChungTu, @IDChungTu, @TaiKhoanNo, @TaiKhoanCo, @SoTien, @DienGiai, GETDATE(), @NguoiTao, 0)",
-                                    new { NgayChungTu = model.NgayChungTu, SoChungTu = model.SoChungTu, LoaiChungTu = "BAN", IDChungTu = model.ID, TaiKhoanNo = "632", TaiKhoanCo = "156", SoTien = tongGiaVon, DienGiai = "Giá vốn hàng bán CT " + model.SoChungTu, NguoiTao = nguoiCapNhat }, transaction: tr);
+                                    new { NgayChungTu = model.NgayChungTu, SoChungTu = model.SoChungTu, LoaiChungTu = "BAN", IDChungTu = model.ID, TaiKhoanNo = "632", TaiKhoanCo = "156", SoTien = tongGiaVonThucTe, DienGiai = "Giá vốn hàng bán CT " + model.SoChungTu, NguoiTao = nguoiCapNhat }, transaction: tr);
                             }
 
                             // Cập nhật trạng thái đơn đặt hàng
@@ -522,6 +601,7 @@ namespace SalesManagementSystem.Repositories
 
                         // 3. Update Status KHO_PhieuXuat = 2
                         int? idPhieuXuat = conn.ExecuteScalar<int?>("SELECT ID FROM KHO_PhieuXuat WHERE IDChungTuBanHang = @ID", new { ID = id }, transaction: tr);
+                        decimal tongGiaVon = 0;
                         if (idPhieuXuat.HasValue)
                         {
                             conn.Execute("UPDATE KHO_PhieuXuat SET TrangThai = 2, NguoiCapNhat = @NguoiGhi, NgayCapNhat = GETDATE() WHERE ID = @IDPhieuXuat", new { NguoiGhi = nguoiGhi, IDPhieuXuat = idPhieuXuat.Value }, transaction: tr);
@@ -535,6 +615,24 @@ namespace SalesManagementSystem.Repositories
                                 var pxCt = pxChiTiets.FirstOrDefault(x => x.IDSanPham == ct.IDSanPham);
                                 int idChiTietKho = pxCt != null ? (int)pxCt.ID : 0;
 
+                                string sqlAvg = @"
+                                    DECLARE @TongSoLuong DECIMAL(18,2) = 0;
+                                    DECLARE @TongGiaTri DECIMAL(18,2) = 0;
+                                    SELECT 
+                                        @TongSoLuong = ISNULL(SUM(SoLuongNhap),0) - ISNULL(SUM(SoLuongXuat),0),
+                                        @TongGiaTri = ISNULL(SUM(SoLuongNhap * DonGia),0) - ISNULL(SUM(SoLuongXuat * ISNULL(DonGiaVon, 0)),0)
+                                    FROM KHO_GiaoDichKho
+                                    WHERE IDSanPham = @IDSanPham AND NgayChungTu <= @NgayChungTu;
+                                    
+                                    IF @TongSoLuong > 0
+                                        SELECT CAST(@TongGiaTri / @TongSoLuong AS DECIMAL(18,2));
+                                    ELSE
+                                        SELECT CAST(0 AS DECIMAL(18,2));
+                                ";
+                                decimal donGiaVon = conn.ExecuteScalar<decimal>(sqlAvg, new { IDSanPham = ct.IDSanPham, NgayChungTu = master.NgayChungTu }, transaction: tr);
+                                decimal thanhTienVon = ct.SoLuong * donGiaVon;
+                                tongGiaVon += thanhTienVon;
+
                                 var pGd = new DynamicParameters();
                                 pGd.Add("@NgayChungTu", master.NgayChungTu);
                                 pGd.Add("@SoChungTu", soPx);
@@ -546,11 +644,26 @@ namespace SalesManagementSystem.Repositories
                                 pGd.Add("@SoLuongXuat", ct.SoLuong);
                                 pGd.Add("@DonGia", ct.DonGia);
                                 pGd.Add("@ThanhTien", ct.ThanhTien);
+                                pGd.Add("@DonGiaVon", donGiaVon);
+                                pGd.Add("@ThanhTienVon", thanhTienVon);
                                 pGd.Add("@DienGiai", "Xuất kho tự động từ CTBH " + master.SoChungTu);
                                 pGd.Add("@NguoiTao", nguoiGhi);
 
-                                conn.Execute("INSERT INTO KHO_GiaoDichKho (NgayChungTu, SoChungTu, LoaiChungTu, IDChiTietKho, IDKho, IDSanPham, SoLuongNhap, SoLuongXuat, DonGia, ThanhTien, DienGiai, NgayTao, NguoiTao) VALUES (@NgayChungTu, @SoChungTu, @LoaiChungTu, @IDChiTietKho, @IDKho, @IDSanPham, @SoLuongNhap, @SoLuongXuat, @DonGia, @ThanhTien, @DienGiai, GETDATE(), @NguoiTao)", pGd, transaction: tr);
+                                conn.Execute("INSERT INTO KHO_GiaoDichKho (NgayChungTu, SoChungTu, LoaiChungTu, IDChiTietKho, IDKho, IDSanPham, SoLuongNhap, SoLuongXuat, DonGia, ThanhTien, DonGiaVon, ThanhTienVon, DienGiai, NgayTao, NguoiTao) VALUES (@NgayChungTu, @SoChungTu, @LoaiChungTu, @IDChiTietKho, @IDKho, @IDSanPham, @SoLuongNhap, @SoLuongXuat, @DonGia, @ThanhTien, @DonGiaVon, @ThanhTienVon, @DienGiai, GETDATE(), @NguoiTao)", pGd, transaction: tr);
+                                
+                                conn.Execute("UPDATE BAN_ChungTuBanHang_ChiTiet SET DonGiaVon = @DonGiaVon, ThanhTienVon = @ThanhTienVon WHERE IDChungTuBanHang = @IDChungTu AND IDSanPham = @IDSanPham", 
+                                    new { DonGiaVon = donGiaVon, ThanhTienVon = thanhTienVon, IDChungTu = id, IDSanPham = ct.IDSanPham }, transaction: tr);
+
+                                if (idChiTietKho > 0)
+                                {
+                                    conn.Execute("UPDATE KHO_PhieuXuat_ChiTiet SET DonGiaVon = @DonGiaVon, ThanhTienVon = @ThanhTienVon WHERE ID = @IDChiTietKho",
+                                        new { DonGiaVon = donGiaVon, ThanhTienVon = thanhTienVon, IDChiTietKho = idChiTietKho }, transaction: tr);
+                                }
                             }
+                        }
+                        else
+                        {
+                            // In case idPhieuXuat is null, which shouldn't happen but just in case, tongGiaVon is 0 or we calculate it.
                         }
 
                         // 5. KT_NhatKyChung
@@ -572,8 +685,7 @@ namespace SalesManagementSystem.Repositories
                                 new { NgayChungTu = master.NgayChungTu, SoChungTu = master.SoChungTu, LoaiChungTu = "BAN", IDChungTu = id, TaiKhoanNo = taiKhoanNo, TaiKhoanCo = "33311", SoTien = master.TongTienThue, DienGiai = "Thuế GTGT đầu ra CT " + master.SoChungTu, NguoiTao = nguoiGhi }, transaction: tr);
                         }
 
-                        decimal tongGiaVon = details.Sum(x => x.DonGia * (decimal)x.SoLuong);
-                        if (tongGiaVon > 0)
+                        if (idPhieuXuat.HasValue && tongGiaVon > 0)
                         {
                             conn.Execute("INSERT INTO KT_NhatKyChung (NgayChungTu, SoChungTu, LoaiChungTu, IDChungTu, TaiKhoanNo, TaiKhoanCo, SoTien, DienGiai, NgayTao, NguoiTao, IsHuy) VALUES (@NgayChungTu, @SoChungTu, @LoaiChungTu, @IDChungTu, @TaiKhoanNo, @TaiKhoanCo, @SoTien, @DienGiai, GETDATE(), @NguoiTao, 0)",
                                 new { NgayChungTu = master.NgayChungTu, SoChungTu = master.SoChungTu, LoaiChungTu = "BAN", IDChungTu = id, TaiKhoanNo = "632", TaiKhoanCo = "156", SoTien = tongGiaVon, DienGiai = "Giá vốn hàng bán CT " + master.SoChungTu, NguoiTao = nguoiGhi }, transaction: tr);

@@ -195,13 +195,14 @@ BEGIN
     DECLARE @newTongTien DECIMAL(18,2);
 
     SELECT 
-        @newThanhTienHang = SUM(ThanhTien),
-        @newThanhTienThue = SUM(ThanhTienThue)
+        @newThanhTienHang = SUM(ThanhTienHang),
+        @newThanhTienThue = SUM(ThanhTienThue),
+        @newTongTien = SUM(ThanhTienSauThue)
     FROM @ChiTietMoi;
 
     SET @newThanhTienHang = ISNULL(@newThanhTienHang, 0);
     SET @newThanhTienThue = ISNULL(@newThanhTienThue, 0);
-    SET @newTongTien = @newThanhTienHang + @newThanhTienThue - @PhiBocXep;
+    SET @newTongTien = ISNULL(@newTongTien, 0);
 
     -- 3. Sinh số điều chỉnh
     DECLARE @adjCount INT;

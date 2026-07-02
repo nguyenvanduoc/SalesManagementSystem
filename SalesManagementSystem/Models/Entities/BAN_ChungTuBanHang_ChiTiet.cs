@@ -1,4 +1,4 @@
-using System;
+ using System;
 
 namespace SalesManagementSystem.Models.Entities
 {
@@ -12,6 +12,8 @@ namespace SalesManagementSystem.Models.Entities
         public decimal DonGia { get; set; }
         public decimal? DonGiaBocXep { get; set; }
         public decimal? ThanhTienBocXep { get; set; }
+        public decimal? DonGiaVon { get; set; }
+        public decimal? ThanhTienVon { get; set; }
         public decimal? ThanhTienHang { get; set; }
         public decimal ThanhTien { get; set; }
         public decimal ThueGTGT { get; set; }

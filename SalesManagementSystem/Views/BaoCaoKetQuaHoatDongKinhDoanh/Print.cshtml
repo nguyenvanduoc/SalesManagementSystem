@@ -1,0 +1,134 @@
+@model SalesManagementSystem.Models.ViewModels.BaoCaoKetQuaHoatDongKinhDoanhViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>In Báo Cáo Kết Quả Hoạt Động Kinh Doanh</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        @media print {
+            @page {
+                size: landscape;
+                margin: 1cm;
+            }
+            body {
+                -webkit-print-color-adjust: exact;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            background-color: #fff;
+        }
+        .report-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .report-title {
+            font-size: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        .table-custom th {
+            background-color: #f8f9fa !important;
+            vertical-align: middle;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-3">
+        <div class="no-print mb-3 text-end">
+            <button class="btn btn-primary" onclick="window.print()"><i class="bi bi-printer"></i> In báo cáo</button>
+            <button class="btn btn-secondary" onclick="window.close()">Đóng</button>
+        </div>
+
+        <div class="report-header">
+            <div class="report-title">BÁO CÁO KẾT QUẢ HOẠT ĐỘNG KINH DOANH</div>
+            <div>Từ ngày @Model.Filter.TuNgay.Value.ToString("dd/MM/yyyy") đến ngày @Model.Filter.DenNgay.Value.ToString("dd/MM/yyyy")</div>
+        </div>
+
+        <table class="table table-bordered table-sm table-custom">
+            <thead>
+                <tr>
+                    <th rowspan="2">STT</th>
+                    <th rowspan="2">Mã sản phẩm</th>
+                    <th rowspan="2">Tên sản phẩm</th>
+                    <th rowspan="2">ĐVT</th>
+                    <th colspan="2">Doanh thu bán hàng</th>
+                    <th colspan="2">Giá vốn hàng bán</th>
+                    <th>Chi phí VC</th>
+                    <th>Chi phí bao bì</th>
+                    <th>Lợi nhuận gộp</th>
+                    <th>Lợi nhuận thuần</th>
+                    <th rowspan="2">Tỷ suất LN (%)</th>
+                </tr>
+                <tr>
+                    <th>Số lượng</th>
+                    <th>Thành tiền</th>
+                    <th>Số lượng</th>
+                    <th>Thành tiền</th>
+                    <th>Thành tiền</th>
+                    <th>Thành tiền</th>
+                    <th>Thành tiền</th>
+                    <th>Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Data != null && Model.Data.Any())
+                {
+                    foreach (var item in Model.Data)
+                    {
+                        var trClass = item.IsGroup ? "table-secondary fw-bold" : "";
+                        var paddingLeft = item.IsGroup ? "" : "padding-left: 20px;";
+                        
+                        <tr class="@trClass">
+                            <td class="text-center">@(item.IsGroup ? "" : item.STT.ToString())</td>
+                            <td>@item.MaSanPham</td>
+                            <td style="@paddingLeft">@item.TenSanPham</td>
+                            <td class="text-center">@item.DonViTinh</td>
+                            <td class="text-end">@item.SoLuongDoanhThu.ToString("N0")</td>
+                            <td class="text-end">@item.ThanhTienDoanhThu.ToString("N0")</td>
+                            <td class="text-end">@item.SoLuongGiaVon.ToString("N0")</td>
+                            <td class="text-end">@item.ThanhTienGiaVon.ToString("N0")</td>
+                            <td class="text-end">@item.ChiPhiVanChuyen.ToString("N0")</td>
+                            <td class="text-end">@item.ChiPhiBaoBi.ToString("N0")</td>
+                            <td class="text-end">@item.LoiNhuanGop.ToString("N0")</td>
+                            <td class="text-end">@item.LoiNhuanThuan.ToString("N0")</td>
+                            <td class="text-end">@item.TySuatLoiNhuan.ToString("N2")%</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="13" class="text-center">Không có dữ liệu</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot class="fw-bold">
+                <tr class="table-light">
+                    <td colspan="4" class="text-end text-uppercase">Tổng cộng:</td>
+                    <td class="text-end">@Model.Data.Where(x => !x.IsGroup).Sum(x => x.SoLuongDoanhThu).ToString("N0")</td>
+                    <td class="text-end">@Model.TotalDoanhThu.ToString("N0")</td>
+                    <td class="text-end">@Model.Data.Where(x => !x.IsGroup).Sum(x => x.SoLuongGiaVon).ToString("N0")</td>
+                    <td class="text-end">@Model.TotalGiaVon.ToString("N0")</td>
+                    <td class="text-end">@Model.TotalChiPhiVanChuyen.ToString("N0")</td>
+                    <td class="text-end">@Model.TotalChiPhiBaoBi.ToString("N0")</td>
+                    <td class="text-end">@Model.TotalLoiNhuanGop.ToString("N0")</td>
+                    <td class="text-end">@Model.TotalLoiNhuanThuan.ToString("N0")</td>
+                    <td class="text-end">@Model.TotalTySuatLN.ToString("N2")%</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</body>
+</html>

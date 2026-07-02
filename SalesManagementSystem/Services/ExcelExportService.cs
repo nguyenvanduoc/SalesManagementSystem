@@ -6,7 +6,9 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
+using NPOI.XSSF.UserModel;
 using SalesManagementSystem.Repositories.Interfaces;
+using SalesManagementSystem.Models.ViewModels;
 
 namespace SalesManagementSystem.Services
 {
@@ -837,6 +839,225 @@ namespace SalesManagementSystem.Services
                     }
                 }
             }
+        }
+
+        public MemoryStream ExportBaoCaoKetQuaKinhDoanh(BaoCaoKetQuaHoatDongKinhDoanhViewModel model)
+        {
+            IWorkbook workbook = new XSSFWorkbook();
+            ISheet sheet = workbook.CreateSheet("Báo cáo KQHĐKD");
+
+            // Define styles
+            var headerStyle = workbook.CreateCellStyle();
+            headerStyle.Alignment = HorizontalAlignment.Center;
+            headerStyle.VerticalAlignment = VerticalAlignment.Center;
+            var headerFont = workbook.CreateFont();
+            headerFont.IsBold = true;
+            headerStyle.SetFont(headerFont);
+            headerStyle.BorderBottom = BorderStyle.Thin;
+            headerStyle.BorderTop = BorderStyle.Thin;
+            headerStyle.BorderLeft = BorderStyle.Thin;
+            headerStyle.BorderRight = BorderStyle.Thin;
+
+            var boldStyle = workbook.CreateCellStyle();
+            var boldFont = workbook.CreateFont();
+            boldFont.IsBold = true;
+            boldStyle.SetFont(boldFont);
+            boldStyle.BorderBottom = BorderStyle.Thin;
+            boldStyle.BorderTop = BorderStyle.Thin;
+            boldStyle.BorderLeft = BorderStyle.Thin;
+            boldStyle.BorderRight = BorderStyle.Thin;
+
+            var numberStyle = workbook.CreateCellStyle();
+            numberStyle.DataFormat = workbook.CreateDataFormat().GetFormat("#,##0");
+            numberStyle.BorderBottom = BorderStyle.Thin;
+            numberStyle.BorderTop = BorderStyle.Thin;
+            numberStyle.BorderLeft = BorderStyle.Thin;
+            numberStyle.BorderRight = BorderStyle.Thin;
+
+            var percentStyle = workbook.CreateCellStyle();
+            percentStyle.DataFormat = workbook.CreateDataFormat().GetFormat("0.00%");
+            percentStyle.BorderBottom = BorderStyle.Thin;
+            percentStyle.BorderTop = BorderStyle.Thin;
+            percentStyle.BorderLeft = BorderStyle.Thin;
+            percentStyle.BorderRight = BorderStyle.Thin;
+
+            var normalStyle = workbook.CreateCellStyle();
+            normalStyle.BorderBottom = BorderStyle.Thin;
+            normalStyle.BorderTop = BorderStyle.Thin;
+            normalStyle.BorderLeft = BorderStyle.Thin;
+            normalStyle.BorderRight = BorderStyle.Thin;
+
+            // Title
+            IRow titleRow = sheet.CreateRow(0);
+            var titleCell = titleRow.CreateCell(0);
+            titleCell.SetCellValue("BÁO CÁO KẾT QUẢ HOẠT ĐỘNG KINH DOANH");
+            var titleStyle = workbook.CreateCellStyle();
+            var titleFont = workbook.CreateFont();
+            titleFont.IsBold = true;
+            titleFont.FontHeightInPoints = 16;
+            titleStyle.SetFont(titleFont);
+            titleStyle.Alignment = HorizontalAlignment.Center;
+            titleCell.CellStyle = titleStyle;
+            sheet.AddMergedRegion(new CellRangeAddress(0, 0, 0, 12));
+
+            // Time range
+            IRow timeRow = sheet.CreateRow(1);
+            var timeCell = timeRow.CreateCell(0);
+            timeCell.SetCellValue($"Từ ngày {model.Filter.TuNgay:dd/MM/yyyy} đến ngày {model.Filter.DenNgay:dd/MM/yyyy}");
+            var timeStyle = workbook.CreateCellStyle();
+            timeStyle.Alignment = HorizontalAlignment.Center;
+            timeCell.CellStyle = timeStyle;
+            sheet.AddMergedRegion(new CellRangeAddress(1, 1, 0, 12));
+
+            // Headers
+            IRow headerRow1 = sheet.CreateRow(3);
+            IRow headerRow2 = sheet.CreateRow(4);
+
+            string[] headers1 = { "STT", "Mã sản phẩm", "Tên sản phẩm", "ĐVT", "Doanh thu bán hàng", "", "Giá vốn hàng bán", "", "Chi phí VC", "Chi phí bao bì", "Lợi nhuận gộp", "Lợi nhuận thuần", "Tỷ suất LN (%)" };
+            for (int i = 0; i < headers1.Length; i++)
+            {
+                var cell = headerRow1.CreateCell(i);
+                cell.SetCellValue(headers1[i]);
+                cell.CellStyle = headerStyle;
+                
+                // create cell for row 2 to apply border
+                var cell2 = headerRow2.CreateCell(i);
+                cell2.CellStyle = headerStyle;
+            }
+
+            headerRow2.GetCell(4).SetCellValue("Số lượng");
+            headerRow2.GetCell(5).SetCellValue("Thành tiền");
+            headerRow2.GetCell(6).SetCellValue("Số lượng");
+            headerRow2.GetCell(7).SetCellValue("Thành tiền");
+            headerRow2.GetCell(8).SetCellValue("Thành tiền");
+            headerRow2.GetCell(9).SetCellValue("Thành tiền");
+            headerRow2.GetCell(10).SetCellValue("Thành tiền");
+            headerRow2.GetCell(11).SetCellValue("Thành tiền");
+
+            sheet.AddMergedRegion(new CellRangeAddress(3, 4, 0, 0)); // STT
+            sheet.AddMergedRegion(new CellRangeAddress(3, 4, 1, 1)); // Mã
+            sheet.AddMergedRegion(new CellRangeAddress(3, 4, 2, 2)); // Tên
+            sheet.AddMergedRegion(new CellRangeAddress(3, 4, 3, 3)); // ĐVT
+            sheet.AddMergedRegion(new CellRangeAddress(3, 3, 4, 5)); // Doanh thu
+            sheet.AddMergedRegion(new CellRangeAddress(3, 3, 6, 7)); // Giá vốn
+            sheet.AddMergedRegion(new CellRangeAddress(3, 4, 8, 8)); // Chi phí VC
+            sheet.AddMergedRegion(new CellRangeAddress(3, 4, 9, 9)); // Chi phí BB
+            sheet.AddMergedRegion(new CellRangeAddress(3, 4, 10, 10)); // LN gộp
+            sheet.AddMergedRegion(new CellRangeAddress(3, 4, 11, 11)); // LN thuần
+            sheet.AddMergedRegion(new CellRangeAddress(3, 4, 12, 12)); // Tỷ suất
+
+            int rowIndex = 5;
+            if (model.Data != null && model.Data.Any())
+            {
+                foreach (var item in model.Data)
+                {
+                    IRow row = sheet.CreateRow(rowIndex++);
+                    var style = item.IsGroup ? boldStyle : normalStyle;
+                    var numStyle = item.IsGroup ? boldStyle : numberStyle; // Need combined style in real app, but for now just assign type
+                    
+                    var cell0 = row.CreateCell(0);
+                    cell0.SetCellValue(item.IsGroup ? "" : item.STT.ToString());
+                    cell0.CellStyle = style;
+
+                    var cell1 = row.CreateCell(1);
+                    cell1.SetCellValue(item.MaSanPham);
+                    cell1.CellStyle = style;
+
+                    var cell2 = row.CreateCell(2);
+                    cell2.SetCellValue((item.IsGroup ? "" : "   ") + item.TenSanPham);
+                    cell2.CellStyle = style;
+
+                    var cell3 = row.CreateCell(3);
+                    cell3.SetCellValue(item.DonViTinh);
+                    cell3.CellStyle = style;
+
+                    var cell4 = row.CreateCell(4);
+                    cell4.SetCellValue(Convert.ToDouble(item.SoLuongDoanhThu));
+                    cell4.CellStyle = numberStyle;
+
+                    var cell5 = row.CreateCell(5);
+                    cell5.SetCellValue(Convert.ToDouble(item.ThanhTienDoanhThu));
+                    cell5.CellStyle = numberStyle;
+
+                    var cell6 = row.CreateCell(6);
+                    cell6.SetCellValue(Convert.ToDouble(item.SoLuongGiaVon));
+                    cell6.CellStyle = numberStyle;
+
+                    var cell7 = row.CreateCell(7);
+                    cell7.SetCellValue(Convert.ToDouble(item.ThanhTienGiaVon));
+                    cell7.CellStyle = numberStyle;
+
+                    var cell8 = row.CreateCell(8);
+                    cell8.SetCellValue(Convert.ToDouble(item.ChiPhiVanChuyen));
+                    cell8.CellStyle = numberStyle;
+
+                    var cell9 = row.CreateCell(9);
+                    cell9.SetCellValue(Convert.ToDouble(item.ChiPhiBaoBi));
+                    cell9.CellStyle = numberStyle;
+
+                    var cell10 = row.CreateCell(10);
+                    cell10.SetCellValue(Convert.ToDouble(item.LoiNhuanGop));
+                    cell10.CellStyle = numberStyle;
+
+                    var cell11 = row.CreateCell(11);
+                    cell11.SetCellValue(Convert.ToDouble(item.LoiNhuanThuan));
+                    cell11.CellStyle = numberStyle;
+
+                    var cell12 = row.CreateCell(12);
+                    cell12.SetCellValue(Convert.ToDouble(item.TySuatLoiNhuan / 100));
+                    cell12.CellStyle = percentStyle;
+
+                    if (item.IsGroup)
+                    {
+                        // apply bold to numbers
+                        cell4.CellStyle = boldStyle;
+                        cell5.CellStyle = boldStyle;
+                        cell6.CellStyle = boldStyle;
+                        cell7.CellStyle = boldStyle;
+                        cell8.CellStyle = boldStyle;
+                        cell9.CellStyle = boldStyle;
+                        cell10.CellStyle = boldStyle;
+                        cell11.CellStyle = boldStyle;
+                    }
+                }
+            }
+
+            // Total row
+            IRow totalRow = sheet.CreateRow(rowIndex);
+            var tCell0 = totalRow.CreateCell(0);
+            tCell0.SetCellValue("Tổng cộng:");
+            tCell0.CellStyle = boldStyle;
+            for(int i=1; i<=3; i++) totalRow.CreateCell(i).CellStyle = boldStyle;
+            sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 0, 3));
+
+            totalRow.CreateCell(4).SetCellValue(Convert.ToDouble(model.Data.Where(x => !x.IsGroup).Sum(x => x.SoLuongDoanhThu)));
+            totalRow.GetCell(4).CellStyle = boldStyle;
+            totalRow.CreateCell(5).SetCellValue(Convert.ToDouble(model.TotalDoanhThu));
+            totalRow.GetCell(5).CellStyle = boldStyle;
+            totalRow.CreateCell(6).SetCellValue(Convert.ToDouble(model.Data.Where(x => !x.IsGroup).Sum(x => x.SoLuongGiaVon)));
+            totalRow.GetCell(6).CellStyle = boldStyle;
+            totalRow.CreateCell(7).SetCellValue(Convert.ToDouble(model.TotalGiaVon));
+            totalRow.GetCell(7).CellStyle = boldStyle;
+            totalRow.CreateCell(8).SetCellValue(Convert.ToDouble(model.TotalChiPhiVanChuyen));
+            totalRow.GetCell(8).CellStyle = boldStyle;
+            totalRow.CreateCell(9).SetCellValue(Convert.ToDouble(model.TotalChiPhiBaoBi));
+            totalRow.GetCell(9).CellStyle = boldStyle;
+            totalRow.CreateCell(10).SetCellValue(Convert.ToDouble(model.TotalLoiNhuanGop));
+            totalRow.GetCell(10).CellStyle = boldStyle;
+            totalRow.CreateCell(11).SetCellValue(Convert.ToDouble(model.TotalLoiNhuanThuan));
+            totalRow.GetCell(11).CellStyle = boldStyle;
+            totalRow.CreateCell(12).SetCellValue(Convert.ToDouble(model.TotalTySuatLN / 100));
+            totalRow.GetCell(12).CellStyle = percentStyle;
+
+            for (int i = 0; i <= 12; i++)
+            {
+                sheet.AutoSizeColumn(i);
+            }
+
+            var stream = new MemoryStream();
+            workbook.Write(stream);
+            stream.Position = 0;
+            return stream;
         }
     }
 }

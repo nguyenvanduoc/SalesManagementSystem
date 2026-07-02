@@ -168,6 +168,7 @@ var PhieuNhapKho = (function () {
             
             if (maLoai === 'CHUYEN_KHO') {
                 $('#colKhoNguon').show();
+                $('#colNhaCungCap').show();
             } else if (maLoai === 'TRA_HANG') {
                 $('#colKhachHang').show();
             } else {
@@ -415,6 +416,7 @@ var PhieuNhapKho = (function () {
         if (maLoai === 'CHUYEN_KHO') {
             if (!$('#IDKhoNguon').val()) { errorMsg += 'Vui lòng chọn Kho nguồn.\n'; isValid = false; }
             if ($('#IDKhoNguon').val() === $('#IDKho').val()) { errorMsg += 'Kho nguồn và Kho nhập không được trùng nhau.\n'; isValid = false; }
+            if (!$('#IDNhaCungCap').val()) { errorMsg += 'Vui lòng chọn Nhà cung cấp.\n'; isValid = false; }
         } else if (maLoai === 'TRA_HANG') {
             if (!$('#IDKhachHang').val()) { errorMsg += 'Vui lòng chọn Khách hàng.\n'; isValid = false; }
         } else {

@@ -1,4 +1,4 @@
-﻿namespace SalesManagementSystem.Models.Entities
+namespace SalesManagementSystem.Models.Entities
 {
     public class KHO_PhieuXuat_ChiTiet
     {
@@ -10,6 +10,8 @@
         public decimal SoLuong { get; set; }
         public decimal DonGia { get; set; }
         public decimal ThanhTien { get; set; }
+        public decimal? DonGiaVon { get; set; }
+        public decimal? ThanhTienVon { get; set; }
         public decimal ThueGTGT { get; set; }
         public decimal TienThue { get; set; }
         public decimal TongSauThue { get; set; }

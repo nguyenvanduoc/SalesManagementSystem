@@ -1,0 +1,112 @@
+@model SalesManagementSystem.Models.ViewModels.BaoCaoKetQuaHoatDongKinhDoanhViewModel
+@{
+    ViewBag.Title = "BÁO CÁO KẾT QUẢ HOẠT ĐỘNG KINH DOANH";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0 fw-bold text-uppercase" style="color:#0b5b84;font-size:1.25rem;">
+        @ViewBag.Title
+    </h4>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form id="searchForm">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Từ ngày</label>
+                    <input type="date" class="form-control" name="TuNgay" id="TuNgay" value="@Model.Filter.TuNgay.Value.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Đến ngày</label>
+                    <input type="date" class="form-control" name="DenNgay" id="DenNgay" value="@Model.Filter.DenNgay.Value.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Kho hàng</label>
+                    @Html.DropDownList("ID", ViewBag.KhoHangList as SelectList, "Tất cả", new { @class = "form-select", id = "ID" })
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Mã sản phẩm</label>
+                    <input type="text" class="form-control" name="MaSanPham" id="MaSanPham" placeholder="Nhập mã SP..." />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Tên sản phẩm</label>
+                    <input type="text" class="form-control" name="TenSanPham" id="TenSanPham" placeholder="Nhập tên SP..." />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Đơn vị tính</label>
+                    <input type="text" class="form-control" name="DonViTinh" id="DonViTinh" placeholder="Nhập ĐVT..." />
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="button" class="btn text-white me-2" style="background:#2998e4" id="btnSearch">
+                        <i class="bi bi-search"></i> Tìm kiếm
+                    </button>
+                    <button type="button" class="btn text-white me-2" style="background:#f1c40f" id="btnReset">
+                        Làm mới
+                    </button>
+                    <button type="button" class="btn btn-success" id="btnExcel">
+                        <i class="bi bi-file-earmark-excel"></i> Xuất Excel
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="listContainer">
+    <!-- Dữ liệu sẽ được load qua AJAX vào đây -->
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            loadData();
+
+            $('#btnSearch').click(function () {
+                loadData();
+            });
+
+            $('#btnReset').click(function () {
+                $('#searchForm')[0].reset();
+                
+                // Đặt lại ngày mặc định
+                var date = new Date();
+                var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+                var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+                
+                $('#TuNgay').val(firstDay.toISOString().split('T')[0]);
+                $('#DenNgay').val(lastDay.toISOString().split('T')[0]);
+                
+                loadData();
+            });
+
+            $('#btnExcel').click(function () {
+                var url = '@Url.Action("ExportExcel", "BaoCaoKetQuaHoatDongKinhDoanh")?' + $('#searchForm').serialize();
+                window.location.href = url;
+            });
+        });
+
+        function loadData() {
+            var tuNgay = $('#TuNgay').val();
+            var denNgay = $('#DenNgay').val();
+            
+            $.ajax({
+                url: '@Url.Action("GetList", "BaoCaoKetQuaHoatDongKinhDoanh")',
+                type: 'POST',
+                data: $('#searchForm').serialize(),
+                success: function (res) {
+                    if (typeof res === 'object' && res.success === false) {
+                        $('#listContainer').html('<div class="alert alert-danger">Lỗi từ máy chủ: ' + (res.message || '') + '</div>');
+                        if (typeof toastr !== 'undefined') { toastr.error(res.message || 'Lỗi dữ liệu'); }
+                    } else {
+                        $('#listContainer').html(res);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    $('#listContainer').html('<div class="alert alert-danger">Lỗi kết nối server: ' + error + '</div>');
+                    if (typeof toastr !== 'undefined') { toastr.error('Có lỗi xảy ra khi gọi server'); }
+                }
+            });
+        }
+    </script>
+}

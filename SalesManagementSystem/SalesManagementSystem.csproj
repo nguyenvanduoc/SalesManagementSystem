@@ -167,6 +167,7 @@
     <Compile Include="App_Start\UnityConfig.cs" />
     <Compile Include="Controllers\AclActionController.cs" />
     <Compile Include="Controllers\BaseController.cs" />
+    <Compile Include="Controllers\BaoCaoKetQuaHoatDongKinhDoanhController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\NhanSuController.cs" />
@@ -226,7 +227,7 @@
     <Compile Include="Models\Entities\DM_BieuMau.cs" />
     <!-- Models - ViewModels -->
     <Compile Include="Models\ViewModels\RevenueReportVM.cs" />
-    <Compile Include="Models\ViewModels\OrderFormViewModel.cs" />
+    <Compile Include="Models\ViewModels\BaoCaoKetQuaHoatDongKinhDoanhViewModel.cs" />
     <Compile Include="Models\ViewModels\MenuSearchResultVM.cs" />
     <Compile Include="Models\ViewModels\MenuViewModel.cs" />
     <Compile Include="Models\ViewModels\AclLoginViewModel.cs" />
@@ -413,6 +414,9 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Views\BaoCaoKetQuaHoatDongKinhDoanh\Index.cshtml" />
+    <Content Include="Views\BaoCaoKetQuaHoatDongKinhDoanh\_List.cshtml" />
+    <Content Include="Views\BaoCaoKetQuaHoatDongKinhDoanh\Print.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Home\_Menu.cshtml" />
     <Content Include="Views\NhanSu\Index.cshtml" />
