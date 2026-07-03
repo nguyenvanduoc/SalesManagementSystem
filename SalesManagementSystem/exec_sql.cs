@@ -20,7 +20,7 @@ class Program
                 conn.Open();
                 Console.WriteLine("Connection opened successfully.");
                 
-                string sqlPath = @"c:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\QuanLyBanHang\SalesManagementSystem\SalesManagementSystem\App_Data\backfill_cogs.sql";
+                string sqlPath = @"c:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\QuanLyBanHang\SalesManagementSystem\SalesManagementSystem\App_Data\create_dashboard_stored_procedure.sql";
                 string sql = File.ReadAllText(sqlPath);
                 string[] batches = sql.Split(new[] { "\r\nGO", "\nGO", "GO\r", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
                 

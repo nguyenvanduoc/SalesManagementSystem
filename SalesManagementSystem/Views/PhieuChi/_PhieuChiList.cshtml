@@ -26,7 +26,6 @@
                         <th width="80" class="text-center fw-bold">Thao tác</th>
                         <th width="40"  class="text-center fw-bold">STT</th>
                         <th width="130" class="text-center fw-bold">Số phiếu chi</th>
-                        <th width="120" class="text-center fw-bold">Số đơn hàng</th>
                         <th width="100" class="text-center fw-bold">Ngày chi</th>
                         <th class="fw-bold">Khoản mục chi</th>
                         <th class="fw-bold">Tài khoản TT</th>
@@ -136,7 +135,6 @@
                                 </td>
                                 <td class="text-center align-middle">@(stt++)</td>
                                 <td class="text-center align-middle fw-semibold text-primary">@item.SoPhieuChi</td>
-                                <td class="text-center align-middle">@item.SoPhieuNhap</td>
                                 <td class="text-center align-middle">@item.NgayChi.ToString("dd/MM/yyyy")</td>
                                 <td class="align-middle">@item.TenKhoanMuc</td>
                                 <td class="align-middle">@item.TenTaiKhoanThanhToan</td>
@@ -173,6 +171,17 @@
                         </tr>
                     }
                 </tbody>
+                @if (Model.Items != null && Model.Items.Any())
+                {
+                    <tfoot>
+                        <tr class="fw-bold bg-light">
+                            <td colspan="9" class="text-end">Tổng cộng</td>
+                            <td class="text-end">@Model.Items.Sum(x => x.SoTienChi).ToString("N0")</td>
+                            <td class="text-end text-success">@Model.Items.Sum(x => x.SoTienPhanBo).ToString("N0")</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                }
             </table>
         </div>
     </div>

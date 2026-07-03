@@ -77,7 +77,7 @@
                 processData: false,
                 success: function (res) {
                     if (res.success) {
-                        $('#globalFormModal').modal('hide');
+                        form.closest('.modal').modal('hide');
                         showToast('success', res.message);
                         if (typeof TabManager !== 'undefined') {
                             TabManager.reloadActiveTabGrid(false);
@@ -132,3 +132,5 @@
         });
     });
 </script>
+
+

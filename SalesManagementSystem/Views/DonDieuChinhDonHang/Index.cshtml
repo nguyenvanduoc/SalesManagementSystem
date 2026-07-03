@@ -1,4 +1,4 @@
-@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DonDieuChinhListViewModel>
+﻿@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DonDieuChinhListViewModel>
 
 @{
     ViewBag.Title = "Điều chỉnh đơn hàng sau bán hàng";
@@ -116,7 +116,7 @@
             data: { id: id },
             success: function(res) {
                 $('#globalFormModal .modal-dialog').removeClass('modal-lg modal-sm').addClass('modal-xl');
-                $('#globalFormModalContent').html(res);
+                $('.form-modal-content').html(res);
                 var formModal = new bootstrap.Modal(document.getElementById('globalFormModal'));
                 formModal.show();
             },
@@ -127,3 +127,4 @@
     }
 </script>
 }
+

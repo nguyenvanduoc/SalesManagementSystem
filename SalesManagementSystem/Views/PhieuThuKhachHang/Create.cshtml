@@ -394,7 +394,7 @@
                         showToast('error', res.message);
                     } else {
                         // Trả về HTML chứa validation errors
-                        $('#globalFormModalContent').html(res);
+                        $('.form-modal-content').html(res);
                     }
                 },
                 error: function() {
@@ -407,3 +407,4 @@
         updateDebtCard();
     });
 </script>
+

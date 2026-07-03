@@ -1,5 +1,6 @@
 @{
     ViewBag.Title = "Dashboard";
+    string uid = Guid.NewGuid().ToString("N");
 }
 
 
@@ -244,7 +245,7 @@
         </div>
         <div class="text-muted small fw-bold bg-white px-3 py-2 rounded-3 shadow-sm border d-flex align-items-center gap-2">
             <i class="bi bi-calendar3 text-success"></i>
-            <span id="currentDateText">-</span>
+            <span id="currentDateText_@uid">-</span>
         </div>
     </div>
 
@@ -253,14 +254,14 @@
         <div class="d-flex align-items-center gap-3 flex-wrap">
             <div class="d-flex align-items-center gap-2">
                 <label class="fw-bold mb-0 text-nowrap text-muted" style="font-size:0.8rem">Từ ngày <span class="text-danger">*</span></label>
-                <input type="date" id="dbTuNgay" class="form-control form-control-sm border-2 rounded-2" style="width:145px; font-size:0.82rem; padding: 4px 8px;" />
+                <input type="date" id="dbTuNgay_@uid" class="form-control form-control-sm border-2 rounded-2" style="width:145px; font-size:0.82rem; padding: 4px 8px;" />
             </div>
             <div class="d-flex align-items-center gap-2">
                 <label class="fw-bold mb-0 text-nowrap text-muted" style="font-size:0.8rem">Đến ngày <span class="text-danger">*</span></label>
-                <input type="date" id="dbDenNgay" class="form-control form-control-sm border-2 rounded-2" style="width:145px; font-size:0.82rem; padding: 4px 8px;" />
+                <input type="date" id="dbDenNgay_@uid" class="form-control form-control-sm border-2 rounded-2" style="width:145px; font-size:0.82rem; padding: 4px 8px;" />
             </div>
-            <button id="btnLoadDashboard" class="btn btn-sm btn-success rounded-2 py-1.5 px-3 fw-bold shadow-sm" style="font-size:0.82rem"><i class="bi bi-search me-1"></i> Tra cứu</button>
-            <button id="btnResetDashboard" class="btn btn-sm btn-light border rounded-2 py-1.5 px-2.5" style="font-size:0.82rem"><i class="bi bi-arrow-clockwise me-1"></i> Làm mới</button>
+            <button id="btnLoadDashboard_@uid" class="btn btn-sm btn-success rounded-2 py-1.5 px-3 fw-bold shadow-sm" style="font-size:0.82rem"><i class="bi bi-search me-1"></i> Tra cứu</button>
+            <button id="btnResetDashboard_@uid" class="btn btn-sm btn-light border rounded-2 py-1.5 px-2.5" style="font-size:0.82rem"><i class="bi bi-arrow-clockwise me-1"></i> Làm mới</button>
         </div>
 
     </div>
@@ -273,7 +274,7 @@
                 <div class="stat-icon-new green"><i class="bi bi-cart3"></i></div>
                 <div class="stat-info-new">
                     <div class="stat-label-new">Đơn hàng trong kỳ</div>
-                    <div class="stat-value-new" id="valDonHang">0</div>
+                    <div class="stat-value-new" id="valDonHang_@uid">0</div>
                     <div class="stat-trend-new text-success"><i class="bi bi-check2-circle"></i> Đặt hàng thành công</div>
                 </div>
             </div>
@@ -284,8 +285,8 @@
                 <div class="stat-icon-new blue"><i class="bi bi-cash-coin"></i></div>
                 <div class="stat-info-new">
                     <div class="stat-label-new">Doanh thu kỳ này</div>
-                    <div class="stat-value-new" id="valDoanhThu">0₫</div>
-                    <div class="stat-trend-new" id="trendDoanhThu"></div>
+                    <div class="stat-value-new" id="valDoanhThu_@uid">0₫</div>
+                    <div class="stat-trend-new" id="trendDoanhThu_@uid"></div>
                 </div>
             </div>
         </div>
@@ -295,9 +296,9 @@
                 <div class="stat-icon-new orange"><i class="bi bi-box-seam"></i></div>
                 <div class="stat-info-new">
                     <div class="stat-label-new">Sản phẩm tồn</div>
-                    <div class="stat-value-new" id="valSpTon">0</div>
-                    <div class="stat-trend-new text-muted" id="trendTongSLTon" style="font-size:0.78rem"></div>
-                    <div class="stat-trend-new text-danger" id="trendSpSapHet"></div>
+                    <div class="stat-value-new" id="valSpTon_@uid">0</div>
+                    <div class="stat-trend-new text-muted" id="trendTongSLTon_@uid" style="font-size:0.78rem"></div>
+                    <div class="stat-trend-new text-danger" id="trendSpSapHet_@uid"></div>
                 </div>
             </div>
         </div>
@@ -307,8 +308,8 @@
                 <div class="stat-icon-new red"><i class="bi bi-graph-up-arrow"></i></div>
                 <div class="stat-info-new">
                     <div class="stat-label-new">Lợi nhuận kỳ này</div>
-                    <div class="stat-value-new" id="valLoiNhuan">0₫</div>
-                    <div class="stat-trend-new" id="trendLoiNhuan"></div>
+                    <div class="stat-value-new" id="valLoiNhuan_@uid">0₫</div>
+                    <div class="stat-trend-new" id="trendLoiNhuan_@uid"></div>
                 </div>
             </div>
         </div>
@@ -318,7 +319,7 @@
                 <div class="stat-icon-new indigo"><i class="bi bi-people"></i></div>
                 <div class="stat-info-new">
                     <div class="stat-label-new">Công nợ KH</div>
-                    <div class="stat-value-new text-primary" id="valCongNoKH">0₫</div>
+                    <div class="stat-value-new text-primary" id="valCongNoKH_@uid">0₫</div>
                     <div class="stat-trend-new text-muted"><i class="bi bi-info-circle"></i> Phải thu khách hàng</div>
                 </div>
             </div>
@@ -329,8 +330,18 @@
                 <div class="stat-icon-new purple"><i class="bi bi-receipt"></i></div>
                 <div class="stat-info-new">
                     <div class="stat-label-new">Công nợ NCC</div>
-                    <div class="stat-value-new text-danger" id="valCongNoNCC">0₫</div>
-                    <div class="stat-trend-new text-muted"><i class="bi bi-info-circle"></i> Phải trả nhà cung cấp</div>
+                    <div class="sodu-row mt-1">
+                        <span class="sodu-label text-muted" style="font-size:0.75rem"><i class="bi bi-cart me-1"></i>Tổng nợ</span>
+                        <span class="sodu-value text-dark fw-bold" id="valTongTienHangNCC_@uid" style="font-size:0.8rem">0₫</span>
+                    </div>
+                    <div class="sodu-row mt-1">
+                        <span class="sodu-label text-muted" style="font-size:0.75rem"><i class="bi bi-check2-circle me-1 text-success"></i>Đã trả</span>
+                        <span class="sodu-value text-success fw-bold" id="valDaThanhToanNCC_@uid" style="font-size:0.8rem">0₫</span>
+                    </div>
+                    <div class="sodu-row mt-1">
+                        <span class="sodu-label text-muted" style="font-size:0.75rem"><i class="bi bi-exclamation-circle me-1 text-danger"></i>Còn nợ</span>
+                        <span class="sodu-value text-danger fw-bold" id="valCongNoNCC_@uid" style="font-size:0.8rem">0₫</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -342,11 +353,11 @@
                     <div class="stat-label-new">Số dư</div>
                     <div class="sodu-row">
                         <span class="sodu-label"><i class="bi bi-cash me-1"></i>Tiền mặt</span>
-                        <span class="sodu-value" id="valTienMat">0₫</span>
+                        <span class="sodu-value" id="valTienMat_@uid">0₫</span>
                     </div>
                     <div class="sodu-row mt-1">
                         <span class="sodu-label"><i class="bi bi-bank me-1"></i>Tổng TK</span>
-                        <span class="sodu-value text-primary" id="valTongSoDu">0₫</span>
+                        <span class="sodu-value text-primary" id="valTongSoDu_@uid">0₫</span>
                     </div>
                 </div>
             </div>
@@ -371,7 +382,7 @@
                         <th class="text-center">TRẠNG THÁI</th>
                     </tr>
                 </thead>
-                <tbody id="tbRecentOrders">
+                <tbody id="tbRecentOrders_@uid">
                     <tr>
                         <td colspan="6" class="text-center text-muted py-3">Đang tải dữ liệu...</td>
                     </tr>
@@ -387,7 +398,7 @@
             <div class="panel-card">
                 <div class="panel-title">HIỆU QUẢ KINH DOANH (DOANH THU VS GIÁ VỐN)</div>
                 <div style="height: 220px; position: relative;">
-                    <canvas id="chartDoanhThu" height="220"></canvas>
+                    <canvas id="chartDoanhThu_@uid" height="220"></canvas>
                 </div>
             </div>
         </div>
@@ -396,10 +407,10 @@
             <div class="panel-card">
                 <div class="panel-title">
                     <span>TRẠNG THÁI ĐƠN HÀNG</span>
-                    <span class="badge bg-primary" id="valTongDonHang" style="font-size: 0.75rem">0 đơn</span>
+                    <span class="badge bg-primary" id="valTongDonHang_@uid" style="font-size: 0.75rem">0 đơn</span>
                 </div>
                 <div style="height: 220px; position: relative;">
-                    <canvas id="chartDonHang" height="220"></canvas>
+                    <canvas id="chartDonHang_@uid" height="220"></canvas>
                 </div>
             </div>
         </div>
@@ -426,13 +437,13 @@
                     <div class="col-6">
                         <div class="border rounded py-1 px-2 bg-light">
                             <div class="text-muted small">GIÁ TRỊ TỒN KHO</div>
-                            <span class="fw-bold text-primary" id="valGiaTriTonKho" style="font-size:1rem">0₫</span>
+                            <span class="fw-bold text-primary" id="valGiaTriTonKho_@uid" style="font-size:1rem">0₫</span>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="border rounded py-1 px-2 bg-light">
                             <div class="text-muted small">SẮP HẾT HÀNG</div>
-                            <span class="fw-bold text-danger" id="valSpSapHet" style="font-size:1rem">0</span>
+                            <span class="fw-bold text-danger" id="valSpSapHet_@uid" style="font-size:1rem">0</span>
                         </div>
                     </div>
                 </div>
@@ -440,12 +451,12 @@
                 <div class="tab-content" id="productTabContent">
                     <div class="tab-pane fade show active" id="sales-pane" role="tabpanel">
                         <div style="height: 160px; position: relative;">
-                            <canvas id="chartBanChay" height="160"></canvas>
+                            <canvas id="chartBanChay_@uid" height="160"></canvas>
                         </div>
                     </div>
                     <div class="tab-pane fade" id="stock-pane" role="tabpanel">
                         <div style="height: 160px; position: relative;">
-                            <canvas id="chartTonKho" height="160"></canvas>
+                            <canvas id="chartTonKho_@uid" height="160"></canvas>
                         </div>
                     </div>
                 </div>
@@ -460,24 +471,24 @@
                     <div class="col-4">
                         <div class="border rounded py-1" style="background:#e8f8f5">
                             <div class="text-success small">TỔNG THU</div>
-                            <span class="fw-bold text-success" id="valTongThu">0₫</span>
+                            <span class="fw-bold text-success" id="valTongThu_@uid">0₫</span>
                         </div>
                     </div>
                     <div class="col-4">
                         <div class="border rounded py-1" style="background:#fdedec">
                             <div class="text-danger small">TỔNG CHI</div>
-                            <span class="fw-bold text-danger" id="valTongChi">0₫</span>
+                            <span class="fw-bold text-danger" id="valTongChi_@uid">0₫</span>
                         </div>
                     </div>
                     <div class="col-4">
                         <div class="border rounded py-1" style="background:#eaf4fb">
                             <div class="text-primary small">THUẦN</div>
-                            <span class="fw-bold text-primary" id="valDongTien">0₫</span>
+                            <span class="fw-bold text-primary" id="valDongTien_@uid">0₫</span>
                         </div>
                     </div>
                 </div>
                 <div style="height: 160px; position: relative;">
-                    <canvas id="chartThuChi" height="160"></canvas>
+                    <canvas id="chartThuChi_@uid" height="160"></canvas>
                 </div>
             </div>
         </div>
@@ -489,7 +500,7 @@
         <div class="col-md-4">
             <div class="panel-card">
                 <div class="panel-title">TÀI KHOẢN THANH TOÁN</div>
-                <div class="scroll-box" id="listTaiKhoan">
+                <div class="scroll-box" id="listTaiKhoan_@uid">
                     <!-- Render by JS -->
                 </div>
             </div>
@@ -501,11 +512,11 @@
                 <div class="panel-title text-warning"><i class="bi bi-exclamation-triangle-fill me-1"></i> CẢNH BÁO HỆ THỐNG</div>
                 <div class="scroll-box">
                     <ul class="list-unstyled warning-list mb-0">
-                        <li><span>Đơn hàng quá hạn giao</span> <strong class="text-danger" id="wDonHang">0</strong></li>
-                        <li><span>Phiếu nhập chưa thanh toán</span> <strong class="text-danger" id="wPhieuNhap">0</strong></li>
-                        <li><span>Tài khoản âm quỹ</span> <strong class="text-danger" id="wTaiKhoan">0</strong></li>
-                        <li><span>Sản phẩm sắp hết hàng</span> <strong class="text-danger" id="wTonKho">0</strong></li>
-                        <li><span>Chứng từ chưa ghi</span> <strong class="text-warning" id="wChungTu">0</strong></li>
+                        <li><span>Đơn hàng quá hạn giao</span> <strong class="text-danger" id="wDonHang_@uid">0</strong></li>
+                        <li><span>Phiếu nhập chưa thanh toán</span> <strong class="text-danger" id="wPhieuNhap_@uid">0</strong></li>
+                        <li><span>Tài khoản âm quỹ</span> <strong class="text-danger" id="wTaiKhoan_@uid">0</strong></li>
+                        <li><span>Sản phẩm sắp hết hàng</span> <strong class="text-danger" id="wTonKho_@uid">0</strong></li>
+                        <li><span>Chứng từ chưa ghi</span> <strong class="text-warning" id="wChungTu_@uid">0</strong></li>
                     </ul>
                 </div>
             </div>
@@ -516,7 +527,7 @@
             <div class="panel-card">
                 <div class="panel-title">HOẠT ĐỘNG GẦN ĐÂY</div>
                 <div class="scroll-box">
-                    <div class="timeline" id="listHoatDong">
+                    <div class="timeline" id="listHoatDong_@uid">
                         <!-- Render by JS -->
                     </div>
                 </div>
@@ -545,9 +556,9 @@
                     <!-- KHỐI 7: Công nợ KH -->
                     <div class="tab-pane fade show active" id="debt-cust-pane" role="tabpanel">
                         <div class="row g-2 mb-2 text-center text-muted" style="font-size:0.75rem">
-                            <div class="col-4">Tổng quá hạn: <strong class="text-danger d-block" id="cnkhTongNo">0₫</strong></div>
-                            <div class="col-4">Số KH quá hạn: <strong class="text-dark d-block" id="cnkhSoDoiTuong">0</strong></div>
-                            <div class="col-4">Nợ lớn nhất: <strong class="text-danger d-block" id="cnkhNoLonNhat">0₫</strong><span class="text-truncate d-block" style="max-width:100%" id="cnkhTenNoLonNhat">-</span></div>
+                            <div class="col-4">Tổng quá hạn: <strong class="text-danger d-block" id="cnkhTongNo_@uid">0₫</strong></div>
+                            <div class="col-4">Số KH quá hạn: <strong class="text-dark d-block" id="cnkhSoDoiTuong_@uid">0</strong></div>
+                            <div class="col-4">Nợ lớn nhất: <strong class="text-danger d-block" id="cnkhNoLonNhat_@uid">0₫</strong><span class="text-truncate d-block" style="max-width:100%" id="cnkhTenNoLonNhat_@uid">-</span></div>
                         </div>
                         <div class="table-responsive" style="max-height: 180px; overflow-y: auto;">
                             <table class="table table-sm table-bordered table-hover align-middle mb-0" style="font-size:0.8rem">
@@ -561,16 +572,16 @@
                                         <th class="text-end">Còn nợ</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tbCongNoKH"></tbody>
+                                <tbody id="tbCongNoKH_@uid"></tbody>
                             </table>
                         </div>
                     </div>
                     <!-- KHỐI 8: Công nợ NCC -->
                     <div class="tab-pane fade" id="debt-vend-pane" role="tabpanel">
                         <div class="row g-2 mb-2 text-center text-muted" style="font-size:0.75rem">
-                            <div class="col-4">Tổng quá hạn: <strong class="text-danger d-block" id="cnnccTongNo">0₫</strong></div>
-                            <div class="col-4">Số NCC quá hạn: <strong class="text-dark d-block" id="cnnccSoDoiTuong">0</strong></div>
-                            <div class="col-4">Nợ lớn nhất: <strong class="text-danger d-block" id="cnnccNoLonNhat">0₫</strong><span class="text-truncate d-block" style="max-width:100%" id="cnnccTenNoLonNhat">-</span></div>
+                            <div class="col-4">Tổng quá hạn: <strong class="text-danger d-block" id="cnnccTongNo_@uid">0₫</strong></div>
+                            <div class="col-4">Số NCC quá hạn: <strong class="text-dark d-block" id="cnnccSoDoiTuong_@uid">0</strong></div>
+                            <div class="col-4">Nợ lớn nhất: <strong class="text-danger d-block" id="cnnccNoLonNhat_@uid">0₫</strong><span class="text-truncate d-block" style="max-width:100%" id="cnnccTenNoLonNhat_@uid">-</span></div>
                         </div>
                         <div class="table-responsive" style="max-height: 180px; overflow-y: auto;">
                             <table class="table table-sm table-bordered table-hover align-middle mb-0" style="font-size:0.8rem">
@@ -584,7 +595,7 @@
                                         <th class="text-end">Còn lại</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tbCongNoNCC"></tbody>
+                                <tbody id="tbCongNoNCC_@uid"></tbody>
                             </table>
                         </div>
                     </div>
@@ -619,7 +630,7 @@
                                         <th class="text-end text-danger">Công nợ hiện tại</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tbTopKH"></tbody>
+                                <tbody id="tbTopKH_@uid"></tbody>
                             </table>
                         </div>
                     </div>
@@ -634,7 +645,7 @@
                                         <th class="text-end text-danger">Công nợ hiện tại</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tbTopNCC"></tbody>
+                                <tbody id="tbTopNCC_@uid"></tbody>
                             </table>
                         </div>
                     </div>
@@ -650,16 +661,16 @@
 
         $(document).ready(function () {
             // Set dynamic date in header
-            $('#currentDateText').text(getVietnameseDate());
+            $('#currentDateText_@uid').text(getVietnameseDate());
             
             initDates();
             loadDashboardData();
 
-            $('#btnLoadDashboard').click(function () {
+            $('#btnLoadDashboard_@uid').click(function () {
                 loadDashboardData();
             });
 
-            $('#btnResetDashboard').click(function () {
+            $('#btnResetDashboard_@uid').click(function () {
                 initDates();
                 loadDashboardData();
             });
@@ -683,8 +694,8 @@
             var d = new Date();
             var fd = new Date(d.getFullYear(), d.getMonth(), 1);
             var ed = new Date(d.getFullYear(), d.getMonth() + 1, 0);
-            $('#dbTuNgay').val(formatDateLocal(fd));
-            $('#dbDenNgay').val(formatDateLocal(ed));
+            $('#dbTuNgay_@uid').val(formatDateLocal(fd));
+            $('#dbDenNgay_@uid').val(formatDateLocal(ed));
         }
 
         function formatMoney(n) {
@@ -708,8 +719,8 @@
         }
 
         function loadDashboardData() {
-            var tuNgay = $('#dbTuNgay').val();
-            var denNgay = $('#dbDenNgay').val();
+            var tuNgay = $('#dbTuNgay_@uid').val();
+            var denNgay = $('#dbDenNgay_@uid').val();
 
             $.ajax({
                 url: '@Url.Action("GetData", "Dashboard")',
@@ -730,28 +741,30 @@
 
         function renderDashboard(data) {
             // KHỐI 1: 5 METRIC CARDS REDESIGN
-            $('#valDonHang').text(data.TongSoDonHang);
+            $('#valDonHang_@uid').text(data.TongSoDonHang);
             
-            $('#valDoanhThu').text(formatMoney(data.Summary.DoanhThu));
+            $('#valDoanhThu_@uid').text(formatMoney(data.Summary.DoanhThu));
             var trendClass = data.Summary.TyLeTangGiamDoanhThu >= 0 ? 'text-success' : 'text-danger';
             var trendIcon = data.Summary.TyLeTangGiamDoanhThu >= 0 ? 'bi-arrow-up-right' : 'bi-arrow-down-right';
-            $('#trendDoanhThu').html(`<i class="bi ${trendIcon}"></i> ${Math.abs(data.Summary.TyLeTangGiamDoanhThu)}% so với kỳ trước`).attr('class', 'stat-trend-new ' + trendClass);
+            $('#trendDoanhThu_@uid').html(`<i class="bi ${trendIcon}"></i> ${Math.abs(data.Summary.TyLeTangGiamDoanhThu)}% so với kỳ trước`).attr('class', 'stat-trend-new ' + trendClass);
             
-            $('#valSpTon').text(data.TonKho.SoLuongSanPhamTon);
-            $('#trendTongSLTon').html('<i class="bi bi-stack"></i> SL: ' + formatNumber(data.TonKho.TongSoLuongTon) + ' thùng');
-            $('#trendSpSapHet').html(`<i class="bi bi-exclamation-triangle"></i> +${data.TonKho.SoSanPhamSapHet} sản phẩm sắp hết hàng`);
+            $('#valSpTon_@uid').text(data.TonKho.SoLuongSanPhamTon);
+            $('#trendTongSLTon_@uid').html('<i class="bi bi-stack"></i> SL: ' + formatNumber(data.TonKho.TongSoLuongTon) + ' thùng');
+            $('#trendSpSapHet_@uid').html(`<i class="bi bi-exclamation-triangle"></i> +${data.TonKho.SoSanPhamSapHet} sản phẩm sắp hết hàng`);
             
-            $('#valLoiNhuan').text(formatMoney(data.Summary.LoiNhuan));
+            $('#valLoiNhuan_@uid').text(formatMoney(data.Summary.LoiNhuan));
             var profitTrendClass = data.Summary.TyLeTangGiamLoiNhuan >= 0 ? 'text-success' : 'text-danger';
             var profitTrendIcon = data.Summary.TyLeTangGiamLoiNhuan >= 0 ? 'bi-arrow-up-right' : 'bi-arrow-down-right';
-            $('#trendLoiNhuan').html(`<i class="bi ${profitTrendIcon}"></i> ${Math.abs(data.Summary.TyLeTangGiamLoiNhuan)}% so với kỳ trước`).attr('class', 'stat-trend-new ' + profitTrendClass);
+            $('#trendLoiNhuan_@uid').html(`<i class="bi ${profitTrendIcon}"></i> ${Math.abs(data.Summary.TyLeTangGiamLoiNhuan)}% so với kỳ trước`).attr('class', 'stat-trend-new ' + profitTrendClass);
             
-            $('#valCongNoKH').text(formatMoney(data.Summary.CongNoKhachHang));
-            $('#valCongNoNCC').text(formatMoney(data.Summary.CongNoNhaCungCap));
+            $('#valCongNoKH_@uid').text(formatMoney(data.Summary.CongNoKhachHang));
+            $('#valTongTienHangNCC_@uid').text(formatMoney(data.Summary.TongTienHangNCC));
+            $('#valDaThanhToanNCC_@uid').text(formatMoney(data.Summary.DaThanhToanNCC));
+            $('#valCongNoNCC_@uid').text(formatMoney(data.Summary.CongNoNhaCungCap));
 
             // Card 7: Số dư
-            $('#valTienMat').text(formatMoney(data.Summary.TienMat));
-            $('#valTongSoDu').text(formatMoney(data.Summary.TongSoDuTaiKhoan));
+            $('#valTienMat_@uid').text(formatMoney(data.Summary.TienMat));
+            $('#valTongSoDu_@uid').text(formatMoney(data.Summary.TongSoDuTaiKhoan));
 
             // KHỐI 2: ĐƠN HÀNG GẦN ĐÂY
             var ordHtml = '';
@@ -783,26 +796,26 @@
             } else {
                 ordHtml = '<tr><td colspan="6" class="text-center text-muted py-3">Không có đơn hàng gần đây.</td></tr>';
             }
-            $('#tbRecentOrders').html(ordHtml);
+            $('#tbRecentOrders_@uid').html(ordHtml);
 
             // KHỐI 3: BIỂU ĐỒ BÁN HÀNG & GIÁ VỐN
-            renderBusinessChart(data.DoanhThuTheoThoiGian, data.GiaVonTheoThoiGian);
+            renderBusinessChart(data.DoanhThuTheoThoiGian, data.GiaVonTheoThoiGian, 'chartDoanhThu_@uid');
 
             // KHỐI 4: TRẠNG THÁI ĐƠN HÀNG
-            $('#valTongDonHang').text(data.TongSoDonHang + ' đơn');
-            renderDonutChart('chartDonHang', data.TrangThaiDonHang);
+            $('#valTongDonHang_@uid').text(data.TongSoDonHang + ' đơn');
+            renderDonutChart('chartDonHang_@uid', data.TrangThaiDonHang);
 
             // KHỐI 5: TỒN KHO & BÁN CHẠY
-            $('#valGiaTriTonKho').text(formatMoney(data.TonKho.TongGiaTriTonKho));
-            $('#valSpSapHet').text(data.TonKho.SoSanPhamSapHet);
-            renderBarChart('chartTonKho', data.TonKho.TopTonKho, 'Số lượng tồn', '#e67e22');
-            renderBarChart('chartBanChay', data.TopBanChay, 'Số lượng bán', '#2ecc71');
+            $('#valGiaTriTonKho_@uid').text(formatMoney(data.TonKho.TongGiaTriTonKho));
+            $('#valSpSapHet_@uid').text(data.TonKho.SoSanPhamSapHet);
+            renderBarChart('chartTonKho_@uid', data.TonKho.TopTonKho, 'Số lượng tồn', '#e67e22');
+            renderBarChart('chartBanChay_@uid', data.TopBanChay, 'Số lượng bán', '#2ecc71');
 
             // KHỐI 6: THU CHI
-            $('#valTongThu').text(formatMoney(data.ThuChi.TongThu));
-            $('#valTongChi').text(formatMoney(data.ThuChi.TongChi));
-            $('#valDongTien').text(formatMoney(data.ThuChi.DongTienThuan));
-            renderBarChart('chartThuChi', data.ThuChi.ThuChiTheoNgay, 'Dòng tiền thuần', '#3498db');
+            $('#valTongThu_@uid').text(formatMoney(data.ThuChi.TongThu));
+            $('#valTongChi_@uid').text(formatMoney(data.ThuChi.TongChi));
+            $('#valDongTien_@uid').text(formatMoney(data.ThuChi.DongTienThuan));
+            renderBarChart('chartThuChi_@uid', data.ThuChi.ThuChiTheoNgay, 'Dòng tiền thuần', '#3498db');
 
             // KHỐI 7: TÀI KHOẢN THANH TOÁN
             var tkHtml = '';
@@ -831,14 +844,14 @@
             } else {
                 tkHtml = '<div class="text-center text-muted small py-3">Không có tài khoản hoạt động.</div>';
             }
-            $('#listTaiKhoan').html(tkHtml);
+            $('#listTaiKhoan_@uid').html(tkHtml);
 
             // KHỐI 8: CẢNH BÁO
-            $('#wDonHang').text(data.CanhBao.DonHangQuaHanGiao);
-            $('#wPhieuNhap').text(data.CanhBao.PhieuNhapChuaThanhToan);
-            $('#wTaiKhoan').text(data.CanhBao.TaiKhoanAmQuy);
-            $('#wTonKho').text(data.CanhBao.SanPhamSapHetHang);
-            $('#wChungTu').text(data.CanhBao.ChungTuChuaGhi);
+            $('#wDonHang_@uid').text(data.CanhBao.DonHangQuaHanGiao);
+            $('#wPhieuNhap_@uid').text(data.CanhBao.PhieuNhapChuaThanhToan);
+            $('#wTaiKhoan_@uid').text(data.CanhBao.TaiKhoanAmQuy);
+            $('#wTonKho_@uid').text(data.CanhBao.SanPhamSapHetHang);
+            $('#wChungTu_@uid').text(data.CanhBao.ChungTuChuaGhi);
 
             // KHỐI 9: HOẠT ĐỘNG
             var hdHtml = '';
@@ -854,13 +867,13 @@
             } else {
                 hdHtml = '<div class="text-center text-muted small py-3">Không có hoạt động mới trong kỳ.</div>';
             }
-            $('#listHoatDong').html(hdHtml);
+            $('#listHoatDong_@uid').html(hdHtml);
 
             // KHỐI 10 & 11: CÔNG NỢ QUÁ HẠN
-            $('#cnkhTongNo').text(formatMoney(data.CongNoKhachHangQuaHan.TongNoQuaHan));
-            $('#cnkhSoDoiTuong').text(data.CongNoKhachHangQuaHan.SoDoiTuongQuaHan);
-            $('#cnkhNoLonNhat').text(formatMoney(data.CongNoKhachHangQuaHan.NoLonNhat));
-            $('#cnkhTenNoLonNhat').text(data.CongNoKhachHangQuaHan.TenDoiTuongNoLonNhat || '-');
+            $('#cnkhTongNo_@uid').text(formatMoney(data.CongNoKhachHangQuaHan.TongNoQuaHan));
+            $('#cnkhSoDoiTuong_@uid').text(data.CongNoKhachHangQuaHan.SoDoiTuongQuaHan);
+            $('#cnkhNoLonNhat_@uid').text(formatMoney(data.CongNoKhachHangQuaHan.NoLonNhat));
+            $('#cnkhTenNoLonNhat_@uid').text(data.CongNoKhachHangQuaHan.TenDoiTuongNoLonNhat || '-');
             
             var cnkhHtml = '';
             if (data.CongNoKhachHangQuaHan.TopKhachHangQuaHan && data.CongNoKhachHangQuaHan.TopKhachHangQuaHan.length > 0) {
@@ -878,12 +891,12 @@
             } else {
                 cnkhHtml = '<tr><td colspan="6" class="text-center text-muted small py-3">Không có công nợ quá hạn.</td></tr>';
             }
-            $('#tbCongNoKH').html(cnkhHtml);
+            $('#tbCongNoKH_@uid').html(cnkhHtml);
 
-            $('#cnnccTongNo').text(formatMoney(data.CongNoNccQuaHan.TongNoQuaHan));
-            $('#cnnccSoDoiTuong').text(data.CongNoNccQuaHan.SoDoiTuongQuaHan);
-            $('#cnnccNoLonNhat').text(formatMoney(data.CongNoNccQuaHan.NoLonNhat));
-            $('#cnnccTenNoLonNhat').text(data.CongNoNccQuaHan.TenDoiTuongNoLonNhat || '-');
+            $('#cnnccTongNo_@uid').text(formatMoney(data.CongNoNccQuaHan.TongNoQuaHan));
+            $('#cnnccSoDoiTuong_@uid').text(data.CongNoNccQuaHan.SoDoiTuongQuaHan);
+            $('#cnnccNoLonNhat_@uid').text(formatMoney(data.CongNoNccQuaHan.NoLonNhat));
+            $('#cnnccTenNoLonNhat_@uid').text(data.CongNoNccQuaHan.TenDoiTuongNoLonNhat || '-');
 
             var cnnccHtml = '';
             if (data.CongNoNccQuaHan.TopNccQuaHan && data.CongNoNccQuaHan.TopNccQuaHan.length > 0) {
@@ -901,7 +914,7 @@
             } else {
                 cnnccHtml = '<tr><td colspan="6" class="text-center text-muted small py-3">Không có công nợ quá hạn.</td></tr>';
             }
-            $('#tbCongNoNCC').html(cnnccHtml);
+            $('#tbCongNoNCC_@uid').html(cnnccHtml);
 
             // KHỐI 12 & 13: TOP ĐỐI TƯỢNG DOANH SỐ
             var tkhHtml = '';
@@ -916,7 +929,7 @@
             } else {
                 tkhHtml = '<tr><td colspan="3" class="text-center text-muted small py-3">Không có dữ liệu.</td></tr>';
             }
-            $('#tbTopKH').html(tkhHtml);
+            $('#tbTopKH_@uid').html(tkhHtml);
 
             var tnccHtml = '';
             if (data.TopNhaCungCap && data.TopNhaCungCap.length > 0) {
@@ -930,11 +943,10 @@
             } else {
                 tnccHtml = '<tr><td colspan="3" class="text-center text-muted small py-3">Không có dữ liệu.</td></tr>';
             }
-            $('#tbTopNCC').html(tnccHtml);
+            $('#tbTopNCC_@uid').html(tnccHtml);
         }
 
-        function renderBusinessChart(salesData, cogsData) {
-            var canvasId = 'chartDoanhThu';
+        function renderBusinessChart(salesData, cogsData, canvasId) {
             if (charts[canvasId]) {
                 charts[canvasId].destroy();
             }
@@ -1059,3 +1071,4 @@
         }
     </script>
 }
+

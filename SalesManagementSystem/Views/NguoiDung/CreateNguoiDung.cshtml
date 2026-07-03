@@ -152,7 +152,7 @@
             data: form.serialize(),
             success: function (result) {
                 if (result.success) {
-                    $('#globalFormModal').modal('hide');
+                    form.closest('.modal').modal('hide');
                     if (typeof showToast === "function") {
                         showToast('success', result.message || 'Thêm mới thành công!');
                     }
@@ -175,3 +175,5 @@
         });
     }
 </script>
+
+

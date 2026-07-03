@@ -515,6 +515,7 @@
     <Content Include="Views\BAN_TraHangBan\Create.cshtml" />
     <Content Include="Views\BAN_TraHangBan\Edit.cshtml" />
     <Content Include="Views\BAN_TraHangBan\_ChonDonHangPopup.cshtml" />
+    <Content Include="Views\PhieuChi\_DetailInline.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />

@@ -417,25 +417,49 @@ var TabManager = (function () {
             localStorage.removeItem('tabManagerState');
         });
 
-        // Đóng toàn bộ Modal khi người dùng chuyển Tab
-                // Xử lý Modal khi chuyển Tab
+                        // Xử lý Modal khi chuyển Tab
+        $(document).on('hide.bs.tab', 'button[data-bs-toggle="tab"]', function (e) {
+            var previousTabId = $(e.target).attr('data-bs-target');
+            if (previousTabId) previousTabId = previousTabId.replace('#', '');
+            
+            // Tìm modal của tab cũ và tạm ẩn nó bằng API của Bootstrap
+            $('.form-modal').each(function() {
+                var modalOwner = $(this).attr('data-owner-tab');
+                if (modalOwner && modalOwner === previousTabId) {
+                    if ($(this).hasClass('show')) {
+                        // Đánh dấu là bị ẩn do chuyển tab chứ không phải người dùng tắt
+                        $(this).data('hidden-by-tab-switch', true);
+                        var modalInstance = bootstrap.Modal.getOrCreateInstance(this);
+                        if (modalInstance) {
+                            modalInstance.hide();
+                        }
+                    }
+                }
+            });
+        });
+
         $(document).on('show.bs.tab', 'button[data-bs-toggle="tab"]', function (e) {
             var targetTabId = $(e.target).attr('data-bs-target');
             if (targetTabId) targetTabId = targetTabId.replace('#', '');
             
-            var modalOwner = $('#globalFormModal').attr('data-owner-tab');
-            if (modalOwner) {
-                if (modalOwner === targetTabId) {
-                    $('#globalFormModal').removeClass('d-none');
-                    $('.modal-backdrop').removeClass('d-none');
-                } else {
-                    $('#globalFormModal').addClass('d-none');
-                    $('.modal-backdrop').addClass('d-none');
+            // Hiện lại modal của tab mới nếu trước đó nó bị ẩn do chuyển tab
+            $('.form-modal').each(function() {
+                var modalOwner = $(this).attr('data-owner-tab');
+                if (modalOwner && modalOwner === targetTabId) {
+                    if ($(this).data('hidden-by-tab-switch') === true) {
+                        $(this).data('hidden-by-tab-switch', false);
+                        var modalInstance = bootstrap.Modal.getOrCreateInstance(this);
+                        if (modalInstance) {
+                            modalInstance.show();
+                        } else {
+                            new bootstrap.Modal(this).show();
+                        }
+                    }
                 }
-            }
+            });
         });
 
-        // Xử lý nạp nội dung khi chuyển sang tab chưa load (ví dụ Dashboard)
+        // Xử lý nạp nội dung khi chuyển sang tab chưa loadví dụ Dashboard)
         $(document).on('shown.bs.tab', 'button[data-bs-toggle="tab"]', function (e) {
             var tabId = $(e.target).attr('id');
             var paneId = $(e.target).attr('data-bs-target');
@@ -908,4 +932,9 @@ var TabManager = (function () {
 $(document).ready(function () {
     TabManager.init();
 });
+
+
+
+
+
 

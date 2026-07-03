@@ -40,6 +40,7 @@ BEGIN
         p.NgayHoaDon,
         p.TenNguoiGiao,
         p.SoDienThoaiNguoiGiao,
+        p.TenNguoiNhan,
         p.IDNhanSuNhan,
         ns.Ten AS TenNhanSuNhan,
         p.TrangThai,

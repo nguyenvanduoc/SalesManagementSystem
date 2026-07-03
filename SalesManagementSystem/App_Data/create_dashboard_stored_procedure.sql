@@ -13,6 +13,33 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    -- Tính DaThanhToan cho tất cả phiếu nhập
+    SELECT 
+        pn.ID AS IDPhieuNhap,
+        ISNULL(
+            (SELECT SUM(ct.SoTienPhanBo)
+             FROM KT_PhieuChiChiTiet ct
+             INNER JOIN KT_PhieuChi pc ON ct.IDPhieuChi = pc.ID
+             WHERE ct.IDPhieuNhap = pn.ID 
+               AND ct.LoaiChi = 1
+               AND pc.TrangThai = 2
+               AND pc.IsDeleted = 0),
+            0
+        ) + ISNULL(
+            (SELECT SUM(pc2.SoTienChi)
+             FROM KT_PhieuChi pc2
+             WHERE pc2.IDPhieuNhap = pn.ID
+               AND pc2.TrangThai = 2
+               AND pc2.IsDeleted = 0
+               AND NOT EXISTS (SELECT 1 FROM KT_PhieuChiChiTiet ct WHERE ct.IDPhieuChi = pc2.ID)
+            ),
+            0
+        ) AS DaThanhToan
+    INTO #PaidNCC
+    FROM KHO_PhieuNhap pn
+    WHERE pn.IsDeleted = 0;
+
+
     -- 1. KHỐI 1: TỔNG QUAN
     -- Doanh thu hiện tại & Doanh thu kỳ trước
     DECLARE @DoanhThu DECIMAL(18, 2) = 0;
@@ -35,9 +62,41 @@ BEGIN
     WHERE IsDeleted = 0 AND TrangThai = 2 AND NgayChungTu <= @DenNgay;
 
     -- Công nợ nhà cung cấp
+    DECLARE @TongTienHangNCC DECIMAL(18, 2) = 0;
+    DECLARE @DaThanhToanNCC DECIMAL(18, 2) = 0;
     DECLARE @CongNoNhaCungCap DECIMAL(18, 2) = 0;
-    SELECT @CongNoNhaCungCap = ISNULL((SELECT SUM(TongCong) FROM KHO_PhieuNhap WHERE TrangThai = 2 AND IsDeleted = 0 AND NgayNhap <= @DenNgay), 0) -
-                               ISNULL((SELECT SUM(SoTienChi) FROM KT_PhieuChi WHERE TrangThai = 2 AND IsDeleted = 0 AND NgayChi <= @DenNgay AND IDNhaCungCap IS NOT NULL), 0);
+    
+    SELECT 
+        @TongTienHangNCC = ISNULL(SUM(TongTienHang), 0),
+        @DaThanhToanNCC = ISNULL(SUM(DaThanhToan), 0)
+    FROM (
+        SELECT 
+            pn.TongCong AS TongTienHang,
+            ISNULL(
+                (SELECT SUM(ct.SoTienPhanBo)
+                 FROM KT_PhieuChiChiTiet ct
+                 INNER JOIN KT_PhieuChi pc ON ct.IDPhieuChi = pc.ID
+                 WHERE ct.IDPhieuNhap = pn.ID 
+                   AND ct.LoaiChi = 1
+                   AND pc.TrangThai = 2
+                   AND pc.IsDeleted = 0),
+                0
+            ) + ISNULL(
+                (SELECT SUM(pc2.SoTienChi)
+                 FROM KT_PhieuChi pc2
+                 WHERE pc2.IDPhieuNhap = pn.ID
+                   AND pc2.TrangThai = 2
+                   AND pc2.IsDeleted = 0
+                   AND NOT EXISTS (SELECT 1 FROM KT_PhieuChiChiTiet ct WHERE ct.IDPhieuChi = pc2.ID)
+                ),
+                0
+            ) AS DaThanhToan
+        FROM KHO_PhieuNhap pn
+        LEFT JOIN #PaidNCC pd ON pn.ID = pd.IDPhieuNhap
+        WHERE pn.IsDeleted = 0 AND pn.NgayNhap <= @DenNgay
+    ) t;
+    
+    SET @CongNoNhaCungCap = @TongTienHangNCC - @DaThanhToanNCC;
 
     -- Tiền hiện có
     DECLARE @TienHienCo DECIMAL(18, 2) = 0;
@@ -117,6 +176,8 @@ BEGIN
         @DoanhThu AS DoanhThu,
         @DoanhThuKyTruoc AS DoanhThuKyTruoc,
         @CongNoKhachHang AS CongNoKhachHang,
+        @TongTienHangNCC AS TongTienHangNCC,
+        @DaThanhToanNCC AS DaThanhToanNCC,
         @CongNoNhaCungCap AS CongNoNhaCungCap,
         @TienHienCo AS TienHienCo,
         @LoiNhuan AS LoiNhuan,
@@ -270,11 +331,12 @@ BEGIN
     INTO #SumNCC
     FROM (
         SELECT ncc.TenNhaCungCap AS NhaCungCap, pn.TongCong AS TongTien, 
-               ISNULL((SELECT SUM(pc2.SoTienChi) FROM KT_PhieuChi pc2 WHERE pc2.IDPhieuNhap = pn.ID AND pc2.TrangThai = 2 AND pc2.IsDeleted = 0), 0) AS DaThanhToan
+               ISNULL(pd.DaThanhToan, 0) AS DaThanhToan
         FROM KHO_PhieuNhap pn
         JOIN DM_NhaCungCap ncc ON pn.IDNhaCungCap = ncc.ID
-        WHERE pn.IsDeleted = 0 AND pn.TrangThai = 2 
-          AND pn.TongCong > ISNULL((SELECT SUM(pc2.SoTienChi) FROM KT_PhieuChi pc2 WHERE pc2.IDPhieuNhap = pn.ID AND pc2.TrangThai = 2 AND pc2.IsDeleted = 0), 0)
+        LEFT JOIN #PaidNCC pd ON pn.ID = pd.IDPhieuNhap
+        WHERE pn.IsDeleted = 0 
+          AND pn.TongCong > ISNULL(pd.DaThanhToan, 0)
           AND DATEADD(day, 30, pn.NgayNhap) < CAST(GETDATE() AS DATE)
     ) t;
 
@@ -282,11 +344,12 @@ BEGIN
     INTO #MaxNCC
     FROM (
         SELECT ncc.TenNhaCungCap AS NhaCungCap, pn.TongCong AS TongTien, 
-               ISNULL((SELECT SUM(pc2.SoTienChi) FROM KT_PhieuChi pc2 WHERE pc2.IDPhieuNhap = pn.ID AND pc2.TrangThai = 2 AND pc2.IsDeleted = 0), 0) AS DaThanhToan
+               ISNULL(pd.DaThanhToan, 0) AS DaThanhToan
         FROM KHO_PhieuNhap pn
         JOIN DM_NhaCungCap ncc ON pn.IDNhaCungCap = ncc.ID
-        WHERE pn.IsDeleted = 0 AND pn.TrangThai = 2 
-          AND pn.TongCong > ISNULL((SELECT SUM(pc2.SoTienChi) FROM KT_PhieuChi pc2 WHERE pc2.IDPhieuNhap = pn.ID AND pc2.TrangThai = 2 AND pc2.IsDeleted = 0), 0)
+        LEFT JOIN #PaidNCC pd ON pn.ID = pd.IDPhieuNhap
+        WHERE pn.IsDeleted = 0 
+          AND pn.TongCong > ISNULL(pd.DaThanhToan, 0)
           AND DATEADD(day, 30, pn.NgayNhap) < CAST(GETDATE() AS DATE)
     ) t GROUP BY NhaCungCap ORDER BY TongNo DESC;
 
@@ -305,11 +368,12 @@ BEGIN
         DATEADD(day, 30, pn.NgayNhap) AS HanThanhToan,
         DATEDIFF(day, DATEADD(day, 30, pn.NgayNhap), GETDATE()) AS SoNgayQuaHan,
         pn.TongCong AS TongTien, 
-        ISNULL((SELECT SUM(pc2.SoTienChi) FROM KT_PhieuChi pc2 WHERE pc2.IDPhieuNhap = pn.ID AND pc2.TrangThai = 2 AND pc2.IsDeleted = 0), 0) AS DaThanhToan
+        ISNULL(pd.DaThanhToan, 0) AS DaThanhToan
     FROM KHO_PhieuNhap pn
     JOIN DM_NhaCungCap ncc ON pn.IDNhaCungCap = ncc.ID
-    WHERE pn.IsDeleted = 0 AND pn.TrangThai = 2 
-      AND pn.TongCong > ISNULL((SELECT SUM(pc2.SoTienChi) FROM KT_PhieuChi pc2 WHERE pc2.IDPhieuNhap = pn.ID AND pc2.TrangThai = 2 AND pc2.IsDeleted = 0), 0)
+    LEFT JOIN #PaidNCC pd ON pn.ID = pd.IDPhieuNhap
+    WHERE pn.IsDeleted = 0 
+      AND pn.TongCong > ISNULL(pd.DaThanhToan, 0)
       AND DATEADD(day, 30, pn.NgayNhap) < CAST(GETDATE() AS DATE)
     ORDER BY SoNgayQuaHan DESC;
 
@@ -359,19 +423,13 @@ BEGIN
     ORDER BY DoanhThuHoacGiaTriNhap DESC;
 
     -- 15. TopNhaCungCap
-    WITH NccPaid AS (
-        SELECT pc2.IDPhieuNhap, SUM(pc2.SoTienChi) AS DaThanhToan
-        FROM KT_PhieuChi pc2
-        WHERE pc2.TrangThai = 2 AND pc2.IsDeleted = 0
-        GROUP BY pc2.IDPhieuNhap
-    )
     SELECT TOP 10 ncc.TenNhaCungCap AS TenDoiTuong,
            SUM(pn.TongCong) AS DoanhThuHoacGiaTriNhap,
-           SUM(pn.TongCong - ISNULL(np.DaThanhToan, 0)) AS CongNo
+           SUM(pn.TongCong - ISNULL(pd.DaThanhToan, 0)) AS CongNo
     FROM KHO_PhieuNhap pn
     JOIN DM_NhaCungCap ncc ON pn.IDNhaCungCap = ncc.ID
-    LEFT JOIN NccPaid np ON pn.ID = np.IDPhieuNhap
-    WHERE pn.IsDeleted = 0 AND pn.TrangThai = 2
+    LEFT JOIN #PaidNCC pd ON pn.ID = pd.IDPhieuNhap
+    WHERE pn.IsDeleted = 0
     GROUP BY ncc.TenNhaCungCap
     ORDER BY DoanhThuHoacGiaTriNhap DESC;
 

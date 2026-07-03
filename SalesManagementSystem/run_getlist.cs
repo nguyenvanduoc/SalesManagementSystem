@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Data;
-using System.Data.SqlClient;
 using System.Reflection;
 
 class Program
@@ -17,18 +16,22 @@ class Program
             MethodInfo createConnMethod = factoryType.GetMethod("CreateConnection");
             using (IDbConnection conn = (IDbConnection)createConnMethod.Invoke(factory, null))
             {
-                using (IDbCommand cmd = conn.CreateCommand())
+                conn.Open();
+                
+                string sqlPath = @"c:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\QuanLyBanHang\SalesManagementSystem\SalesManagementSystem\App_Data\alter_sp_kho_phieunhap_getlist.sql";
+                string sql = File.ReadAllText(sqlPath);
+                string[] batches = sql.Split(new[] { "\r\nGO", "\nGO", "GO\r", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
+                
+                foreach(string batch in batches)
                 {
-                    cmd.CommandText = "sp_helptext 'sp_CongNo_PhaseTra_NCC_GetList'";
-                    conn.Open();
-                    using (IDataReader reader = cmd.ExecuteReader())
+                    if(string.IsNullOrWhiteSpace(batch)) continue;
+                    using (IDbCommand cmd = conn.CreateCommand())
                     {
-                        while (reader.Read())
-                        {
-                            Console.Write(reader.GetString(0));
-                        }
+                        cmd.CommandText = batch;
+                        cmd.ExecuteNonQuery();
                     }
                 }
+                Console.WriteLine("SP Executed successfully.");
             }
         }
         catch(Exception ex)

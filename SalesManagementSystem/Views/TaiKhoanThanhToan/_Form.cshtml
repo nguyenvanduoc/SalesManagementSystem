@@ -1,4 +1,4 @@
-@model SalesManagementSystem.Models.ViewModels.TaiKhoanThanhToanViewModel
+﻿@model SalesManagementSystem.Models.ViewModels.TaiKhoanThanhToanViewModel
 
 <form action="@Url.Action("Save", "TaiKhoanThanhToan")" method="post">
     @Html.AntiForgeryToken()
@@ -60,7 +60,7 @@
     
     <script>
         $(document).ready(function() {
-            var $modal = $('#globalFormModalContent').closest('.modal');
+            var $modal = $('.form-modal-content').closest('.modal');
             if ($modal.length > 0) {
                 $modal.find('.select2').select2({
                     dropdownParent: $modal,
@@ -79,3 +79,4 @@
         </button>
     </div>
 </form>
+

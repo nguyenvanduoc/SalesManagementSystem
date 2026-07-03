@@ -727,15 +727,6 @@
     </main>
 </div>
 
-<!-- ═══════════════ GLOBAL FORM MODAL ═══════════════ -->
-<div class="modal fade" id="globalFormModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content shadow-lg border-0" id="globalFormModalContent">
-            <!-- Dữ liệu Partial View sẽ được nạp vào đây -->
-        </div>
-    </div>
-</div>
-
 <!-- ═══════════════ GLOBAL DELETE MODAL ═══════════════ -->
 <div class="modal fade" id="globalDeleteModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
@@ -996,32 +987,52 @@
         lastClickedElement = e.target;
     });
 
-    // Hàm hiển thị Form Modal qua AJAX
+    // Hàm hiển thị Form Modal qua AJAX (Tạo modal riêng cho từng tab)
     function openFormModal(url) {
+        var ownerTabId = null;
+        if (lastClickedElement) {
+            var $pane = $(lastClickedElement).closest('.tab-pane');
+            if ($pane.length > 0) {
+                ownerTabId = $pane.attr('id');
+            }
+        }
+        if (!ownerTabId) {
+            ownerTabId = $('.tab-pane.active').attr('id');
+        }
+        if (!ownerTabId) ownerTabId = 'global';
+
+        var modalId = 'formModal_' + ownerTabId;
+        var $modal = $('#' + modalId);
+
+        // Tạo modal mới nếu chưa có
+        if ($modal.length === 0) {
+            var modalHtml = '<div class="modal fade form-modal" id="' + modalId + '" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" data-owner-tab="' + ownerTabId + '">' +
+                '<div class="modal-dialog modal-lg modal-dialog-centered">' +
+                    '<div class="modal-content shadow-lg border-0 form-modal-content"></div>' +
+                '</div></div>';
+            $('body').append(modalHtml);
+            $modal = $('#' + modalId);
+            
+            // Xử lý sự kiện ẩn modal
+            $modal.on('hidden.bs.modal', function () {
+                $(this).removeClass('d-none');
+                // Nếu không còn modal nào đang hiển thị thì gỡ backdrop d-none dự phòng
+                if ($('.modal.show').length === 0) {
+                    $('.modal-backdrop').removeClass('d-none');
+                    $('body').removeClass('modal-open');
+                }
+            });
+        }
+
         $.ajax({
             url: url,
             type: 'GET',
             success: function(res) {
                 // Đảm bảo kích thước mặc định là modal-lg
-                $('#globalFormModal .modal-dialog').removeClass('modal-xl modal-sm').addClass('modal-lg');
-                $('#globalFormModalContent').html(res);
+                $modal.find('.modal-dialog').removeClass('modal-xl modal-sm').addClass('modal-lg');
+                $modal.find('.form-modal-content').html(res);
                 
-                // Xác định tab sở hữu form (ưu tiên tab chứa nút được click)
-                var ownerTabId = null;
-                if (lastClickedElement) {
-                    var $pane = $(lastClickedElement).closest('.tab-pane');
-                    if ($pane.length > 0) {
-                        ownerTabId = $pane.attr('id');
-                    }
-                }
-                if (!ownerTabId) {
-                    ownerTabId = $('.tab-pane.active').attr('id');
-                }
-                if (ownerTabId) {
-                    $('#globalFormModal').attr('data-owner-tab', ownerTabId);
-                }
-
-                var formModal = new bootstrap.Modal(document.getElementById('globalFormModal'));
+                var formModal = bootstrap.Modal.getOrCreateInstance($modal[0]);
                 formModal.show();
             },
             error: function() {
@@ -1030,17 +1041,12 @@
         });
     }
 
-    // Bắt sự kiện submit form bên trong globalFormModal
-    $('#globalFormModal').on('hidden.bs.modal', function () {
-        $(this).removeAttr('data-owner-tab');
-        $(this).removeClass('d-none');
-        $('.modal-backdrop').removeClass('d-none');
-    });
-
-    $(document).on('submit', '#globalFormModalContent form', function(e) {
+    // Bắt sự kiện submit form bên trong form-modal
+    $(document).on('submit', '.form-modal-content form', function(e) {
         e.preventDefault();
         var form = $(this);
         var formData = new FormData(this);
+        var $modal = form.closest('.modal');
         
         $.ajax({
             url: form.attr('action'),
@@ -1050,7 +1056,7 @@
             contentType: false,
             success: function(res) {
                 if (res.success === true) {
-                    $('#globalFormModal').modal('hide');
+                    $modal.modal('hide');
                     showToast('success', res.message);
                     if (typeof TabManager !== 'undefined') {
                         TabManager.reloadActiveTabGrid(false);
@@ -1063,7 +1069,7 @@
                     showToast('error', res.message);
                 } else {
                     // Nếu validation lỗi, trả về HTML partial view chứa form
-                    $('#globalFormModalContent').html(res);
+                    $modal.find('.form-modal-content').html(res);
                 }
             },
             error: function() {
@@ -1246,3 +1252,6 @@
 </script>
 </body>
 </html>
+
+
+

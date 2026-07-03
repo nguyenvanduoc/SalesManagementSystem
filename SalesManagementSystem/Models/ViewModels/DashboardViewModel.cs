@@ -24,6 +24,8 @@ namespace SalesManagementSystem.Models.ViewModels
         }
         
         public decimal CongNoKhachHang { get; set; }
+        public decimal TongTienHangNCC { get; set; }
+        public decimal DaThanhToanNCC { get; set; }
         public decimal CongNoNhaCungCap { get; set; }
         public decimal TienHienCo { get; set; }
         public decimal LoiNhuan { get; set; }
