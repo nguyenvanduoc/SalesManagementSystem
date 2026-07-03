@@ -265,10 +265,11 @@
             });
 
             // Modal detail action handler
-            $pane.off('click.soquy_view_detail', '.view-detail-btn');
-            $pane.on('click.soquy_view_detail', '.view-detail-btn', function (e) {
-                e.preventDefault();
-                var accId = $(this).attr('data-id');
+            window.viewSoQuyDetail = function (accId, btn) {
+                var $pane = $(btn).closest('.tab-pane');
+                if ($pane.length === 0) $pane = $('#searchForm').closest('.tab-pane');
+                if ($pane.length === 0) $pane = $('body');
+
                 var tu = $pane.find('#tuNgay').val();
                 var den = $pane.find('#denNgay').val();
 
@@ -280,16 +281,20 @@
                 }
 
                 // Show loading
-                var modalEl = document.getElementById('chiTietModal');
-                var $modalContent = $('#chiTietModalContent');
+                var modalEl = $pane.find('#chiTietModal')[0];
+                if (!modalEl) modalEl = document.getElementById('chiTietModal');
+
+                var $modalContent = $pane.find('#chiTietModalContent');
+                if ($modalContent.length === 0) $modalContent = $('#chiTietModalContent');
+
                 $modalContent.html('<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
                 
-                var myModal = new bootstrap.Modal(modalEl);
+                var myModal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
                 myModal.show();
 
                 // Fetch details
                 $.ajax({
-                    url: '@Url.Action("Details", "SoQuy")',
+                    url: '/SoQuy/Details',
                     type: 'GET',
                     data: {
                         idTaiKhoanThanhToan: accId,
@@ -305,7 +310,7 @@
                         $modalContent.html('<div class="modal-body p-4 text-center text-danger"><i class="bi bi-exclamation-triangle-fill fs-1"></i><p class="mt-2">' + msg + '</p><button class="btn btn-sm btn-secondary mt-3" data-bs-dismiss="modal">Đóng</button></div>');
                     }
                 });
-            });
+            };
 
             // Update stats when grid finishes loading via AJAX
             $(document).off('tabContentLoaded.soquy');

@@ -45,7 +45,7 @@
                                          </button>
                                         <ul class="dropdown-menu shadow border-0" style="font-size: 0.85rem;">
                                             <li>
-                                                <a class="dropdown-item py-2 view-detail-btn" href="#" data-id="@item.ID">
+                                                <a class="dropdown-item py-2 view-detail-btn" href="#" onclick="if(window.viewSoQuyDetail) viewSoQuyDetail(@item.ID, this); return false;">
                                                     <i class="bi bi-eye text-primary me-2"></i> Xem chi tiết
                                                 </a>
                                             </li>
