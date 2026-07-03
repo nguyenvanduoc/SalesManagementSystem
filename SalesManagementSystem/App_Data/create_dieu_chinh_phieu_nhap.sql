@@ -189,6 +189,12 @@ BEGIN
     DECLARE @newTongTien DECIMAL(18,2);
     SELECT @newTongTien = ISNULL(SUM(TongSauThue), 0) FROM @ChiTietMoi;
 
+    DECLARE @newTienHang DECIMAL(18,2);
+    SELECT @newTienHang = ISNULL(SUM(ThanhTien), 0) FROM @ChiTietMoi;
+
+    DECLARE @newTienThue DECIMAL(18,2);
+    SELECT @newTienThue = ISNULL(SUM(TienThue), 0) FROM @ChiTietMoi;
+
     DECLARE @ChenhLech DECIMAL(18,2) = @newTongTien - @TongTienCu;
 
     -- 3. Sinh số điều chỉnh
@@ -288,7 +294,11 @@ BEGIN
             NgayHoaDon = @NgayHoaDon,
             GhiChu = @GhiChu,
             NgayCapNhat = GETDATE(),
-            NguoiCapNhat = @NguoiTao
+            NguoiCapNhat = @NguoiTao,
+            TongTienHang = @newTienHang,
+            TongTienThue = @newTienThue,
+            TongCong = @newTongTien,
+            ConLai = ISNULL(ConLai, 0) + @ChenhLech
         WHERE ID = @IDPhieuNhap;
 
         DELETE FROM KHO_PhieuNhap_ChiTiet WHERE IDPhieuNhap = @IDPhieuNhap;

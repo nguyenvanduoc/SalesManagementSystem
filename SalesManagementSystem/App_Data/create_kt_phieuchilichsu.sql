@@ -1,0 +1,9 @@
+CREATE TABLE KT_PhieuChiLichSu (
+    ID INT IDENTITY PRIMARY KEY,
+    IDPhieuChi INT NOT NULL,
+    NoiDungCu NVARCHAR(MAX),
+    NoiDungMoi NVARCHAR(MAX),
+    NgayTao DATETIME DEFAULT GETDATE(),
+    NguoiTao INT
+);
+GO

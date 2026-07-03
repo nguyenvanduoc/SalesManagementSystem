@@ -21,6 +21,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public int? IDPhieuNhap { get; set; }
         public string SoPhieuNhap { get; set; }
         public decimal SoTienChi { get; set; }
+        public decimal SoTienPhanBo { get; set; }
         public string DienGiai { get; set; }
         public int TrangThai { get; set; }
         public DateTime? NgayTao { get; set; }

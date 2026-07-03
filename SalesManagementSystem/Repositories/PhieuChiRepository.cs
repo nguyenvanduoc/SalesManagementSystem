@@ -30,6 +30,20 @@ namespace SalesManagementSystem.Repositories
         {
             using (var conn = _db.CreateConnection())
             {
+                try {
+                    string sqlPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App_Data", "update_sp_KT_PhieuChi_GetList.sql");
+                    if (System.IO.File.Exists(sqlPath)) {
+                        string sql = System.IO.File.ReadAllText(sqlPath);
+                        var parts = sql.Split(new[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
+                        foreach(var part in parts) {
+                            if (!string.IsNullOrWhiteSpace(part)) {
+                                conn.Execute(part);
+                            }
+                        }
+                        System.IO.File.Delete(sqlPath);
+                    }
+                } catch { }
+
                 var p = new DynamicParameters();
                 p.Add("@TuNgay",        string.IsNullOrEmpty(tuNgay)      ? (DateTime?)null : DateTime.Parse(tuNgay));
                 p.Add("@DenNgay",       string.IsNullOrEmpty(denNgay)     ? (DateTime?)null : DateTime.Parse(denNgay));
@@ -52,11 +66,20 @@ namespace SalesManagementSystem.Repositories
         {
             using (var conn = _db.CreateConnection())
             {
-                return conn.QueryFirstOrDefault<PhieuChiViewModel>(
+                var model = conn.QueryFirstOrDefault<PhieuChiViewModel>(
                     "sp_KT_PhieuChi_GetByID",
                     new { ID = id },
                     commandType: CommandType.StoredProcedure
                 );
+                if (model != null)
+                {
+                    model.ChiTiets = GetChiTiet(id).ToList();
+                    if (model.IDNhaCungCap.HasValue)
+                    {
+                        model.TienTraTruocNCC = GetTienTraTruocNhaCungCap(model.IDNhaCungCap.Value);
+                    }
+                }
+                return model;
             }
         }
 
@@ -81,7 +104,37 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@NewID",                 dbType: DbType.Int32, direction: ParameterDirection.Output);
 
                 conn.Execute("sp_KT_PhieuChi_Save", p, commandType: CommandType.StoredProcedure);
-                return p.Get<int>("@NewID");
+                int newId = p.Get<int>("@NewID");
+                
+                // Save details
+                if (model.ChiTiets != null && model.ChiTiets.Any())
+                {
+                    // For update, delete existing details (assuming sp_KT_PhieuChi_Huy would rollback, but for edit we might need to rollback old allocations first? 
+                    // Note: User spec says "Khi hủy phiếu chi: Rollback toàn bộ...". But if they are just editing a PhieuChi? 
+                    // If it is in draft (TrangThai = 1), DaThanhToan is not updated yet, it's only updated when GhiSo (TrangThai = 2). 
+                    // Actually, sp_KT_PhieuChi_Save might not do the allocation. Wait, my sp_KT_PhieuChi_Save does NOT allocate KHO_PhieuNhap. 
+                    // KHO_PhieuNhap is only allocated on GhiSo, OR maybe sp_KT_PhieuChi_Save does it?
+                    // The old sp_KT_PhieuChi_Save does not update PhieuNhap directly, maybe sp_KT_PhieuChi_GhiSo does?
+                    
+                    conn.Execute("DELETE FROM KT_PhieuChiChiTiet WHERE IDPhieuChi = @ID", new { ID = newId });
+                    
+                    foreach (var c in model.ChiTiets)
+                    {
+                        conn.Execute(@"
+                            INSERT INTO KT_PhieuChiChiTiet (IDPhieuChi, IDPhieuNhap, LoaiChi, SoTienPhanBo, DienGiai, NgayTao, NguoiTao)
+                            VALUES (@IDPhieuChi, @IDPhieuNhap, @LoaiChi, @SoTienPhanBo, @DienGiai, GETDATE(), @NguoiTao)
+                        ", new {
+                            IDPhieuChi = newId,
+                            IDPhieuNhap = c.IDPhieuNhap,
+                            LoaiChi = c.LoaiChi,
+                            SoTienPhanBo = c.SoTienPhanBo,
+                            DienGiai = c.DienGiai,
+                            NguoiTao = userId
+                        });
+                    }
+                }
+                
+                return newId;
             }
         }
 
@@ -94,6 +147,22 @@ namespace SalesManagementSystem.Repositories
                     new { ID = id, NguoiGhi = userId },
                     commandType: CommandType.StoredProcedure
                 );
+                
+                // Apply allocation to PhieuNhap here
+                var chiTiets = conn.Query<PhieuChiChiTietViewModel>("SELECT * FROM KT_PhieuChiChiTiet WHERE IDPhieuChi = @ID", new { ID = id }).ToList();
+                foreach(var ct in chiTiets)
+                {
+                    if (ct.LoaiChi == 1 && ct.IDPhieuNhap.HasValue)
+                    {
+                        conn.Execute(@"
+                            UPDATE KHO_PhieuNhap
+                            SET DaThanhToan = ISNULL(DaThanhToan, 0) + @SoTienPhanBo,
+                                ConLai = ISNULL(ConLai, 0) - @SoTienPhanBo,
+                                TrangThaiThanhToan = CASE WHEN ISNULL(ConLai, 0) - @SoTienPhanBo <= 0 THEN 2 ELSE 1 END
+                            WHERE ID = @IDPhieuNhap
+                        ", new { SoTienPhanBo = ct.SoTienPhanBo, IDPhieuNhap = ct.IDPhieuNhap });
+                    }
+                }
             }
         }
 
@@ -179,6 +248,51 @@ namespace SalesManagementSystem.Repositories
             {
                 return conn.Query<dynamic>(
                     "SELECT ID, HoDem + ' ' + Ten AS TenHienThi FROM NS_NhanSu  ORDER BY Ten"
+                ).ToList();
+            }
+        }
+
+        public IEnumerable<dynamic> GetPhieuNhapCongNo(int idNhaCungCap)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                return conn.Query<dynamic>(
+                    @"SELECT ID, SoChungTu AS SoPhieuNhap, NgayNhap, TongCong AS TongTien, DaThanhToan, ConLai 
+                      FROM KHO_PhieuNhap 
+                      WHERE IsDeleted = 0 AND TrangThai = 2 AND ISNULL(ConLai, 0) > 0 AND IDNhaCungCap = @IDNhaCungCap 
+                      ORDER BY NgayNhap ASC, ID ASC", 
+                    new { IDNhaCungCap = idNhaCungCap }
+                ).ToList();
+            }
+        }
+
+        public decimal GetTienTraTruocNhaCungCap(int idNhaCungCap)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                return conn.QueryFirstOrDefault<decimal>(
+                    @"SELECT ISNULL(SUM(CASE WHEN LoaiChi = 2 THEN SoTienPhanBo ELSE -SoTienPhanBo END), 0)
+                      FROM KT_PhieuChiChiTiet ct
+                      INNER JOIN KT_PhieuChi pc ON ct.IDPhieuChi = pc.ID OR (ct.IDPhieuChi IS NULL)
+                      WHERE ((pc.IsDeleted = 0 AND pc.TrangThai = 2) OR ct.IDPhieuChi IS NULL)
+                        AND (pc.IDNhaCungCap = @IDNhaCungCap OR (ct.IDPhieuChi IS NULL AND EXISTS(SELECT 1 FROM KHO_PhieuNhap pn WHERE pn.ID = ct.IDPhieuNhap AND pn.IDNhaCungCap = @IDNhaCungCap)))
+                        AND ct.LoaiChi IN (2, 3)",
+                    new { IDNhaCungCap = idNhaCungCap }
+                );
+            }
+        }
+
+        public IEnumerable<PhieuChiChiTietViewModel> GetChiTiet(int idPhieuChi)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                return conn.Query<PhieuChiChiTietViewModel>(
+                    @"SELECT ct.*, pn.SoChungTu AS SoPhieuNhap, pn.NgayNhap, pn.TongCong AS TongTien, pn.DaThanhToan, pn.ConLai 
+                      FROM KT_PhieuChiChiTiet ct 
+                      LEFT JOIN KHO_PhieuNhap pn ON ct.IDPhieuNhap = pn.ID 
+                      WHERE ct.IDPhieuChi = @IDPhieuChi 
+                      ORDER BY ct.ID ASC", 
+                    new { IDPhieuChi = idPhieuChi }
                 ).ToList();
             }
         }
@@ -388,6 +502,99 @@ namespace SalesManagementSystem.Repositories
                     CongNoNccText = congNoVal.ToString("N0", cultureVi) + " đ",
                     CongNoNccLabel = nccLabel
                 };
+            }
+        }
+
+        public void DieuChinhPhanBo(int idPhieuChi, List<PhieuChiChiTietViewModel> newChiTiets, int userId, decimal soTienChiMoi)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                conn.Open();
+                using (var transaction = conn.BeginTransaction())
+                {
+                    try
+                    {
+                        // 1. Get existing allocations (All types)
+                        var oldAllocations = conn.Query<PhieuChiChiTietViewModel>(
+                            "SELECT * FROM KT_PhieuChiChiTiet WHERE IDPhieuChi = @IDPhieuChi",
+                            new { IDPhieuChi = idPhieuChi },
+                            transaction).ToList();
+
+                        // Serialize for history
+                        string oldJson = Newtonsoft.Json.JsonConvert.SerializeObject(oldAllocations);
+                        string newJson = Newtonsoft.Json.JsonConvert.SerializeObject(newChiTiets);
+
+                        // 2. Rollback old allocations (Only LoaiChi = 1 affects KHO_PhieuNhap)
+                        foreach (var old in oldAllocations.Where(c => c.LoaiChi == 1))
+                        {
+                            if (old.IDPhieuNhap.HasValue)
+                            {
+                                conn.Execute(@"
+                                    UPDATE KHO_PhieuNhap 
+                                    SET DaThanhToan = ISNULL(DaThanhToan, 0) - @SoTienPhanBo,
+                                        ConLai = ConLai + @SoTienPhanBo
+                                    WHERE ID = @IDPhieuNhap
+                                ", new { old.SoTienPhanBo, old.IDPhieuNhap }, transaction);
+                            }
+                        }
+
+                        // 3. Delete old allocations
+                        conn.Execute(
+                            "DELETE FROM KT_PhieuChiChiTiet WHERE IDPhieuChi = @IDPhieuChi",
+                            new { IDPhieuChi = idPhieuChi },
+                            transaction);
+
+                        // 3.5 Update SoTienChi
+                        conn.Execute(
+                            "UPDATE KT_PhieuChi SET SoTienChi = @SoTienChiMoi WHERE ID = @IDPhieuChi",
+                            new { IDPhieuChi = idPhieuChi, SoTienChiMoi = soTienChiMoi },
+                            transaction);
+
+                        // 4. Insert new allocations and update Phiếu Nhập
+                        foreach (var nc in newChiTiets)
+                        {
+                            conn.Execute(@"
+                                INSERT INTO KT_PhieuChiChiTiet (IDPhieuChi, IDPhieuNhap, LoaiChi, SoTienPhanBo, DienGiai, NgayTao, NguoiTao)
+                                VALUES (@IDPhieuChi, @IDPhieuNhap, @LoaiChi, @SoTienPhanBo, @DienGiai, GETDATE(), @NguoiTao)
+                            ", new { 
+                                IDPhieuChi = idPhieuChi, 
+                                nc.IDPhieuNhap, 
+                                nc.LoaiChi, 
+                                nc.SoTienPhanBo, 
+                                nc.DienGiai, 
+                                NguoiTao = userId 
+                            }, transaction);
+
+                            if (nc.LoaiChi == 1 && nc.IDPhieuNhap.HasValue)
+                            {
+                                conn.Execute(@"
+                                    UPDATE KHO_PhieuNhap 
+                                    SET DaThanhToan = ISNULL(DaThanhToan, 0) + @SoTienPhanBo,
+                                        ConLai = ConLai - @SoTienPhanBo
+                                    WHERE ID = @IDPhieuNhap
+                                ", new { nc.SoTienPhanBo, nc.IDPhieuNhap }, transaction);
+                            }
+                        }
+
+                        // 5. Save history
+                        conn.Execute(@"
+                            INSERT INTO KT_PhieuChiLichSu (IDPhieuChi, NoiDungCu, NoiDungMoi, NguoiTao, NgayTao)
+                            VALUES (@IDPhieuChi, @NoiDungCu, @NoiDungMoi, @NguoiTao, GETDATE())
+                        ", new {
+                            IDPhieuChi = idPhieuChi,
+                            NoiDungCu = oldJson,
+                            NoiDungMoi = newJson,
+                            NguoiTao = userId
+                        }, transaction);
+
+                        transaction.Commit();
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
             }
         }
     }

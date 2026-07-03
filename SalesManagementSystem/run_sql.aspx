@@ -4,11 +4,9 @@
 <%@ Import Namespace="System.IO" %>
 <%
     try {
-        string path = Server.MapPath("~/App_Data/sp_BC_KetQuaHoatDongKinhDoanh_GetList.sql");
+        string path = Server.MapPath("~/App_Data/phieuchi_change.sql");
         string sql = File.ReadAllText(path);
-        // Split by GO
         var commands = sql.Split(new[] { "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
-        
         using(var conn = new DbConnectionFactory().CreateConnection()) {
             foreach(var cmd in commands) {
                 if(string.IsNullOrWhiteSpace(cmd)) continue;

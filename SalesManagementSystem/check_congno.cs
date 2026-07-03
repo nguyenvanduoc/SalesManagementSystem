@@ -17,17 +17,28 @@ class Program {
                 break;
             }
             if (string.IsNullOrEmpty(connStr)) {
-                connStr = "Server=localhost;Database=SalesManagementSystem;Trusted_Connection=True;"; // Let's guess the connection string
+                string datPath = @"c:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\QuanLyBanHang\SalesManagementSystem\SalesManagementSystem\App_Config\system.dat";
+                if (System.IO.File.Exists(datPath)) {
+                    var bytes = System.IO.File.ReadAllBytes(datPath);
+                    string b64 = System.Text.Encoding.UTF8.GetString(bytes);
+                    var b64b = Convert.FromBase64String(b64);
+                    string raw = System.Text.Encoding.UTF8.GetString(b64b);
+                    var rawParts = raw.Split(new[] { "@@" }, StringSplitOptions.None);
+                    if (rawParts.Length >= 2) {
+                        connStr = rawParts[1];
+                    }
+                }
+            }
+            if (string.IsNullOrEmpty(connStr)) {
+                connStr = "Server=localhost;Database=SalesManagementSystem;Trusted_Connection=True;"; 
             }
 
             using (var conn = new SqlConnection(connStr)) {
                 conn.Open();
-                
-                using (var cmd = new SqlCommand("SELECT name FROM sys.columns WHERE object_id = OBJECT_ID('KHO_PhieuNhap')", conn)) {
+                using (var cmd = new SqlCommand("EXEC sp_helptext 'sp_CongNo_PhaseTra_NCC_GetList'", conn)) {
                     using (var reader = cmd.ExecuteReader()) {
-                        Console.WriteLine("KHO_PhieuNhap columns:");
                         while(reader.Read()) {
-                            Console.WriteLine(reader["name"]);
+                            Console.Write(reader[0]);
                         }
                     }
                 }

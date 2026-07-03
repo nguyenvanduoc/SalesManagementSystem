@@ -16,18 +16,28 @@ class Program {
                 connStr = cs.ConnectionString;
                 break;
             }
-            if (string.IsNullOrEmpty(connStr)) {
-                connStr = "Server=localhost;Database=SalesManagementSystem;Trusted_Connection=True;"; // Let's guess the connection string
-            }
 
             using (var conn = new SqlConnection(connStr)) {
                 conn.Open();
-                
-                using (var cmd = new SqlCommand("SELECT name FROM sys.columns WHERE object_id = OBJECT_ID('KHO_PhieuNhap')", conn)) {
+                using (var cmd = new SqlCommand("sp_KT_PhieuChi_GetList", conn)) {
+                    cmd.CommandType = CommandType.StoredProcedure;
                     using (var reader = cmd.ExecuteReader()) {
-                        Console.WriteLine("KHO_PhieuNhap columns:");
-                        while(reader.Read()) {
-                            Console.WriteLine(reader["name"]);
+                        bool hasCol = false;
+                        for (int i = 0; i < reader.FieldCount; i++) {
+                            if (reader.GetName(i).Equals("SoTienPhanBo", StringComparison.OrdinalIgnoreCase)) {
+                                hasCol = true;
+                                break;
+                            }
+                        }
+                        Console.WriteLine("Has SoTienPhanBo column: " + hasCol);
+                        
+                        if (!hasCol) return;
+                        
+                        // Check data
+                        int count = 0;
+                        while(reader.Read() && count < 5) {
+                            Console.WriteLine("ID: " + reader["ID"] + ", SoTienChi: " + reader["SoTienChi"] + ", SoTienPhanBo: " + reader["SoTienPhanBo"]);
+                            count++;
                         }
                     }
                 }

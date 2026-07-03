@@ -321,6 +321,7 @@
     <Compile Include="Repositories\TaiKhoanThanhToanRepository.cs" />
     <Compile Include="Controllers\TaiKhoanThanhToanController.cs" />
     <Compile Include="Models\ViewModels\PhieuChiViewModel.cs" />
+    <Compile Include="Models\ViewModels\PhieuChiChiTietViewModel.cs" />
     <Compile Include="Models\ViewModels\PhieuChiListViewModel.cs" />
     <Compile Include="Models\ViewModels\PhieuChiDashboardViewModel.cs" />
     <Compile Include="Models\ViewModels\SoQuyViewModel.cs" />

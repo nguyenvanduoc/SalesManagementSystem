@@ -274,6 +274,66 @@
                 var params = $pane.find('#searchForm').serialize();
                 window.location.href = '@Url.Action("ExportExcel","PhieuChi")?' + params;
             });
+
+            // Handle row click to expand details
+            $pane.off('click.pc-expand', '.pc-row');
+            $pane.on('click.pc-expand', '.pc-row', function (e) {
+                // Ignore clicks on buttons/links/dropdowns inside the row
+                if ($(e.target).closest('button, a, .dropdown').length > 0) return;
+
+                var $row = $(this);
+                var id = $row.data('id');
+                if (!id) return;
+
+                var $nextRow = $row.next();
+                var isAlreadyExpanded = $nextRow.hasClass('pc-detail-row') && $nextRow.data('parent-id') == id;
+
+                // Close any currently open detail rows
+                $pane.find('.pc-detail-row').remove();
+                $pane.find('.pc-row').removeClass('table-active');
+                $pane.find('.toggle-icon').removeClass('bi-caret-down-fill text-primary').addClass('bi-caret-right-fill text-muted');
+
+                if (isAlreadyExpanded) {
+                    return;
+                }
+
+                $row.addClass('table-active');
+                $row.find('.toggle-icon').removeClass('bi-caret-right-fill text-muted').addClass('bi-caret-down-fill text-primary');
+
+                // Add loading row
+                var loadingHtml = `
+                    <tr class="pc-detail-row" data-parent-id="${id}">
+                        <td colspan="13" class="p-0 border-0">
+                            <div class="text-center p-3 text-muted">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Đang tải chi tiết...
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                $row.after(loadingHtml);
+
+                var url = '@Url.Action("GetDetailInline", "PhieuChi")/' + id;
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function (res) {
+                        var html = `
+                            <tr class="pc-detail-row" data-parent-id="${id}">
+                                <td colspan="13" class="p-0 border-0 shadow-inner">
+                                    <div class="detail-container p-2" style="background-color: #f8f9fa;">
+                                        ${res}
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        $row.next('.pc-detail-row').replaceWith(html);
+                    },
+                    error: function () {
+                        $row.next('.pc-detail-row').find('td').html('<div class="text-center p-3 text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i> Lỗi khi tải chi tiết.</div>');
+                    }
+                });
+            });
         })();
     </script>
 }

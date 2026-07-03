@@ -27,6 +27,13 @@ namespace SalesManagementSystem.Repositories.Interfaces
         IEnumerable<dynamic> GetNhaCungCapDropdown();
         IEnumerable<dynamic> GetPhieuNhapDropdown(int? idNhaCungCap, int? currentPhieuNhapId = null);
         IEnumerable<dynamic> GetNhanSuDropdown();
+
+        // New methods for multiple allocations
+        IEnumerable<dynamic> GetPhieuNhapCongNo(int idNhaCungCap);
+        decimal GetTienTraTruocNhaCungCap(int idNhaCungCap);
+        IEnumerable<PhieuChiChiTietViewModel> GetChiTiet(int idPhieuChi);
+        void DieuChinhPhanBo(int idPhieuChi, List<PhieuChiChiTietViewModel> newChiTiets, int userId, decimal soTienChiMoi);
+
         dynamic GetPhieuNhapDetail(int idPhieuNhap);
         IEnumerable<dynamic> GetLichSuChiTienPhieuNhap(int idPhieuNhap);
         PhieuChiDashboardViewModel GetDashboardData(

@@ -223,10 +223,63 @@ namespace SalesManagementSystem.Repositories
         {
             using (var conn = _db.CreateConnection())
             {
+                // 1. Ghi sổ phiếu nhập
                 conn.Execute(
                     "sp_KHO_PhieuNhap_GhiSo", 
                     new { ID = id, NguoiGhiSo = userId }, 
                     commandType: CommandType.StoredProcedure);
+                
+                // 2. Tự động cấn trừ Tiền trả trước (nếu có)
+                // Lấy thông tin phiếu nhập
+                var phieuNhap = conn.QueryFirstOrDefault("SELECT IDNhaCungCap, TongCong, DaThanhToan, ConLai FROM KHO_PhieuNhap WHERE ID = @ID", new { ID = id });
+                if (phieuNhap != null && phieuNhap.IDNhaCungCap != null && phieuNhap.ConLai > 0)
+                {
+                    // Lấy danh sách phiếu chi còn dư tiền của NCC này
+                    string sqlTienDu = @"
+                        SELECT pc.ID, pc.SoTienChi, 
+                               ISNULL((SELECT SUM(SoTienPhanBo) FROM KT_PhieuChiChiTiet WHERE IDPhieuChi = pc.ID), 0) AS DaPhanBo
+                        FROM KT_PhieuChi pc
+                        WHERE pc.IDNhaCungCap = @IDNcc AND pc.TrangThai = 2
+                    ";
+                    var listPc = conn.Query(sqlTienDu, new { IDNcc = phieuNhap.IDNhaCungCap }).ToList();
+                    
+                    decimal conLaiPhieuNhap = phieuNhap.ConLai;
+                    
+                    foreach(var pc in listPc)
+                    {
+                        if (conLaiPhieuNhap <= 0) break;
+                        
+                        decimal soTienChi = pc.SoTienChi ?? 0m;
+                        decimal daPhanBo = pc.DaPhanBo;
+                        decimal tienDu = soTienChi - daPhanBo;
+                        
+                        if (tienDu > 0)
+                        {
+                            decimal soTienCanTru = Math.Min(tienDu, conLaiPhieuNhap);
+                            
+                            // Thêm chi tiết phân bổ
+                            string insertCt = @"
+                                INSERT INTO KT_PhieuChiChiTiet (IDPhieuChi, IDPhieuNhap, LoaiChi, SoTienPhanBo, DienGiai)
+                                VALUES (@IDPhieuChi, @IDPhieuNhap, 1, @SoTienPhanBo, N'Tự động cấn trừ tiền trả trước')
+                            ";
+                            conn.Execute(insertCt, new { 
+                                IDPhieuChi = pc.ID,
+                                IDPhieuNhap = id,
+                                SoTienPhanBo = soTienCanTru
+                            });
+                            
+                            // Cập nhật lại phiếu nhập
+                            conn.Execute(@"
+                                UPDATE KHO_PhieuNhap 
+                                SET DaThanhToan = ISNULL(DaThanhToan, 0) + @SoTien, 
+                                    ConLai = TongCong - (ISNULL(DaThanhToan, 0) + @SoTien)
+                                WHERE ID = @ID
+                            ", new { SoTien = soTienCanTru, ID = id });
+                            
+                            conLaiPhieuNhap -= soTienCanTru;
+                        }
+                    }
+                }
             }
         }
 

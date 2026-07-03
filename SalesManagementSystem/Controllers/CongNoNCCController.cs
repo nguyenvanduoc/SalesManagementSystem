@@ -12,11 +12,13 @@ namespace SalesManagementSystem.Controllers
     {
         private readonly ICongNoNCCRepository _repo;
         private readonly INhaCungCapRepository _nccRepo;
+        private readonly IPhieuChiRepository _phieuChiRepo;
 
-        public CongNoNCCController(ICongNoNCCRepository repo, INhaCungCapRepository nccRepo)
+        public CongNoNCCController(ICongNoNCCRepository repo, INhaCungCapRepository nccRepo, IPhieuChiRepository phieuChiRepo)
         {
             _repo    = repo;
             _nccRepo = nccRepo;
+            _phieuChiRepo = phieuChiRepo;
         }
 
         // GET: /cong-no-ncc
@@ -53,6 +55,13 @@ namespace SalesManagementSystem.Controllers
             ViewBag.TongPhaiTra     = list.Sum(x => x.TongTienHang);
             ViewBag.TongDaTra       = list.Sum(x => x.DaThanhToan);
             ViewBag.TongConLai      = list.Sum(x => x.ConLai);
+            
+            decimal tongTienTraTruoc = 0;
+            if (idNhaCungCap.HasValue && idNhaCungCap.Value > 0)
+            {
+                tongTienTraTruoc = _phieuChiRepo.GetTienTraTruocNhaCungCap(idNhaCungCap.Value);
+            }
+            ViewBag.TongTienTraTruoc = tongTienTraTruoc;
 
             PopulateNhaCungCapDropdown(idNhaCungCap);
 
@@ -91,6 +100,13 @@ namespace SalesManagementSystem.Controllers
                 ViewBag.TongPhaiTra = list.Sum(x => x.TongTienHang);
                 ViewBag.TongDaTra   = list.Sum(x => x.DaThanhToan);
                 ViewBag.TongConLai  = list.Sum(x => x.ConLai);
+                
+                decimal tongTienTraTruoc = 0;
+                if (idNhaCungCap.HasValue && idNhaCungCap.Value > 0)
+                {
+                    tongTienTraTruoc = _phieuChiRepo.GetTienTraTruocNhaCungCap(idNhaCungCap.Value);
+                }
+                ViewBag.TongTienTraTruoc = tongTienTraTruoc;
 
                 return PartialView("_CongNoNCCList", model);
             }

@@ -60,9 +60,12 @@
     </div>
 </div>
 
+@{
+    decimal tongTienTraTruoc = ViewBag.TongTienTraTruoc ?? 0M;
+}
 <!-- Tổng hợp -->
 <div class="row g-3 mb-4">
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="card border-0 shadow-sm" style="border-left:4px solid #8e44ad!important;">
             <div class="card-body py-3">
                 <div class="text-muted small fw-semibold mb-1">TỔNG PHẢI TRẢ</div>
@@ -70,7 +73,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="card border-0 shadow-sm" style="border-left:4px solid #27ae60!important;">
             <div class="card-body py-3">
                 <div class="text-muted small fw-semibold mb-1">ĐÃ THANH TOÁN</div>
@@ -78,11 +81,19 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="card border-0 shadow-sm" style="border-left:4px solid #e74c3c!important;">
             <div class="card-body py-3">
                 <div class="text-muted small fw-semibold mb-1">CÒN NỢ</div>
                 <div class="fw-bold fs-5 text-danger">@tongConLai.ToString("N0") <small class="fs-6 fw-normal">VND</small></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm" style="border-left:4px solid #f39c12!important;">
+            <div class="card-body py-3">
+                <div class="text-muted small fw-semibold mb-1">TIỀN TRẢ TRƯỚC (NCC ĐƯỢC CHỌN)</div>
+                <div class="fw-bold fs-5 text-warning" style="color:#f39c12!important;">@tongTienTraTruoc.ToString("N0") <small class="fs-6 fw-normal">VND</small></div>
             </div>
         </div>
     </div>

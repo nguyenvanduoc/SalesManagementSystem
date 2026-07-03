@@ -177,6 +177,14 @@ namespace SalesManagementSystem.Controllers
             return PartialView("_Form", model);
         }
 
+        [HttpGet]
+        public ActionResult GetDetailInline(int id)
+        {
+            var model = _repo.GetByID(id);
+            if (model == null) return Content("<div class='alert alert-danger'>Không tìm thấy dữ liệu</div>");
+            return PartialView("_DetailInline", model);
+        }
+
         // GET: /phieu-chi/cap-nhat?id=x
         [HttpGet]
         public ActionResult Edit(int id)
@@ -213,10 +221,66 @@ namespace SalesManagementSystem.Controllers
             return PartialView("_Form", model);
         }
 
+        // GET: /phieu-chi/dieu-chinh-phan-bo?id=x
+        [HttpGet]
+        public ActionResult AdjustAllocation(int id)
+        {
+            if (!PermissionHelper.HasPermission("PhieuChi", LoaiPhanQuyen.CapNhat))
+                return Content("<div class='alert alert-danger'>Không có quyền cập nhật (điều chỉnh phân bổ)</div>");
+
+            var model = _repo.GetByID(id);
+            if (model == null) return HttpNotFound();
+
+            if (model.TrangThai == 3)
+                return Content("<div class='alert alert-danger'>Phiếu đã hủy, không thể điều chỉnh.</div>");
+
+            if (model.TrangThai != 2)
+                return Content("<div class='alert alert-warning'>Chỉ có thể điều chỉnh phiếu đã ghi sổ.</div>");
+
+            ViewBag.Title = "Điều chỉnh phân bổ";
+            ViewBag.IsAdjustAllocation = true;
+            PopulateFormDropdowns(model.IDNhaCungCap, model.IDPhieuNhap);
+            return PartialView("_Form", model);
+        }
+
+        [HttpPost]
+        public ActionResult AdjustAllocation(int id, string chiTietJson, decimal soTienChiMoi)
+        {
+            try
+            {
+                if (!PermissionHelper.HasPermission("PhieuChi", LoaiPhanQuyen.CapNhat))
+                    return Json(new { success = false, message = "Không có quyền thực hiện" });
+
+                var model = _repo.GetByID(id);
+                if (model == null)
+                    return Json(new { success = false, message = "Phiếu chi không tồn tại" });
+
+                if (model.TrangThai == 3)
+                    return Json(new { success = false, message = "Phiếu chi đã hủy, không thể điều chỉnh." });
+
+                var user = GetCurrentUser();
+                int userId = user?.IDNhanSu ?? 0;
+
+                var newChiTiets = new List<PhieuChiChiTietViewModel>();
+                if (!string.IsNullOrEmpty(chiTietJson))
+                {
+                    newChiTiets = Newtonsoft.Json.JsonConvert.DeserializeObject<List<PhieuChiChiTietViewModel>>(chiTietJson);
+                }
+
+                _repo.DieuChinhPhanBo(id, newChiTiets, userId, soTienChiMoi);
+
+                return Json(new { success = true, message = "Điều chỉnh phân bổ thành công." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
         // POST: /phieu-chi/save
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Save(PhieuChiViewModel model, bool ghiSo = false)
+        public ActionResult Save(PhieuChiViewModel model, string chiTietJson, bool ghiSo = false)
         {
             bool hasThem = PermissionHelper.HasPermission("PhieuChi", LoaiPhanQuyen.Them);
             bool hasSua  = PermissionHelper.HasPermission("PhieuChi", LoaiPhanQuyen.CapNhat);
@@ -230,6 +294,15 @@ namespace SalesManagementSystem.Controllers
             {
                 PopulateFormDropdowns(model.IDNhaCungCap, model.IDPhieuNhap);
                 return PartialView("_Form", model);
+            }
+
+            if (!string.IsNullOrEmpty(chiTietJson))
+            {
+                try {
+                    model.ChiTiets = Newtonsoft.Json.JsonConvert.DeserializeObject<List<PhieuChiChiTietViewModel>>(chiTietJson);
+                } catch {
+                    model.ChiTiets = new List<PhieuChiChiTietViewModel>();
+                }
             }
 
             try
@@ -376,6 +449,44 @@ namespace SalesManagementSystem.Controllers
             }
         }
 
+        // GET AJAX: /phieu-chi/get-phieu-nhap-cong-no?idNhaCungCap=x
+        [HttpGet]
+        public ActionResult GetPhieuNhapCongNo(int idNhaCungCap)
+        {
+            try
+            {
+                var list = _repo.GetPhieuNhapCongNo(idNhaCungCap)
+                    .Select(x => new {
+                        id = (int)x.ID,
+                        soPhieuNhap = (string)x.SoPhieuNhap,
+                        ngayNhap = ((DateTime)x.NgayNhap).ToString("dd/MM/yyyy"),
+                        tongTien = (decimal)x.TongTien,
+                        daThanhToan = (decimal)x.DaThanhToan,
+                        conLai = (decimal)x.ConLai
+                    });
+                return Json(new { success = true, data = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // GET AJAX: /phieu-chi/get-tien-tra-truoc?idNhaCungCap=x
+        [HttpGet]
+        public ActionResult GetTienTraTruocNhaCungCap(int idNhaCungCap)
+        {
+            try
+            {
+                var tien = _repo.GetTienTraTruocNhaCungCap(idNhaCungCap);
+                return Json(new { success = true, data = tien }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
         private void PopulateFilterDropdowns()
         {
             var khoanMucs = _repo.GetKhoanMucDropdown()
@@ -412,6 +523,45 @@ namespace SalesManagementSystem.Controllers
             var phieuNhaps = _repo.GetPhieuNhapDropdown(idNhaCungCap, currentPhieuNhapId)
                 .Select(x => new SelectListItem { Value = ((int)x.ID).ToString(), Text = (string)x.TenHienThi });
             ViewBag.PhieuNhapList = new SelectList(phieuNhaps.ToList(), "Value", "Text");
+        }
+        [HttpGet]
+        public ActionResult DebugSchema()
+        {
+            var connStr = SalesManagementSystem.Helpers.Security.ConfigManager.GetConnectionString("DefaultConnection");
+            var result = new List<string>();
+            try 
+            {
+                using (var conn = new System.Data.SqlClient.SqlConnection(connStr))
+                {
+                    conn.Open();
+                    using (var cmd = new System.Data.SqlClient.SqlCommand("SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'KT_PhieuChiChiTiet'", conn))
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            result.Add(reader["COLUMN_NAME"] + " : " + reader["DATA_TYPE"]);
+                        }
+                    }
+                    
+                    // also select top 5 rows
+                    result.Add("--- TOP 5 ROWS ---");
+                    using (var cmd = new System.Data.SqlClient.SqlCommand("SELECT TOP 5 * FROM KT_PhieuChiChiTiet ORDER BY ID DESC", conn))
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var row = "";
+                            for(int i = 0; i < reader.FieldCount; i++) row += reader.GetName(i) + "=" + reader[i] + ", ";
+                            result.Add(row);
+                        }
+                    }
+                }
+            } 
+            catch(Exception ex)
+            {
+                result.Add("ERROR: " + ex.Message);
+            }
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
     }
 }

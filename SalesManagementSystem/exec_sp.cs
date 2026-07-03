@@ -1,7 +1,8 @@
 using System;
 using System.Configuration;
-using System.Data;
 using System.Data.SqlClient;
+using System.IO;
+using System.Text;
 
 class Program {
     static void Main() {
@@ -9,31 +10,32 @@ class Program {
             string webConfigPath = @"c:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\QuanLyBanHang\SalesManagementSystem\SalesManagementSystem\Web.config";
             var map = new ExeConfigurationFileMap { ExeConfigFilename = webConfigPath };
             var config = ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.None);
+            string connStr = config.ConnectionStrings.ConnectionStrings["DefaultConnection"]?.ConnectionString;
             
-            string connStr = null;
+            // Wait, we don't know the connection string name. Let's list all!
             foreach(ConnectionStringSettings cs in config.ConnectionStrings.ConnectionStrings) {
                 if (cs.Name == "LocalSqlServer") continue;
                 connStr = cs.ConnectionString;
                 break;
             }
-            if (string.IsNullOrEmpty(connStr)) {
-                connStr = "Server=localhost;Database=SalesManagementSystem;Trusted_Connection=True;"; // Let's guess the connection string
-            }
 
             using (var conn = new SqlConnection(connStr)) {
                 conn.Open();
-                
-                using (var cmd = new SqlCommand("SELECT name FROM sys.columns WHERE object_id = OBJECT_ID('KHO_PhieuNhap')", conn)) {
+                using (var cmd = new SqlCommand("sp_helptext", conn)) {
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@objname", "sp_KT_PhieuChi_GetList");
                     using (var reader = cmd.ExecuteReader()) {
-                        Console.WriteLine("KHO_PhieuNhap columns:");
+                        var sb = new StringBuilder();
                         while(reader.Read()) {
-                            Console.WriteLine(reader["name"]);
+                            sb.Append(reader.GetString(0));
                         }
+                        File.WriteAllText("c:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\sp_def.txt", sb.ToString());
                     }
                 }
+                Console.WriteLine("Done.");
             }
         } catch (Exception ex) {
-            Console.WriteLine(ex.Message);
+            Console.WriteLine(ex.ToString());
         }
     }
 }

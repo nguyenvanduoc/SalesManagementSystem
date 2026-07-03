@@ -22,7 +22,8 @@
             <table id="tblPhieuChiList" class="table table-custom table-bordered table-hover mb-0" style="width:100%; min-width:1350px;">
                 <thead>
                     <tr>
-                        <th width="60"  class="text-center fw-bold">Thao tác</th>
+                        <th width="40"></th>
+                        <th width="80" class="text-center fw-bold">Thao tác</th>
                         <th width="40"  class="text-center fw-bold">STT</th>
                         <th width="130" class="text-center fw-bold">Số phiếu chi</th>
                         <th width="120" class="text-center fw-bold">Số đơn hàng</th>
@@ -32,6 +33,7 @@
                         <th class="fw-bold">Nhà cung cấp</th>
                         <th class="fw-bold">Người nhận</th>
                         <th width="130" class="text-end fw-bold">Số tiền chi</th>
+                        <th width="130" class="text-end fw-bold text-success">Số tiền phân bổ</th>
                         <th width="110" class="text-center fw-bold">Trạng thái</th>
                     </tr>
                 </thead>
@@ -45,7 +47,10 @@
 
                         foreach (var item in Model.Items)
                         {
-                            <tr>
+                            <tr class="align-middle pc-row" data-id="@item.ID" style="cursor: pointer;">
+                                <td class="text-center align-middle">
+                                    <i class="bi bi-caret-right-fill text-muted toggle-icon" style="font-size: 0.95rem;"></i>
+                                </td>
                                 <td class="text-center align-middle">
                                     <div class="dropdown dropdown-hover">
                                         <button class="btn btn-sm btn-light border dropdown-toggle-hide-arrow shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 2px 6px;">
@@ -103,6 +108,15 @@
                                             }
                                             else if (item.TrangThai == 2)
                                             {
+                                                if (canSua)
+                                                {
+                                                    <li>
+                                                        <button type="button" class="dropdown-item py-2 text-primary"
+                                                                onclick="openFormModal('@Url.Action("AdjustAllocation", "PhieuChi", new { id = item.ID })')">
+                                                                <i class="bi bi-sliders text-primary me-2"></i>Điều chỉnh phân bổ
+                                                        </button>
+                                                    </li>
+                                                }
                                                 if (canTuyChon)
                                                 {
                                                     <li>
@@ -142,6 +156,7 @@
                                     }
                                 </td>
                                 <td class="text-end align-middle fw-semibold">@item.SoTienChi.ToString("N0")</td>
+                                <td class="text-end align-middle fw-semibold text-success">@item.SoTienPhanBo.ToString("N0")</td>
                                 <td class="text-center align-middle">
                                     <span class="@item.CssTrangThai">@item.TenTrangThai</span>
                                 </td>
@@ -151,8 +166,8 @@
                     else
                     {
                         <tr>
-                            <td colspan="11" class="text-center text-muted py-4">
-                                <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
+                            <td colspan="13" class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
                                 Không có dữ liệu
                             </td>
                         </tr>

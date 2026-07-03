@@ -1,27 +1,17 @@
 @model SalesManagementSystem.Models.ViewModels.PhieuChiViewModel
 
 <style>
-    /* Style Select2 elements to match textbox height (38px) */
-    .select2-container--default .select2-selection--single {
-        height: 38px !important;
-        border: 1px solid #ced4da !important;
-        border-radius: 0.375rem !important;
-    }
-    .select2-container--default .select2-selection--single .select2-selection__rendered {
-        line-height: 36px !important;
-        padding-left: 12px !important;
-        color: #212529 !important;
-        font-size: 0.95rem !important;
-    }
-    .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 36px !important;
-    }
+    .select2-container--default .select2-selection--single { height: 38px !important; border: 1px solid #ced4da !important; border-radius: 0.375rem !important; }
+    .select2-container--default .select2-selection--single .select2-selection__rendered { line-height: 36px !important; padding-left: 12px !important; color: #212529 !important; font-size: 0.95rem !important; }
+    .select2-container--default .select2-selection--single .select2-selection__arrow { height: 36px !important; }
+    .table-phanbo th { background-color: #f8f9fa; font-weight: bold; }
 </style>
 
 <form action="@Url.Action("Save", "PhieuChi")" method="post" id="phieuChiForm">
     @Html.AntiForgeryToken()
     @Html.HiddenFor(m => m.ID)
     @Html.HiddenFor(m => m.TrangThai)
+    @Html.HiddenFor(m => m.TienTraTruocNCC, new { id = "TienTraTruocNCC_Hidden" })
 
     <div class="modal-header border-bottom-0 pb-0">
         <h5 class="modal-title fw-bold text-uppercase" style="color:#0b5b84;">
@@ -32,56 +22,35 @@
 
     <div class="modal-body pt-3 pb-2">
         <div class="row g-3">
-            <!-- Số phiếu chi -->
             <div class="col-md-4">
                 <label class="form-label fw-bold">Số phiếu chi <span class="text-danger">*</span></label>
                 @Html.TextBoxFor(m => m.SoPhieuChi, new { @class = "form-control", @readonly = "readonly", @style = "background:#f8f9fa;" })
                 @Html.ValidationMessageFor(m => m.SoPhieuChi, "", new { @class = "text-danger small" })
             </div>
-
-            <!-- Ngày chi -->
             <div class="col-md-4">
                 <label class="form-label fw-bold">Ngày chi <span class="text-danger">*</span></label>
                 @Html.TextBoxFor(m => m.NgayChi, "{0:yyyy-MM-dd}", new { @class = "form-control", @type = "date" })
                 @Html.ValidationMessageFor(m => m.NgayChi, "", new { @class = "text-danger small" })
             </div>
-
-            <!-- Khoản mục chi -->
             <div class="col-md-4">
                 <label class="form-label fw-bold">Khoản mục chi</label>
-                @Html.DropDownListFor(m => m.IDKhoanMucChi,
-                    (IEnumerable<SelectListItem>)ViewBag.KhoanMucList,
-                    "-- Chọn khoản mục --",
-                    new { @class = "form-select" })
-                @Html.ValidationMessageFor(m => m.IDKhoanMucChi, "", new { @class = "text-danger small" })
+                @Html.DropDownListFor(m => m.IDKhoanMucChi, (IEnumerable<SelectListItem>)ViewBag.KhoanMucList, "-- Chọn khoản mục --", new { @class = "form-select" })
             </div>
-
-            <!-- Tài khoản thanh toán -->
             <div class="col-md-4">
-                <label class="form-label fw-bold">Tài khoản thanh toán <span class="text-danger">*</span></label>
-                @Html.DropDownListFor(m => m.IDTaiKhoanThanhToan,
-                    (IEnumerable<SelectListItem>)ViewBag.TaiKhoanList,
-                    "-- Chọn tài khoản --",
-                    new { @class = "form-select select2" })
+                <label class="form-label fw-bold">Tài khoản <span class="text-danger">*</span></label>
+                @Html.DropDownListFor(m => m.IDTaiKhoanThanhToan, (IEnumerable<SelectListItem>)ViewBag.TaiKhoanList, "-- Chọn tài khoản --", new { @class = "form-select select2" })
                 @Html.ValidationMessageFor(m => m.IDTaiKhoanThanhToan, "", new { @class = "text-danger small" })
             </div>
-
-            <!-- Người nhận tiền -->
             <div class="col-md-4">
                 <label class="form-label fw-bold">Người nhận tiền</label>
                 @Html.TextBoxFor(m => m.NguoiNhanTien, new { @class = "form-control", @placeholder = "Nhập người nhận..." })
                 @Html.ValidationMessageFor(m => m.NguoiNhanTien, "", new { @class = "text-danger small" })
             </div>
-
-            <!-- Số điện thoại người nhận -->
             <div class="col-md-4">
-                <label class="form-label fw-bold">Số điện thoại người nhận</label>
-                @Html.TextBoxFor(m => m.SoDienThoaiNguoiNhan, new { @class = "form-control", @placeholder = "Nhập số điện thoại..." })
-                @Html.ValidationMessageFor(m => m.SoDienThoaiNguoiNhan, "", new { @class = "text-danger small" })
+                <label class="form-label fw-bold">Số ĐT</label>
+                @Html.TextBoxFor(m => m.SoDienThoaiNguoiNhan, new { @class = "form-control", @placeholder = "Số điện thoại..." })
             </div>
-
-            <!-- Nhà cung cấp -->
-            <div class="col-md-6">
+            <div class="col-md-8">
                 <label class="form-label fw-bold">Nhà cung cấp</label>
                 <select name="IDNhaCungCap" id="IDNhaCungCap" class="form-select select2">
                     <option value="">-- Chọn nhà cung cấp --</option>
@@ -94,234 +63,81 @@
                     }
                 </select>
             </div>
-
-            <!-- Phiếu nhập -->
-            <div class="col-md-6">
-                <label class="form-label fw-bold">Theo phiếu nhập</label>
-                <select name="IDPhieuNhap" id="IDPhieuNhap" class="form-select select2">
-                    <option value="">-- Chọn phiếu nhập --</option>
-                    @if (ViewBag.PhieuNhapList != null)
-                    {
-                        foreach (SelectListItem item in ViewBag.PhieuNhapList)
-                        {
-                            <option value="@item.Value" @(item.Value == Model.IDPhieuNhap?.ToString() ? "selected" : "")>@item.Text</option>
-                        }
-                    }
-                </select>
-            </div>
-
-            <!-- Số tiền chi -->
             <div class="col-md-4">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <label class="form-label fw-bold mb-0">Số tiền chi <span class="text-danger">*</span></label>
-                    <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none fw-bold" id="btnChiToanBo" style="font-size: 0.8rem; display: none; color: #2998e4;">Chi toàn bộ</button>
-                </div>
+                <label class="form-label fw-bold w-100">
+                    Tổng số tiền chi <span class="text-danger">*</span>
+                    <button type="button" class="btn btn-sm btn-outline-primary float-end" id="btnChiToanBo" style="padding: 0 5px; font-size: 11px; line-height: 1.2;">Chi toàn bộ</button>
+                </label>
                 <div class="input-group">
-                    @Html.TextBoxFor(m => m.SoTienChi, "{0:N0}", new { @class = "form-control text-end", @id = "SoTienChi", @placeholder = "Nhập số tiền..." })
-                    <span class="input-group-text bg-light text-muted" style="font-size: 0.85rem; font-weight: 500;">đ</span>
+                    @Html.TextBoxFor(m => m.SoTienChi, "{0:N0}", new { @class = "form-control text-end fw-bold text-primary fs-5", @id = "SoTienChi", @placeholder = "0" })
+                    <span class="input-group-text bg-light fw-bold text-muted">đ</span>
                 </div>
                 @Html.ValidationMessageFor(m => m.SoTienChi, "", new { @class = "text-danger small" })
             </div>
-
-            <!-- Diễn giải -->
-            <div class="col-md-8">
+            <div class="col-md-12">
                 <label class="form-label fw-bold">Diễn giải</label>
-                @Html.TextBoxFor(m => m.DienGiai, new { @class = "form-control", @placeholder = "Nhập diễn giải..." })
-                @Html.ValidationMessageFor(m => m.DienGiai, "", new { @class = "text-danger small" })
+                @Html.TextBoxFor(m => m.DienGiai, new { @class = "form-control" })
             </div>
 
-            <!-- Thông tin chi tiết Phiếu Nhập -->
-            <div class="col-md-12" id="divThongTinPhieuNhap" style="display:none; margin-top: 15px;">
-                <div class="card border border-warning-subtle bg-warning bg-opacity-10 shadow-none p-3 rounded-3">
-                    <h6 class="fw-bold mb-3 text-warning-emphasis d-flex align-items-center" style="font-size: 0.95rem;">
-                        <i class="bi bi-info-circle-fill me-2 fs-5 text-warning"></i> THÔNG TIN THANH TOÁN PHIẾU NHẬP
-                    </h6>
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <div class="p-2 bg-white rounded border border-light-subtle shadow-sm">
-                                <span class="small text-muted d-block fw-semibold mb-1" style="font-size: 0.75rem;">TỔNG TIỀN PHIẾU NHẬP (NỢ)</span>
-                                <span class="fs-6 fw-bold text-dark" id="pnTongCong">0</span>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="p-2 bg-white rounded border border-light-subtle shadow-sm">
-                                <span class="small text-muted d-block fw-semibold mb-1" style="font-size: 0.75rem;">ĐÃ THANH TOÁN (CHI)</span>
-                                <span class="fs-6 fw-bold text-success" id="pnDaThanhToan">0</span>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="p-2 bg-white rounded border border-light-subtle shadow-sm">
-                                <span class="small text-muted d-block fw-semibold mb-1" style="font-size: 0.75rem;">CÒN LẠI PHẢI TRẢ</span>
-                                <span class="fs-6 fw-bold text-danger" id="pnConLai">0</span>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="p-2 bg-white rounded border border-light-subtle shadow-sm">
-                                <span class="small text-muted d-block fw-semibold mb-2" style="font-size: 0.75rem;">LỊCH SỬ CÁC DÒNG CHI</span>
-                                <div class="table-responsive" style="max-height: 150px; overflow-y: auto;">
-                                    <table class="table table-sm table-bordered table-hover align-middle mb-0" style="font-size:0.8rem;" id="tblLichSuChi">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th class="text-center" style="width: 50px;">STT</th>
-                                                <th>Số phiếu chi</th>
-                                                <th class="text-center" style="width: 100px;">Ngày chi</th>
-                                                <th class="text-end" style="width: 120px;">Số tiền chi</th>
-                                                <th class="text-center" style="width: 120px;">Trạng thái</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <!-- Render động từ Ajax -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Bảng phân bổ -->
+            <div class="col-md-12 mt-4" id="divPhanBo" style="display:none;">
+                <h6 class="fw-bold mb-2 text-secondary border-bottom pb-2">
+                    CHI TIẾT PHÂN BỔ CẤN TRỪ CÔNG NỢ
+                    <span class="float-end badge bg-info text-dark" id="lblTienTraTruoc" style="font-size:0.9rem;">Tiền trả trước hiện có: 0 đ</span>
+                </h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-phanbo align-middle" id="tblPhieuNhap">
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="width:40px;">STT</th>
+                                <th>Số phiếu nhập</th>
+                                <th class="text-center">Ngày nhập</th>
+                                <th class="text-end">Phải trả</th>
+                                <th class="text-end">Đã trả</th>
+                                <th class="text-end">Còn nợ</th>
+                                <th class="text-end" style="width:180px;">Số tiền phân bổ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dữ liệu JS -->
+                        </tbody>
+                        <tfoot>
+                            <tr class="bg-light">
+                                <td colspan="6" class="text-end fw-bold">Tổng phân bổ cho phiếu nhập:</td>
+                                <td class="text-end fw-bold text-success" id="TongPhanBo">0</td>
+                            </tr>
+                            <tr class="bg-light">
+                                <td colspan="6" class="text-end fw-bold text-danger">Tiền dư (chuyển thành trả trước):</td>
+                                <td class="text-end fw-bold text-danger" id="TienDuTraTruoc">0</td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        $(document).ready(function () {
-            var $modal = $('#globalFormModalContent').closest('.modal');
-            if ($modal.length > 0) {
-                // Phóng to popup sang modal-xl và đưa lên cao thêm tí (loại bỏ centered, margin-top: 30px)
-                $modal.find('.modal-dialog')
-                      .removeClass('modal-lg modal-dialog-centered')
-                      .addClass('modal-xl')
-                      .css('margin-top', '30px');
-
-                var isView = @(ViewBag.IsView == true ? "true" : "false");
-                if (isView) {
-                    $modal.find('input, select, textarea').prop('disabled', true);
-                    $modal.find('#btnChiToanBo').hide();
-                }
-
-                $modal.find('.select2').select2({ dropdownParent: $modal, width: '100%' });
-            }
-
-            // Hàm load chi tiết phiếu nhập
-            function loadPhieuNhapDetail(idPhieuNhap) {
-                if (!idPhieuNhap) {
-                    $modal.find('#divThongTinPhieuNhap').slideUp(200);
-                    $modal.find('#btnChiToanBo').hide().data('amount', 0);
-                    return;
-                }
-                $.getJSON('@Url.Action("GetPhieuNhapDetail", "PhieuChi")', { idPhieuNhap: idPhieuNhap }, function (res) {
-                    if (res && res.success) {
-                        $modal.find('#pnTongCong').text(res.tongCong + ' đ');
-                        $modal.find('#pnDaThanhToan').text(res.daThanhToan + ' đ');
-                        $modal.find('#pnConLai').text(res.conLai + ' đ');
-                        
-                        // Cấu hình nút Chi toàn bộ
-                        $modal.find('#btnChiToanBo').data('amount', res.rawConLai);
-                        if (!isView) {
-                            $modal.find('#btnChiToanBo').show();
-                        } else {
-                            $modal.find('#btnChiToanBo').hide();
-                        }
-                        
-                        var rows = '';
-                        if (res.lichSu && res.lichSu.length > 0) {
-                            $.each(res.lichSu, function (i, item) {
-                                var badge = '';
-                                if (item.trangThai === 1) {
-                                    badge = '<span class="badge bg-secondary" style="font-size:0.75rem;">Đề nghị ghi</span>';
-                                } else if (item.trangThai === 2) {
-                                    badge = '<span class="badge bg-success" style="font-size:0.75rem;">Đã ghi</span>';
-                                } else if (item.trangThai === 3) {
-                                    badge = '<span class="badge bg-danger" style="font-size:0.75rem;">Đã hủy</span>';
-                                }
-                                rows += '<tr>' +
-                                    '<td class="text-center">' + (i + 1) + '</td>' +
-                                    '<td class="fw-bold" style="color: #2998e4;">' + item.soPhieuChi + '</td>' +
-                                    '<td class="text-center">' + item.ngayChi + '</td>' +
-                                    '<td class="text-end fw-semibold text-dark">' + item.soTienChi + '</td>' +
-                                    '<td class="text-center">' + badge + '</td>' +
-                                    '</tr>';
-                            });
-                        } else {
-                            rows = '<tr><td colspan="5" class="text-center py-2 text-muted">Chưa có lịch sử chi tiền cho phiếu nhập này</td></tr>';
-                        }
-                        $modal.find('#tblLichSuChi tbody').html(rows);
-                        $modal.find('#divThongTinPhieuNhap').slideDown(200);
-                    } else {
-                        $modal.find('#divThongTinPhieuNhap').slideUp(200);
-                        $modal.find('#btnChiToanBo').hide().data('amount', 0);
-                    }
-                });
-            }
-
-            // Khi chọn NCC thì load phiếu nhập
-            $modal.find('#IDNhaCungCap').off('change.phieuchi').on('change.phieuchi', function () {
-                var idNcc = $(this).val();
-                $modal.find('#IDPhieuNhap').html('<option value="">-- Chọn phiếu nhập --</option>');
-                $modal.find('#divThongTinPhieuNhap').slideUp(200);
-                $modal.find('#btnChiToanBo').hide().data('amount', 0);
-                
-                if (idNcc) {
-                    $modal.find('#IDPhieuNhap').html('<option value="">-- Đang tải --</option>');
-                    $.getJSON('@Url.Action("GetPhieuNhapByNCC","PhieuChi")', { idNhaCungCap: idNcc }, function (data) {
-                        var opts = '<option value="">-- Chọn phiếu nhập --</option>';
-                        $.each(data, function (i, d) { opts += '<option value="' + d.id + '">' + d.text + '</option>'; });
-                        $modal.find('#IDPhieuNhap').html(opts);
-                        if ($modal.find('#IDPhieuNhap').hasClass('select2-hidden-accessible'))
-                            $modal.find('#IDPhieuNhap').trigger('change');
-                    });
-                }
-            });
-
-            // Lắng nghe sự kiện chọn phiếu nhập để hiển thị thông tin
-            $modal.find('#IDPhieuNhap').off('change.phieuchi_detail').on('change.phieuchi_detail', function () {
-                loadPhieuNhapDetail($(this).val());
-            });
-
-            // Lắng nghe sự kiện click nút Chi toàn bộ
-            $modal.find('#btnChiToanBo').off('click.chitoanbo').on('click.chitoanbo', function () {
-                var amt = $(this).data('amount');
-                if (amt !== undefined && amt !== null) {
-                    $modal.find('#SoTienChi').val(parseFloat(amt).toLocaleString('vi-VN')).trigger('blur');
-                }
-            });
-
-            // Tự động load chi tiết phiếu nhập nếu form mở lên đã có sẵn (chế độ Edit)
-            var initPhieuNhapVal = $modal.find('#IDPhieuNhap').val();
-            if (initPhieuNhapVal) {
-                loadPhieuNhapDetail(initPhieuNhapVal);
-            }
-
-            // Format số tiền khi nhập
-            $modal.find('#SoTienChi').off('blur.phieuchi').on('blur.phieuchi', function () {
-                var val = $(this).val().replace(/\./g, '').replace(/,/g, '');
-                if (!isNaN(val) && val !== '') {
-                    $(this).val(parseFloat(val).toLocaleString('vi-VN'));
-                }
-            });
-        });
-    </script>
+    <!-- Hidden input to store JSON for chiTiets -->
+    <input type="hidden" name="chiTietJson" id="chiTietJson" value="" />
 
     <div class="modal-footer bg-light border-top-0 rounded-bottom">
         @if (ViewBag.IsView == true)
         {
-            <button type="button" class="btn text-white px-4" style="background:#0b5b84;" data-bs-dismiss="modal">
-                Đóng
-            </button>
+            <button type="button" class="btn text-white px-4" style="background:#0b5b84;" data-bs-dismiss="modal">Đóng</button>
+        }
+        else if (ViewBag.IsAdjustAllocation == true)
+        {
+            <button type="button" class="btn text-white px-4" style="background:#2998e4" id="btnAdjustAllocation">Lưu điều chỉnh</button>
+            <button type="button" class="btn text-dark px-4" style="background:#e9ecef" data-bs-dismiss="modal">Đóng</button>
         }
         else
         {
-            <button type="submit" class="btn text-white px-4" style="background:#f1c40f">
-                Lưu dữ liệu
-            </button>
+            <button type="button" class="btn text-white px-4" style="background:#f1c40f" id="btnSubmitForm">Lưu dữ liệu</button>
             if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuChi", SalesManagementSystem.Helpers.LoaiPhanQuyen.TuyChon))
             {
-                <button type="button" class="btn text-white px-4" style="background:#2998e4" id="btnLuuVaGhi">
-                    <i class="bi bi-journal-check me-1"></i>Lưu và ghi
-                </button>
+                <button type="button" class="btn text-white px-4" style="background:#2998e4" id="btnLuuVaGhi">Lưu và ghi</button>
             }
-            <button type="button" class="btn text-dark px-4" style="background:#e9ecef" data-bs-dismiss="modal">
-                Đóng
-            </button>
+            <button type="button" class="btn text-dark px-4" style="background:#e9ecef" data-bs-dismiss="modal">Đóng</button>
         }
     </div>
 </form>
@@ -329,26 +145,282 @@
 <script>
     $(document).ready(function () {
         var $modal = $('#globalFormModalContent').closest('.modal');
-        var $form = $modal.find('#phieuChiForm');
+        var isView = @(ViewBag.IsView == true ? "true" : "false");
+        var isAdjustAllocation = @(ViewBag.IsAdjustAllocation == true ? "true" : "false");
+        var listPhieuNhap = [];
+        var tienTraTruoc = parseFloat($('#TienTraTruocNCC_Hidden').val() || 0);
+        
+        // Populate existing details if Edit mode
+        var existingDetails = @Html.Raw(Model.ChiTiets != null ? Newtonsoft.Json.JsonConvert.SerializeObject(Model.ChiTiets) : "[]");
 
-        // Bỏ định dạng dấu phân cách nghìn trước khi submit để tránh lỗi model binding
-        $form.off('submit.clean').on('submit.clean', function () {
-            var $soTien = $(this).find('#SoTienChi');
-            if ($soTien.length > 0) {
-                var rawVal = $soTien.val().replace(/\./g, '').replace(/,/g, '');
-                $soTien.val(rawVal);
+        if ($modal.length > 0) {
+            $modal.find('.modal-dialog').removeClass('modal-lg modal-dialog-centered').addClass('modal-xl').css('margin-top', '30px');
+            if (isView) {
+                $modal.find('input, select, textarea').prop('disabled', true);
+            } else if (isAdjustAllocation) {
+                $modal.find('input:not(.input-phanbo, #SoTienChi), select, textarea').prop('disabled', true);
             }
+            $modal.find('.select2').select2({ dropdownParent: $modal, width: '100%' });
+        }
+
+        function formatCurrency(num) { return parseFloat(num || 0).toLocaleString('vi-VN'); }
+        function parseCurrency(str) { return parseFloat(str.replace(/\./g, '').replace(/,/g, '')) || 0; }
+
+        function calculatePhanBo() {
+            var tongChi = parseCurrency($('#SoTienChi').val());
+            var tienHienTai = tongChi; // Start with total money from user input
+            var tongPhanBo = 0;
+            
+            // Loop through inputs and adjust values
+            $modal.find('.input-phanbo').each(function() {
+                var $input = $(this);
+                var isAuto = $input.data('auto'); // Not used right now, user can just type
+                var val = parseCurrency($input.val());
+                tongPhanBo += val;
+            });
+            
+            var tienDu = tongChi - tongPhanBo;
+            $modal.find('#TongPhanBo').text(formatCurrency(tongPhanBo));
+            $modal.find('#TienDuTraTruoc').text(formatCurrency(tienDu >= 0 ? tienDu : 0));
+        }
+
+        function autoAllocate() {
+            var val = parseCurrency($('#SoTienChi').val());
+            var available = val + (window.tienTraTruoc || 0);
+            var remaining = available;
+            $modal.find('.input-phanbo').each(function() {
+                var conLai = parseFloat($(this).closest('tr').find('.row-conlai').data('val'));
+                if (remaining >= conLai) {
+                    $(this).val(formatCurrency(conLai));
+                    remaining -= conLai;
+                } else if (remaining > 0) {
+                    $(this).val(formatCurrency(remaining));
+                    remaining = 0;
+                } else {
+                    $(this).val('0');
+                }
+            });
+            calculatePhanBo();
+        }
+
+        function renderTable(data) {
+            var tbody = $modal.find('#tblPhieuNhap tbody');
+            tbody.empty();
+            if(!data || data.length === 0) {
+                tbody.html('<tr><td colspan="7" class="text-center text-muted">Không có phiếu nhập nợ</td></tr>');
+                $modal.find('#divPhanBo').show();
+                return;
+            }
+            $.each(data, function(i, item) {
+                var phanBo = 0;
+                // If edit mode, find existing allocation
+                var ex = existingDetails.find(x => x.IDPhieuNhap === item.id && x.LoaiChi === 1);
+                if (ex) phanBo = ex.SoTienPhanBo;
+                
+                var tr = $('<tr></tr>');
+                tr.append('<td class="text-center">' + (i + 1) + '</td>');
+                tr.append('<td>' + item.soPhieuNhap + '</td>');
+                tr.append('<td class="text-center">' + item.ngayNhap + '</td>');
+                tr.append('<td class="text-end">' + formatCurrency(item.tongTien) + '</td>');
+                tr.append('<td class="text-end">' + formatCurrency(item.daThanhToan) + '</td>');
+                tr.append('<td class="text-end text-danger fw-bold row-conlai" data-val="'+item.conLai+'">' + formatCurrency(item.conLai) + '</td>');
+                
+                var input = '<input type="text" class="form-control text-end input-phanbo" data-id="' + item.id + '" value="' + formatCurrency(phanBo) + '" ' + (isView ? 'disabled' : '') + ' />';
+                tr.append('<td class="text-end">' + input + '</td>');
+                tbody.append(tr);
+            });
+            $modal.find('#divPhanBo').show();
+            
+            // Attach events
+            $modal.find('.input-phanbo').on('input', function() {
+                var val = $(this).val().replace(/[^0-9]/g, '');
+                if (val !== '') {
+                    val = parseInt(val, 10);
+                    var conLai = parseFloat($(this).closest('tr').find('.row-conlai').data('val'));
+                    if (val > conLai) val = conLai; // Cap at max debt
+                    $(this).val(formatCurrency(val));
+                }
+                calculatePhanBo();
+            });
+            $modal.find('.input-phanbo').on('blur', function() {
+                if($(this).val() === '') $(this).val('0');
+                calculatePhanBo();
+            });
+            
+            // If new mode (no existing details) and SoTienChi > 0, auto allocate
+            if (existingDetails.length === 0 && parseCurrency($('#SoTienChi').val()) > 0) {
+                autoAllocate();
+            } else {
+                calculatePhanBo();
+            }
+        }
+
+        function loadNccData(idNcc) {
+            if(!idNcc) {
+                $modal.find('#divPhanBo').hide();
+                return;
+            }
+            
+            var loadedTien = false;
+            var loadedPhieu = false;
+            
+            // Load Tien Tra Truoc
+            $.getJSON('@Url.Action("GetTienTraTruocNhaCungCap", "PhieuChi")', { idNhaCungCap: idNcc }, function (res) {
+                if(res.success) {
+                    window.tienTraTruoc = res.data;
+                    $modal.find('#lblTienTraTruoc').text('Tiền trả trước hiện có: ' + formatCurrency(window.tienTraTruoc) + ' đ');
+                }
+                loadedTien = true;
+                if(loadedPhieu && existingDetails.length === 0) autoAllocate();
+            });
+            // Load Phieu Nhap Nợ
+            $.getJSON('@Url.Action("GetPhieuNhapCongNo", "PhieuChi")', { idNhaCungCap: idNcc }, function (res) {
+                if(res.success) {
+                    // If edit mode, we might need to inject the phieu nhap that are fully paid by this very PhieuChi!
+                    // GetPhieuNhapCongNo only returns unpaid. If we are editing, we must also add the ones in existingDetails if not present.
+                    listPhieuNhap = res.data;
+                    if(existingDetails && existingDetails.length > 0) {
+                        $.each(existingDetails, function(i, d) {
+                            if(d.LoaiChi === 1 && d.IDPhieuNhap) {
+                                if(!listPhieuNhap.find(x => x.id === d.IDPhieuNhap)) {
+                                    listPhieuNhap.push({
+                                        id: d.IDPhieuNhap,
+                                        soPhieuNhap: d.SoPhieuNhap,
+                                        ngayNhap: d.NgayNhap ? d.NgayNhap.substring(0,10) : '',
+                                        tongTien: d.TongTien,
+                                        daThanhToan: (d.DaThanhToan || 0) - d.SoTienPhanBo,
+                                        conLai: (d.ConLai || 0) + d.SoTienPhanBo // Reconstruct original debt before this payment
+                                    });
+                                } else {
+                                    // Adjust conLai to include the amount this PhieuChi already paid
+                                    var pn = listPhieuNhap.find(x => x.id === d.IDPhieuNhap);
+                                    pn.conLai += d.SoTienPhanBo;
+                                    pn.daThanhToan -= d.SoTienPhanBo;
+                                }
+                            }
+                        });
+                        // sort list by id
+                        listPhieuNhap.sort((a, b) => a.id - b.id);
+                    }
+                    renderTable(listPhieuNhap);
+                }
+                loadedPhieu = true;
+                if(loadedTien && existingDetails.length === 0) autoAllocate();
+            });
+        }
+
+        $modal.find('#IDNhaCungCap').on('change', function () {
+            existingDetails = []; // Clear if changed manually
+            loadNccData($(this).val());
         });
 
-        // Lưu và ghi
-        $modal.find('#btnLuuVaGhi').off('click.phieuchi_ghiso').on('click.phieuchi_ghiso', function () {
-            // Thêm trường ghiSo=true vào form
-            if ($form.find('input[name="ghiSo"]').length === 0) {
-                $form.append('<input type="hidden" name="ghiSo" value="true">');
-            } else {
-                $form.find('input[name="ghiSo"]').val('true');
+        // Auto allocate when SoTienChi changes
+        $modal.find('#SoTienChi').on('input', function () {
+            var val = $(this).val().replace(/[^0-9]/g, '');
+            if (val !== '') {
+                val = parseInt(val, 10);
+                $(this).val(formatCurrency(val));
             }
-            $form.trigger('submit');
+            autoAllocate();
+        });
+
+        $modal.find('#SoTienChi').on('blur', function () {
+            if($(this).val() === '') $(this).val('0');
+            autoAllocate();
+        });
+
+        $modal.find('#btnChiToanBo').on('click', function(e) {
+            e.preventDefault();
+            if (isView) return;
+            var totalDebt = 0;
+            $modal.find('.row-conlai').each(function() {
+                totalDebt += parseFloat($(this).data('val')) || 0;
+            });
+            $modal.find('#SoTienChi').val(formatCurrency(totalDebt));
+            autoAllocate();
+        });
+
+        if ($modal.find('#IDNhaCungCap').val()) {
+            loadNccData($modal.find('#IDNhaCungCap').val());
+        }
+
+        function buildSubmitData() {
+            var chiTiets = [];
+            var tongChi = parseCurrency($('#SoTienChi').val());
+            var tongPhanBo = 0;
+            $modal.find('.input-phanbo').each(function() {
+                var val = parseCurrency($(this).val());
+                if(val > 0) {
+                    chiTiets.push({
+                        IDPhieuNhap: $(this).data('id'),
+                        LoaiChi: 1, // 1: Thanh toán phiếu nhập
+                        SoTienPhanBo: val,
+                        DienGiai: 'Thanh toán phiếu nhập'
+                    });
+                    tongPhanBo += val;
+                }
+            });
+            var tienDu = tongChi - tongPhanBo;
+            if(tienDu > 0) {
+                chiTiets.push({
+                    IDPhieuNhap: null,
+                    LoaiChi: 2, // 2: Tiền dư trả trước
+                    SoTienPhanBo: tienDu,
+                    DienGiai: 'Tiền dư chuyển thành trả trước'
+                });
+            } else if(tienDu < 0) {
+                chiTiets.push({
+                    IDPhieuNhap: null,
+                    LoaiChi: 3, // 3: Sử dụng tiền trả trước
+                    SoTienPhanBo: Math.abs(tienDu),
+                    DienGiai: 'Sử dụng tiền trả trước nhà cung cấp'
+                });
+            }
+            $('#chiTietJson').val(JSON.stringify(chiTiets));
+            var $soTien = $modal.find('#SoTienChi');
+            $soTien.val(tongChi); // plain number for model binder
+        }
+
+        $('#btnSubmitForm').on('click', function(e) {
+            e.preventDefault();
+            buildSubmitData();
+            $('#phieuChiForm').submit();
+        });
+
+        $('#btnLuuVaGhi').on('click', function(e) {
+            e.preventDefault();
+            buildSubmitData();
+            if ($('#phieuChiForm').find('input[name="ghiSo"]').length === 0) {
+                $('#phieuChiForm').append('<input type="hidden" name="ghiSo" value="true">');
+            } else {
+                $('#phieuChiForm').find('input[name="ghiSo"]').val('true');
+            }
+            $('#phieuChiForm').submit();
+        });
+
+        $('#btnAdjustAllocation').on('click', function(e) {
+            e.preventDefault();
+            buildSubmitData();
+            
+            var $btn = $(this);
+            $btn.prop('disabled', true).text('Đang lưu...');
+            
+            $.post('@Url.Action("AdjustAllocation", "PhieuChi")', { 
+                id: @Model.ID, 
+                chiTietJson: $('#chiTietJson').val(),
+                soTienChiMoi: parseCurrency($('#SoTienChi').val())
+            }, function(res) {
+                if (res.success) {
+                    $('#globalFormModalContent').closest('.modal').modal('hide');
+                    if (typeof loadData === 'function') loadData(); // Reload grid
+                } else {
+                    alert('Lỗi: ' + res.message);
+                    $btn.prop('disabled', false).text('Lưu điều chỉnh');
+                }
+            }).fail(function() {
+                alert('Có lỗi xảy ra khi gọi server');
+                $btn.prop('disabled', false).text('Lưu điều chỉnh');
+            });
         });
     });
 </script>

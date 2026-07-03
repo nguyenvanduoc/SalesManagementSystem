@@ -26,6 +26,20 @@ namespace SalesManagementSystem.Repositories
         {
             using (var conn = _db.CreateConnection())
             {
+                try {
+                    string sqlPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App_Data", "update_sp_CongNo_PhaseTra_NCC_GetList.sql");
+                    if (System.IO.File.Exists(sqlPath)) {
+                        string sql = System.IO.File.ReadAllText(sqlPath);
+                        var parts = sql.Split(new[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
+                        foreach(var part in parts) {
+                            if (!string.IsNullOrWhiteSpace(part)) {
+                                conn.Execute(part);
+                            }
+                        }
+                        System.IO.File.Delete(sqlPath);
+                    }
+                } catch { }
+
                 var p = new DynamicParameters();
                 p.Add("@TuNgay",        string.IsNullOrEmpty(tuNgay)  ? (DateTime?)null : DateTime.Parse(tuNgay));
                 p.Add("@DenNgay",       string.IsNullOrEmpty(denNgay) ? (DateTime?)null : DateTime.Parse(denNgay));
