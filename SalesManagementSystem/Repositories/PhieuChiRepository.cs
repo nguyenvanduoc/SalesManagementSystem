@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -417,7 +417,7 @@ namespace SalesManagementSystem.Repositories
                     LEFT JOIN NS_NhanSu ns ON pc.IDNguoiNhan = ns.ID
                     WHERE pc.IsDeleted = 0
                       AND pc.NgayChi >= @StartCurr AND pc.NgayChi <= @EndCurr
-                      AND (@SoPhieuChi IS NULL OR pc.SoPhieuChi LIKE '%' + @SoPhieuChi + '%')
+                      AND (@SoPhieuChi IS NULL OR (pc.SoPhieuChi LIKE '%' + @SoPhieuChi + '%' OR EXISTS (SELECT 1 FROM KT_PhieuChiChiTiet ls INNER JOIN KHO_PhieuNhap pn2 ON ls.IDPhieuNhap = pn2.ID WHERE ls.IDPhieuChi = pc.ID AND pn2.SoChungTu LIKE '%' + @SoPhieuChi + '%')))
                       AND (@IDNhaCungCap IS NULL OR pc.IDNhaCungCap = @IDNhaCungCap)
                       AND (@IDKhoanMucChi IS NULL OR pc.IDKhoanMucChi = @IDKhoanMucChi)
                       AND (pc.TrangThai = @TrangThai)
@@ -441,7 +441,7 @@ namespace SalesManagementSystem.Repositories
                     LEFT JOIN NS_NhanSu ns ON pc.IDNguoiNhan = ns.ID
                     WHERE pc.IsDeleted = 0
                       AND pc.NgayChi >= @StartPrev AND pc.NgayChi <= @EndPrev
-                      AND (@SoPhieuChi IS NULL OR pc.SoPhieuChi LIKE '%' + @SoPhieuChi + '%')
+                      AND (@SoPhieuChi IS NULL OR (pc.SoPhieuChi LIKE '%' + @SoPhieuChi + '%' OR EXISTS (SELECT 1 FROM KT_PhieuChiChiTiet ls INNER JOIN KHO_PhieuNhap pn2 ON ls.IDPhieuNhap = pn2.ID WHERE ls.IDPhieuChi = pc.ID AND pn2.SoChungTu LIKE '%' + @SoPhieuChi + '%')))
                       AND (@IDNhaCungCap IS NULL OR pc.IDNhaCungCap = @IDNhaCungCap)
                       AND (@IDKhoanMucChi IS NULL OR pc.IDKhoanMucChi = @IDKhoanMucChi)
                       AND (pc.TrangThai = @TrangThai)

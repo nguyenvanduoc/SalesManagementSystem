@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SPA Tab Manager for SalesManagementSystem
  *
  * FIX: Ngăn chặn việc đăng ký sự kiện ajax-link và pageSizeSelect trùng lặp
@@ -418,10 +418,21 @@ var TabManager = (function () {
         });
 
         // Đóng toàn bộ Modal khi người dùng chuyển Tab
+                // Xử lý Modal khi chuyển Tab
         $(document).on('show.bs.tab', 'button[data-bs-toggle="tab"]', function (e) {
-            $('.modal').modal('hide');
-            $('.modal-backdrop').remove();
-            $('body').removeClass('modal-open').css('padding-right', '');
+            var targetTabId = $(e.target).attr('data-bs-target');
+            if (targetTabId) targetTabId = targetTabId.replace('#', '');
+            
+            var modalOwner = $('#globalFormModal').attr('data-owner-tab');
+            if (modalOwner) {
+                if (modalOwner === targetTabId) {
+                    $('#globalFormModal').removeClass('d-none');
+                    $('.modal-backdrop').removeClass('d-none');
+                } else {
+                    $('#globalFormModal').addClass('d-none');
+                    $('.modal-backdrop').addClass('d-none');
+                }
+            }
         });
 
         // Xử lý nạp nội dung khi chuyển sang tab chưa load (ví dụ Dashboard)
@@ -897,3 +908,4 @@ var TabManager = (function () {
 $(document).ready(function () {
     TabManager.init();
 });
+

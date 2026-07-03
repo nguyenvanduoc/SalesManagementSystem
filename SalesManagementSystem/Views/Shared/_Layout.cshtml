@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
@@ -326,10 +326,16 @@
         body.sidebar-collapsed .sidebar .nav-group-toggle i { width: auto; font-size: 1.2rem; margin: 0; }
         body.sidebar-collapsed .main-wrapper { margin-left: 60px; }
 
-        /* ─── Modal horizontal centering relative to main-wrapper ─── */
+        /* 🚀 Modal centering relative to main-wrapper 🚀 */
+        .modal-backdrop {
+            z-index: 1010 !important;
+        }
         .modal {
+            z-index: 1015 !important;
             left: var(--sidebar-width) !important;
             width: calc(100% - var(--sidebar-width)) !important;
+            top: calc(var(--topbar-height) + 45px) !important;
+            height: calc(100vh - var(--topbar-height) - 45px) !important;
         }
         body.sidebar-collapsed .modal {
             left: 60px !important;
@@ -984,6 +990,12 @@
         myModal.show();
     }
 
+    // Theo dõi phần tử được click cuối cùng để xác định tab chứa nút gọi modal
+    var lastClickedElement = null;
+    $(document).on('mousedown', function(e) {
+        lastClickedElement = e.target;
+    });
+
     // Hàm hiển thị Form Modal qua AJAX
     function openFormModal(url) {
         $.ajax({
@@ -993,6 +1005,22 @@
                 // Đảm bảo kích thước mặc định là modal-lg
                 $('#globalFormModal .modal-dialog').removeClass('modal-xl modal-sm').addClass('modal-lg');
                 $('#globalFormModalContent').html(res);
+                
+                // Xác định tab sở hữu form (ưu tiên tab chứa nút được click)
+                var ownerTabId = null;
+                if (lastClickedElement) {
+                    var $pane = $(lastClickedElement).closest('.tab-pane');
+                    if ($pane.length > 0) {
+                        ownerTabId = $pane.attr('id');
+                    }
+                }
+                if (!ownerTabId) {
+                    ownerTabId = $('.tab-pane.active').attr('id');
+                }
+                if (ownerTabId) {
+                    $('#globalFormModal').attr('data-owner-tab', ownerTabId);
+                }
+
                 var formModal = new bootstrap.Modal(document.getElementById('globalFormModal'));
                 formModal.show();
             },
@@ -1003,6 +1031,12 @@
     }
 
     // Bắt sự kiện submit form bên trong globalFormModal
+    $('#globalFormModal').on('hidden.bs.modal', function () {
+        $(this).removeAttr('data-owner-tab');
+        $(this).removeClass('d-none');
+        $('.modal-backdrop').removeClass('d-none');
+    });
+
     $(document).on('submit', '#globalFormModalContent form', function(e) {
         e.preventDefault();
         var form = $(this);
