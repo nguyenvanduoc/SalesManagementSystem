@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
@@ -1185,6 +1185,16 @@
 
 <script>
     /* ================================================================
+       GLOBAL AJAX ERROR HANDLER (Bắt lỗi 401 khi mất Session)
+    ================================================================ */
+    $(document).ajaxError(function (event, jqxhr, settings, thrownError) {
+        if (jqxhr.status === 401 || jqxhr.status === 403) {
+            localStorage.removeItem('tabManagerState');
+            window.location.href = '@Url.Action("Logout", "Login")';
+        }
+    });
+
+    /* ================================================================
        SESSION KEEP-ALIVE
        - Ping /Home/KeepAlive mỗi 4 phút để giữ App Pool sống
        - Tự động logout sau 8 tiếng (28800 giây)
@@ -1211,8 +1221,11 @@
                         window.location.href = logoutUrl;
                     }
                 },
-                error: function () {
-                    // Không kết nối được server - không làm gì, thử lần sau
+                error: function (xhr) {
+                    if (xhr.status === 401 || xhr.status === 403) {
+                        localStorage.removeItem('tabManagerState');
+                        window.location.href = logoutUrl;
+                    }
                 }
             });
         }

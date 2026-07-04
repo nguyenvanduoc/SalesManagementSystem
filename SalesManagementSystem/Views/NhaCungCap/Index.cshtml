@@ -81,13 +81,6 @@
                 }
             });
 
-            $pane.on('click', '.btn-reset', function() {
-                $pane.find('input[name="ma"]').val('');
-                $pane.find('input[name="ten"]').val('');
-                $pane.find('input[name="dt"]').val('');
-                $pane.find('input[name="email"]').val('');
-                $pane.find('#searchForm').trigger('submit');
-            });
 
             window.deleteSelectedNhaCungCap = function() {
                 var selectedIds = [];

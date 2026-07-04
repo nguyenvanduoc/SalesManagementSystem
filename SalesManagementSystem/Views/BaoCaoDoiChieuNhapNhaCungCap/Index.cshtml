@@ -1,0 +1,138 @@
+@{
+    ViewBag.Title = ViewBag.Title ?? "BÁO CÁO ĐỐI CHIẾU NHẬP NCC";
+    Layout = null;
+    var uid = Guid.NewGuid().ToString("N");
+}
+
+<style>
+    .filter-section {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+        margin-bottom: 20px;
+    }
+    .page-title {
+        color: #0b5b84;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div id="baocao-@uid">
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-2">
+        <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">
+            <i class="bi bi-file-earmark-bar-graph me-2"></i>@ViewBag.Title
+        </h4>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body py-2">
+            <form id="frmFilter-@uid" onsubmit="return false;">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label text-muted small mb-1">Nhà cung cấp <span class="text-danger">*</span></label>
+                        @Html.DropDownList("idNhaCungCap", (SelectList)ViewBag.NhaCungCapList, "-- Chọn nhà cung cấp --", new { @class = "form-select form-select-sm select2", @id = "idNhaCungCap_" + uid })
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Từ ngày <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control form-control-sm" id="tuNgay_@uid" name="tuNgay" value="@ViewBag.TuNgay" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Đến ngày <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control form-control-sm" id="denNgay_@uid" name="denNgay" value="@ViewBag.DenNgay" />
+                    </div>
+                    <div class="col-md-5">
+                        <button type="button" class="btn btn-primary btn-sm px-3 shadow-sm" id="btnSearch_@uid" style="background-color: #3498db; border-color: #3498db;">
+                            <i class="bi bi-search me-1"></i> Tìm kiếm
+                        </button>
+                        <button type="button" class="btn btn-warning btn-sm px-3 ms-2 shadow-sm" id="btnReset_@uid">
+                            <i class="bi bi-arrow-clockwise me-1"></i> Làm mới
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="table-container-@uid">
+        <div class="alert alert-info text-center">
+            Vui lòng chọn Nhà cung cấp và ấn <b>Tìm kiếm</b> để xem báo cáo.
+        </div>
+    </div>
+</div>
+
+
+    <script>
+        $(document).ready(function () {
+            var $container = $('#baocao-@uid');
+            
+            // Khởi tạo select2
+            if ($container.find('.select2').length) {
+                $container.find('.select2').select2({
+                    width: '100%',
+                    dropdownParent: $container
+                });
+            }
+
+            // Hàm load dữ liệu
+            function loadData() {
+                var idNhaCungCap = $container.find('#idNhaCungCap_@uid').val();
+                var tuNgay = $container.find('#tuNgay_@uid').val();
+                var denNgay = $container.find('#denNgay_@uid').val();
+
+                // Validate
+                if (!idNhaCungCap) {
+                    alert('Vui lòng chọn nhà cung cấp!');
+                    return;
+                }
+                if (!tuNgay) {
+                    alert('Vui lòng chọn từ ngày!');
+                    return;
+                }
+                if (!denNgay) {
+                    alert('Vui lòng chọn đến ngày!');
+                    return;
+                }
+                if (new Date(tuNgay) > new Date(denNgay)) {
+                    alert('Từ ngày không được lớn hơn đến ngày!');
+                    return;
+                }
+
+                var $tableContainer = $container.find('#table-container-@uid');
+                
+                $tableContainer.html('<div class="text-center mt-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted">Đang tải dữ liệu...</p></div>');
+
+                $.ajax({
+                    url: '@Url.Action("GetList", "BaoCaoDoiChieuNhapNhaCungCap")',
+                    type: 'GET',
+                    data: {
+                        idNhaCungCap: idNhaCungCap,
+                        tuNgay: tuNgay,
+                        denNgay: denNgay
+                    },
+                    success: function (res) {
+                        $tableContainer.html(res);
+                    },
+                    error: function () {
+                        alert('Lỗi khi tải dữ liệu báo cáo');
+                        $tableContainer.html('<div class="alert alert-danger text-center mt-3">Đã xảy ra lỗi khi kết nối với máy chủ.</div>');
+                    }
+                });
+            }
+
+            // Sự kiện tìm kiếm
+            $container.find('#btnSearch_@uid').on('click', function () {
+                loadData();
+            });
+
+            // Sự kiện làm mới
+            $container.find('#btnReset_@uid').on('click', function () {
+                $container.find('#idNhaCungCap_@uid').val('').trigger('change');
+                $container.find('#tuNgay_@uid').val('@ViewBag.TuNgay');
+                $container.find('#denNgay_@uid').val('@ViewBag.DenNgay');
+                $container.find('#table-container-@uid').html('<div class="alert alert-info text-center">Vui lòng chọn Nhà cung cấp và ấn <b>Tìm kiếm</b> để xem báo cáo.</div>');
+            });
+        });
+    </script>

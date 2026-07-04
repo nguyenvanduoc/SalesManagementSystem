@@ -112,9 +112,9 @@
 
 <!-- Bộ lọc tìm kiếm -->
 <div class="card shadow-sm mb-4">
-    <div class="card-body">
-        <form method="get" action="@Url.Action("GetList","PhieuChi")" id="searchForm">
-            <div class="row g-2 align-items-end">
+    <div class="col-md-12">
+        <form id="searchForm" action="@Url.Action("GetList", "PhieuChi")" method="get" class="bg-white p-3 rounded shadow-sm mb-3">
+            <div class="row gx-2 gy-2 align-items-end">
                 <div class="col-md col-sm-6">
                     <label class="form-label text-muted small mb-1 fw-semibold">Từ ngày</label>
                     <input type="date" class="form-control form-control-sm" name="tuNgay" value="@ViewBag.TuNgay" />
@@ -178,24 +178,59 @@
 @section Scripts {
     <script>
         (function () {
-            var $pane = $('#searchForm').closest('.tab-pane');
+            var $script = $('script').last();
+            var $pane = $script.closest('.tab-pane');
             if ($pane.length === 0) $pane = $('body');
 
-            $pane.off('click.phieuchi_reset', '.btn-reset');
-            $pane.on('click.phieuchi_reset', '.btn-reset', function () {
-                $pane.find('input[name="tuNgay"]').val('');
-                $pane.find('input[name="denNgay"]').val('');
-                $pane.find('input[name="soPhieuChi"]').val('');
-                $pane.find('input[name="nguoiNhanTien"]').val('');
-                $pane.find('select[name="idKhoanMucChi"]').val('');
-                $pane.find('select[name="idTaiKhoanThanhToan"]').val('');
-                $pane.find('#searchForm').trigger('submit');
-            });
 
             $pane.off('click.phieuchi_export', '.btn-export-excel');
             $pane.on('click.phieuchi_export', '.btn-export-excel', function () {
                 var params = $pane.find('#searchForm').serialize();
                 window.location.href = '@Url.Action("ExportExcel","PhieuChi")?' + params;
+            });
+
+            var $form = $pane.find('#searchForm');
+            
+            $form.on('submit', function (e) {
+                e.preventDefault();
+                var params = $(this).serialize();
+                // Ensure page=1 on search
+                params = params.replace(/&?page=[^&]*/, '') + '&page=1';
+                var url = '@Url.Action("GetList", "PhieuChi")?' + params;
+                
+                var $grid = $pane.find('#table-container');
+                if (typeof showLoadingLocal === 'function') showLoadingLocal($grid);
+                
+                // Visual blink effect for user feedback
+                $grid.css({ 'opacity': '0.2', 'transition': 'none' });
+                
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    success: function (res) {
+                        if (typeof hideLoadingLocal === 'function') hideLoadingLocal($grid);
+                        $grid.html(res);
+                        if (typeof reInitPlugins === 'function') reInitPlugins($pane.attr('id'));
+                        
+                        setTimeout(function() {
+                            $grid.css({ 'transition': 'opacity 0.2s', 'opacity': '1' });
+                        }, 100);
+                    },
+                    error: function(xhr) {
+                        if (typeof hideLoadingLocal === 'function') hideLoadingLocal($grid);
+                        $grid.css({ 'transition': 'opacity 0.2s', 'opacity': '1' });
+                        if (xhr.status !== 404) { // Let global handler handle 404 if it really is one
+                            if (typeof showToast === 'function') showToast('error', 'Lỗi khi tải dữ liệu');
+                        }
+                    }
+                });
+            });
+
+            $pane.find('.btn-reset').on('click', function() {
+                $form[0].reset();
+                $form.find('.select2').val('').trigger('change');
+                $form.trigger('submit');
             });
 
             // Handle row click to expand details

@@ -57,12 +57,6 @@
             var $pane = $('#searchForm').closest('.tab-pane');
             if ($pane.length === 0) $pane = $('body');
 
-            $pane.off('click.localreset', '.btn-reset');
-            $pane.on('click.localreset', '.btn-reset', function() {
-                $pane.find('input[name="keyword"]').val('');
-                $pane.find('select[name="isHoatDong"]').val('');
-                $pane.find('#searchForm').trigger('submit');
-            });
         })();
     </script>
 }

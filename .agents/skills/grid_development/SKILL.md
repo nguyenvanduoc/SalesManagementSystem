@@ -93,3 +93,24 @@ Ví dụ:
 ```
 
 **Lưu ý:** Chắc chắn rằng biến chuỗi cho ID truyền vào trong đoạn script trùng khớp với thẻ HTML `table` id.
+
+## 3. Chức năng Làm mới (Reset) và Tìm kiếm
+
+Đối với các màn hình danh sách có form lọc/tìm kiếm dữ liệu:
+- Khi người dùng click vào nút **Làm mới** (Clear/Reset), hệ thống không chỉ phải xóa các điều kiện lọc (clear form) mà còn phải **TỰ ĐỘNG** thực hiện lại lệnh tìm kiếm để tải lại danh sách dữ liệu ban đầu (dữ liệu không có bộ lọc).
+- Tránh tình trạng nút Làm mới chỉ xóa trắng các trường nhập liệu nhưng bảng dữ liệu bên dưới vẫn giữ nguyên kết quả tìm kiếm cũ hoặc bị biến mất.
+
+**Mã Javascript chuẩn (Ví dụ):**
+```javascript
+$container.find('.btn-reset').on('click', function() {
+    // 1. Reset toàn bộ form
+    $form[0].reset();
+    
+    // Nếu có sử dụng thư viện Select2, cần reset riêng giao diện Select2
+    $form.find('.select2').val('').trigger('change');
+    
+    // 2. Tự động trigger sự kiện submit form hoặc gọi lại hàm loadData() 
+    // để tìm kiếm và tải lại dữ liệu ban đầu.
+    $form.trigger('submit'); 
+});
+```

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -184,6 +184,7 @@
     <Compile Include="Models\ViewModels\DmSanPhamCreateEditViewModel.cs" />
     <Compile Include="Models\ViewModels\DmKhoHangViewModel.cs" />
     <Compile Include="Models\ViewModels\DmKhoHangCreateEditViewModel.cs" />
+    <Compile Include="Models\ViewModels\OrderFormViewModel.cs" />
     <Compile Include="Models\ViewModels\PhanQuyenTreeViewModel.cs" />
     <Compile Include="Models\ViewModels\PhanQuyenMatrixViewModel.cs" />
     <Compile Include="Repositories\Interfaces\IAclPhanQuyenRepository.cs" />
@@ -347,6 +348,10 @@
     <Compile Include="Repositories\Interfaces\ITraHangBanRepository.cs" />
     <Compile Include="Repositories\TraHangBanRepository.cs" />
     <Compile Include="Controllers\BAN_TraHangBanController.cs" />
+    <Compile Include="Models\ViewModels\BaoCaoDoiChieuNhapNhaCungCapViewModel.cs" />
+    <Compile Include="Repositories\Interfaces\IBaoCaoDoiChieuNhapNhaCungCapRepository.cs" />
+    <Compile Include="Repositories\BaoCaoDoiChieuNhapNhaCungCapRepository.cs" />
+    <Compile Include="Controllers\BaoCaoDoiChieuNhapNhaCungCapController.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-grid.css" />
@@ -376,6 +381,23 @@
     <Content Include="Content\bootstrap-icons.min.css" />
     <Content Include="Content\fonts\bootstrap-icons.woff2" />
     <Content Include="Content\fonts\bootstrap-icons.woff" />
+    <Content Include="node_modules\iconv-lite\encodings\dbcs-codec.js" />
+    <Content Include="node_modules\iconv-lite\encodings\dbcs-data.js" />
+    <Content Include="node_modules\iconv-lite\encodings\index.js" />
+    <Content Include="node_modules\iconv-lite\encodings\internal.js" />
+    <Content Include="node_modules\iconv-lite\encodings\sbcs-codec.js" />
+    <Content Include="node_modules\iconv-lite\encodings\sbcs-data-generated.js" />
+    <Content Include="node_modules\iconv-lite\encodings\sbcs-data.js" />
+    <Content Include="node_modules\iconv-lite\encodings\utf16.js" />
+    <Content Include="node_modules\iconv-lite\encodings\utf32.js" />
+    <Content Include="node_modules\iconv-lite\encodings\utf7.js" />
+    <Content Include="node_modules\iconv-lite\lib\bom-handling.js" />
+    <Content Include="node_modules\iconv-lite\lib\helpers\merge-exports.js" />
+    <Content Include="node_modules\iconv-lite\lib\index.js" />
+    <Content Include="node_modules\iconv-lite\lib\streams.js" />
+    <Content Include="node_modules\safer-buffer\dangerous.js" />
+    <Content Include="node_modules\safer-buffer\safer.js" />
+    <Content Include="node_modules\safer-buffer\tests.js" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -391,6 +413,22 @@
     <Content Include="obj\Release\Package\PackageTmp\Views\PhieuNhapKho\_DetailInline.cshtml" />
     <Content Include="obj\Release\Package\PackageTmp\Views\PhieuXuatKho\_DetailInline.cshtml" />
     <Content Include="obj\Release\Package\PackageTmp\Views\CongNoNCC\_CongNoNCCList.cshtml" />
+    <Content Include="node_modules\.package-lock.json" />
+    <Content Include="node_modules\iconv-lite\encodings\tables\big5-added.json" />
+    <Content Include="node_modules\iconv-lite\encodings\tables\cp936.json" />
+    <Content Include="node_modules\iconv-lite\encodings\tables\cp949.json" />
+    <Content Include="node_modules\iconv-lite\encodings\tables\cp950.json" />
+    <Content Include="node_modules\iconv-lite\encodings\tables\eucjp.json" />
+    <Content Include="node_modules\iconv-lite\encodings\tables\gb18030-ranges.json" />
+    <Content Include="node_modules\iconv-lite\encodings\tables\gbk-added.json" />
+    <Content Include="node_modules\iconv-lite\encodings\tables\shiftjis.json" />
+    <Content Include="node_modules\iconv-lite\LICENSE" />
+    <Content Include="node_modules\iconv-lite\package.json" />
+    <Content Include="node_modules\iconv-lite\README.md" />
+    <Content Include="node_modules\safer-buffer\LICENSE" />
+    <Content Include="node_modules\safer-buffer\package.json" />
+    <Content Include="node_modules\safer-buffer\Porting-Buffer.md" />
+    <Content Include="node_modules\safer-buffer\Readme.md" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -516,6 +554,10 @@
     <Content Include="Views\BAN_TraHangBan\Edit.cshtml" />
     <Content Include="Views\BAN_TraHangBan\_ChonDonHangPopup.cshtml" />
     <Content Include="Views\PhieuChi\_DetailInline.cshtml" />
+    <Content Include="Views\BaoCaoDoiChieuNhapNhaCungCap\Index.cshtml" />
+    <Content Include="Views\BaoCaoDoiChieuNhapNhaCungCap\_DanhSach.cshtml" />
+    <Content Include="App_Data\sp_BaoCao_DoiChieuNhapNhaCungCap.sql" />
+    <Content Include="App_Data\insert_acl_BaoCaoDoiChieuNhapNhaCungCap.sql" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />
@@ -637,6 +679,7 @@
     <Content Include="Views\PhieuNhapKho\Index.cshtml" />
     <Content Include="Views\PhieuNhapKho\Edit.cshtml" />
     <Content Include="Scripts\phieu-nhap-kho.js" />
+    <Content Include="Scripts\dieu-chinh-nhap-kho.js" />
     <Content Include="Scripts\phieu-xuat-kho.js" />
     <Compile Include="Models\ViewModels\NhaCungCapViewModel.cs" />
     <Compile Include="Models\ViewModels\NhaCungCapCreateEditViewModel.cs" />
@@ -685,5 +728,12 @@
     <Content Include="Views\DieuChinhNhapKho\_HistoryModal.cshtml" />
     <Content Include="App_Data\create_dieu_chinh_don_hang.sql" />
     <Content Include="App_Data\create_dieu_chinh_phieu_nhap.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="node_modules\iconv-lite\lib\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\iconv-lite\types\encodings.d.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
   </ItemGroup>
 </Project>

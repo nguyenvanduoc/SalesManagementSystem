@@ -110,14 +110,6 @@
             var $pane = $('#searchForm').closest('.tab-pane');
             if ($pane.length === 0) $pane = $('body');
 
-            $pane.off('click.congnophai_reset', '.btn-reset');
-            $pane.on('click.congnophai_reset', '.btn-reset', function () {
-                $pane.find('input[name="tuNgay"]').val('');
-                $pane.find('input[name="denNgay"]').val('');
-                $pane.find('select[name="idNhaCungCap"]').val('');
-                $pane.find('select[name="trangThaiCongNo"]').val('');
-                $pane.find('#searchForm').trigger('submit');
-            });
         })();
     </script>
 }

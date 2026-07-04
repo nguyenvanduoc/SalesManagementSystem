@@ -25,6 +25,7 @@
 </style>
 
 <!-- Toolbar -->
+<div id="dieu-chinh-nhap-kho-container">
 <div class="form-toolbar">
     <a href="@Url.Action("Index")" class="btn btn-secondary btn-sm">
         <i class="bi bi-arrow-left"></i> Quay lại
@@ -147,12 +148,12 @@
             <div class="don-header-card mb-0">
                 <div class="d-flex align-items-center mb-2 gap-2">
                     <div class="don-section-title mb-0"><i class="bi bi-table me-1"></i>Chi tiết hàng hóa</div>
-                    <button type="button" class="btn-add-row ms-auto" id="PNK_btnAddRow">
+                    <button type="button" class="btn-add-row ms-auto" id="DCNK_btnAddRow">
                         <i class="bi bi-plus-lg me-1"></i> Thêm mặt hàng
                     </button>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-bordered grid-detail mb-0" id="PNK_tblChiTiet" style="min-width:900px;">
+                    <table class="table table-bordered grid-detail mb-0" id="DCNK_tblChiTiet" style="min-width:900px;">
                         <thead>
                             <tr>
                                 <th style="width:40px;">STT</th>
@@ -206,12 +207,12 @@
         </div>
     </div>
 </form>
+</div>
 
-@section Scripts {
-    <script src="@Url.Content("~/Scripts/phieu-nhap-kho.js?v=2.1")"></script>
-    <script>
-        $(document).ready(function () {
-            PhieuNhapKho.init({
+<script>
+    $(document).ready(function () {
+        $.getScript('@Url.Content("~/Scripts/dieu-chinh-nhap-kho.js?v=3.0")', function() {
+            DieuChinhNhapKho.init({
                 searchLoaiNhapKhoUrl: '@Url.Action("SearchLoaiNhapKho", "PhieuNhapKho")',
                 searchKhachHangUrl: '@Url.Action("SearchKhachHang", "PhieuNhapKho")',
                 searchKhoUrl: '@Url.Action("SearchKhoHang", "PhieuNhapKho")',
@@ -244,7 +245,7 @@
                     return;
                 }
 
-                var baseData = PhieuNhapKho.validateAndSerialize();
+                var baseData = DieuChinhNhapKho.validateAndSerialize();
                 if (!baseData) return;
 
                 var data = {
@@ -288,5 +289,5 @@
                 });
             });
         });
-    </script>
-}
+    });
+</script>

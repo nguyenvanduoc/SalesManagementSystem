@@ -124,6 +124,10 @@
         });
 
         function searchData(page = 1) {
+            var $listContainer = $('#listContainer');
+            $listContainer.css({ 'opacity': '0.5', 'transition': 'opacity 0.1s' });
+            setTimeout(function() { $listContainer.css('opacity', '1'); }, 100);
+
             var data = $('#searchForm').serialize() + '&page=' + page;
             $.ajax({
                 url: '/DieuChinhNhapKho/Index',
@@ -139,7 +143,19 @@
         }
 
         function resetForm() {
-            $('#searchForm')[0].reset();
+            var $btn = $('button[onclick="resetForm()"]');
+            $btn.css({ 'opacity': '0.5', 'transition': 'opacity 0.1s' });
+            setTimeout(function() { $btn.css('opacity', '1'); }, 100);
+
+            var $form = $('#searchForm');
+            $form[0].reset();
+            // Đưa từ ngày đến ngày về mặc định (đầu tháng và cuối tháng)
+            var date = new Date();
+            var firstDay = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
+            var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0];
+            $form.find('input[name="tuNgay"]').val(firstDay);
+            $form.find('input[name="denNgay"]').val(lastDay);
+
             $('.select2-ajax').val(null).trigger('change');
             searchData();
         }

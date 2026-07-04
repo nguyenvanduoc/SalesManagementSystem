@@ -202,21 +202,6 @@
             if ($pane.length === 0) $pane = $('body');
 
             // Reset filters to defaults and reload
-            $pane.off('click.soquy_reset', '.btn-reset');
-            $pane.on('click.soquy_reset', '.btn-reset', function () {
-                var now = new Date();
-                var y = now.getFullYear();
-                var m = now.getMonth(); // 0-indexed
-                var firstDay = new Date(y, m, 1);
-                var lastDay = new Date(y, m + 1, 0);
-
-                var pad = function(num) { return (num < 10 ? '0' : '') + num; };
-                
-                $pane.find('#tuNgay').val(y + '-' + pad(firstDay.getMonth() + 1) + '-' + pad(firstDay.getDate()));
-                $pane.find('#denNgay').val(y + '-' + pad(lastDay.getMonth() + 1) + '-' + pad(lastDay.getDate()));
-                $pane.find('#idTaiKhoanThanhToan').val('').trigger('change');
-                $pane.find('#searchForm').trigger('submit');
-            });
 
             // Client side validation on search
             $pane.off('submit.soquy_search', '#searchForm');

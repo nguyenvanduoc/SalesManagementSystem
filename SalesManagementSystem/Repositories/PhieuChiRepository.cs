@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -505,7 +505,7 @@ namespace SalesManagementSystem.Repositories
             }
         }
 
-        public void DieuChinhPhanBo(int idPhieuChi, List<PhieuChiChiTietViewModel> newChiTiets, int userId, decimal soTienChiMoi)
+        public void DieuChinhPhanBo(PhieuChiViewModel model, List<PhieuChiChiTietViewModel> newChiTiets, int userId)
         {
             using (var conn = _db.CreateConnection())
             {
@@ -514,6 +514,7 @@ namespace SalesManagementSystem.Repositories
                 {
                     try
                     {
+                        int idPhieuChi = model.ID;
                         // 1. Get existing allocations (All types)
                         var oldAllocations = conn.Query<PhieuChiChiTietViewModel>(
                             "SELECT * FROM KT_PhieuChiChiTiet WHERE IDPhieuChi = @IDPhieuChi",
@@ -532,7 +533,12 @@ namespace SalesManagementSystem.Repositories
                                 conn.Execute(@"
                                     UPDATE KHO_PhieuNhap 
                                     SET DaThanhToan = ISNULL(DaThanhToan, 0) - @SoTienPhanBo,
-                                        ConLai = ConLai + @SoTienPhanBo
+                                        ConLai = ConLai + @SoTienPhanBo,
+                                        TrangThaiThanhToan = CASE 
+                                            WHEN ConLai + @SoTienPhanBo <= 0 THEN 2 
+                                            WHEN ISNULL(DaThanhToan, 0) - @SoTienPhanBo <= 0 THEN 0 
+                                            ELSE 1 
+                                        END
                                     WHERE ID = @IDPhieuNhap
                                 ", new { old.SoTienPhanBo, old.IDPhieuNhap }, transaction);
                             }
@@ -544,11 +550,31 @@ namespace SalesManagementSystem.Repositories
                             new { IDPhieuChi = idPhieuChi },
                             transaction);
 
-                        // 3.5 Update SoTienChi
-                        conn.Execute(
-                            "UPDATE KT_PhieuChi SET SoTienChi = @SoTienChiMoi WHERE ID = @IDPhieuChi",
-                            new { IDPhieuChi = idPhieuChi, SoTienChiMoi = soTienChiMoi },
-                            transaction);
+                        // 3.5 Update all fields in KT_PhieuChi
+                        conn.Execute(@"
+                            UPDATE KT_PhieuChi 
+                            SET NgayChi = @NgayChi,
+                                IDKhoanMucChi = @IDKhoanMucChi,
+                                IDTaiKhoanThanhToan = @IDTaiKhoanThanhToan,
+                                IDNguoiNhan = @IDNguoiNhan,
+                                NguoiNhanTien = @NguoiNhanTien,
+                                SoDienThoaiNguoiNhan = @SoDienThoaiNguoiNhan,
+                                IDNhaCungCap = @IDNhaCungCap,
+                                SoTienChi = @SoTienChi,
+                                DienGiai = @DienGiai
+                            WHERE ID = @IDPhieuChi
+                        ", new {
+                            model.NgayChi,
+                            model.IDKhoanMucChi,
+                            model.IDTaiKhoanThanhToan,
+                            model.IDNguoiNhan,
+                            model.NguoiNhanTien,
+                            model.SoDienThoaiNguoiNhan,
+                            model.IDNhaCungCap,
+                            model.SoTienChi,
+                            model.DienGiai,
+                            IDPhieuChi = idPhieuChi
+                        }, transaction);
 
                         // 4. Insert new allocations and update Phiếu Nhập
                         foreach (var nc in newChiTiets)
@@ -570,7 +596,11 @@ namespace SalesManagementSystem.Repositories
                                 conn.Execute(@"
                                     UPDATE KHO_PhieuNhap 
                                     SET DaThanhToan = ISNULL(DaThanhToan, 0) + @SoTienPhanBo,
-                                        ConLai = ConLai - @SoTienPhanBo
+                                        ConLai = ConLai - @SoTienPhanBo,
+                                        TrangThaiThanhToan = CASE 
+                                            WHEN ConLai - @SoTienPhanBo <= 0 THEN 2 
+                                            ELSE 1 
+                                        END
                                     WHERE ID = @IDPhieuNhap
                                 ", new { nc.SoTienPhanBo, nc.IDPhieuNhap }, transaction);
                             }

@@ -24,6 +24,9 @@
     .select2-container--default .select2-selection--single .select2-selection__arrow { height: 36px; }
 </style>
 
+@{ string containerId = "pnk_edit_" + Guid.NewGuid().ToString("N"); }
+
+<div id="@containerId">
 @if (ViewBag.IsInlineDetail != true)
 {
     <!-- Toolbar -->
@@ -64,23 +67,23 @@
                     <div class="row g-2">
                         <div class="col-md-3">
                             <label class="form-label text-muted fw-semibold small">Loại nhập kho <span class="text-danger">*</span></label>
-                            <select id="IDLoaiNhapKho" class="form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
+                            <select id="IDLoaiNhapKho_@containerId" class="sel-IDLoaiNhapKho form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label text-muted fw-semibold small">Kho nhập <span class="text-danger">*</span></label>
-                            <select id="IDKho" class="form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
+                            <select id="IDKho_@containerId" class="sel-IDKho form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
                         </div>
                         <div class="col-md-3" id="colKhoNguon" style="display:none;">
                             <label class="form-label text-muted fw-semibold small">Kho xuất <span class="text-danger">*</span></label>
-                            <select id="IDKhoNguon" class="form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
+                            <select id="IDKhoNguon_@containerId" class="sel-IDKhoNguon form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
                         </div>
                         <div class="col-md-3" id="colKhachHang" style="display:none;">
                             <label class="form-label text-muted fw-semibold small">Khách hàng <span class="text-danger">*</span></label>
-                            <select id="IDKhachHang" class="form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
+                            <select id="IDKhachHang_@containerId" class="sel-IDKhachHang form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
                         </div>
                         <div class="col-md-3" id="colNhaCungCap">
                             <label class="form-label text-muted fw-semibold small">Nhà cung cấp <span class="text-danger">*</span></label>
-                            <select id="IDNhaCungCap" class="form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
+                            <select id="IDNhaCungCap_@containerId" class="sel-IDNhaCungCap form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label text-muted fw-semibold small">Người nhận</label>
@@ -103,7 +106,7 @@
                     <div class="row g-2">
                         <div class="col-md-3">
                             <label class="form-label text-muted fw-semibold small">Phương tiện</label>
-                            <select id="IDPhuongTien" class="form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
+                            <select id="IDPhuongTien_@containerId" class="sel-IDPhuongTien form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label text-muted fw-semibold small">Ngày giao hàng</label>
@@ -223,15 +226,17 @@
         </div>
     </div>
 </form>
+</div>
 
 @if (ViewBag.IsInlineDetail == true)
 {
-    <script src="@Url.Content("~/Scripts/phieu-nhap-kho.js?v=2.1")"></script>
     <script>
         var isViewMode = @(isView.ToString().ToLower());
 
         $(document).ready(function () {
-            PhieuNhapKho.init({
+            $.getScript('@Url.Content("~/Scripts/phieu-nhap-kho.js?v=3.0")', function() {
+                var pnk = new window.PhieuNhapKhoClass({
+                containerSelector: '#@containerId',
                 searchLoaiNhapKhoUrl: '@Url.Action("SearchLoaiNhapKho")',
                 searchKhachHangUrl: '@Url.Action("SearchKhachHang")',
                 searchKhoUrl: '@Url.Action("SearchKhoHang")',
@@ -255,11 +260,14 @@
                 isViewMode: isViewMode,
                 isInlineDetail: true
             });
+            pnk.init();
+            $('#@containerId').data('pnkInstance', pnk);
 
-            if (isViewMode) {
-                $('.sel-sanpham, .txt-soluong, .txt-dongia, .txt-thue, .txt-ghichu').prop('disabled', true);
-                $('.btn-remove-row, #btnAddRow, #btnSavePhieu').hide();
-            }
+                if (isViewMode) {
+                    $('.sel-sanpham, .txt-soluong, .txt-dongia, .txt-thue, .txt-ghichu').prop('disabled', true);
+                    $('.btn-remove-row, #btnAddRow, #btnSavePhieu').hide();
+                }
+            });
         });
     </script>
     <style>
@@ -273,12 +281,13 @@
 else
 {
     @section Scripts {
-    <script src="@Url.Content("~/Scripts/phieu-nhap-kho.js?v=2.1")"></script>
+    <script src="@Url.Content("~/Scripts/phieu-nhap-kho.js?v=3.0")"></script>
     <script>
         var isViewMode = @(isView.ToString().ToLower());
 
         $(document).ready(function () {
-            PhieuNhapKho.init({
+            var pnk = new window.PhieuNhapKhoClass({
+                containerSelector: '#@containerId',
                 searchLoaiNhapKhoUrl: '@Url.Action("SearchLoaiNhapKho")',
                 searchKhachHangUrl: '@Url.Action("SearchKhachHang")',
                 searchKhoUrl: '@Url.Action("SearchKhoHang")',
@@ -302,6 +311,8 @@ else
                 isViewMode: isViewMode,
                 isInlineDetail: false
             });
+            pnk.init();
+            $('#@containerId').data('pnkInstance', pnk);
 
             if (isViewMode) {
                 $('.sel-sanpham, .txt-soluong, .txt-dongia, .txt-thue, .txt-ghichu').prop('disabled', true);
@@ -309,7 +320,9 @@ else
             }
 
             $('#btnSavePhieu').on('click', function () {
-                var data = PhieuNhapKho.validateAndSerialize();
+                var pnk = $('#@containerId').data('pnkInstance');
+                if (!pnk) { showToast('error', 'Lỗi khởi tạo đối tượng JavaScript'); return; }
+                var data = pnk.validateAndSerialize();
                 if (!data) return;
 
                 showConfirm("Bạn có chắc chắn muốn lưu phiếu này?", function() {
@@ -338,7 +351,10 @@ else
         });
 
         function LuuVaGhiNow(btn) {
-            var data = PhieuNhapKho.validateAndSerialize();
+            var $container = $(btn).closest('[id^="pnk_edit_"]');
+            var pnk = $container.data('pnkInstance');
+            if (!pnk) { showToast('error', 'Lỗi khởi tạo đối tượng JavaScript'); return; }
+            var data = pnk.validateAndSerialize();
             if (!data) return;
 
             showConfirm('Bạn có chắc chắn muốn lưu và ghi dữ liệu phiếu này? Kho sẽ được cập nhật.', function() {

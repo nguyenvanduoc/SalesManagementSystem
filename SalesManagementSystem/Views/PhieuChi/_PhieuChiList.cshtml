@@ -112,7 +112,7 @@
                                                     <li>
                                                         <button type="button" class="dropdown-item py-2 text-primary"
                                                                 onclick="openFormModal('@Url.Action("AdjustAllocation", "PhieuChi", new { id = item.ID })')">
-                                                                <i class="bi bi-sliders text-primary me-2"></i>Điều chỉnh phân bổ
+                                                                <i class="bi bi-sliders text-primary me-2"></i>Cập nhật
                                                         </button>
                                                     </li>
                                                 }
@@ -188,9 +188,32 @@
     @Html.Partial("_Pagination", Model)
 </div>
 
+<!-- Modal Hủy Phiếu Chi -->
+<div class="modal fade" id="modalHuyPhieuChi" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
+        <div class="modal-content shadow-lg" style="border: none; border-radius: 6px;">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-uppercase" style="color:#0b5b84;">HỦY PHIẾU CHI</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="huy-id" />
+                <div class="mb-3">
+                    <label class="form-label text-muted small fw-semibold">Lý do hủy <span class="text-danger">*</span></label>
+                    <textarea id="huy-lydo" class="form-control" rows="3" placeholder="Nhập lý do hủy phiếu..." required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer bg-light d-flex justify-content-end gap-2">
+                <button type="button" id="btnConfirmHuy" class="btn" style="background-color: #ffc107; color: #fff; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem;">ĐỒNG Ý</button>
+                <button type="button" class="btn" data-bs-dismiss="modal" style="background-color: #e9ecef; color: #333; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem; border: none;">ĐỂ SAU</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 (function () {
-    var $pane = $('#table-container').closest('.tab-pane');
+    var $pane = $('#phieuchi-table-container').closest('.tab-pane');
     if ($pane.length === 0) $pane = $('body');
 
     // Cập nhật Dashboard nếu có dữ liệu cầu nối
@@ -254,11 +277,31 @@
     $pane.on('click.phieuchi_huy', '.btn-huy', function () {
         var id = $(this).data('id');
         var so = $(this).data('so');
-        var lyDo = prompt('Nhập lý do hủy phiếu ' + so + ':');
-        if (!lyDo) return;
+        
+        $pane.find('#huy-id').val(id);
+        $pane.find('#huy-lydo').val('');
+        $pane.find('#modalHuyPhieuChi .modal-title').text('HỦY PHIẾU ' + so);
+        
+        var myModal = new bootstrap.Modal($pane.find('#modalHuyPhieuChi')[0]);
+        myModal.show();
+    });
+
+    $pane.off('click', '#btnConfirmHuy');
+    $pane.on('click', '#btnConfirmHuy', function () {
+        var id = $pane.find('#huy-id').val();
+        var lyDo = $pane.find('#huy-lydo').val().trim();
+        
+        if (!lyDo) {
+            showToast('error', 'Vui lòng nhập lý do hủy.');
+            $pane.find('#huy-lydo').focus();
+            return;
+        }
+        
         $.post('@Url.Action("Huy","PhieuChi")', { id: id, lyDo: lyDo }, function (res) {
             if (res.success) {
                 showToast('success', res.message);
+                var modal = bootstrap.Modal.getInstance($pane.find('#modalHuyPhieuChi')[0]);
+                if (modal) modal.hide();
                 TabManager.reloadActiveTabGrid(false);
             } else {
                 showToast('error', res.message);

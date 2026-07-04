@@ -69,7 +69,7 @@
                     <button type="button" class="btn btn-sm btn-outline-primary float-end" id="btnChiToanBo" style="padding: 0 5px; font-size: 11px; line-height: 1.2;">Chi toàn bộ</button>
                 </label>
                 <div class="input-group">
-                    @Html.TextBoxFor(m => m.SoTienChi, "{0:N0}", new { @class = "form-control text-end fw-bold text-primary fs-5", @id = "SoTienChi", @placeholder = "0", @Value = Model.ID == 0 ? "" : Model.SoTienChi.ToString("N0") })
+                    @Html.TextBoxFor(m => m.SoTienChi, "{0:N0}", new { @class = "form-control text-end fw-bold text-primary fs-5", @id = "SoTienChi", @placeholder = "", @Value = Model.SoTienChi == 0 ? "" : Model.SoTienChi.ToString("N0") })
                     <span class="input-group-text bg-light fw-bold text-muted">đ</span>
                 </div>
                 @Html.ValidationMessageFor(m => m.SoTienChi, "", new { @class = "text-danger small" })
@@ -127,7 +127,7 @@
         }
         else if (ViewBag.IsAdjustAllocation == true)
         {
-            <button type="button" class="btn text-white px-4" style="background:#2998e4" id="btnAdjustAllocation">Lưu điều chỉnh</button>
+            <button type="button" class="btn text-white px-4" style="background:#2998e4" id="btnAdjustAllocation">Lưu cập nhật</button>
             <button type="button" class="btn text-dark px-4" style="background:#e9ecef" data-bs-dismiss="modal">Đóng</button>
         }
         else
@@ -157,8 +157,6 @@
             $modal.find('.modal-dialog').removeClass('modal-lg modal-dialog-centered').addClass('modal-xl').css('margin-top', '30px');
             if (isView) {
                 $modal.find('input, select, textarea').prop('disabled', true);
-            } else if (isAdjustAllocation) {
-                $modal.find('input:not(.input-phanbo, #SoTienChi), select, textarea').prop('disabled', true);
             }
             $modal.find('.select2').select2({ dropdownParent: $modal, width: '100%' });
         }
@@ -325,7 +323,6 @@
         });
 
         $modal.find('#SoTienChi').on('blur', function () {
-            if($(this).val() === '') $(this).val('0');
             autoAllocate();
         });
 
@@ -405,21 +402,17 @@
             var $btn = $(this);
             $btn.prop('disabled', true).text('Đang lưu...');
             
-            $.post('@Url.Action("AdjustAllocation", "PhieuChi")', { 
-                id: @Model.ID, 
-                chiTietJson: $('#chiTietJson').val(),
-                soTienChiMoi: parseCurrency($('#SoTienChi').val())
-            }, function(res) {
+            $.post('@Url.Action("AdjustAllocation", "PhieuChi")', $('#phieuChiForm').serialize(), function(res) {
                 if (res.success) {
                     $('.form-modal-content').closest('.modal').modal('hide');
                     if (typeof loadData === 'function') loadData(); // Reload grid
                 } else {
                     alert('Lỗi: ' + res.message);
-                    $btn.prop('disabled', false).text('Lưu điều chỉnh');
+                    $btn.prop('disabled', false).text('Lưu cập nhật');
                 }
             }).fail(function() {
                 alert('Có lỗi xảy ra khi gọi server');
-                $btn.prop('disabled', false).text('Lưu điều chỉnh');
+                $btn.prop('disabled', false).text('Lưu cập nhật');
             });
         });
     });

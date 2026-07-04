@@ -19,7 +19,7 @@ class Program
             {
                 using (IDbCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "sp_helptext 'sp_CongNo_PhaseTra_NCC_GetList'";
+                    cmd.CommandText = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'KHO_PhieuNhap' AND COLUMN_NAME = 'ConLai'";
                     conn.Open();
                     using (IDataReader reader = cmd.ExecuteReader())
                     {

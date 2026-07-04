@@ -31,6 +31,9 @@ namespace SalesManagementSystem.Controllers
         {
             if (!PermissionHelper.HasPermission("DieuChinhNhapKho", LoaiPhanQuyen.Xem)) return View("AccessDenied");
 
+            if (string.IsNullOrEmpty(tuNgay)) tuNgay = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).ToString("yyyy-MM-dd");
+            if (string.IsNullOrEmpty(denNgay)) denNgay = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month)).ToString("yyyy-MM-dd");
+
             ViewBag.TuNgay = tuNgay;
             ViewBag.DenNgay = denNgay;
             ViewBag.IDLoaiNhap = idLoaiNhap;

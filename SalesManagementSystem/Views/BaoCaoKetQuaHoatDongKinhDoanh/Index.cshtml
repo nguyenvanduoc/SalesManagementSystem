@@ -66,19 +66,6 @@
                 loadData();
             });
 
-            $('#btnReset').click(function () {
-                $('#searchForm')[0].reset();
-                
-                // Đặt lại ngày mặc định
-                var date = new Date();
-                var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-                var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-                
-                $('#TuNgay').val(firstDay.toISOString().split('T')[0]);
-                $('#DenNgay').val(lastDay.toISOString().split('T')[0]);
-                
-                loadData();
-            });
 
             $('#btnExcel').click(function () {
                 var url = '@Url.Action("ExportExcel", "BaoCaoKetQuaHoatDongKinhDoanh")?' + $('#searchForm').serialize();

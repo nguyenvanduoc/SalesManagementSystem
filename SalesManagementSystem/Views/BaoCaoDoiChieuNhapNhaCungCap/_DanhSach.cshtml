@@ -1,0 +1,115 @@
+@model IEnumerable<SalesManagementSystem.Models.ViewModels.BaoCaoDoiChieuNhapNhaCungCapViewModel>
+@{
+    Layout = null;
+
+    decimal tongSoLuongNhap = 0;
+    decimal tongPhaiTra = 0;
+    decimal tongDaThanhToan = 0;
+    decimal conNoCuoiKy = 0;
+
+    if (Model != null && Model.Any())
+    {
+        tongSoLuongNhap = Model.Sum(x => x.SoLuongNhap);
+        tongPhaiTra = Model.Sum(x => x.PhaiTra);
+        tongDaThanhToan = Model.Sum(x => x.DaThanhToan);
+        conNoCuoiKy = Model.Last().ConNoLuyKe;
+    }
+}
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover table-custom" style="white-space: nowrap;">
+        <thead>
+            <tr style="background-color: #f4f6f9; color: #333;">
+                <th class="text-center" style="width: 50px;">STT</th>
+                <th class="text-center">Ngày phát sinh</th>
+                <th class="text-center">Số chứng từ</th>
+                <th class="text-center">Loại phát sinh</th>
+                <th class="text-center">Mã SP</th>
+                <th>Tên sản phẩm / Diễn giải</th>
+                <th class="text-end">Số lượng</th>
+                <th class="text-end">Đơn giá</th>
+                <th class="text-end">Phải trả</th>
+                <th class="text-end">Đã thanh toán</th>
+                <th class="text-end">Còn nợ lũy kế</th>
+                <th>Ghi chú</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                int rowIdx = 0;
+                foreach (var item in Model)
+                {
+                    rowIdx++;
+                    var trClass = rowIdx % 2 == 0 ? "table-secondary-custom" : ""; // Tuỳ chỉnh CSS dòng chẵn nếu hệ thống chưa có sẵn nth-child css
+                    var isNoDauKy = item.LoaiDong == 0;
+                    var isPhieuChi = item.LoaiDong == 2;
+                    var fontWeight = isNoDauKy ? "font-weight: bold;" : "";
+                    
+                    <tr class="@trClass" style="@fontWeight">
+                        <td class="text-center">@item.STT</td>
+                        <td class="text-center">@(item.NgayPhatSinh.HasValue ? item.NgayPhatSinh.Value.ToString("dd/MM/yyyy") : "")</td>
+                        <td class="text-center">
+                            @if(isPhieuChi)
+                            {
+                                <span class="badge bg-success">@item.SoChungTu</span>
+                            }
+                            else if (item.LoaiDong == 1)
+                            {
+                                <span class="badge bg-primary">@item.SoChungTu</span>
+                            }
+                            else
+                            {
+                                @item.SoChungTu
+                            }
+                        </td>
+                        <td class="text-center">
+                            @if (isNoDauKy) { <span class="text-danger fw-bold">@item.LoaiPhatSinh</span> }
+                            else { @item.LoaiPhatSinh }
+                        </td>
+                        <td class="text-center">@item.MaSanPham</td>
+                        <td>@item.TenSanPham</td>
+                        <td class="text-end">@(item.SoLuongNhap > 0 ? item.SoLuongNhap.ToString("N2") : "-")</td>
+                        <td class="text-end">@(item.DonGiaNhap > 0 ? item.DonGiaNhap.ToString("N0") : "-")</td>
+                        <td class="text-end">@(item.PhaiTra > 0 ? item.PhaiTra.ToString("N0") : "-")</td>
+                        <td class="text-end">@(item.DaThanhToan > 0 ? item.DaThanhToan.ToString("N0") : "-")</td>
+                        <td class="text-end text-danger fw-bold">@item.ConNoLuyKe.ToString("N0")</td>
+                        <td>@item.GhiChu</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="12" class="text-center text-muted">Không có dữ liệu phát sinh trong khoảng thời gian này</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr style="background-color: #f4f6f9; font-weight: bold;">
+                <td colspan="6" class="text-end">TỔNG CỘNG:</td>
+                <td class="text-end">@tongSoLuongNhap.ToString("N2")</td>
+                <td class="text-end"></td>
+                <td class="text-end">@tongPhaiTra.ToString("N0")</td>
+                <td class="text-end">@tongDaThanhToan.ToString("N0")</td>
+                <td class="text-end text-danger">@conNoCuoiKy.ToString("N0")</td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+<style>
+    /* Tuỳ chỉnh table theo yêu cầu */
+    .table-custom thead th {
+        vertical-align: middle;
+        background-color: #f4f6f9;
+        font-weight: bold;
+    }
+    .table-custom tbody tr:nth-child(even) {
+        background-color: #dbe6ef !important;
+    }
+    .table-custom tbody tr:hover {
+        background-color: #c9d9e8 !important;
+    }
+</style>

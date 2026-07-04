@@ -32,7 +32,7 @@ namespace SalesManagementSystem.Repositories.Interfaces
         IEnumerable<dynamic> GetPhieuNhapCongNo(int idNhaCungCap);
         decimal GetTienTraTruocNhaCungCap(int idNhaCungCap);
         IEnumerable<PhieuChiChiTietViewModel> GetChiTiet(int idPhieuChi);
-        void DieuChinhPhanBo(int idPhieuChi, List<PhieuChiChiTietViewModel> newChiTiets, int userId, decimal soTienChiMoi);
+        void DieuChinhPhanBo(PhieuChiViewModel model, List<PhieuChiChiTietViewModel> newChiTiets, int userId);
 
         dynamic GetPhieuNhapDetail(int idPhieuNhap);
         IEnumerable<dynamic> GetLichSuChiTienPhieuNhap(int idPhieuNhap);

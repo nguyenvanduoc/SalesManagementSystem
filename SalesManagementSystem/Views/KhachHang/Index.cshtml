@@ -71,10 +71,6 @@
                 }
             });
 
-            $pane.on('click', '.btn-reset', function() {
-                $pane.find('input[name="keyword"]').val('');
-                $pane.find('#searchForm').trigger('submit');
-            });
 
             window.deleteSelectedKhachHang = function() {
                 var selectedIds = [];

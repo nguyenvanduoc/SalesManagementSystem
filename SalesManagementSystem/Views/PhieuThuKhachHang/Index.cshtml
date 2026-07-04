@@ -88,14 +88,6 @@
             });
 
             // Handle Reset button click
-            $pane.on('click', '.btn-reset', function() {
-                $pane.find('input[name="tuNgay"]').val('');
-                $pane.find('input[name="denNgay"]').val('');
-                $pane.find('input[name="soChungTu"]').val('');
-                $pane.find('select[name="idKhachHang"]').val('').trigger('change');
-                $pane.find('select[name="trangThaiCongNo"]').val('').trigger('change');
-                $pane.find('#searchForm').trigger('submit');
-            });
         })();
     </script>
 }

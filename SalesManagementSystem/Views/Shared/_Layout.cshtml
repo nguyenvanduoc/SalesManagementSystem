@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
@@ -14,6 +14,7 @@
     <!-- Global Search CSS -->
     <link rel="stylesheet" href="@Url.Content("~/Content/css/global-search.css")" />
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
 
     <style>
         /* ─── Variables ─────────────────────────────────── */
@@ -807,6 +808,8 @@
 <script src="@Url.Content("~/Scripts/jquery-3.7.0.min.js")"></script>
 <script src="@Url.Content("~/Scripts/bootstrap.bundle.min.js")"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/vn.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // Sidebar toggle
@@ -1185,6 +1188,139 @@
 
 <script>
     /* ================================================================
+       GLOBAL AJAX ERROR HANDLER (Bắt lỗi 401 khi mất Session)
+    ================================================================ */
+    $(document).ajaxError(function (event, jqxhr, settings, thrownError) {
+        if (jqxhr.status === 401 || jqxhr.status === 403) {
+            localStorage.removeItem('tabManagerState');
+            window.location.href = '@Url.Action("Logout", "Login")';
+        }
+    });
+
+    /* ================================================================
+       GLOBAL AJAX SEND HANDLER (Blink effect cho màn hình tìm kiếm)
+    ================================================================ */
+    $(document).ajaxSend(function (event, jqxhr, settings) {
+        if (settings.url && (settings.url.toLowerCase().indexOf('getlist') !== -1 || settings.url.toLowerCase().indexOf('search') !== -1)) {
+            var $tableContainer = $('.tab-pane.active #table-container, .tab-pane.active [id^="table-container-"]');
+            if ($tableContainer.length === 0) {
+                $tableContainer = $('#table-container, [id^="table-container-"]'); 
+            }
+            if ($tableContainer.length > 0) {
+                $tableContainer.css('opacity', '0.5');
+                setTimeout(function() { $tableContainer.css('opacity', '1'); }, 100);
+            }
+        }
+    });
+
+    /* ================================================================
+       GLOBAL FORM RESET HANDLER (Chuẩn SKILL.md)
+    ================================================================ */
+    $(document).on('click', '.btn-reset, [id^="btnReset"]', function () {
+        var $form = $(this).closest('form');
+        if ($form.length === 0) {
+            // Trường hợp nút không nằm trong form, tìm form gần nhất trong tab
+            $form = $(this).closest('.tab-pane').find('form').first();
+            if ($form.length === 0) $form = $('form').first();
+        }
+        
+        if ($form.length > 0) {
+            // 1. Clear form cơ bản
+            $form[0].reset();
+            
+            // 2. Clear thư viện Select2 (nếu có)
+            var $select2 = $form.find('.select2, .select2-hidden-accessible');
+            if ($select2.length > 0) {
+                $select2.val(null).trigger('change');
+            }
+
+            // 3. Xử lý giá trị flatpickr (đặt lại mặc định cho Từ ngày/Đến ngày)
+            var today = new Date();
+            var firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            var lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+            $form.find('.flatpickr-input').each(function() {
+                if (this._flatpickr) {
+                    var name = $(this).attr('name');
+                    if (name === 'tuNgay') {
+                        this._flatpickr.setDate(firstDay);
+                    } else if (name === 'denNgay') {
+                        this._flatpickr.setDate(lastDay);
+                    } else {
+                        this._flatpickr.clear();
+                    }
+                }
+            });
+            
+            // Đợi một chút để DOM cập nhật xong rồi mới submit
+            setTimeout(function() {
+                $form.trigger('submit');
+            }, 50);
+        }
+    });
+
+    /* ================================================================
+       GLOBAL DATE PICKER (Flatpickr)
+    ================================================================ */
+    function initGlobalDatePickers(context) {
+        var today = new Date();
+        var firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        var lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+        $(context).find('input[type="date"]').each(function () {
+            var $this = $(this);
+            if ($this.hasClass('flatpickr-input') || $this.hasClass('date-initialized')) return;
+            $this.addClass('date-initialized');
+
+            var name = $this.attr('name');
+            var val = $this.val();
+
+            // Nếu ô ngày trống và tên là tuNgay/denNgay thì set mặc định đầu/cuối tháng
+            if (!val && (name === 'tuNgay' || name === 'denNgay')) {
+                if (name === 'tuNgay') val = flatpickr.formatDate(firstDay, "Y-m-d");
+                if (name === 'denNgay') val = flatpickr.formatDate(lastDay, "Y-m-d");
+                $this.val(val); // Set value immediately so normal form submit works
+            }
+
+            // Đổi type thành text để trình duyệt không hiện lịch mặc định
+            $this.attr('type', 'text');
+
+            flatpickr(this, {
+                dateFormat: "Y-m-d", // Format gửi lên server
+                altInput: true,
+                altFormat: "d/m/Y", // Format hiển thị
+                allowInput: true,
+                defaultDate: val,
+                locale: "vn"
+            });
+        });
+    }
+
+    // Khởi tạo cho các thẻ có sẵn khi trang vừa load
+    $(document).ready(function() {
+        initGlobalDatePickers(document);
+    });
+
+    // Dùng MutationObserver để bắt các Tab hoặc form được load động bằng AJAX
+    var observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+                mutation.addedNodes.forEach(function (node) {
+                    if (node.nodeType === 1) { // ELEMENT_NODE
+                        // Kiểm tra nếu bản thân node là date hoặc con nó là date
+                        if ($(node).is('input[type="date"]')) {
+                            initGlobalDatePickers($(node).parent());
+                        } else if ($(node).find('input[type="date"]').length > 0) {
+                            initGlobalDatePickers(node);
+                        }
+                    }
+                });
+            }
+        });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    /* ================================================================
        SESSION KEEP-ALIVE
        - Ping /Home/KeepAlive mỗi 4 phút để giữ App Pool sống
        - Tự động logout sau 8 tiếng (28800 giây)
@@ -1211,8 +1347,11 @@
                         window.location.href = logoutUrl;
                     }
                 },
-                error: function () {
-                    // Không kết nối được server - không làm gì, thử lần sau
+                error: function (xhr) {
+                    if (xhr.status === 401 || xhr.status === 403) {
+                        localStorage.removeItem('tabManagerState');
+                        window.location.href = logoutUrl;
+                    }
                 }
             });
         }

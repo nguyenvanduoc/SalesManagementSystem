@@ -237,25 +237,25 @@ namespace SalesManagementSystem.Controllers
             if (model.TrangThai != 2)
                 return Content("<div class='alert alert-warning'>Chỉ có thể điều chỉnh phiếu đã ghi sổ.</div>");
 
-            ViewBag.Title = "Điều chỉnh phân bổ";
+            ViewBag.Title = "Cập nhật";
             ViewBag.IsAdjustAllocation = true;
             PopulateFormDropdowns(model.IDNhaCungCap, model.IDPhieuNhap);
             return PartialView("_Form", model);
         }
 
         [HttpPost]
-        public ActionResult AdjustAllocation(int id, string chiTietJson, decimal soTienChiMoi)
+        public ActionResult AdjustAllocation(PhieuChiViewModel model, string chiTietJson)
         {
             try
             {
                 if (!PermissionHelper.HasPermission("PhieuChi", LoaiPhanQuyen.CapNhat))
                     return Json(new { success = false, message = "Không có quyền thực hiện" });
 
-                var model = _repo.GetByID(id);
-                if (model == null)
+                var oldModel = _repo.GetByID(model.ID);
+                if (oldModel == null)
                     return Json(new { success = false, message = "Phiếu chi không tồn tại" });
 
-                if (model.TrangThai == 3)
+                if (oldModel.TrangThai == 3)
                     return Json(new { success = false, message = "Phiếu chi đã hủy, không thể điều chỉnh." });
 
                 var user = GetCurrentUser();
@@ -267,9 +267,11 @@ namespace SalesManagementSystem.Controllers
                     newChiTiets = Newtonsoft.Json.JsonConvert.DeserializeObject<List<PhieuChiChiTietViewModel>>(chiTietJson);
                 }
 
-                _repo.DieuChinhPhanBo(id, newChiTiets, userId, soTienChiMoi);
+                _repo.DieuChinhPhanBo(model, newChiTiets, userId);
 
-                return Json(new { success = true, message = "Điều chỉnh phân bổ thành công." });
+                AuditLog.AddUpdate("KT_PhieuChi", model.ID.ToString(), null, model);
+
+                return Json(new { success = true, message = "Cập nhật thành công." });
             }
             catch (Exception ex)
             {

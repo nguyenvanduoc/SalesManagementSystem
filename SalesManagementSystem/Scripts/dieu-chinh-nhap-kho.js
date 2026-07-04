@@ -1,5 +1,5 @@
-window.PhieuNhapKhoClass = function (options) {
-    var config = $.extend({
+var DieuChinhNhapKho = (function () {
+    var config = {
         chiTietsJson: [],
         selectedKhoId: null,
         selectedKhoText: '',
@@ -21,12 +21,9 @@ window.PhieuNhapKhoClass = function (options) {
         selectedKhoNguonText: '',
         selectedKhachHangId: null,
         selectedKhachHangText: ''
-    }, options);
+    };
 
-    function getEl(selector) {
-        if (config.containerSelector) {
-            return $(config.containerSelector).find(selector);
-        }
+        function getEl(selector) {
         var $active = $('.tab-pane.active');
         if ($active.length > 0) {
             var $el = $active.find(selector);
@@ -60,7 +57,8 @@ function _formatNumber(n) {
         return dateStr;
     }
 
-    function init() {
+    function init(options) {
+        $.extend(config, options);
         _initSelect2();
         _initEvents();
         _renderTable(config.chiTietsJson);
@@ -71,7 +69,7 @@ function _formatNumber(n) {
 
         // Load Loại Nhập Kho once and initialize Select2 locally
         $.get(config.searchLoaiNhapKhoUrl, function(res) {
-            var $loaiSelect = getEl('.sel-IDLoaiNhapKho');
+            var $loaiSelect = getEl('#IDLoaiNhapKho');
             // Remove existing options except the empty one if any
             $loaiSelect.find('option[value!=""]').remove();
             
@@ -95,7 +93,7 @@ function _formatNumber(n) {
             }
         });
 
-        getEl('.sel-IDKhoNguon').select2({
+        getEl('#IDKhoNguon').select2({
             placeholder: '-- Chọn kho nguồn --',
             minimumInputLength: 0,
             ajax: {
@@ -108,7 +106,7 @@ function _formatNumber(n) {
             }
         });
 
-        getEl('.sel-IDKhachHang').select2({
+        getEl('#IDKhachHang').select2({
             placeholder: '-- Chọn khách hàng --',
             minimumInputLength: 0,
             ajax: {
@@ -121,7 +119,7 @@ function _formatNumber(n) {
             }
         });
 
-        getEl('.sel-IDKho').select2({
+        getEl('#IDKho').select2({
             placeholder: '-- Chọn kho --',
             minimumInputLength: 0,
             ajax: {
@@ -134,7 +132,7 @@ function _formatNumber(n) {
             }
         });
 
-        getEl('.sel-IDNhaCungCap').select2({
+        getEl('#IDNhaCungCap').select2({
             placeholder: '-- Chọn nhà cung cấp --',
             minimumInputLength: 0,
             ajax: {
@@ -147,7 +145,7 @@ function _formatNumber(n) {
             }
         });
 
-        getEl('.sel-IDPhuongTien').select2({
+        getEl('#IDPhuongTien').select2({
             placeholder: '-- Chọn phương tiện --',
             allowClear: true,
             minimumInputLength: 0,
@@ -162,27 +160,26 @@ function _formatNumber(n) {
         });
 
         if (config.selectedKhoId) {
-            getEl('.sel-IDKho').append(new Option(config.selectedKhoText, config.selectedKhoId, true, true)).trigger('change');
+            getEl('#IDKho').append(new Option(config.selectedKhoText, config.selectedKhoId, true, true)).trigger('change');
         }
         if (config.selectedNccId) {
-            getEl('.sel-IDNhaCungCap').append(new Option(config.selectedNccText, config.selectedNccId, true, true)).trigger('change');
+            getEl('#IDNhaCungCap').append(new Option(config.selectedNccText, config.selectedNccId, true, true)).trigger('change');
         }
         if (config.selectedPhuongTienId) {
-            getEl('.sel-IDPhuongTien').append(new Option(config.selectedPhuongTienText, config.selectedPhuongTienId, true, true)).trigger('change');
+            getEl('#IDPhuongTien').append(new Option(config.selectedPhuongTienText, config.selectedPhuongTienId, true, true)).trigger('change');
         }
 
         // IDLoaiNhapKho pre-fill is now handled inside the $.get callback above
         if (config.selectedKhoNguonId) {
-            getEl('.sel-IDKhoNguon').append(new Option(config.selectedKhoNguonText, config.selectedKhoNguonId, true, true)).trigger('change');
+            getEl('#IDKhoNguon').append(new Option(config.selectedKhoNguonText, config.selectedKhoNguonId, true, true)).trigger('change');
         }
         if (config.selectedKhachHangId) {
-            getEl('.sel-IDKhachHang').append(new Option(config.selectedKhachHangText, config.selectedKhachHangId, true, true)).trigger('change');
+            getEl('#IDKhachHang').append(new Option(config.selectedKhachHangText, config.selectedKhachHangId, true, true)).trigger('change');
         }
 
-        getEl('.sel-IDLoaiNhapKho').on('change', function () {
+        getEl('#IDLoaiNhapKho').on('change', function () {
             var $selectedOpt = $(this).find('option:selected');
             var maLoai = $selectedOpt.attr('data-ma') || '';
-            
             if (!maLoai && config.selectedLoaiNhapKhoMa) {
                 maLoai = config.selectedLoaiNhapKhoMa;
             }
@@ -200,7 +197,7 @@ function _formatNumber(n) {
         });
         
         // Trigger change to set correct visibility on load
-        setTimeout(function() { getEl('.sel-IDLoaiNhapKho').trigger('change'); }, 100);
+        setTimeout(function() { getEl('#IDLoaiNhapKho').trigger('change'); }, 100);
     }
 
     function _initSanPhamSelect2($row, ctData) {
@@ -231,7 +228,7 @@ function _formatNumber(n) {
     }
 
     function _renderTable(dataList) {
-        var $tbody = getEl('#PNK_tblChiTiet tbody');
+        var $tbody = getEl('#DCNK_tblChiTiet tbody');
         $tbody.empty();
 
         if (dataList && dataList.length > 0) {
@@ -331,11 +328,11 @@ function _formatNumber(n) {
     }
 
     function _initEvents() {
-        getEl('#PNK_btnAddRow').on('click', function () {
-            _addRowWithData(getEl('#PNK_tblChiTiet tbody'), null);
+        getEl('#DCNK_btnAddRow').on('click', function () {
+            _addRowWithData(getEl('#DCNK_tblChiTiet tbody'), null);
         });
 
-        getEl('#PNK_tblChiTiet').on('click', '.btn-remove-row', function () {
+        getEl('#DCNK_tblChiTiet').on('click', '.btn-remove-row', function () {
             $(this).closest('tr').remove();
             _updateSTT();
             _updateTotal();
@@ -343,7 +340,7 @@ function _formatNumber(n) {
     }
 
     function _updateSTT() {
-        getEl('#PNK_tblChiTiet tbody tr').each(function (idx) {
+        getEl('#DCNK_tblChiTiet tbody tr').each(function (idx) {
             $(this).find('.row-stt').text(idx + 1);
         });
     }
@@ -392,7 +389,7 @@ function _formatNumber(n) {
         var totalCong = 0;
         var totalSoLuong = 0;
 
-        getEl('#PNK_tblChiTiet tbody tr').each(function () {
+        getEl('#DCNK_tblChiTiet tbody tr').each(function () {
             var slInput = $(this).find('.txt-soluong');
             var sl = slInput.is('input') ? _parseMoney(slInput.val()) : _parseMoney(slInput.text() || slInput.attr('data-val'));
 
@@ -423,11 +420,11 @@ function _formatNumber(n) {
         var errorMsg = '';
 
         if (!getEl('#NgayNhap').val()) { errorMsg += 'Ngày nhập không được để trống.\n'; isValid = false; }
-        if (!getEl('.sel-IDLoaiNhapKho').val()) { errorMsg += 'Vui lòng chọn Loại nhập kho.\n'; isValid = false; }
-        if (!getEl('.sel-IDKho').val()) { errorMsg += 'Vui lòng chọn Kho.\n'; isValid = false; }
+        if (!getEl('#IDLoaiNhapKho').val()) { errorMsg += 'Vui lòng chọn Loại nhập kho.\n'; isValid = false; }
+        if (!getEl('#IDKho').val()) { errorMsg += 'Vui lòng chọn Kho.\n'; isValid = false; }
         
         var maLoai = '';
-        var loaiData = getEl('.sel-IDLoaiNhapKho').select2('data');
+        var loaiData = getEl('#IDLoaiNhapKho').select2('data');
         if (loaiData && loaiData.length > 0) {
             maLoai = loaiData[0].ma || '';
         } 
@@ -437,17 +434,17 @@ function _formatNumber(n) {
         }
 
         if (maLoai === 'CHUYEN_KHO') {
-            if (!getEl('.sel-IDKhoNguon').val()) { errorMsg += 'Vui lòng chọn Kho nguồn.\n'; isValid = false; }
-            if (getEl('.sel-IDKhoNguon').val() === getEl('.sel-IDKho').val()) { errorMsg += 'Kho nguồn và Kho nhập không được trùng nhau.\n'; isValid = false; }
-            if (!getEl('.sel-IDNhaCungCap').val()) { errorMsg += 'Vui lòng chọn Nhà cung cấp.\n'; isValid = false; }
+            if (!getEl('#IDKhoNguon').val()) { errorMsg += 'Vui lòng chọn Kho nguồn.\n'; isValid = false; }
+            if (getEl('#IDKhoNguon').val() === getEl('#IDKho').val()) { errorMsg += 'Kho nguồn và Kho nhập không được trùng nhau.\n'; isValid = false; }
+            if (!getEl('#IDNhaCungCap').val()) { errorMsg += 'Vui lòng chọn Nhà cung cấp.\n'; isValid = false; }
         } else if (maLoai === 'TRA_HANG') {
-            if (!getEl('.sel-IDKhachHang').val()) { errorMsg += 'Vui lòng chọn Khách hàng.\n'; isValid = false; }
+            if (!getEl('#IDKhachHang').val()) { errorMsg += 'Vui lòng chọn Khách hàng.\n'; isValid = false; }
         } else {
-            if (!getEl('.sel-IDNhaCungCap').val()) { errorMsg += 'Vui lòng chọn Nhà cung cấp.\n'; isValid = false; }
+            if (!getEl('#IDNhaCungCap').val()) { errorMsg += 'Vui lòng chọn Nhà cung cấp.\n'; isValid = false; }
         }
 
         var chiTiets = [];
-        var rows = getEl('#PNK_tblChiTiet tbody tr');
+        var rows = getEl('#DCNK_tblChiTiet tbody tr');
         if (rows.length === 0) {
             errorMsg += 'Phiếu nhập phải có ít nhất 1 mặt hàng.\n';
             isValid = false;
@@ -503,25 +500,27 @@ function _formatNumber(n) {
             ID: getEl('#ID').val(),
             SoChungTu: getEl('#SoChungTu').val(),
             NgayNhap: getEl('#NgayNhap').val(),
-            IDKho: getEl('.sel-IDKho').val(),
-            IDNhaCungCap: getEl('.sel-IDNhaCungCap').val(),
+            IDKho: getEl('#IDKho').val(),
+            IDNhaCungCap: getEl('#IDNhaCungCap').val(),
             SoHoaDon: getEl('#SoHoaDon').val(),
             NgayHoaDon: getEl('#NgayHoaDon').val(),
             TenNguoiGiao: getEl('#TenNguoiGiao').val(),
             SoDienThoaiNguoiGiao: getEl('#SoDienThoaiNguoiGiao').val(),
             TenNguoiNhan: getEl('#TenNguoiNhan').val(),
             GhiChu: getEl('#GhiChu').val(),
-            IDPhuongTien: getEl('.sel-IDPhuongTien').val(),
+            IDPhuongTien: getEl('#IDPhuongTien').val(),
             NgayGiaoHang: getEl('#NgayGiaoHang').val(),
             HoTenTaiXe: getEl('#HoTenTaiXe').val(),
             SoDienThoaiTaiXe: getEl('#SoDienThoaiTaiXe').val(),
-            IDLoaiNhapKho: getEl('.sel-IDLoaiNhapKho').val(),
-            IDKhoNguon: getEl('.sel-IDKhoNguon').val(),
-            IDKhachHang: getEl('.sel-IDKhachHang').val(),
+            IDLoaiNhapKho: getEl('#IDLoaiNhapKho').val(),
+            IDKhoNguon: getEl('#IDKhoNguon').val(),
+            IDKhachHang: getEl('#IDKhachHang').val(),
             ChiTiets: chiTiets
         };
     }
 
-    this.init = init;
-    this.validateAndSerialize = validateAndSerialize;
-};
+    return {
+        init: init,
+        validateAndSerialize: validateAndSerialize
+    };
+})();
