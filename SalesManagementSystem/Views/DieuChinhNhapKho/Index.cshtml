@@ -130,7 +130,7 @@
 
             var data = $('#searchForm').serialize() + '&page=' + page;
             $.ajax({
-                url: '/DieuChinhNhapKho/Index',
+                url: '@Url.Action("Index", "DieuChinhNhapKho")',
                 type: 'GET',
                 data: data,
                 success: function (res) {

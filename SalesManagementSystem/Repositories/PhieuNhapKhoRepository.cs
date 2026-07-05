@@ -25,6 +25,7 @@ namespace SalesManagementSystem.Repositories
             string tuNgay, string denNgay,
             string soChungTu, int? idKho, int? idNhaCungCap, 
             int? trangThai, string tenNguoiNhan,
+            string tenNguoiGiao, int? idPhuongTien,
             out int totalRecords)
         {
             using (var conn = _db.CreateConnection())
@@ -37,6 +38,8 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@IDNhaCungCap", idNhaCungCap);
                 p.Add("@TrangThai", trangThai);
                 p.Add("@TenNguoiNhan", tenNguoiNhan);
+                p.Add("@TenNguoiGiao", tenNguoiGiao);
+                p.Add("@IDPhuongTien", idPhuongTien);
                 p.Add("@Offset", (page - 1) * pageSize);
                 p.Add("@PageSize", pageSize);
                 p.Add("@TotalRecords", dbType: DbType.Int32, direction: ParameterDirection.Output);
@@ -135,6 +138,9 @@ namespace SalesManagementSystem.Repositories
 
                 // Tính toán lại và cập nhật TongTienHang, TongTienThue, TongCong vào KHO_PhieuNhap dựa trên KHO_PhieuNhap_ChiTiet
                 int activeId = model.ID > 0 ? model.ID : newId;
+
+                // Cập nhật TrangThai
+                conn.Execute("UPDATE KHO_PhieuNhap SET TrangThai = @TrangThai WHERE ID = @ID", new { TrangThai = model.TrangThai, ID = activeId });
 
                 // Cập nhật NgaySanXuat, HanSuDung cho từng chi tiết
                 if (model.ChiTiets != null && model.ChiTiets.Count > 0)

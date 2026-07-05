@@ -26,6 +26,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public string TenNguoiNhan { get; set; }
         public string GhiChu { get; set; }
         public int TrangThai { get; set; }
+        public int TrangThaiThanhToan { get; set; }
         public bool IsReadOnly { get; set; } // Set to true if TrangThai == 2 or 3
 
         public int? IDPhuongTien { get; set; }

@@ -1,5 +1,7 @@
-﻿using System.Web.Mvc;
+using System.Web.Mvc;
 using System.Web.Routing;
+using System;
+using System.Linq;
 using SalesManagementSystem.Helpers;
 using SalesManagementSystem.Models.ViewModels;
 
@@ -36,6 +38,32 @@ namespace SalesManagementSystem.Controllers
             }
 
             AuditLog = new AuditHelper();
+            
+            // Auto-default tuNgay and denNgay to current month on initial screen load
+            if (filterContext.ActionParameters.ContainsKey("tuNgay"))
+            {
+                var tuNgay = filterContext.ActionParameters["tuNgay"] as string;
+                bool hasParam = (filterContext.HttpContext.Request.QueryString.AllKeys.Contains("tuNgay") || 
+                                 filterContext.HttpContext.Request.Form.AllKeys.Contains("tuNgay"));
+                                
+                if (!hasParam && string.IsNullOrEmpty(tuNgay))
+                {
+                    filterContext.ActionParameters["tuNgay"] = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).ToString("yyyy-MM-dd");
+                }
+            }
+
+            if (filterContext.ActionParameters.ContainsKey("denNgay"))
+            {
+                var denNgay = filterContext.ActionParameters["denNgay"] as string;
+                bool hasParam = (filterContext.HttpContext.Request.QueryString.AllKeys.Contains("denNgay") || 
+                                 filterContext.HttpContext.Request.Form.AllKeys.Contains("denNgay"));
+                                
+                if (!hasParam && string.IsNullOrEmpty(denNgay))
+                {
+                    filterContext.ActionParameters["denNgay"] = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month)).ToString("yyyy-MM-dd");
+                }
+            }
+
             base.OnActionExecuting(filterContext);
         }
 

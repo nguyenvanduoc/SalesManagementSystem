@@ -13,6 +13,7 @@
                         <th class="text-center">Ngày nhập</th>
                         <th>Kho nhập</th>
                         <th>Nhà cung cấp</th>
+                        <th>Người giao hàng</th>
                         <th>Người nhận</th>
                         <th>Phương tiện</th>
                         <th class="text-end">Số lượng</th>
@@ -57,7 +58,7 @@
                                                     </a>
                                                 </li>
                                             }
-                                            @if (item.TrangThai == 1 && SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuNhapKho", SalesManagementSystem.Helpers.LoaiPhanQuyen.CapNhat))
+                                            @if ((item.TrangThai == 0 || item.TrangThai == 1) && SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuNhapKho", SalesManagementSystem.Helpers.LoaiPhanQuyen.CapNhat))
                                             {
                                                 <li>
                                                     <a href="@Url.Action("Edit", "PhieuNhapKho", new { id = item.ID })" class="dropdown-item">
@@ -80,7 +81,7 @@
                                                 </li>
                                             }
                                             
-                                            @if (item.TrangThai == 1 && SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuNhapKho", SalesManagementSystem.Helpers.LoaiPhanQuyen.Xoa))
+                                            @if ((item.TrangThai == 0 || item.TrangThai == 1) && SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuNhapKho", SalesManagementSystem.Helpers.LoaiPhanQuyen.Xoa))
                                             {
                                                 <li><hr class="dropdown-divider"></li>
                                                 <li>
@@ -97,6 +98,7 @@
                                 <td class="text-center align-middle">@(item.NgayNhap.ToString("dd/MM/yyyy"))</td>
                                 <td class="align-middle">@item.TenKho</td>
                                 <td class="align-middle">@item.TenNhaCungCap</td>
+                                <td class="align-middle">@item.TenNguoiGiao</td>
                                 <td class="align-middle">@item.TenNguoiNhan</td>
                                 <td class="align-middle">@item.TenPhuongTien</td>
                                 <td class="text-end align-middle">@(item.TongSoLuong.ToString("N0"))</td>
@@ -109,9 +111,24 @@
                                     @(item.NgayTao?.ToString("dd/MM/yyyy HH:mm") ?? "")
                                 </td>
                                 <td class="text-center align-middle">
-                                    @if (item.TrangThai == 1)
+                                    @if (item.TrangThai == 0)
                                     {
-                                        <span class="badge bg-secondary" style="font-size: 0.8rem; padding: 5px 8px;">Đề nghị ghi</span>
+                                        <span class="badge bg-light text-dark border" style="font-size: 0.8rem; padding: 5px 8px;">Lưu nháp</span>
+                                    }
+                                    else if (item.TrangThai == 1)
+                                    {
+                                        if (item.TrangThaiThanhToan == 1)
+                                        {
+                                            <span class="badge bg-secondary" style="font-size: 0.8rem; padding: 5px 8px;">Đề nghị ghi (thanh toán 1 phần)</span>
+                                        }
+                                        else if (item.TrangThaiThanhToan == 2)
+                                        {
+                                            <span class="badge bg-secondary" style="font-size: 0.8rem; padding: 5px 8px;">Đề nghị ghi (đã thanh toán)</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary" style="font-size: 0.8rem; padding: 5px 8px;">Đề nghị ghi</span>
+                                        }
                                     }
                                     else if (item.TrangThai == 2)
                                     {
@@ -150,7 +167,7 @@
                 {
                     <tfoot>
                         <tr class="fw-bold" style="background-color: #f8f9fa;">
-                            <td colspan="9" class="text-end">Tổng cộng</td>
+                            <td colspan="10" class="text-end">Tổng cộng</td>
                             <td class="text-end">@(Model.Items.Sum(x => x.TongSoLuong).ToString("N0"))</td>
                             <td class="text-end d-none">@(Model.Items.Sum(x => x.TongTienThue).ToString("N0"))</td>
                             <td class="text-end" style="color: #1a5276; font-size: 1.1em;">@(Model.Items.Sum(x => x.TongCong).ToString("N0"))</td>

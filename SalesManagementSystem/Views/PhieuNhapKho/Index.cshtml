@@ -53,6 +53,14 @@
                         @Html.DropDownList("idNhaCungCap", (SelectList)ViewBag.NhaCungCaps, "-- Tất cả --", new { @class = "form-select form-select-sm ddlNhaCungCap" })
                     </div>
                     <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Người giao hàng</label>
+                        <input type="text" name="tenNguoiGiao" class="form-control form-control-sm" placeholder="Nhập người giao..." value="@ViewBag.TenNguoiGiao" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Phương tiện</label>
+                        @Html.DropDownList("idPhuongTien", (SelectList)ViewBag.PhuongTiens, "-- Tất cả --", new { @class = "form-select form-select-sm ddlPhuongTien" })
+                    </div>
+                    <div class="col-md-2">
                         <label class="form-label text-muted small mb-1">Trạng thái</label>
                         <select name="trangThai" class="form-select form-select-sm">
                             <option value="">-- Tất cả --</option>

@@ -43,17 +43,22 @@ namespace SalesManagementSystem.Controllers
             return new SelectList(items, "ID", "Name", selectedId);
         }
 
-        public ActionResult Index(
-            int page = 1, int pageSize = 20,
-            string tuNgay = "", string denNgay = "",
-            string soChungTu = "", int? idKho = null,
-            int? idNhaCungCap = null, int? trangThai = null,
-            string tenNguoiNhan = "")
+        private SelectList GetPhuongTienList(int? selectedId = null)
+        {
+            var items = _repo.GetPhuongTienForDropdown("").Select(x => new { ID = x.ID, Name = x.MaPhuongTien + " - " + x.TenPhuongTien }).ToList();
+            return new SelectList(items, "ID", "Name", selectedId);
+        }
+
+        public ActionResult Index(int page = 1, int pageSize = 20, 
+            string tuNgay = null, string denNgay = null,
+            string soChungTu = null, int? idKho = null, int? idNhaCungCap = null, 
+            int? trangThai = null, string tenNguoiNhan = null,
+            string tenNguoiGiao = null, int? idPhuongTien = null)
         {
             if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.Xem)) return View("AccessDenied");
 
             int totalRecords;
-            var list = _repo.GetPaged(page, pageSize, tuNgay, denNgay, soChungTu, idKho, idNhaCungCap, trangThai, tenNguoiNhan, out totalRecords);
+            var list = _repo.GetPaged(page, pageSize, tuNgay, denNgay, soChungTu, idKho, idNhaCungCap, trangThai, tenNguoiNhan, tenNguoiGiao, idPhuongTien, out totalRecords);
 
             var model = new PagedListViewModel<PhieuNhapKhoListViewModel>
             {
@@ -69,7 +74,9 @@ namespace SalesManagementSystem.Controllers
             ViewBag.SoChungTu = soChungTu;
             ViewBag.Khos = GetKhoList(idKho);
             ViewBag.NhaCungCaps = GetNhaCungCapList(idNhaCungCap);
+            ViewBag.PhuongTiens = GetPhuongTienList(idPhuongTien);
             ViewBag.TrangThai = trangThai;
+            ViewBag.TenNguoiGiao = tenNguoiGiao;
 
             if (Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 return PartialView("_PhieuNhapKhoList", model);
@@ -78,13 +85,13 @@ namespace SalesManagementSystem.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetList(int page = 1, int pageSize = 20, string tuNgay = "", string denNgay = "", string soChungTu = "", int? idKho = null, int? idNhaCungCap = null, int? trangThai = null, string tenNguoiNhan = "")
+        public ActionResult GetList(int page = 1, int pageSize = 20, string tuNgay = "", string denNgay = "", string soChungTu = "", int? idKho = null, int? idNhaCungCap = null, int? trangThai = null, string tenNguoiNhan = "", string tenNguoiGiao = "", int? idPhuongTien = null)
         {
             if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.Xem)) return Content("<div class='alert alert-danger'>Không có quyền truy cập</div>");
 
             try 
             {
-                var list = _repo.GetPaged(page, pageSize, tuNgay, denNgay, soChungTu, idKho, idNhaCungCap, trangThai, tenNguoiNhan, out int totalRecords);
+                var list = _repo.GetPaged(page, pageSize, tuNgay, denNgay, soChungTu, idKho, idNhaCungCap, trangThai, tenNguoiNhan, tenNguoiGiao, idPhuongTien, out int totalRecords);
 
                 var model = new PagedListViewModel<PhieuNhapKhoListViewModel>
                 {
@@ -104,14 +111,14 @@ namespace SalesManagementSystem.Controllers
         }
 
         [HttpGet]
-        public ActionResult ExportExcel(string tuNgay = "", string denNgay = "", string soChungTu = "", int? idKho = null, int? idNhaCungCap = null, int? trangThai = null, string tenNguoiNhan = "")
+        public ActionResult ExportExcel(string tuNgay = "", string denNgay = "", string soChungTu = "", int? idKho = null, int? idNhaCungCap = null, int? trangThai = null, string tenNguoiNhan = "", string tenNguoiGiao = "", int? idPhuongTien = null)
         {
             if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.Xem)) 
                 return View("AccessDenied");
 
             try
             {
-                var list = _repo.GetPaged(1, 100000, tuNgay, denNgay, soChungTu, idKho, idNhaCungCap, trangThai, tenNguoiNhan, out int totalRecords);
+                var list = _repo.GetPaged(1, 100000, tuNgay, denNgay, soChungTu, idKho, idNhaCungCap, trangThai, tenNguoiNhan, tenNguoiGiao, idPhuongTien, out int totalRecords);
 
                 var session = (UserLoginViewModel)Session[CommonConstants.USER_SESSION];
                 string nguoiLapBieu = session != null ? (session.HoDem + " " + session.Ten).Trim() : "Hệ thống";
@@ -217,7 +224,7 @@ namespace SalesManagementSystem.Controllers
             };
 
             int total;
-            var list = _repo.GetPaged(1, 1, null, null, entity.SoChungTu, null, null, null, null, out total);
+            var list = _repo.GetPaged(1, 1, null, null, entity.SoChungTu, null, null, null, null, null, null, out total);
             var item = list.FirstOrDefault();
             if (item != null)
             {
@@ -287,6 +294,7 @@ namespace SalesManagementSystem.Controllers
                 TenNguoiNhan = entity.TenNguoiNhan,
                 GhiChu = entity.GhiChu,
                 TrangThai = entity.TrangThai,
+                TrangThaiThanhToan = entity.TrangThaiThanhToan,
                 IsReadOnly = isView || entity.TrangThai == 2 || entity.TrangThai == 3,
                 IDLoaiNhapKho = entity.IDLoaiNhapKho,
                 IDKhoNguon = entity.IDKhoNguon,
@@ -298,7 +306,7 @@ namespace SalesManagementSystem.Controllers
             };
 
             int total;
-            var list = _repo.GetPaged(1, 1, null, null, entity.SoChungTu, null, null, null, null, out total);
+            var list = _repo.GetPaged(1, 1, null, null, entity.SoChungTu, null, null, null, null, null, null, out total);
             var item = list.FirstOrDefault();
             if (item != null)
             {
@@ -380,12 +388,12 @@ namespace SalesManagementSystem.Controllers
                 if (model.ID > 0)
                 {
                     _repo.Save(model, userId);
-                    return Json(new { success = true, message = "Cập nhật phiếu nhập kho thành công" });
+                    return Json(new { success = true, message = model.TrangThai == 0 ? "Lưu nháp thành công" : "Cập nhật phiếu nhập kho thành công" });
                 }
                 else
                 {
                     int newId = _repo.Save(model, userId);
-                    return Json(new { success = true, id = newId, soChungTu = model.SoChungTu, message = "Đề nghị ghi thành công" });
+                    return Json(new { success = true, id = newId, soChungTu = model.SoChungTu, message = model.TrangThai == 0 ? "Lưu nháp thành công" : "Đề nghị ghi thành công" });
                 }
             }
             catch (Exception ex)
@@ -490,7 +498,7 @@ namespace SalesManagementSystem.Controllers
             };
 
             int total;
-            var list = _repo.GetPaged(1, 1, null, null, entity.SoChungTu, null, null, null, null, out total);
+            var list = _repo.GetPaged(1, 1, null, null, entity.SoChungTu, null, null, null, null, null, null, out total);
             var item = list.FirstOrDefault();
             if (item != null)
             {

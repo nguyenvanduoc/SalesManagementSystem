@@ -36,13 +36,16 @@
         </a>
         @if (!isView)
         {
+            <button type="button" id="btnSaveDraft" class="btn btn-sm btn-secondary me-1">
+                <i class="bi bi-file-earmark-text me-1"></i> Lưu nháp
+            </button>
             <button type="button" id="btnSavePhieu" class="btn btn-sm text-white" style="background-color:#2998e4;border:none;">
                 <i class="bi bi-save me-1"></i> Lưu phiếu nhập
             </button>
         }
         @if (!isView)
         {
-            <button type="button" id="btnGhiDuLieu" class="btn btn-sm btn-success" onclick="LuuVaGhiNow(this)" style="@(Model.TrangThai == 1 ? "" : "display:none;")">
+            <button type="button" id="btnGhiDuLieu" class="btn btn-sm btn-success" onclick="LuuVaGhiNow(this)" style="@((Model.TrangThai == 0 || Model.TrangThai == 1) ? "" : "display:none;")">
                 <i class="bi bi-check-circle me-1"></i> Lưu và ghi
             </button>
         }
@@ -195,7 +198,21 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <span class="text-muted small me-2">Trạng thái:</span>
-                        @if (Model.TrangThai == 1) { <span class="badge bg-secondary" id="badgeTrangThai">Đề nghị ghi</span> }
+                        @if (Model.TrangThai == 1) 
+                        { 
+                            if (Model.TrangThaiThanhToan == 1)
+                            {
+                                <span class="badge bg-secondary" id="badgeTrangThai">Đề nghị ghi (thanh toán một phần)</span> 
+                            }
+                            else if (Model.TrangThaiThanhToan == 2)
+                            {
+                                <span class="badge bg-secondary" id="badgeTrangThai">Đề nghị ghi (đã thanh toán)</span> 
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary" id="badgeTrangThai">Đề nghị ghi</span> 
+                            }
+                        }
                         else if (Model.TrangThai == 2) { <span class="badge bg-success" id="badgeTrangThai">Đã ghi</span> }
                         else if (Model.TrangThai == 3) { <span class="badge bg-danger" id="badgeTrangThai">Đã hủy</span> }
                         else { <span class="badge bg-secondary" id="badgeTrangThai">Thêm mới</span> }
@@ -319,11 +336,45 @@ else
                 $('.btn-remove-row, #btnAddRow, #btnSavePhieu').hide();
             }
 
+            $('#btnSaveDraft').on('click', function () {
+                var pnk = $('#@containerId').data('pnkInstance');
+                if (!pnk) { showToast('error', 'Lỗi khởi tạo đối tượng JavaScript'); return; }
+                var data = pnk.validateAndSerialize();
+                if (!data) return;
+                data.TrangThai = 0;
+
+                showConfirm("Bạn có chắc chắn muốn lưu nháp phiếu này?", function() {
+                    $.ajax({
+                        url: '@Url.Action("Save")',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(data),
+                        success: function (res) {
+                            if (res.success) {
+                                showToast('success', res.message);
+                                if (data.ID == 0 && res.id) {
+                                    $('#ID').val(res.id);
+                                    $('#SoChungTu').val(res.soChungTu);
+                                    $('#btnGhiDuLieu').show();
+                                    $('#badgeTrangThai').text('Nháp');
+                                } else {
+                                    $('#badgeTrangThai').text('Nháp');
+                                }
+                            } else {
+                                showToast('error', res.message);
+                            }
+                        },
+                        error: function () { showToast('error', 'Đã xảy ra lỗi hệ thống'); }
+                    });
+                });
+            });
+
             $('#btnSavePhieu').on('click', function () {
                 var pnk = $('#@containerId').data('pnkInstance');
                 if (!pnk) { showToast('error', 'Lỗi khởi tạo đối tượng JavaScript'); return; }
                 var data = pnk.validateAndSerialize();
                 if (!data) return;
+                data.TrangThai = 1;
 
                 showConfirm("Bạn có chắc chắn muốn lưu phiếu này?", function() {
                     $.ajax({
@@ -356,6 +407,7 @@ else
             if (!pnk) { showToast('error', 'Lỗi khởi tạo đối tượng JavaScript'); return; }
             var data = pnk.validateAndSerialize();
             if (!data) return;
+            data.TrangThai = 1;
 
             showConfirm('Bạn có chắc chắn muốn lưu và ghi dữ liệu phiếu này? Kho sẽ được cập nhật.', function() {
                 $.ajax({

@@ -35,5 +35,6 @@ namespace SalesManagementSystem.Models.Entities
         public int? IDLoaiNhapKho { get; set; }
         public int? IDKhoNguon { get; set; }
         public int? IDKhachHang { get; set; }
+        public int TrangThaiThanhToan { get; set; }
     }
 }

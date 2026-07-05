@@ -10,6 +10,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public string LoaiPhatSinh { get; set; }
         public string MaSanPham { get; set; }
         public string TenSanPham { get; set; }
+        public string TenNhaCungCap { get; set; }
         public string DienGiai { get; set; }
         public decimal SoLuongNhap { get; set; }
         public decimal DonGiaNhap { get; set; }

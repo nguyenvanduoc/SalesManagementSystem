@@ -18,7 +18,7 @@ namespace SalesManagementSystem.Repositories
             _db = db;
         }
 
-        public IEnumerable<BaoCaoDoiChieuNhapNhaCungCapViewModel> GetList(int idNhaCungCap, DateTime tuNgay, DateTime denNgay)
+        public IEnumerable<BaoCaoDoiChieuNhapNhaCungCapViewModel> GetList(int? idNhaCungCap, DateTime tuNgay, DateTime denNgay)
         {
             using (var conn = _db.CreateConnection())
             {

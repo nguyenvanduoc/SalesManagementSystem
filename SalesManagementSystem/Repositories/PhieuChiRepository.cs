@@ -155,11 +155,11 @@ namespace SalesManagementSystem.Repositories
                     if (ct.LoaiChi == 1 && ct.IDPhieuNhap.HasValue)
                     {
                         conn.Execute(@"
-                            UPDATE KHO_PhieuNhap
-                            SET DaThanhToan = ISNULL(DaThanhToan, 0) + @SoTienPhanBo,
-                                ConLai = ISNULL(ConLai, 0) - @SoTienPhanBo,
-                                TrangThaiThanhToan = CASE WHEN ISNULL(ConLai, 0) - @SoTienPhanBo <= 0 THEN 2 ELSE 1 END
-                            WHERE ID = @IDPhieuNhap
+                              UPDATE KHO_PhieuNhap
+                              SET DaThanhToan = ISNULL(DaThanhToan, 0) + @SoTienPhanBo,
+                                  ConLai = ISNULL(TongCong, 0) - (ISNULL(DaThanhToan, 0) + @SoTienPhanBo),
+                                  TrangThaiThanhToan = CASE WHEN ISNULL(TongCong, 0) - (ISNULL(DaThanhToan, 0) + @SoTienPhanBo) <= 0 THEN 2 ELSE 1 END
+                              WHERE ID = @IDPhieuNhap
                         ", new { SoTienPhanBo = ct.SoTienPhanBo, IDPhieuNhap = ct.IDPhieuNhap });
                     }
                 }
@@ -236,8 +236,8 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
             {
                 var sql = idNhaCungCap.HasValue
-                    ? "SELECT ID, SoChungTu AS TenHienThi FROM KHO_PhieuNhap WHERE IsDeleted = 0 AND TrangThai = 2 AND (ISNULL(TrangThaiThanhToan, 0) < 2 OR ID = @CurrentID) AND IDNhaCungCap = @IDNhaCungCap ORDER BY NgayNhap DESC"
-                    : "SELECT ID, SoChungTu AS TenHienThi FROM KHO_PhieuNhap WHERE IsDeleted = 0 AND TrangThai = 2 AND (ISNULL(TrangThaiThanhToan, 0) < 2 OR ID = @CurrentID) ORDER BY NgayNhap DESC";
+                    ? "SELECT ID, SoChungTu AS TenHienThi FROM KHO_PhieuNhap WHERE IsDeleted = 0 AND TrangThai IN (1, 2) AND (ISNULL(TrangThaiThanhToan, 0) < 2 OR ID = @CurrentID) AND IDNhaCungCap = @IDNhaCungCap ORDER BY NgayNhap DESC"
+                    : "SELECT ID, SoChungTu AS TenHienThi FROM KHO_PhieuNhap WHERE IsDeleted = 0 AND TrangThai IN (1, 2) AND (ISNULL(TrangThaiThanhToan, 0) < 2 OR ID = @CurrentID) ORDER BY NgayNhap DESC";
                 return conn.Query<dynamic>(sql, new { IDNhaCungCap = idNhaCungCap, CurrentID = currentPhieuNhapId }).ToList();
             }
         }
@@ -257,9 +257,9 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
             {
                 return conn.Query<dynamic>(
-                    @"SELECT ID, SoChungTu AS SoPhieuNhap, NgayNhap, TongCong AS TongTien, DaThanhToan, ConLai 
+                    @"SELECT ID, SoChungTu AS SoPhieuNhap, NgayNhap, TongCong AS TongTien, ISNULL(DaThanhToan, 0) AS DaThanhToan, (TongCong - ISNULL(DaThanhToan, 0)) AS ConLai 
                       FROM KHO_PhieuNhap 
-                      WHERE IsDeleted = 0 AND TrangThai = 2 AND ISNULL(ConLai, 0) > 0 AND IDNhaCungCap = @IDNhaCungCap 
+                      WHERE IsDeleted = 0 AND TrangThai IN (1, 2) AND (TongCong - ISNULL(DaThanhToan, 0)) > 0 AND IDNhaCungCap = @IDNhaCungCap 
                       ORDER BY NgayNhap ASC, ID ASC", 
                     new { IDNhaCungCap = idNhaCungCap }
                 ).ToList();
@@ -531,15 +531,15 @@ namespace SalesManagementSystem.Repositories
                             if (old.IDPhieuNhap.HasValue)
                             {
                                 conn.Execute(@"
-                                    UPDATE KHO_PhieuNhap 
-                                    SET DaThanhToan = ISNULL(DaThanhToan, 0) - @SoTienPhanBo,
-                                        ConLai = ConLai + @SoTienPhanBo,
-                                        TrangThaiThanhToan = CASE 
-                                            WHEN ConLai + @SoTienPhanBo <= 0 THEN 2 
-                                            WHEN ISNULL(DaThanhToan, 0) - @SoTienPhanBo <= 0 THEN 0 
-                                            ELSE 1 
-                                        END
-                                    WHERE ID = @IDPhieuNhap
+                                      UPDATE KHO_PhieuNhap 
+                                      SET DaThanhToan = ISNULL(DaThanhToan, 0) - @SoTienPhanBo,
+                                          ConLai = ISNULL(TongCong, 0) - (ISNULL(DaThanhToan, 0) - @SoTienPhanBo),
+                                          TrangThaiThanhToan = CASE 
+                                              WHEN ISNULL(TongCong, 0) - (ISNULL(DaThanhToan, 0) - @SoTienPhanBo) <= 0 THEN 2 
+                                              WHEN ISNULL(DaThanhToan, 0) - @SoTienPhanBo <= 0 THEN 0 
+                                              ELSE 1 
+                                          END
+                                      WHERE ID = @IDPhieuNhap
                                 ", new { old.SoTienPhanBo, old.IDPhieuNhap }, transaction);
                             }
                         }
@@ -594,14 +594,14 @@ namespace SalesManagementSystem.Repositories
                             if (nc.LoaiChi == 1 && nc.IDPhieuNhap.HasValue)
                             {
                                 conn.Execute(@"
-                                    UPDATE KHO_PhieuNhap 
-                                    SET DaThanhToan = ISNULL(DaThanhToan, 0) + @SoTienPhanBo,
-                                        ConLai = ConLai - @SoTienPhanBo,
-                                        TrangThaiThanhToan = CASE 
-                                            WHEN ConLai - @SoTienPhanBo <= 0 THEN 2 
-                                            ELSE 1 
-                                        END
-                                    WHERE ID = @IDPhieuNhap
+                                      UPDATE KHO_PhieuNhap 
+                                      SET DaThanhToan = ISNULL(DaThanhToan, 0) + @SoTienPhanBo,
+                                          ConLai = ISNULL(TongCong, 0) - (ISNULL(DaThanhToan, 0) + @SoTienPhanBo),
+                                          TrangThaiThanhToan = CASE 
+                                              WHEN ISNULL(TongCong, 0) - (ISNULL(DaThanhToan, 0) + @SoTienPhanBo) <= 0 THEN 2 
+                                              ELSE 1 
+                                          END
+                                      WHERE ID = @IDPhieuNhap
                                 ", new { nc.SoTienPhanBo, nc.IDPhieuNhap }, transaction);
                             }
                         }

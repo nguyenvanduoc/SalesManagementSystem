@@ -1,28 +1,21 @@
-@model IEnumerable<SalesManagementSystem.Models.ViewModels.BaoCaoDoiChieuNhapNhaCungCapViewModel>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.BaoCaoDoiChieuNhapNhaCungCapViewModel>
 @{
     Layout = null;
 
-    decimal tongSoLuongNhap = 0;
-    decimal tongPhaiTra = 0;
-    decimal tongDaThanhToan = 0;
-    decimal conNoCuoiKy = 0;
-
-    if (Model != null && Model.Any())
-    {
-        tongSoLuongNhap = Model.Sum(x => x.SoLuongNhap);
-        tongPhaiTra = Model.Sum(x => x.PhaiTra);
-        tongDaThanhToan = Model.Sum(x => x.DaThanhToan);
-        conNoCuoiKy = Model.Last().ConNoLuyKe;
-    }
+    decimal tongSoLuongNhap = ViewBag.TongSoLuongNhap != null ? (decimal)ViewBag.TongSoLuongNhap : 0;
+    decimal tongPhaiTra = ViewBag.TongPhaiTra != null ? (decimal)ViewBag.TongPhaiTra : 0;
+    decimal tongDaThanhToan = ViewBag.TongDaThanhToan != null ? (decimal)ViewBag.TongDaThanhToan : 0;
+    decimal conNoCuoiKy = ViewBag.ConNoCuoiKy != null ? (decimal)ViewBag.ConNoCuoiKy : 0;
 }
 
 <div class="table-responsive">
-    <table class="table table-bordered table-hover table-custom" style="white-space: nowrap;">
+    <table id="tblBaoCaoDoiChieuNhapNhaCungCap" class="table table-bordered table-hover table-custom" style="width: 100%; min-width: 1350px; white-space: nowrap;">
         <thead>
             <tr style="background-color: #f4f6f9; color: #333;">
                 <th class="text-center" style="width: 50px;">STT</th>
                 <th class="text-center">Ngày phát sinh</th>
                 <th class="text-center">Số chứng từ</th>
+                <th class="text-center">Nhà cung cấp</th>
                 <th class="text-center">Loại phát sinh</th>
                 <th class="text-center">Mã SP</th>
                 <th>Tên sản phẩm / Diễn giải</th>
@@ -35,10 +28,10 @@
             </tr>
         </thead>
         <tbody>
-            @if (Model != null && Model.Any())
+            @if (Model != null && Model.Items != null && Model.Items.Any())
             {
                 int rowIdx = 0;
-                foreach (var item in Model)
+                foreach (var item in Model.Items)
                 {
                     rowIdx++;
                     var trClass = rowIdx % 2 == 0 ? "table-secondary-custom" : ""; // Tuỳ chỉnh CSS dòng chẵn nếu hệ thống chưa có sẵn nth-child css
@@ -48,7 +41,7 @@
                     
                     <tr class="@trClass" style="@fontWeight">
                         <td class="text-center">@item.STT</td>
-                        <td class="text-center">@(item.NgayPhatSinh.HasValue ? item.NgayPhatSinh.Value.ToString("dd/MM/yyyy") : "")</td>
+                        <td class="text-center">@((item.NgayPhatSinh.HasValue && !isNoDauKy) ? item.NgayPhatSinh.Value.ToString("dd/MM/yyyy") : "")</td>
                         <td class="text-center">
                             @if(isPhieuChi)
                             {
@@ -63,13 +56,14 @@
                                 @item.SoChungTu
                             }
                         </td>
+                        <td>@item.TenNhaCungCap</td>
                         <td class="text-center">
                             @if (isNoDauKy) { <span class="text-danger fw-bold">@item.LoaiPhatSinh</span> }
                             else { @item.LoaiPhatSinh }
                         </td>
                         <td class="text-center">@item.MaSanPham</td>
                         <td>@item.TenSanPham</td>
-                        <td class="text-end">@(item.SoLuongNhap > 0 ? item.SoLuongNhap.ToString("N2") : "-")</td>
+                        <td class="text-end">@(item.SoLuongNhap > 0 ? item.SoLuongNhap.ToString("N0") : "-")</td>
                         <td class="text-end">@(item.DonGiaNhap > 0 ? item.DonGiaNhap.ToString("N0") : "-")</td>
                         <td class="text-end">@(item.PhaiTra > 0 ? item.PhaiTra.ToString("N0") : "-")</td>
                         <td class="text-end">@(item.DaThanhToan > 0 ? item.DaThanhToan.ToString("N0") : "-")</td>
@@ -88,7 +82,7 @@
         <tfoot>
             <tr style="background-color: #f4f6f9; font-weight: bold;">
                 <td colspan="6" class="text-end">TỔNG CỘNG:</td>
-                <td class="text-end">@tongSoLuongNhap.ToString("N2")</td>
+                <td class="text-end">@tongSoLuongNhap.ToString("N0")</td>
                 <td class="text-end"></td>
                 <td class="text-end">@tongPhaiTra.ToString("N0")</td>
                 <td class="text-end">@tongDaThanhToan.ToString("N0")</td>
@@ -98,6 +92,11 @@
         </tfoot>
     </table>
 </div>
+
+@if (Model != null && Model.Items != null && Model.Items.Any())
+{
+    @Html.Partial("_Pagination", Model)
+}
 
 <style>
     /* Tuỳ chỉnh table theo yêu cầu */
@@ -112,4 +111,75 @@
     .table-custom tbody tr:hover {
         background-color: #c9d9e8 !important;
     }
+    /* Pagination styles */
+    .pagination-custom .page-item.active .page-link {
+        background-color: #0b5b84;
+        border-color: #0b5b84;
+        color: white;
+    }
+    .pagination-custom .page-link {
+        color: #0b5b84;
+        cursor: pointer;
+    }
+    /* Resizer styles */
+    #tblBaoCaoDoiChieuNhapNhaCungCap th {
+        position: relative;
+        background-clip: padding-box;
+    }
+    #tblBaoCaoDoiChieuNhapNhaCungCap th .resizer {
+        position: absolute;
+        top: 0;
+        right: -3px;
+        width: 6px;
+        height: 100%;
+        cursor: col-resize;
+        user-select: none;
+        z-index: 10;
+        background-color: transparent;
+    }
+    #tblBaoCaoDoiChieuNhapNhaCungCap th .resizer:hover, #tblBaoCaoDoiChieuNhapNhaCungCap th .resizer.resizing {
+        background-color: rgba(11, 91, 132, 0.5);
+    }
 </style>
+
+<script>
+    (function() {
+        var table = document.getElementById('tblBaoCaoDoiChieuNhapNhaCungCap');
+        if (!table) return;
+
+        // Resizer Logic
+        var ths = table.querySelectorAll('th');
+        ths.forEach(function(th) {
+            if(th.innerText.trim() === '' && (th.style.width === '35px' || th.style.width === '40px' || th.style.width === '50px')) return;
+            if(th.innerText.trim() === 'Thao tác' || th.innerText.trim() === 'STT') return;
+            if(th.querySelector('.resizer')) return;
+
+            var resizer = document.createElement('div');
+            resizer.classList.add('resizer');
+            th.appendChild(resizer);
+
+            var startX, startWidth;
+            resizer.addEventListener('mousedown', function(e) {
+                startX = e.pageX;
+                startWidth = th.offsetWidth;
+                resizer.classList.add('resizing');
+                var doDrag = function(e) {
+                    var newWidth = startWidth + (e.pageX - startX);
+                    if(newWidth > 30) {
+                        th.style.width = newWidth + 'px';
+                        th.style.minWidth = newWidth + 'px';
+                        th.style.maxWidth = newWidth + 'px';
+                    }
+                };
+                var stopDrag = function(e) {
+                    resizer.classList.remove('resizing');
+                    document.removeEventListener('mousemove', doDrag);
+                    document.removeEventListener('mouseup', stopDrag);
+                };
+                document.addEventListener('mousemove', doDrag);
+                document.addEventListener('mouseup', stopDrag);
+                e.preventDefault();
+            });
+        });
+    })();
+</script>
