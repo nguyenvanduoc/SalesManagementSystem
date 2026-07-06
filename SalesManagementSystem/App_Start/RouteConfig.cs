@@ -76,6 +76,11 @@ namespace SalesManagementSystem
             routes.MapRoute(name: "PhieuThuKhachHang_GhiSo", url: "phieu-thu/ghi-so", defaults: new { controller = "PhieuThuKhachHang", action = "GhiSo" });
             routes.MapRoute(name: "PhieuThuKhachHang_Huy", url: "phieu-thu/huy", defaults: new { controller = "PhieuThuKhachHang", action = "Huy" });
             routes.MapRoute(name: "PhieuThuKhachHang_Delete", url: "phieu-thu/xoa", defaults: new { controller = "PhieuThuKhachHang", action = "Delete" });
+            routes.MapRoute(name: "PhieuThuKhachHang_GetFiles", url: "phieu-thu/file/danh-sach", defaults: new { controller = "PhieuThuKhachHang", action = "GetFiles" });
+            routes.MapRoute(name: "PhieuThuKhachHang_UploadFile", url: "phieu-thu/file/tai-len", defaults: new { controller = "PhieuThuKhachHang", action = "UploadFile" });
+            routes.MapRoute(name: "PhieuThuKhachHang_DeleteFile", url: "phieu-thu/file/xoa", defaults: new { controller = "PhieuThuKhachHang", action = "DeleteFile" });
+            routes.MapRoute(name: "PhieuThuKhachHang_DownloadFile", url: "phieu-thu/file/tai-xuong", defaults: new { controller = "PhieuThuKhachHang", action = "DownloadFile" });
+            routes.MapRoute(name: "PhieuThuKhachHang_ViewFile", url: "phieu-thu/file/xem", defaults: new { controller = "PhieuThuKhachHang", action = "ViewFile" });
             routes.MapRoute(name: "PhieuThuKhachHang_GetCongNo", url: "phieu-thu/get-cong-no", defaults: new { controller = "PhieuThuKhachHang", action = "GetCongNoChungTu" });
 
             // Tài khoản thanh toán
@@ -96,6 +101,11 @@ namespace SalesManagementSystem
             routes.MapRoute(name: "PhieuChi_GhiSo",  url: "phieu-chi/ghi-so",      defaults: new { controller = "PhieuChi", action = "GhiSo" });
             routes.MapRoute(name: "PhieuChi_Huy",    url: "phieu-chi/huy",         defaults: new { controller = "PhieuChi", action = "Huy" });
             routes.MapRoute(name: "PhieuChi_Delete", url: "phieu-chi/xoa",         defaults: new { controller = "PhieuChi", action = "Delete" });
+            routes.MapRoute(name: "PhieuChi_GetFiles", url: "phieu-chi/file/danh-sach", defaults: new { controller = "PhieuChi", action = "GetFiles" });
+            routes.MapRoute(name: "PhieuChi_UploadFile", url: "phieu-chi/file/tai-len", defaults: new { controller = "PhieuChi", action = "UploadFile" });
+            routes.MapRoute(name: "PhieuChi_DeleteFile", url: "phieu-chi/file/xoa", defaults: new { controller = "PhieuChi", action = "DeleteFile" });
+            routes.MapRoute(name: "PhieuChi_DownloadFile", url: "phieu-chi/file/tai-xuong", defaults: new { controller = "PhieuChi", action = "DownloadFile" });
+            routes.MapRoute(name: "PhieuChi_ViewFile", url: "phieu-chi/file/xem", defaults: new { controller = "PhieuChi", action = "ViewFile" });
             routes.MapRoute(name: "PhieuChi_GetPhieuNhap", url: "phieu-chi/get-phieu-nhap", defaults: new { controller = "PhieuChi", action = "GetPhieuNhapByNCC" });
             routes.MapRoute(name: "PhieuChi_GetPhieuNhapDetail", url: "phieu-chi/get-phieu-nhap-detail", defaults: new { controller = "PhieuChi", action = "GetPhieuNhapDetail" });
 

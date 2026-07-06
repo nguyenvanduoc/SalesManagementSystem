@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Web;
 using System.Web.Mvc;
 using SalesManagementSystem.Helpers;
+using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories.Interfaces;
 using Dapper;
@@ -361,6 +364,146 @@ namespace SalesManagementSystem.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "Xóa thất bại: " + ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public ActionResult GetFiles(int idChungTuBanHang)
+        {
+            if (!PermissionHelper.HasPermission("PhieuThuKhachHang", LoaiPhanQuyen.Xem))
+                return Content("<div class='alert alert-danger'>Khong co quyen xem file dinh kem</div>");
+
+            try
+            {
+                ViewBag.CanDeleteFile = PermissionHelper.HasPermission("PhieuThuKhachHang", LoaiPhanQuyen.Xoa);
+                var files = _repo.File_GetList(idChungTuBanHang);
+                return PartialView("_PhieuThuKhachHangFileList", files);
+            }
+            catch (Exception ex)
+            {
+                return Content("Loi tai danh sach file: " + ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult UploadFile(int idChungTuBanHang, HttpPostedFileBase file)
+        {
+            if (!PermissionHelper.HasPermission("PhieuThuKhachHang", LoaiPhanQuyen.CapNhat))
+                return Json(new { success = false, message = "Khong co quyen dinh kem file" });
+
+            try
+            {
+                if (file == null || file.ContentLength == 0)
+                    return Json(new { success = false, message = "Vui long chon file hop le." });
+
+                var chungTu = _repo.GetCongNoChungTuByID(idChungTuBanHang);
+                if (chungTu == null)
+                    return Json(new { success = false, message = "Chung tu ban hang khong ton tai." });
+
+                string ext = Path.GetExtension(file.FileName).ToLower();
+                var allowedExts = new[] { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".jpg", ".jpeg", ".png" };
+                if (!allowedExts.Contains(ext))
+                    return Json(new { success = false, message = "Dinh dang file khong duoc ho tro." });
+
+                byte[] fileData;
+                using (var binaryReader = new BinaryReader(file.InputStream))
+                {
+                    fileData = binaryReader.ReadBytes(file.ContentLength);
+                }
+
+                var model = new PhieuThuKhachHangFile
+                {
+                    IDChungTuBanHang = idChungTuBanHang,
+                    TenFile = Path.GetFileName(file.FileName),
+                    LoaiFile = ext.Replace(".", ""),
+                    DungLuong = file.ContentLength,
+                    NoiDungFile = fileData
+                };
+
+                var user = GetCurrentUser();
+                _repo.File_Save(model, user?.IDNhanSu ?? 0);
+
+                return Json(new { success = true, message = "Tai file len thanh cong." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Loi tai file: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public ActionResult DeleteFile(int id)
+        {
+            if (!PermissionHelper.HasPermission("PhieuThuKhachHang", LoaiPhanQuyen.Xoa))
+                return Json(new { success = false, message = "Khong co quyen xoa file" });
+
+            try
+            {
+                var user = GetCurrentUser();
+                _repo.File_Delete(id, user?.IDNhanSu ?? 0);
+                return Json(new { success = true, message = "Xoa file thanh cong." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Loi khi xoa file: " + ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public ActionResult DownloadFile(int id)
+        {
+            if (!PermissionHelper.HasPermission("PhieuThuKhachHang", LoaiPhanQuyen.Xem))
+                return HttpNotFound("Khong co quyen tai file.");
+
+            try
+            {
+                var file = _repo.File_GetByID(id);
+                if (file == null) return HttpNotFound("File khong ton tai.");
+
+                return File(file.NoiDungFile, GetMimeType(file.LoaiFile), file.TenFile);
+            }
+            catch (Exception)
+            {
+                return HttpNotFound("Co loi xay ra khi lay file.");
+            }
+        }
+
+        [HttpGet]
+        public ActionResult ViewFile(int id)
+        {
+            if (!PermissionHelper.HasPermission("PhieuThuKhachHang", LoaiPhanQuyen.Xem))
+                return HttpNotFound("Khong co quyen xem file.");
+
+            try
+            {
+                var file = _repo.File_GetByID(id);
+                if (file == null) return HttpNotFound("File khong ton tai.");
+
+                var ext = (file.LoaiFile ?? "").ToLower();
+                if (ext != "pdf" && ext != "jpg" && ext != "jpeg" && ext != "png")
+                    return File(file.NoiDungFile, "application/octet-stream", file.TenFile);
+
+                return File(file.NoiDungFile, GetMimeType(file.LoaiFile));
+            }
+            catch (Exception)
+            {
+                return HttpNotFound("Co loi xay ra khi lay file.");
+            }
+        }
+
+        private string GetMimeType(string loaiFile)
+        {
+            switch ((loaiFile ?? "").ToLower())
+            {
+                case "pdf": return "application/pdf";
+                case "doc": return "application/msword";
+                case "docx": return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                case "xls": return "application/vnd.ms-excel";
+                case "xlsx": return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                case "jpg":
+                case "jpeg": return "image/jpeg";
+                case "png": return "image/png";
+                default: return "application/octet-stream";
             }
         }
 

@@ -28,10 +28,10 @@ namespace SalesManagementSystem.Controllers
 
             var model = new BaoCaoKetQuaHoatDongKinhDoanhViewModel();
             
-            // Mặc định từ ngày đầu tháng đến cuối tháng
+            // Mac dinh tu ngay dau thang den hien tai, giong form nhap hang.
             var now = DateTime.Now;
             model.Filter.TuNgay = new DateTime(now.Year, now.Month, 1);
-            model.Filter.DenNgay = model.Filter.TuNgay.Value.AddMonths(1).AddDays(-1);
+            model.Filter.DenNgay = now.Date;
 
             ViewBag.KhoHangList = GetKhoHangList();
 
@@ -62,7 +62,7 @@ namespace SalesManagementSystem.Controllers
             {
                 var parameters = new DynamicParameters();
                 parameters.Add("@TuNgay", filter.TuNgay ?? new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1));
-                parameters.Add("@DenNgay", filter.DenNgay ?? new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddMonths(1).AddDays(-1));
+                parameters.Add("@DenNgay", filter.DenNgay ?? DateTime.Now.Date);
                 parameters.Add("@IDKho", filter.IDKho);
                 parameters.Add("@IDSanPham", filter.IDSanPham);
                 parameters.Add("@DonViTinh", filter.DonViTinh);

@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using Dapper;
 using SalesManagementSystem.Data;
+using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories.Interfaces;
 
@@ -54,11 +55,30 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@NguoiNhanTien",  string.IsNullOrEmpty(nguoiNhanTien) ? null : nguoiNhanTien);
                 p.Add("@IDTaiKhoanThanhToan", idTaiKhoanThanhToan);
 
-                return conn.Query<PhieuChiListViewModel>(
+                var list = conn.Query<PhieuChiListViewModel>(
                     "sp_KT_PhieuChi_GetList",
                     p,
                     commandType: CommandType.StoredProcedure
                 ).ToList();
+
+                if (list.Any())
+                {
+                    EnsureFileTable(conn);
+                    var ids = list.Select(x => x.ID).ToArray();
+                    var fileIds = new HashSet<int>(conn.Query<int>(@"
+                        SELECT DISTINCT IDPhieuChi
+                        FROM KT_PhieuChiFile
+                        WHERE IsDeleted = 0
+                          AND IDPhieuChi IN @Ids",
+                        new { Ids = ids }));
+
+                    foreach (var item in list)
+                    {
+                        item.HasDinhKem = fileIds.Contains(item.ID);
+                    }
+                }
+
+                return list;
             }
         }
 
@@ -625,6 +645,123 @@ namespace SalesManagementSystem.Repositories
                         throw;
                     }
                 }
+            }
+        }
+
+        private void EnsureFileTable(IDbConnection conn)
+        {
+            conn.Execute(@"
+                IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'KT_PhieuChiFile')
+                BEGIN
+                    CREATE TABLE KT_PhieuChiFile (
+                        ID INT IDENTITY(1,1) PRIMARY KEY,
+                        IDPhieuChi INT NOT NULL,
+                        TenFile NVARCHAR(255) NOT NULL,
+                        LoaiFile NVARCHAR(50) NULL,
+                        DungLuong BIGINT NULL,
+                        NoiDungFile VARBINARY(MAX) NOT NULL,
+                        GhiChu NVARCHAR(500) NULL,
+                        NgayTao DATETIME NULL DEFAULT GETDATE(),
+                        NguoiTao INT NULL,
+                        NgayCapNhat DATETIME NULL,
+                        NguoiCapNhat INT NULL,
+                        IsDeleted BIT NOT NULL DEFAULT 0
+                    );
+
+                    CREATE INDEX IX_KT_PhieuChiFile_IDPhieuChi
+                    ON KT_PhieuChiFile(IDPhieuChi, IsDeleted);
+                END");
+        }
+
+        public IEnumerable<PhieuChiFile> File_GetList(int idPhieuChi)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                EnsureFileTable(conn);
+                return conn.Query<PhieuChiFile>(@"
+                    SELECT f.ID,
+                           f.IDPhieuChi,
+                           f.TenFile,
+                           f.LoaiFile,
+                           f.DungLuong,
+                           f.GhiChu,
+                           f.NgayTao,
+                           f.NguoiTao,
+                           f.NgayCapNhat,
+                           f.NguoiCapNhat,
+                           f.IsDeleted,
+                           LTRIM(RTRIM(ISNULL(ns.HoDem, '') + ' ' + ISNULL(ns.Ten, ''))) AS TenNguoiTao
+                    FROM KT_PhieuChiFile f
+                    LEFT JOIN NS_NhanSu ns ON f.NguoiTao = ns.ID
+                    WHERE f.IDPhieuChi = @IDPhieuChi
+                      AND f.IsDeleted = 0
+                    ORDER BY f.NgayTao DESC, f.ID DESC",
+                    new { IDPhieuChi = idPhieuChi }).ToList();
+            }
+        }
+
+        public PhieuChiFile File_GetByID(int id)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                EnsureFileTable(conn);
+                return conn.QueryFirstOrDefault<PhieuChiFile>(@"
+                    SELECT f.ID,
+                           f.IDPhieuChi,
+                           f.TenFile,
+                           f.LoaiFile,
+                           f.DungLuong,
+                           f.NoiDungFile,
+                           f.GhiChu,
+                           f.NgayTao,
+                           f.NguoiTao,
+                           f.NgayCapNhat,
+                           f.NguoiCapNhat,
+                           f.IsDeleted,
+                           LTRIM(RTRIM(ISNULL(ns.HoDem, '') + ' ' + ISNULL(ns.Ten, ''))) AS TenNguoiTao
+                    FROM KT_PhieuChiFile f
+                    LEFT JOIN NS_NhanSu ns ON f.NguoiTao = ns.ID
+                    WHERE f.ID = @ID
+                      AND f.IsDeleted = 0",
+                    new { ID = id });
+            }
+        }
+
+        public void File_Save(PhieuChiFile model, int nguoiThaoTac)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                EnsureFileTable(conn);
+                conn.Execute(@"
+                    INSERT INTO KT_PhieuChiFile
+                        (IDPhieuChi, TenFile, LoaiFile, DungLuong, NoiDungFile, GhiChu, NgayTao, NguoiTao, IsDeleted)
+                    VALUES
+                        (@IDPhieuChi, @TenFile, @LoaiFile, @DungLuong, @NoiDungFile, @GhiChu, GETDATE(), @NguoiThaoTac, 0)",
+                    new
+                    {
+                        model.IDPhieuChi,
+                        model.TenFile,
+                        model.LoaiFile,
+                        model.DungLuong,
+                        model.NoiDungFile,
+                        model.GhiChu,
+                        NguoiThaoTac = nguoiThaoTac
+                    });
+            }
+        }
+
+        public void File_Delete(int id, int nguoiThaoTac)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                EnsureFileTable(conn);
+                conn.Execute(@"
+                    UPDATE KT_PhieuChiFile
+                    SET IsDeleted = 1,
+                        NgayCapNhat = GETDATE(),
+                        NguoiCapNhat = @NguoiThaoTac
+                    WHERE ID = @ID",
+                    new { ID = id, NguoiThaoTac = nguoiThaoTac });
             }
         }
     }

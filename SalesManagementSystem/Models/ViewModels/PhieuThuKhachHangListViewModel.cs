@@ -12,6 +12,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public decimal TongCong { get; set; }
         public decimal DaThanhToan { get; set; }
         public decimal ConLai { get; set; }
+        public bool HasDinhKem { get; set; }
         public int TrangThaiCongNo { get; set; }
         public string TenNguoiTao { get; set; }
         public DateTime NgayTao { get; set; }

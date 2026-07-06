@@ -24,6 +24,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public decimal SoTienPhanBo { get; set; }
         public decimal TienTraTruoc => SoTienChi > SoTienPhanBo ? SoTienChi - SoTienPhanBo : 0;
         public string DienGiai { get; set; }
+        public bool HasDinhKem { get; set; }
         public int TrangThai { get; set; }
         public DateTime? NgayTao { get; set; }
         public DateTime? NgayGhi { get; set; }

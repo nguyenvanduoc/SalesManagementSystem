@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Models.ViewModels;
 
 namespace SalesManagementSystem.Repositories.Interfaces
@@ -45,5 +46,10 @@ namespace SalesManagementSystem.Repositories.Interfaces
             int? trangThai,
             string nguoiNhanTien = null,
             int? idTaiKhoanThanhToan = null);
+
+        IEnumerable<PhieuChiFile> File_GetList(int idPhieuChi);
+        PhieuChiFile File_GetByID(int id);
+        void File_Save(PhieuChiFile model, int nguoiThaoTac);
+        void File_Delete(int id, int nguoiThaoTac);
     }
 }

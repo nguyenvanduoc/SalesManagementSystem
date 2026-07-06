@@ -1,4 +1,4 @@
-@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.PhieuChiListViewModel>
+﻿@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.PhieuChiListViewModel>
 
 @{
     var dashboard = ViewBag.Dashboard as SalesManagementSystem.Models.ViewModels.PhieuChiDashboardViewModel;
@@ -34,6 +34,7 @@
                         <th width="130" class="text-end fw-bold">Số tiền chi</th>
                         <th width="130" class="text-end fw-bold text-success">Số tiền phân bổ</th>
                         <th width="130" class="text-end fw-bold text-primary">Tiền trả trước</th>
+                        <th width="95" class="text-center fw-bold">Đính kèm</th>
                         <th width="110" class="text-center fw-bold">Trạng thái</th>
                     </tr>
                 </thead>
@@ -44,6 +45,7 @@
                         bool canSua     = SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuChi", SalesManagementSystem.Helpers.LoaiPhanQuyen.CapNhat);
                         bool canTuyChon = SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuChi", SalesManagementSystem.Helpers.LoaiPhanQuyen.TuyChon);
                         bool canXoa     = SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuChi", SalesManagementSystem.Helpers.LoaiPhanQuyen.Xoa);
+                        bool canDinhKem = canSua;
 
                         foreach (var item in Model.Items)
                         {
@@ -131,6 +133,22 @@
                                             {
                                                 <li><span class="dropdown-item text-muted disabled">Phiếu đã hủy</span></li>
                                             }
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <button type="button" class="dropdown-item py-2 text-secondary btn-view-pc-files"
+                                                        data-id="@item.ID" data-so="@item.SoPhieuChi">
+                                                    <i class="bi bi-paperclip text-secondary me-2"></i>Xem file &#273;&#237;nh k&#232;m
+                                                </button>
+                                            </li>
+                                            @if (canDinhKem)
+                                            {
+                                                <li>
+                                                    <button type="button" class="dropdown-item py-2 text-primary btn-upload-pc-file"
+                                                            data-id="@item.ID" data-so="@item.SoPhieuChi">
+                                                        <i class="bi bi-upload text-primary me-2"></i>&#272;&#237;nh k&#232;m file
+                                                    </button>
+                                                </li>
+                                            }
                                         </ul>
                                     </div>
                                 </td>
@@ -158,6 +176,13 @@
                                 <td class="text-end align-middle fw-semibold text-success">@item.SoTienPhanBo.ToString("N0")</td>
                                 <td class="text-end align-middle fw-semibold text-primary">@item.TienTraTruoc.ToString("N0")</td>
                                 <td class="text-center align-middle">
+                                    <input type="checkbox"
+                                           class="form-check-input pc-has-file-checkbox"
+                                           data-id="@item.ID"
+                                           @(item.HasDinhKem ? "checked=\"checked\"" : "")
+                                           disabled />
+                                </td>
+                                <td class="text-center align-middle">
                                     <span class="@item.CssTrangThai">@item.TenTrangThai</span>
                                 </td>
                             </tr>
@@ -182,6 +207,7 @@
                             <td class="text-end text-success">@Model.Items.Sum(x => x.SoTienPhanBo).ToString("N0")</td>
                             <td class="text-end text-primary">@Model.Items.Sum(x => x.TienTraTruoc).ToString("N0")</td>
                             <td></td>
+                            <td></td>
                         </tr>
                     </tfoot>
                 }
@@ -192,6 +218,29 @@
 </div>
 
 <!-- Modal Hủy Phiếu Chi -->
+<!-- Modal Xem file dinh kem Phieu Chi -->
+<div class="modal fade" id="modalPhieuChiFiles" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content shadow">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-uppercase" style="color:#0b5b84;">FILE &#272;&#205;NH K&#200;M</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4" id="modalPhieuChiFilesContent" style="min-height:200px;">
+                <div class="text-center py-5 text-muted">
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    &#272;ang t&#7843;i danh s&#225;ch file...
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn text-dark fw-bold" style="background:#e9ecef;border:none;" data-bs-dismiss="modal">&#272;&#211;NG</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="file" id="pcFileInput" multiple style="display:none;" />
+
 <div class="modal fade" id="modalHuyPhieuChi" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
         <div class="modal-content shadow-lg" style="border: none; border-radius: 6px;">
@@ -218,6 +267,151 @@
 (function () {
     var $pane = $('#phieuchi-table-container').closest('.tab-pane');
     if ($pane.length === 0) $pane = $('body');
+    var currentUploadPhieuChiId = 0;
+    var currentUploadPhieuChiSo = '';
+
+    function normalizePhieuChiFileLabels($scope) {
+        var labelView = 'Xem file \u0111\u00ednh k\u00e8m';
+        var labelUpload = '\u0110\u00ednh k\u00e8m file';
+        var labelDownload = 'T\u1ea3i xu\u1ed1ng';
+        var labelDelete = 'X\u00f3a file';
+        var labelEmpty = 'Ch\u01b0a c\u00f3 file \u0111\u00ednh k\u00e8m n\u00e0o.';
+
+        $scope.find('.btn-view-pc-files').each(function () {
+            $(this).html('<i class="bi bi-paperclip text-secondary me-2"></i>' + labelView);
+        });
+        $scope.find('.btn-upload-pc-file').each(function () {
+            $(this).html('<i class="bi bi-upload text-primary me-2"></i>' + labelUpload);
+        });
+        $scope.find('.phieuchi-file-list th').eq(0).text('Thao t\u00e1c');
+        $scope.find('.phieuchi-file-list th').eq(2).text('T\u00ean file');
+        $scope.find('.phieuchi-file-list th').eq(3).text('Ng\u01b0\u1eddi t\u1ea3i l\u00ean');
+        $scope.find('.phieuchi-file-list th').eq(4).text('Ng\u00e0y t\u1ea3i');
+        $scope.find('.phieuchi-file-list .dropdown-header').text('Thao t\u00e1c');
+        $scope.find('.phieuchi-file-list a[href*="DownloadFile"]').each(function () {
+            $(this).html('<i class="bi bi-download me-2 text-success"></i> ' + labelDownload);
+        });
+        $scope.find('.phieuchi-file-list .btn-delete-pc-file').each(function () {
+            $(this).html('<i class="bi bi-trash-fill me-2 text-danger"></i> ' + labelDelete);
+        });
+        $scope.find('.phieuchi-file-list td[colspan="5"]').text(labelEmpty);
+    }
+
+    normalizePhieuChiFileLabels($pane);
+
+    function loadPhieuChiFiles(idPhieuChi, soPhieuChi) {
+        var $modal = $pane.find('#modalPhieuChiFiles');
+        var $content = $pane.find('#modalPhieuChiFilesContent');
+        var safeSoPhieuChi = $('<div>').text(soPhieuChi || '').html();
+        $modal.find('.modal-title').html('FILE &#272;&#205;NH K&#200;M ' + safeSoPhieuChi);
+        $content.html('<div class="text-center py-5 text-muted"><span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>&#272;ang t&#7843;i danh s&#225;ch file...</div>');
+        bootstrap.Modal.getOrCreateInstance($modal[0]).show();
+
+        $.get('@Url.Action("GetFiles", "PhieuChi")', { idPhieuChi: idPhieuChi }, function (res) {
+            $content.html(res);
+            $content.find('.phieuchi-file-list').removeClass('mt-3').addClass('mt-0');
+            normalizePhieuChiFileLabels($content);
+            setPhieuChiFileCheckbox(idPhieuChi, hasPhieuChiFiles($content));
+        }).fail(function () {
+            $content.html('<div class="text-center text-danger py-4">Loi tai danh sach file dinh kem.</div>');
+            if (typeof showToast === 'function') showToast('error', 'Loi tai danh sach file dinh kem.');
+        });
+    }
+
+    function reloadCurrentPhieuChiFiles() {
+        if (!currentUploadPhieuChiId) return;
+        $.get('@Url.Action("GetFiles", "PhieuChi")', { idPhieuChi: currentUploadPhieuChiId }, function (res) {
+            var $content = $pane.find('#modalPhieuChiFilesContent');
+            $content.html(res);
+            $content.find('.phieuchi-file-list').removeClass('mt-3').addClass('mt-0');
+            normalizePhieuChiFileLabels($content);
+            setPhieuChiFileCheckbox(currentUploadPhieuChiId, hasPhieuChiFiles($content));
+        });
+    }
+
+    function setPhieuChiFileCheckbox(idPhieuChi, checked) {
+        $pane.find('.pc-has-file-checkbox[data-id="' + idPhieuChi + '"]').prop('checked', checked);
+    }
+
+    function hasPhieuChiFiles($scope) {
+        return $scope.find('.phieuchi-file-list tbody tr').filter(function () {
+            return $(this).find('td[colspan]').length === 0;
+        }).length > 0;
+    }
+
+    $pane.off('click.phieuchi_view_files', '.btn-view-pc-files');
+    $pane.on('click.phieuchi_view_files', '.btn-view-pc-files', function () {
+        currentUploadPhieuChiId = $(this).data('id');
+        currentUploadPhieuChiSo = $(this).data('so');
+        loadPhieuChiFiles(currentUploadPhieuChiId, currentUploadPhieuChiSo);
+    });
+
+    $pane.off('click.phieuchi_upload_file', '.btn-upload-pc-file');
+    $pane.on('click.phieuchi_upload_file', '.btn-upload-pc-file', function () {
+        currentUploadPhieuChiId = $(this).data('id');
+        currentUploadPhieuChiSo = $(this).data('so');
+        $pane.find('#pcFileInput').val('').trigger('click');
+    });
+
+    $pane.off('change.phieuchi_file_input', '#pcFileInput');
+    $pane.on('change.phieuchi_file_input', '#pcFileInput', function () {
+        if (!this.files || this.files.length === 0 || !currentUploadPhieuChiId) return;
+
+        var files = this.files;
+        var uploaded = 0;
+        var hasError = false;
+        if (typeof showToast === 'function') showToast('info', 'Dang tai len ' + files.length + ' file...');
+
+        for (var i = 0; i < files.length; i++) {
+            var formData = new FormData();
+            formData.append('idPhieuChi', currentUploadPhieuChiId);
+            formData.append('file', files[i]);
+
+            $.ajax({
+                url: '@Url.Action("UploadFile", "PhieuChi")',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (res) {
+                    uploaded++;
+                    if (!res.success) hasError = true;
+                    if (uploaded === files.length) {
+                        if (typeof showToast === 'function') {
+                            showToast(hasError ? 'warning' : 'success', hasError ? 'Mot so file khong the tai len.' : 'Tai file len thanh cong.');
+                        }
+                        if (!hasError) setPhieuChiFileCheckbox(currentUploadPhieuChiId, true);
+                        loadPhieuChiFiles(currentUploadPhieuChiId, currentUploadPhieuChiSo);
+                    }
+                },
+                error: function () {
+                    uploaded++;
+                    hasError = true;
+                    if (uploaded === files.length) {
+                        if (typeof showToast === 'function') showToast('warning', 'Mot so file khong the tai len.');
+                        loadPhieuChiFiles(currentUploadPhieuChiId, currentUploadPhieuChiSo);
+                    }
+                }
+            });
+        }
+    });
+
+    $pane.off('click.phieuchi_delete_file', '.btn-delete-pc-file');
+    $pane.on('click.phieuchi_delete_file', '.btn-delete-pc-file', function () {
+        var id = $(this).data('id');
+        showConfirm('Ban co chac chan muon xoa file dinh kem nay?', function () {
+            $.post('@Url.Action("DeleteFile", "PhieuChi")', { id: id }, function (res) {
+                if (res.success) {
+                    if (typeof showToast === 'function') showToast('success', res.message);
+                    reloadCurrentPhieuChiFiles();
+                } else {
+                    if (typeof showToast === 'function') showToast('error', res.message);
+                }
+            }).fail(function () {
+                if (typeof showToast === 'function') showToast('error', 'Loi ket noi may chu.');
+            });
+        });
+    });
 
     // Cập nhật Dashboard nếu có dữ liệu cầu nối
     var $bridge = $('#dashboard-data-bridge');
@@ -264,15 +458,16 @@
     $pane.on('click.phieuchi_ghiso', '.btn-ghiso', function () {
         var id = $(this).data('id');
         var so = $(this).data('so');
-        if (!confirm('Bạn có chắc muốn ghi phiếu ' + so + '?')) return;
-        $.post('@Url.Action("GhiSo","PhieuChi")', { id: id }, function (res) {
-            if (res.success) {
-                showToast('success', res.message);
-                TabManager.reloadActiveTabGrid(false);
-            } else {
-                showToast('error', res.message);
-            }
-        }).fail(function () { showToast('error', 'Lỗi kết nối máy chủ.'); });
+        showConfirm('Bạn có chắc muốn ghi phiếu ' + so + '?', function () {
+            $.post('@Url.Action("GhiSo","PhieuChi")', { id: id }, function (res) {
+                if (res.success) {
+                    showToast('success', res.message);
+                    TabManager.reloadActiveTabGrid(false);
+                } else {
+                    showToast('error', res.message);
+                }
+            }).fail(function () { showToast('error', 'Lỗi kết nối máy chủ.'); });
+        });
     });
 
     // Hủy

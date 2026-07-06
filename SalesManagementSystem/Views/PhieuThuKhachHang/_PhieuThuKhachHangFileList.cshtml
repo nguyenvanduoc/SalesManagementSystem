@@ -1,0 +1,79 @@
+@model IEnumerable<SalesManagementSystem.Models.Entities.PhieuThuKhachHangFile>
+
+@{
+    bool canDeleteFile = ViewBag.CanDeleteFile == true;
+}
+
+<div class="mt-3 phieuthu-file-list" style="overflow: visible;">
+    <table class="table table-custom table-bordered table-hover align-middle mb-0">
+        <thead>
+            <tr style="background:#f4f6f9;font-weight:bold;">
+                <th class="text-center" style="width: 60px;">Thao t&#225;c</th>
+                <th class="text-center" style="width: 50px;">STT</th>
+                <th>T&#234;n file</th>
+                <th>Ng&#432;&#7901;i t&#7843;i l&#234;n</th>
+                <th class="text-center">Ng&#224;y t&#7843;i</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                int stt = 1;
+                foreach (var file in Model)
+                {
+                    var loaiFile = (file.LoaiFile ?? "").ToLower();
+                    <tr>
+                        <td class="text-center align-middle">
+                            <div class="dropdown dropdown-hover">
+                                <button class="btn btn-sm btn-light border dropdown-toggle-hide-arrow shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 2px 6px;">
+                                    <i class="bi bi-grid-3x3-gap-fill text-dark"></i>
+                                </button>
+                                <ul class="dropdown-menu shadow">
+                                    <li><h6 class="dropdown-header text-uppercase fw-bold text-dark">Thao t&#225;c</h6></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a href="@Url.Action("ViewFile", "PhieuThuKhachHang", new { id = file.ID })" target="_blank" class="dropdown-item text-primary">
+                                            <i class="bi bi-eye me-2 text-primary"></i> Xem file
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="@Url.Action("DownloadFile", "PhieuThuKhachHang", new { id = file.ID })" target="_blank" download class="dropdown-item text-success">
+                                            <i class="bi bi-download me-2 text-success"></i> T&#7843;i xu&#7889;ng
+                                        </a>
+                                    </li>
+                                    @if (canDeleteFile)
+                                    {
+                                        <li>
+                                            <button type="button" class="dropdown-item text-danger btn-delete-pt-file" data-id="@file.ID">
+                                                <i class="bi bi-trash-fill me-2 text-danger"></i> X&#243;a file
+                                            </button>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </td>
+                        <td class="text-center align-middle">@(stt++)</td>
+                        <td class="fw-bold align-middle">
+                            @if (loaiFile == "pdf") { <i class="bi bi-file-earmark-pdf text-danger me-2"></i> }
+                            else if (loaiFile == "jpg" || loaiFile == "jpeg" || loaiFile == "png") { <i class="bi bi-file-image text-success me-2"></i> }
+                            else if (loaiFile.StartsWith("doc")) { <i class="bi bi-file-earmark-word text-primary me-2"></i> }
+                            else if (loaiFile.StartsWith("xls")) { <i class="bi bi-file-earmark-excel text-success me-2"></i> }
+                            else { <i class="bi bi-file-earmark text-muted me-2"></i> }
+                            @file.TenFile
+                        </td>
+                        <td class="align-middle">@file.TenNguoiTao</td>
+                        <td class="text-center align-middle">@(file.NgayTao?.ToString("dd/MM/yyyy"))</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">
+                        Ch&#432;a c&#243; file &#273;&#237;nh k&#232;m n&#224;o.
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

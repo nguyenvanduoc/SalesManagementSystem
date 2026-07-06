@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Web;
 using System.Web.Mvc;
 using SalesManagementSystem.Helpers;
+using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories.Interfaces;
 using SalesManagementSystem.Services.Interfaces;
@@ -486,6 +489,146 @@ namespace SalesManagementSystem.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult GetFiles(int idPhieuChi)
+        {
+            if (!PermissionHelper.HasPermission("PhieuChi", LoaiPhanQuyen.Xem))
+                return Content("<div class='alert alert-danger'>KhÃ´ng cÃ³ quyá»n xem file Ä‘Ã­nh kÃ¨m</div>");
+
+            try
+            {
+                ViewBag.CanDeleteFile = PermissionHelper.HasPermission("PhieuChi", LoaiPhanQuyen.Xoa);
+                var files = _repo.File_GetList(idPhieuChi);
+                return PartialView("_PhieuChiFileList", files);
+            }
+            catch (Exception ex)
+            {
+                return Content("Lá»—i táº£i danh sÃ¡ch file: " + ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult UploadFile(int idPhieuChi, HttpPostedFileBase file)
+        {
+            if (!PermissionHelper.HasPermission("PhieuChi", LoaiPhanQuyen.CapNhat))
+                return Json(new { success = false, message = "KhÃ´ng cÃ³ quyá»n Ä‘Ã­nh kÃ¨m file" });
+
+            try
+            {
+                if (file == null || file.ContentLength == 0)
+                    return Json(new { success = false, message = "Vui lÃ²ng chá»n file há»£p lá»‡." });
+
+                var phieuChi = _repo.GetByID(idPhieuChi);
+                if (phieuChi == null)
+                    return Json(new { success = false, message = "Phiáº¿u chi khÃ´ng tá»“n táº¡i." });
+
+                string ext = Path.GetExtension(file.FileName).ToLower();
+                var allowedExts = new[] { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".jpg", ".jpeg", ".png" };
+                if (!allowedExts.Contains(ext))
+                    return Json(new { success = false, message = "Äá»‹nh dáº¡ng file khÃ´ng Ä‘Æ°á»£c há»— trá»£." });
+
+                byte[] fileData;
+                using (var binaryReader = new BinaryReader(file.InputStream))
+                {
+                    fileData = binaryReader.ReadBytes(file.ContentLength);
+                }
+
+                var model = new PhieuChiFile
+                {
+                    IDPhieuChi = idPhieuChi,
+                    TenFile = Path.GetFileName(file.FileName),
+                    LoaiFile = ext.Replace(".", ""),
+                    DungLuong = file.ContentLength,
+                    NoiDungFile = fileData
+                };
+
+                var user = GetCurrentUser();
+                _repo.File_Save(model, user?.IDNhanSu ?? 0);
+
+                return Json(new { success = true, message = "Táº£i file lÃªn thÃ nh cÃ´ng." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lá»—i táº£i file: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public ActionResult DeleteFile(int id)
+        {
+            if (!PermissionHelper.HasPermission("PhieuChi", LoaiPhanQuyen.Xoa))
+                return Json(new { success = false, message = "KhÃ´ng cÃ³ quyá»n xÃ³a file" });
+
+            try
+            {
+                var user = GetCurrentUser();
+                _repo.File_Delete(id, user?.IDNhanSu ?? 0);
+                return Json(new { success = true, message = "XÃ³a file thÃ nh cÃ´ng." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lá»—i khi xÃ³a file: " + ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public ActionResult DownloadFile(int id)
+        {
+            if (!PermissionHelper.HasPermission("PhieuChi", LoaiPhanQuyen.Xem))
+                return HttpNotFound("KhÃ´ng cÃ³ quyá»n táº£i file.");
+
+            try
+            {
+                var file = _repo.File_GetByID(id);
+                if (file == null) return HttpNotFound("File khÃ´ng tá»“n táº¡i.");
+
+                return File(file.NoiDungFile, GetMimeType(file.LoaiFile), file.TenFile);
+            }
+            catch (Exception)
+            {
+                return HttpNotFound("CÃ³ lá»—i xáº£y ra khi láº¥y file.");
+            }
+        }
+
+        [HttpGet]
+        public ActionResult ViewFile(int id)
+        {
+            if (!PermissionHelper.HasPermission("PhieuChi", LoaiPhanQuyen.Xem))
+                return HttpNotFound("KhÃ´ng cÃ³ quyá»n xem file.");
+
+            try
+            {
+                var file = _repo.File_GetByID(id);
+                if (file == null) return HttpNotFound("File khÃ´ng tá»“n táº¡i.");
+
+                var ext = (file.LoaiFile ?? "").ToLower();
+                if (ext != "pdf" && ext != "jpg" && ext != "jpeg" && ext != "png")
+                    return File(file.NoiDungFile, "application/octet-stream", file.TenFile);
+
+                return File(file.NoiDungFile, GetMimeType(file.LoaiFile));
+            }
+            catch (Exception)
+            {
+                return HttpNotFound("CÃ³ lá»—i xáº£y ra khi láº¥y file.");
+            }
+        }
+
+        private string GetMimeType(string loaiFile)
+        {
+            switch ((loaiFile ?? "").ToLower())
+            {
+                case "pdf": return "application/pdf";
+                case "doc": return "application/msword";
+                case "docx": return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                case "xls": return "application/vnd.ms-excel";
+                case "xlsx": return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                case "jpg":
+                case "jpeg": return "image/jpeg";
+                case "png": return "image/png";
+                default: return "application/octet-stream";
             }
         }
 

@@ -312,6 +312,7 @@
     <Compile Include="Controllers\ChungTuBanHangController.cs" />
     <Compile Include="Controllers\NhatKyChungController.cs" />
     <Compile Include="Models\Entities\BAN_PhieuThuKhachHang.cs" />
+    <Compile Include="Models\Entities\PhieuThuKhachHangFile.cs" />
     <Compile Include="Models\ViewModels\PhieuThuKhachHangViewModel.cs" />
     <Compile Include="Models\ViewModels\PhieuThuKhachHangListViewModel.cs" />
     <Compile Include="Repositories\Interfaces\IPhieuThuKhachHangRepository.cs" />
@@ -325,6 +326,7 @@
     <Compile Include="Models\ViewModels\PhieuChiChiTietViewModel.cs" />
     <Compile Include="Models\ViewModels\PhieuChiListViewModel.cs" />
     <Compile Include="Models\ViewModels\PhieuChiDashboardViewModel.cs" />
+    <Compile Include="Models\Entities\PhieuChiFile.cs" />
     <Compile Include="Models\ViewModels\SoQuyViewModel.cs" />
     <Compile Include="Models\ViewModels\CongNoNCCViewModel.cs" />
     <Compile Include="Repositories\Interfaces\IPhieuChiRepository.cs" />
@@ -523,6 +525,7 @@
     <Content Include="Views\TonKho\PrintTheKhoMulti.cshtml" />
     <Content Include="Views\PhieuThuKhachHang\Index.cshtml" />
     <Content Include="Views\PhieuThuKhachHang\_PhieuThuKhachHangList.cshtml" />
+    <Content Include="Views\PhieuThuKhachHang\_PhieuThuKhachHangFileList.cshtml" />
     <Content Include="Views\PhieuThuKhachHang\Create.cshtml" />
     <Content Include="Views\PhieuThuKhachHang\Collect.cshtml" />
     <Content Include="Views\TaiKhoanThanhToan\Index.cshtml" />
@@ -530,6 +533,7 @@
     <Content Include="Views\TaiKhoanThanhToan\_Form.cshtml" />
     <Content Include="Views\PhieuChi\Index.cshtml" />
     <Content Include="Views\PhieuChi\_PhieuChiList.cshtml" />
+    <Content Include="Views\PhieuChi\_PhieuChiFileList.cshtml" />
     <Content Include="Views\PhieuChi\_Form.cshtml" />
     <Content Include="Views\SoQuy\Index.cshtml" />
     <Content Include="Views\SoQuy\_SoQuyList.cshtml" />
@@ -554,6 +558,8 @@
     <Content Include="Views\BAN_TraHangBan\Edit.cshtml" />
     <Content Include="Views\BAN_TraHangBan\_ChonDonHangPopup.cshtml" />
     <Content Include="Views\PhieuChi\_DetailInline.cshtml" />
+    <Content Include="App_Data\create_ban_phieuthukhachhangfile.sql" />
+    <Content Include="App_Data\create_kt_phieuchifile.sql" />
     <Content Include="Views\BaoCaoDoiChieuNhapNhaCungCap\Index.cshtml" />
     <Content Include="Views\BaoCaoDoiChieuNhapNhaCungCap\_DanhSach.cshtml" />
     <Content Include="App_Data\insert_acl_BaoCaoDoiChieuNhapNhaCungCap.sql" />

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Models.ViewModels;
 
 namespace SalesManagementSystem.Repositories.Interfaces
@@ -28,5 +29,10 @@ namespace SalesManagementSystem.Repositories.Interfaces
         IEnumerable<dynamic> GetHistoryByChungTuID(int idChungTuBanHang);
         decimal GetCreditInfo(int idKhachHang);
         IEnumerable<dynamic> GetRecentActivities(int idChungTuBanHang);
+
+        IEnumerable<PhieuThuKhachHangFile> File_GetList(int idChungTuBanHang);
+        PhieuThuKhachHangFile File_GetByID(int id);
+        void File_Save(PhieuThuKhachHangFile model, int nguoiThaoTac);
+        void File_Delete(int id, int nguoiThaoTac);
     }
 }
