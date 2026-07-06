@@ -12,6 +12,8 @@
                 <th class="text-center" style="width:120px;">Ngày sản xuất</th>
                 <th class="text-center" style="width:120px;">Hạn sử dụng</th>
                 <th class="text-end" style="width:120px;">Thành tiền</th>
+                <th class="text-end" style="width:110px;">Đơn giá VC</th>
+                <th class="text-end" style="width:110px;">Tiền VC</th>
                 <th class="text-end" style="width:120px;">Tổng cộng</th>
                 <th class="text-start">Ghi chú</th>
             </tr>
@@ -40,6 +42,8 @@
                         <td class="text-center">@(item.NgaySanXuat.HasValue ? item.NgaySanXuat.Value.ToString("dd/MM/yyyy") : "")</td>
                         <td class="text-center">@(item.HanSuDung.HasValue ? item.HanSuDung.Value.ToString("dd/MM/yyyy") : "")</td>
                         <td class="text-end">@(item.ThanhTien > 0 ? item.ThanhTien.ToString("N0") : "0")</td>
+                        <td class="text-end">@(item.DonGiaVanChuyen > 0 ? item.DonGiaVanChuyen.ToString("N0") : "0")</td>
+                        <td class="text-end">@(item.TienVanChuyen > 0 ? item.TienVanChuyen.ToString("N0") : "0")</td>
                         <td class="text-end">@(item.TongSauThue > 0 ? item.TongSauThue.ToString("N0") : "0")</td>
                         <td>@item.GhiChu</td>
                     </tr>
@@ -62,6 +66,8 @@
                     <td></td>
                     <td></td>
                     <td class="text-end">@(Model.ChiTiets.Sum(x => x.ThanhTien).ToString("N0"))</td>
+                    <td></td>
+                    <td class="text-end">@(Model.ChiTiets.Sum(x => x.TienVanChuyen).ToString("N0"))</td>
                     <td class="text-end">@(Model.ChiTiets.Sum(x => x.TongSauThue).ToString("N0"))</td>
                     <td></td>
                 </tr>

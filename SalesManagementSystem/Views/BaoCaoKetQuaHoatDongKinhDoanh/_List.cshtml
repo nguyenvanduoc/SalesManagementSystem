@@ -78,6 +78,7 @@
                         <th>Lợi nhuận gộp</th>
                         <th>Lợi nhuận thuần</th>
                         <th rowspan="2">Tỷ suất LN (%)</th>
+                        <th rowspan="2" style="width: 90px;">Thao tác</th>
                     </tr>
                     <tr>
                         <th>Số lượng</th>
@@ -112,13 +113,21 @@
                                 <td class="text-end">@item.LoiNhuanGop.ToString("N0")</td>
                                 <td class="text-end">@item.LoiNhuanThuan.ToString("N0")</td>
                                 <td class="text-end">@item.TySuatLoiNhuan.ToString("N2")%</td>
+                                <td class="text-center">
+                                    @if (!item.IsGroup && item.IDSanPham > 0)
+                                    {
+                                        <button type="button" class="btn btn-sm btn-info text-white py-0 px-2" style="font-size:0.85rem;" onclick="xemChiTiet(@item.IDSanPham)">
+                                            <i class="bi bi-eye-fill"></i> Xem
+                                        </button>
+                                    }
+                                </td>
                             </tr>
                         }
                     }
                     else
                     {
                         <tr>
-                            <td colspan="13" class="text-center text-danger">Không có dữ liệu</td>
+                            <td colspan="14" class="text-center text-danger">Không có dữ liệu</td>
                         </tr>
                     }
                 </tbody>
@@ -134,6 +143,7 @@
                         <td class="text-end">@Model.TotalLoiNhuanGop.ToString("N0")</td>
                         <td class="text-end">@Model.TotalLoiNhuanThuan.ToString("N0")</td>
                         <td class="text-end">@Model.TotalTySuatLN.ToString("N2")%</td>
+                        <td></td>
                     </tr>
                 </tfoot>
             </table>

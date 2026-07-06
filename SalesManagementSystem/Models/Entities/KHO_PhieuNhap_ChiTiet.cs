@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace SalesManagementSystem.Models.Entities
 {
@@ -13,6 +13,8 @@ namespace SalesManagementSystem.Models.Entities
         public decimal ThueGTGT { get; set; }
         public decimal TienThue { get; set; }
         public decimal TongSauThue { get; set; }
+        public decimal DonGiaVanChuyen { get; set; }
+        public decimal TienVanChuyen { get; set; }
         public string GhiChu { get; set; }
         public DateTime? NgaySanXuat { get; set; }
         public DateTime? HanSuDung { get; set; }

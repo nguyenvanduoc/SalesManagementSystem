@@ -164,6 +164,8 @@
                                 <th style="width:120px;">Ngày sản xuất</th>
                                 <th style="width:120px;">Hạn sử dụng</th>
                                 <th style="width:120px;">Thành tiền</th>
+                                <th style="width:110px;">Đơn giá VC</th>
+                                <th style="width:110px;">Tiền VC</th>
                                 <th style="width:70px;" class="d-none">Thuế %</th>
                                 <th style="width:110px;" class="d-none">Tiền thuế</th>
                                 <th style="width:120px;">Tổng cộng</th>
@@ -195,6 +197,10 @@
                             <span class="text-muted small me-1">Cộng tiền hàng:</span>
                             <span class="fs-6 text-dark" id="dispTongTienHang">0</span>
                         </div>
+                        <div>
+                            <span class="text-muted small me-1">Tiền vận chuyển:</span>
+                            <span class="fs-6 text-dark" id="dispTienVanChuyen">0</span>
+                        </div>
                     </div>
                     
                     <div class="d-flex align-items-center gap-2">
@@ -211,7 +217,7 @@
 
 <script>
     $(document).ready(function () {
-        $.getScript('@Url.Content("~/Scripts/dieu-chinh-nhap-kho.js?v=3.0")', function() {
+        $.getScript('@Url.Content("~/Scripts/dieu-chinh-nhap-kho.js?v=3.1")', function() {
             DieuChinhNhapKho.init({
                 searchLoaiNhapKhoUrl: '@Url.Action("SearchLoaiNhapKho", "PhieuNhapKho")',
                 searchKhachHangUrl: '@Url.Action("SearchKhachHang", "PhieuNhapKho")',

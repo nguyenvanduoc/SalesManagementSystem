@@ -1,4 +1,4 @@
-﻿/**
+/**
  * SPA Tab Manager for SalesManagementSystem
  *
  * FIX: Ngăn chặn việc đăng ký sự kiện ajax-link và pageSizeSelect trùng lặp
@@ -417,35 +417,41 @@ var TabManager = (function () {
             localStorage.removeItem('tabManagerState');
         });
 
-                        // Xử lý Modal khi chuyển Tab
+        // Xử lý Modal khi chuyển Tab
         $(document).on('hide.bs.tab', 'button[data-bs-toggle="tab"]', function (e) {
             var previousTabId = $(e.target).attr('data-bs-target');
-            if (previousTabId) previousTabId = previousTabId.replace('#', '');
             
-            // Tìm modal của tab cũ và tạm ẩn nó bằng API của Bootstrap
-            $('.form-modal').each(function() {
-                var modalOwner = $(this).attr('data-owner-tab');
-                if (modalOwner && modalOwner === previousTabId) {
-                    if ($(this).hasClass('show')) {
-                        // Đánh dấu là bị ẩn do chuyển tab chứ không phải người dùng tắt
+            // Tìm tất cả các modal đang mở trong tab cũ và tạm ẩn nó
+            if (previousTabId) {
+                $(previousTabId).find('.modal.show').each(function() {
+                    $(this).data('hidden-by-tab-switch', true);
+                    var modalInstance = bootstrap.Modal.getOrCreateInstance(this);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    }
+                });
+                
+                // Fallback for modals that might be placed outside but have data-owner-tab
+                var prevIdWithoutHash = previousTabId.replace('#', '');
+                $('.form-modal.show').each(function() {
+                    var modalOwner = $(this).attr('data-owner-tab');
+                    if (modalOwner && modalOwner === prevIdWithoutHash) {
                         $(this).data('hidden-by-tab-switch', true);
                         var modalInstance = bootstrap.Modal.getOrCreateInstance(this);
                         if (modalInstance) {
                             modalInstance.hide();
                         }
                     }
-                }
-            });
+                });
+            }
         });
 
         $(document).on('show.bs.tab', 'button[data-bs-toggle="tab"]', function (e) {
             var targetTabId = $(e.target).attr('data-bs-target');
-            if (targetTabId) targetTabId = targetTabId.replace('#', '');
             
             // Hiện lại modal của tab mới nếu trước đó nó bị ẩn do chuyển tab
-            $('.form-modal').each(function() {
-                var modalOwner = $(this).attr('data-owner-tab');
-                if (modalOwner && modalOwner === targetTabId) {
+            if (targetTabId) {
+                $(targetTabId).find('.modal').each(function() {
                     if ($(this).data('hidden-by-tab-switch') === true) {
                         $(this).data('hidden-by-tab-switch', false);
                         var modalInstance = bootstrap.Modal.getOrCreateInstance(this);
@@ -455,8 +461,25 @@ var TabManager = (function () {
                             new bootstrap.Modal(this).show();
                         }
                     }
-                }
-            });
+                });
+
+                // Fallback for modals outside
+                var targetIdWithoutHash = targetTabId.replace('#', '');
+                $('.form-modal').each(function() {
+                    var modalOwner = $(this).attr('data-owner-tab');
+                    if (modalOwner && modalOwner === targetIdWithoutHash) {
+                        if ($(this).data('hidden-by-tab-switch') === true) {
+                            $(this).data('hidden-by-tab-switch', false);
+                            var modalInstance = bootstrap.Modal.getOrCreateInstance(this);
+                            if (modalInstance) {
+                                modalInstance.show();
+                            } else {
+                                new bootstrap.Modal(this).show();
+                            }
+                        }
+                    }
+                });
+            }
         });
 
         // Xử lý nạp nội dung khi chuyển sang tab chưa loadví dụ Dashboard)

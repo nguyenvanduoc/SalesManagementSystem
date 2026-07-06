@@ -105,7 +105,8 @@ namespace SalesManagementSystem.Controllers
                 IDPhuongTien = entity.IDPhuongTien,
                 NgayGiaoHang = entity.NgayGiaoHang,
                 HoTenTaiXe = entity.HoTenTaiXe,
-                SoDienThoaiTaiXe = entity.SoDienThoaiTaiXe
+                SoDienThoaiTaiXe = entity.SoDienThoaiTaiXe,
+                TienVanChuyen = entity.TienVanChuyen
             };
 
             int total;
@@ -148,6 +149,18 @@ namespace SalesManagementSystem.Controllers
                 {
                     return Json(new { success = false, message = "Dữ liệu không hợp lệ." });
                 }
+
+                var chiTiets = Newtonsoft.Json.JsonConvert.DeserializeObject<List<PhieuNhapKhoChiTietViewModel>>(model.ChiTietsJson) ?? new List<PhieuNhapKhoChiTietViewModel>();
+                foreach (var ct in chiTiets)
+                {
+                    if (ct.DonGiaVanChuyen < 0)
+                    {
+                        return Json(new { success = false, message = "Đơn giá vận chuyển không được âm" });
+                    }
+
+                    ct.TienVanChuyen = ct.DonGiaVanChuyen * ct.SoLuong;
+                }
+                model.ChiTietsJson = Newtonsoft.Json.JsonConvert.SerializeObject(chiTiets);
 
                 if (model.IDLoaiNhapKho > 0 && model.IDKhoNguon.HasValue)
                 {

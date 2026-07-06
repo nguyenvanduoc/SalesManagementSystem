@@ -146,6 +146,7 @@ namespace SalesManagementSystem.Controllers
                     TenNguoiNhan = item.TenNguoiNhan,
                     TongTienHang = item.TongTienHang,
                     TongTienThue = item.TongTienThue,
+                    TienVanChuyen = item.TienVanChuyen,
                     TongCong = item.TongCong,
                     TrangThai = item.TrangThai == 1 ? "Đề nghị ghi" : (item.TrangThai == 2 ? "Đã ghi" : (item.TrangThai == 3 ? "Đã hủy" : "")),
                     NguoiTao = item.NguoiTaoText,
@@ -220,7 +221,8 @@ namespace SalesManagementSystem.Controllers
                 IDPhuongTien = entity.IDPhuongTien,
                 NgayGiaoHang = entity.NgayGiaoHang,
                 HoTenTaiXe = entity.HoTenTaiXe,
-                SoDienThoaiTaiXe = entity.SoDienThoaiTaiXe
+                SoDienThoaiTaiXe = entity.SoDienThoaiTaiXe,
+                TienVanChuyen = entity.TienVanChuyen
             };
 
             int total;
@@ -263,6 +265,8 @@ namespace SalesManagementSystem.Controllers
                     ThueGTGT = x.ThueGTGT,
                     TienThue = x.TienThue,
                     TongSauThue = x.TongSauThue,
+                    DonGiaVanChuyen = x.DonGiaVanChuyen,
+                    TienVanChuyen = x.TienVanChuyen,
                     GhiChu = x.GhiChu,
                     NgaySanXuat = x.NgaySanXuat,
                     HanSuDung = x.HanSuDung
@@ -302,7 +306,8 @@ namespace SalesManagementSystem.Controllers
                 IDPhuongTien = entity.IDPhuongTien,
                 NgayGiaoHang = entity.NgayGiaoHang,
                 HoTenTaiXe = entity.HoTenTaiXe,
-                SoDienThoaiTaiXe = entity.SoDienThoaiTaiXe
+                SoDienThoaiTaiXe = entity.SoDienThoaiTaiXe,
+                TienVanChuyen = entity.TienVanChuyen
             };
 
             int total;
@@ -346,6 +351,11 @@ namespace SalesManagementSystem.Controllers
 
             try
             {
+                if (model.ChiTiets != null && model.ChiTiets.Any(x => x.DonGiaVanChuyen < 0))
+                {
+                    return Json(new { success = false, message = "Tiá»n váº­n chuyá»ƒn khÃ´ng Ä‘Æ°á»£c Ã¢m." });
+                }
+
                 if (model.IDLoaiNhapKho.HasValue && model.IDKhoNguon.HasValue)
                 {
                     var loaiNhapList = _repo.GetLoaiNhapKhoForDropdown();
@@ -494,7 +504,8 @@ namespace SalesManagementSystem.Controllers
                 IDPhuongTien = entity.IDPhuongTien,
                 NgayGiaoHang = entity.NgayGiaoHang,
                 HoTenTaiXe = entity.HoTenTaiXe,
-                SoDienThoaiTaiXe = entity.SoDienThoaiTaiXe
+                SoDienThoaiTaiXe = entity.SoDienThoaiTaiXe,
+                TienVanChuyen = entity.TienVanChuyen
             };
 
             int total;

@@ -205,7 +205,7 @@ namespace SalesManagementSystem.Controllers
             model.TongTienHang = model.ChiTiets.Sum(x => x.ThanhTien);
             model.TongTienThue = model.ChiTiets.Sum(x => x.TienThue);
             model.PhiBocXep = donHang.PhiBocXep;
-            model.TongCong = model.ChiTiets.Sum(x => x.TongSauThue) - model.PhiBocXep;
+            model.TongCong = model.ChiTiets.Sum(x => x.TongSauThue);
             model.ConLai = model.TongCong;
             model.DaThanhToan = 0;
 

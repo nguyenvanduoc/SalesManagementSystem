@@ -250,21 +250,44 @@
     </div>
 
     <!-- FILTER BAR -->
-    <div class="filter-bar d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <div class="d-flex align-items-center gap-3 flex-wrap">
+    <div class="filter-bar">
+        <form id="dashboardFilterForm_@uid" onsubmit="return false;" class="no-ajax d-flex align-items-center gap-3 flex-wrap">
+            <div class="d-flex align-items-center gap-2">
+                <label class="fw-bold mb-0 text-nowrap text-muted" style="font-size:0.8rem">Thời gian</label>
+                <select class="form-select form-select-sm ddl-thoi-gian border-2 rounded-2" style="width:180px; font-size:0.82rem; padding: 4px 8px; height: 32px;">
+                    <option value="current_month">Đầu tháng đến hiện tại</option>
+                    <option value="month_1">Tháng 1</option>
+                    <option value="month_2">Tháng 2</option>
+                    <option value="month_3">Tháng 3</option>
+                    <option value="month_4">Tháng 4</option>
+                    <option value="month_5">Tháng 5</option>
+                    <option value="month_6">Tháng 6</option>
+                    <option value="month_7">Tháng 7</option>
+                    <option value="month_8">Tháng 8</option>
+                    <option value="month_9">Tháng 9</option>
+                    <option value="month_10">Tháng 10</option>
+                    <option value="month_11">Tháng 11</option>
+                    <option value="month_12">Tháng 12</option>
+                    <option value="quarter_1">Quý 1</option>
+                    <option value="quarter_2">Quý 2</option>
+                    <option value="quarter_3">Quý 3</option>
+                    <option value="quarter_4">Quý 4</option>
+                </select>
+            </div>
             <div class="d-flex align-items-center gap-2">
                 <label class="fw-bold mb-0 text-nowrap text-muted" style="font-size:0.8rem">Từ ngày <span class="text-danger">*</span></label>
-                <input type="date" id="dbTuNgay_@uid" class="form-control form-control-sm border-2 rounded-2" style="width:145px; font-size:0.82rem; padding: 4px 8px;" />
+                <input type="date" id="dbTuNgay_@uid" name="tuNgay" class="form-control form-control-sm border-2 rounded-2" style="width:145px; font-size:0.82rem; padding: 4px 8px;" />
             </div>
             <div class="d-flex align-items-center gap-2">
                 <label class="fw-bold mb-0 text-nowrap text-muted" style="font-size:0.8rem">Đến ngày <span class="text-danger">*</span></label>
-                <input type="date" id="dbDenNgay_@uid" class="form-control form-control-sm border-2 rounded-2" style="width:145px; font-size:0.82rem; padding: 4px 8px;" />
+                <input type="date" id="dbDenNgay_@uid" name="denNgay" class="form-control form-control-sm border-2 rounded-2" style="width:145px; font-size:0.82rem; padding: 4px 8px;" />
             </div>
-            <button id="btnLoadDashboard_@uid" class="btn btn-sm btn-success rounded-2 py-1.5 px-3 fw-bold shadow-sm" style="font-size:0.82rem"><i class="bi bi-search me-1"></i> Tra cứu</button>
-            <button id="btnResetDashboard_@uid" class="btn btn-sm btn-light border rounded-2 py-1.5 px-2.5" style="font-size:0.82rem"><i class="bi bi-arrow-clockwise me-1"></i> Làm mới</button>
-        </div>
-
+            <button type="submit" id="btnLoadDashboard_@uid" class="btn btn-sm btn-success rounded-2 py-1.5 px-3 fw-bold shadow-sm" style="font-size:0.82rem; height: 32px;"><i class="bi bi-search me-1"></i> Tra cứu</button>
+            <button type="button" id="btnResetDashboard_@uid" class="btn btn-sm btn-light border rounded-2 py-1.5 px-2.5" style="font-size:0.82rem; height: 32px;"><i class="bi bi-arrow-clockwise me-1"></i> Làm mới</button>
+        </form>
     </div>
+
+    <div id="dashboardContentArea_@uid" style="transition: opacity 0.1s ease-in-out;">
 
     <!-- KHỐI 1: 6 METRIC CARDS RESPONSIVE -->
     <div class="row g-2 mb-3">
@@ -653,6 +676,7 @@
             </div>
         </div>
     </div>
+    </div> <!-- /dashboardContentArea -->
 </div>
 
 @section Scripts {
@@ -666,10 +690,20 @@
             initDates();
             loadDashboardData();
 
-            $('#btnLoadDashboard_@uid').click(function () {
+            $('#dashboardFilterForm_@uid').on('submit', function (e) {
+                e.preventDefault();
                 loadDashboardData();
             });
 
+            $('#btnResetDashboard_@uid').click(function () {
+                var d = new Date();
+                var fd = new Date(d.getFullYear(), d.getMonth(), 1);
+                var ed = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+                $('#dbTuNgay_@uid').val(formatDateLocal(fd));
+                $('#dbDenNgay_@uid').val(formatDateLocal(ed));
+                $('#dashboardFilterForm_@uid').find('.ddl-thoi-gian').val('current_month');
+                loadDashboardData();
+            });
         });
 
         function getVietnameseDate() {
@@ -715,6 +749,9 @@
         }
 
         function loadDashboardData() {
+            var $area = $('#dashboardContentArea_@uid');
+            $area.css('opacity', '0.25');
+
             var tuNgay = $('#dbTuNgay_@uid').val();
             var denNgay = $('#dbDenNgay_@uid').val();
 
@@ -723,13 +760,17 @@
                 type: 'POST',
                 data: { tuNgay: tuNgay, denNgay: denNgay },
                 success: function (res) {
-                    if (res.success) {
-                        renderDashboard(res.data);
-                    } else {
-                        alert("Lỗi tải dữ liệu: " + res.message);
-                    }
+                    setTimeout(function() {
+                        if (res.success) {
+                            renderDashboard(res.data);
+                        } else {
+                            alert("Lỗi tải dữ liệu: " + res.message);
+                        }
+                        $area.css('opacity', '1');
+                    }, 100);
                 },
                 error: function(err) {
+                    $area.css('opacity', '1');
                     alert("Lỗi kết nối máy chủ Dashboard.");
                 }
             });

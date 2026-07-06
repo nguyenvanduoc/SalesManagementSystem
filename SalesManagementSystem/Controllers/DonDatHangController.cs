@@ -625,9 +625,9 @@ namespace SalesManagementSystem.Controllers
                     { "TongThanhTien", totalThanhTien },
                     { "PhiBocXep", don.PhiBocXep },
                     { "DonGiaBocXep", donGiaBocXep > 0 ? donGiaBocXep.ToString("N0"): "" },
-                    { "TongTienThanhToan", totalThanhTien - don.PhiBocXep },
+                    { "TongTienThanhToan", totalThanhTien },
                     { "ThoiGianGiaoHang", don.ThoiHanGiaoHang?.ToString("dd/MM/yyyy") },
-                    { "SoTienBangChu", SalesManagementSystem.Helpers.NumberToTextHelper.DocTienBangChu(totalThanhTien - don.PhiBocXep) }
+                    { "SoTienBangChu", SalesManagementSystem.Helpers.NumberToTextHelper.DocTienBangChu(totalThanhTien) }
                 };
 
                 // The prefix will be %DH01. since we use maBieuMau = "DH01"

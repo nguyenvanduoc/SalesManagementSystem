@@ -51,6 +51,10 @@ namespace SalesManagementSystem.Models.ViewModels
         public decimal? DonGiaMoi { get; set; }
         public decimal? ThanhTienCu { get; set; }
         public decimal? ThanhTienMoi { get; set; }
+        public decimal? DonGiaVanChuyenCu { get; set; }
+        public decimal? DonGiaVanChuyenMoi { get; set; }
+        public decimal? TienVanChuyenCu { get; set; }
+        public decimal? TienVanChuyenMoi { get; set; }
         public string LoaiThayDoi { get; set; }
     }
 

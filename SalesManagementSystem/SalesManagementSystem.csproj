@@ -351,18 +351,10 @@
     <Compile Include="Repositories\TraHangBanRepository.cs" />
     <Compile Include="Controllers\BAN_TraHangBanController.cs" />
     <Compile Include="Models\ViewModels\BaoCaoDoiChieuNhapNhaCungCapViewModel.cs" />
+    <Compile Include="Models\ViewModels\PhieuNhapChiTietDetailViewModel.cs" />
     <Compile Include="Repositories\Interfaces\IBaoCaoDoiChieuNhapNhaCungCapRepository.cs" />
     <Compile Include="Repositories\BaoCaoDoiChieuNhapNhaCungCapRepository.cs" />
     <Compile Include="Controllers\BaoCaoDoiChieuNhapNhaCungCapController.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Content\bootstrap-grid.css" />
-    <Content Include="Content\bootstrap-grid.min.css" />
-    <Content Include="Content\bootstrap-grid.rtl.css" />
-    <Content Include="Content\bootstrap-grid.rtl.min.css" />
-    <Content Include="Content\bootstrap-reboot.css" />
-    <Content Include="Content\bootstrap-reboot.min.css" />
-    <Content Include="Content\bootstrap-reboot.rtl.css" />
     <Content Include="Content\bootstrap-reboot.rtl.min.css" />
     <Content Include="Content\bootstrap-utilities.css" />
     <Content Include="Content\bootstrap-utilities.min.css" />
@@ -563,6 +555,8 @@
     <Content Include="Views\BaoCaoDoiChieuNhapNhaCungCap\Index.cshtml" />
     <Content Include="Views\BaoCaoDoiChieuNhapNhaCungCap\_DanhSach.cshtml" />
     <Content Include="App_Data\insert_acl_BaoCaoDoiChieuNhapNhaCungCap.sql" />
+    <Content Include="Views\BaoCaoDoiChieuNhapNhaCungCap\_DetailsModal.cshtml" />
+    <Content Include="Views\BaoCaoKetQuaHoatDongKinhDoanh\_DetailsModal.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />

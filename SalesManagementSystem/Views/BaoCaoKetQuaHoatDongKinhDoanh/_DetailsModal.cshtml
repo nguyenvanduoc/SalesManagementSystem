@@ -1,0 +1,182 @@
+@{
+    var salesDetails = ViewBag.SalesDetails as List<dynamic>;
+    var purchaseDetails = ViewBag.PurchaseDetails as List<dynamic>;
+}
+
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content shadow-lg border-0" style="border-radius: 8px;">
+            <div class="modal-header text-white p-3" style="background: linear-gradient(135deg, #0b5b84, #1d82b8); border-top-left-radius: 8px; border-top-right-radius: 8px;">
+                <h5 class="modal-title fw-bold text-uppercase" id="detailsModalLabel">
+                    <i class="bi bi-info-circle-fill me-2"></i> Chi tiết đối chiếu dữ liệu sản phẩm
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <!-- Thông tin sản phẩm -->
+                <div class="bg-light p-3 rounded mb-4 shadow-sm border-start border-4 border-info">
+                    <div class="row text-center text-md-start">
+                        <div class="col-md-4 mb-2 mb-md-0">
+                            <span class="text-muted small d-block">Mã sản phẩm</span>
+                            <strong class="text-dark" style="font-size: 1.1rem;">@ViewBag.MaSanPham</strong>
+                        </div>
+                        <div class="col-md-6 mb-2 mb-md-0">
+                            <span class="text-muted small d-block">Tên sản phẩm</span>
+                            <strong class="text-dark" style="font-size: 1.1rem;">@ViewBag.TenSanPham</strong>
+                        </div>
+                        <div class="col-md-2">
+                            <span class="text-muted small d-block">Đơn vị tính</span>
+                            <strong class="text-dark" style="font-size: 1.1rem;">@ViewBag.DVT</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nav tabs -->
+                <ul class="nav nav-pills mb-3" id="detailsTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-bold text-uppercase px-4 shadow-sm" id="sales-tab" data-bs-toggle="tab" data-bs-target="#sales" type="button" role="tab" aria-controls="sales" aria-selected="true">
+                            <i class="bi bi-cart-check-fill me-2"></i> Chi tiết Doanh thu bán hàng
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold text-uppercase px-4 shadow-sm" id="purchases-tab" data-bs-toggle="tab" data-bs-target="#purchases" type="button" role="tab" aria-controls="purchases" aria-selected="false">
+                            <i class="bi bi-box-seam me-2"></i> Chi tiết Nhập kho (Giá vốn & Vận chuyển)
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab panes -->
+                <div class="tab-content border p-3 rounded bg-white shadow-sm" style="min-height: 300px;">
+                    <!-- Sales Tab -->
+                    <div class="tab-pane fade show active" id="sales" role="tabpanel" aria-labelledby="sales-tab">
+                        <h6 class="fw-bold mb-3 text-secondary text-uppercase border-bottom pb-2">Hóa đơn bán hàng phát sinh trong kỳ</h6>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover align-middle mb-0 text-center" style="font-size: 0.95rem;">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th style="width: 60px;">STT</th>
+                                        <th>Số chứng từ</th>
+                                        <th>Ngày chứng từ</th>
+                                        <th>Số lượng bán</th>
+                                        <th>Đơn giá bán</th>
+                                        <th>Thành tiền doanh thu</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (salesDetails != null && salesDetails.Any())
+                                    {
+                                        int stt = 1;
+                                        foreach (var s in salesDetails)
+                                        {
+                                            <tr>
+                                                <td>@(stt++)</td>
+                                                <td class="fw-bold text-primary">@s.SoChungTu</td>
+                                                <td>@(((DateTime)s.NgayChungTu).ToString("dd/MM/yyyy"))</td>
+                                                <td class="text-end fw-bold text-dark">@(((decimal)s.SoLuong).ToString("N0"))</td>
+                                                <td class="text-end">@(((decimal)s.DonGia).ToString("N0"))</td>
+                                                <td class="text-end fw-bold text-success">@(((decimal)s.ThanhTien).ToString("N0"))</td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted p-4">Không có hóa đơn phát sinh trong kỳ</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                @if (salesDetails != null && salesDetails.Any())
+                                {
+                                    <tfoot class="table-light fw-bold text-end">
+                                        <tr>
+                                            <td colspan="3" class="text-center text-uppercase">Tổng cộng:</td>
+                                            <td class="text-success">@(((decimal)salesDetails.Sum(x => (decimal)x.SoLuong)).ToString("N0"))</td>
+                                            <td></td>
+                                            <td class="text-success">@(((decimal)salesDetails.Sum(x => (decimal)x.ThanhTien)).ToString("N0"))</td>
+                                        </tr>
+                                    </tfoot>
+                                }
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Purchases Tab -->
+                    <div class="tab-pane fade" id="purchases" role="tabpanel" aria-labelledby="purchases-tab">
+                        <h6 class="fw-bold mb-3 text-secondary text-uppercase border-bottom pb-2">Phiếu nhập kho đầu vào (Được dùng để tính Bình quân gia quyền)</h6>
+                        <p class="text-muted small mb-3">
+                            <i class="bi bi-info-circle me-1"></i> Giá vốn hàng bán và Chi phí vận chuyển được tính bằng phương pháp **Bình quân gia quyền di động** dựa trên toàn bộ các phiếu nhập kho đã ghi sổ dưới đây.
+                        </p>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover align-middle mb-0 text-center" style="font-size: 0.95rem;">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th style="width: 60px;">STT</th>
+                                        <th>Số chứng từ</th>
+                                        <th>Ngày nhập</th>
+                                        <th>Số lượng nhập</th>
+                                        <th>Đơn giá nhập</th>
+                                        <th>Thành tiền hàng</th>
+                                        <th>Đơn giá VC</th>
+                                        <th>Thành tiền VC</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (purchaseDetails != null && purchaseDetails.Any())
+                                    {
+                                        int stt = 1;
+                                        foreach (var p in purchaseDetails)
+                                        {
+                                            <tr>
+                                                <td>@(stt++)</td>
+                                                <td class="fw-bold text-success">@p.SoChungTu</td>
+                                                <td>@(((DateTime)p.NgayNhap).ToString("dd/MM/yyyy"))</td>
+                                                <td class="text-end fw-bold text-dark">@(((decimal)p.SoLuong).ToString("N0"))</td>
+                                                <td class="text-end">@(((decimal)p.DonGia).ToString("N0"))</td>
+                                                <td class="text-end fw-bold text-primary">@(((decimal)p.ThanhTienHang).ToString("N0"))</td>
+                                                <td class="text-end text-warning">@(((decimal)p.DonGiaVanChuyen).ToString("N0"))</td>
+                                                <td class="text-end fw-bold text-warning">@(((decimal)p.TienVanChuyen).ToString("N0"))</td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="8" class="text-center text-muted p-4">Không có phiếu nhập kho nào được ghi sổ trước thời điểm này</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                @if (purchaseDetails != null && purchaseDetails.Any())
+                                {
+                                    <tfoot class="table-light fw-bold text-end">
+                                        <tr>
+                                            <td colspan="3" class="text-center text-uppercase">Tổng cộng / Trung bình:</td>
+                                            <td class="text-primary">@(((decimal)purchaseDetails.Sum(x => (decimal)x.SoLuong)).ToString("N0"))</td>
+                                            <td class="text-primary">
+                                                @{
+                                                    var totalQty = purchaseDetails.Sum(x => (decimal)x.SoLuong);
+                                                    var avgPrice = totalQty > 0 ? purchaseDetails.Sum(x => (decimal)x.SoLuong * (decimal)x.DonGia) / totalQty : 0;
+                                                    @avgPrice.ToString("N2")
+                                                }
+                                            </td>
+                                            <td class="text-primary">@(((decimal)purchaseDetails.Sum(x => (decimal)x.ThanhTienHang)).ToString("N0"))</td>
+                                            <td class="text-warning">
+                                                @{
+                                                    var avgVc = totalQty > 0 ? purchaseDetails.Sum(x => (decimal)x.SoLuong * (decimal)x.DonGiaVanChuyen) / totalQty : 0;
+                                                    @avgVc.ToString("N2")
+                                                }
+                                            </td>
+                                            <td class="text-warning">@(((decimal)purchaseDetails.Sum(x => (decimal)x.TienVanChuyen)).ToString("N0"))</td>
+                                        </tr>
+                                    </tfoot>
+                                }
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer p-3 bg-light" style="border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+                <button type="button" class="btn btn-secondary text-white fw-bold px-4" data-bs-dismiss="modal" style="background-color: #6c757d; border: none; border-radius: 4px;">ĐÓNG</button>
+            </div>
+        </div>
+    </div>
+</div>

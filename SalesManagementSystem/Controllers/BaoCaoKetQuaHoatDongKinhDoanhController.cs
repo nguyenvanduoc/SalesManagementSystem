@@ -154,6 +154,78 @@ namespace SalesManagementSystem.Controllers
             return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
 
+        [HttpPost]
+        public ActionResult GetDetails(int idSanPham, DateTime? tuNgay, DateTime? denNgay, int? idKho)
+        {
+            if (!PermissionHelper.HasPermission("BaoCaoKetQuaHoatDongKinhDoanh", LoaiPhanQuyen.Xem))
+                return Json(new { success = false, message = "Bạn không có quyền xem chi tiết báo cáo này" });
+
+            try
+            {
+                using (var conn = new DbConnectionFactory().CreateConnection())
+                {
+                    var sanPham = conn.QueryFirstOrDefault("SELECT MaSanPham, TenSanPham, DVT FROM DM_SanPham WHERE ID = @ID", new { ID = idSanPham });
+                    ViewBag.MaSanPham = sanPham?.MaSanPham ?? "";
+                    ViewBag.TenSanPham = sanPham?.TenSanPham ?? "";
+                    ViewBag.DVT = sanPham?.DVT ?? "";
+                    
+                    string sqlSales = @"
+                        SELECT 
+                            hd.SoChungTu,
+                            hd.NgayChungTu,
+                            ct.SoLuong,
+                            ct.DonGia,
+                            ct.ThanhTien
+                        FROM BAN_ChungTuBanHang_ChiTiet ct
+                        INNER JOIN BAN_ChungTuBanHang hd ON ct.IDChungTuBanHang = hd.ID
+                        WHERE hd.IsDeleted = 0 
+                          AND hd.TrangThai = 2
+                          AND ct.IDSanPham = @IDSanPham
+                          AND hd.NgayChungTu >= @TuNgay AND hd.NgayChungTu <= @DenNgay
+                          AND (@IDKho IS NULL OR hd.IDKho = @IDKho)
+                        ORDER BY hd.NgayChungTu DESC, hd.ID DESC";
+
+                    var salesList = conn.Query(sqlSales, new { 
+                        IDSanPham = idSanPham, 
+                        TuNgay = tuNgay ?? new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1),
+                        DenNgay = denNgay ?? DateTime.Now.Date,
+                        IDKho = idKho
+                    }).ToList();
+
+                    string sqlPurchases = @"
+                        SELECT 
+                            p.SoChungTu,
+                            p.NgayNhap,
+                            ct.SoLuong,
+                            ct.DonGia,
+                            ct.SoLuong * ct.DonGia AS ThanhTienHang,
+                            ISNULL(ct.DonGiaVanChuyen, 0) AS DonGiaVanChuyen,
+                            ISNULL(ct.TienVanChuyen, 0) AS TienVanChuyen
+                        FROM KHO_PhieuNhap_ChiTiet ct
+                        INNER JOIN KHO_PhieuNhap p ON ct.IDPhieuNhap = p.ID
+                        WHERE p.IsDeleted = 0 
+                          AND p.TrangThai = 2
+                          AND ct.IDSanPham = @IDSanPham
+                          AND p.NgayNhap <= @DenNgay
+                        ORDER BY p.NgayNhap DESC, p.ID DESC";
+
+                    var purchaseList = conn.Query(sqlPurchases, new { 
+                        IDSanPham = idSanPham,
+                        DenNgay = denNgay ?? DateTime.Now.Date
+                    }).ToList();
+
+                    ViewBag.SalesDetails = salesList;
+                    ViewBag.PurchaseDetails = purchaseList;
+
+                    return PartialView("_DetailsModal");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
         private SelectList GetKhoHangList()
         {
             using (var conn = new DbConnectionFactory().CreateConnection())

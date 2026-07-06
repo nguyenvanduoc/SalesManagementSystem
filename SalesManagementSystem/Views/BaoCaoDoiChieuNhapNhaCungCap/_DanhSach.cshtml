@@ -25,6 +25,7 @@
                 <th class="text-end">Đã thanh toán</th>
                 <th class="text-end">Còn nợ lũy kế</th>
                 <th>Ghi chú</th>
+                <th class="text-center" style="width:65px;">Thao tác</th>
             </tr>
         </thead>
         <tbody>
@@ -69,24 +70,37 @@
                         <td class="text-end">@(item.DaThanhToan > 0 ? item.DaThanhToan.ToString("N0") : "-")</td>
                         <td class="text-end text-danger fw-bold">@item.ConNoLuyKe.ToString("N0")</td>
                         <td>@item.GhiChu</td>
+                        <td class="text-center">
+                            @if (item.LoaiDong == 1 || item.LoaiDong == 2)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 btn-xem-chitiet"
+                                        style="font-size:0.75rem;"
+                                        data-id="@item.IDPhatSinh"
+                                        data-loai="@item.LoaiDong"
+                                        title="Xem chi tiết">
+                                    <i class="bi bi-eye"></i> Xem
+                                </button>
+                            }
+                        </td>
                     </tr>
                 }
             }
             else
             {
                 <tr>
-                    <td colspan="12" class="text-center text-muted">Không có dữ liệu phát sinh trong khoảng thời gian này</td>
+                    <td colspan="14" class="text-center text-muted">Không có dữ liệu phát sinh trong khoảng thời gian này</td>
                 </tr>
             }
         </tbody>
         <tfoot>
             <tr style="background-color: #f4f6f9; font-weight: bold;">
-                <td colspan="6" class="text-end">TỔNG CỘNG:</td>
+                <td colspan="7" class="text-end">TỔNG CỘNG:</td>
                 <td class="text-end">@tongSoLuongNhap.ToString("N0")</td>
                 <td class="text-end"></td>
                 <td class="text-end">@tongPhaiTra.ToString("N0")</td>
                 <td class="text-end">@tongDaThanhToan.ToString("N0")</td>
                 <td class="text-end text-danger">@conNoCuoiKy.ToString("N0")</td>
+                <td></td>
                 <td></td>
             </tr>
         </tfoot>

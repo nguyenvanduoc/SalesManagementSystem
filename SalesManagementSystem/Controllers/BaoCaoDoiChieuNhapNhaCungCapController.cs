@@ -5,6 +5,8 @@ using SalesManagementSystem.Helpers;
 using SalesManagementSystem.Repositories.Interfaces;
 using SalesManagementSystem.Services.Interfaces;
 using System.Collections.Generic;
+using Dapper;
+using SalesManagementSystem.Data;
 
 namespace SalesManagementSystem.Controllers
 {
@@ -21,16 +23,12 @@ namespace SalesManagementSystem.Controllers
 
         public ActionResult Index()
         {
-            // Tự do tuỳ chỉnh quyền nếu cần, hiện tại không ràng buộc quyền cụ thể hoặc bạn có thể tự thêm
-            // if (!PermissionHelper.HasPermission("BaoCao", LoaiPhanQuyen.Xem)) return View("AccessDenied");
-
             ViewBag.Title = "BÁO CÁO ĐỐI CHIẾU NHẬP NCC";
-            
+
             var nccs = _repo.GetNhaCungCapDropdown()
                 .Select(x => new SelectListItem { Value = ((int)x.ID).ToString(), Text = (string)x.TenHienThi });
             ViewBag.NhaCungCapList = new SelectList(nccs.ToList(), "Value", "Text");
 
-            // Khởi tạo ngày mặc định (đầu tháng đến hiện tại)
             ViewBag.TuNgay = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).ToString("yyyy-MM-dd");
             ViewBag.DenNgay = DateTime.Now.ToString("yyyy-MM-dd");
 
@@ -54,7 +52,7 @@ namespace SalesManagementSystem.Controllers
                 var data = _repo.GetList(idNhaCungCap, tuNgay.Value, denNgay.Value).ToList();
                 var totalRecords = data.Count;
                 var pagedItems = data.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-                
+
                 decimal tongSoLuongNhap = 0;
                 decimal tongPhaiTra = 0;
                 decimal tongDaThanhToan = 0;
@@ -92,6 +90,145 @@ namespace SalesManagementSystem.Controllers
         }
 
         [HttpGet]
+        public ActionResult GetDetails(int idPhatSinh, int loaiDong)
+        {
+            try
+            {
+                using (var conn = new DbConnectionFactory().CreateConnection())
+                {
+                    if (loaiDong == 1) // Phiếu nhập kho
+                    {
+                        var phieuNhap = conn.QueryFirstOrDefault(@"
+                            SELECT pn.ID, pn.SoChungTu, pn.NgayNhap, ncc.TenNhaCungCap,
+                                   pn.GhiChu, pn.TongTienHang, pn.TongTienThue, pn.TongCong,
+                                   ISNULL(pn.TienVanChuyen, 0) AS TienVanChuyen,
+                                   LTRIM(RTRIM(ISNULL(ns.HoDem, '') + ' ' + ISNULL(ns.Ten, ''))) AS NguoiTaoTen
+                            FROM KHO_PhieuNhap pn
+                            LEFT JOIN DM_NhaCungCap ncc ON pn.IDNhaCungCap = ncc.ID
+                            LEFT JOIN NS_NhanSu ns ON pn.NguoiTao = ns.ID
+                            WHERE pn.ID = @ID AND pn.IsDeleted = 0", new { ID = idPhatSinh });
+
+                        var chiTiets = conn.Query(@"
+                            SELECT ct.IDSanPham, sp.MaSanPham, sp.TenSanPham, sp.DVT,
+                                   ct.SoLuong, ct.DonGia, ct.ThanhTien,
+                                   ISNULL(ct.DonGiaVanChuyen, 0) AS DonGiaVanChuyen,
+                                   ISNULL(ct.TienVanChuyen, 0) AS TienVanChuyen,
+                                   ISNULL(ct.TongSauThue, ct.ThanhTien) AS TongSauThue,
+                                   ct.GhiChu
+                            FROM KHO_PhieuNhap_ChiTiet ct
+                            LEFT JOIN DM_SanPham sp ON ct.IDSanPham = sp.ID
+                            WHERE ct.IDPhieuNhap = @IDPhieuNhap
+                            ORDER BY ct.ID", new { IDPhieuNhap = idPhatSinh }).ToList();
+
+                        // Pre-process sang typed scalar để Razor không cần dynamic cast
+                        if (phieuNhap != null)
+                        {
+                            ViewBag.PN_SoChungTu = (string)(phieuNhap.SoChungTu ?? "");
+                            ViewBag.PN_TenNCC = (string)(phieuNhap.TenNhaCungCap ?? "");
+                            ViewBag.PN_NgayNhap = (DateTime?)phieuNhap.NgayNhap;
+                            ViewBag.PN_TongTienHang = (decimal)(phieuNhap.TongTienHang ?? 0m);
+                            ViewBag.PN_TongCong = (decimal)(phieuNhap.TongCong ?? 0m);
+                            ViewBag.PN_TienVanChuyen = (decimal)(phieuNhap.TienVanChuyen ?? 0m);
+                            ViewBag.PN_GhiChu = (string)(phieuNhap.GhiChu ?? "");
+                            ViewBag.PN_NguoiTao = (string)(phieuNhap.NguoiTaoTen ?? "");
+                        }
+                        else
+                        {
+                            ViewBag.PN_SoChungTu = ""; ViewBag.PN_TenNCC = "";
+                            ViewBag.PN_NgayNhap = null;
+                            ViewBag.PN_TongTienHang = 0m; ViewBag.PN_TongCong = 0m;
+                            ViewBag.PN_TienVanChuyen = 0m; ViewBag.PN_GhiChu = "";
+                            ViewBag.PN_NguoiTao = "";
+                        }
+
+                        // Chuyển sang named ViewModel để Razor truy cập property an toàn (anonymous type bị lỗi cross-assembly)
+                        var chiTietList = chiTiets.Select(ct => new SalesManagementSystem.Models.ViewModels.PhieuNhapChiTietDetailViewModel
+                        {
+                            MaSanPham        = (string)(ct.MaSanPham ?? ""),
+                            TenSanPham       = (string)(ct.TenSanPham ?? ""),
+                            DVT              = (string)(ct.DVT ?? ""),
+                            SoLuong          = (decimal)(ct.SoLuong ?? 0m),
+                            DonGia           = (decimal)(ct.DonGia ?? 0m),
+                            ThanhTien        = (decimal)(ct.ThanhTien ?? 0m),
+                            DonGiaVanChuyen  = (decimal)(ct.DonGiaVanChuyen ?? 0m),
+                            TienVanChuyen    = (decimal)(ct.TienVanChuyen ?? 0m),
+                            TongSauThue      = (decimal)(ct.TongSauThue ?? 0m),
+                            GhiChu           = (string)(ct.GhiChu ?? "")
+                        }).ToList();
+
+                        ViewBag.LoaiDong = 1;
+                        ViewBag.ChiTiets = chiTietList;
+                        ViewBag.TongThanhTien = chiTietList.Sum(x => x.ThanhTien);
+                        ViewBag.TongVanChuyen = chiTietList.Sum(x => x.TienVanChuyen);
+                    }
+                    else if (loaiDong == 2) // Phiếu chi thanh toán
+                    {
+                        var phieuChi = conn.QueryFirstOrDefault(@"
+                            SELECT pc.ID, pc.SoPhieuChi, pc.NgayChi, ncc.TenNhaCungCap,
+                                   pc.SoTienChi, pc.DienGiai,
+                                   tk.TenTaiKhoan, tk.LoaiTaiKhoan,
+                                   ISNULL(tk.NganHang, '') AS NganHang,
+                                   pc.IDPhieuNhap,
+                                   pn.SoChungTu AS SoChungTuNhap,
+                                   LTRIM(RTRIM(ISNULL(ns.HoDem, '') + ' ' + ISNULL(ns.Ten, ''))) AS NguoiTaoTen
+                            FROM KT_PhieuChi pc
+                            LEFT JOIN DM_NhaCungCap ncc ON pc.IDNhaCungCap = ncc.ID
+                            LEFT JOIN DM_TaiKhoanThanhToan tk ON pc.IDTaiKhoanThanhToan = tk.ID
+                            LEFT JOIN KHO_PhieuNhap pn ON pc.IDPhieuNhap = pn.ID
+                            LEFT JOIN NS_NhanSu ns ON pc.NguoiTao = ns.ID
+                            WHERE pc.ID = @ID AND pc.IsDeleted = 0", new { ID = idPhatSinh });
+
+                        if (phieuChi != null)
+                        {
+                            ViewBag.PC_SoPhieuChi     = (string)(phieuChi.SoPhieuChi ?? "");
+                            ViewBag.PC_TenNCC          = (string)(phieuChi.TenNhaCungCap ?? "");
+                            ViewBag.PC_NgayChi         = (DateTime?)phieuChi.NgayChi;
+                            ViewBag.PC_SoTienChi       = (decimal)(phieuChi.SoTienChi ?? 0m);
+                            ViewBag.PC_DienGiai        = (string)(phieuChi.DienGiai ?? "");
+                            
+                            // Safe processing of LoaiTaiKhoan (int)
+                            string hinhThuc = "";
+                            var ltk = phieuChi.LoaiTaiKhoan;
+                            if (ltk != null)
+                            {
+                                int ltkInt = 0;
+                                if (int.TryParse(ltk.ToString(), out ltkInt))
+                                {
+                                    if (ltkInt == 1) hinhThuc = "Tiền mặt";
+                                    else if (ltkInt == 2) hinhThuc = "Chuyển khoản";
+                                    else hinhThuc = "Loại khác (" + ltkInt + ")";
+                                }
+                            }
+                            ViewBag.PC_HinhThuc        = hinhThuc;
+                            ViewBag.PC_TenTaiKhoan     = (string)(phieuChi.TenTaiKhoan ?? "");
+                            ViewBag.PC_NganHang        = (string)(phieuChi.NganHang ?? "");
+                            ViewBag.PC_SoChungTuNhap   = (string)(phieuChi.SoChungTuNhap ?? "");
+                            ViewBag.PC_NguoiTao        = (string)(phieuChi.NguoiTaoTen ?? "");
+                        }
+                        else
+                        {
+                            ViewBag.PC_SoPhieuChi = ""; ViewBag.PC_TenNCC = "";
+                            ViewBag.PC_NgayChi = null; ViewBag.PC_SoTienChi = 0m;
+                            ViewBag.PC_DienGiai = ""; ViewBag.PC_HinhThuc = "";
+                            ViewBag.PC_TenTaiKhoan = ""; ViewBag.PC_NganHang = "";
+                            ViewBag.PC_SoChungTuNhap = ""; ViewBag.PC_NguoiTao = "";
+                        }
+
+
+                        ViewBag.LoaiDong = 2;
+                    }
+
+                    return PartialView("_DetailsModal");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+
+        [HttpGet]
         public ActionResult ExportExcel(int? idNhaCungCap, DateTime? tuNgay, DateTime? denNgay)
         {
             if (!tuNgay.HasValue || !denNgay.HasValue) return Content("Vui lòng chọn từ ngày và đến ngày");
@@ -99,7 +236,7 @@ namespace SalesManagementSystem.Controllers
             try
             {
                 var data = _repo.GetList(idNhaCungCap, tuNgay.Value, denNgay.Value).ToList();
-                
+
                 string nhaCungCapName = "Tất cả";
                 if (idNhaCungCap.HasValue)
                 {

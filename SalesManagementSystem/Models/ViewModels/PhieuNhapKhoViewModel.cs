@@ -34,6 +34,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public DateTime? NgayGiaoHang { get; set; }
         public string HoTenTaiXe { get; set; }
         public string SoDienThoaiTaiXe { get; set; }
+        public decimal TienVanChuyen { get; set; }
 
         public List<PhieuNhapKhoChiTietViewModel> ChiTiets { get; set; }
 

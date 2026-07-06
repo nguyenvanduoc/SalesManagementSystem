@@ -18,6 +18,7 @@
                         <th>Phương tiện</th>
                         <th class="text-end">Số lượng</th>
                         <th class="text-end d-none">Tiền thuế</th>
+                        <th class="text-end">Tiền vận chuyển</th>
                         <th class="text-end">Tổng cộng</th>
                         <th>Người tạo</th>
                         <th class="text-center">Ngày tạo</th>
@@ -103,6 +104,7 @@
                                 <td class="align-middle">@item.TenPhuongTien</td>
                                 <td class="text-end align-middle">@(item.TongSoLuong.ToString("N0"))</td>
                                 <td class="text-end align-middle d-none">@(item.TongTienThue.ToString("N0"))</td>
+                                <td class="text-end align-middle">@(item.TienVanChuyen.ToString("N0"))</td>
                                 <td class="text-end align-middle">
                                     @item.TongCong.ToString("N0")
                                 </td>
@@ -170,6 +172,7 @@
                             <td colspan="10" class="text-end">Tổng cộng</td>
                             <td class="text-end">@(Model.Items.Sum(x => x.TongSoLuong).ToString("N0"))</td>
                             <td class="text-end d-none">@(Model.Items.Sum(x => x.TongTienThue).ToString("N0"))</td>
+                            <td class="text-end">@(Model.Items.Sum(x => x.TienVanChuyen).ToString("N0"))</td>
                             <td class="text-end" style="color: #1a5276; font-size: 1.1em;">@(Model.Items.Sum(x => x.TongCong).ToString("N0"))</td>
                             <td colspan="3"></td>
                         </tr>

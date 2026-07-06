@@ -24,21 +24,31 @@ BEGIN
         SUM(ct.SoLuong) AS SoLuongDoanhThu,
         SUM(ct.ThanhTien) AS ThanhTienDoanhThu, -- Tổng tiền đã trừ phí bốc xếp
         SUM(ct.SoLuong) AS SoLuongGiaVon,
-        SUM(ISNULL(ct.ThanhTienVon, 0)) AS ThanhTienGiaVon,
-        -- Phân bổ phí vận chuyển: (ThanhTien của chi tiết / Tổng thành tiền của đơn) * Phí vận chuyển của đơn
         SUM(
-            ISNULL(dh.TongTienVanChuyen, 0) * 
-            CASE WHEN ISNULL(hd.TongTienHang, 0) = 0 THEN 0 ELSE (ct.ThanhTienHang / hd.TongTienHang) END
-        ) AS ChiPhiVanChuyen
+            CASE 
+                WHEN ISNULL(ct.ThanhTienVon, 0) > 0 THEN ct.ThanhTienVon
+                ELSE ct.SoLuong * ISNULL(ap.AvgDonGia, 0)
+            END
+        ) AS ThanhTienGiaVon,
+        SUM(ct.SoLuong * ISNULL(ap.AvgDonGiaVanChuyen, 0)) AS ChiPhiVanChuyen
     INTO #TmpDoanhThu
     FROM BAN_ChungTuBanHang_ChiTiet ct
     INNER JOIN BAN_ChungTuBanHang hd ON ct.IDChungTuBanHang = hd.ID
-    LEFT JOIN NS_DonDatHang dh ON hd.IDDonDatHang = dh.ID
+    OUTER APPLY (
+        SELECT 
+            SUM(pn_ct.SoLuong * pn_ct.DonGia) / NULLIF(SUM(pn_ct.SoLuong), 0) AS AvgDonGia,
+            SUM(pn_ct.SoLuong * ISNULL(pn_ct.DonGiaVanChuyen, 0)) / NULLIF(SUM(pn_ct.SoLuong), 0) AS AvgDonGiaVanChuyen
+        FROM KHO_PhieuNhap_ChiTiet pn_ct
+        INNER JOIN KHO_PhieuNhap pn ON pn_ct.IDPhieuNhap = pn.ID
+        WHERE pn_ct.IDSanPham = ct.IDSanPham 
+          AND pn.TrangThai = 2 AND pn.IsDeleted = 0
+          AND pn.NgayNhap <= @DenNgay
+    ) ap
     WHERE hd.IsDeleted = 0 
       AND hd.TrangThai = 2 -- Đã ghi sổ
       AND hd.NgayChungTu >= @TuNgay AND hd.NgayChungTu <= @DenNgay
       AND (@IDKho IS NULL OR hd.IDKho = @IDKho)
-    GROUP BY ct.IDSanPham
+    GROUP BY ct.IDSanPham, ap.AvgDonGia, ap.AvgDonGiaVanChuyen
 
     -- 3. Tổng hợp dữ liệu
     SELECT 

@@ -30,6 +30,7 @@ namespace SalesManagementSystem.Models.Entities
         public DateTime? NgayGiaoHang { get; set; }
         public string HoTenTaiXe { get; set; }
         public string SoDienThoaiTaiXe { get; set; }
+        public decimal TienVanChuyen { get; set; }
         
         // Bổ sung cho Loại Nhập
         public int? IDLoaiNhapKho { get; set; }

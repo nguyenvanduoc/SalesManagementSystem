@@ -1,0 +1,306 @@
+@{
+    Layout = null;
+    int loaiDong = ViewBag.LoaiDong != null ? (int)ViewBag.LoaiDong : 0;
+}
+
+<div class="modal fade" id="detailsModalNCC" tabindex="-1" aria-labelledby="detailsModalNCCLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 12px; overflow: hidden; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+
+            @* ====== PHIẾU NHẬP KHO ====== *@
+            @if (loaiDong == 1)
+            {
+                string soChungTu    = ViewBag.PN_SoChungTu ?? "";
+                string tenNCC       = ViewBag.PN_TenNCC ?? "";
+                DateTime? ngayNhap  = ViewBag.PN_NgayNhap as DateTime?;
+                decimal tongCong    = ViewBag.PN_TongCong != null ? (decimal)ViewBag.PN_TongCong : 0m;
+                decimal tienVC      = ViewBag.PN_TienVanChuyen != null ? (decimal)ViewBag.PN_TienVanChuyen : 0m;
+                string ghiChu       = ViewBag.PN_GhiChu ?? "";
+                decimal tongThanhTien = ViewBag.TongThanhTien != null ? (decimal)ViewBag.TongThanhTien : 0m;
+                decimal tongVanChuyen = ViewBag.TongVanChuyen != null ? (decimal)ViewBag.TongVanChuyen : 0m;
+
+                <div class="modal-header" style="background: linear-gradient(135deg, #0b5b84, #1a8cc1); color: white; border-bottom: none; padding: 18px 24px;">
+                    <div>
+                        <h5 class="modal-title fw-bold mb-1" id="detailsModalNCCLabel">
+                            <i class="bi bi-box-arrow-in-down me-2"></i>Chi tiết Phiếu Nhập Kho
+                        </h5>
+                        <div style="font-size: 0.85rem; opacity: 0.9;">
+                            <span class="badge bg-light text-primary me-2 px-3 py-1" style="font-size:0.85rem;">@soChungTu</span>
+                            @if (ngayNhap.HasValue)
+                            {
+                                <span class="me-3"><i class="bi bi-calendar3 me-1"></i>@ngayNhap.Value.ToString("dd/MM/yyyy")</span>
+                            }
+                            @if (!string.IsNullOrEmpty(ViewBag.PN_NguoiTao))
+                            {
+                                <span><i class="bi bi-person me-1"></i>Người nhập: @ViewBag.PN_NguoiTao</span>
+                            }
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-0">
+                    <!-- Info header -->
+                    <div class="px-4 py-3" style="background: #f0f7ff; border-bottom: 1px solid #dbe9f5;">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div style="width:34px;height:34px;background:#e8f4fd;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                                        <i class="bi bi-building text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted" style="font-size:0.75rem;">Nhà cung cấp</div>
+                                        <div class="fw-semibold" style="font-size:0.9rem;">@tenNCC</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div style="width:34px;height:34px;background:#e8f4fd;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                                        <i class="bi bi-calendar-event text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted" style="font-size:0.75rem;">Ngày nhập</div>
+                                        <div class="fw-semibold" style="font-size:0.9rem;">
+                                            @(ngayNhap.HasValue ? ngayNhap.Value.ToString("dd/MM/yyyy") : "-")
+                                            @if (!string.IsNullOrEmpty(ViewBag.PN_NguoiTao))
+                                            {
+                                                <span class="text-muted fw-normal ms-2" style="font-size:0.8rem;">(Người lập: @ViewBag.PN_NguoiTao)</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @if (!string.IsNullOrEmpty(ghiChu))
+                            {
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div style="width:34px;height:34px;background:#fff3cd;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                                            <i class="bi bi-sticky text-warning"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-muted" style="font-size:0.75rem;">Ghi chú</div>
+                                            <div class="fw-semibold" style="font-size:0.9rem;">@ghiChu</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Chi tiết sản phẩm -->
+                    <div class="px-4 pt-3 pb-1">
+                        <div class="fw-semibold text-primary mb-2" style="font-size:0.9rem;">
+                            <i class="bi bi-list-ul me-1"></i>Danh sách sản phẩm nhập
+                        </div>
+                    </div>
+                    <div class="table-responsive px-4 pb-3">
+                        <table class="table table-bordered table-hover" style="font-size:0.875rem;white-space:nowrap;">
+                            <thead style="background:#f4f6f9;color:#333;">
+                                <tr>
+                                    <th class="text-center" style="width:45px;">STT</th>
+                                    <th class="text-center">Mã SP</th>
+                                    <th>Tên sản phẩm</th>
+                                    <th class="text-center">ĐVT</th>
+                                    <th class="text-end">Số lượng</th>
+                                    <th class="text-end">Đơn giá</th>
+                                    <th class="text-end">Thành tiền hàng</th>
+                                    <th class="text-end">VC/đơn vị</th>
+                                    <th class="text-end">Tiền vận chuyển</th>
+                                    <th class="text-end">Tổng sau thuế</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var chiTiets = ViewBag.ChiTiets as List<SalesManagementSystem.Models.ViewModels.PhieuNhapChiTietDetailViewModel>;
+                                    int idx = 0;
+                                    if (chiTiets != null)
+                                    {
+                                        foreach (var ct in chiTiets)
+                                        {
+                                            idx++;
+                                            <tr>
+                                                <td class="text-center">@idx</td>
+                                                <td class="text-center"><span class="badge bg-secondary">@ct.MaSanPham</span></td>
+                                                <td>@ct.TenSanPham</td>
+                                                <td class="text-center">@ct.DVT</td>
+                                                <td class="text-end">@ct.SoLuong.ToString("N0")</td>
+                                                <td class="text-end">@ct.DonGia.ToString("N0")</td>
+                                                <td class="text-end fw-semibold">@ct.ThanhTien.ToString("N0")</td>
+                                                <td class="text-end">@(ct.DonGiaVanChuyen > 0 ? ct.DonGiaVanChuyen.ToString("N0") : "-")</td>
+                                                <td class="text-end text-info">@(ct.TienVanChuyen > 0 ? ct.TienVanChuyen.ToString("N0") : "-")</td>
+                                                <td class="text-end fw-bold text-primary">@ct.TongSauThue.ToString("N0")</td>
+                                            </tr>
+                                        }
+                                    }
+                                }
+                            </tbody>
+                            <tfoot style="background:#f4f6f9;font-weight:bold;">
+                                <tr>
+                                    <td colspan="6" class="text-end">TỔNG CỘNG:</td>
+                                    <td class="text-end">@tongThanhTien.ToString("N0")</td>
+                                    <td></td>
+                                    <td class="text-end text-info">@(tongVanChuyen > 0 ? tongVanChuyen.ToString("N0") : (tienVC > 0 ? tienVC.ToString("N0") : "-"))</td>
+                                    <td class="text-end text-primary">@tongCong.ToString("N0")</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <!-- Summary cards -->
+                    <div class="px-4 pb-4">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="rounded-3 p-3 text-center" style="background:#e8f4fd;border:1px solid #bcd9f0;">
+                                    <div class="text-muted small mb-1">Tổng tiền hàng</div>
+                                    <div class="fw-bold text-primary" style="font-size:1.1rem;">@tongThanhTien.ToString("N0")</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="rounded-3 p-3 text-center" style="background:#e8f8f5;border:1px solid #a9dfd0;">
+                                    <div class="text-muted small mb-1">Tổng vận chuyển</div>
+                                    <div class="fw-bold text-success" style="font-size:1.1rem;">@(tongVanChuyen > 0 ? tongVanChuyen.ToString("N0") : (tienVC > 0 ? tienVC.ToString("N0") : "-"))</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="rounded-3 p-3 text-center" style="background:#fff8e1;border:1px solid #ffd54f;">
+                                    <div class="text-muted small mb-1">Tổng phải trả</div>
+                                    <div class="fw-bold text-warning" style="font-size:1.1rem;">@tongCong.ToString("N0")</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @* ====== PHIẾU CHI THANH TOÁN ====== *@
+            else if (loaiDong == 2)
+            {
+                string soPhieuChi     = ViewBag.PC_SoPhieuChi ?? "";
+                string tenNCC         = ViewBag.PC_TenNCC ?? "";
+                DateTime? ngayChi     = ViewBag.PC_NgayChi as DateTime?;
+                decimal soTienChi     = ViewBag.PC_SoTienChi != null ? (decimal)ViewBag.PC_SoTienChi : 0m;
+                string dienGiai       = ViewBag.PC_DienGiai ?? "";
+                string hinhThuc       = ViewBag.PC_HinhThuc ?? "";
+                string tenTaiKhoan    = ViewBag.PC_TenTaiKhoan ?? "";
+                string nganHang       = ViewBag.PC_NganHang ?? "";
+                string soChungTuNhap  = ViewBag.PC_SoChungTuNhap ?? "";
+
+                <div class="modal-header" style="background: linear-gradient(135deg, #27ae60, #1abc9c); color: white; border-bottom: none; padding: 18px 24px;">
+                    <div>
+                        <h5 class="modal-title fw-bold mb-1" id="detailsModalNCCLabel">
+                            <i class="bi bi-cash-coin me-2"></i>Chi tiết Phiếu Thanh Toán
+                        </h5>
+                        <div style="font-size: 0.85rem; opacity: 0.9;">
+                            <span class="badge bg-light text-success me-2 px-3 py-1" style="font-size:0.85rem;">@soPhieuChi</span>
+                            @if (ngayChi.HasValue)
+                            {
+                                <span class="me-3"><i class="bi bi-calendar3 me-1"></i>@ngayChi.Value.ToString("dd/MM/yyyy")</span>
+                            }
+                            @if (!string.IsNullOrEmpty(ViewBag.PC_NguoiTao))
+                            {
+                                <span><i class="bi bi-person me-1"></i>Người nhập: @ViewBag.PC_NguoiTao</span>
+                            }
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-0">
+                    <div class="px-4 py-4">
+                        <div class="row g-4">
+                            <!-- Thông tin thanh toán -->
+                            <div class="col-md-6">
+                                <div class="card border-0 rounded-3 h-100" style="background:#f8fffe;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                                    <div class="card-header border-0 pb-0" style="background:transparent;">
+                                        <h6 class="fw-bold text-success mb-0"><i class="bi bi-info-circle me-1"></i>Thông tin thanh toán</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <table class="table table-sm table-borderless mb-0">
+                                            <tr>
+                                                <td class="text-muted" style="width:140px;">Số phiếu chi</td>
+                                                <td><span class="badge bg-success px-3">@soPhieuChi</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">Ngày chi</td>
+                                                <td class="fw-semibold">@(ngayChi.HasValue ? ngayChi.Value.ToString("dd/MM/yyyy") : "-")</td>
+                                            </tr>
+                                            @if (!string.IsNullOrEmpty(ViewBag.PC_NguoiTao))
+                                            {
+                                                <tr>
+                                                    <td class="text-muted">Người lập phiếu</td>
+                                                    <td class="fw-semibold">@ViewBag.PC_NguoiTao</td>
+                                                </tr>
+                                            }
+                                            <tr>
+                                                <td class="text-muted">Nhà cung cấp</td>
+                                                <td class="fw-semibold">@tenNCC</td>
+                                            </tr>
+                                            @if (!string.IsNullOrEmpty(soChungTuNhap))
+                                            {
+                                                <tr>
+                                                    <td class="text-muted">Phiếu nhập</td>
+                                                    <td><span class="badge bg-primary px-3">@soChungTuNhap</span></td>
+                                                </tr>
+                                            }
+                                            @if (!string.IsNullOrEmpty(hinhThuc))
+                                            {
+                                                <tr>
+                                                    <td class="text-muted">Hình thức TT</td>
+                                                    <td class="fw-semibold">@hinhThuc</td>
+                                                </tr>
+                                            }
+                                            @if (!string.IsNullOrEmpty(tenTaiKhoan))
+                                            {
+                                                <tr>
+                                                    <td class="text-muted">Tài khoản</td>
+                                                    <td class="fw-semibold">@tenTaiKhoan</td>
+                                                </tr>
+                                            }
+                                            @if (!string.IsNullOrEmpty(nganHang))
+                                            {
+                                                <tr>
+                                                    <td class="text-muted">Ngân hàng</td>
+                                                    <td class="fw-semibold">@nganHang</td>
+                                                </tr>
+                                            }
+                                            @if (!string.IsNullOrEmpty(dienGiai))
+                                            {
+                                                <tr>
+                                                    <td class="text-muted">Diễn giải</td>
+                                                    <td>@dienGiai</td>
+                                                </tr>
+                                            }
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Số tiền thanh toán -->
+                            <div class="col-md-6">
+                                <div class="card border-0 rounded-3 h-100 text-center d-flex align-items-center justify-content-center"
+                                     style="background: linear-gradient(135deg, #27ae60, #1abc9c); color: white;">
+                                    <div class="card-body">
+                                        <div class="mb-2" style="font-size: 0.9rem; opacity: 0.9;">
+                                            <i class="bi bi-cash-stack me-1"></i>SỐ TIỀN THANH TOÁN
+                                        </div>
+                                        <div style="font-size: 2rem; font-weight: 800; letter-spacing: -0.5px;">
+                                            @soTienChi.ToString("N0")
+                                        </div>
+                                        <div style="font-size: 0.85rem; opacity: 0.85; margin-top: 4px;">VNĐ</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="modal-footer" style="border-top: 1px solid #e9ecef; padding: 12px 20px; background:#fafbfc;">
+                <button type="button" class="btn btn-secondary btn-sm px-4" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

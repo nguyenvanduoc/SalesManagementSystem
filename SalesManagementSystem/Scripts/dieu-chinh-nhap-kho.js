@@ -243,6 +243,7 @@ function _formatNumber(n) {
         var id = ct ? ct.ID : 0;
         var soLuong = ct ? ct.SoLuong : '';
         var donGia = ct ? ct.DonGia : '';
+        var donGiaVanChuyen = ct ? (ct.DonGiaVanChuyen || 0) : '';
         var thue = ct ? ct.ThueGTGT : 0;
         var ghiChu = ct ? ct.GhiChu || '' : '';
         var dvt = ct ? ct.DVT || '' : '';
@@ -266,6 +267,8 @@ function _formatNumber(n) {
                 '  <td class="text-center align-middle">' + _formatDateText(ngaySanXuat) + '</td>' +
                 '  <td class="text-center align-middle">' + _formatDateText(hanSuDung) + '</td>' +
                 '  <td class="text-end align-middle txt-thanhtien">0</td>' +
+                '  <td class="text-end align-middle txt-dongiavanchuyen" data-val="' + donGiaVanChuyen + '">' + _formatNumber(donGiaVanChuyen) + '</td>' +
+                '  <td class="text-end align-middle txt-tienvanchuyen">0</td>' +
                 '  <td class="d-none txt-thue" data-val="' + thue + '">' + thue + '</td>' +
                 '  <td class="d-none txt-tienthue">0</td>' +
                 '  <td class="text-end align-middle txt-tongsauthue">0</td>' +
@@ -296,6 +299,8 @@ function _formatNumber(n) {
             '  <td><input type="date" class="form-control txt-ngaysanxuat" value="' + ngaySanXuat + '" /></td>' +
             '  <td><input type="date" class="form-control txt-hansudung" value="' + hanSuDung + '" /></td>' +
             '  <td><input type="text" class="form-control readonly-cell txt-thanhtien text-end" readonly value="0" /></td>' +
+            '  <td><input type="text" class="form-control txt-dongiavanchuyen text-end" inputmode="decimal" value="' + _formatNumber(donGiaVanChuyen) + '" /></td>' +
+            '  <td><input type="text" class="form-control readonly-cell txt-tienvanchuyen text-end" readonly value="0" /></td>' +
             '  <td class="d-none"><input type="number" class="form-control txt-thue text-end" step="0.1" value="' + thue + '" /></td>' +
             '  <td class="d-none"><input type="text" class="form-control readonly-cell txt-tienthue text-end" readonly value="0" /></td>' +
             '  <td><input type="text" class="form-control readonly-cell txt-tongsauthue text-end" readonly value="0" /></td>' +
@@ -315,11 +320,11 @@ function _formatNumber(n) {
             calcRow($row);
         });
 
-        $row.find('.txt-dongia, .txt-thue').on('input change', function () {
+        $row.find('.txt-dongia, .txt-thue, .txt-dongiavanchuyen').on('input change', function () {
             calcRow($row);
         });
 
-        $row.find('.txt-dongia, .txt-soluong').on('blur change', function () {
+        $row.find('.txt-dongia, .txt-soluong, .txt-dongiavanchuyen').on('blur change', function () {
             $(this).val(_formatNumber(_parseMoney($(this).val())));
         });
 
@@ -358,6 +363,9 @@ function _formatNumber(n) {
         var thanhTien = sl * dg;
         var tienThue = thanhTien * thuePt / 100;
         var tong = thanhTien + tienThue;
+        var dgvcInput = $row.find('.txt-dongiavanchuyen');
+        var dgvc = dgvcInput.is('input') ? _parseMoney(dgvcInput.val()) : _parseMoney(dgvcInput.text() || dgvcInput.attr('data-val'));
+        var tienVanChuyen = dgvc * sl;
 
         var ttInput = $row.find('.txt-thanhtien');
         if (ttInput.is('input')) {
@@ -380,6 +388,13 @@ function _formatNumber(n) {
             tstInput.text(_formatNumber(tong));
         }
 
+        var tvcInput = $row.find('.txt-tienvanchuyen');
+        if (tvcInput.is('input')) {
+            tvcInput.val(_formatNumber(tienVanChuyen));
+        } else {
+            tvcInput.text(_formatNumber(tienVanChuyen));
+        }
+
         _updateTotal();
     }
 
@@ -388,6 +403,7 @@ function _formatNumber(n) {
         var totalTienThue = 0;
         var totalCong = 0;
         var totalSoLuong = 0;
+        var totalVanChuyen = 0;
 
         getEl('#DCNK_tblChiTiet tbody tr').each(function () {
             var slInput = $(this).find('.txt-soluong');
@@ -401,16 +417,20 @@ function _formatNumber(n) {
 
             var tstInput = $(this).find('.txt-tongsauthue');
             var tst = tstInput.is('input') ? _parseMoney(tstInput.val()) : _parseMoney(tstInput.text());
+            var tvcInput = $(this).find('.txt-tienvanchuyen');
+            var tvc = tvcInput.is('input') ? _parseMoney(tvcInput.val()) : _parseMoney(tvcInput.text());
 
             totalSoLuong += sl;
             totalTienHang += tt;
             totalTienThue += tth;
             totalCong += tst;
+            totalVanChuyen += tvc;
         });
 
         getEl('#dispTongSoLuong').text(_formatNumber(totalSoLuong));
         getEl('#dispTongTienHang').text(_formatNumber(totalTienHang));
         getEl('#dispTongTienThue').text(_formatNumber(totalTienThue));
+        getEl('#dispTienVanChuyen').text(_formatNumber(totalVanChuyen));
         getEl('#dispTongCong').text(_formatNumber(totalCong));
         getEl('#dispTongCongMini').text(_formatNumber(totalCong));
     }
@@ -457,6 +477,7 @@ function _formatNumber(n) {
                 var sl = _parseMoney($row.find('.txt-soluong').val());
                 var dg = _parseMoney($row.find('.txt-dongia').val());
                 var thue = _parseMoney($row.find('.txt-thue').val());
+                var dgvc = _parseMoney($row.find('.txt-dongiavanchuyen').val());
 
                 var rowValid = true;
                 if (!spId) { errorMsg += 'Dòng ' + stt + ': Chưa chọn sản phẩm.\n'; rowValid = false; }
@@ -464,6 +485,8 @@ function _formatNumber(n) {
                 if (dg < 0) { errorMsg += 'Dòng ' + stt + ': Đơn giá không được âm.\n'; rowValid = false; }
                 if (thue < 0) { errorMsg += 'Dòng ' + stt + ': Thuế GTGT không được âm.\n'; rowValid = false; }
                 
+                if (dgvc < 0) { errorMsg += 'Dong ' + stt + ': Don gia van chuyen khong duoc am.\n'; rowValid = false; }
+
                 if (!rowValid) {
                     $row.addClass('table-danger');
                     isValid = false;
@@ -475,6 +498,8 @@ function _formatNumber(n) {
                         IDSanPham: parseInt(spId),
                         SoLuong: sl,
                         DonGia: dg,
+                        DonGiaVanChuyen: dgvc,
+                        TienVanChuyen: dgvc * sl,
                         NgaySanXuat: $row.find('.txt-ngaysanxuat').val() || null,
                         HanSuDung: $row.find('.txt-hansudung').val() || null,
                         ThanhTien: _parseMoney($row.find('.txt-thanhtien').val()),

@@ -62,6 +62,15 @@ namespace SalesManagementSystem.Repositories
                         if (dict.TryGetValue(item.ID, out var sl))
                             item.TongSoLuong = sl;
                     }
+
+                    var sqlVanChuyen = @"SELECT ID, ISNULL(TienVanChuyen, 0) AS TienVanChuyen FROM KHO_PhieuNhap WHERE ID IN @Ids";
+                    var vanChuyenResult = conn.Query(sqlVanChuyen, new { Ids = ids });
+                    var vanChuyenDict = vanChuyenResult.ToDictionary(row => (int)row.ID, row => (decimal)(row.TienVanChuyen ?? 0m));
+                    foreach (var item in list)
+                    {
+                        if (vanChuyenDict.TryGetValue(item.ID, out var tienVanChuyen))
+                            item.TienVanChuyen = tienVanChuyen;
+                    }
                 }
 
                 return list;
@@ -88,7 +97,10 @@ namespace SalesManagementSystem.Repositories
                         c.ID, c.IDPhieuNhap, c.IDSanPham, 
                         s.MaSanPham, s.TenSanPham, s.DVT,
                         c.STT, c.SoLuong, c.DonGia, c.ThanhTien, 
-                        c.ThueGTGT, c.TienThue, c.TongSauThue, c.GhiChu,
+                        c.ThueGTGT, c.TienThue, c.TongSauThue,
+                        ISNULL(c.DonGiaVanChuyen, 0) AS DonGiaVanChuyen,
+                        ISNULL(c.TienVanChuyen, 0) AS TienVanChuyen,
+                        c.GhiChu,
                         c.NgaySanXuat, c.HanSuDung
                     FROM KHO_PhieuNhap_ChiTiet c
                     LEFT JOIN DM_SanPham s ON c.IDSanPham = s.ID
@@ -102,6 +114,7 @@ namespace SalesManagementSystem.Repositories
         {
             using (var conn = _db.CreateConnection())
             {
+                NormalizeVanChuyen(model);
                 var chiTietJson = JsonConvert.SerializeObject(model.ChiTiets);
                 chiTietJson = System.Text.RegularExpressions.Regex.Replace(chiTietJson, @"\.0+(?=[,\}])", "");
 
@@ -149,12 +162,17 @@ namespace SalesManagementSystem.Repositories
                     {
                         string updateDateSql = @"
                             UPDATE [dbo].[KHO_PhieuNhap_ChiTiet] 
-                            SET NgaySanXuat = @NgaySanXuat, HanSuDung = @HanSuDung 
+                            SET NgaySanXuat = @NgaySanXuat,
+                                HanSuDung = @HanSuDung,
+                                DonGiaVanChuyen = @DonGiaVanChuyen,
+                                TienVanChuyen = @TienVanChuyen
                             WHERE IDPhieuNhap = @IDPhieuNhap AND IDSanPham = @IDSanPham
                         ";
                         conn.Execute(updateDateSql, new { 
                             NgaySanXuat = ct.NgaySanXuat, 
                             HanSuDung = ct.HanSuDung, 
+                            DonGiaVanChuyen = ct.DonGiaVanChuyen,
+                            TienVanChuyen = ct.TienVanChuyen,
                             IDPhieuNhap = activeId, 
                             IDSanPham = ct.IDSanPham 
                         });
@@ -165,7 +183,8 @@ namespace SalesManagementSystem.Repositories
                     UPDATE [dbo].[KHO_PhieuNhap]
                     SET TongTienHang = ISNULL((SELECT SUM(ThanhTien) FROM [dbo].[KHO_PhieuNhap_ChiTiet] WHERE IDPhieuNhap = @ID), 0),
                         TongTienThue = ISNULL((SELECT SUM(TienThue) FROM [dbo].[KHO_PhieuNhap_ChiTiet] WHERE IDPhieuNhap = @ID), 0),
-                        TongCong = ISNULL((SELECT SUM(TongSauThue) FROM [dbo].[KHO_PhieuNhap_ChiTiet] WHERE IDPhieuNhap = @ID), 0)
+                        TongCong = ISNULL((SELECT SUM(TongSauThue) FROM [dbo].[KHO_PhieuNhap_ChiTiet] WHERE IDPhieuNhap = @ID), 0),
+                        TienVanChuyen = ISNULL((SELECT SUM(TienVanChuyen) FROM [dbo].[KHO_PhieuNhap_ChiTiet] WHERE IDPhieuNhap = @ID), 0)
                     WHERE ID = @ID;
                 ";
                 conn.Execute(updateTotalsSql, new { ID = activeId });
@@ -401,6 +420,23 @@ namespace SalesManagementSystem.Repositories
 
                 return conn.Query("sp_KHO_TonKho_CheckChuyenKho", p, commandType: CommandType.StoredProcedure);
             }
+        }
+
+        private void NormalizeVanChuyen(PhieuNhapKhoViewModel model)
+        {
+            if (model?.ChiTiets == null)
+            {
+                if (model != null) model.TienVanChuyen = 0;
+                return;
+            }
+
+            foreach (var ct in model.ChiTiets)
+            {
+                if (ct.DonGiaVanChuyen < 0) ct.DonGiaVanChuyen = 0;
+                ct.TienVanChuyen = ct.DonGiaVanChuyen * ct.SoLuong;
+            }
+
+            model.TienVanChuyen = model.ChiTiets.Sum(x => x.TienVanChuyen);
         }
     }
 }
