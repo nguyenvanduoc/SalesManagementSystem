@@ -1299,6 +1299,7 @@
     // Khởi tạo cho các thẻ có sẵn khi trang vừa load
     $(document).ready(function() {
         initGlobalDatePickers(document);
+        syncThoiGianFilter(document);
     });
 
     // Dùng MutationObserver để bắt các Tab hoặc form được load động bằng AJAX
@@ -1313,12 +1314,124 @@
                         } else if ($(node).find('input[type="date"]').length > 0) {
                             initGlobalDatePickers(node);
                         }
+                        
+                        if ($(node).is('.ddl-thoi-gian')) {
+                            syncThoiGianFilter($(node).parent());
+                        } else if ($(node).find('.ddl-thoi-gian').length > 0) {
+                            syncThoiGianFilter(node);
+                        }
                     }
                 });
             }
         });
     });
     observer.observe(document.body, { childList: true, subtree: true });
+
+    /* ================================================================
+       GLOBAL THOI GIAN FILTER HANDLER
+       - Đồng bộ giá trị Combobox khi tải trang dựa trên Từ ngày/Đến ngày
+    ================================================================ */
+    function syncThoiGianFilter(context) {
+        var $ctx = $(context || document);
+        $ctx.find('.ddl-thoi-gian').each(function() {
+            if ($(this).data('synced')) return;
+            $(this).data('synced', true);
+            
+            var $form = $(this).closest('form');
+            var txtTu = $form.find('input[name="tuNgay"]').val();
+            var txtDen = $form.find('input[name="denNgay"]').val();
+            if (!txtTu || !txtDen) return;
+            
+            var tuDate = new Date(txtTu);
+            var denDate = new Date(txtDen);
+            
+            var yTu = tuDate.getFullYear();
+            var mTu = tuDate.getMonth() + 1;
+            var dTu = tuDate.getDate();
+            
+            var yDen = denDate.getFullYear();
+            var mDen = denDate.getMonth() + 1;
+            var dDen = denDate.getDate();
+            
+            var isFirstDay = dTu === 1;
+            var daysInMonth = new Date(yDen, mDen, 0).getDate();
+            var isLastDay = dDen === daysInMonth;
+            
+            if (yTu === yDen && mTu === mDen && isFirstDay && isLastDay) {
+                $(this).val('month_' + mTu);
+            }
+        });
+    }
+
+    /* ================================================================
+       - Xử lý thay đổi Combobox "Thời gian" tự động cập nhật Từ ngày/Đến ngày
+    ================================================================ */
+    $(document).on('change', '.ddl-thoi-gian', function() {
+        try {
+            var val = this.value;
+            if (!val) return;
+            
+            var now = new Date();
+            var y = now.getFullYear();
+            var s = '', e = '';
+            
+            function getDays(year, month) {
+                var days = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+                if (month === 2 && ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0)) return 29;
+                return days[month];
+            }
+            
+            function fDate(year, month, day) {
+                var m = month < 10 ? '0' + month : month;
+                var d = day < 10 ? '0' + day : day;
+                return year + '-' + m + '-' + d;
+            }
+            
+            if (val === 'current_month') {
+                var cm = now.getMonth() + 1;
+                s = fDate(y, cm, 1);
+                e = fDate(now.getFullYear(), now.getMonth() + 1, now.getDate());
+            } else if (val.indexOf('month_') === 0) {
+                var m = parseInt(val.replace('month_', ''), 10);
+                s = fDate(y, m, 1);
+                e = fDate(y, m, getDays(y, m));
+            } else if (val.indexOf('quarter_') === 0) {
+                var q = parseInt(val.replace('quarter_', ''), 10);
+                var startM = (q - 1) * 3 + 1;
+                var endM = startM + 2;
+                s = fDate(y, startM, 1);
+                e = fDate(y, endM, getDays(y, endM));
+            }
+
+            if (s && e) {
+                // Tìm 2 ô input gần nhất trong cùng 1 form
+                var $form = $(this).closest('form');
+                if ($form.length === 0) return;
+                
+                var txtTuNgay = $form.find('input[name="tuNgay"]')[0];
+                var txtDenNgay = $form.find('input[name="denNgay"]')[0];
+                
+                if (txtTuNgay && txtDenNgay) {
+                    if (txtTuNgay._flatpickr) txtTuNgay._flatpickr.setDate(s);
+                    else { $(txtTuNgay).val(s).trigger('change'); }
+                    
+                    if (txtDenNgay._flatpickr) txtDenNgay._flatpickr.setDate(e);
+                    else { $(txtDenNgay).val(e).trigger('change'); }
+                    
+                    setTimeout(function() {
+                        var btn = $form.find('button[type="submit"]')[0];
+                        if (btn) {
+                            btn.click();
+                        } else {
+                            $form.trigger('submit');
+                        }
+                    }, 50);
+                }
+            }
+        } catch(err) {
+            console.error("Loi xu ly thoi gian: ", err);
+        }
+    });
 
     /* ================================================================
        SESSION KEEP-ALIVE

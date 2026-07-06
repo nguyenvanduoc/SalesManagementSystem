@@ -184,7 +184,7 @@
 
         function autoAllocate() {
             var val = parseCurrency($('#SoTienChi').val());
-            var available = val + (window.tienTraTruoc || 0);
+            var available = val + (parseFloat(window.tienTraTruoc) || 0);
             var remaining = available;
             $modal.find('.input-phanbo').each(function() {
                 var conLai = parseFloat($(this).closest('tr').find('.row-conlai').data('val'));
@@ -378,14 +378,35 @@
             $soTien.val(tongChi); // plain number for model binder
         }
 
+        function validatePhanBo() {
+            var tongChi = parseCurrency($('#SoTienChi').val());
+            var tongPhanBo = 0;
+            $modal.find('.input-phanbo').each(function() {
+                tongPhanBo += parseCurrency($(this).val());
+            });
+            var tienTraTruocHienCo = parseFloat(window.tienTraTruoc) || 0;
+            
+            if (tongChi + tienTraTruocHienCo < tongPhanBo) {
+                if (typeof showToast === 'function') {
+                    showToast('warning', 'Tổng số tiền chi và Tiền trả trước (' + formatCurrency(tongChi + tienTraTruocHienCo) + ' đ) nhỏ hơn Tổng chi phân bổ (' + formatCurrency(tongPhanBo) + ' đ). Vui lòng kiểm tra lại!');
+                } else {
+                    alert('Tổng số tiền chi và Tiền trả trước (' + formatCurrency(tongChi + tienTraTruocHienCo) + ' đ) nhỏ hơn Tổng chi phân bổ (' + formatCurrency(tongPhanBo) + ' đ). Vui lòng kiểm tra lại!');
+                }
+                return false;
+            }
+            return true;
+        }
+
         $('#btnSubmitForm').on('click', function(e) {
             e.preventDefault();
+            if (!validatePhanBo()) return;
             buildSubmitData();
             $('#phieuChiForm').submit();
         });
 
         $('#btnLuuVaGhi').on('click', function(e) {
             e.preventDefault();
+            if (!validatePhanBo()) return;
             buildSubmitData();
             if ($('#phieuChiForm').find('input[name="ghiSo"]').length === 0) {
                 $('#phieuChiForm').append('<input type="hidden" name="ghiSo" value="true">');
@@ -397,6 +418,7 @@
 
         $('#btnAdjustAllocation').on('click', function(e) {
             e.preventDefault();
+            if (!validatePhanBo()) return;
             buildSubmitData();
             
             var $btn = $(this);

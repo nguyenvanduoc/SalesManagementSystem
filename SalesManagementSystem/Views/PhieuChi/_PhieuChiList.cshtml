@@ -33,6 +33,7 @@
                         <th class="fw-bold">Người nhận</th>
                         <th width="130" class="text-end fw-bold">Số tiền chi</th>
                         <th width="130" class="text-end fw-bold text-success">Số tiền phân bổ</th>
+                        <th width="130" class="text-end fw-bold text-primary">Tiền trả trước</th>
                         <th width="110" class="text-center fw-bold">Trạng thái</th>
                     </tr>
                 </thead>
@@ -155,6 +156,7 @@
                                 </td>
                                 <td class="text-end align-middle fw-semibold">@item.SoTienChi.ToString("N0")</td>
                                 <td class="text-end align-middle fw-semibold text-success">@item.SoTienPhanBo.ToString("N0")</td>
+                                <td class="text-end align-middle fw-semibold text-primary">@item.TienTraTruoc.ToString("N0")</td>
                                 <td class="text-center align-middle">
                                     <span class="@item.CssTrangThai">@item.TenTrangThai</span>
                                 </td>
@@ -164,7 +166,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="13" class="text-center py-4 text-muted">
+                            <td colspan="14" class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
                                 Không có dữ liệu
                             </td>
@@ -178,6 +180,7 @@
                             <td colspan="9" class="text-end">Tổng cộng</td>
                             <td class="text-end">@Model.Items.Sum(x => x.SoTienChi).ToString("N0")</td>
                             <td class="text-end text-success">@Model.Items.Sum(x => x.SoTienPhanBo).ToString("N0")</td>
+                            <td class="text-end text-primary">@Model.Items.Sum(x => x.TienTraTruoc).ToString("N0")</td>
                             <td></td>
                         </tr>
                     </tfoot>

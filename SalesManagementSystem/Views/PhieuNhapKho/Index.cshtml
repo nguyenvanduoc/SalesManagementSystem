@@ -33,6 +33,28 @@
             <form id="searchForm" action="@Url.Action("GetList")" method="get">
                 <div class="row g-2 align-items-end">
                     <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Thời gian</label>
+                        <select class="form-select form-select-sm ddl-thoi-gian">
+                            <option value="current_month">Đầu tháng đến hiện tại</option>
+                            <option value="month_1">Tháng 1</option>
+                            <option value="month_2">Tháng 2</option>
+                            <option value="month_3">Tháng 3</option>
+                            <option value="month_4">Tháng 4</option>
+                            <option value="month_5">Tháng 5</option>
+                            <option value="month_6">Tháng 6</option>
+                            <option value="month_7">Tháng 7</option>
+                            <option value="month_8">Tháng 8</option>
+                            <option value="month_9">Tháng 9</option>
+                            <option value="month_10">Tháng 10</option>
+                            <option value="month_11">Tháng 11</option>
+                            <option value="month_12">Tháng 12</option>
+                            <option value="quarter_1">Quý 1</option>
+                            <option value="quarter_2">Quý 2</option>
+                            <option value="quarter_3">Quý 3</option>
+                            <option value="quarter_4">Quý 4</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
                         <label class="form-label text-muted small mb-1">Từ ngày</label>
                         <input type="date" name="tuNgay" class="form-control form-control-sm" value="@ViewBag.TuNgay" />
                     </div>
@@ -64,6 +86,7 @@
                         <label class="form-label text-muted small mb-1">Trạng thái</label>
                         <select name="trangThai" class="form-select form-select-sm">
                             <option value="">-- Tất cả --</option>
+                            <option value="0" @(ViewBag.TrangThai == 0 ? "selected" : "")>Lưu nháp</option>
                             <option value="1" @(ViewBag.TrangThai == 1 ? "selected" : "")>Đề nghị ghi</option>
                             <option value="2" @(ViewBag.TrangThai == 2 ? "selected" : "")>Đã ghi</option>
                             <option value="3" @(ViewBag.TrangThai == 3 ? "selected" : "")>Đã hủy</option>
@@ -133,6 +156,111 @@
                     }
                 });
             });
+
+            // Filter: Thời gian
+            var ddlThoiGian = $container.find('.ddl-thoi-gian')[0];
+            var txtTuNgay = $container.find('input[name="tuNgay"]')[0];
+            var txtDenNgay = $container.find('input[name="denNgay"]')[0];
+            var frmSearch = $container.find('#searchForm')[0];
+
+            function fDate(y, m, d) {
+                var sm = m < 10 ? '0' + m : m;
+                var sd = d < 10 ? '0' + d : d;
+                return y + '-' + sm + '-' + sd;
+            }
+
+            function getDays(y, m) {
+                var days = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+                if (m === 2 && ((y % 4 === 0 && y % 100 !== 0) || y % 400 === 0)) return 29;
+                return days[m];
+            }
+
+            if (ddlThoiGian && txtTuNgay && txtDenNgay) {
+                $(ddlThoiGian).on('change', function() {
+                    try {
+                        var val = this.value;
+                        if (!val) return;
+                        
+                        var now = new Date();
+                        var y = now.getFullYear();
+                        var s = '', e = '';
+                        
+                        if (val === 'current_month') {
+                            var cm = now.getMonth() + 1;
+                            s = fDate(y, cm, 1);
+                            e = fDate(now.getFullYear(), now.getMonth() + 1, now.getDate());
+                        } else if (val.indexOf('month_') === 0) {
+                            var m = parseInt(val.replace('month_', ''), 10);
+                            s = fDate(y, m, 1);
+                            e = fDate(y, m, getDays(y, m));
+                        } else if (val.indexOf('quarter_') === 0) {
+                            var q = parseInt(val.replace('quarter_', ''), 10);
+                            var startM = (q - 1) * 3 + 1;
+                            var endM = startM + 2;
+                            s = fDate(y, startM, 1);
+                            e = fDate(y, endM, getDays(y, endM));
+                        }
+
+                        if (s && e) {
+                            if (txtTuNgay._flatpickr) txtTuNgay._flatpickr.setDate(s);
+                            else { $(txtTuNgay).val(s).trigger('change'); }
+                            
+                            if (txtDenNgay._flatpickr) txtDenNgay._flatpickr.setDate(e);
+                            else { $(txtDenNgay).val(e).trigger('change'); }
+                            
+                            setTimeout(function() {
+                                var btn = $container.find('button[type="submit"]')[0];
+                                if (btn) {
+                                    btn.click();
+                                } else {
+                                    $(frmSearch).trigger('submit');
+                                }
+                            }, 50);
+                        }
+                    } catch(err) {
+                        console.error("Loi xu ly thoi gian: ", err);
+                    }
+                });
+
+                var cT = txtTuNgay.value;
+                var cD = txtDenNgay.value;
+                
+                if (!cT && !cD) {
+                    ddlThoiGian.value = 'current_month';
+                    $(ddlThoiGian).trigger('change');
+                } else {
+                    var match = false;
+                    $(ddlThoiGian).find('option').each(function() {
+                        var val = this.value;
+                        var now = new Date();
+                        var y = now.getFullYear();
+                        var s = '', e = '';
+                        
+                        if (val === 'current_month') {
+                            var cm = now.getMonth() + 1;
+                            s = fDate(y, cm, 1);
+                            e = fDate(now.getFullYear(), now.getMonth() + 1, now.getDate());
+                        } else if (val.indexOf('month_') === 0) {
+                            var m = parseInt(val.replace('month_', ''), 10);
+                            s = fDate(y, m, 1);
+                            e = fDate(y, m, getDays(y, m));
+                        } else if (val.indexOf('quarter_') === 0) {
+                            var q = parseInt(val.replace('quarter_', ''), 10);
+                            var startM = (q - 1) * 3 + 1;
+                            var endM = startM + 2;
+                            s = fDate(y, startM, 1);
+                            e = fDate(y, endM, getDays(y, endM));
+                        }
+
+                        if (s && e && s === cT && e === cD) {
+                            ddlThoiGian.value = val;
+                            match = true;
+                            return false; 
+                        }
+                    });
+                    if (!match) ddlThoiGian.value = '';
+                }
+            }
 
             // Delegate row clicks for inline detail view
             $container.on('click', '.pnk-row', function (e) {

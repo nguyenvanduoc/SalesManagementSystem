@@ -427,9 +427,9 @@ function _formatNumber(n) {
         if (!getEl('.sel-IDKho').val()) { errorMsg += 'Vui lòng chọn Kho.\n'; isValid = false; }
         
         var maLoai = '';
-        var loaiData = getEl('.sel-IDLoaiNhapKho').select2('data');
-        if (loaiData && loaiData.length > 0) {
-            maLoai = loaiData[0].ma || '';
+        var $selectedLoai = getEl('.sel-IDLoaiNhapKho').find('option:selected');
+        if ($selectedLoai.length > 0) {
+            maLoai = $selectedLoai.attr('data-ma') || '';
         } 
         
         if (!maLoai && config.selectedLoaiNhapKhoMa) {

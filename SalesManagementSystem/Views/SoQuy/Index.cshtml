@@ -106,6 +106,29 @@
     <div class="card-body">
         <form method="get" action="@Url.Action("GetList","SoQuy")" id="searchForm">
             <div class="row g-3 align-items-end">
+                
+                <div class="col-md-2">
+                    <label class="form-label text-muted small mb-1">Thời gian</label>
+                    <select class="form-select form-select-sm ddl-thoi-gian">
+                        <option value="current_month">Đầu tháng đến hiện tại</option>
+                        <option value="month_1">Tháng 1</option>
+                        <option value="month_2">Tháng 2</option>
+                        <option value="month_3">Tháng 3</option>
+                        <option value="month_4">Tháng 4</option>
+                        <option value="month_5">Tháng 5</option>
+                        <option value="month_6">Tháng 6</option>
+                        <option value="month_7">Tháng 7</option>
+                        <option value="month_8">Tháng 8</option>
+                        <option value="month_9">Tháng 9</option>
+                        <option value="month_10">Tháng 10</option>
+                        <option value="month_11">Tháng 11</option>
+                        <option value="month_12">Tháng 12</option>
+                        <option value="quarter_1">Quý 1</option>
+                        <option value="quarter_2">Quý 2</option>
+                        <option value="quarter_3">Quý 3</option>
+                        <option value="quarter_4">Quý 4</option>
+                    </select>
+                </div>
                 <div class="col-md-3">
                     <label class="form-label text-muted small mb-1 fw-semibold">Từ ngày (*)</label>
                     <input type="date" class="form-control form-control-sm" name="tuNgay" id="tuNgay" value="@ViewBag.TuNgay" required />

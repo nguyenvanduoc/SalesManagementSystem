@@ -22,6 +22,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public string SoPhieuNhap { get; set; }
         public decimal SoTienChi { get; set; }
         public decimal SoTienPhanBo { get; set; }
+        public decimal TienTraTruoc => SoTienChi > SoTienPhanBo ? SoTienChi - SoTienPhanBo : 0;
         public string DienGiai { get; set; }
         public int TrangThai { get; set; }
         public DateTime? NgayTao { get; set; }
