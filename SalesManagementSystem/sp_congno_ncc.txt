@@ -1,0 +1,70 @@
+Text                                                                                                                                                                                                                                                           
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE   PROCEDURE sp_CongNo_PhaseTra_NCC_GetList
+    @TuNgay         DATETIME        = NULL,
+    @DenNgay        DATETIME        = NULL,
+    @IDNhaCungCap   INT             = NULL,
+    @TrangThaiCongNo INT            = NULL
+    -- TrangThaiCongNo: NULL=t
+?t c?, 1=còn n?, 2=dã thanh toán h?t
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- CTE to calculate DaThanhToan for each PhieuNhap
+    ;WITH Paid AS (
+        SELECT 
+            pn.ID,
+            ISNULL(
+                (SELECT SUM(ct.SoTienPhanBo)
+             
+    FROM KT_PhieuChiChiTiet ct
+                 INNER JOIN KT_PhieuChi pc ON ct.IDPhieuChi = pc.ID
+                 WHERE ct.IDPhieuNhap = pn.ID 
+                   AND ct.LoaiChi = 1
+                   AND pc.TrangThai = 2
+                   AND pc.IsDel
+eted = 0),
+                0
+            ) + ISNULL(
+                (SELECT SUM(pc2.SoTienChi)
+                 FROM KT_PhieuChi pc2
+                 WHERE pc2.IDPhieuNhap = pn.ID
+                   AND pc2.TrangThai = 2
+                   AND pc2.IsDele
+ted = 0
+                   AND NOT EXISTS (SELECT 1 FROM KT_PhieuChiChiTiet ct WHERE ct.IDPhieuChi = pc2.ID)
+                ),
+                0
+            ) AS DaThanhToan
+        FROM KHO_PhieuNhap pn
+        WHERE pn.IsDeleted = 0
+    )
+    SELECT
+  
+      pn.ID               AS IDPhieuNhap,
+        pn.SoChungTu        AS SoPhieuNhap,
+        pn.NgayNhap,
+        pn.IDNhaCungCap,
+        ncc.TenNhaCungCap,
+        ncc.DienThoai       AS DienThoaiNCC,
+        pn.TongCong         AS TongTienHang,
+      
+  pd.DaThanhToan,
+        pn.TongCong - pd.DaThanhToan AS ConLai
+    FROM KHO_PhieuNhap pn
+    INNER JOIN Paid pd ON pn.ID = pd.ID
+    LEFT JOIN DM_NhaCungCap ncc ON pn.IDNhaCungCap = ncc.ID
+    WHERE pn.IsDeleted = 0
+      AND (@TuNgay IS NULL OR CAST(pn
+.NgayNhap AS DATE) >= CAST(@TuNgay AS DATE))
+      AND (@DenNgay IS NULL OR CAST(pn.NgayNhap AS DATE) <= CAST(@DenNgay AS DATE))
+      AND (@IDNhaCungCap IS NULL OR pn.IDNhaCungCap = @IDNhaCungCap)
+      AND (
+          @TrangThaiCongNo IS NULL
+          
+OR (@TrangThaiCongNo = 1 AND (pn.TongCong - pd.DaThanhToan) > 0)
+          OR (@TrangThaiCongNo = 2 AND (pn.TongCong - pd.DaThanhToan) <= 0)
+      )
+    ORDER BY pn.NgayNhap DESC, pn.ID DESC;
+END                                                            

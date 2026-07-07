@@ -103,9 +103,6 @@
         <button type="button" class="btn text-white fw-bold px-3 d-flex align-items-center gap-1 btn-export-excel" style="background:#2ecc71;border:none;">
             <i class="bi bi-file-earmark-excel"></i> Xuất Excel
         </button>
-        <button type="button" class="btn btn-outline-secondary fw-semibold px-3 d-flex align-items-center gap-1" style="border-color:#d0d7de;color:#24292f;background-color:#fff;">
-            <i class="bi bi-printer"></i> In
-        </button>
     </div>
 </div>
 
@@ -284,7 +281,7 @@
                 // Add loading row
                 var loadingHtml = `
                     <tr class="pc-detail-row" data-parent-id="${id}">
-                        <td colspan="14" class="p-0 border-0">
+                        <td colspan="16" class="p-0 border-0">
                             <div class="text-center p-3 text-muted">
                                 <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                 Đang tải chi tiết...
@@ -301,7 +298,7 @@
                     success: function (res) {
                         var html = `
                             <tr class="pc-detail-row" data-parent-id="${id}">
-                                <td colspan="14" class="p-0 border-0 shadow-inner">
+                                <td colspan="16" class="p-0 border-0 shadow-inner">
                                     <div class="detail-container p-2" style="background-color: #f8f9fa;">
                                         ${res}
                                     </div>

@@ -92,6 +92,7 @@ namespace SalesManagementSystem.Repositories
                       AND (@SoDonHang IS NULL OR d.SoDonHang LIKE '%' + @SoDonHang + '%')
                       AND (@IDKhachHang IS NULL OR d.IDKhachHang = @IDKhachHang)
                       AND (@TrangThaiChungTu IS NULL OR (CASE WHEN d.TrangThaiDon = 4 THEN 3 ELSE ISNULL(c.TrangThai, 0) END) = @TrangThaiChungTu)
+                      AND ISNULL(d.TrangThaiDon, 1) <> 0
                     ORDER BY d.NgayTaoDon DESC, d.ID DESC;";
 
                 return conn.Query<DonHangChungTuViewModel>(sql, p);

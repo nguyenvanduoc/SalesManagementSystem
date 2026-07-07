@@ -175,9 +175,11 @@ namespace SalesManagementSystem.Controllers
                             hd.NgayChungTu,
                             ct.SoLuong,
                             ct.DonGia,
-                            ct.ThanhTien
+                            ct.ThanhTien,
+                            kh.TenKhachHang
                         FROM BAN_ChungTuBanHang_ChiTiet ct
                         INNER JOIN BAN_ChungTuBanHang hd ON ct.IDChungTuBanHang = hd.ID
+                        LEFT JOIN NS_KhachHang kh ON hd.IDKhachHang = kh.ID
                         WHERE hd.IsDeleted = 0 
                           AND hd.TrangThai = 2
                           AND ct.IDSanPham = @IDSanPham

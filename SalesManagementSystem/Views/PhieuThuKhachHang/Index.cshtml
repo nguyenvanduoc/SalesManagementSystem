@@ -12,7 +12,7 @@
 <!-- Bộ lọc tìm kiếm theo chuẩn UI compact trên 1 dòng -->
 <div class="card shadow-sm mb-4">
     <div class="card-body py-2">
-        <form method="get" action="@Url.Action("GetList")" id="searchForm">
+        <form method="get" action="@Url.Action("GetList")" id="searchFormPhieuThu">
             <div class="d-flex flex-wrap align-items-end gap-2">
                 
                 <div class="flex-grow-1" style="min-width: 140px; max-width: 170px;">
@@ -115,13 +115,114 @@
     </style>
     <script>
         (function() {
-            var $pane = $('#searchForm').closest('.tab-pane');
+            var $script = $('script').last();
+            var $pane = $script.closest('.tab-pane');
             if ($pane.length === 0) $pane = $('body');
 
             // Initialize select2 simply
             $pane.find('.select2').select2({
                 width: '100%',
                 dropdownParent: $pane
+            });
+        
+            // Bind local search form submit specifically for PhieuThu to prevent global conflicts
+            $pane.off('submit.phieuthu_search', '#searchFormPhieuThu');
+            $pane.on('submit.phieuthu_search', '#searchFormPhieuThu', function(e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                
+                var $form = $(this);
+                var action = $form.attr('action');
+                var pageSize = $pane.find('.page-size-select').val() || 20;
+                
+                var params = $form.serializeArray();
+                params = params.filter(function (item) {
+                    return item.name !== 'page' && item.name !== 'pageSize';
+                });
+                params.push({ name: 'page', value: 1 });
+                params.push({ name: 'pageSize', value: pageSize });
+                var url = action + '?' + $.param(params);
+                
+                var $grid = $pane.find('#table-container');
+                if (typeof showLoadingLocal === 'function') showLoadingLocal($grid);
+                
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    success: function (res) {
+                        if (typeof hideLoadingLocal === 'function') hideLoadingLocal($grid);
+                        $grid.html(res);
+                        if (typeof reInitPlugins === 'function') reInitPlugins($pane.attr('id'));
+                    },
+                    error: function() {
+                        if (typeof hideLoadingLocal === 'function') hideLoadingLocal($grid);
+                        if (typeof showToast === 'function') showToast('error', 'L?i khi t?i d? li?u.');
+                    }
+                });
+            });
+
+            // Bind local reset button specifically for PhieuThu
+            $pane.off('click.phieuthu_reset', '.btn-reset');
+            $pane.on('click.phieuthu_reset', '.btn-reset', function(e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                
+                var $form = $pane.find('#searchFormPhieuThu');
+                if ($form.length > 0) {
+                    $form[0].reset();
+                    $form.find('.select2').val('').trigger('change');
+                    
+                    // Reset flatpickr if any
+                    $form.find('.flatpickr-input').each(function() {
+                        if (this._flatpickr) {
+                            var name = $(this).attr('name');
+                            var today = new Date();
+                            var firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+                            var lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                            if (name === 'tuNgay') this._flatpickr.setDate(firstDay);
+                            else if (name === 'denNgay') this._flatpickr.setDate(lastDay);
+                            else this._flatpickr.clear();
+                        }
+                    });
+                    $form.trigger('submit');
+                }
+            });
+
+            // Local reload grid function
+            window.loadData = function() {
+                $pane.find('#searchFormPhieuThu').submit();
+            };
+
+            // Handle row click to expand details - delegate to document to survive AJAX grid reloads
+            $(document).off('click.pt-expand', '.pt-row');
+            $(document).on('click.pt-expand', '.pt-row', function (e) {
+                if ($(e.target).closest('button, a, .dropdown').length > 0) return;
+                var $row = $(this);
+                var id = $row.data('id');
+                if (!id) return;
+                var $nextRow = $row.next();
+                var isAlreadyExpanded = $nextRow.hasClass('pt-detail-row') && $nextRow.data('parent-id') == id;
+                $('.pt-detail-row').remove();
+                $('.pt-row').removeClass('table-active');
+                $('.pt-row .toggle-icon').removeClass('bi-caret-down-fill text-primary').addClass('bi-caret-right-fill text-muted');
+                if (isAlreadyExpanded) return;
+                $row.addClass('table-active');
+                $row.find('.toggle-icon').removeClass('bi-caret-right-fill text-muted').addClass('bi-caret-down-fill text-primary');
+                var loadingHtml = '<tr class="pt-detail-row" data-parent-id="' + id + '"><td colspan="16" class="p-0 border-0"><div class="text-center p-3 text-muted"><span class="spinner-border spinner-border-sm me-2"></span>&#272;ang t&#7843;i chi ti&#7871;t...</div></td></tr>';
+                $row.after(loadingHtml);
+                var url = '@Url.Action("GetDetailInline", "PhieuThuKhachHang")/' + id;
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function (res) {
+                        var html = '<tr class="pt-detail-row" data-parent-id="' + id + '"><td colspan="16" class="p-0 border-0 shadow-inner"><div class="detail-container p-2" style="background-color: #f8f9fa;">' + res + '</div></td></tr>';
+                        $row.next('.pt-detail-row').replaceWith(html);
+                    },
+                    error: function () {
+                        $row.next('.pt-detail-row').find('td').html('<div class="text-center p-3 text-danger">L&#7895;i khi t&#7843;i chi ti&#7871;t.</div>');
+                    }
+                });
             });
         })();
     </script>

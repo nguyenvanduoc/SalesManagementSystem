@@ -307,8 +307,10 @@ var TabManager = (function () {
             var paneId = $(this).closest('.tab-pane').attr('id');
             var key = paneId.replace('-pane', '');
 
+            var baseUrl = $(this).attr('data-base-url') || href;
             loadTabContent(key, href);
-            $('#' + paneId).attr('data-url', href);
+            $('#' + paneId).attr('data-url', baseUrl);
+            saveTabsState();
             // Vô hiệu hóa đổi URL để ẩn địa chỉ chi tiết lộ liễu
             // if (window.history && window.history.replaceState) {
             //     window.history.replaceState(null, '', cleanUrlForHistory(href));
@@ -368,7 +370,9 @@ var TabManager = (function () {
                             setTimeout(function() { reloadActiveTabGrid(false); }, 100);
                         } else if (res.redirectUrl) {
                             loadTabContent(key, res.redirectUrl);
-                            $('#' + paneId).attr('data-url', res.redirectUrl);
+                            var baseUrl = res.redirectBaseUrl || res.redirectUrl;
+                            $('#' + paneId).attr('data-url', baseUrl);
+                            saveTabsState();
                             // Vô hiệu hóa đổi URL để ẩn địa chỉ chi tiết lộ liễu
                             // if (window.history && window.history.replaceState) {
                             //     window.history.replaceState(null, '', cleanUrlForHistory(res.redirectUrl));

@@ -21,6 +21,9 @@
                         <th>Mã khách hàng</th>
                         <th>Tên khách hàng</th>
                         <th>Nhân sự phụ trách</th>
+                        <th>Phương tiện</th>
+                        <th>Họ tên tài xế</th>
+                        <th class="d-none">SĐT tài xế</th>
                         <th>Người tạo</th>
                         <th class="text-center">Hạn giao</th>
                         <th class="text-end" style="min-width:120px;">Tổng tiền</th>
@@ -120,6 +123,9 @@
                                 <td class="align-middle">@item.MaKhachHang</td>
                                 <td class="align-middle">@item.TenKhachHang</td>
                                 <td class="align-middle">@item.TenNhanVien</td>
+                                <td class="align-middle">@item.TenPhuongTien</td>
+                                <td class="align-middle">@item.HoTenTaiXe</td>
+                                <td class="align-middle d-none">@item.SoDienThoaiTaiXe</td>
                                 <td class="align-middle">@item.TenNguoiTao</td>
                                 <td class="text-center align-middle">
                                     @(item.ThoiHanGiaoHang.HasValue ? item.ThoiHanGiaoHang.Value.ToString("dd/MM/yyyy") : "")
@@ -132,7 +138,8 @@
                                         string badgeClass = item.TrangThaiDon == 1 ? "bg-danger"
                                                           : item.TrangThaiDon == 2 ? "bg-warning text-dark"
                                                           : item.TrangThaiDon == 3 ? "bg-success"
-                                                          : item.TrangThaiDon == 4 ? "bg-secondary"
+                                                          : item.TrangThaiDon == 4 ? "bg-dark"
+                                                          : item.TrangThaiDon == 0 ? "bg-secondary"
                                                           : "bg-secondary";
                                     }
                                     <span class="badge @badgeClass">@item.TenTrangThai</span>
@@ -143,7 +150,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="13" class="text-center py-4 text-muted">
+                            <td colspan="16" class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox fs-2 d-block mb-2"></i>
                                 Chưa có đơn đặt hàng nào.
                             </td>
@@ -223,3 +230,4 @@
         });
     })();
 </script>
+

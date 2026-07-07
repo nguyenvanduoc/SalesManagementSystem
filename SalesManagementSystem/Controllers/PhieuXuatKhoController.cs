@@ -93,7 +93,7 @@ namespace SalesManagementSystem.Controllers
         public ActionResult GetDonDatHangDaDuyet()
         {
             int totalRecords;
-            var paged = _donDatHangRepo.GetPaged(1, 1000, "", "", null, null, 2, "", out totalRecords); // 2 = Đã duyệt
+            var paged = _donDatHangRepo.GetPaged(1, 1000, "", "", null, null, 2, "", null, null, out totalRecords); // 2 = Đã duyệt
             return Json(new { data = paged }, JsonRequestBehavior.AllowGet);
         }
 

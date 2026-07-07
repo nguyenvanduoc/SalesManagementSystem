@@ -110,7 +110,7 @@ namespace SalesManagementSystem.Controllers
             };
 
             int total;
-            var list = _phieuNhapRepo.GetPaged(1, 1, null, null, entity.SoChungTu, null, null, null, null, null, null, out total);
+            var list = _phieuNhapRepo.GetPaged(1, 1, null, null, entity.SoChungTu, null, null, null, null, null, null, null, out total);
             var item = list.FirstOrDefault();
             if (item != null)
             {

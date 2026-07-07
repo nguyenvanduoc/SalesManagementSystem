@@ -104,7 +104,7 @@
                 <i class="bi bi-printer"></i> In chi tiết (Thẻ kho)
             </button>
             <button type="button" class="btn text-white fw-bold px-3 d-flex align-items-center gap-1 btn-export" style="background:#2ecc71;border:none;">
-                <i class="bi bi-file-earmark-excel"></i> Xuất Excel (TK01)
+                <i class="bi bi-file-earmark-excel"></i> Xuất Excel
             </button>
         </div>
     </div>
@@ -115,12 +115,34 @@
                 <div class="card-body">
                     <form id="searchForm" method="get" action="@Url.Action("GetList")" class="row align-items-end g-3">
                         <div class="col-md-2">
+                            <label class="form-label text-muted small mb-1 fw-semibold">Thời gian</label>
+                            <select class="form-select form-select-sm ddl-thoi-gian">
+                                <option value="current_month">Đầu tháng đến hiện tại</option>
+                                <option value="month_1">Tháng 1</option>
+                                <option value="month_2">Tháng 2</option>
+                                <option value="month_3">Tháng 3</option>
+                                <option value="month_4">Tháng 4</option>
+                                <option value="month_5">Tháng 5</option>
+                                <option value="month_6">Tháng 6</option>
+                                <option value="month_7">Tháng 7</option>
+                                <option value="month_8">Tháng 8</option>
+                                <option value="month_9">Tháng 9</option>
+                                <option value="month_10">Tháng 10</option>
+                                <option value="month_11">Tháng 11</option>
+                                <option value="month_12">Tháng 12</option>
+                                <option value="quarter_1">Quý 1</option>
+                                <option value="quarter_2">Quý 2</option>
+                                <option value="quarter_3">Quý 3</option>
+                                <option value="quarter_4">Quý 4</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
                             <label class="form-label text-muted small mb-1 fw-semibold">Từ ngày (*)</label>
-                            <input type="date" class="form-control form-control-sm" name="TuNgay" id="tuNgay" value="@ViewBag.TuNgay" required />
+                            <input type="date" class="form-control form-control-sm" name="tuNgay" id="tuNgay" value="@ViewBag.TuNgay" required />
                         </div>
                         <div class="col-md-2">
                             <label class="form-label text-muted small mb-1 fw-semibold">Đến ngày (*)</label>
-                            <input type="date" class="form-control form-control-sm" name="DenNgay" id="denNgay" value="@ViewBag.DenNgay" required />
+                            <input type="date" class="form-control form-control-sm" name="denNgay" id="denNgay" value="@ViewBag.DenNgay" required />
                         </div>
                         <div class="col-md-2">
                             <label class="form-label text-muted small mb-1 fw-semibold">Kho hàng</label>
@@ -130,7 +152,7 @@
                             <label class="form-label text-muted small mb-1 fw-semibold">Sản phẩm</label>
                             <select class="form-select form-select-sm tk-sp select2" name="IDSanPham" id="idSanPham" style="width: 100%"></select>
                         </div>
-                        <div class="col-md-4 d-flex align-items-end mb-1">
+                        <div class="col-md-2 d-flex align-items-end mb-1">
                             <div class="form-check w-100">
                                 <input class="form-check-input" type="checkbox" id="ChiConTon_@uid" name="ChiConTon" value="true">
                                 <label for="ChiConTon_@uid" class="form-check-label small fw-semibold text-muted">Chỉ hiển thị SP còn tồn</label>
@@ -234,8 +256,8 @@
             }
 
             function loadData(urlOverride) {
-                var tu = $container.find('[name="TuNgay"]').val();
-                var den = $container.find('[name="DenNgay"]').val();
+                var tu = $container.find('[name="tuNgay"]').val();
+                var den = $container.find('[name="denNgay"]').val();
                 if (!tu || !den) {
                     if (typeof showToast === 'function') {
                         showToast('warning', 'Vui lòng chọn khoảng thời gian tra cứu.');
@@ -324,18 +346,19 @@
 
                 var pad = function(num) { return (num < 10 ? '0' : '') + num; };
 
-                $container.find('[name="TuNgay"]').val(y + '-' + pad(firstDay.getMonth() + 1) + '-' + pad(firstDay.getDate()));
-                $container.find('[name="DenNgay"]').val(y + '-' + pad(lastDay.getMonth() + 1) + '-' + pad(lastDay.getDate()));
+                $container.find('[name="tuNgay"]').val(y + '-' + pad(firstDay.getMonth() + 1) + '-' + pad(firstDay.getDate()));
+                $container.find('[name="denNgay"]').val(y + '-' + pad(lastDay.getMonth() + 1) + '-' + pad(lastDay.getDate()));
 
                 $container.find('.tk-kho').val(null).trigger('change');
                 $container.find('.tk-sp').val(null).trigger('change');
+                $container.find('.ddl-thoi-gian').val('current_month');
                 $container.find('input[type="checkbox"]').prop('checked', false);
                 loadData();
             });
 
             $container.find('.btn-export').on('click', function() {
-                var tu = $container.find('[name="TuNgay"]').val();
-                var den = $container.find('[name="DenNgay"]').val();
+                var tu = $container.find('[name="tuNgay"]').val();
+                var den = $container.find('[name="denNgay"]').val();
                 if (!tu || !den) {
                     if (typeof showToast === 'function') {
                         showToast('warning', 'Vui lòng chọn khoảng thời gian tra cứu.');
@@ -347,8 +370,8 @@
             });
 
             $container.find('.btn-print').on('click', function() {
-                var tu = $container.find('[name="TuNgay"]').val();
-                var den = $container.find('[name="DenNgay"]').val();
+                var tu = $container.find('[name="tuNgay"]').val();
+                var den = $container.find('[name="denNgay"]').val();
                 if (!tu || !den) {
                     if (typeof showToast === 'function') {
                         showToast('warning', 'Vui lòng chọn khoảng thời gian tra cứu.');
@@ -360,8 +383,8 @@
             });
 
             $container.find('.btn-print-multi').on('click', function() {
-                var tu = $container.find('[name="TuNgay"]').val();
-                var den = $container.find('[name="DenNgay"]').val();
+                var tu = $container.find('[name="tuNgay"]').val();
+                var den = $container.find('[name="denNgay"]').val();
                 if (!tu || !den) {
                     if (typeof showToast === 'function') {
                         showToast('warning', 'Vui lòng chọn khoảng thời gian tra cứu.');
@@ -375,8 +398,8 @@
             $container.on('click', '.btn-view-thekho', function() {
                 var idKho = $(this).data('idkho');
                 var idSanPham = $(this).data('idsp');
-                var tuNgay = $form.find('[name="TuNgay"]').val();
-                var denNgay = $form.find('[name="DenNgay"]').val();
+                var tuNgay = $form.find('[name="tuNgay"]').val();
+                var denNgay = $form.find('[name="denNgay"]').val();
                 if (!tuNgay || !denNgay) {
                     if (typeof showToast === 'function') {
                         showToast('warning', 'Vui lòng chọn khoảng thời gian tra cứu.');

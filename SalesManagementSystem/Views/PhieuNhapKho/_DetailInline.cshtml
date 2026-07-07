@@ -1,7 +1,7 @@
 @model SalesManagementSystem.Models.ViewModels.PhieuNhapKhoViewModel
 
 <div class="table-responsive">
-    <table id="tblDetailInline" class="table table-custom table-bordered table-hover align-middle mb-0" style="width:100%; min-width:1000px;">
+    <table id="tblDetailInline_@(Model.ID)" class="table table-custom table-bordered table-hover align-middle mb-0" style="width:100%; min-width:1000px;">
         <thead>
             <tr>
                 <th class="text-center" style="width:40px;">STT</th>
@@ -77,11 +77,11 @@
 </div>
 
 <style>
-    #tblDetailInline th {
+    #tblDetailInline_@(Model.ID) th {
         position: relative;
         background-clip: padding-box;
     }
-    #tblDetailInline th .resizer {
+    #tblDetailInline_@(Model.ID) th .resizer {
         position: absolute;
         top: 0;
         right: -3px;
@@ -92,13 +92,13 @@
         z-index: 10;
         background-color: transparent;
     }
-    #tblDetailInline th .resizer:hover, #tblDetailInline th .resizer.resizing {
+    #tblDetailInline_@(Model.ID) th .resizer:hover, #tblDetailInline_@(Model.ID) th .resizer.resizing {
         background-color: rgba(11, 91, 132, 0.5);
     }
 </style>
 <script>
     (function() {
-        var table = document.getElementById('tblDetailInline');
+        var table = document.getElementById('tblDetailInline_@(Model.ID)');
         if (!table) return;
         
         var ths = table.querySelectorAll('th');
@@ -142,3 +142,4 @@
         });
     })();
 </script>
+

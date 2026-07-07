@@ -1,0 +1,99 @@
+Text                                                                                                                                                                                                                                                           
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE PROCEDURE [dbo].[sp_KHO_PhieuNhap_GetList]
+    @TuNgay DATETIME = NULL,
+    @DenNgay DATETIME = NULL,
+    @SoChungTu NVARCHAR(50) = NULL,
+    @IDKho INT = NULL,
+    @IDNhaCungCap INT = NULL,
+    @TrangThai INT = NULL,
+    @TenNguoiNhan NVARCHAR(200
+) = NULL,
+    @TenNguoiGiao NVARCHAR(200) = NULL,
+    @IDPhuongTien INT = NULL,
+    @HoTenTaiXe NVARCHAR(200) = NULL,
+    @Offset INT,
+    @PageSize INT,
+    @TotalRecords INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT @TotalRecords = COUNT(1)
+    FR
+OM [dbo].[KHO_PhieuNhap] p
+    WHERE p.IsDeleted = 0
+      AND (@TuNgay IS NULL OR p.NgayNhap >= @TuNgay)
+      AND (@DenNgay IS NULL OR p.NgayNhap <= @DenNgay)
+      AND (@SoChungTu IS NULL OR p.SoChungTu LIKE '%' + @SoChungTu + '%')
+      AND (@IDKho IS
+ NULL OR p.IDKho = @IDKho)
+      AND (@IDNhaCungCap IS NULL OR p.IDNhaCungCap = @IDNhaCungCap)
+      AND (@TrangThai IS NULL OR p.TrangThai = @TrangThai)
+      AND (LEN(ISNULL(@TenNguoiNhan,'')) = 0 OR p.TenNguoiNhan = @TenNguoiNhan)
+      AND (LEN(ISNULL
+(@TenNguoiGiao,'')) = 0 OR p.TenNguoiGiao = @TenNguoiGiao)
+      AND (@IDPhuongTien IS NULL OR p.IDPhuongTien = @IDPhuongTien)
+      AND (@HoTenTaiXe IS NULL OR p.HoTenTaiXe LIKE '%' + @HoTenTaiXe + '%');
+
+    SELECT 
+        p.ID,
+        p.SoChungTu,
+  
+      p.NgayNhap,
+        p.IDKho,
+        k.TenKhoHang AS TenKho,
+        k.MaKhoHang AS MaKhoHang,
+        p.IDNhaCungCap,
+        ncc.TenNhaCungCap AS TenNhaCungCap,
+        ncc.MaNhaCungCap AS MaNhaCungCap,
+        p.SoHoaDon,
+        p.NgayHoaDon,
+  
+      p.TenNguoiGiao,
+        p.SoDienThoaiNguoiGiao,
+        p.IDNhanSuNhan,
+        ns.Ten AS TenNhanSuNhan,
+        p.TrangThai,
+        p.TongTienHang,
+        p.TongTienThue,
+        p.TongCong,
+        p.NgayTao,
+        p.NguoiTao,
+        NguoiTao
+Text = nsTao.HoDem + ' ' + ns.Ten,
+        p.TrangThaiThanhToan,
+        p.DaThanhToan,
+        p.ConLai,
+        p.IDPhuongTien,
+        pt.TenPhuongTien AS TenPhuongTien,
+        ISNULL(p.TienVanChuyen, 0) AS TienVanChuyen,
+        p.HoTenTaiXe,
+       
+ p.SoDienThoaiTaiXe
+    FROM [dbo].[KHO_PhieuNhap] p
+    LEFT JOIN [dbo].[DM_KhoHang] k ON p.IDKho = k.ID
+    LEFT JOIN [dbo].[DM_NhaCungCap] ncc ON p.IDNhaCungCap = ncc.ID
+    LEFT JOIN [dbo].[NS_NhanSu] ns ON p.IDNhanSuNhan = ns.ID
+    LEFT JOIN [dbo].[
+ACL_Login] u ON p.NguoiTao = u.ID
+    LEFT JOIN [dbo].[NS_NhanSu] nsTao ON u.IDNhanSu = nsTao.ID
+    LEFT JOIN [dbo].[DM_PhuongTien] pt ON p.IDPhuongTien = pt.ID
+    WHERE p.IsDeleted = 0
+      AND (@TuNgay IS NULL OR p.NgayNhap >= @TuNgay)
+      AND (@De
+nNgay IS NULL OR p.NgayNhap <= @DenNgay)
+      AND (@SoChungTu IS NULL OR p.SoChungTu LIKE '%' + @SoChungTu + '%')
+      AND (@IDKho IS NULL OR p.IDKho = @IDKho)
+      AND (@IDNhaCungCap IS NULL OR p.IDNhaCungCap = @IDNhaCungCap)
+      AND (@TrangThai IS 
+NULL OR p.TrangThai = @TrangThai)
+      AND (LEN(ISNULL(@TenNguoiNhan,'')) = 0 OR p.TenNguoiNhan = @TenNguoiNhan)
+      AND (LEN(ISNULL(@TenNguoiGiao,'')) = 0 OR p.TenNguoiGiao = @TenNguoiGiao)
+      AND (@IDPhuongTien IS NULL OR p.IDPhuongTien = @IDPhuon
+gTien)
+      AND (@HoTenTaiXe IS NULL OR p.HoTenTaiXe LIKE '%' + @HoTenTaiXe + '%')
+    ORDER BY p.NgayNhap DESC, p.ID DESC
+    OFFSET @Offset ROWS
+    FETCH NEXT @PageSize ROWS ONLY;
+END;                                                                   

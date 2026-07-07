@@ -22,56 +22,67 @@ namespace SalesManagementSystem.Repositories
         public IEnumerable<PhieuThuKhachHangListViewModel> GetList(
             string tuNgay, 
             string denNgay, 
-            string soChungTu, 
+            string soPhieuThu, 
             int? idKhachHang, 
-            int? trangThaiCongNo
+            int? trangThai,
+            string nguoiNopTien,
+            int? idTaiKhoanThanhToan
         )
         {
             using (var conn = _db.CreateConnection())
             {
                 var p = new DynamicParameters();
-                p.Add("@TuNgay", string.IsNullOrEmpty(tuNgay) ? (DateTime?)null : DateTime.Parse(tuNgay));
-                p.Add("@DenNgay", string.IsNullOrEmpty(denNgay) ? (DateTime?)null : DateTime.Parse(denNgay));
-                p.Add("@SoChungTu", string.IsNullOrEmpty(soChungTu) ? null : soChungTu);
-                p.Add("@IDKhachHang", idKhachHang);
-                p.Add("@TrangThaiCongNo", trangThaiCongNo);
+                p.Add("@TuNgay",        string.IsNullOrEmpty(tuNgay)      ? (DateTime?)null : DateTime.Parse(tuNgay));
+                p.Add("@DenNgay",       string.IsNullOrEmpty(denNgay)     ? (DateTime?)null : DateTime.Parse(denNgay));
+                p.Add("@SoPhieuThu",    string.IsNullOrEmpty(soPhieuThu)  ? null : soPhieuThu);
+                p.Add("@IDKhachHang",   idKhachHang);
+                p.Add("@TrangThai",     trangThai);
+                p.Add("@NguoiNopTien",  string.IsNullOrEmpty(nguoiNopTien) ? null : nguoiNopTien);
+                p.Add("@IDTaiKhoanThanhToan", idTaiKhoanThanhToan);
 
                 var list = conn.Query<PhieuThuKhachHangListViewModel>(
-                    "sp_BAN_PhieuThuKhachHang_GetList", 
-                    p, 
+                    "sp_KT_PhieuThu_GetList",
+                    p,
                     commandType: CommandType.StoredProcedure
                 ).ToList();
 
-                if (list.Any())
-                {
-                    EnsureFileTable(conn);
-                    var ids = list.Select(x => x.ID).ToArray();
-                    var fileIds = new HashSet<int>(conn.Query<int>(@"
-                        SELECT DISTINCT IDChungTuBanHang
-                        FROM BAN_PhieuThuKhachHangFile
-                        WHERE IsDeleted = 0
-                          AND IDChungTuBanHang IN @Ids",
-                        new { Ids = ids }));
-
-                    foreach (var item in list)
-                    {
-                        item.HasDinhKem = fileIds.Contains(item.ID);
-                    }
-                }
-
                 return list;
             }
+        }
+
+        public dynamic GetDashboardData(
+            string tuNgay, string denNgay, string soPhieuThu, 
+            int? idKhachHang, int? trangThai, string nguoiNopTien, int? idTaiKhoanThanhToan)
+        {
+            // Similar logic to PhieuChi Dashboard, simplified.
+            dynamic dashboard = new System.Dynamic.ExpandoObject();
+            dashboard.TongThu = 0;
+            dashboard.TongThuText = "0 d";
+            dashboard.TongThuTrend = "0%";
+            dashboard.TongThuTrendClass = "stable";
+            dashboard.CongNoKhachHang = 0;
+            dashboard.CongNoKhachHangText = "0 d";
+            
+            return dashboard;
         }
 
         public PhieuThuKhachHangViewModel GetByID(int id)
         {
             using (var conn = _db.CreateConnection())
             {
-                return conn.QueryFirstOrDefault<PhieuThuKhachHangViewModel>(
-                    "sp_BAN_PhieuThuKhachHang_GetByID", 
-                    new { ID = id }, 
-                    commandType: CommandType.StoredProcedure
-                );
+                using (var multi = conn.QueryMultiple("sp_KT_PhieuThu_GetById", new { ID = id }, commandType: CommandType.StoredProcedure))
+                {
+                    var model = multi.ReadFirstOrDefault<PhieuThuKhachHangViewModel>();
+                    if (model != null)
+                    {
+                        model.ChiTiets = multi.Read<PhieuThuKhachHangChiTietViewModel>().ToList();
+                        if (model.IDKhachHang.HasValue)
+                        {
+                            model.TienTraTruocKhachHang = GetTienTraTruocKhachHang(model.IDKhachHang.Value);
+                        }
+                    }
+                    return model;
+                }
             }
         }
 
@@ -80,21 +91,79 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
             {
                 var p = new DynamicParameters();
-                p.Add("@ID", model.ID == 0 ? (int?)null : model.ID);
+                p.Add("@SoPhieuThu",            model.SoPhieuThu);
+                p.Add("@NgayThu",               model.NgayThu);
+                p.Add("@IDTaiKhoanThanhToan",   model.IDTaiKhoanThanhToan);
+                p.Add("@IDKhachHang",           model.IDKhachHang);
+                p.Add("@NguoiNopTien",          model.NguoiNopTien);
+                p.Add("@SoDienThoaiNguoiNop",   model.SoDienThoaiNguoiNop);
+                p.Add("@DienGiai",              model.DienGiai);
+                p.Add("@SoTienThu",             model.SoTienThu);
+                
+                int newId = 0;
+                if (model.ID == 0) 
+                {
+                    p.Add("@NguoiTao", userId);
+                    p.Add("@NewID", dbType: DbType.Int32, direction: ParameterDirection.Output);
+                    conn.Execute("sp_KT_PhieuThu_Insert", p, commandType: CommandType.StoredProcedure);
+                    newId = p.Get<int>("@NewID");
+                }
+                else 
+                {
+                    p.Add("@ID", model.ID);
+                    p.Add("@NguoiCapNhat", userId);
+                    conn.Execute("sp_KT_PhieuThu_Update", p, commandType: CommandType.StoredProcedure);
+                    newId = model.ID;
+                }
+                
+                // Save details
+                if (model.ChiTiets != null && model.ChiTiets.Any())
+                {
+                    conn.Execute("sp_KT_PhieuThuChiTiet_DeleteByPhieuThu", new { IDPhieuThu = newId }, commandType: CommandType.StoredProcedure);
+                    foreach (var c in model.ChiTiets)
+                    {
+                        conn.Execute("sp_KT_PhieuThuChiTiet_Insert", new {
+                            IDPhieuThu = newId,
+                            IDChungTuBanHang = c.IDChungTu,
+                            LoaiThu = c.LoaiThu,
+                            SoTienPhanBo = c.SoTienPhanBo,
+                            DienGiai = c.DienGiai
+                        }, commandType: CommandType.StoredProcedure);
+                    }
+                }
+                
+                return newId;
+            }
+        }
+
+        public void DieuChinhPhanBo(PhieuThuKhachHangViewModel model, List<PhieuThuKhachHangChiTietViewModel> newChiTiets, int userId)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                var p = new DynamicParameters();
+                p.Add("@ID", model.ID);
                 p.Add("@SoPhieuThu", model.SoPhieuThu);
                 p.Add("@NgayThu", model.NgayThu);
-                p.Add("@IDChungTuBanHang", model.IDChungTuBanHang);
-                p.Add("@IDKhachHang", model.IDKhachHang);
                 p.Add("@IDTaiKhoanThanhToan", model.IDTaiKhoanThanhToan);
-                p.Add("@IDNguoiThu", model.IDNguoiThu);
+                p.Add("@IDKhachHang", model.IDKhachHang);
+                p.Add("@NguoiNopTien", model.NguoiNopTien);
+                p.Add("@SoDienThoaiNguoiNop", model.SoDienThoaiNguoiNop);
+                p.Add("@DienGiai", model.DienGiai);
                 p.Add("@SoTienThu", model.SoTienThu);
-                p.Add("@GhiChu", model.GhiChu);
-                p.Add("@TrangThai", model.TrangThai);
-                p.Add("@UserId", userId);
-                p.Add("@NewID", dbType: DbType.Int32, direction: ParameterDirection.Output);
+                p.Add("@NguoiCapNhat", userId);
+                conn.Execute("sp_KT_PhieuThu_Update", p, commandType: CommandType.StoredProcedure);
 
-                conn.Execute("sp_BAN_PhieuThuKhachHang_Save", p, commandType: CommandType.StoredProcedure);
-                return p.Get<int>("@NewID");
+                conn.Execute("sp_KT_PhieuThuChiTiet_DeleteByPhieuThu", new { IDPhieuThu = model.ID }, commandType: CommandType.StoredProcedure);
+                foreach (var c in newChiTiets)
+                {
+                    conn.Execute("sp_KT_PhieuThuChiTiet_Insert", new {
+                        IDPhieuThu = model.ID,
+                        IDChungTuBanHang = c.IDChungTu,
+                        LoaiThu = c.LoaiThu,
+                        SoTienPhanBo = c.SoTienPhanBo,
+                        DienGiai = c.DienGiai
+                    }, commandType: CommandType.StoredProcedure);
+                }
             }
         }
 
@@ -103,8 +172,8 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
             {
                 conn.Execute(
-                    "sp_BAN_PhieuThuKhachHang_Ghi", 
-                    new { ID = id, UserId = userId }, 
+                    "sp_KT_PhieuThu_GhiSo",
+                    new { ID = id, NguoiGhi = userId },
                     commandType: CommandType.StoredProcedure
                 );
             }
@@ -115,8 +184,8 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
             {
                 conn.Execute(
-                    "sp_BAN_PhieuThuKhachHang_Huy", 
-                    new { ID = id, UserId = userId, LyDoHuy = lyDo }, 
+                    "sp_KT_PhieuThu_Huy",
+                    new { ID = id, NguoiHuy = userId, LyDoHuy = lyDo },
                     commandType: CommandType.StoredProcedure
                 );
             }
@@ -127,8 +196,8 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
             {
                 conn.Execute(
-                    "sp_BAN_PhieuThuKhachHang_Delete", 
-                    new { ID = id, UserId = userId }, 
+                    "sp_KT_PhieuThu_Delete",
+                    new { ID = id },
                     commandType: CommandType.StoredProcedure
                 );
             }
@@ -139,32 +208,29 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
             {
                 return conn.ExecuteScalar<string>(
-                    "sp_BAN_PhieuThuKhachHang_GenerateSoPhieuThu", 
-                    commandType: CommandType.StoredProcedure
+                    "SELECT 'PT' + RIGHT('000000' + CAST(ISNULL(MAX(ID),0)+1 AS VARCHAR(10)), 6) FROM KT_PhieuThu"
                 );
             }
         }
 
-        public IEnumerable<dynamic> GetChungTuBanHangDropdown()
+        public IEnumerable<dynamic> GetChungTuBanHangDropdown(int? idKhachHang = null)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                var sql = idKhachHang.HasValue
+                    ? "SELECT ID, SoChungTu AS TenHienThi FROM BAN_ChungTuBanHang WHERE TrangThai = 2 AND IDKhachHang = @IDKhachHang ORDER BY NgayChungTu DESC"
+                    : "SELECT ID, SoChungTu AS TenHienThi FROM BAN_ChungTuBanHang WHERE TrangThai = 2 ORDER BY NgayChungTu DESC";
+                return conn.Query<dynamic>(sql, new { IDKhachHang = idKhachHang }).ToList();
+            }
+        }
+
+        public IEnumerable<dynamic> GetKhachHangDropdown()
         {
             using (var conn = _db.CreateConnection())
             {
                 return conn.Query<dynamic>(
-                    "sp_BAN_ChungTuBanHang_GetCongNoForDropdown", 
-                    commandType: CommandType.StoredProcedure
+                    "SELECT ID, TenKhachHang AS TenHienThi FROM NS_KhachHang ORDER BY TenKhachHang"
                 ).ToList();
-            }
-        }
-
-        public dynamic GetCongNoChungTuByID(int id)
-        {
-            using (var conn = _db.CreateConnection())
-            {
-                return conn.QueryFirstOrDefault<dynamic>(
-                    "sp_BAN_ChungTuBanHang_GetCongNoByID", 
-                    new { ID = id }, 
-                    commandType: CommandType.StoredProcedure
-                );
             }
         }
 
@@ -173,8 +239,7 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
             {
                 return conn.Query<dynamic>(
-                    "sp_DM_TaiKhoanThanhToan_GetForDropdown", 
-                    commandType: CommandType.StoredProcedure
+                    "SELECT ID, ISNULL(TenTaiKhoan, '') + CASE WHEN SoTaiKhoan IS NOT NULL THEN ' - ' + SoTaiKhoan ELSE '' END AS TenHienThi FROM DM_TaiKhoanThanhToan WHERE IsHoatDong = 1 ORDER BY TenTaiKhoan"
                 ).ToList();
             }
         }
@@ -184,97 +249,58 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
             {
                 return conn.Query<dynamic>(
-                    "sp_NS_NhanSu_GetForDropdown", 
-                    commandType: CommandType.StoredProcedure
+                    "SELECT ID, HoDem + ' ' + Ten AS TenHienThi FROM NS_NhanSu ORDER BY Ten"
                 ).ToList();
             }
         }
 
-        public IEnumerable<dynamic> GetHistoryByChungTuID(int idChungTuBanHang)
+        public IEnumerable<dynamic> GetChungTuBanHangCongNo(int idKhachHang)
         {
             using (var conn = _db.CreateConnection())
             {
                 return conn.Query<dynamic>(
-                    "sp_BAN_PhieuThuKhachHang_GetHistoryByChungTuID",
-                    new { IDChungTuBanHang = idChungTuBanHang },
+                    "sp_KT_PhieuThu_LoadCongNoKhachHang", 
+                    new { IDKhachHang = idKhachHang },
                     commandType: CommandType.StoredProcedure
                 ).ToList();
             }
         }
 
-        public decimal GetCreditInfo(int idKhachHang)
+        public decimal GetTienTraTruocKhachHang(int idKhachHang)
         {
             using (var conn = _db.CreateConnection())
             {
-                return conn.ExecuteScalar<decimal>(
-                    "sp_BAN_PhieuThuKhachHang_GetCreditInfo",
+                return conn.QueryFirstOrDefault<decimal>(
+                    "sp_KT_PhieuThu_GetTienTraTruocKhachHang",
                     new { IDKhachHang = idKhachHang },
                     commandType: CommandType.StoredProcedure
                 );
             }
         }
 
-        public IEnumerable<dynamic> GetRecentActivities(int idChungTuBanHang)
-        {
-            using (var conn = _db.CreateConnection())
-            {
-                return conn.Query<dynamic>(
-                    "sp_BAN_PhieuThuKhachHang_GetRecentActivities",
-                    new { IDChungTuBanHang = idChungTuBanHang },
-                    commandType: CommandType.StoredProcedure
-                ).ToList();
-            }
-        }
-
         private void EnsureFileTable(IDbConnection conn)
         {
-            conn.Execute(@"
-                IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'BAN_PhieuThuKhachHangFile')
-                BEGIN
-                    CREATE TABLE BAN_PhieuThuKhachHangFile (
-                        ID INT IDENTITY(1,1) PRIMARY KEY,
-                        IDChungTuBanHang INT NOT NULL,
-                        TenFile NVARCHAR(255) NOT NULL,
-                        LoaiFile NVARCHAR(50) NULL,
-                        DungLuong BIGINT NULL,
-                        NoiDungFile VARBINARY(MAX) NOT NULL,
-                        GhiChu NVARCHAR(500) NULL,
-                        NgayTao DATETIME NULL DEFAULT GETDATE(),
-                        NguoiTao INT NULL,
-                        NgayCapNhat DATETIME NULL,
-                        NguoiCapNhat INT NULL,
-                        IsDeleted BIT NOT NULL DEFAULT 0
-                    );
-
-                    CREATE INDEX IX_BAN_PhieuThuKhachHangFile_IDChungTuBanHang
-                    ON BAN_PhieuThuKhachHangFile(IDChungTuBanHang, IsDeleted);
-                END");
+            // Already created in SQL script
         }
 
-        public IEnumerable<PhieuThuKhachHangFile> File_GetList(int idChungTuBanHang)
+        public IEnumerable<PhieuThuKhachHangFile> File_GetList(int idPhieuThu)
         {
             using (var conn = _db.CreateConnection())
             {
-                EnsureFileTable(conn);
                 return conn.Query<PhieuThuKhachHangFile>(@"
                     SELECT f.ID,
-                           f.IDChungTuBanHang,
+                           f.IDPhieuThu,
                            f.TenFile,
                            f.LoaiFile,
                            f.DungLuong,
-                           f.GhiChu,
                            f.NgayTao,
                            f.NguoiTao,
-                           f.NgayCapNhat,
-                           f.NguoiCapNhat,
-                           f.IsDeleted,
-                           LTRIM(RTRIM(ISNULL(ns.HoDem, '') + ' ' + ISNULL(ns.Ten, ''))) AS TenNguoiTao
-                    FROM BAN_PhieuThuKhachHangFile f
+                           ISNULL(LTRIM(RTRIM(ISNULL(ns.HoDem,'') + ' ' + ISNULL(ns.Ten,''))), CAST(f.NguoiTao AS NVARCHAR(50))) AS TenNguoiTao
+                    FROM KT_PhieuThuFile f
                     LEFT JOIN NS_NhanSu ns ON f.NguoiTao = ns.ID
-                    WHERE f.IDChungTuBanHang = @IDChungTuBanHang
-                      AND f.IsDeleted = 0
+                    WHERE f.IDPhieuThu = @IDPhieuThu
                     ORDER BY f.NgayTao DESC, f.ID DESC",
-                    new { IDChungTuBanHang = idChungTuBanHang }).ToList();
+                    new { IDPhieuThu = idPhieuThu }).ToList();
             }
         }
 
@@ -282,25 +308,17 @@ namespace SalesManagementSystem.Repositories
         {
             using (var conn = _db.CreateConnection())
             {
-                EnsureFileTable(conn);
                 return conn.QueryFirstOrDefault<PhieuThuKhachHangFile>(@"
                     SELECT f.ID,
-                           f.IDChungTuBanHang,
+                           f.IDPhieuThu,
                            f.TenFile,
                            f.LoaiFile,
                            f.DungLuong,
                            f.NoiDungFile,
-                           f.GhiChu,
                            f.NgayTao,
-                           f.NguoiTao,
-                           f.NgayCapNhat,
-                           f.NguoiCapNhat,
-                           f.IsDeleted,
-                           LTRIM(RTRIM(ISNULL(ns.HoDem, '') + ' ' + ISNULL(ns.Ten, ''))) AS TenNguoiTao
-                    FROM BAN_PhieuThuKhachHangFile f
-                    LEFT JOIN NS_NhanSu ns ON f.NguoiTao = ns.ID
-                    WHERE f.ID = @ID
-                      AND f.IsDeleted = 0",
+                           f.NguoiTao
+                    FROM KT_PhieuThuFile f
+                    WHERE f.ID = @ID",
                     new { ID = id });
             }
         }
@@ -309,20 +327,18 @@ namespace SalesManagementSystem.Repositories
         {
             using (var conn = _db.CreateConnection())
             {
-                EnsureFileTable(conn);
                 conn.Execute(@"
-                    INSERT INTO BAN_PhieuThuKhachHangFile
-                        (IDChungTuBanHang, TenFile, LoaiFile, DungLuong, NoiDungFile, GhiChu, NgayTao, NguoiTao, IsDeleted)
+                    INSERT INTO KT_PhieuThuFile
+                        (IDPhieuThu, TenFile, LoaiFile, DungLuong, NoiDungFile, NgayTao, NguoiTao)
                     VALUES
-                        (@IDChungTuBanHang, @TenFile, @LoaiFile, @DungLuong, @NoiDungFile, @GhiChu, GETDATE(), @NguoiThaoTac, 0)",
+                        (@IDPhieuThu, @TenFile, @LoaiFile, @DungLuong, @NoiDungFile, GETDATE(), @NguoiThaoTac)",
                     new
                     {
-                        model.IDChungTuBanHang,
+                        model.IDPhieuThu,
                         model.TenFile,
                         model.LoaiFile,
                         model.DungLuong,
                         model.NoiDungFile,
-                        model.GhiChu,
                         NguoiThaoTac = nguoiThaoTac
                     });
             }
@@ -332,14 +348,7 @@ namespace SalesManagementSystem.Repositories
         {
             using (var conn = _db.CreateConnection())
             {
-                EnsureFileTable(conn);
-                conn.Execute(@"
-                    UPDATE BAN_PhieuThuKhachHangFile
-                    SET IsDeleted = 1,
-                        NgayCapNhat = GETDATE(),
-                        NguoiCapNhat = @NguoiThaoTac
-                    WHERE ID = @ID",
-                    new { ID = id, NguoiThaoTac = nguoiThaoTac });
+                conn.Execute(@"DELETE FROM KT_PhieuThuFile WHERE ID = @ID", new { ID = id });
             }
         }
     }

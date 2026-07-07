@@ -30,6 +30,10 @@
         <i class="bi bi-arrow-left"></i> Quay lại
     </a>
     @if (Model.TrangThaiDon != 3 && Model.TrangThaiDon != 4 && ViewBag.IsView != true) {
+    <button type="button" id="btnSaveDraft" class="btn btn-sm text-white"
+            style="background-color:#6c757d;border:none;">
+        <i class="bi bi-file-earmark-text me-1"></i> Lưu nháp
+    </button>
     <button type="button" id="btnSaveDon" class="btn btn-sm text-white"
             style="background-color:#2998e4;border:none;">
         <i class="bi bi-save me-1"></i> Lưu thay đổi
@@ -112,7 +116,7 @@
                         <label class="form-label text-muted fw-semibold small">Hạn giao hàng</label>
                         @Html.TextBoxFor(m => m.ThoiHanGiaoHang, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <label class="form-label text-muted fw-semibold small">
                             Nhân sự phụ trách <span class="text-danger">*</span>
                         </label>
@@ -126,9 +130,23 @@
                         @Html.DropDownListFor(m => m.TrangThaiDon, Model.TrangThaiList,
                             new { @class = "form-select" })
                     </div>
-                    <div class="col-md-12">
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Phương tiện</label>
+                        @Html.DropDownListFor(m => m.IDPhuongTien, Model.PhuongTienList,
+                            "-- Chọn phương tiện --",
+                            new { @class = "form-select" })
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Họ tên tài xế</label>
+                        @Html.TextBoxFor(m => m.HoTenTaiXe, new { @class = "form-control", placeholder = "Họ tên tài xế" })
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">SĐT tài xế</label>
+                        @Html.TextBoxFor(m => m.SoDienThoaiTaiXe, new { @class = "form-control", placeholder = "SĐT tài xế" })
+                    </div>
+                    <div class="col-md-9">
                         <label class="form-label text-muted fw-semibold small">Ghi chú</label>
-                        @Html.TextAreaFor(m => m.GhiChu, new { @class = "form-control", rows = 2 })
+                        @Html.TextAreaFor(m => m.GhiChu, new { @class = "form-control", rows = 1 })
                     </div>
                 </div>
             </div>
@@ -142,7 +160,7 @@
                     </button>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-bordered grid-detail mb-0" id="tblChiTiet">
+                    <table class="table table-bordered table-custom grid-detail mb-0" id="tblChiTiet">
                         <thead>
                             <tr>
                                 <th style="width:35px;" class="text-center">#</th>
@@ -245,6 +263,42 @@
             $('body').append(confirmHtml);
             var $modal = $('#' + confirmModalId);
             $modal.find('#btnConfirmSaveAction').on('click', function() {
+                $modal.modal('hide');
+                setTimeout(function() {
+                    $form.submit();
+                }, 150);
+            });
+            
+            var myModal = new bootstrap.Modal(document.getElementById(confirmModalId));
+            myModal.show();
+        });
+
+        $pane.find('#btnSaveDraft').on('click', function () {
+            if (!DonDatHang.validateAndSerialize($form)) return;
+            
+            var confirmModalId = 'confirmSaveDraftModal_' + Math.random().toString(36).substr(2, 9);
+            var confirmHtml = '<div class="modal fade" id="' + confirmModalId + '" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">' +
+                '<div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">' +
+                    '<div class="modal-content shadow-lg" style="background-color: #ffffff; color: #333; border: none; border-top: 5px solid #6c757d; border-radius: 6px;">' +
+                        '<div class="modal-body p-4">' +
+                            '<div class="d-flex align-items-center mb-3">' +
+                                '<i class="bi bi-file-earmark-text text-secondary me-3" style="font-size: 1.6rem;"></i>' +
+                                '<h5 class="mb-0" style="font-size: 1.3rem; font-weight: 600; color: #333;">Lưu nháp</h5>' +
+                            '</div>' +
+                            '<p class="mb-4" style="font-size: 1rem; color: #555;">Bạn có muốn lưu nháp đơn hàng này không?</p>' +
+                            '<div class="d-flex justify-content-end gap-2">' +
+                                '<button type="button" class="btn" id="btnConfirmSaveDraftAction" style="background-color: #6c757d; color: #fff; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem;">ĐỒNG Ý</button>' +
+                                '<button type="button" class="btn" data-bs-dismiss="modal" style="background-color: #e9ecef; color: #333; font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 0.9rem; border: none;">ĐỂ SAU</button>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+            
+            $('body').append(confirmHtml);
+            var $modal = $('#' + confirmModalId);
+            $modal.find('#btnConfirmSaveDraftAction').on('click', function() {
+                $form.find('[name="TrangThaiDon"]').val('0');
                 $modal.modal('hide');
                 setTimeout(function() {
                     $form.submit();

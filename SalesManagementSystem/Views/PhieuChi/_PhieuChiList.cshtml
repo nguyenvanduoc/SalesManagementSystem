@@ -1,4 +1,4 @@
-﻿@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.PhieuChiListViewModel>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.PhieuChiListViewModel>
 
 @{
     var dashboard = ViewBag.Dashboard as SalesManagementSystem.Models.ViewModels.PhieuChiDashboardViewModel;
@@ -27,13 +27,15 @@
                         <th width="40"  class="text-center fw-bold">STT</th>
                         <th width="130" class="text-center fw-bold">Số phiếu chi</th>
                         <th width="100" class="text-center fw-bold">Ngày chi</th>
-                        <th class="fw-bold">Khoản mục chi</th>
-                        <th class="fw-bold">Tài khoản TT</th>
-                        <th class="fw-bold">Nhà cung cấp</th>
-                        <th class="fw-bold">Người nhận</th>
-                        <th width="130" class="text-end fw-bold">Số tiền chi</th>
-                        <th width="130" class="text-end fw-bold text-success">Số tiền phân bổ</th>
-                        <th width="130" class="text-end fw-bold text-primary">Tiền trả trước</th>
+                        <th class="text-center fw-bold">Khoản mục chi</th>
+                        <th class="text-center fw-bold">Tài khoản TT</th>
+                        <th class="text-center fw-bold">Nhà cung cấp</th>
+                        <th class="text-center fw-bold">Người nhận</th>
+                        <th width="130" class="text-center fw-bold">Tồn đầu kỳ</th>
+                        <th width="130" class="text-center fw-bold">Số tiền chi</th>
+                        <th width="130" class="text-center fw-bold">Số tiền phân bổ</th>
+                        <th width="130" class="text-center fw-bold">Tiền trả trước</th>
+                        <th width="130" class="text-center fw-bold">Lũy kế</th>
                         <th width="95" class="text-center fw-bold">Đính kèm</th>
                         <th width="110" class="text-center fw-bold">Trạng thái</th>
                     </tr>
@@ -172,9 +174,11 @@
                                         @item.TenNguoiNhan
                                     }
                                 </td>
+                                <td class="text-end align-middle fw-semibold">@(item.IDNhaCungCap.HasValue ? item.TonDauKy.ToString("N0") : "-")</td>
                                 <td class="text-end align-middle fw-semibold">@item.SoTienChi.ToString("N0")</td>
                                 <td class="text-end align-middle fw-semibold text-success">@item.SoTienPhanBo.ToString("N0")</td>
                                 <td class="text-end align-middle fw-semibold text-primary">@item.TienTraTruoc.ToString("N0")</td>
+                                <td class="text-end align-middle fw-bold text-danger">@(item.IDNhaCungCap.HasValue ? item.LuyKe.ToString("N0") : "-")</td>
                                 <td class="text-center align-middle">
                                     <input type="checkbox"
                                            class="form-check-input pc-has-file-checkbox"
@@ -191,7 +195,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="14" class="text-center py-4 text-muted">
+                            <td colspan="16" class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
                                 Không có dữ liệu
                             </td>
@@ -203,9 +207,11 @@
                     <tfoot>
                         <tr class="fw-bold bg-light">
                             <td colspan="9" class="text-end">Tổng cộng</td>
+                            <td></td>
                             <td class="text-end">@Model.Items.Sum(x => x.SoTienChi).ToString("N0")</td>
                             <td class="text-end text-success">@Model.Items.Sum(x => x.SoTienPhanBo).ToString("N0")</td>
                             <td class="text-end text-primary">@Model.Items.Sum(x => x.TienTraTruoc).ToString("N0")</td>
+                            <td></td>
                             <td></td>
                             <td></td>
                         </tr>

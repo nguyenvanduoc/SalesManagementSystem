@@ -5,7 +5,7 @@ namespace SalesManagementSystem.Models.Entities
     public class PhieuThuKhachHangFile
     {
         public int ID { get; set; }
-        public int IDChungTuBanHang { get; set; }
+        public int IDPhieuThu { get; set; }
         public string TenFile { get; set; }
         public string LoaiFile { get; set; }
         public long? DungLuong { get; set; }

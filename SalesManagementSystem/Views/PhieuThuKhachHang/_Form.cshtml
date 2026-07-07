@@ -1,0 +1,451 @@
+@model SalesManagementSystem.Models.ViewModels.PhieuThuKhachHangViewModel
+
+<style>
+    .select2-container--default .select2-selection--single { height: 38px !important; border: 1px solid #ced4da !important; border-radius: 0.375rem !important; }
+    .select2-container--default .select2-selection--single .select2-selection__rendered { line-height: 36px !important; padding-left: 12px !important; color: #212529 !important; font-size: 0.95rem !important; }
+    .select2-container--default .select2-selection--single .select2-selection__arrow { height: 36px !important; }
+    .table-phanbo th { background-color: #f8f9fa; font-weight: bold; }
+</style>
+
+<form action="@Url.Action("Save", "PhieuThuKhachHang")" method="post" id="phieuThuForm">
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.ID)
+    @Html.HiddenFor(m => m.TrangThai)
+    @Html.HiddenFor(m => m.TienTraTruocKhachHang, new { id = "TienTraTruocKhachHang_Hidden" })
+
+    <div class="modal-header border-bottom-0 pb-0">
+        <h5 class="modal-title fw-bold text-uppercase" style="color:#0b5b84;">
+            @ViewBag.Title
+        </h5>
+        <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+
+    <div class="modal-body pt-3 pb-2">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Số phiếu thu <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.SoPhieuThu, new { @class = "form-control", @readonly = "readonly", @style = "background:#f8f9fa;" })
+                @Html.ValidationMessageFor(m => m.SoPhieuThu, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Ngày thu <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.NgayThu, "{0:yyyy-MM-dd}", new { @class = "form-control", @type = "date" })
+                @Html.ValidationMessageFor(m => m.NgayThu, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Tài khoản <span class="text-danger">*</span></label>
+                @Html.DropDownListFor(m => m.IDTaiKhoanThanhToan, (IEnumerable<SelectListItem>)ViewBag.TaiKhoanList, "-- Chọn tài khoản --", new { @class = "form-select select2" })
+                @Html.ValidationMessageFor(m => m.IDTaiKhoanThanhToan, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Người nộp tiền</label>
+                @Html.TextBoxFor(m => m.NguoiNopTien, new { @class = "form-control", @placeholder = "Nhập người nộp..." })
+                @Html.ValidationMessageFor(m => m.NguoiNopTien, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Số ĐT</label>
+                @Html.TextBoxFor(m => m.SoDienThoaiNguoiNop, new { @class = "form-control", @placeholder = "Số điện thoại..." })
+            </div>
+            <div class="col-md-8">
+                <label class="form-label fw-bold">Khách hàng</label>
+                <select name="IDKhachHang" id="IDKhachHang" class="form-select select2">
+                    <option value="">-- Chọn khách hàng --</option>
+                    @if (ViewBag.KhachHangList != null)
+                    {
+                        foreach (SelectListItem item in ViewBag.KhachHangList)
+                        {
+                            <option value="@item.Value" @(item.Value == Model.IDKhachHang?.ToString() ? "selected" : "")>@item.Text</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold w-100">
+                    Tổng số tiền thu <span class="text-danger">*</span>
+                    <button type="button" class="btn btn-sm btn-outline-primary float-end" id="btnThuToanBo" style="padding: 0 5px; font-size: 11px; line-height: 1.2;">Thu toàn bộ</button>
+                </label>
+                <div class="input-group">
+                    @Html.TextBoxFor(m => m.SoTienThu, "{0:N0}", new { @class = "form-control text-end fw-bold text-primary fs-5", @id = "SoTienThu", @placeholder = "", @Value = Model.SoTienThu == 0 ? "" : Model.SoTienThu.ToString("N0") })
+                    <span class="input-group-text bg-light fw-bold text-muted">đ</span>
+                </div>
+                @Html.ValidationMessageFor(m => m.SoTienThu, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-md-12">
+                <label class="form-label fw-bold">Diễn giải</label>
+                @Html.TextBoxFor(m => m.DienGiai, new { @class = "form-control" })
+            </div>
+
+            <!-- Bảng phân bổ -->
+            <div class="col-md-12 mt-4" id="divPhanBo" style="display:none;">
+                <h6 class="fw-bold mb-2 text-secondary border-bottom pb-2">
+                    CHI TIẾT PHÂN BỔ CẤN TRỪ CÔNG NỢ
+                    <span class="float-end badge bg-info text-dark" id="lblTienTraTruoc" style="font-size:0.9rem;">Tiền trả trước hiện có: 0 đ</span>
+                </h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-phanbo align-middle" id="tblChungTuBanHang">
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="width:40px;">STT</th>
+                                <th>Số chứng từ</th>
+                                <th class="text-center">Ngày chứng từ</th>
+                                <th class="text-end">Phải thu</th>
+                                <th class="text-end">Đã thu</th>
+                                <th class="text-end">Còn nợ</th>
+                                <th class="text-end" style="width:180px;">Số tiền phân bổ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dữ liệu JS -->
+                        </tbody>
+                        <tfoot>
+                            <tr class="bg-light">
+                                <td colspan="6" class="text-end fw-bold">Tổng phân bổ cho chứng từ:</td>
+                                <td class="text-end fw-bold text-success" id="TongPhanBo">0</td>
+                            </tr>
+                            <tr class="bg-light">
+                                <td colspan="6" class="text-end fw-bold text-danger">Tiền dư (chuyển thành trả trước):</td>
+                                <td class="text-end fw-bold text-danger" id="TienDuTraTruoc">0</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden input to store JSON for chiTiets -->
+    <input type="hidden" name="chiTietJson" id="chiTietJson" value="" />
+
+    <div class="modal-footer bg-light border-top-0 rounded-bottom">
+        @if (ViewBag.IsView == true)
+        {
+            <button type="button" class="btn text-white px-4" style="background:#0b5b84;" data-bs-dismiss="modal">Đóng</button>
+        }
+        else if (ViewBag.IsAdjustAllocation == true)
+        {
+            <button type="button" class="btn text-white px-4" style="background:#2998e4" id="btnAdjustAllocation">Lưu cập nhật</button>
+            <button type="button" class="btn text-dark px-4" style="background:#e9ecef" data-bs-dismiss="modal">Đóng</button>
+        }
+        else
+        {
+            <button type="button" class="btn text-white px-4" style="background:#f1c40f" id="btnSubmitForm">Lưu dữ liệu</button>
+            if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuThuKhachHang", SalesManagementSystem.Helpers.LoaiPhanQuyen.TuyChon))
+            {
+                <button type="button" class="btn text-white px-4" style="background:#2998e4" id="btnLuuVaGhi">Lưu và ghi</button>
+            }
+            <button type="button" class="btn text-dark px-4" style="background:#e9ecef" data-bs-dismiss="modal">Đóng</button>
+        }
+    </div>
+</form>
+
+<script>
+    $(document).ready(function () {
+        var $modal = $('.form-modal-content').closest('.modal');
+        var isView = @(ViewBag.IsView == true ? "true" : "false");
+        var isAdjustAllocation = @(ViewBag.IsAdjustAllocation == true ? "true" : "false");
+        var listChungTu = [];
+        var tienTraTruoc = parseFloat($('#TienTraTruocKhachHang_Hidden').val() || 0);
+        
+        // Populate existing details if Edit mode
+        var existingDetails = @Html.Raw(Model.ChiTiets != null ? Newtonsoft.Json.JsonConvert.SerializeObject(Model.ChiTiets) : "[]");
+
+        if ($modal.length > 0) {
+            $modal.find('.modal-dialog').removeClass('modal-lg modal-dialog-centered').addClass('modal-xl').css('margin-top', '30px');
+            if (isView) {
+                $modal.find('input, select, textarea').prop('disabled', true);
+            }
+            $modal.find('.select2').select2({ dropdownParent: $modal, width: '100%' });
+        }
+
+        function formatCurrency(num) { return parseFloat(num || 0).toLocaleString('vi-VN'); }
+        function parseCurrency(str) { return parseFloat(str.replace(/\./g, '').replace(/,/g, '')) || 0; }
+
+        function calculatePhanBo() {
+            var tongThu = parseCurrency($('#SoTienThu').val());
+            var tienHienTai = tongThu; // Start with total money from user input
+            var tongPhanBo = 0;
+            
+            // Loop through inputs and adjust values
+            $modal.find('.input-phanbo').each(function() {
+                var $input = $(this);
+                var isAuto = $input.data('auto'); // Not used right now, user can just type
+                var val = parseCurrency($input.val());
+                tongPhanBo += val;
+            });
+            
+            var tienDu = tongThu - tongPhanBo;
+            $modal.find('#TongPhanBo').text(formatCurrency(tongPhanBo));
+            $modal.find('#TienDuTraTruoc').text(formatCurrency(tienDu >= 0 ? tienDu : 0));
+        }
+
+        function autoAllocate() {
+            var val = parseCurrency($('#SoTienThu').val());
+            var available = val + (parseFloat(window.tienTraTruoc) || 0);
+            var remaining = available;
+            $modal.find('.input-phanbo').each(function() {
+                var conLai = parseFloat($(this).closest('tr').find('.row-conlai').data('val'));
+                if (remaining >= conLai) {
+                    $(this).val(formatCurrency(conLai));
+                    remaining -= conLai;
+                } else if (remaining > 0) {
+                    $(this).val(formatCurrency(remaining));
+                    remaining = 0;
+                } else {
+                    $(this).val('0');
+                }
+            });
+            calculatePhanBo();
+        }
+
+        function renderTable(data) {
+            var tbody = $modal.find('#tblChungTuBanHang tbody');
+            tbody.empty();
+            if(!data || data.length === 0) {
+                tbody.html('<tr><td colspan="7" class="text-center text-muted">Không có chứng từ nợ</td></tr>');
+                $modal.find('#divPhanBo').show();
+                return;
+            }
+            $.each(data, function(i, item) {
+                var phanBo = 0;
+                // If edit mode, find existing allocation
+                var ex = existingDetails.find(x => x.IDChungTuBanHang === item.id && x.LoaiThu === 1);
+                if (ex) phanBo = ex.SoTienPhanBo;
+                
+                var tr = $('<tr></tr>');
+                tr.append('<td class="text-center">' + (i + 1) + '</td>');
+                tr.append('<td>' + item.soChungTu + '</td>');
+                tr.append('<td class="text-center">' + item.ngayChungTu + '</td>');
+                tr.append('<td class="text-end">' + formatCurrency(item.tongTien) + '</td>');
+                tr.append('<td class="text-end">' + formatCurrency(item.daThanhToan) + '</td>');
+                tr.append('<td class="text-end text-danger fw-bold row-conlai" data-val="'+item.conLai+'">' + formatCurrency(item.conLai) + '</td>');
+                
+                var input = '<input type="text" class="form-control text-end input-phanbo" data-id="' + item.id + '" value="' + formatCurrency(phanBo) + '" ' + (isView ? 'disabled' : '') + ' />';
+                tr.append('<td class="text-end">' + input + '</td>');
+                tbody.append(tr);
+            });
+            $modal.find('#divPhanBo').show();
+            
+            // Attach events
+            $modal.find('.input-phanbo').on('input', function() {
+                var val = $(this).val().replace(/[^0-9]/g, '');
+                if (val !== '') {
+                    val = parseInt(val, 10);
+                    var conLai = parseFloat($(this).closest('tr').find('.row-conlai').data('val'));
+                    if (val > conLai) val = conLai; // Cap at max debt
+                    $(this).val(formatCurrency(val));
+                }
+                calculatePhanBo();
+            });
+            $modal.find('.input-phanbo').on('blur', function() {
+                if($(this).val() === '') $(this).val('0');
+                calculatePhanBo();
+            });
+            
+            // If new mode (no existing details) and SoTienThu > 0, auto allocate
+            if (existingDetails.length === 0 && parseCurrency($('#SoTienThu').val()) > 0) {
+                autoAllocate();
+            } else {
+                calculatePhanBo();
+            }
+        }
+
+        function loadKhachHangData(idKhachHang) {
+            if(!idKhachHang) {
+                $modal.find('#divPhanBo').hide();
+                return;
+            }
+            
+            var loadedTien = false;
+            var loadedPhieu = false;
+            
+            // Load Tien Tra Truoc
+            $.getJSON('@Url.Action("GetTienTraTruocKhachHang", "PhieuThuKhachHang")', { idKhachHang: idKhachHang }, function (res) {
+                if(res.success) {
+                    window.tienTraTruoc = res.data;
+                    $modal.find('#lblTienTraTruoc').text('Tiền trả trước hiện có: ' + formatCurrency(window.tienTraTruoc) + ' đ');
+                }
+                loadedTien = true;
+                if(loadedPhieu && existingDetails.length === 0) autoAllocate();
+            });
+            // Load Phieu Nhap Nợ (ChungTuBanHang)
+            $.getJSON('@Url.Action("GetChungTuCongNo", "PhieuThuKhachHang")', { idKhachHang: idKhachHang }, function (res) {
+                if(res.success) {
+                    // If edit mode, we might need to inject the chung tu that are fully paid by this very PhieuThu!
+                    listChungTu = res.data;
+                    if(existingDetails && existingDetails.length > 0) {
+                        $.each(existingDetails, function(i, d) {
+                            if(d.LoaiThu === 1 && d.IDChungTuBanHang) {
+                                if(!listChungTu.find(x => x.id === d.IDChungTuBanHang)) {
+                                    listChungTu.push({
+                                        id: d.IDChungTuBanHang,
+                                        soChungTu: d.SoChungTu,
+                                        ngayChungTu: d.NgayChungTu ? d.NgayChungTu.substring(0,10) : '',
+                                        tongTien: d.TongTien,
+                                        daThanhToan: (d.DaThanhToan || 0) - d.SoTienPhanBo,
+                                        conLai: (d.ConLai || 0) + d.SoTienPhanBo // Reconstruct original debt before this payment
+                                    });
+                                } else {
+                                    // Adjust conLai to include the amount this PhieuThu already paid
+                                    var pn = listChungTu.find(x => x.id === d.IDChungTuBanHang);
+                                    pn.conLai += d.SoTienPhanBo;
+                                    pn.daThanhToan -= d.SoTienPhanBo;
+                                }
+                            }
+                        });
+                        // sort list by id
+                        listChungTu.sort((a, b) => a.id - b.id);
+                    }
+                    renderTable(listChungTu);
+                }
+                loadedPhieu = true;
+                if(loadedTien && existingDetails.length === 0) autoAllocate();
+            });
+        }
+
+        $modal.find('#IDKhachHang').on('change', function () {
+            existingDetails = []; // Clear if changed manually
+            loadKhachHangData($(this).val());
+        });
+
+        // Auto allocate when SoTienThu changes
+        $modal.find('#SoTienThu').on('input', function () {
+            var val = $(this).val().replace(/[^0-9]/g, '');
+            if (val !== '') {
+                val = parseInt(val, 10);
+                $(this).val(formatCurrency(val));
+            }
+            autoAllocate();
+        });
+
+        $modal.find('#SoTienThu').on('blur', function () {
+            autoAllocate();
+        });
+
+        $modal.find('#btnThuToanBo').on('click', function(e) {
+            e.preventDefault();
+            if (isView) return;
+            var totalDebt = 0;
+            $modal.find('.row-conlai').each(function() {
+                totalDebt += parseFloat($(this).data('val')) || 0;
+            });
+            $modal.find('#SoTienThu').val(formatCurrency(totalDebt));
+            autoAllocate();
+        });
+
+        if ($modal.find('#IDKhachHang').val()) {
+            loadKhachHangData($modal.find('#IDKhachHang').val());
+        }
+
+        function buildSubmitData() {
+            var chiTiets = [];
+            var tongThu = parseCurrency($('#SoTienThu').val());
+            var tongPhanBo = 0;
+            $modal.find('.input-phanbo').each(function() {
+                var val = parseCurrency($(this).val());
+                if(val > 0) {
+                    chiTiets.push({
+                        IDChungTu: $(this).data('id'),
+                        LoaiThu: 1, // 1: Thanh toán chứng từ
+                        SoTienPhanBo: val,
+                        DienGiai: 'Thanh toán chứng từ'
+                    });
+                    tongPhanBo += val;
+                }
+            });
+            var tienDu = tongThu - tongPhanBo;
+            if(tienDu > 0) {
+                chiTiets.push({
+                    IDChungTu: null,
+                    LoaiThu: 2, // 2: Tiền dư trả trước
+                    SoTienPhanBo: tienDu,
+                    DienGiai: 'Tiền dư chuyển thành trả trước'
+                });
+            } else if(tienDu < 0) {
+                chiTiets.push({
+                    IDChungTu: null,
+                    LoaiThu: 3, // 3: Sử dụng tiền trả trước
+                    SoTienPhanBo: Math.abs(tienDu),
+                    DienGiai: 'Sử dụng tiền trả trước khách hàng'
+                });
+            }
+            $('#chiTietJson').val(JSON.stringify(chiTiets));
+            var $soTien = $modal.find('#SoTienThu');
+            $soTien.val(tongThu); // plain number for model binder
+        }
+
+        function validatePhanBo() {
+            var tongThu = parseCurrency($('#SoTienThu').val());
+            var tongPhanBo = 0;
+            $modal.find('.input-phanbo').each(function() {
+                tongPhanBo += parseCurrency($(this).val());
+            });
+            var tienTraTruocHienCo = parseFloat(window.tienTraTruoc) || 0;
+            
+            if (tongThu + tienTraTruocHienCo < tongPhanBo) {
+                if (typeof showToast === 'function') {
+                    showToast('warning', 'Tổng số tiền thu và Tiền trả trước (' + formatCurrency(tongThu + tienTraTruocHienCo) + ' đ) nhỏ hơn Tổng thu phân bổ (' + formatCurrency(tongPhanBo) + ' đ). Vui lòng kiểm tra lại!');
+                } else {
+                    alert('Tổng số tiền thu và Tiền trả trước (' + formatCurrency(tongThu + tienTraTruocHienCo) + ' đ) nhỏ hơn Tổng thu phân bổ (' + formatCurrency(tongPhanBo) + ' đ). Vui lòng kiểm tra lại!');
+                }
+                return false;
+            }
+            return true;
+        }
+
+        $('#btnSubmitForm').on('click', function(e) {
+            e.preventDefault();
+            if (!validatePhanBo()) return;
+            buildSubmitData();
+            $('#phieuThuForm').submit();
+        });
+
+        $('#btnLuuVaGhi').on('click', function(e) {
+            e.preventDefault();
+            if (!validatePhanBo()) return;
+            buildSubmitData();
+            if ($('#phieuThuForm').find('input[name="ghiSo"]').length === 0) {
+                $('#phieuThuForm').append('<input type="hidden" name="ghiSo" value="true">');
+            } else {
+                $('#phieuThuForm').find('input[name="ghiSo"]').val('true');
+            }
+            $('#phieuThuForm').submit();
+        });
+
+        $('#btnAdjustAllocation').on('click', function(e) {
+            e.preventDefault();
+            if (!validatePhanBo()) return;
+            buildSubmitData();
+            
+            var $btn = $(this);
+            $btn.prop('disabled', true).text('Đang lưu...');
+            
+            $.post('@Url.Action("AdjustAllocation", "PhieuThuKhachHang")', $('#phieuThuForm').serialize(), function(res) {
+                if (res.success) {
+                    $('.form-modal-content').closest('.modal').modal('hide');
+                    if (typeof showToast === 'function') {
+                        showToast('success', res.message || 'Cập nhật phân bổ thành công.');
+                    }
+                    if (typeof TabManager !== 'undefined') {
+                        TabManager.reloadActiveTabGrid(false);
+                    } else if (typeof loadData === 'function') {
+                        loadData(); // Fallback
+                    }
+                } else {
+                    if (typeof showToast === 'function') {
+                        showToast('error', res.message);
+                    } else {
+                        alert('Lỗi: ' + res.message);
+                    }
+                    $btn.prop('disabled', false).text('Lưu cập nhật');
+                }
+            }).fail(function() {
+                if (typeof showToast === 'function') {
+                    showToast('error', 'Có lỗi xảy ra khi kết nối máy chủ.');
+                } else {
+                    alert('Có lỗi xảy ra khi gọi server');
+                }
+                $btn.prop('disabled', false).text('Lưu cập nhật');
+            });
+        });
+    });
+</script>

@@ -36,5 +36,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public string NguoiTaoText { get; set; }
         public int? IDPhuongTien { get; set; }
         public string TenPhuongTien { get; set; }
+        public string HoTenTaiXe { get; set; }
+        public string SoDienThoaiTaiXe { get; set; }
     }
 }

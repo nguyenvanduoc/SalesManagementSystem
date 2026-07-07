@@ -60,6 +60,16 @@ namespace SalesManagementSystem.Controllers
             return new SelectList(items, "ID", "Name", selectedId);
         }
 
+        private SelectList GetPhuongTienList(int? selectedId = null)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                var items = conn.Query<DropdownItem>(
+                    "SELECT ID, ISNULL(MaPhuongTien, '') + ' - ' + ISNULL(TenPhuongTien, '') AS Name FROM DM_PhuongTien ORDER BY STT, TenPhuongTien").ToList();
+                return new SelectList(items, "ID", "Name", selectedId);
+            }
+        }
+
         private UserLoginViewModel GetCurrentUser()
             => (UserLoginViewModel)Session[CommonConstants.USER_SESSION];
 
@@ -69,11 +79,13 @@ namespace SalesManagementSystem.Controllers
             int page = 1, int pageSize = 10,
             string tuNgay = "", string denNgay = "",
             int? idKhachHang = null, int? idNhanVien = null,
-            int? trangThai = null, string soDonHang = "")
+            int? trangThai = null, string soDonHang = "",
+            int? idPhuongTien = null, string hoTenTaiXe = "")
         {
             int totalRecords;
             var list = _repo.GetPaged(page, pageSize,
                 tuNgay, denNgay, idKhachHang, idNhanVien, trangThai, soDonHang,
+                idPhuongTien, hoTenTaiXe,
                 out totalRecords);
 
             var model = new PagedListViewModel<DonDatHangViewModel>
@@ -92,6 +104,8 @@ namespace SalesManagementSystem.Controllers
             ViewBag.KhachHangs = GetKhachHangList(idKhachHang);
             ViewBag.NhanViens  = GetNhanVienList(idNhanVien);
             ViewBag.TrangThais = GetTrangThaiList(trangThai);
+            ViewBag.PhuongTiens= GetPhuongTienList(idPhuongTien);
+            ViewBag.HoTenTaiXe = hoTenTaiXe;
 
             if (Request.IsAjaxRequest())
                 return PartialView("_DonDatHangList", model);
@@ -103,11 +117,13 @@ namespace SalesManagementSystem.Controllers
             int page = 1, int pageSize = 10,
             string tuNgay = "", string denNgay = "",
             int? idKhachHang = null, int? idNhanVien = null,
-            int? trangThai = null, string soDonHang = "")
+            int? trangThai = null, string soDonHang = "",
+            int? idPhuongTien = null, string hoTenTaiXe = "")
         {
             int totalRecords;
             var list = _repo.GetPaged(page, pageSize,
                 tuNgay, denNgay, idKhachHang, idNhanVien, trangThai, soDonHang,
+                idPhuongTien, hoTenTaiXe,
                 out totalRecords);
 
             var model = new PagedListViewModel<DonDatHangViewModel>
@@ -135,6 +151,7 @@ namespace SalesManagementSystem.Controllers
             };
             model.NhanVienList  = GetNhanVienList();
             model.TrangThaiList = GetTrangThaiList();
+            model.PhuongTienList = GetPhuongTienList();
 
             ViewBag.Title = "Tạo đơn đặt hàng";
             return View("Create", model);
@@ -217,6 +234,7 @@ namespace SalesManagementSystem.Controllers
 
             model.NhanVienList  = GetNhanVienList(don.IDNhanVien);
             model.TrangThaiList = GetTrangThaiList(1); // Set default status (1) select list item selected
+            model.PhuongTienList = GetPhuongTienList(don.IDPhuongTien);
 
             ViewBag.Title        = "Tạo đơn đặt hàng";
             ViewBag.ChiTietsJson = JsonConvert.SerializeObject(model.ChiTiets);
@@ -228,7 +246,7 @@ namespace SalesManagementSystem.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
-        public ActionResult Create(DonDatHangCreateEditViewModel model, string chiTietsJson)
+        public ActionResult Create(DonDatHangCreateEditViewModel model, string chiTietsJson, string returnUrlParams = "")
         {
             // Parse chi tiết từ JSON
             var chiTiets = ParseChiTiets(chiTietsJson);
@@ -270,6 +288,7 @@ namespace SalesManagementSystem.Controllers
             {
                 model.NhanVienList  = GetNhanVienList(model.IDNhanVien);
                 model.TrangThaiList = GetTrangThaiList(model.TrangThaiDon);
+                model.PhuongTienList = GetPhuongTienList(model.IDPhuongTien);
                 ViewBag.Title       = "Tạo đơn đặt hàng";
                 ViewBag.ChiTietsJson = chiTietsJson;
                 return View("Create", model);
@@ -280,8 +299,8 @@ namespace SalesManagementSystem.Controllers
             NormalizeChiTiets(chiTiets);
             decimal thanhTienHang = chiTiets.Sum(x => x.ThanhTienHang ?? 0m);
             decimal phiBocXep = chiTiets.Sum(x => x.ThanhTienBocXep ?? 0m);
-            decimal thanhTienThue = chiTiets.Sum(x => x.ThanhTienThue);
-            decimal tong = chiTiets.Sum(x => x.ThanhTienSauThue);
+            decimal thanhTienThue = chiTiets.Sum(x => x.ThanhTienThue ?? 0m);
+            decimal tong = chiTiets.Sum(x => x.ThanhTienSauThue ?? 0m);
 
             var header = new NS_DonDatHang
             {
@@ -296,6 +315,9 @@ namespace SalesManagementSystem.Controllers
                 ThanhTienHang   = thanhTienHang,
                 ThanhTienThue   = thanhTienThue,
                 GhiChu          = model.GhiChu,
+                SoDienThoaiTaiXe = model.SoDienThoaiTaiXe,
+                HoTenTaiXe      = model.HoTenTaiXe,
+                IDPhuongTien    = model.IDPhuongTien,
                 NgayTao         = DateTime.Now,
                 NguoiTao        = userId
             };
@@ -319,7 +341,9 @@ namespace SalesManagementSystem.Controllers
             _repo.Insert(header, details);
             
             if (Request.IsAjaxRequest() || Request.Headers["X-SPA-Load"] == "true") {
-                return Json(new { success = true, message = "Tạo đơn đặt hàng thành công!", closeTab = true });
+                string redirect = Url.Action("Index");
+                if (!string.IsNullOrEmpty(returnUrlParams)) redirect += "?" + returnUrlParams;
+                return Json(new { success = true, message = "Tạo đơn đặt hàng thành công!", redirectUrl = redirect, redirectBaseUrl = Url.Action("Index") });
             }
 
             TempData["ToastMessage"] = "Tạo đơn đặt hàng thành công!";
@@ -399,10 +423,14 @@ namespace SalesManagementSystem.Controllers
                 ThanhTienHang   = don.ThanhTienHang ?? 0,
                 ThanhTienThue   = don.ThanhTienThue ?? 0,
                 GhiChu          = don.GhiChu,
+                SoDienThoaiTaiXe = don.SoDienThoaiTaiXe,
+                HoTenTaiXe      = don.HoTenTaiXe,
+                IDPhuongTien    = don.IDPhuongTien,
                 ChiTiets        = chiTiets
             };
             model.NhanVienList  = GetNhanVienList(don.IDNhanVien);
             model.TrangThaiList = GetTrangThaiList(don.TrangThaiDon);
+            model.PhuongTienList = GetPhuongTienList(don.IDPhuongTien);
 
             ViewBag.Title        = isView ? "Chi tiết đơn đặt hàng" : "Chỉnh sửa đơn đặt hàng";
             ViewBag.ChiTietsJson = JsonConvert.SerializeObject(chiTiets);
@@ -413,7 +441,7 @@ namespace SalesManagementSystem.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
-        public ActionResult Edit(DonDatHangCreateEditViewModel model, string chiTietsJson)
+        public ActionResult Edit(DonDatHangCreateEditViewModel model, string chiTietsJson, string returnUrlParams = "")
         {
             var oldDon = _repo.GetById(model.ID);
             if (oldDon == null) return HttpNotFound();
@@ -454,6 +482,7 @@ namespace SalesManagementSystem.Controllers
             {
                 model.NhanVienList   = GetNhanVienList(model.IDNhanVien);
                 model.TrangThaiList  = GetTrangThaiList(model.TrangThaiDon);
+                model.PhuongTienList = GetPhuongTienList(model.IDPhuongTien);
                 ViewBag.Title        = "Chỉnh sửa đơn đặt hàng";
                 ViewBag.ChiTietsJson = chiTietsJson;
                 return View("Edit", model);
@@ -464,8 +493,8 @@ namespace SalesManagementSystem.Controllers
             NormalizeChiTiets(chiTiets);
             decimal thanhTienHang = chiTiets.Sum(x => x.ThanhTienHang ?? 0m);
             decimal phiBocXep = chiTiets.Sum(x => x.ThanhTienBocXep ?? 0m);
-            decimal thanhTienThue = chiTiets.Sum(x => x.ThanhTienThue);
-            decimal tong = chiTiets.Sum(x => x.ThanhTienSauThue);
+            decimal thanhTienThue = chiTiets.Sum(x => x.ThanhTienThue ?? 0m);
+            decimal tong = chiTiets.Sum(x => x.ThanhTienSauThue ?? 0m);
 
             var header = new NS_DonDatHang
             {
@@ -481,6 +510,9 @@ namespace SalesManagementSystem.Controllers
                 ThanhTienHang   = thanhTienHang,
                 ThanhTienThue   = thanhTienThue,
                 GhiChu          = model.GhiChu,
+                SoDienThoaiTaiXe = model.SoDienThoaiTaiXe,
+                HoTenTaiXe      = model.HoTenTaiXe,
+                IDPhuongTien    = model.IDPhuongTien,
                 NgayCapNhat     = DateTime.Now,
                 NguoiCapNhat    = userId
             };
@@ -505,7 +537,9 @@ namespace SalesManagementSystem.Controllers
             _repo.Update(header, details);
             
             if (Request.IsAjaxRequest() || Request.Headers["X-SPA-Load"] == "true") {
-                return Json(new { success = true, message = "Cập nhật đơn đặt hàng thành công!", closeTab = true });
+                string redirect = Url.Action("Index");
+                if (!string.IsNullOrEmpty(returnUrlParams)) redirect += "?" + returnUrlParams;
+                return Json(new { success = true, message = "Cập nhật đơn đặt hàng thành công!", redirectUrl = redirect, redirectBaseUrl = Url.Action("Index") });
             }
 
             TempData["ToastMessage"] = "Cập nhật đơn đặt hàng thành công!";
@@ -588,7 +622,7 @@ namespace SalesManagementSystem.Controllers
                 foreach (var ct in chiTiets)
                 {
                     totalSoLuong += ct.SoLuong;
-                    totalThanhTien += ct.ThanhTienSauThue;
+                    totalThanhTien += ct.ThanhTienSauThue ?? 0m;
                 }
                 decimal donGiaBocXep = don.PhiBocXep;
                 string tenKhachHang = "";
@@ -669,7 +703,7 @@ namespace SalesManagementSystem.Controllers
             try
             {
                 int totalRecords;
-                var list = _repo.GetPaged(1, int.MaxValue, tuNgay, denNgay, idKhachHang, idNhanVien, trangThai, soDonHang, out totalRecords);
+                var list = _repo.GetPaged(1, int.MaxValue, tuNgay, denNgay, idKhachHang, idNhanVien, trangThai, soDonHang, null, null, out totalRecords);
 
                 var variables = new Dictionary<string, object>
                 {
@@ -716,7 +750,7 @@ namespace SalesManagementSystem.Controllers
             try
             {
                 int totalRecords;
-                var list = _repo.GetPaged(1, int.MaxValue, tuNgay, denNgay, idKhachHang, idNhanVien, trangThai, soDonHang, out totalRecords);
+                var list = _repo.GetPaged(1, int.MaxValue, tuNgay, denNgay, idKhachHang, idNhanVien, trangThai, soDonHang, null, null, out totalRecords);
 
                 decimal totalTongTien = list.Sum(x => x.TongTien);
                 decimal totalPhiBocXep = 0m;
@@ -906,7 +940,7 @@ namespace SalesManagementSystem.Controllers
                 ct.ThanhTien = Math.Round((ct.ThanhTienHang ?? 0m) - (ct.ThanhTienBocXep ?? 0m), 0);
                 
                 ct.ThanhTienThue = Math.Round(ct.ThanhTien * ct.ThueGTGT / 100, 0);
-                ct.ThanhTienSauThue = Math.Round(ct.ThanhTien + ct.ThanhTienThue, 0);
+                ct.ThanhTienSauThue = Math.Round(ct.ThanhTien + (ct.ThanhTienThue ?? 0m), 0);
             }
         }
     }

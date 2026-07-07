@@ -38,6 +38,10 @@ namespace SalesManagementSystem.Models.ViewModels
         [StringLength(3000)]
         public string GhiChu { get; set; }
 
+        public string SoDienThoaiTaiXe { get; set; }
+        public string HoTenTaiXe { get; set; }
+        public int? IDPhuongTien { get; set; }
+
         public decimal TongTien { get; set; }
         public decimal PhiBocXep { get; set; }
         public decimal ThanhTienHang { get; set; }
@@ -50,5 +54,6 @@ namespace SalesManagementSystem.Models.ViewModels
         // ── Dropdown data (không map DB) ────────────────────────────────
         public System.Web.Mvc.SelectList NhanVienList { get; set; }
         public System.Web.Mvc.SelectList TrangThaiList { get; set; }
+        public System.Web.Mvc.SelectList PhuongTienList { get; set; }
     }
 }

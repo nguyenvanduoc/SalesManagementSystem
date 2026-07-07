@@ -1,0 +1,2 @@
+Msg 15009, Level 16, State 1, Server DESKTOP-PC\MSSQLSERVER01, Procedure sp_helptext, Line 54
+The object 'sp_BAN_ChungTuBanHang_Save' does not exist in database 'SalesWarehouseDB' or is invalid for this operation.

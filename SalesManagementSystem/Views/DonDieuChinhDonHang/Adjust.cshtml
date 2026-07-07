@@ -155,7 +155,7 @@
                     </button>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-bordered grid-detail mb-0" id="tblChiTiet">
+                    <table class="table table-bordered table-custom grid-detail mb-0" id="tblChiTiet">
                         <thead>
                             <tr>
                                 <th style="width:35px;" class="text-center">#</th>
@@ -341,6 +341,13 @@
             var modalTonKho = bootstrap.Modal.getInstance(modalEl);
             if (modalTonKho) {
                 modalTonKho.hide();
+                
+                // Kích hoạt resizable columns
+                setTimeout(function() {
+                    if (typeof initResizableColumns === 'function') {
+                        initResizableColumns('tblChiTiet');
+                    }
+                }, 100);
             }
         });
 

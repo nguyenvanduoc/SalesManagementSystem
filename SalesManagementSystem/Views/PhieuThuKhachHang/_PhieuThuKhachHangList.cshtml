@@ -13,16 +13,19 @@
             <table id="tblPhieuThuList" class="table table-custom table-bordered table-hover mb-0" style="width:100%; min-width:1200px;">
                 <thead>
                     <tr>
+                        <th width="40"></th>
                         <th class="text-center" style="width: 80px;">Thao t&#225;c</th>
                         <th class="text-center" style="width: 60px;">STT</th>
-                        <th class="text-center" style="width: 140px;">S&#7889; ch&#7913;ng t&#7915;</th>
-                        <th class="text-center" style="width: 120px;">Ng&#224;y ch&#7913;ng t&#7915;</th>
+                        <th class="text-center" style="width: 140px;">S&#7889; phi&#7871;u thu</th>
+                        <th class="text-center" style="width: 120px;">Ng&#224;y thu</th>
                         <th>Kh&#225;ch h&#224;ng</th>
-                        <th class="text-end" style="width: 150px;">T&#7893;ng ti&#7873;n</th>
-                        <th class="text-end" style="width: 150px;">&#272;&#227; thanh to&#225;n</th>
-                        <th class="text-end" style="width: 150px;">C&#242;n l&#7841;i</th>
+                        <th class="text-end" style="width: 150px;">T&#7891;n &#273;&#7847;u k&#7923;</th>
+                        <th class="text-end" style="width: 150px;">S&#7889; ti&#7873;n thu</th>
+                        <th class="text-end" style="width: 150px;">S&#7889; ti&#7873;n ph&#226;n b&#7893;</th>
+                        <th class="text-end" style="width: 150px;">Ti&#7873;n tr&#7843; tr&#432;&#7899;c</th>
+                        <th class="text-end" style="width: 150px;">L&#361;y k&#7871;</th>
                         <th class="text-center" style="width: 95px;">&#272;&#237;nh k&#232;m</th>
-                        <th class="text-center" style="width: 180px;">Tr&#7841;ng th&#225;i c&#244;ng n&#7907;</th>
+                        <th class="text-center" style="width: 130px;">Tr&#7841;ng th&#225;i</th>
                         <th>Ng&#432;&#7901;i t&#7841;o</th>
                         <th class="text-center" style="width: 160px;">Ng&#224;y t&#7841;o</th>
                     </tr>
@@ -35,38 +38,48 @@
                         {
                             int stt = ((Model.CurrentPage - 1) * Model.PageSize) + rowNum;
                             rowNum++;
-
-                            string badgeClass = "bg-danger text-white";
-                            string statusText = "CH&#431;A THANH TO&#193;N";
-
-                            if (item.TrangThaiCongNo == 2)
-                            {
-                                badgeClass = "bg-warning text-dark";
-                                statusText = "THANH TO&#193;N M&#7896;T PH&#7846;N";
-                            }
-                            else if (item.TrangThaiCongNo == 3)
-                            {
-                                badgeClass = "bg-success text-white";
-                                statusText = "&#272;&#195; THANH TO&#193;N";
-                            }
-
-                            <tr>
+                            
+                            <tr class="pt-row" data-id="@item.ID">
+                                <td class="text-center align-middle">
+                                    <i class="bi bi-caret-right-fill text-muted toggle-icon" style="cursor: pointer; font-size: 0.9rem;"></i>
+                                </td>
                                 <td class="text-center align-middle">
                                     <div class="dropdown dropdown-hover">
                                         <button class="btn btn-sm btn-light border dropdown-toggle-hide-arrow shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 3px 7px;">
                                             <i class="bi bi-grid-3x3-gap-fill text-dark"></i>
                                         </button>
                                         <ul class="dropdown-menu shadow">
-                                            <li><h6 class="dropdown-header text-uppercase fw-bold text-dark">Thao t&#225;c</h6></li>
                                             <li>
-                                                <button type="button" class="dropdown-item py-2 text-primary" onclick="openFormModal('@Url.Action("Edit", "PhieuThuKhachHang", new { id = item.ID })')">
-                                                    <i class="bi bi-pencil-square text-primary me-2"></i>Thu ti&#7873;n
+                                                <button type="button" class="dropdown-item py-2" onclick="openFormModal('@Url.Action("Details", "PhieuThuKhachHang", new { id = item.ID })')">
+                                                    <i class="bi bi-eye text-info me-2"></i>Xem chi ti&#7871;t
                                                 </button>
                                             </li>
+                                            @if (item.TrangThai == 1)
+                                            {
+                                                <li>
+                                                    <button type="button" class="dropdown-item py-2" onclick="openFormModal('@Url.Action("Edit", "PhieuThuKhachHang", new { id = item.ID })')">
+                                                        <i class="bi bi-pencil-square text-primary me-2"></i>C&#7853;p nh&#7853;t
+                                                    </button>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <button type="button" class="dropdown-item py-2 text-danger" onclick="confirmDelete('@Url.Action("Delete", "PhieuThuKhachHang", new { id = item.ID })', 'B&#7841;n c&#243; ch&#7855;c ch&#7855;n mu&#7889;n x&#243;a phi&#7871;u @item.SoPhieuThu?')">
+                                                        <i class="bi bi-trash-fill text-danger me-2"></i>X&#243;a
+                                                    </button>
+                                                </li>
+                                            }
+                                            else if (item.TrangThai == 2)
+                                            {
+                                                <li>
+                                                    <button type="button" class="dropdown-item py-2 text-primary" onclick="openFormModal('@Url.Action("AdjustAllocation", "PhieuThuKhachHang", new { id = item.ID })')">
+                                                        <i class="bi bi-sliders text-primary me-2"></i>C&#7853;p nh&#7853;t ph&#226;n b&#7893;
+                                                    </button>
+                                                </li>
+                                            }
                                             <li><hr class="dropdown-divider"></li>
                                             <li>
                                                 <button type="button" class="dropdown-item py-2 text-secondary btn-view-pt-files"
-                                                        data-id="@item.ID" data-so="@item.SoChungTu">
+                                                        data-id="@item.ID" data-so="@item.SoPhieuThu">
                                                     <i class="bi bi-paperclip text-secondary me-2"></i>Xem file &#273;&#237;nh k&#232;m
                                                 </button>
                                             </li>
@@ -74,7 +87,7 @@
                                             {
                                                 <li>
                                                     <button type="button" class="dropdown-item py-2 text-primary btn-upload-pt-file"
-                                                            data-id="@item.ID" data-so="@item.SoChungTu">
+                                                            data-id="@item.ID" data-so="@item.SoPhieuThu">
                                                         <i class="bi bi-upload text-primary me-2"></i>&#272;&#237;nh k&#232;m file
                                                     </button>
                                                 </li>
@@ -85,14 +98,16 @@
                                 <td class="text-center align-middle">@stt</td>
                                 <td class="align-middle text-center">
                                     <button type="button" class="btn btn-link fw-bold text-decoration-none p-0" style="color: #2998e4;" onclick="openFormModal('@Url.Action("Edit", "PhieuThuKhachHang", new { id = item.ID })')">
-                                        @item.SoChungTu
+                                        @item.SoPhieuThu
                                     </button>
                                 </td>
-                                <td class="align-middle text-center">@item.NgayChungTu.ToString("dd/MM/yyyy")</td>
+                                <td class="align-middle text-center">@item.NgayThu.ToString("dd/MM/yyyy")</td>
                                 <td class="align-middle">@item.TenKhachHang</td>
-                                <td class="align-middle text-end text-dark fw-semibold">@item.TongCong.ToString("N0", cultureVi)</td>
-                                <td class="align-middle text-end text-success">@item.DaThanhToan.ToString("N0", cultureVi)</td>
-                                <td class="align-middle text-end text-danger fw-semibold">@item.ConLai.ToString("N0", cultureVi)</td>
+                                <td class="align-middle text-end text-secondary fw-semibold">@item.TonDauKy.ToString("N0", cultureVi)</td>
+                                <td class="align-middle text-end text-dark fw-semibold">@item.SoTienThu.ToString("N0", cultureVi)</td>
+                                <td class="align-middle text-end text-success">@item.SoTienPhanBo.ToString("N0", cultureVi)</td>
+                                <td class="align-middle text-end text-primary">@item.TienTraTruoc.ToString("N0", cultureVi)</td>
+                                <td class="align-middle text-end fw-semibold text-danger">@item.LuyKe.ToString("N0", cultureVi)</td>
                                 <td class="text-center align-middle">
                                     <input type="checkbox"
                                            class="form-check-input pt-has-file-checkbox"
@@ -101,19 +116,19 @@
                                            disabled />
                                 </td>
                                 <td class="text-center align-middle">
-                                    <span class="badge @badgeClass px-2.5 py-1.5" style="font-size: 0.75rem; font-weight: 600; border-radius: 4px; display: inline-block; min-width: 140px;">
-                                        @Html.Raw(statusText)
+                                    <span class="@item.CssTrangThai px-2.5 py-1.5" style="font-size: 0.75rem; font-weight: 600; border-radius: 4px; display: inline-block; min-width: 100px;">
+                                        @item.TenTrangThai
                                     </span>
                                 </td>
-                                <td class="align-middle">@item.TenNguoiTao</td>
-                                <td class="align-middle text-center">@item.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="align-middle">@item.NguoiTao</td>
+                                <td class="align-middle text-center">@(item.NgayTao.HasValue ? item.NgayTao.Value.ToString("dd/MM/yyyy HH:mm") : "")</td>
                             </tr>
                         }
                     }
                     else
                     {
                         <tr>
-                            <td colspan="12" class="text-center py-4 text-muted">Ch&#432;a c&#243; ch&#7913;ng t&#7915; b&#225;n h&#224;ng n&#224;o ph&#249; h&#7907;p.</td>
+                            <td colspan="14" class="text-center py-4 text-muted">Ch&#432;a c&#243; phi&#7871;u thu n&#224;o ph&#249; h&#7907;p.</td>
                         </tr>
                     }
                 </tbody>
@@ -171,6 +186,102 @@
         if ($pane.length === 0) $pane = $('body');
         var currentUploadPhieuThuId = 0;
         var currentUploadPhieuThuSo = '';
+        // Intercept pagination clicks specifically for PhieuThu to prevent global conflicts
+        $pane.off('click.phieuthu_pag', '.pagination .ajax-link');
+        $pane.on('click.phieuthu_pag', '.pagination .ajax-link', function(e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            
+            var $li = $(this).closest('li');
+            if ($li.hasClass('disabled') || $li.hasClass('active')) return;
+            
+            var href = $(this).attr('href');
+            if (!href || href === '#' || href.indexOf('javascript:') === 0) return;
+
+            var page = 1;
+            var matchPage = href.match(/[?&]page=(\\d+)/);
+            if (matchPage) page = parseInt(matchPage[1], 10);
+            
+            var pageSize = $pane.find('.page-size-select').val() || 20;
+
+            var $form = $pane.find('#searchFormPhieuThu');
+            var url;
+            if ($form.length > 0) {
+                var action = $form.attr('action') || href.split('?')[0];
+                var params = $form.serializeArray();
+                params = params.filter(function (item) {
+                    return item.name !== 'page' && item.name !== 'pageSize';
+                });
+                params.push({ name: 'page', value: page });
+                params.push({ name: 'pageSize', value: pageSize });
+                url = action + '?' + $.param(params);
+            } else {
+                url = href;
+            }
+
+            var $grid = $pane.find('#table-container');
+            if (typeof showLoadingLocal === 'function') showLoadingLocal($grid);
+            
+            $.ajax({
+                url: url,
+                type: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                success: function (res) {
+                    if (typeof hideLoadingLocal === 'function') hideLoadingLocal($grid);
+                    $grid.html(res);
+                    if (typeof reInitPlugins === 'function') reInitPlugins($pane.attr('id'));
+                },
+                error: function() {
+                    if (typeof hideLoadingLocal === 'function') hideLoadingLocal($grid);
+                    if (typeof showToast === 'function') showToast('error', 'L?i khi t?i d? li?u.');
+                }
+            });
+        });
+
+        // Intercept pageSize select changes specifically for PhieuThu
+        $pane.off('change.phieuthu_ps', '.page-size-select');
+        $pane.on('change.phieuthu_ps', '.page-size-select', function(e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            
+            var pageSize = $(this).val();
+            var $paginationBlock = $(this).closest('.custom-pagination');
+            var baseUrl = $paginationBlock.attr('data-action') || '@Url.Action("GetList", "PhieuThuKhachHang")';
+            
+            var $form = $pane.find('#searchFormPhieuThu');
+            var url;
+            if ($form.length > 0) {
+                var action = $form.attr('action') || baseUrl;
+                var params = $form.serializeArray();
+                params = params.filter(function (item) {
+                    return item.name !== 'page' && item.name !== 'pageSize';
+                });
+                params.push({ name: 'page', value: 1 });
+                params.push({ name: 'pageSize', value: pageSize });
+                url = action + '?' + $.param(params);
+            } else {
+                url = baseUrl + '?page=1&pageSize=' + pageSize;
+            }
+
+            var $grid = $pane.find('#table-container');
+            if (typeof showLoadingLocal === 'function') showLoadingLocal($grid);
+            
+            $.ajax({
+                url: url,
+                type: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                success: function (res) {
+                    if (typeof hideLoadingLocal === 'function') hideLoadingLocal($grid);
+                    $grid.html(res);
+                    if (typeof reInitPlugins === 'function') reInitPlugins($pane.attr('id'));
+                },
+                error: function() {
+                    if (typeof hideLoadingLocal === 'function') hideLoadingLocal($grid);
+                    if (typeof showToast === 'function') showToast('error', 'L?i khi t?i d? li?u.');
+                }
+            });
+        });
+
 
         function normalizePhieuThuFileLabels($scope) {
             var labelView = 'Xem file \u0111\u00ednh k\u00e8m';
@@ -201,28 +312,28 @@
 
         normalizePhieuThuFileLabels($pane);
 
-        function loadPhieuThuFiles(idChungTuBanHang, soChungTu) {
+        function loadPhieuThuFiles(idPhieuThu, soPhieuThu) {
             var $modal = $pane.find('#modalPhieuThuFiles');
             var $content = $pane.find('#modalPhieuThuFilesContent');
-            var safeSoChungTu = $('<div>').text(soChungTu || '').html();
-            $modal.find('.modal-title').html('FILE &#272;&#205;NH K&#200;M ' + safeSoChungTu);
+            var safeSoPhieuThu = $('<div>').text(soPhieuThu || '').html();
+            $modal.find('.modal-title').html('FILE &#272;&#205;NH K&#200;M ' + safeSoPhieuThu);
             $content.html('<div class="text-center py-5 text-muted"><span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>&#272;ang t&#7843;i danh s&#225;ch file...</div>');
             bootstrap.Modal.getOrCreateInstance($modal[0]).show();
 
-            $.get('@Url.Action("GetFiles", "PhieuThuKhachHang")', { idChungTuBanHang: idChungTuBanHang }, function (res) {
+            $.get('@Url.Action("GetFiles", "PhieuThuKhachHang")', { idPhieuThu: idPhieuThu }, function (res) {
                 $content.html(res);
                 $content.find('.phieuthu-file-list').removeClass('mt-3').addClass('mt-0');
                 normalizePhieuThuFileLabels($content);
-                setPhieuThuFileCheckbox(idChungTuBanHang, hasPhieuThuFiles($content));
+                setPhieuThuFileCheckbox(idPhieuThu, hasPhieuThuFiles($content));
             }).fail(function () {
-                $content.html('<div class="text-center text-danger py-4">Loi tai danh sach file dinh kem.</div>');
-                if (typeof showToast === 'function') showToast('error', 'Loi tai danh sach file dinh kem.');
+                $content.html('<div class="text-center text-danger py-4">L&#7895;i t&#7843;i danh s&#225;ch file &#273;&#237;nh k&#232;m.</div>');
+                if (typeof showToast === 'function') showToast('error', 'L&#7895;i t&#7843;i danh s&#225;ch file &#273;&#237;nh k&#232;m.');
             });
         }
 
         function reloadCurrentPhieuThuFiles() {
             if (!currentUploadPhieuThuId) return;
-            $.get('@Url.Action("GetFiles", "PhieuThuKhachHang")', { idChungTuBanHang: currentUploadPhieuThuId }, function (res) {
+            $.get('@Url.Action("GetFiles", "PhieuThuKhachHang")', { idPhieuThu: currentUploadPhieuThuId }, function (res) {
                 var $content = $pane.find('#modalPhieuThuFilesContent');
                 $content.html(res);
                 $content.find('.phieuthu-file-list').removeClass('mt-3').addClass('mt-0');
@@ -266,7 +377,7 @@
 
             for (var i = 0; i < files.length; i++) {
                 var formData = new FormData();
-                formData.append('idChungTuBanHang', currentUploadPhieuThuId);
+                formData.append('idPhieuThu', currentUploadPhieuThuId);
                 formData.append('file', files[i]);
 
                 $.ajax({

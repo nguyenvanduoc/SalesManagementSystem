@@ -133,8 +133,8 @@ namespace SalesManagementSystem.Controllers
                             ThanhTienHang = ct.ThanhTienHang,
                             ThanhTien = ct.ThanhTien,
                             ThueGTGT = ct.ThueGTGT,
-                            TienThue = ct.ThanhTienThue,
-                            TongSauThue = ct.ThanhTienSauThue
+                            TienThue = ct.ThanhTienThue ?? 0m,
+                            TongSauThue = ct.ThanhTienSauThue ?? 0m
                         });
                     }
                     var donHang = new SalesManagementSystem.Repositories.DonDatHangRepository(new Data.DbConnectionFactory()).GetById(idDonDatHang.Value);
@@ -197,8 +197,8 @@ namespace SalesManagementSystem.Controllers
                     ThanhTienHang = ct.ThanhTienHang,
                     ThanhTien = ct.ThanhTien,
                     ThueGTGT = ct.ThueGTGT,
-                    TienThue = ct.ThanhTienThue,
-                    TongSauThue = ct.ThanhTienSauThue
+                    TienThue = ct.ThanhTienThue ?? 0m,
+                    TongSauThue = ct.ThanhTienSauThue ?? 0m
                 });
             }
 
@@ -344,6 +344,7 @@ namespace SalesManagementSystem.Controllers
 
                 if (model.ID > 0)
                 {
+                    model.ConLai = model.TongCong - model.DaThanhToan;
                     _repo.Update(model, userId, ghiSo && PermissionHelper.HasPermission("ChungTuBanHang", LoaiPhanQuyen.TuyChon));
                     return Json(new { success = true, id = model.ID });
                 }
@@ -353,6 +354,7 @@ namespace SalesManagementSystem.Controllers
                     {
                         model.SoChungTu = _repo.GenerateSoChungTu();
                     }
+                    model.ConLai = model.TongCong - model.DaThanhToan;
 
                     int newId = _repo.Insert(model, userId, ghiSo && PermissionHelper.HasPermission("ChungTuBanHang", LoaiPhanQuyen.TuyChon));
 

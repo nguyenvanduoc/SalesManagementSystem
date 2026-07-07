@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Models.ViewModels;
 
@@ -11,6 +11,7 @@ namespace SalesManagementSystem.Repositories.Interfaces
             string tuNgay, string denNgay,
             int? idKhachHang, int? idNhanVien,
             int? trangThai, string soDonHang,
+            int? idPhuongTien, string hoTenTaiXe,
             out int totalRecords);
 
         NS_DonDatHang GetById(int id);

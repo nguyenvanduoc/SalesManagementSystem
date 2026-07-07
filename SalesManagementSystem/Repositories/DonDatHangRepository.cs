@@ -37,10 +37,16 @@ namespace SalesManagementSystem.Repositories
                                 KichHoat BIT NOT NULL DEFAULT 1
                             );
                             INSERT INTO DM_TrangThaiDonHang (ID, TenTrangThai, ThuTuHienThi, KichHoat) VALUES
+                            (0, N'Lưu nháp', 0, 1),
                             (1, N'Chưa giao', 1, 1),
                             (2, N'Đang đi đường', 2, 1),
                             (3, N'Đã giao', 3, 1),
                             (4, N'Đã hủy', 4, 1);
+                        END
+                        ELSE
+                        BEGIN
+                            IF NOT EXISTS(SELECT 1 FROM DM_TrangThaiDonHang WHERE ID = 0)
+                                INSERT INTO DM_TrangThaiDonHang (ID, TenTrangThai, ThuTuHienThi, KichHoat) VALUES (0, N'Lưu nháp', 0, 1);
                         END
                     ";
                     conn.Execute(initTrangThaiSql);
@@ -55,6 +61,7 @@ namespace SalesManagementSystem.Repositories
             string tuNgay, string denNgay,
             int? idKhachHang, int? idNhanVien,
             int? trangThai, string soDonHang,
+            int? idPhuongTien, string hoTenTaiXe,
             out int totalRecords)
         {
             using (var conn = _db.CreateConnection())
@@ -66,6 +73,8 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@IDNhanVien",  idNhanVien);
                 p.Add("@TrangThai",   trangThai);
                 p.Add("@SoDonHang",   string.IsNullOrWhiteSpace(soDonHang) ? null : soDonHang.Trim());
+                p.Add("@IDPhuongTien", idPhuongTien);
+                p.Add("@HoTenTaiXe",  string.IsNullOrWhiteSpace(hoTenTaiXe) ? null : hoTenTaiXe.Trim());
                 p.Add("@Offset",      (page - 1) * pageSize);
                 p.Add("@PageSize",    pageSize);
 
@@ -77,6 +86,8 @@ namespace SalesManagementSystem.Repositories
                       AND (@IDKhachHang IS NULL OR d.IDKhachHang  = @IDKhachHang)
                       AND (@IDNhanVien  IS NULL OR d.IDNhanVien   = @IDNhanVien)
                       AND (@TrangThai   IS NULL OR d.TrangThaiDon = @TrangThai)
+                      AND (@IDPhuongTien IS NULL OR d.IDPhuongTien = @IDPhuongTien)
+                      AND (@HoTenTaiXe  IS NULL OR d.HoTenTaiXe LIKE '%' + @HoTenTaiXe + '%')
                       AND (@SoDonHang   IS NULL OR d.SoDonHang LIKE '%' + @SoDonHang + '%')";
 
                 totalRecords = conn.ExecuteScalar<int>(countSql, p);
@@ -93,17 +104,22 @@ namespace SalesManagementSystem.Repositories
                         d.IDNhanVien,
                         nv.HoDem + ' ' + nv.Ten AS TenNhanVien,
                         d.NgayTao, d.NguoiTao,
-                        creator.HoDem + ' ' + creator.Ten AS TenNguoiTao
+                        creator.HoDem + ' ' + creator.Ten AS TenNguoiTao,
+                        d.SoDienThoaiTaiXe, d.HoTenTaiXe, d.IDPhuongTien,
+                        pt.TenPhuongTien
                     FROM NS_DonDatHang d
                     LEFT JOIN NS_KhachHang k  ON d.IDKhachHang = k.ID
                     LEFT JOIN NS_NhanSu  nv ON d.IDNhanVien  = nv.ID
                     LEFT JOIN DM_TrangThaiDonHang tt ON d.TrangThaiDon = tt.ID
                     LEFT JOIN NS_NhanSu creator ON d.NguoiTao = creator.ID
+                    LEFT JOIN DM_PhuongTien pt ON d.IDPhuongTien = pt.ID
                     WHERE (@TuNgay      IS NULL OR d.NgayTaoDon  >= @TuNgay)
                       AND (@DenNgay     IS NULL OR d.NgayTaoDon  <= @DenNgay)
                       AND (@IDKhachHang IS NULL OR d.IDKhachHang  = @IDKhachHang)
                       AND (@IDNhanVien  IS NULL OR d.IDNhanVien   = @IDNhanVien)
                       AND (@TrangThai   IS NULL OR d.TrangThaiDon = @TrangThai)
+                      AND (@IDPhuongTien IS NULL OR d.IDPhuongTien = @IDPhuongTien)
+                      AND (@HoTenTaiXe  IS NULL OR d.HoTenTaiXe LIKE '%' + @HoTenTaiXe + '%')
                       AND (@SoDonHang   IS NULL OR d.SoDonHang LIKE '%' + @SoDonHang + '%')
                     ORDER BY d.ID DESC
                     OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
@@ -189,10 +205,12 @@ namespace SalesManagementSystem.Repositories
                         string headerSql = @"
                             INSERT INTO NS_DonDatHang
                                 (IDKhachHang, NgayTaoDon, SoDonHang, IDNhanVien, ThoiHanGiaoHang,
-                                 TrangThaiDon, TongTien, PhiBocXep, ThanhTienHang, ThanhTienThue, GhiChu, NgayTao, NguoiTao)
+                                 TrangThaiDon, TongTien, PhiBocXep, ThanhTienHang, ThanhTienThue, GhiChu, 
+                                 SoDienThoaiTaiXe, HoTenTaiXe, IDPhuongTien, NgayTao, NguoiTao)
                             VALUES
                                 (@IDKhachHang, @NgayTaoDon, @SoDonHang, @IDNhanVien, @ThoiHanGiaoHang,
-                                 @TrangThaiDon, @TongTien, @PhiBocXep, @ThanhTienHang, @ThanhTienThue, @GhiChu, @NgayTao, @NguoiTao);
+                                 @TrangThaiDon, @TongTien, @PhiBocXep, @ThanhTienHang, @ThanhTienThue, @GhiChu, 
+                                 @SoDienThoaiTaiXe, @HoTenTaiXe, @IDPhuongTien, @NgayTao, @NguoiTao);
                             SELECT CAST(SCOPE_IDENTITY() as int);";
 
                         int newId = conn.QuerySingle<int>(headerSql, header, tran);
@@ -257,6 +275,9 @@ namespace SalesManagementSystem.Repositories
                                 ThanhTienHang   = @ThanhTienHang,
                                 ThanhTienThue   = @ThanhTienThue,
                                 GhiChu          = @GhiChu,
+                                SoDienThoaiTaiXe = @SoDienThoaiTaiXe,
+                                HoTenTaiXe      = @HoTenTaiXe,
+                                IDPhuongTien    = @IDPhuongTien,
                                 NgayCapNhat     = @NgayCapNhat,
                                 NguoiCapNhat    = @NguoiCapNhat
                             WHERE ID = @ID";

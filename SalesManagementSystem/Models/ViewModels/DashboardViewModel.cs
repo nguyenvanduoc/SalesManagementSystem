@@ -47,6 +47,12 @@ namespace SalesManagementSystem.Models.ViewModels
     {
         public string Label { get; set; }
         public decimal Value { get; set; }
+
+        // Optional fields for TopBanChay product grid
+        public string MaSanPham { get; set; }
+        public string TopCustomerName { get; set; }
+        public decimal? TopCustomerQty { get; set; }
+        public decimal? TopCustomerRatio { get; set; }
     }
 
     public class DashboardTonKhoViewModel

@@ -427,13 +427,28 @@
             $.post('@Url.Action("AdjustAllocation", "PhieuChi")', $('#phieuChiForm').serialize(), function(res) {
                 if (res.success) {
                     $('.form-modal-content').closest('.modal').modal('hide');
-                    if (typeof loadData === 'function') loadData(); // Reload grid
+                    if (typeof showToast === 'function') {
+                        showToast('success', res.message || 'Cập nhật phân bổ thành công.');
+                    }
+                    if (typeof TabManager !== 'undefined') {
+                        TabManager.reloadActiveTabGrid(false);
+                    } else if (typeof loadData === 'function') {
+                        loadData(); // Fallback
+                    }
                 } else {
-                    alert('Lỗi: ' + res.message);
+                    if (typeof showToast === 'function') {
+                        showToast('error', res.message);
+                    } else {
+                        alert('Lỗi: ' + res.message);
+                    }
                     $btn.prop('disabled', false).text('Lưu cập nhật');
                 }
             }).fail(function() {
-                alert('Có lỗi xảy ra khi gọi server');
+                if (typeof showToast === 'function') {
+                    showToast('error', 'Có lỗi xảy ra khi kết nối máy chủ.');
+                } else {
+                    alert('Có lỗi xảy ra khi gọi server');
+                }
                 $btn.prop('disabled', false).text('Lưu cập nhật');
             });
         });

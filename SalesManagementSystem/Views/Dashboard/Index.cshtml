@@ -473,8 +473,23 @@
 
                 <div class="tab-content" id="productTabContent">
                     <div class="tab-pane fade show active" id="sales-pane" role="tabpanel">
-                        <div style="height: 160px; position: relative;">
-                            <canvas id="chartBanChay_@uid" height="160"></canvas>
+                        <div class="table-responsive scroll-box" style="height: 160px; overflow-y: auto; border: 1px solid #f1f5f9;">
+                            <table class="table table-sm table-bordered table-hover align-middle mb-0 text-center" style="font-size:0.75rem">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>Mã SP</th>
+                                        <th class="text-start">Tên Sản Phẩm</th>
+                                        <th>Số lượng</th>
+                                        <th class="text-start">Khách mua nhiều nhất</th>
+                                        <th>Tỷ lệ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbBanChay_@uid">
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-3">Đang tải dữ liệu...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                     <div class="tab-pane fade" id="stock-pane" role="tabpanel">
@@ -842,11 +857,37 @@
             $('#valTongDonHang_@uid').text(data.TongSoDonHang + ' đơn');
             renderDonutChart('chartDonHang_@uid', data.TrangThaiDonHang);
 
-            // KHỐI 5: TỒN KHO & BÁN CHẠY
+            // KHỐI 5: TỒN KHO & BÁN CHẠY (Bản Bán chạy dạng lưới rút gọn + tỷ lệ khách mua)
             $('#valGiaTriTonKho_@uid').text(formatMoney(data.TonKho.TongGiaTriTonKho));
             $('#valSpSapHet_@uid').text(data.TonKho.SoSanPhamSapHet);
             renderBarChart('chartTonKho_@uid', data.TonKho.TopTonKho, 'Số lượng tồn', '#e67e22');
-            renderBarChart('chartBanChay_@uid', data.TopBanChay, 'Số lượng bán', '#2ecc71');
+            
+            var bcHtml = '';
+            if (data.TopBanChay && data.TopBanChay.length > 0) {
+                data.TopBanChay.forEach(function(item) {
+                    var maSP = item.MaSanPham || '-';
+                    var tenSP = item.Label || '';
+                    var sl = formatNumber(item.Value);
+                    var kh = item.TopCustomerName || '-';
+                    var tyLe = item.TopCustomerRatio != null ? item.TopCustomerRatio.toFixed(1) + '%' : '-';
+                    var khDisplay = kh;
+                    if (kh !== '-' && item.TopCustomerQty != null) {
+                        khDisplay = `<span class="fw-semibold text-dark">${kh}</span> <span class="text-muted" style="font-size:0.75rem">(${formatNumber(item.TopCustomerQty)})</span>`;
+                    }
+                    bcHtml += `
+                        <tr>
+                            <td class="fw-bold text-success">${maSP}</td>
+                            <td class="text-start text-truncate" style="max-width: 140px;" title="${tenSP}">${tenSP}</td>
+                            <td class="fw-bold text-dark text-end">${sl}</td>
+                            <td class="text-start text-truncate" style="max-width: 130px;" title="${kh}">${khDisplay}</td>
+                            <td><span class="badge bg-light text-info border border-info rounded-pill px-2" style="font-size:0.75rem">${tyLe}</span></td>
+                        </tr>
+                    `;
+                });
+            } else {
+                bcHtml = '<tr><td colspan="5" class="text-center text-muted py-3">Không có sản phẩm bán ra.</td></tr>';
+            }
+            $('#tbBanChay_@uid').html(bcHtml);
 
             // KHỐI 6: THU CHI
             $('#valTongThu_@uid').text(formatMoney(data.ThuChi.TongThu));
@@ -1018,7 +1059,10 @@
                             backgroundColor: 'rgba(46, 204, 113, 0.08)',
                             borderWidth: 2.5,
                             fill: true,
-                            tension: 0.25
+                            tension: 0.25,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            pointBackgroundColor: '#2ecc71'
                         },
                         {
                             label: 'Giá vốn',
@@ -1027,7 +1071,10 @@
                             backgroundColor: 'rgba(231, 76, 60, 0.04)',
                             borderWidth: 2.5,
                             fill: true,
-                            tension: 0.25
+                            tension: 0.25,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            pointBackgroundColor: '#e74c3c'
                         }
                     ]
                 },

@@ -17,6 +17,9 @@ namespace SalesManagementSystem.Models.Entities
         public decimal? ThanhTienHang { get; set; }
         public decimal? ThanhTienThue { get; set; }
         public string GhiChu { get; set; }
+        public string SoDienThoaiTaiXe { get; set; }
+        public string HoTenTaiXe { get; set; }
+        public int? IDPhuongTien { get; set; }
         public DateTime? NgayCapNhat { get; set; }
         public int? NguoiCapNhat { get; set; }
         public DateTime? NgayTao { get; set; }

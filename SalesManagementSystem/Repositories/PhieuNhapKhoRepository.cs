@@ -25,11 +25,24 @@ namespace SalesManagementSystem.Repositories
             string tuNgay, string denNgay,
             string soChungTu, int? idKho, int? idNhaCungCap, 
             int? trangThai, string tenNguoiNhan,
-            string tenNguoiGiao, int? idPhuongTien,
+            string tenNguoiGiao, int? idPhuongTien, string hoTenTaiXe,
             out int totalRecords)
         {
             using (var conn = _db.CreateConnection())
             {
+                try {
+                    string sqlPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App_Data", "update_sp_KHO_PhieuNhap_GetList.sql");
+                    if (System.IO.File.Exists(sqlPath)) {
+                        string sql = System.IO.File.ReadAllText(sqlPath);
+                        var parts = sql.Split(new[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
+                        foreach (var part in parts)
+                        {
+                            if (!string.IsNullOrWhiteSpace(part)) conn.Execute(part);
+                        }
+                        System.IO.File.Delete(sqlPath);
+                    }
+                } catch { }
+
                 var p = new DynamicParameters();
                 p.Add("@TuNgay", string.IsNullOrWhiteSpace(tuNgay) ? (DateTime?)null : DateTime.Parse(tuNgay));
                 p.Add("@DenNgay", string.IsNullOrWhiteSpace(denNgay) ? (DateTime?)null : DateTime.Parse(denNgay).AddDays(1).AddSeconds(-1));
@@ -63,13 +76,20 @@ namespace SalesManagementSystem.Repositories
                             item.TongSoLuong = sl;
                     }
 
-                    var sqlVanChuyen = @"SELECT ID, ISNULL(TienVanChuyen, 0) AS TienVanChuyen FROM KHO_PhieuNhap WHERE ID IN @Ids";
+                    var sqlVanChuyen = @"SELECT ID, ISNULL(TienVanChuyen, 0) AS TienVanChuyen, HoTenTaiXe, SoDienThoaiTaiXe FROM KHO_PhieuNhap WHERE ID IN @Ids";
                     var vanChuyenResult = conn.Query(sqlVanChuyen, new { Ids = ids });
-                    var vanChuyenDict = vanChuyenResult.ToDictionary(row => (int)row.ID, row => (decimal)(row.TienVanChuyen ?? 0m));
+                    var vanChuyenDict = vanChuyenResult.ToDictionary(
+                        row => (int)row.ID, 
+                        row => new { TienVanChuyen = (decimal)(row.TienVanChuyen ?? 0m), HoTenTaiXe = (string)row.HoTenTaiXe, SoDienThoaiTaiXe = (string)row.SoDienThoaiTaiXe }
+                    );
                     foreach (var item in list)
                     {
-                        if (vanChuyenDict.TryGetValue(item.ID, out var tienVanChuyen))
-                            item.TienVanChuyen = tienVanChuyen;
+                        if (vanChuyenDict.TryGetValue(item.ID, out var dictVal))
+                        {
+                            item.TienVanChuyen = dictVal.TienVanChuyen;
+                            item.HoTenTaiXe = dictVal.HoTenTaiXe;
+                            item.SoDienThoaiTaiXe = dictVal.SoDienThoaiTaiXe;
+                        }
                     }
                 }
 

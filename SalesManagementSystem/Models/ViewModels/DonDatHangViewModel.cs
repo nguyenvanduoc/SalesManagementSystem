@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace SalesManagementSystem.Models.ViewModels
 {
@@ -27,5 +27,10 @@ namespace SalesManagementSystem.Models.ViewModels
         public DateTime? NgayTao { get; set; }
         public int? NguoiTao { get; set; }
         public string TenNguoiTao { get; set; }
+
+        public string SoDienThoaiTaiXe { get; set; }
+        public string HoTenTaiXe { get; set; }
+        public int? IDPhuongTien { get; set; }
+        public string TenPhuongTien { get; set; }
     }
 }

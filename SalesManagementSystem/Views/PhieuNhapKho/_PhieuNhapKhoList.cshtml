@@ -16,6 +16,8 @@
                         <th>Người giao hàng</th>
                         <th>Người nhận</th>
                         <th>Phương tiện</th>
+                        <th>Họ tên tài xế</th>
+                        <th class="d-none">SĐT tài xế</th>
                         <th class="text-end">Số lượng</th>
                         <th class="text-end d-none">Tiền thuế</th>
                         <th class="text-end">Tiền vận chuyển</th>
@@ -102,6 +104,8 @@
                                 <td class="align-middle">@item.TenNguoiGiao</td>
                                 <td class="align-middle">@item.TenNguoiNhan</td>
                                 <td class="align-middle">@item.TenPhuongTien</td>
+                                <td class="align-middle">@item.HoTenTaiXe</td>
+                                <td class="align-middle d-none">@item.SoDienThoaiTaiXe</td>
                                 <td class="text-end align-middle">@(item.TongSoLuong.ToString("N0"))</td>
                                 <td class="text-end align-middle d-none">@(item.TongTienThue.ToString("N0"))</td>
                                 <td class="text-end align-middle">@(item.TienVanChuyen.ToString("N0"))</td>
@@ -158,9 +162,9 @@
                     else
                     {
                         <tr>
-                            <td colspan="15" class="text-center py-4 text-muted">
+                            <td colspan="19" class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox fs-2 d-block mb-2"></i>
-                                Không có dữ liệu
+                                Không tìm thấy dữ liệu phiếu nhập.
                             </td>
                         </tr>
                     }

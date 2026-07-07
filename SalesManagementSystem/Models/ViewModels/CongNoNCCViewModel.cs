@@ -13,6 +13,8 @@ namespace SalesManagementSystem.Models.ViewModels
         public decimal TongTienHang { get; set; }
         public decimal DaThanhToan { get; set; }
         public decimal ConLai { get; set; }
+        public decimal TonDauKy { get; set; }
+        public decimal LuyKe => TonDauKy + TongTienHang;
 
         public string TrangThaiCongNo
         {

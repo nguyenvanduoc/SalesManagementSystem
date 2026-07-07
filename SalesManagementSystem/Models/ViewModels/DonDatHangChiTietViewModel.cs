@@ -17,8 +17,8 @@ namespace SalesManagementSystem.Models.ViewModels
         public decimal DonGia { get; set; }
         public decimal ThueGTGT { get; set; }
         public decimal ThanhTien { get; set; }
-        public decimal ThanhTienThue { get; set; }
-        public decimal ThanhTienSauThue { get; set; }
+        public decimal? ThanhTienThue { get; set; }
+        public decimal? ThanhTienSauThue { get; set; }
 
         public decimal? DonGiaBocXep { get; set; }
         public decimal? ThanhTienBocXep { get; set; }
