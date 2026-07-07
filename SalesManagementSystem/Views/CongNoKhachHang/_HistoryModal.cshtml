@@ -1,0 +1,80 @@
+@model IEnumerable<dynamic>
+
+<div class="modal-header bg-success text-white py-2.5">
+    <h6 class="modal-title fw-bold text-uppercase fs-7">
+        <i class="bi bi-clock-history me-2"></i> Lịch sử thanh toán chứng từ
+    </h6>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body p-4" style="background-color: #f8fafc;">
+    
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive" style="max-height: 350px;">
+                <table class="table table-bordered table-striped table-hover mb-0" style="font-size: 13px;">
+                    <thead class="table-light text-center sticky-top">
+                        <tr>
+                            <th width="45" class="fw-bold py-2">STT</th>
+                            <th width="140" class="fw-bold py-2">Số phiếu thu</th>
+                            <th width="110" class="fw-bold py-2">Ngày thu</th>
+                            <th width="150" class="fw-bold py-2 text-end">Số tiền (VND)</th>
+                            <th class="fw-bold py-2 text-start">Diễn giải</th>
+                            <th width="110" class="fw-bold py-2">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            int stt = 1;
+                            decimal total = 0;
+                            foreach (var item in Model)
+                            {
+                                total += (decimal)item.SoTienThu;
+                                <tr>
+                                    <td class="text-center align-middle">@(stt++)</td>
+                                    <td class="text-center align-middle fw-semibold text-success">
+                                        <a href="javascript:void(0);" onclick="openFormModal('@Url.Action("Details", "PhieuThuKhachHang", new { id = item.IDPhieuThu })')" class="text-decoration-none text-success">
+                                            @item.SoPhieuThu
+                                        </a>
+                                    </td>
+                                    <td class="text-center align-middle">@(((DateTime)item.NgayThu).ToString("dd/MM/yyyy"))</td>
+                                    <td class="text-end align-middle fw-bold text-success">@(((decimal)item.SoTienThu).ToString("N0"))</td>
+                                    <td class="align-middle text-start">@item.DienGiai</td>
+                                    <td class="text-center align-middle">
+                                        @if (item.TrangThai == 2)
+                                        {
+                                            <span class="badge bg-success">Đã ghi sổ</span>
+                                        }
+                                        else if (item.TrangThai == 3)
+                                        {
+                                            <span class="badge bg-danger">Đã hủy</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Mới tạo</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                            <tr class="fw-bold table-light">
+                                <td colspan="3" class="text-end align-middle">Tổng cộng đã thu:</td>
+                                <td class="text-end align-middle text-success">@total.ToString("N0")</td>
+                                <td colspan="2"></td>
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">Chưa có giao dịch thanh toán cho chứng từ này.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="modal-footer bg-light py-1.5 px-3">
+    <button type="button" class="btn btn-sm btn-secondary px-4" data-bs-dismiss="modal">Đóng</button>
+</div>

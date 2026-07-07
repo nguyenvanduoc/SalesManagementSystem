@@ -111,15 +111,21 @@ namespace SalesManagementSystem.Controllers
 
         // GET: /phieu-thu-khach-hang/them-moi
         [HttpGet]
-        public ActionResult Create()
+        public ActionResult Create(int? idKhachHang = null, int? idChungTuBanHang = null, decimal? soTien = null)
         {
             if (!PermissionHelper.HasPermission("PhieuThuKhachHang", LoaiPhanQuyen.Them))
                 return Content("<div class='alert alert-danger'>Không có quyền thêm mới</div>");
 
             ViewBag.Title = "Thêm mới Phiếu Thu Khách Hàng";
-            PopulateFormDropdowns();
-            var model = new PhieuThuKhachHangViewModel { NgayThu = DateTime.Today };
+            PopulateFormDropdowns(idKhachHang);
+            var model = new PhieuThuKhachHangViewModel 
+            { 
+                NgayThu = DateTime.Today,
+                IDKhachHang = idKhachHang,
+                SoTienThu = soTien ?? 0M
+            };
             model.SoPhieuThu = _repo.GenerateSoPhieuThu();
+            ViewBag.PreSelectedChungTu = idChungTuBanHang;
             return PartialView("_Form", model);
         }
 

@@ -54,6 +54,7 @@ namespace SalesManagementSystem.App_Start
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IPhieuChiRepository, PhieuChiRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.ISoQuyRepository, SoQuyRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.ICongNoNCCRepository, CongNoNCCRepository>(new HierarchicalLifetimeManager());
+            container.RegisterType<SalesManagementSystem.Repositories.Interfaces.ICongNoKhachHangRepository, CongNoKhachHangRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IDashboardRepository, DashboardRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IPhuongTienRepository, PhuongTienRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IHopDongKhachHangRepository, HopDongKhachHangRepository>(new HierarchicalLifetimeManager());

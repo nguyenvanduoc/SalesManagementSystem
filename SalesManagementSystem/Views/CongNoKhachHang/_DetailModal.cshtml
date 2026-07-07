@@ -1,0 +1,153 @@
+@model IEnumerable<SalesManagementSystem.Models.ViewModels.CongNoKhachHangDetailViewModel>
+
+@{
+    string customerName = ViewBag.CustomerName ?? "";
+    string customerAddress = ViewBag.CustomerAddress ?? "";
+    string customerPhone = ViewBag.CustomerPhone ?? "";
+    string tuNgay = ViewBag.TuNgay ?? "";
+    string denNgay = ViewBag.DenNgay ?? "";
+    
+    decimal totalPhaiThu = ViewBag.TotalPhaiThu ?? 0M;
+    decimal totalThanhToan = ViewBag.TotalThanhToan ?? 0M;
+    decimal currentBalance = ViewBag.CurrentBalance ?? 0M;
+}
+
+<div class="modal-header bg-primary text-white py-3">
+    <h5 class="modal-title fw-bold text-uppercase fs-6">
+        <i class="bi bi-file-earmark-spreadsheet me-2"></i> Sổ công nợ chi tiết khách hàng
+    </h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body p-4" style="background-color: #f8fafc;">
+    
+    <!-- Thông tin khách hàng & Kỳ báo cáo -->
+    <div class="row g-3 mb-4 p-3 bg-white border rounded shadow-sm">
+        <div class="col-md-7 border-end">
+            <h6 class="fw-bold text-uppercase text-primary mb-3">Thông tin khách hàng</h6>
+            <div class="d-flex flex-column gap-2 small">
+                <div><span class="text-muted fw-semibold">Khách hàng:</span> <strong class="text-dark">@customerName</strong></div>
+                <div><span class="text-muted fw-semibold">Điện thoại:</span> <span class="text-dark">@customerPhone</span></div>
+                <div><span class="text-muted fw-semibold">Địa chỉ:</span> <span class="text-dark">@customerAddress</span></div>
+            </div>
+        </div>
+        <div class="col-md-5 ps-md-4">
+            <h6 class="fw-bold text-uppercase text-primary mb-3">Khoảng thời gian đối chiếu</h6>
+            <div class="d-flex flex-column gap-2 small">
+                <div>
+                    <span class="text-muted fw-semibold">Từ ngày:</span> 
+                    <span class="text-dark">@(string.IsNullOrEmpty(tuNgay) ? "Tất cả" : DateTime.Parse(tuNgay).ToString("dd/MM/yyyy"))</span>
+                </div>
+                <div>
+                    <span class="text-muted fw-semibold">Đến ngày:</span> 
+                    <span class="text-dark">@(string.IsNullOrEmpty(denNgay) ? "Hiện tại" : DateTime.Parse(denNgay).ToString("dd/MM/yyyy"))</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bảng Sổ Chi Tiết Công Nợ -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive" style="max-height: 450px;">
+                <table class="table table-bordered table-striped table-hover mb-0" style="font-size: 13.5px;">
+                    <thead class="table-light text-center sticky-top" style="z-index: 1;">
+                        <tr>
+                            <th width="105" class="fw-bold py-2.5">Ngày</th>
+                            <th width="140" class="fw-bold py-2.5">Số chứng từ</th>
+                            <th width="130" class="fw-bold py-2.5">Loại chứng từ</th>
+                            <th class="fw-bold py-2.5 text-start">Diễn giải</th>
+                            <th width="140" class="fw-bold py-2.5 text-end">Phải thu (VND)</th>
+                            <th width="140" class="fw-bold py-2.5 text-end">Thanh toán (VND)</th>
+                            <th width="150" class="fw-bold py-2.5 text-end">Còn lại (VND)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="text-center align-middle">@item.Ngay</td>
+                                    <td class="text-center align-middle fw-semibold">
+                                        @if (item.SoChungTu != "-")
+                                        {
+                                            if (item.LoaiChungTu == "BÁN HÀNG")
+                                            {
+                                                <span class="text-primary">@item.SoChungTu</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-success">@item.SoChungTu</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span>@item.SoChungTu</span>
+                                        }
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        @if (item.LoaiChungTu == "BÁN HÀNG")
+                                        {
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2">@item.LoaiChungTu</span>
+                                        }
+                                        else if (item.LoaiChungTu == "PHIẾU THU")
+                                        {
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2">@item.LoaiChungTu</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fw-semibold">@item.LoaiChungTu</span>
+                                        }
+                                    </td>
+                                    <td class="align-middle text-start">@item.DienGiai</td>
+                                    <td class="text-end align-middle fw-semibold @(item.PhaiThu > 0 ? "text-dark" : "text-muted")">
+                                        @(item.PhaiThu > 0 ? item.PhaiThu.ToString("N0") : "0")
+                                    </td>
+                                    <td class="text-end align-middle fw-semibold @(item.ThanhToan > 0 ? "text-success" : "text-muted")">
+                                        @(item.ThanhToan > 0 ? item.ThanhToan.ToString("N0") : "0")
+                                    </td>
+                                    <td class="text-end align-middle fw-bold @(item.ConLai > 0 ? "text-danger" : "text-muted")">
+                                        @item.ConLai.ToString("N0")
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">Không có dữ liệu giao dịch công nợ.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tóm tắt số dư -->
+    <div class="row g-3 mt-3">
+        <div class="col-md-4">
+            <div class="bg-white border rounded p-3 text-center shadow-sm">
+                <div class="text-muted small fw-semibold text-uppercase mb-1">TỔNG PHẢI THU</div>
+                <h5 class="fw-bold text-dark mb-0">@totalPhaiThu.ToString("N0") <small class="fs-6 fw-normal text-muted">VND</small></h5>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="bg-white border rounded p-3 text-center shadow-sm">
+                <div class="text-muted small fw-semibold text-uppercase mb-1">TỔNG ĐÃ THU</div>
+                <h5 class="fw-bold text-success mb-0">@totalThanhToan.ToString("N0") <small class="fs-6 fw-normal text-muted">VND</small></h5>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="bg-white border rounded p-3 text-center shadow-sm" style="border-left: 4px solid #ef4444!important;">
+                <div class="text-muted small fw-semibold text-uppercase mb-1">DƯ NỢ CÒN LẠI</div>
+                <h5 class="fw-bold text-danger mb-0">@currentBalance.ToString("N0") <small class="fs-6 fw-normal text-muted">VND</small></h5>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="modal-footer bg-light py-2 px-3 d-flex justify-content-between">
+    <button type="button" class="btn btn-sm btn-outline-secondary px-3" onclick="window.print()"><i class="bi bi-printer me-1"></i> In sổ đối chiếu</button>
+    <button type="button" class="btn btn-sm btn-secondary px-4" data-bs-dismiss="modal">Đóng</button>
+</div>

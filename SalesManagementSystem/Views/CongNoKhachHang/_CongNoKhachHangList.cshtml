@@ -1,0 +1,215 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.CongNoKhachHangViewModel>
+
+@{
+    decimal tongPhaiThu = ViewBag.TongPhaiThu ?? 0M;
+    decimal tongDaThu   = ViewBag.DaThu ?? 0M;
+    decimal tongConLai  = ViewBag.ConPhaiThu ?? 0M;
+}
+
+<div class="card shadow-sm" id="divCongNoKhachHangListCard"
+     data-tong-phai-thu="@(ViewBag.TongPhaiThu ?? 0)"
+     data-da-thu="@(ViewBag.DaThu ?? 0)"
+     data-con-phai-thu="@(ViewBag.ConPhaiThu ?? 0)"
+     data-khach-tra-truoc="@(ViewBag.KhachTraTruoc ?? 0)"
+     data-cong-no-qua-han="@(ViewBag.CongNoQuaHan ?? 0)">
+    <div class="card-body p-0">
+        <div class="table-responsive" style="min-height:350px;">
+            <table id="tblCongNoKhachHangList" class="table table-custom table-bordered table-hover mb-0" style="width:100%; min-width:1100px;">
+                <thead>
+                    <tr>
+                        <th width="80" class="text-center fw-bold">Thao tác</th>
+                        <th width="45" class="text-center fw-bold">STT</th>
+                        <th width="125" class="text-center fw-bold">Số chứng từ</th>
+                        <th width="105" class="text-center fw-bold">Ngày chứng từ</th>
+                        <th class="text-center fw-bold">Khách hàng</th>
+                        <th width="100" class="text-center fw-bold">Điện thoại</th>
+                        <th width="125" class="text-center fw-bold">Dư đầu kỳ</th>
+                        <th width="125" class="text-center fw-bold">Doanh thu</th>
+                        <th width="125" class="text-center fw-bold">Lũy kế</th>
+                        <th width="125" class="text-center fw-bold">Đã thu</th>
+                        <th width="125" class="text-center fw-bold">Còn phải thu</th>
+                        <th width="120" class="text-center fw-bold">Quá hạn</th>
+                        <th width="130" class="text-center fw-bold">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Items != null && Model.Items.Any())
+                    {
+                        int stt = (Model.CurrentPage - 1) * Model.PageSize + 1;
+                        foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td class="text-center align-middle">
+                                    <div class="dropdown dropdown-hover">
+                                        <button class="btn btn-sm btn-light border dropdown-toggle-hide-arrow shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 3px 7px;">
+                                            <i class="bi bi-grid-3x3-gap-fill text-dark"></i>
+                                        </button>
+                                        <ul class="dropdown-menu shadow" style="font-size: 13px;">
+                                            <li>
+                                                <button class="dropdown-item py-2" type="button" onclick="openCongNoDetail(@item.IDKhachHang)">
+                                                    <i class="bi bi-eye text-info me-2"></i> Xem chi tiết
+                                                </button>
+                                            </li>
+                                            @if (item.ConPhaiThu > 0)
+                                            {
+                                                <li>
+                                                    <button class="dropdown-item py-2 text-success" type="button" onclick="openFormModal('@Url.Action("Create", "PhieuThuKhachHang", new { idKhachHang = item.IDKhachHang, idChungTuBanHang = item.IDChungTuBanHang, soTien = item.ConPhaiThu })')">
+                                                        <i class="bi bi-wallet2 me-2"></i> Thu tiền
+                                                    </button>
+                                                </li>
+                                            }
+                                            <li>
+                                                <button class="dropdown-item py-2" type="button" onclick="openPaymentHistory(@item.IDChungTuBanHang)">
+                                                    <i class="bi bi-clock-history text-secondary me-2"></i> Xem lịch sử thanh toán
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button class="dropdown-item py-2" type="button" onclick="TabManager.openTab('ChungTuBanHang', 'CT Bán hàng @item.SoChungTu', '@Url.Action("Detail", "ChungTuBanHang", new { id = item.IDChungTuBanHang })')">
+                                                    <i class="bi bi-file-earmark-text text-primary me-2"></i> Xem chứng từ bán hàng
+                                                </button>
+                                            </li>
+                                            @if (item.IDDonDatHang.HasValue)
+                                            {
+                                                <li>
+                                                    <button class="dropdown-item py-2" type="button" onclick="TabManager.openTab('DonDatHang', 'Đơn hàng @item.SoChungTu', '@Url.Action("Edit", "DonDatHang", new { id = item.IDDonDatHang, isView = true })')">
+                                                        <i class="bi bi-cart3 text-primary me-2"></i> Xem đơn hàng
+                                                    </button>
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </td>
+                                <td class="text-center align-middle">@(stt++)</td>
+                                <td class="text-center align-middle fw-semibold text-primary">
+                                    <a href="javascript:void(0);" onclick="TabManager.openTab('ChungTuBanHang', 'CT Bán hàng @item.SoChungTu', '@Url.Action("Detail", "ChungTuBanHang", new { id = item.IDChungTuBanHang })')" class="text-decoration-none">
+                                        @item.SoChungTu
+                                    </a>
+                                </td>
+                                <td class="text-center align-middle">@item.NgayChungTu.ToString("dd/MM/yyyy")</td>
+                                <td class="align-middle fw-semibold text-dark">@item.TenKhachHang</td>
+                                <td class="text-center align-middle">@item.DienThoai</td>
+                                <td class="text-end align-middle fw-semibold text-secondary">@item.TonDauKy.ToString("N0")</td>
+                                <td class="text-end align-middle fw-semibold text-dark">@item.DoanhThu.ToString("N0")</td>
+                                <td class="text-end align-middle fw-bold text-danger">@item.LuyKe.ToString("N0")</td>
+                                <td class="text-end align-middle text-success fw-semibold">@item.DaThu.ToString("N0")</td>
+                                <td class="text-end align-middle @(item.ConPhaiThu > 0 ? "text-danger fw-bold" : "text-muted")">
+                                    @item.ConPhaiThu.ToString("N0")
+                                </td>
+                                <td class="text-end align-middle @(item.TienQuaHan > 0 ? "text-danger fw-bold" : "text-muted")">
+                                    @if (item.TienQuaHan > 0)
+                                    {
+                                        <i class="bi bi-exclamation-triangle-fill text-warning me-1" title="Quá hạn thanh toán"></i>
+                                        @item.TienQuaHan.ToString("N0")
+                                    }
+                                    else
+                                    {
+                                        <span>0</span>
+                                    }
+                                </td>
+                                <td class="text-center align-middle">
+                                    @if (item.TienQuaHan > 0)
+                                    {
+                                        <span class="badge" style="background-color: #8b0000; color: white;">@item.TrangThai</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="@item.CssTrangThai">@item.TrangThai</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+
+                        <!-- Dòng tổng -->
+                        <tr class="fw-bold" style="background:#f4f6f9;">
+                            <td colspan="6" class="text-end align-middle">Tổng cộng:</td>
+                            <td class="text-end align-middle text-secondary"></td>
+                            <td class="text-end align-middle text-dark">@tongPhaiThu.ToString("N0")</td>
+                            <td class="text-end align-middle"></td>
+                            <td class="text-end align-middle text-success">@tongDaThu.ToString("N0")</td>
+                            <td class="text-end align-middle text-danger">@tongConLai.ToString("N0")</td>
+                            <td class="text-end align-middle text-danger"></td>
+                            <td></td>
+                        </tr>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="13" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
+                                Không có dữ liệu công nợ khách hàng
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @Html.Partial("_Pagination", Model)
+</div>
+
+<style>
+    #tblCongNoKhachHangList th {
+        position: relative;
+        background-clip: padding-box;
+    }
+    #tblCongNoKhachHangList th .resizer {
+        position: absolute;
+        top: 0;
+        right: -3px;
+        width: 6px;
+        height: 100%;
+        cursor: col-resize;
+        user-select: none;
+        z-index: 10;
+        background-color: transparent;
+    }
+    #tblCongNoKhachHangList th .resizer:hover, #tblCongNoKhachHangList th .resizer.resizing {
+        background-color: rgba(11, 91, 132, 0.5);
+    }
+</style>
+<script>
+    (function() {
+        var table = document.getElementById('tblCongNoKhachHangList');
+        if (!table) return;
+        
+        var ths = table.querySelectorAll('th');
+        ths.forEach(function(th) {
+            if(th.innerText.trim() === '' && (th.style.width === '35px' || th.style.width === '40px' || th.style.width === '50px')) return;
+            if(th.innerText.trim() === 'Thao tác' || th.innerText.trim() === 'STT') return;
+            
+            if(th.querySelector('.resizer')) return;
+
+            var resizer = document.createElement('div');
+            resizer.classList.add('resizer');
+            th.appendChild(resizer);
+
+            var startX, startWidth;
+            
+            resizer.addEventListener('mousedown', function(e) {
+                startX = e.pageX;
+                startWidth = th.offsetWidth;
+                resizer.classList.add('resizing');
+
+                var doDrag = function(e) {
+                    var newWidth = startWidth + (e.pageX - startX);
+                    if(newWidth > 30) {
+                        th.style.width = newWidth + 'px';
+                        th.style.minWidth = newWidth + 'px';
+                        th.style.maxWidth = newWidth + 'px';
+                    }
+                };
+
+                var stopDrag = function(e) {
+                    resizer.classList.remove('resizing');
+                    document.removeEventListener('mousemove', doDrag);
+                    document.removeEventListener('mouseup', stopDrag);
+                };
+
+                document.addEventListener('mousemove', doDrag);
+                document.addEventListener('mouseup', stopDrag);
+                
+                e.preventDefault();
+            });
+        });
+    })();
+</script>

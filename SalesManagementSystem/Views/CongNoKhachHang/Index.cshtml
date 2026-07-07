@@ -1,0 +1,313 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.CongNoKhachHangViewModel>
+
+@{
+    ViewBag.Title = "Công nợ khách hàng";
+    decimal tongPhaiThu   = ViewBag.TongPhaiThu   ?? 0M;
+    decimal daThu         = ViewBag.DaThu         ?? 0M;
+    decimal conPhaiThu    = ViewBag.ConPhaiThu    ?? 0M;
+    decimal khachTraTruoc = ViewBag.KhachTraTruoc ?? 0M;
+    decimal congNoQuaHan  = ViewBag.CongNoQuaHan  ?? 0M;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0 fw-bold text-uppercase" style="color:#0b5b84;font-size:1.25rem;">
+        CÔNG NỢ PHẢI THU KHÁCH HÀNG
+    </h4>
+</div>
+
+<!-- Bộ lọc tìm kiếm -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body py-2.5">
+        <form method="get" action="@Url.Action("GetList","CongNoKhachHang")" id="searchFormCongNoKH">
+            <div class="d-flex flex-wrap align-items-end gap-2">
+                
+                <div class="flex-grow-1" style="min-width: 140px; max-width: 170px;">
+                    <label class="form-label text-muted small mb-1">Thời gian</label>
+                    <select class="form-select form-select-sm ddl-thoi-gian">
+                        <option value="current_month">Đầu tháng đến hiện tại</option>
+                        <option value="month_1">Tháng 1</option>
+                        <option value="month_2">Tháng 2</option>
+                        <option value="month_3">Tháng 3</option>
+                        <option value="month_4">Tháng 4</option>
+                        <option value="month_5">Tháng 5</option>
+                        <option value="month_6">Tháng 6</option>
+                        <option value="month_7">Tháng 7</option>
+                        <option value="month_8">Tháng 8</option>
+                        <option value="month_9">Tháng 9</option>
+                        <option value="month_10">Tháng 10</option>
+                        <option value="month_11">Tháng 11</option>
+                        <option value="month_12">Tháng 12</option>
+                        <option value="quarter_1">Quý 1</option>
+                        <option value="quarter_2">Quý 2</option>
+                        <option value="quarter_3">Quý 3</option>
+                        <option value="quarter_4">Quý 4</option>
+                    </select>
+                </div>
+                
+                <div class="flex-grow-1" style="min-width: 120px; max-width: 140px;">
+                    <label class="form-label text-muted small mb-1">Từ ngày</label>
+                    <input type="date" class="form-control form-control-sm" name="tuNgay" value="@ViewBag.TuNgay" />
+                </div>
+                
+                <div class="flex-grow-1" style="min-width: 120px; max-width: 140px;">
+                    <label class="form-label text-muted small mb-1">Đến ngày</label>
+                    <input type="date" class="form-control form-control-sm" name="denNgay" value="@ViewBag.DenNgay" />
+                </div>
+                
+                <div class="flex-grow-1" style="min-width: 180px; max-width: 250px;">
+                    <label class="form-label text-muted small mb-1">Khách hàng</label>
+                    <select class="form-select form-select-sm select2" name="idKhachHang" data-placeholder="Tất cả khách hàng">
+                        <option value="">Tất cả khách hàng</option>
+                        @if (ViewBag.KhachHangList != null)
+                        {
+                            foreach (System.Web.Mvc.SelectListItem item in ViewBag.KhachHangList)
+                            {
+                                <option value="@item.Value" @(item.Selected ? "selected" : "")>@item.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+                
+                <div class="flex-grow-1" style="min-width: 150px; max-width: 180px;">
+                    <label class="form-label text-muted small mb-1">Trạng thái công nợ</label>
+                    <select class="form-select form-select-sm" name="trangThaiCongNo">
+                        <option value="">Tất cả</option>
+                        <option value="1" @(ViewBag.TrangThaiCongNo == 1 ? "selected" : "")>Chưa thanh toán</option>
+                        <option value="2" @(ViewBag.TrangThaiCongNo == 2 ? "selected" : "")>Thanh toán một phần</option>
+                        <option value="3" @(ViewBag.TrangThaiCongNo == 3 ? "selected" : "")>Đã thanh toán</option>
+                        <option value="4" @(ViewBag.TrangThaiCongNo == 4 ? "selected" : "")>Quá hạn</option>
+                    </select>
+                </div>
+                
+                <div class="d-flex gap-2 ms-auto" style="padding-bottom: 2px;">
+                    <button type="submit" class="btn btn-sm text-white px-3 shadow-sm" style="background-color:#2998e4;border:none;height:31px;">
+                        <i class="bi bi-search me-1"></i> Tìm kiếm
+                    </button>
+                    <button type="button" class="btn btn-sm text-white px-3 btn-reset shadow-sm" style="background-color:#f1c40f;border:none;height:31px;">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Làm mới
+                    </button>
+                </div>
+                
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Dashboard 5 thẻ -->
+<div class="row g-2.5 mb-4 row-cols-1 row-cols-sm-2 row-cols-md-5">
+    <div class="col">
+        <div class="card border-0 shadow-sm" style="border-bottom: 3.5px solid #1e3a8a!important;">
+            <div class="card-body py-2.5 px-3">
+                <div class="text-muted small fw-semibold mb-1 text-uppercase">TỔNG PHẢI THU</div>
+                <div class="fw-bold fs-5" style="color:#1e3a8a;" id="lblTongPhaiThu">@tongPhaiThu.ToString("N0") <small class="fs-6 fw-normal text-muted">VND</small></div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card border-0 shadow-sm" style="border-bottom: 3.5px solid #10b981!important;">
+            <div class="card-body py-2.5 px-3">
+                <div class="text-muted small fw-semibold mb-1 text-uppercase">ĐÃ THU</div>
+                <div class="fw-bold fs-5 text-success" id="lblDaThu">@daThu.ToString("N0") <small class="fs-6 fw-normal text-muted">VND</small></div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card border-0 shadow-sm" style="border-bottom: 3.5px solid #2563eb!important;">
+            <div class="card-body py-2.5 px-3">
+                <div class="text-muted small fw-semibold mb-1 text-uppercase">CÒN PHẢI THU</div>
+                <div class="fw-bold fs-5 text-primary" id="lblConPhaiThu">@conPhaiThu.ToString("N0") <small class="fs-6 fw-normal text-muted">VND</small></div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card border-0 shadow-sm" style="border-bottom: 3.5px solid #059669!important;">
+            <div class="card-body py-2.5 px-3">
+                <div class="text-muted small fw-semibold mb-1 text-uppercase">KHÁCH TRẢ TRƯỚC</div>
+                <div class="fw-bold fs-5" style="color:#059669;" id="lblKhachTraTruoc">@khachTraTruoc.ToString("N0") <small class="fs-6 fw-normal text-muted">VND</small></div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card border-0 shadow-sm" style="border-bottom: 3.5px solid #ef4444!important;">
+            <div class="card-body py-2.5 px-3">
+                <div class="text-muted small fw-semibold mb-1 text-uppercase">CÔNG NỢ QUÁ HẠN</div>
+                <div class="fw-bold fs-5 text-danger" id="lblCongNoQuaHan">@congNoQuaHan.ToString("N0") <small class="fs-6 fw-normal text-muted">VND</small></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grid dữ liệu -->
+<div id="table-container">
+    @Html.Partial("_CongNoKhachHangList", Model)
+</div>
+
+<!-- Placeholder cho các Modal -->
+<div class="modal fade" id="modalCongNoDetail" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content shadow" id="modalCongNoDetailContent">
+            <!-- Content loaded via AJAX -->
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalPaymentHistory" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content shadow" id="modalPaymentHistoryContent">
+            <!-- Content loaded via AJAX -->
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        .select2-container .select2-selection--single {
+            height: 31px !important;
+            padding-top: 1px !important;
+            border: 1px solid #ced4da !important;
+            border-radius: 4px !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            font-size: 0.875rem !important;
+            line-height: 29px !important;
+            color: #495057 !important;
+            padding-left: 8px !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 29px !important;
+        }
+        .row-cols-md-5 > * {
+            flex: 0 0 20%;
+            max-width: 20%;
+        }
+        @@media(max-width: 576px) {
+            .row-cols-md-5 > * {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+        }
+    </style>
+    <script>
+        (function () {
+            var $script = $('script').last();
+            var $pane = $script.closest('.tab-pane');
+            if ($pane.length === 0) $pane = $('body');
+
+            // Khởi tạo Select2
+            $pane.find('.select2').select2({
+                width: '100%',
+                dropdownParent: $pane
+            });
+
+            // Lắng nghe sự kiện Submit bộ lọc
+            $pane.off('submit.cnkh_search', '#searchFormCongNoKH');
+            $pane.on('submit.cnkh_search', '#searchFormCongNoKH', function(e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+
+                var $form = $(this);
+                var action = $form.attr('action');
+                var pageSize = $pane.find('.page-size-select').val() || 20;
+
+                var params = $form.serializeArray();
+                params = params.filter(function (item) {
+                    return item.name !== 'page' && item.name !== 'pageSize';
+                });
+                params.push({ name: 'page', value: 1 });
+                params.push({ name: 'pageSize', value: pageSize });
+                var url = action + '?' + $.param(params);
+
+                var $grid = $pane.find('#table-container');
+                if (typeof showLoadingLocal === 'function') showLoadingLocal($grid);
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    success: function (res) {
+                        if (typeof hideLoadingLocal === 'function') hideLoadingLocal($grid);
+                        $grid.html(res);
+
+                        // Cập nhật các thẻ Dashboard từ dữ liệu mới của Ajax
+                        var $card = $grid.find('#divCongNoKhachHangListCard');
+                        if ($card.length > 0) {
+                            var tongPhaiThu = parseFloat($card.attr('data-tong-phai-thu') || 0);
+                            var daThu = parseFloat($card.attr('data-da-thu') || 0);
+                            var conPhaiThu = parseFloat($card.attr('data-con-phai-thu') || 0);
+                            var khachTraTruoc = parseFloat($card.attr('data-khach-tra-truoc') || 0);
+                            var congNoQuaHan = parseFloat($card.attr('data-cong-no-qua-han') || 0);
+
+                            var formatMoney = function (num) {
+                                return Math.round(num).toLocaleString('vi-VN');
+                            };
+
+                            $pane.find('#lblTongPhaiThu').html(formatMoney(tongPhaiThu) + ' <small class="fs-6 fw-normal text-muted">VND</small>');
+                            $pane.find('#lblDaThu').html(formatMoney(daThu) + ' <small class="fs-6 fw-normal text-muted">VND</small>');
+                            $pane.find('#lblConPhaiThu').html(formatMoney(conPhaiThu) + ' <small class="fs-6 fw-normal text-muted">VND</small>');
+                            $pane.find('#lblKhachTraTruoc').html(formatMoney(khachTraTruoc) + ' <small class="fs-6 fw-normal text-muted">VND</small>');
+                            $pane.find('#lblCongNoQuaHan').html(formatMoney(congNoQuaHan) + ' <small class="fs-6 fw-normal text-muted">VND</small>');
+                        }
+
+                        if (typeof reInitPlugins === 'function') reInitPlugins($pane.attr('id'));
+                    },
+                    error: function() {
+                        if (typeof hideLoadingLocal === 'function') hideLoadingLocal($grid);
+                        if (typeof showToast === 'function') showToast('error', 'Lỗi khi nạp dữ liệu công nợ.');
+                    }
+                });
+            });
+
+            // Nút Làm mới bộ lọc
+            $pane.off('click.cnkh_reset', '.btn-reset');
+            $pane.on('click.cnkh_reset', '.btn-reset', function(e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+
+                var $form = $pane.find('#searchFormCongNoKH');
+                if ($form.length > 0) {
+                    $form[0].reset();
+                    $form.find('.select2').val('').trigger('change');
+                    $form.trigger('submit');
+                }
+            });
+
+            // Override window.loadData để tự động reload
+            window.loadData = function() {
+                $pane.find('#searchFormCongNoKH').submit();
+            };
+
+            // Hàm mở popup xem sổ chi tiết công nợ
+            window.openCongNoDetail = function (idKhachHang) {
+                var tuNgay = $pane.find('[name="tuNgay"]').val() || '';
+                var denNgay = $pane.find('[name="denNgay"]').val() || '';
+                var $modal = $pane.find('#modalCongNoDetail');
+                var $content = $pane.find('#modalCongNoDetailContent');
+
+                $content.html('<div class="text-center py-5"><span class="spinner-border spinner-border-sm me-2"></span>Đang tải sổ chi tiết...</div>');
+                bootstrap.Modal.getOrCreateInstance($modal[0]).show();
+
+                $.get('@Url.Action("GetDetail", "CongNoKhachHang")', { idKhachHang: idKhachHang, tuNgay: tuNgay, denNgay: denNgay }, function(res) {
+                    $content.html(res);
+                }).fail(function() {
+                    $content.html('<div class="alert alert-danger m-3">Lỗi tải sổ chi tiết công nợ.</div>');
+                });
+            };
+
+            // Hàm mở popup xem lịch sử thanh toán
+            window.openPaymentHistory = function (idChungTuBanHang) {
+                var $modal = $pane.find('#modalPaymentHistory');
+                var $content = $pane.find('#modalPaymentHistoryContent');
+
+                $content.html('<div class="text-center py-5"><span class="spinner-border spinner-border-sm me-2"></span>Đang tải lịch sử...</div>');
+                bootstrap.Modal.getOrCreateInstance($modal[0]).show();
+
+                $.get('@Url.Action("GetHistory", "CongNoKhachHang")', { idChungTuBanHang: idChungTuBanHang }, function(res) {
+                    $content.html(res);
+                }).fail(function() {
+                    $content.html('<div class="alert alert-danger m-3">Lỗi tải lịch sử thanh toán.</div>');
+                });
+            };
+
+        })();
+    </script>
+}

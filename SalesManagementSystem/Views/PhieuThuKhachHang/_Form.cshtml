@@ -146,8 +146,18 @@
         var listChungTu = [];
         var tienTraTruoc = parseFloat($('#TienTraTruocKhachHang_Hidden').val() || 0);
         
-        // Populate existing details if Edit mode
         var existingDetails = @Html.Raw(Model.ChiTiets != null ? Newtonsoft.Json.JsonConvert.SerializeObject(Model.ChiTiets) : "[]");
+        var preSelectedChungTu = @(ViewBag.PreSelectedChungTu != null ? ViewBag.PreSelectedChungTu.ToString() : "null");
+        var preSelectedSoTien = @(Model.SoTienThu > 0 ? Model.SoTienThu.ToString() : "0");
+        if (preSelectedChungTu && existingDetails.length === 0) {
+            existingDetails = [{
+                IDChungTu: preSelectedChungTu,
+                IDChungTuBanHang: preSelectedChungTu,
+                LoaiThu: 1,
+                SoTienPhanBo: parseFloat(preSelectedSoTien),
+                SoTienThu: parseFloat(preSelectedSoTien)
+            }];
+        }
 
         if ($modal.length > 0) {
             $modal.find('.modal-dialog').removeClass('modal-lg modal-dialog-centered').addClass('modal-xl').css('margin-top', '30px');

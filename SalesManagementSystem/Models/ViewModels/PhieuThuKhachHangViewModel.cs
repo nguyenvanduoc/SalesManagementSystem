@@ -54,6 +54,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public int ID { get; set; }
         public int IDPhieuThu { get; set; }
         public int? IDChungTu { get; set; }
+        public int? IDChungTuBanHang { get; set; }
         public string SoChungTu { get; set; }
         public int LoaiThu { get; set; }
         public string DienGiai { get; set; }
