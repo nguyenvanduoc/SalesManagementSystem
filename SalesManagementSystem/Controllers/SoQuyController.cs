@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -43,8 +43,8 @@ namespace SalesManagementSystem.Controllers
             if (string.IsNullOrEmpty(tuNgay) && string.IsNullOrEmpty(denNgay))
             {
                 var now = DateTime.Now;
-                tuNgay = new DateTime(now.Year, now.Month, 1).ToString("yyyy-MM-dd");
-                denNgay = new DateTime(now.Year, now.Month, DateTime.DaysInMonth(now.Year, now.Month)).ToString("yyyy-MM-dd");
+                tuNgay = new DateTime(now.Year, 1, 1).ToString("yyyy-MM-dd");
+                denNgay = DateTime.Now.ToString("yyyy-MM-dd");
             }
 
             // Perform server-side validation: if dates are empty, do not query data

@@ -16,7 +16,7 @@
                         <th>Người giao hàng</th>
                         <th>Người nhận</th>
                         <th>Phương tiện</th>
-                        <th>Họ tên tài xế</th>
+                        <th>Ngày nhận hàng</th>
                         <th class="d-none">SĐT tài xế</th>
                         <th class="text-end">Số lượng</th>
                         <th class="text-end d-none">Tiền thuế</th>
@@ -104,7 +104,7 @@
                                 <td class="align-middle">@item.TenNguoiGiao</td>
                                 <td class="align-middle">@item.TenNguoiNhan</td>
                                 <td class="align-middle">@item.TenPhuongTien</td>
-                                <td class="align-middle">@item.HoTenTaiXe</td>
+                                <td class="align-middle text-center">@(item.NgayGiaoHang?.ToString("dd/MM/yyyy") ?? "")</td>
                                 <td class="align-middle d-none">@item.SoDienThoaiTaiXe</td>
                                 <td class="text-end align-middle">@(item.TongSoLuong.ToString("N0"))</td>
                                 <td class="text-end align-middle d-none">@(item.TongTienThue.ToString("N0"))</td>

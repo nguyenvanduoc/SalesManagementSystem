@@ -96,10 +96,8 @@
                                     </div>
                                 </td>
                                 <td class="text-center align-middle">@stt</td>
-                                <td class="align-middle text-center">
-                                    <button type="button" class="btn btn-link fw-bold text-decoration-none p-0" style="color: #2998e4;" onclick="openFormModal('@Url.Action("Edit", "PhieuThuKhachHang", new { id = item.ID })')">
-                                        @item.SoPhieuThu
-                                    </button>
+                                <td class="align-middle text-center fw-bold text-dark">
+                                    @item.SoPhieuThu
                                 </td>
                                 <td class="align-middle text-center">@item.NgayThu.ToString("dd/MM/yyyy")</td>
                                 <td class="align-middle">@item.TenKhachHang</td>

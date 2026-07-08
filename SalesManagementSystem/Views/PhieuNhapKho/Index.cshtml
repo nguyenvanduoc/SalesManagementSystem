@@ -35,7 +35,8 @@
                     <div class="col-md-2">
                         <label class="form-label text-muted small mb-1">Thời gian</label>
                         <select class="form-select form-select-sm ddl-thoi-gian">
-                            <option value="current_month">Đầu tháng đến hiện tại</option>
+                            <option value="current_year">Từ đầu năm đến hiện tại</option>
+                                <option value="current_month">Đầu tháng đến hiện tại</option>
                             <option value="month_1">Tháng 1</option>
                             <option value="month_2">Tháng 2</option>
                             <option value="month_3">Tháng 3</option>
@@ -83,8 +84,8 @@
                         @Html.DropDownList("idPhuongTien", (SelectList)ViewBag.PhuongTiens, "-- Tất cả --", new { @class = "form-select form-select-sm ddlPhuongTien" })
                     </div>
                     <div class="col-md-2 mt-2">
-                        <label class="form-label text-muted small mb-1">Tên tài xế</label>
-                        <input type="text" name="hoTenTaiXe" class="form-control form-control-sm" placeholder="Nhập tên tài xế..." value="@ViewBag.HoTenTaiXe" />
+                        <label class="form-label text-muted small mb-1">Người nhận</label>
+                        <input type="text" name="tenNguoiNhan" class="form-control form-control-sm" placeholder="Nhập người nhận..." value="@ViewBag.TenNguoiNhan" />
                     </div>
                     <div class="col-md-2 mt-2">
                         <label class="form-label text-muted small mb-1">Trạng thái</label>
@@ -145,6 +146,17 @@
         $(document).ready(function() {
             $form.on('submit', function (e) {
                 e.preventDefault();
+                
+                var txtTuNgay = $container.find('input[name="tuNgay"]')[0];
+                var txtDenNgay = $container.find('input[name="denNgay"]')[0];
+                var ddlThoiGian = $container.find('.ddl-thoi-gian')[0];
+                
+                if (txtTuNgay && txtDenNgay && ddlThoiGian) {
+                    sessionStorage.setItem('pnk_last_tuNgay', txtTuNgay.value);
+                    sessionStorage.setItem('pnk_last_denNgay', txtDenNgay.value);
+                    sessionStorage.setItem('pnk_last_thoiGian', ddlThoiGian.value);
+                }
+
                 var params = $(this).serialize();
                 var url = '@Url.Action("GetList")?' + params;
                 $.ajax({
@@ -212,6 +224,10 @@
                             if (txtDenNgay._flatpickr) txtDenNgay._flatpickr.setDate(e);
                             else { $(txtDenNgay).val(e).trigger('change'); }
                             
+                            sessionStorage.setItem('pnk_last_tuNgay', s);
+                            sessionStorage.setItem('pnk_last_denNgay', e);
+                            sessionStorage.setItem('pnk_last_thoiGian', val);
+                            
                             setTimeout(function() {
                                 var btn = $container.find('button[type="submit"]')[0];
                                 if (btn) {
@@ -228,7 +244,35 @@
 
                 var cT = txtTuNgay.value;
                 var cD = txtDenNgay.value;
-                
+
+                var isReload = false;
+                if (window.performance) {
+                    var navEntries = window.performance.getEntriesByType("navigation");
+                    if (navEntries.length > 0 && navEntries[0].type === 'reload') {
+                        isReload = true;
+                    } else if (window.performance.navigation && window.performance.navigation.type === 1) {
+                        isReload = true;
+                    }
+                }
+
+                if (isReload) {
+                    sessionStorage.removeItem('pnk_last_tuNgay');
+                    sessionStorage.removeItem('pnk_last_denNgay');
+                    sessionStorage.removeItem('pnk_last_thoiGian');
+                } else if (!cT && !cD) {
+                    cT = sessionStorage.getItem('pnk_last_tuNgay') || '';
+                    cD = sessionStorage.getItem('pnk_last_denNgay') || '';
+                    if (cT || cD) {
+                        if (txtTuNgay._flatpickr) txtTuNgay._flatpickr.setDate(cT); else txtTuNgay.value = cT;
+                        if (txtDenNgay._flatpickr) txtDenNgay._flatpickr.setDate(cD); else txtDenNgay.value = cD;
+                        
+                        var savedThoiGian = sessionStorage.getItem('pnk_last_thoiGian');
+                        if (savedThoiGian) ddlThoiGian.value = savedThoiGian;
+                        
+                        // Let it fall through to the else branch so it can select the right dropdown option and trigger search
+                    }
+                }
+
                 if (!cT && !cD) {
                     ddlThoiGian.value = 'current_month';
                     $(ddlThoiGian).trigger('change');

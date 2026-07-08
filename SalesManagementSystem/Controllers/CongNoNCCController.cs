@@ -18,7 +18,7 @@ namespace SalesManagementSystem.Controllers
         {
             _repo    = repo;
             _nccRepo = nccRepo;
-            _phieuChiRepo = phieuChiRepo;
+            _phieuChiRepo = phieuChiRepo;  
         }
 
         // GET: /cong-no-ncc

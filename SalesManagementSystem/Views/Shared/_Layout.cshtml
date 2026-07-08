@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
@@ -1357,7 +1357,9 @@
             var daysInMonth = new Date(yDen, mDen, 0).getDate();
             var isLastDay = dDen === daysInMonth;
             
-            if (yTu === yDen && mTu === mDen && isFirstDay && isLastDay) {
+            if (yTu === yDen && mTu === 1 && dTu === 1 && dDen === new Date().getDate() && mDen === (new Date().getMonth() + 1) && yDen === new Date().getFullYear()) {
+                $(this).val('current_year');
+            } else if (yTu === yDen && mTu === mDen && isFirstDay && isLastDay) {
                 $(this).val('month_' + mTu);
             }
         });
@@ -1387,7 +1389,10 @@
                 return year + '-' + m + '-' + d;
             }
             
-            if (val === 'current_month') {
+            if (val === 'current_year') {
+                s = fDate(y, 1, 1);
+                e = fDate(now.getFullYear(), now.getMonth() + 1, now.getDate());
+            } else if (val === 'current_month') {
                 var cm = now.getMonth() + 1;
                 s = fDate(y, cm, 1);
                 e = fDate(now.getFullYear(), now.getMonth() + 1, now.getDate());

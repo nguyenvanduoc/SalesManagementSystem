@@ -1,4 +1,4 @@
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using System.Web.Routing;
 using System;
 using System.Linq;
@@ -48,7 +48,7 @@ namespace SalesManagementSystem.Controllers
                                 
                 if (!hasParam && string.IsNullOrEmpty(tuNgay))
                 {
-                    filterContext.ActionParameters["tuNgay"] = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).ToString("yyyy-MM-dd");
+                    filterContext.ActionParameters["tuNgay"] = new DateTime(DateTime.Now.Year, 1, 1).ToString("yyyy-MM-dd");
                 }
             }
 
@@ -60,7 +60,7 @@ namespace SalesManagementSystem.Controllers
                                 
                 if (!hasParam && string.IsNullOrEmpty(denNgay))
                 {
-                    filterContext.ActionParameters["denNgay"] = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month)).ToString("yyyy-MM-dd");
+                    filterContext.ActionParameters["denNgay"] = DateTime.Now.ToString("yyyy-MM-dd");
                 }
             }
 

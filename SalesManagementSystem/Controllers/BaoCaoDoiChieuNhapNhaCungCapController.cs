@@ -29,7 +29,7 @@ namespace SalesManagementSystem.Controllers
                 .Select(x => new SelectListItem { Value = ((int)x.ID).ToString(), Text = (string)x.TenHienThi });
             ViewBag.NhaCungCapList = new SelectList(nccs.ToList(), "Value", "Text");
 
-            ViewBag.TuNgay = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).ToString("yyyy-MM-dd");
+            ViewBag.TuNgay = new DateTime(DateTime.Now.Year, 1, 1).ToString("yyyy-MM-dd");
             ViewBag.DenNgay = DateTime.Now.ToString("yyyy-MM-dd");
 
             return View();

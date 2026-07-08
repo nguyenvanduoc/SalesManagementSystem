@@ -1,0 +1,105 @@
+@model IEnumerable<SalesManagementSystem.Models.ViewModels.CongNoNCCDetailViewModel>
+
+@{
+    string nccName = ViewBag.TenNhaCungCap ?? "";
+    string nccPhone = ViewBag.SoDienThoai ?? "";
+}
+
+<div class="modal-header bg-primary text-white py-3">
+    <h5 class="modal-title fw-bold text-uppercase fs-6">
+        <i class="bi bi-file-earmark-spreadsheet me-2"></i> Sổ công nợ chi tiết nhà cung cấp
+    </h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body p-4" style="background-color: #f8fafc;">
+    
+    <!-- Thông tin NCC -->
+    <div class="row g-3 mb-4 p-3 bg-white border rounded shadow-sm">
+        <div class="col-md-12">
+            <h6 class="fw-bold text-uppercase text-primary mb-3">Thông tin nhà cung cấp</h6>
+            <div class="d-flex flex-column gap-2 small">
+                <div><span class="text-muted fw-semibold">Nhà cung cấp:</span> <strong class="text-dark">@nccName</strong></div>
+                <div><span class="text-muted fw-semibold">Điện thoại:</span> <span class="text-dark">@nccPhone</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bảng Sổ Chi Tiết Công Nợ -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive" style="max-height: 450px;">
+                <table class="table table-bordered table-striped table-hover mb-0" style="font-size: 13.5px;">
+                    <thead class="table-light text-center sticky-top" style="z-index: 1;">
+                        <tr>
+                            <th width="105" class="fw-bold py-2.5">Ngày</th>
+                            <th width="140" class="fw-bold py-2.5">Số chứng từ</th>
+                            <th width="130" class="fw-bold py-2.5">Loại chứng từ</th>
+                            <th class="fw-bold py-2.5 text-start">Diễn giải</th>
+                            <th width="140" class="fw-bold py-2.5 text-end">Phải trả (VND)</th>
+                            <th width="140" class="fw-bold py-2.5 text-end">Đã trả (VND)</th>
+                            <th width="150" class="fw-bold py-2.5 text-end">Còn lại (VND)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="text-center align-middle">@item.Ngay</td>
+                                    <td class="text-center align-middle fw-semibold">
+                                        @if (item.SoChungTu != "-")
+                                        {
+                                            if (item.LoaiChungTu == "NHẬP KHO")
+                                            {
+                                                <span class="text-primary">@item.SoChungTu</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-success">@item.SoChungTu</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span>@item.SoChungTu</span>
+                                        }
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        @if (item.LoaiChungTu == "NHẬP KHO")
+                                        {
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2">@item.LoaiChungTu</span>
+                                        }
+                                        else if (item.LoaiChungTu == "PHIẾU CHI")
+                                        {
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2">@item.LoaiChungTu</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fw-semibold">@item.LoaiChungTu</span>
+                                        }
+                                    </td>
+                                    <td class="align-middle">@item.DienGiai</td>
+                                    <td class="text-end align-middle fw-semibold">@(item.PhaiTra > 0 ? item.PhaiTra.ToString("N0") : "-")</td>
+                                    <td class="text-end align-middle text-success fw-semibold">@(item.DaTra > 0 ? item.DaTra.ToString("N0") : "-")</td>
+                                    <td class="text-end align-middle text-danger fw-bold">@item.ConLai.ToString("N0")</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox fs-3 d-block mb-2 text-secondary"></i>
+                                    Không có dữ liệu
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer bg-light">
+    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Đóng</button>
+</div>

@@ -97,9 +97,7 @@
             BÁO CÁO TỒN KHO
         </h4>
         <div class="d-flex gap-2">
-            <button type="button" class="btn btn-outline-secondary fw-semibold px-3 d-flex align-items-center gap-1 btn-print" style="border-color:#d0d7de;color:#24292f;background-color:#fff;">
-                <i class="bi bi-printer"></i> In báo cáo
-            </button>
+
             <button type="button" class="btn btn-outline-secondary fw-semibold px-3 d-flex align-items-center gap-1 btn-print-multi" style="border-color:#d0d7de;color:#24292f;background-color:#fff;">
                 <i class="bi bi-printer"></i> In chi tiết (Thẻ kho)
             </button>
@@ -117,6 +115,7 @@
                         <div class="col-md-2">
                             <label class="form-label text-muted small mb-1 fw-semibold">Thời gian</label>
                             <select class="form-select form-select-sm ddl-thoi-gian">
+                                <option value="current_year">Từ đầu năm đến hiện tại</option>
                                 <option value="current_month">Đầu tháng đến hiện tại</option>
                                 <option value="month_1">Tháng 1</option>
                                 <option value="month_2">Tháng 2</option>
@@ -351,7 +350,7 @@
 
                 $container.find('.tk-kho').val(null).trigger('change');
                 $container.find('.tk-sp').val(null).trigger('change');
-                $container.find('.ddl-thoi-gian').val('current_month');
+                $container.find('.ddl-thoi-gian').val('current_year');
                 $container.find('input[type="checkbox"]').prop('checked', false);
                 loadData();
             });

@@ -77,7 +77,7 @@ namespace SalesManagementSystem.Controllers
             ViewBag.PhuongTiens = GetPhuongTienList(idPhuongTien);
             ViewBag.TrangThai = trangThai;
             ViewBag.TenNguoiGiao = tenNguoiGiao;
-            ViewBag.HoTenTaiXe = hoTenTaiXe;
+            ViewBag.TenNguoiNhan = tenNguoiNhan;
 
             if (Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 return PartialView("_PhieuNhapKhoList", model);

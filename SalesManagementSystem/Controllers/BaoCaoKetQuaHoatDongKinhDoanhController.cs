@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -30,7 +30,7 @@ namespace SalesManagementSystem.Controllers
             
             // Mac dinh tu ngay dau thang den hien tai, giong form nhap hang.
             var now = DateTime.Now;
-            model.Filter.TuNgay = new DateTime(now.Year, now.Month, 1);
+            model.Filter.TuNgay = new DateTime(now.Year, 1, 1);
             model.Filter.DenNgay = now.Date;
 
             ViewBag.KhoHangList = GetKhoHangList();
@@ -61,7 +61,7 @@ namespace SalesManagementSystem.Controllers
             using (var conn = new DbConnectionFactory().CreateConnection())
             {
                 var parameters = new DynamicParameters();
-                parameters.Add("@TuNgay", filter.TuNgay ?? new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1));
+                parameters.Add("@TuNgay", filter.TuNgay ?? new DateTime(DateTime.Now.Year, 1, 1));
                 parameters.Add("@DenNgay", filter.DenNgay ?? DateTime.Now.Date);
                 parameters.Add("@IDKho", filter.IDKho);
                 parameters.Add("@IDSanPham", filter.IDSanPham);
@@ -189,7 +189,7 @@ namespace SalesManagementSystem.Controllers
 
                     var salesList = conn.Query(sqlSales, new { 
                         IDSanPham = idSanPham, 
-                        TuNgay = tuNgay ?? new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1),
+                        TuNgay = tuNgay ?? new DateTime(DateTime.Now.Year, 1, 1),
                         DenNgay = denNgay ?? DateTime.Now.Date,
                         IDKho = idKho
                     }).ToList();

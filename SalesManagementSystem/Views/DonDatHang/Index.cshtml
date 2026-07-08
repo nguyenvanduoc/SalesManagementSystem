@@ -1,4 +1,4 @@
-@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DonDatHangViewModel>
+﻿@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DonDatHangViewModel>
 
 @{
     ViewBag.Title = "Danh sách đơn đặt hàng";
@@ -58,7 +58,8 @@
                 <div class="col-md-2">
                     <label class="form-label text-muted small mb-1">Thời gian</label>
                     <select class="form-select form-select-sm ddl-thoi-gian">
-                        <option value="current_month">Đầu tháng đến hiện tại</option>
+                        <option value="current_year">Từ đầu năm đến hiện tại</option>
+                                <option value="current_month">Đầu tháng đến hiện tại</option>
                         <option value="month_1">Tháng 1</option>
                         <option value="month_2">Tháng 2</option>
                         <option value="month_3">Tháng 3</option>
@@ -261,7 +262,7 @@
         var $form = $('#searchForm');
         $form[0].reset();
         $form.find('select').not('.ddl-thoi-gian').val('').trigger('change');
-        $form.find('.ddl-thoi-gian').val('current_month').trigger('change');
+        $form.find('.ddl-thoi-gian').val('current_year').trigger('change');
         loadDataDonDatHang($form.serialize());
     }
 

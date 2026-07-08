@@ -59,7 +59,7 @@
         else
         {
             <h2 class="text-center font-weight-bold">CHI TIẾT THẺ KHO</h2>
-            <p class="text-center mb-1"><strong>Kho hàng:</strong> @(Model.FirstOrDefault()?.TenKho ?? "Tất cả kho")</p>
+            <p class="text-center mb-1"><strong>Kho hàng:</strong> @(ViewBag.TenKho ?? "Tất cả kho")</p>
             <p class="text-center mb-4"><strong>Thời gian:</strong> @thoiGian</p>
 
             for (int i = 0; i < Model.Count; i++)
@@ -119,6 +119,17 @@
                                         }
                                     </tr>
                                 }
+                                <tr class="font-weight-bold bg-light">
+                                    <td colspan="4" class="text-right">Tổng cộng:</td>
+                                    <td class="text-right">@(card.TheKhoList.Sum(x => x.Nhap).ToString("N0"))</td>
+                                    <td class="text-right">@(card.TheKhoList.Sum(x => x.Xuat).ToString("N0"))</td>
+                                    <td></td>
+                                    @if (ViewBag.IsNhanVienKho != true)
+                                    {
+                                        <td></td>
+                                        <td class="text-right">@(card.TheKhoList.Sum(x => x.ThanhTien).ToString("N0"))</td>
+                                    }
+                                </tr>
                             }
                             else
                             {

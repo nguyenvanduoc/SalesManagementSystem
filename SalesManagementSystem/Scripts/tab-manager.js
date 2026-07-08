@@ -947,6 +947,9 @@ var TabManager = (function () {
     }
 
     // ─── API ────────────────────────────────────────────────────────────────
+    window.showLoadingLocal = showLoadingLocal;
+    window.hideLoadingLocal = hideLoadingLocal;
+
     return {
         init: init,
         openTab: openTab,

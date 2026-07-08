@@ -24,7 +24,8 @@
                 <div class="flex-grow-1" style="min-width: 140px; max-width: 170px;">
                     <label class="form-label text-muted small mb-1">Thời gian</label>
                     <select class="form-select form-select-sm ddl-thoi-gian">
-                        <option value="current_month">Đầu tháng đến hiện tại</option>
+                        <option value="current_year">Từ đầu năm đến hiện tại</option>
+                                <option value="current_month">Đầu tháng đến hiện tại</option>
                         <option value="month_1">Tháng 1</option>
                         <option value="month_2">Tháng 2</option>
                         <option value="month_3">Tháng 3</option>
@@ -56,7 +57,7 @@
                 
                 <div class="flex-grow-1" style="min-width: 180px; max-width: 250px;">
                     <label class="form-label text-muted small mb-1">Khách hàng</label>
-                    <select class="form-select form-select-sm select2" name="idKhachHang" data-placeholder="Tất cả khách hàng">
+                    <select class="form-select form-select-sm select2" name="idKhachHang">
                         <option value="">Tất cả khách hàng</option>
                         @if (ViewBag.KhachHangList != null)
                         {

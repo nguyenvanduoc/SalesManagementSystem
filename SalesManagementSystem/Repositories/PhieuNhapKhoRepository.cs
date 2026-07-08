@@ -76,11 +76,11 @@ namespace SalesManagementSystem.Repositories
                             item.TongSoLuong = sl;
                     }
 
-                    var sqlVanChuyen = @"SELECT ID, ISNULL(TienVanChuyen, 0) AS TienVanChuyen, HoTenTaiXe, SoDienThoaiTaiXe FROM KHO_PhieuNhap WHERE ID IN @Ids";
+                    var sqlVanChuyen = @"SELECT ID, ISNULL(TienVanChuyen, 0) AS TienVanChuyen, HoTenTaiXe, SoDienThoaiTaiXe, NgayGiaoHang FROM KHO_PhieuNhap WHERE ID IN @Ids";
                     var vanChuyenResult = conn.Query(sqlVanChuyen, new { Ids = ids });
                     var vanChuyenDict = vanChuyenResult.ToDictionary(
                         row => (int)row.ID, 
-                        row => new { TienVanChuyen = (decimal)(row.TienVanChuyen ?? 0m), HoTenTaiXe = (string)row.HoTenTaiXe, SoDienThoaiTaiXe = (string)row.SoDienThoaiTaiXe }
+                        row => new { TienVanChuyen = (decimal)(row.TienVanChuyen ?? 0m), HoTenTaiXe = (string)row.HoTenTaiXe, SoDienThoaiTaiXe = (string)row.SoDienThoaiTaiXe, NgayGiaoHang = (DateTime?)row.NgayGiaoHang }
                     );
                     foreach (var item in list)
                     {
@@ -89,6 +89,7 @@ namespace SalesManagementSystem.Repositories
                             item.TienVanChuyen = dictVal.TienVanChuyen;
                             item.HoTenTaiXe = dictVal.HoTenTaiXe;
                             item.SoDienThoaiTaiXe = dictVal.SoDienThoaiTaiXe;
+                            item.NgayGiaoHang = dictVal.NgayGiaoHang;
                         }
                     }
                 }

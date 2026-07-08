@@ -1,4 +1,4 @@
-@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DonHangChungTuViewModel>
+﻿@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DonHangChungTuViewModel>
 @{
     ViewBag.Title = "Chứng Từ Bán Hàng";
     var uid = Guid.NewGuid().ToString("N");
@@ -28,7 +28,8 @@
                     <div class="col-md-2">
                         <label class="form-label text-muted small mb-1">Thời gian</label>
                         <select class="form-select form-select-sm ddl-thoi-gian">
-                            <option value="current_month">Đầu tháng đến hiện tại</option>
+                            <option value="current_year">Từ đầu năm đến hiện tại</option>
+                                <option value="current_month">Đầu tháng đến hiện tại</option>
                             <option value="month_1">Tháng 1</option>
                             <option value="month_2">Tháng 2</option>
                             <option value="month_3">Tháng 3</option>

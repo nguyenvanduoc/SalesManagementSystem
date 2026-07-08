@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using SalesManagementSystem.Models.ViewModels;
 
 namespace SalesManagementSystem.Repositories.Interfaces
@@ -13,7 +13,7 @@ namespace SalesManagementSystem.Repositories.Interfaces
             bool chiConTon);
 
         IEnumerable<TheKhoListViewModel> GetTheKho(
-            int idKho, 
+            int? idKho, 
             int idSanPham, 
             string tuNgay, 
             string denNgay);

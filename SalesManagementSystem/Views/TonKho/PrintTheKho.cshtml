@@ -104,6 +104,17 @@
                         }
                     </tr>
                 }
+                <tr class="font-weight-bold bg-light">
+                    <td colspan="4" class="text-right">Tổng cộng:</td>
+                    <td class="text-right">@(Model.Sum(x => x.Nhap).ToString("N0"))</td>
+                    <td class="text-right">@(Model.Sum(x => x.Xuat).ToString("N0"))</td>
+                    <td></td>
+                    @if (ViewBag.IsNhanVienKho != true)
+                    {
+                        <td></td>
+                        <td class="text-right">@(Model.Sum(x => x.ThanhTien).ToString("N0"))</td>
+                    }
+                </tr>
             </tbody>
         </table>
         

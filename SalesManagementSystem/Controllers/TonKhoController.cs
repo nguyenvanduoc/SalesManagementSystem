@@ -46,8 +46,8 @@ namespace SalesManagementSystem.Controllers
             if (string.IsNullOrEmpty(tuNgay) && string.IsNullOrEmpty(denNgay))
             {
                 var now = DateTime.Now;
-                tuNgay = new DateTime(now.Year, now.Month, 1).ToString("yyyy-MM-dd");
-                denNgay = new DateTime(now.Year, now.Month, DateTime.DaysInMonth(now.Year, now.Month)).ToString("yyyy-MM-dd");
+                tuNgay = new DateTime(now.Year, 1, 1).ToString("yyyy-MM-dd");
+                denNgay = DateTime.Now.ToString("yyyy-MM-dd");
             }
 
             ViewBag.TuNgay = tuNgay;
@@ -251,15 +251,18 @@ namespace SalesManagementSystem.Controllers
             if (!PermissionHelper.HasPermission("TonKho", LoaiPhanQuyen.Xem)) return Content("Không có quyền in");
             if (string.IsNullOrEmpty(tuNgay) || string.IsNullOrEmpty(denNgay)) return Content("Vui lòng chọn khoảng thời gian tra cứu.");
 
-            var products = _tonKhoRepo.GetList(idKho, idSanPham, tuNgay, denNgay, chiConTon).ToList();
+            var products = _tonKhoRepo.GetList(idKho, idSanPham, tuNgay, denNgay, chiConTon)
+                                      .GroupBy(p => p.IDSanPham)
+                                      .Select(g => g.First())
+                                      .ToList();
             var model = new List<PrintTheKhoMultiViewModel>();
 
             foreach (var p in products)
             {
-                var cards = _tonKhoRepo.GetTheKho(p.IDKho, p.IDSanPham, tuNgay, denNgay);
+                var cards = _tonKhoRepo.GetTheKho(idKho, p.IDSanPham, tuNgay, denNgay);
                 model.Add(new PrintTheKhoMultiViewModel
                 {
-                    TenKho = p.TenKho,
+                    TenKho = idKho.HasValue ? p.TenKho : "Tất cả kho",
                     TenSanPham = p.MaSanPham + " - " + p.TenSanPham,
                     TheKhoList = cards
                 });
@@ -268,6 +271,7 @@ namespace SalesManagementSystem.Controllers
             ViewBag.TuNgay = tuNgay;
             ViewBag.DenNgay = denNgay;
             ViewBag.IsNhanVienKho = CheckIsNhanVienKho();
+            ViewBag.TenKho = idKho.HasValue ? (products.FirstOrDefault()?.TenKho ?? "Không xác định") : "Tất cả kho";
 
             return View(model);
         }

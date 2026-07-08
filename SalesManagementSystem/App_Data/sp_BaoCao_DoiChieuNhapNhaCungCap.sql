@@ -18,7 +18,7 @@ BEGIN
     FROM KHO_PhieuNhap pn
     INNER JOIN KHO_PhieuNhap_ChiTiet ct ON pn.ID = ct.IDPhieuNhap
     WHERE pn.IsDeleted = 0 
-      AND pn.TrangThai = 2
+      AND pn.TrangThai IN (1, 2)
       AND (@IDNhaCungCap IS NULL OR pn.IDNhaCungCap = @IDNhaCungCap)
       AND CAST(pn.NgayNhap AS DATE) < CAST(@TuNgay AS DATE);
 
@@ -75,7 +75,7 @@ BEGIN
         pn.NgayNhap,
         pn.SoChungTu,
         ncc.TenNhaCungCap,
-        N'Nhập hàng',
+        CASE WHEN pn.TrangThai = 1 THEN N'Nhập hàng (Đề nghị ghi)' ELSE N'Nhập hàng' END,
         sp.MaSanPham,
         sp.TenSanPham,
         ct.GhiChu,
@@ -93,7 +93,7 @@ BEGIN
     LEFT JOIN DM_NhaCungCap ncc ON pn.IDNhaCungCap = ncc.ID
     LEFT JOIN DM_SanPham sp ON ct.IDSanPham = sp.ID
     WHERE pn.IsDeleted = 0 
-      AND pn.TrangThai = 2
+      AND pn.TrangThai IN (1, 2)
       AND (@IDNhaCungCap IS NULL OR pn.IDNhaCungCap = @IDNhaCungCap)
       AND CAST(pn.NgayNhap AS DATE) >= CAST(@TuNgay AS DATE)
       AND CAST(pn.NgayNhap AS DATE) <= CAST(@DenNgay AS DATE);

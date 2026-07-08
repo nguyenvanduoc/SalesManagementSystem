@@ -38,5 +38,6 @@ namespace SalesManagementSystem.Models.ViewModels
         public string TenPhuongTien { get; set; }
         public string HoTenTaiXe { get; set; }
         public string SoDienThoaiTaiXe { get; set; }
+        public DateTime? NgayGiaoHang { get; set; }
     }
 }
