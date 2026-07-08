@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
@@ -1340,7 +1340,11 @@
             var $form = $(this).closest('form');
             var txtTu = $form.find('input[name="tuNgay"]').val();
             var txtDen = $form.find('input[name="denNgay"]').val();
-            if (!txtTu || !txtDen) return;
+            if (!txtTu || !txtDen) {
+                // Nếu không có giá trị (load lần đầu), trigger change để set về Đầu tháng đến hiện tại
+                $(this).val('current_month').trigger('change');
+                return;
+            }
             
             var tuDate = new Date(txtTu);
             var denDate = new Date(txtDen);

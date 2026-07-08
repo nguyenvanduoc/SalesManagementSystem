@@ -40,5 +40,36 @@ namespace SalesManagementSystem
                 }
             }
         }
+
+        protected void Application_AcquireRequestState(object sender, System.EventArgs e)
+        {
+            if (HttpContext.Current != null && HttpContext.Current.Session != null)
+            {
+                if (HttpContext.Current.Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION] == null)
+                {
+                    var authCookie = HttpContext.Current.Request.Cookies["SMS_AutoLogin"];
+                    if (authCookie != null && !string.IsNullOrEmpty(authCookie.Value))
+                    {
+                        try
+                        {
+                            var ticket = System.Web.Security.FormsAuthentication.Decrypt(authCookie.Value);
+                            if (ticket != null && !ticket.Expired)
+                            {
+                                var userSession = Newtonsoft.Json.JsonConvert.DeserializeObject<SalesManagementSystem.Models.ViewModels.UserLoginViewModel>(ticket.UserData);
+                                if (userSession != null)
+                                {
+                                    HttpContext.Current.Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION] = userSession;
+                                    HttpContext.Current.Session["LoginSessionID"] = 0; // Dummy or unlogged re-session
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            // Ignore decryption/deserialization errors, just let them be logged out
+                        }
+                    }
+                }
+            }
+        }
     }
 }

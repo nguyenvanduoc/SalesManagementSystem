@@ -46,7 +46,7 @@
                                         </button>
                                         <ul class="dropdown-menu shadow" style="font-size: 13px;">
                                             <li>
-                                                <button class="dropdown-item py-2" type="button" onclick="openCongNoDetail(@item.IDKhachHang)">
+                                                <button class="dropdown-item py-2" type="button" onclick="openCongNoDetail(this, @item.IDKhachHang)">
                                                     <i class="bi bi-eye text-info me-2"></i> Xem chi tiết
                                                 </button>
                                             </li>
@@ -59,7 +59,7 @@
                                                 </li>
                                             }
                                             <li>
-                                                <button class="dropdown-item py-2" type="button" onclick="openPaymentHistory(@item.IDChungTuBanHang)">
+                                                <button class="dropdown-item py-2" type="button" onclick="openPaymentHistory(this, @item.IDChungTuBanHang)">
                                                     <i class="bi bi-clock-history text-secondary me-2"></i> Xem lịch sử thanh toán
                                                 </button>
                                             </li>
@@ -80,10 +80,8 @@
                                     </div>
                                 </td>
                                 <td class="text-center align-middle">@(stt++)</td>
-                                <td class="text-center align-middle fw-semibold text-primary">
-                                    <a href="javascript:void(0);" onclick="TabManager.openTab('ChungTuBanHang', 'CT Bán hàng @item.SoChungTu', '@Url.Action("Detail", "ChungTuBanHang", new { id = item.IDChungTuBanHang })')" class="text-decoration-none">
-                                        @item.SoChungTu
-                                    </a>
+                                <td class="text-center align-middle fw-semibold text-dark">
+                                    @item.SoChungTu
                                 </td>
                                 <td class="text-center align-middle">@item.NgayChungTu.ToString("dd/MM/yyyy")</td>
                                 <td class="align-middle fw-semibold text-dark">@item.TenKhachHang</td>

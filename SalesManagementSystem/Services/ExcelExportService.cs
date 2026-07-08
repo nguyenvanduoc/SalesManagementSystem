@@ -271,18 +271,21 @@ namespace SalesManagementSystem.Services
                 }
             }
 
+            int rowsToInsert = data.Count - 1;
+            if (rowsToInsert > 0)
+            {
+                int insertRowIndex = (tmpRowIndex != -1) ? tmpRowIndex : templateRowIndex + 1;
+                ShiftRowsSafely(worksheet, insertRowIndex, worksheet.LastRowNum, rowsToInsert);
+                ExpandPrintArea(worksheet.Workbook, worksheet, insertRowIndex, rowsToInsert);
+                
+                if (tmpRowIndex != -1) tmpRowIndex += rowsToInsert;
+            }
+
             if (tmpRowIndex != -1)
             {
                 worksheet.RemoveRow(worksheet.GetRow(tmpRowIndex));
                 if (tmpRowIndex < worksheet.LastRowNum)
                     ShiftRowsSafely(worksheet, tmpRowIndex + 1, worksheet.LastRowNum, -1);
-            }
-
-            int rowsToInsert = data.Count - 1;
-            if (rowsToInsert > 0)
-            {
-                ShiftRowsSafely(worksheet, templateRowIndex + 1, worksheet.LastRowNum, rowsToInsert);
-                ExpandPrintArea(worksheet.Workbook, worksheet, templateRowIndex + 1, rowsToInsert);
             }
 
             // 4. Gán dữ liệu (duyệt ngược để giữ nguyên templateRow cho đến khi copy xong)
@@ -613,11 +616,17 @@ namespace SalesManagementSystem.Services
             }
         }
 
-        private void CopyRowDataExact(IRow sourceRow, IRow targetRow, int firstCol, int lastCol)
+        private void CopyRowDataExact(IRow sourceRow, IRow targetRow, int firstCol, int lastCol, int threshold = -1, int offset = 0)
         {
             if (sourceRow == null || targetRow == null) return;
             targetRow.Height = sourceRow.Height;
             if (sourceRow.RowStyle != null) targetRow.RowStyle = sourceRow.RowStyle;
+
+            if (threshold == -1) 
+            {
+                threshold = sourceRow.RowNum + 1;
+                offset = targetRow.RowNum - sourceRow.RowNum;
+            }
 
             for (int i = firstCol; i <= lastCol; i++)
             {
@@ -633,7 +642,7 @@ namespace SalesManagementSystem.Services
                         case CellType.Numeric: tCell.SetCellValue(sCell.NumericCellValue); break;
                         case CellType.Boolean: tCell.SetCellValue(sCell.BooleanCellValue); break;
                         case CellType.Formula: 
-                            tCell.SetCellFormula(UpdateFormulaRow(sCell.CellFormula, sourceRow.RowNum, targetRow.RowNum));
+                            tCell.SetCellFormula(UpdateFormulaRow(sCell.CellFormula, threshold, offset));
                             break;
                     }
                 }
@@ -659,16 +668,23 @@ namespace SalesManagementSystem.Services
             foreach (var r in regionsToAdd) worksheet.AddMergedRegion(r);
         }
 
-        private string UpdateFormulaRow(string formula, int oldRow, int newRow)
+        private string UpdateFormulaRow(string formula, int threshold, int offset)
         {
             if (string.IsNullOrEmpty(formula)) return formula;
-            int offset = newRow - oldRow;
-            return Regex.Replace(formula, @"([A-Z]+)(\d+)", match =>
+            return Regex.Replace(formula, @"(:)?([A-Z]+)(\d+)", match =>
             {
-                string col = match.Groups[1].Value;
-                if (int.TryParse(match.Groups[2].Value, out int row))
+                bool isRightSideOfRange = match.Groups[1].Value == ":";
+                string col = match.Groups[2].Value;
+                if (int.TryParse(match.Groups[3].Value, out int row))
                 {
-                    if (row == oldRow + 1) return col + (row + offset).ToString();
+                    if (row >= threshold) 
+                    {
+                        return (isRightSideOfRange ? ":" : "") + col + (row + offset).ToString();
+                    }
+                    else if (offset > 0 && isRightSideOfRange && row == threshold - 1)
+                    {
+                        return ":" + col + (row + offset).ToString();
+                    }
                 }
                 return match.Value;
             });
@@ -695,6 +711,8 @@ namespace SalesManagementSystem.Services
             regionsToRemove.Reverse();
             foreach (var idx in regionsToRemove) sheet.RemoveMergedRegion(idx);
 
+            int threshold = (n > 0) ? startRow + 1 : startRow;
+
             if (n > 0)
             {
                 for (int i = endRow; i >= startRow; i--)
@@ -703,7 +721,7 @@ namespace SalesManagementSystem.Services
                     if (sourceRow != null)
                     {
                         var targetRow = sheet.GetRow(i + n) ?? sheet.CreateRow(i + n);
-                        CopyRowDataExact(sourceRow, targetRow, 0, sourceRow.LastCellNum);
+                        CopyRowDataExact(sourceRow, targetRow, 0, sourceRow.LastCellNum, threshold, n);
                         sheet.RemoveRow(sourceRow);
                     }
                     else
@@ -721,7 +739,7 @@ namespace SalesManagementSystem.Services
                     if (sourceRow != null)
                     {
                         var targetRow = sheet.GetRow(i + n) ?? sheet.CreateRow(i + n);
-                        CopyRowDataExact(sourceRow, targetRow, 0, sourceRow.LastCellNum);
+                        CopyRowDataExact(sourceRow, targetRow, 0, sourceRow.LastCellNum, threshold, n);
                         sheet.RemoveRow(sourceRow);
                     }
                     else
@@ -731,8 +749,8 @@ namespace SalesManagementSystem.Services
                     }
                 }
             }
-            
-            foreach (var region in regionsToShift) sheet.AddMergedRegion(region);
+
+            foreach (var r in regionsToShift) sheet.AddMergedRegion(r);
         }
 
         private void ExpandPrintArea(IWorkbook workbook, ISheet sheet, int startRow, int n)

@@ -57,6 +57,13 @@ namespace SalesManagementSystem.Controllers
                     });
                     Session["LoginSessionID"] = sessionId;
 
+                    // Set persistent cookie to survive AppDomain restarts (IIS file changes)
+                    string userData = Newtonsoft.Json.JsonConvert.SerializeObject(userSession);
+                    var ticket = new System.Web.Security.FormsAuthenticationTicket(1, result.TenDangNhap, System.DateTime.Now, System.DateTime.Now.AddDays(30), true, userData);
+                    var encryptedTicket = System.Web.Security.FormsAuthentication.Encrypt(ticket);
+                    var cookie = new System.Web.HttpCookie("SMS_AutoLogin", encryptedTicket) { HttpOnly = true, Expires = ticket.Expiration };
+                    Response.Cookies.Add(cookie);
+
                     // Kiểm tra quyền Dashboard
                     bool hasDashboardPerm = SalesManagementSystem.Helpers.PermissionHelper.HasActionPermission("Dashboard", "Index");
                     if (hasDashboardPerm)
@@ -82,6 +89,10 @@ namespace SalesManagementSystem.Controllers
                 _sessionRepo.LogLogout(userSession.UserID);
             }
             Session.Remove(CommonConstants.USER_SESSION);
+
+            var cookie = new System.Web.HttpCookie("SMS_AutoLogin", "") { Expires = System.DateTime.Now.AddDays(-1) };
+            Response.Cookies.Add(cookie);
+
             return RedirectToAction("Index", "Login");
         }
     }

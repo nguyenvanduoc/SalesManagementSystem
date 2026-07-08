@@ -433,6 +433,25 @@ namespace SalesManagementSystem.Controllers
         }
 
         [HttpPost]
+        public ActionResult BoGhiSo(int id)
+        {
+            if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.TuyChon)) return Json(new { success = false, message = "Không có quyền bỏ ghi" });
+
+            try
+            {
+                var user = GetCurrentUser();
+                int userId = user?.IDNhanSu ?? 0;
+
+                _repo.BoGhiSo(id, userId);
+                return Json(new { success = true, message = "Bỏ ghi thành công" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
         public ActionResult HuyPhieu(int id, string lyDoHuy)
         {
             if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.TuyChon)) return Json(new { success = false, message = "Không có quyền hủy phiếu" });

@@ -82,6 +82,11 @@
                                                         <i class="bi bi-x-circle me-2 text-warning"></i> Hủy phiếu
                                                     </button>
                                                 </li>
+                                                <li>
+                                                    <button type="button" class="dropdown-item text-secondary" onclick="boGhiSoPhieu(this, @item.ID)">
+                                                        <i class="bi bi-arrow-counterclockwise me-2 text-secondary"></i> Bỏ ghi
+                                                    </button>
+                                                </li>
                                             }
                                             
                                             @if ((item.TrangThai == 0 || item.TrangThai == 1) && SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuNhapKho", SalesManagementSystem.Helpers.LoaiPhanQuyen.Xoa))

@@ -15,5 +15,6 @@ namespace SalesManagementSystem.Helpers
 
         // Thêm các mã biểu mẫu khác ở đây (Ví dụ nhóm Hàng Hoá, Kho, ...)
         public const string DS_SO_QUY = "SQ01";
+        public const string CNKH = "CNKH";
     }
 }

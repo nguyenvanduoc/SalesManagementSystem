@@ -5,6 +5,7 @@ using System.Web.Mvc;
 using SalesManagementSystem.Helpers;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories.Interfaces;
+using SalesManagementSystem.Services.Interfaces;
 
 namespace SalesManagementSystem.Controllers
 {
@@ -12,13 +13,16 @@ namespace SalesManagementSystem.Controllers
     {
         private readonly ICongNoKhachHangRepository _repo;
         private readonly IKhachHangRepository _khachHangRepo;
+        private readonly IExcelExportService _excelExportService;
 
         public CongNoKhachHangController(
             ICongNoKhachHangRepository repo,
-            IKhachHangRepository khachHangRepo)
+            IKhachHangRepository khachHangRepo,
+            IExcelExportService excelExportService)
         {
             _repo = repo;
             _khachHangRepo = khachHangRepo;
+            _excelExportService = excelExportService;
         }
 
         // GET: /CongNoKhachHang
@@ -109,6 +113,77 @@ namespace SalesManagementSystem.Controllers
             catch (Exception ex)
             {
                 return Content($"<div class='alert alert-danger'>Lỗi: {ex.Message}</div>");
+            }
+        }
+
+        [HttpGet]
+        public ActionResult ExportExcel(string tuNgay = "", string denNgay = "", int? idKhachHang = null, int? trangThaiCongNo = null)
+        {
+            if (!PermissionHelper.HasPermission("CongNoKhachHang", LoaiPhanQuyen.Xem))
+            {
+                TempData["ToastType"] = "error";
+                TempData["ToastMessage"] = "Bạn không có quyền thực hiện chức năng này.";
+                return RedirectToAction("Index");
+            }
+
+            try
+            {
+                var list = _repo.GetList(tuNgay, denNgay, idKhachHang, trangThaiCongNo).ToList();
+
+                var exportData = list.Select((item, index) => new
+                {
+                    STT = index + 1,
+                    SoChungTu = item.SoChungTu,
+                    NgayChungTu = item.NgayChungTu.ToString("dd/MM/yyyy"),
+                    TenKhachHang = item.TenKhachHang,
+                    SoDienThoai = item.DienThoai,
+                    DuDauKy = item.TonDauKy,
+                    DoanhThu = item.DoanhThu,
+                    LuyKe = item.LuyKe,
+                    DaThu = item.DaThu,
+                    ConPhaiThu = item.ConPhaiThu,
+                    QuaHan = item.TienQuaHan,
+                    TenTrangThai = item.TrangThai
+                }).ToList();
+
+                string khachHangName = "Tất cả khách hàng";
+                if (idKhachHang.HasValue)
+                {
+                    var kh = _khachHangRepo.GetById(idKhachHang.Value);
+                    if (kh != null) khachHangName = kh.TenKhachHang;
+                }
+
+                var variables = new Dictionary<string, object>
+                {
+                    { "TuNgay", string.IsNullOrEmpty(tuNgay) ? "..." : DateTime.Parse(tuNgay).ToString("dd/MM/yyyy") },
+                    { "DenNgay", string.IsNullOrEmpty(denNgay) ? "..." : DateTime.Parse(denNgay).ToString("dd/MM/yyyy") },
+                    { "KhachHang", khachHangName },
+                    { "Ngay", DateTime.Now.Day.ToString("00") },
+                    { "Thang", DateTime.Now.Month.ToString("00") },
+                    { "Nam", DateTime.Now.Year.ToString() }
+                };
+
+                string fileExtension;
+                var fileBytes = _excelExportService.Export(BieuMauConstants.CNKH, exportData, out fileExtension, variables);
+
+                if (fileBytes == null || fileBytes.Length == 0)
+                {
+                    TempData["ToastType"] = "error";
+                    TempData["ToastMessage"] = "Không tìm thấy biểu mẫu hoặc lỗi khi tạo Excel.";
+                    return RedirectToAction("Index");
+                }
+
+                string contentType = fileExtension == "xls" 
+                    ? "application/vnd.ms-excel" 
+                    : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                return File(fileBytes, contentType, $"CongNoKhachHang_{DateTime.Now:yyyyMMddHHmmss}.{fileExtension}");
+            }
+            catch (Exception ex)
+            {
+                TempData["ToastType"] = "error";
+                TempData["ToastMessage"] = "Lỗi khi xuất excel: " + ex.Message;
+                return RedirectToAction("Index");
             }
         }
 

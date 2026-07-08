@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewBag.Title = "Dashboard";
     string uid = Guid.NewGuid().ToString("N");
 }
@@ -255,7 +255,6 @@
             <div class="d-flex align-items-center gap-2">
                 <label class="fw-bold mb-0 text-nowrap text-muted" style="font-size:0.8rem">Thời gian</label>
                 <select class="form-select form-select-sm ddl-thoi-gian border-2 rounded-2" style="width:180px; font-size:0.82rem; padding: 4px 8px; height: 32px;">
-                    <option value="current_year">Từ đầu năm đến hiện tại</option>
                                 <option value="current_month">Đầu tháng đến hiện tại</option>
                     <option value="month_1">Tháng 1</option>
                     <option value="month_2">Tháng 2</option>
@@ -273,6 +272,7 @@
                     <option value="quarter_2">Quý 2</option>
                     <option value="quarter_3">Quý 3</option>
                     <option value="quarter_4">Quý 4</option>
+                            <option value="current_year">Từ đầu năm đến hiện tại</option>
                 </select>
             </div>
             <div class="d-flex align-items-center gap-2">

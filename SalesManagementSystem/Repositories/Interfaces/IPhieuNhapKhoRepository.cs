@@ -20,6 +20,7 @@ namespace SalesManagementSystem.Repositories.Interfaces
         int Save(PhieuNhapKhoViewModel model, int userId);
         void UpdateMaster(PhieuNhapKhoViewModel model, int userId);
         void GhiSo(int id, int userId);
+        void BoGhiSo(int id, int userId);
         void HuyPhieu(int id, string lyDoHuy, int userId);
         void Delete(int id, int userId);
         string GenerateSoChungTu();

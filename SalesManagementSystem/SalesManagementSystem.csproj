@@ -563,6 +563,9 @@
     <Content Include="App_Data\insert_acl_BaoCaoDoiChieuNhapNhaCungCap.sql" />
     <Content Include="Views\BaoCaoDoiChieuNhapNhaCungCap\_DetailsModal.cshtml" />
     <Content Include="Views\BaoCaoKetQuaHoatDongKinhDoanh\_DetailsModal.cshtml" />
+    <Content Include="Views\PhieuThuKhachHang\_DetailInline.cshtml" />
+    <Content Include="Views\PhieuThuKhachHang\_Form.cshtml" />
+    <Content Include="Views\PhieuThuKhachHang\_PhieuThuFileList.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />

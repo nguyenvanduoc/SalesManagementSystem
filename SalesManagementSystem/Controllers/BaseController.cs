@@ -1,4 +1,4 @@
-﻿using System.Web.Mvc;
+using System.Web.Mvc;
 using System.Web.Routing;
 using System;
 using System.Linq;
@@ -15,7 +15,7 @@ namespace SalesManagementSystem.Controllers
         protected override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             var sessionId = Session["LoginSessionID"];
-            if (sessionId != null)
+            if (sessionId != null && (int)sessionId > 0)
             {
                 var sessionRepo = System.Web.Mvc.DependencyResolver.Current.GetService(typeof(SalesManagementSystem.Repositories.Interfaces.IAclLoginSessionRepository)) as SalesManagementSystem.Repositories.Interfaces.IAclLoginSessionRepository;
                 if (sessionRepo != null)

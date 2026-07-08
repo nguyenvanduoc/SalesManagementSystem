@@ -63,37 +63,6 @@ namespace SalesManagementSystem.Repositories
                     commandType: CommandType.StoredProcedure).ToList();
                 
                 totalRecords = p.Get<int>("@TotalRecords");
-
-                if (list.Any())
-                {
-                    var ids = list.Select(x => x.ID).ToList();
-                    var sqlSoLuong = @"SELECT IDPhieuNhap, SUM(SoLuong) as TongSoLuong FROM KHO_PhieuNhap_ChiTiet WHERE IDPhieuNhap IN @Ids GROUP BY IDPhieuNhap";
-                    var dapperResult = conn.Query(sqlSoLuong, new { Ids = ids });
-                    var dict = dapperResult.ToDictionary(row => (int)row.IDPhieuNhap, row => (decimal)(row.TongSoLuong ?? 0m));
-                    foreach (var item in list)
-                    {
-                        if (dict.TryGetValue(item.ID, out var sl))
-                            item.TongSoLuong = sl;
-                    }
-
-                    var sqlVanChuyen = @"SELECT ID, ISNULL(TienVanChuyen, 0) AS TienVanChuyen, HoTenTaiXe, SoDienThoaiTaiXe, NgayGiaoHang FROM KHO_PhieuNhap WHERE ID IN @Ids";
-                    var vanChuyenResult = conn.Query(sqlVanChuyen, new { Ids = ids });
-                    var vanChuyenDict = vanChuyenResult.ToDictionary(
-                        row => (int)row.ID, 
-                        row => new { TienVanChuyen = (decimal)(row.TienVanChuyen ?? 0m), HoTenTaiXe = (string)row.HoTenTaiXe, SoDienThoaiTaiXe = (string)row.SoDienThoaiTaiXe, NgayGiaoHang = (DateTime?)row.NgayGiaoHang }
-                    );
-                    foreach (var item in list)
-                    {
-                        if (vanChuyenDict.TryGetValue(item.ID, out var dictVal))
-                        {
-                            item.TienVanChuyen = dictVal.TienVanChuyen;
-                            item.HoTenTaiXe = dictVal.HoTenTaiXe;
-                            item.SoDienThoaiTaiXe = dictVal.SoDienThoaiTaiXe;
-                            item.NgayGiaoHang = dictVal.NgayGiaoHang;
-                        }
-                    }
-                }
-
                 return list;
             }
         }
@@ -210,7 +179,42 @@ namespace SalesManagementSystem.Repositories
                 ";
                 conn.Execute(updateTotalsSql, new { ID = activeId });
 
+                SyncGiaoDichKho(conn, activeId, model.SoChungTu, model.TrangThai, userId);
+
                 return newId;
+            }
+        }
+
+        private void SyncGiaoDichKho(System.Data.IDbConnection conn, int id, string soChungTu, int trangThai, int userId)
+        {
+            if (trangThai == 1 || trangThai == 2)
+            {
+                conn.Execute("DELETE FROM KHO_GiaoDichKho WHERE LoaiChungTu = 1 AND SoChungTu = @SoChungTu", new { SoChungTu = soChungTu });
+                string sqlGiaoDich = @"
+                    INSERT INTO KHO_GiaoDichKho (NgayChungTu, SoChungTu, LoaiChungTu, IDChiTietKho, IDKho, IDSanPham, SoLuongNhap, SoLuongXuat, DonGia, ThanhTien, DienGiai, NgayTao, NguoiTao)
+                    SELECT 
+                        p.NgayNhap,
+                        p.SoChungTu,
+                        1,
+                        ct.ID,
+                        p.IDKho,
+                        ct.IDSanPham,
+                        ct.SoLuong,
+                        0,
+                        ct.DonGia,
+                        ct.ThanhTien,
+                        p.GhiChu,
+                        GETDATE(),
+                        @UserId
+                    FROM KHO_PhieuNhap_ChiTiet ct
+                    INNER JOIN KHO_PhieuNhap p ON ct.IDPhieuNhap = p.ID
+                    WHERE p.ID = @ID;
+                ";
+                conn.Execute(sqlGiaoDich, new { ID = id, UserId = userId });
+            }
+            else
+            {
+                conn.Execute("DELETE FROM KHO_GiaoDichKho WHERE LoaiChungTu = 1 AND SoChungTu = @SoChungTu", new { SoChungTu = soChungTu });
             }
         }
 
@@ -260,8 +264,10 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@IDLoaiNhapKho", model.IDLoaiNhapKho);
                 p.Add("@IDKhoNguon", model.IDKhoNguon);
                 p.Add("@IDKhachHang", model.IDKhachHang);
-                
                 conn.Execute(sql, p);
+                
+                var trangThai = conn.ExecuteScalar<int>("SELECT TrangThai FROM KHO_PhieuNhap WHERE ID = @ID", new { ID = model.ID });
+                SyncGiaoDichKho(conn, model.ID, model.SoChungTu, trangThai, userId);
             }
         }
 
@@ -269,6 +275,19 @@ namespace SalesManagementSystem.Repositories
         {
             using (var conn = _db.CreateConnection())
             {
+                try {
+                    string sqlPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App_Data", "update_sp_KHO_PhieuNhap_GhiSo.sql");
+                    if (System.IO.File.Exists(sqlPath)) {
+                        string sql = System.IO.File.ReadAllText(sqlPath);
+                        var parts = sql.Split(new[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
+                        foreach (var part in parts)
+                        {
+                            if (!string.IsNullOrWhiteSpace(part)) conn.Execute(part);
+                        }
+                        System.IO.File.Delete(sqlPath);
+                    }
+                } catch { }
+
                 // 1. Ghi sổ phiếu nhập
                 conn.Execute(
                     "sp_KHO_PhieuNhap_GhiSo", 
@@ -326,6 +345,30 @@ namespace SalesManagementSystem.Repositories
                         }
                     }
                 }
+            }
+        }
+
+        public void BoGhiSo(int id, int userId)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                try {
+                    string sqlPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App_Data", "update_sp_KHO_PhieuNhap_BoGhiSo.sql");
+                    if (System.IO.File.Exists(sqlPath)) {
+                        string sql = System.IO.File.ReadAllText(sqlPath);
+                        var parts = sql.Split(new[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
+                        foreach (var part in parts)
+                        {
+                            if (!string.IsNullOrWhiteSpace(part)) conn.Execute(part);
+                        }
+                        System.IO.File.Delete(sqlPath);
+                    }
+                } catch { }
+
+                conn.Execute(
+                    "sp_KHO_PhieuNhap_BoGhiSo", 
+                    new { ID = id, NguoiBoGhi = userId }, 
+                    commandType: CommandType.StoredProcedure);
             }
         }
 

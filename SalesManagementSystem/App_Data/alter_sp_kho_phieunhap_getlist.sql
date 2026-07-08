@@ -18,6 +18,7 @@ BEGIN
     -- Lấy tổng số dòng
     SELECT @TotalRecords = COUNT(*)
     FROM [dbo].[KHO_PhieuNhap] p
+    LEFT JOIN [dbo].[NS_NhanSu] ns ON p.IDNhanSuNhan = ns.ID
     WHERE p.IsDeleted = 0
       AND (@TuNgay IS NULL OR p.NgayNhap >= @TuNgay)
       AND (@DenNgay IS NULL OR p.NgayNhap <= @DenNgay)
@@ -25,7 +26,7 @@ BEGIN
       AND (@IDKho IS NULL OR p.IDKho = @IDKho)
       AND (@IDNhaCungCap IS NULL OR p.IDNhaCungCap = @IDNhaCungCap)
       AND (@TrangThai IS NULL OR p.TrangThai = @TrangThai)
-      AND (LEN(ISNULL(@TenNguoiNhan,'')) = 0 OR p.TenNguoiNhan = @TenNguoiNhan)
+      AND (LEN(ISNULL(@TenNguoiNhan,'')) = 0 OR ISNULL(NULLIF(p.TenNguoiNhan, ''), ns.Ten) LIKE N'%' + @TenNguoiNhan + N'%')
       AND (LEN(ISNULL(@TenNguoiGiao,'')) = 0 OR p.TenNguoiGiao LIKE N'%' + @TenNguoiGiao + N'%')
       AND (@IDPhuongTien IS NULL OR p.IDPhuongTien = @IDPhuongTien)
 
@@ -44,7 +45,7 @@ BEGIN
         p.NgayHoaDon,
         p.TenNguoiGiao,
         p.SoDienThoaiNguoiGiao,
-        p.TenNguoiNhan,
+        ISNULL(NULLIF(p.TenNguoiNhan, ''), ns.Ten) AS TenNguoiNhan,
         p.IDNhanSuNhan,
         ns.Ten AS TenNhanSuNhan,
         p.TrangThai,
@@ -62,7 +63,12 @@ BEGIN
         DaThanhToan = ISNULL(pay.DaThanhToan, 0),
         ConLai = p.TongCong - ISNULL(pay.DaThanhToan, 0),
         p.IDPhuongTien,
-        pt.TenPhuongTien AS TenPhuongTien
+        pt.TenPhuongTien AS TenPhuongTien,
+        ISNULL(sl.TongSoLuong, 0) AS TongSoLuong,
+        ISNULL(p.TienVanChuyen, 0) AS TienVanChuyen,
+        p.HoTenTaiXe,
+        p.SoDienThoaiTaiXe,
+        p.NgayGiaoHang
 		
     FROM [dbo].[KHO_PhieuNhap] p
     LEFT JOIN (
@@ -72,6 +78,11 @@ BEGIN
         WHERE pc.TrangThai = 2 AND pc.IsDeleted = 0 AND ct.LoaiChi = 1
         GROUP BY ct.IDPhieuNhap
     ) pay ON pay.IDPhieuNhap = p.ID
+    LEFT JOIN (
+        SELECT IDPhieuNhap, SUM(SoLuong) AS TongSoLuong
+        FROM [dbo].[KHO_PhieuNhap_ChiTiet]
+        GROUP BY IDPhieuNhap
+    ) sl ON sl.IDPhieuNhap = p.ID
     LEFT JOIN [dbo].[DM_KhoHang] k ON p.IDKho = k.ID
     LEFT JOIN [dbo].[DM_NhaCungCap] ncc ON p.IDNhaCungCap = ncc.ID
     LEFT JOIN [dbo].[NS_NhanSu] ns ON p.IDNhanSuNhan = ns.ID
@@ -84,7 +95,7 @@ BEGIN
       AND (@IDKho IS NULL OR p.IDKho = @IDKho)
       AND (@IDNhaCungCap IS NULL OR p.IDNhaCungCap = @IDNhaCungCap)
       AND (@TrangThai IS NULL OR p.TrangThai = @TrangThai)
-      AND (LEN(ISNULL(@TenNguoiNhan,'')) = 0 OR p.TenNguoiNhan = @TenNguoiNhan)
+      AND (LEN(ISNULL(@TenNguoiNhan,'')) = 0 OR ISNULL(NULLIF(p.TenNguoiNhan, ''), ns.Ten) LIKE N'%' + @TenNguoiNhan + N'%')
       AND (LEN(ISNULL(@TenNguoiGiao,'')) = 0 OR p.TenNguoiGiao LIKE N'%' + @TenNguoiGiao + N'%')
       AND (@IDPhuongTien IS NULL OR p.IDPhuongTien = @IDPhuongTien)
     ORDER BY p.NgayNhap DESC, p.ID DESC
