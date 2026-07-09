@@ -109,7 +109,7 @@
                         style="background-color:#2998e4;border:none;" onclick="loadData()">
                     <i class="bi bi-search"></i> Tìm kiếm
                 </button>
-                <button type="button" onclick="resetFilter()" class="btn btn-sm text-white px-3"
+                <button type="button" onclick="resetFilter()" class="btn btn-sm text-white px-3 btn-reset"
                         style="background-color:#f1c40f;border:none;">
                     Làm mới
                 </button>
@@ -320,8 +320,20 @@
             var fm = (firstDay.getMonth() + 1).toString().padStart(2, '0');
             var fd = firstDay.getDate().toString().padStart(2, '0');
 
-            $('#TuNgay').val(`${fy}-${fm}-${fd}`);
-            $('#DenNgay').val(`${y}-${m}-${d}`);
+            var s = `${fy}-${fm}-${fd}`;
+            var e = `${y}-${m}-${d}`;
+
+            // Reset Flatpickr
+            var tuNgay = $('#TuNgay')[0];
+            var denNgay = $('#DenNgay')[0];
+            if (tuNgay && tuNgay._flatpickr) tuNgay._flatpickr.setDate(s);
+            else $('#TuNgay').val(s);
+
+            if (denNgay && denNgay._flatpickr) denNgay._flatpickr.setDate(e);
+            else $('#DenNgay').val(e);
+
+            // Reset dropdowns
+            $('.ddl-thoi-gian').val('current_month');
             $('#LoaiHaoHut').val('0');
             $('#IDKho').val('0').trigger('change');
             $('#SoChungTu').val('');

@@ -596,6 +596,41 @@
             align-items: center;
             z-index: 10;
         }
+
+        /* ─── CUSTOM MULTI-COLOR LOADER SPINNER ───────────────── */
+        .global-tab-loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(1px);
+            -webkit-backdrop-filter: blur(1px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .custom-multi-spinner {
+            width: 2.8rem;
+            height: 2.8rem;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            /* Phối màu chuẩn theo ảnh của người dùng */
+            border-top-color: #3498db;    /* Xanh dương */
+            border-right-color: #f1948a;  /* Hồng đào / đỏ nhạt */
+            border-bottom-color: #9cca3b; /* Xanh lá / Lime */
+            border-left-color: #f5e6a9;   /* Vàng nhạt / Beige */
+            animation: custom-spin 1s linear infinite;
+        }
+
+        @@keyframes custom-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -1197,21 +1232,7 @@
         }
     });
 
-    /* ================================================================
-       GLOBAL AJAX SEND HANDLER (Blink effect cho màn hình tìm kiếm)
-    ================================================================ */
-    $(document).ajaxSend(function (event, jqxhr, settings) {
-        if (settings.url && (settings.url.toLowerCase().indexOf('getlist') !== -1 || settings.url.toLowerCase().indexOf('search') !== -1)) {
-            var $tableContainer = $('.tab-pane.active #table-container, .tab-pane.active [id^="table-container-"]');
-            if ($tableContainer.length === 0) {
-                $tableContainer = $('#table-container, [id^="table-container-"]'); 
-            }
-            if ($tableContainer.length > 0) {
-                $tableContainer.css('opacity', '0.5');
-                setTimeout(function() { $tableContainer.css('opacity', '1'); }, 100);
-            }
-        }
-    });
+
 
     /* ================================================================
        GLOBAL FORM RESET HANDLER (Chuẩn SKILL.md)
@@ -1225,29 +1246,39 @@
         }
         
         if ($form.length > 0) {
-            // 1. Clear form cơ bản
+            // 1. Clear form cơ bản (khôi phục giá trị ban đầu của các thẻ HTML)
             $form[0].reset();
             
-            // 2. Clear thư viện Select2 (nếu có)
+            // 2. Đồng bộ hóa lại thư viện Select2 về giá trị mặc định của HTML sau reset
             var $select2 = $form.find('.select2, .select2-hidden-accessible');
             if ($select2.length > 0) {
-                $select2.val(null).trigger('change');
+                $select2.each(function() {
+                    // Lấy giá trị được chọn mặc định trong thẻ native select sau khi reset
+                    var $defaultOption = $(this).find('option[selected]');
+                    var val = $defaultOption.length > 0 ? $defaultOption.val() : $(this).find('option').first().val();
+                    $(this).val(val).trigger('change');
+                });
             }
 
-            // 3. Xử lý giá trị flatpickr (đặt lại mặc định cho Từ ngày/Đến ngày)
-            var today = new Date();
-            var firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-            var lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-
+            // 3. Xử lý giá trị flatpickr về giá trị khởi tạo ban đầu
             $form.find('.flatpickr-input').each(function() {
                 if (this._flatpickr) {
-                    var name = $(this).attr('name');
-                    if (name === 'tuNgay') {
-                        this._flatpickr.setDate(firstDay);
-                    } else if (name === 'denNgay') {
-                        this._flatpickr.setDate(lastDay);
+                    var initialVal = $(this).data('initial-value') || '';
+                    if (initialVal) {
+                        this._flatpickr.setDate(initialVal);
                     } else {
-                        this._flatpickr.clear();
+                        var name = $(this).attr('name');
+                        var today = new Date();
+                        var firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+                        var lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+                        if (name === 'tuNgay') {
+                            this._flatpickr.setDate(firstDay);
+                        } else if (name === 'denNgay') {
+                            this._flatpickr.setDate(lastDay);
+                        } else {
+                            this._flatpickr.clear();
+                        }
                     }
                 }
             });
@@ -1281,6 +1312,9 @@
                 if (name === 'denNgay') val = flatpickr.formatDate(lastDay, "Y-m-d");
                 $this.val(val); // Set value immediately so normal form submit works
             }
+
+            // Lưu lại giá trị khởi tạo ban đầu để phục vụ chức năng "Làm mới" (Reset)
+            $this.data('initial-value', val);
 
             // Đổi type thành text để trình duyệt không hiện lịch mặc định
             $this.attr('type', 'text');
@@ -1338,8 +1372,8 @@
             $(this).data('synced', true);
             
             var $form = $(this).closest('form');
-            var txtTu = $form.find('input[name="tuNgay"]').val();
-            var txtDen = $form.find('input[name="denNgay"]').val();
+            var txtTu = $form.find('input[name="tuNgay"], input[name="TuNgay"]').val();
+            var txtDen = $form.find('input[name="denNgay"], input[name="DenNgay"]').val();
             if (!txtTu || !txtDen) {
                 // Nếu không có giá trị (load lần đầu), trigger change để set về Đầu tháng đến hiện tại
                 $(this).val('current_month').trigger('change');
@@ -1417,8 +1451,8 @@
                 var $form = $(this).closest('form');
                 if ($form.length === 0) return;
                 
-                var txtTuNgay = $form.find('input[name="tuNgay"]')[0];
-                var txtDenNgay = $form.find('input[name="denNgay"]')[0];
+                var txtTuNgay = $form.find('input[name="tuNgay"], input[name="TuNgay"]')[0];
+                var txtDenNgay = $form.find('input[name="denNgay"], input[name="DenNgay"]')[0];
                 
                 if (txtTuNgay && txtDenNgay) {
                     if (txtTuNgay._flatpickr) txtTuNgay._flatpickr.setDate(s);
@@ -1428,9 +1462,11 @@
                     else { $(txtDenNgay).val(e).trigger('change'); }
                     
                     setTimeout(function() {
-                        var btn = $form.find('button[type="submit"]')[0];
+                        var btn = $form.find('button[type="submit"], #btnSearch, .btn-search')[0];
                         if (btn) {
                             btn.click();
+                        } else if (typeof TabManager !== 'undefined') {
+                            TabManager.reloadActiveTabGrid(false);
                         } else {
                             $form.trigger('submit');
                         }
@@ -1461,6 +1497,7 @@
             $.ajax({
                 url: keepAliveUrl,
                 type: 'POST',
+                global: false,
                 headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
                 success: function (res) {
                     if (!res.alive) {
@@ -1509,6 +1546,111 @@
 
         // Kiểm tra 40 tiếng mỗi 30 giây
         setInterval(checkTimeout, 30000);
+    })();
+</script>
+
+<!-- Global Loading Overlay Manager script -->
+<script>
+    (function () {
+        var loadingStartTime = 0;
+        var loadingTimeoutId = null;
+        var loadingRequestCount = 0;
+
+        function showLoading() {
+            loadingRequestCount++;
+            if (loadingRequestCount === 1) {
+                if (loadingTimeoutId) {
+                    clearTimeout(loadingTimeoutId);
+                    loadingTimeoutId = null;
+                }
+                loadingStartTime = Date.now();
+
+                // Tìm tab-pane đang hoạt động
+                var $activePane = $('.tab-pane.active');
+                if ($activePane.length === 0) {
+                    $activePane = $('body');
+                }
+
+                // Tìm vùng hiển thị lưới/bảng dữ liệu bên trong tab active
+                var $target = $activePane.find('#listContainer, #table-container, [id^="table-container-"], #grid-container, [id^="grid-container-"], #gridData, [id^="gridData-"], .table-responsive, .grid-container, .table-container').first();
+                if ($target.length === 0) {
+                    $target = $activePane; // Fallback nếu không tìm thấy grid container
+                }
+
+                if ($target.css('position') === 'static') {
+                    $target.css('position', 'relative');
+                }
+
+                // Đảm bảo chiều cao tối thiểu để spinner hiển thị đẹp mắt khi bảng trống
+                var currentHeight = $target.height();
+                if (currentHeight < 150) {
+                    $target.data('original-min-height', $target.css('min-height'));
+                    $target.css('min-height', '150px');
+                }
+
+                // Gỡ bỏ loading cũ nếu có
+                $target.find('.global-tab-loading-overlay').remove();
+
+                // Chèn loading mới vào vùng grid/table
+                var overlayHtml = 
+                    '<div class="global-tab-loading-overlay">' +
+                    '    <div class="custom-multi-spinner"></div>' +
+                    '</div>';
+
+                $target.append(overlayHtml);
+            }
+        }
+
+        function hideLoading() {
+            loadingRequestCount--;
+            if (loadingRequestCount < 0) loadingRequestCount = 0;
+
+            if (loadingRequestCount === 0) {
+                var elapsed = Date.now() - loadingStartTime;
+                var remaining = 500 - elapsed; // Đảm bảo hiển thị ít nhất 500ms để tránh nhấp nháy
+
+                function hideActual() {
+                    var $overlay = $('.global-tab-loading-overlay');
+                    if ($overlay.length > 0) {
+                        var $parent = $overlay.parent();
+                        var originalMin = $parent.data('original-min-height');
+                        if (originalMin !== undefined) {
+                            $parent.css('min-height', originalMin);
+                        }
+                        $overlay.remove();
+                    }
+                    loadingTimeoutId = null;
+                }
+
+                if (remaining > 0) {
+                    loadingTimeoutId = setTimeout(hideActual, remaining);
+                } else {
+                    hideActual();
+                }
+            }
+        }
+
+        // Đăng ký toàn cục
+        window.showLoading = showLoading;
+        window.hideLoading = hideLoading;
+
+        // Bắt sự kiện AJAX toàn cục của jQuery qua ajaxSend và ajaxComplete để tránh xung đột với các request chạy ngầm
+        $(document).on('ajaxSend', function (event, xhr, settings) {
+            // Chỉ hiện loading cho các request tải lại bảng/lưới dữ liệu (trả về HTML)
+            // Không hiện loading cho Select2, Autocomplete (trả về JSON) hoặc khi đang mở Modal
+            if (settings.global === false) return;
+            if (settings.dataType === 'json' || settings.dataType === 'jsonp') return;
+            if ($('.modal.show').length > 0 || $('body').hasClass('modal-open')) return;
+
+            showLoading();
+        });
+
+        $(document).on('ajaxComplete', function (event, xhr, settings) {
+            if (settings.global === false) return;
+            if (settings.dataType === 'json' || settings.dataType === 'jsonp') return;
+
+            hideLoading();
+        });
     })();
 </script>
 </body>

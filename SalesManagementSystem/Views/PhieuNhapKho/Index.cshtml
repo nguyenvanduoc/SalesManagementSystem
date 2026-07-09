@@ -171,13 +171,16 @@
 
                 var params = $(this).serialize();
                 var url = '@Url.Action("GetList")?' + params;
+                if (typeof showLoading === 'function') showLoading();
                 $.ajax({
                     url: url,
                     type: 'GET',
                     success: function (res) {
+                        if (typeof hideLoading === 'function') hideLoading();
                         $container.find('#table-container').html(res);
                     },
                     error: function () {
+                        if (typeof hideLoading === 'function') hideLoading();
                         if (typeof showToast === 'function') {
                             showToast('error', 'Lỗi khi tải dữ liệu.');
                         }

@@ -75,7 +75,7 @@ var TabManager = (function () {
         
         $container.find('.tab-loading-overlay').remove();
         var overlay = $('<div>', { class: 'tab-loading-overlay' });
-        overlay.html('<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
+        overlay.html('<div class="custom-multi-spinner"></div>');
         $container.append(overlay);
     }
 
@@ -770,6 +770,7 @@ var TabManager = (function () {
         activeRequests[paneId] = $.ajax({
             url: url,
             type: 'GET',
+            global: false,
             beforeSend: function (xhr) {
                 xhr.setRequestHeader('X-Requested-With', 'SPA');
                 xhr.setRequestHeader('X-SPA-Load', 'true');
@@ -794,7 +795,7 @@ var TabManager = (function () {
     }
 
     // Đã gỡ bỏ toàn bộ cơ chế global loading để tránh flash/flicker toàn bộ layout.
-    $(document).off('ajaxStart ajaxStop');
+    // $(document).off('ajaxStart ajaxStop');
 
     // ─── reInitPlugins() ────────────────────────────────────────────────────
 

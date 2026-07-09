@@ -56,3 +56,386 @@
    at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
 --------------------------------------------------
 
+--------------------------------------------------
+[Thời gian]       : 09/07/2026 22:48:26
+[Username]        : 1
+[Controller]      : Dashboard
+[Action]          : Index
+[URL]             : https://localhost:44326/Dashboard
+[Message]         : C:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\QuanLyBanHang\SalesManagementSystem\SalesManagementSystem\Views\Shared\_Layout.cshtml(630): error CS0103: The name 'keyframes' does not exist in the current context
+[InnerException]  : None
+[StackTrace]      : 
+   at System.Web.Compilation.AssemblyBuilder.Compile()
+   at System.Web.Compilation.BuildProvidersCompiler.PerformBuild()
+   at System.Web.Compilation.BuildManager.CompileWebFile(VirtualPath virtualPath)
+   at System.Web.Compilation.BuildManager.GetVPathBuildResultInternal(VirtualPath virtualPath, Boolean noBuild, Boolean allowCrossApp, Boolean allowBuildInPrecompile, Boolean throwIfNotFound, Boolean ensureIsUpToDate)
+   at System.Web.Compilation.BuildManager.GetVPathBuildResultWithNoAssert(HttpContext context, VirtualPath virtualPath, Boolean noBuild, Boolean allowCrossApp, Boolean allowBuildInPrecompile, Boolean throwIfNotFound, Boolean ensureIsUpToDate)
+   at System.Web.Compilation.BuildManager.GetVirtualPathObjectFactory(VirtualPath virtualPath, HttpContext context, Boolean allowCrossApp, Boolean throwIfNotFound)
+   at System.Web.Compilation.BuildManager.CreateInstanceFromVirtualPath(VirtualPath virtualPath, Type requiredBaseType, HttpContext context, Boolean allowCrossApp)
+   at System.Web.WebPages.BuildManagerWrapper.CreateInstanceOfType[T](String virtualPath)
+   at System.Web.WebPages.VirtualPathFactoryManager.CreateInstanceOfType[T](String virtualPath)
+   at System.Web.WebPages.WebPageBase.CreatePageFromVirtualPath(String virtualPath, HttpContextBase httpContext, Func`2 virtualPathExists, DisplayModeProvider displayModeProvider, IDisplayMode displayMode)
+   at System.Web.WebPages.WebPageBase.<>c__DisplayClass40_0.<RenderPageCore>b__0(TextWriter writer)
+   at System.Web.WebPages.WebPageBase.Write(HelperResult result)
+   at System.Web.WebPages.WebPageBase.RenderSurrounding(String partialViewName, Action`1 body)
+   at System.Web.WebPages.WebPageBase.PopContext()
+   at System.Web.Mvc.ViewResultBase.ExecuteResult(ControllerContext context)
+   at System.Web.Mvc.ControllerActionInvoker.InvokeActionResultFilterRecursive(IList`1 filters, Int32 filterIndex, ResultExecutingContext preContext, ControllerContext controllerContext, ActionResult actionResult)
+   at System.Web.Mvc.ControllerActionInvoker.InvokeActionResultFilterRecursive(IList`1 filters, Int32 filterIndex, ResultExecutingContext preContext, ControllerContext controllerContext, ActionResult actionResult)
+   at System.Web.Mvc.ControllerActionInvoker.InvokeActionResultFilterRecursive(IList`1 filters, Int32 filterIndex, ResultExecutingContext preContext, ControllerContext controllerContext, ActionResult actionResult)
+   at System.Web.Mvc.ControllerActionInvoker.InvokeActionResultWithFilters(ControllerContext controllerContext, IList`1 filters, ActionResult actionResult)
+   at System.Web.Mvc.Async.AsyncControllerActionInvoker.<>c__DisplayClass3_1.<BeginInvokeAction>b__1(IAsyncResult asyncResult)
+   at System.Web.Mvc.Async.AsyncControllerActionInvoker.EndInvokeAction(IAsyncResult asyncResult)
+   at System.Web.Mvc.Controller.<>c.<BeginExecuteCore>b__152_1(IAsyncResult asyncResult, ExecuteCoreState innerState)
+   at System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncVoid`1.CallEndDelegate(IAsyncResult asyncResult)
+   at System.Web.Mvc.Controller.EndExecuteCore(IAsyncResult asyncResult)
+   at System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncVoid`1.CallEndDelegate(IAsyncResult asyncResult)
+   at System.Web.Mvc.Controller.EndExecute(IAsyncResult asyncResult)
+   at System.Web.Mvc.MvcHandler.<>c.<BeginProcessRequest>b__20_1(IAsyncResult asyncResult, ProcessRequestState innerState)
+   at System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncVoid`1.CallEndDelegate(IAsyncResult asyncResult)
+   at System.Web.Mvc.MvcHandler.EndProcessRequest(IAsyncResult asyncResult)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+
+--------------------------------------------------
+[Thời gian]       : 09/07/2026 23:23:02
+[Username]        : 1
+[Controller]      : undefined
+[Action]          : Index
+[URL]             : https://localhost:44326/undefined?TuNgay=2026-01-01&DenNgay=2026-07-09&IDKho=&MaSanPham=&TenSanPham=&DonViTinh=&page=1&pageSize=20
+[Message]         : The controller for path '/undefined' was not found or does not implement IController.
+[InnerException]  : None
+[StackTrace]      : 
+   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)
+   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController& controller, IControllerFactory& factory)
+   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+
+--------------------------------------------------
+[Thời gian]       : 09/07/2026 23:23:54
+[Username]        : 1
+[Controller]      : undefined
+[Action]          : Index
+[URL]             : https://localhost:44326/undefined?TuNgay=2026-01-01&DenNgay=2026-07-09&IDKho=&MaSanPham=&TenSanPham=&DonViTinh=&page=1&pageSize=20
+[Message]         : The controller for path '/undefined' was not found or does not implement IController.
+[InnerException]  : None
+[StackTrace]      : 
+   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)
+   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController& controller, IControllerFactory& factory)
+   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+
+--------------------------------------------------
+[Thời gian]       : 09/07/2026 23:24:59
+[Username]        : 1
+[Controller]      : undefined
+[Action]          : Index
+[URL]             : https://localhost:44326/undefined?TuNgay=2026-01-01&DenNgay=2026-07-09&IDKho=&MaSanPham=&TenSanPham=&DonViTinh=&page=1&pageSize=20
+[Message]         : The controller for path '/undefined' was not found or does not implement IController.
+[InnerException]  : None
+[StackTrace]      : 
+   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)
+   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController& controller, IControllerFactory& factory)
+   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+
+--------------------------------------------------
+[Thời gian]       : 09/07/2026 23:25:38
+[Username]        : 1
+[Controller]      : undefined
+[Action]          : Index
+[URL]             : https://localhost:44326/undefined?TuNgay=2026-01-01&DenNgay=2026-07-09&IDKho=&MaSanPham=&TenSanPham=&DonViTinh=&page=1&pageSize=20
+[Message]         : The controller for path '/undefined' was not found or does not implement IController.
+[InnerException]  : None
+[StackTrace]      : 
+   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)
+   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController& controller, IControllerFactory& factory)
+   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+
+--------------------------------------------------
+[Thời gian]       : 09/07/2026 23:25:40
+[Username]        : 1
+[Controller]      : undefined
+[Action]          : Index
+[URL]             : https://localhost:44326/undefined?TuNgay=2026-01-01&DenNgay=2026-07-09&IDKho=&MaSanPham=&TenSanPham=&DonViTinh=&page=1&pageSize=20
+[Message]         : The controller for path '/undefined' was not found or does not implement IController.
+[InnerException]  : None
+[StackTrace]      : 
+   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)
+   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController& controller, IControllerFactory& factory)
+   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+
+--------------------------------------------------
+[Thời gian]       : 09/07/2026 23:25:41
+[Username]        : 1
+[Controller]      : undefined
+[Action]          : Index
+[URL]             : https://localhost:44326/undefined?TuNgay=2026-01-01&DenNgay=2026-07-09&IDKho=&MaSanPham=&TenSanPham=&DonViTinh=&page=1&pageSize=20
+[Message]         : The controller for path '/undefined' was not found or does not implement IController.
+[InnerException]  : None
+[StackTrace]      : 
+   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)
+   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController& controller, IControllerFactory& factory)
+   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+
+--------------------------------------------------
+[Thời gian]       : 09/07/2026 23:25:42
+[Username]        : 1
+[Controller]      : undefined
+[Action]          : Index
+[URL]             : https://localhost:44326/undefined?TuNgay=2026-01-01&DenNgay=2026-07-09&IDKho=&MaSanPham=&TenSanPham=&DonViTinh=&page=1&pageSize=20
+[Message]         : The controller for path '/undefined' was not found or does not implement IController.
+[InnerException]  : None
+[StackTrace]      : 
+   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)
+   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController& controller, IControllerFactory& factory)
+   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+
+--------------------------------------------------
+[Thời gian]       : 09/07/2026 23:26:30
+[Username]        : 1
+[Controller]      : undefined
+[Action]          : Index
+[URL]             : https://localhost:44326/undefined?TuNgay=2026-01-01&DenNgay=2026-07-09&IDKho=&MaSanPham=&TenSanPham=&DonViTinh=&page=1&pageSize=20
+[Message]         : The controller for path '/undefined' was not found or does not implement IController.
+[InnerException]  : None
+[StackTrace]      : 
+   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)
+   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController& controller, IControllerFactory& factory)
+   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+
+--------------------------------------------------
+[Thời gian]       : 09/07/2026 23:38:10
+[Username]        : 1
+[Controller]      : undefined
+[Action]          : Index
+[URL]             : https://localhost:44326/undefined?TuNgay=2026-06-01&DenNgay=2026-06-30&IDKho=&MaSanPham=&TenSanPham=&DonViTinh=&page=1&pageSize=20
+[Message]         : The controller for path '/undefined' was not found or does not implement IController.
+[InnerException]  : None
+[StackTrace]      : 
+   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)
+   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController& controller, IControllerFactory& factory)
+   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+
+--------------------------------------------------
+[Thời gian]       : 09/07/2026 23:38:12
+[Username]        : 1
+[Controller]      : undefined
+[Action]          : Index
+[URL]             : https://localhost:44326/undefined?TuNgay=2026-11-01&DenNgay=2026-11-30&IDKho=&MaSanPham=&TenSanPham=&DonViTinh=&page=1&pageSize=20
+[Message]         : The controller for path '/undefined' was not found or does not implement IController.
+[InnerException]  : None
+[StackTrace]      : 
+   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)
+   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController& controller, IControllerFactory& factory)
+   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+
+--------------------------------------------------
+[Thời gian]       : 09/07/2026 23:38:14
+[Username]        : 1
+[Controller]      : undefined
+[Action]          : Index
+[URL]             : https://localhost:44326/undefined?TuNgay=2026-01-01&DenNgay=2026-07-09&IDKho=&MaSanPham=&TenSanPham=&DonViTinh=&page=1&pageSize=20
+[Message]         : The controller for path '/undefined' was not found or does not implement IController.
+[InnerException]  : None
+[StackTrace]      : 
+   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)
+   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController& controller, IControllerFactory& factory)
+   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+
+--------------------------------------------------
+[Thời gian]       : 09/07/2026 23:38:15
+[Username]        : 1
+[Controller]      : undefined
+[Action]          : Index
+[URL]             : https://localhost:44326/undefined?TuNgay=2026-01-01&DenNgay=2026-07-09&IDKho=&MaSanPham=&TenSanPham=&DonViTinh=&page=1&pageSize=20
+[Message]         : The controller for path '/undefined' was not found or does not implement IController.
+[InnerException]  : None
+[StackTrace]      : 
+   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)
+   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController& controller, IControllerFactory& factory)
+   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+
+--------------------------------------------------
+[Thời gian]       : 09/07/2026 23:38:18
+[Username]        : 1
+[Controller]      : undefined
+[Action]          : Index
+[URL]             : https://localhost:44326/undefined?TuNgay=2026-01-01&DenNgay=2026-07-09&IDKho=&MaSanPham=&TenSanPham=&DonViTinh=&page=1&pageSize=20
+[Message]         : The controller for path '/undefined' was not found or does not implement IController.
+[InnerException]  : None
+[StackTrace]      : 
+   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)
+   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController& controller, IControllerFactory& factory)
+   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+
+--------------------------------------------------
+[Thời gian]       : 09/07/2026 23:38:46
+[Username]        : 1
+[Controller]      : undefined
+[Action]          : Index
+[URL]             : https://localhost:44326/undefined?TuNgay=2026-01-01&DenNgay=2026-07-09&IDKho=&MaSanPham=&TenSanPham=&DonViTinh=&page=1&pageSize=20
+[Message]         : The controller for path '/undefined' was not found or does not implement IController.
+[InnerException]  : None
+[StackTrace]      : 
+   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)
+   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController& controller, IControllerFactory& factory)
+   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+
+--------------------------------------------------
+[Thời gian]       : 09/07/2026 23:38:50
+[Username]        : 1
+[Controller]      : undefined
+[Action]          : Index
+[URL]             : https://localhost:44326/undefined?TuNgay=2026-01-01&DenNgay=2026-07-09&IDKho=&MaSanPham=&TenSanPham=&DonViTinh=&page=1&pageSize=20
+[Message]         : The controller for path '/undefined' was not found or does not implement IController.
+[InnerException]  : None
+[StackTrace]      : 
+   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)
+   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController& controller, IControllerFactory& factory)
+   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+
+--------------------------------------------------
+[Thời gian]       : 09/07/2026 23:41:30
+[Username]        : 1
+[Controller]      : undefined
+[Action]          : Index
+[URL]             : https://localhost:44326/undefined?TuNgay=2026-01-01&DenNgay=2026-07-09&IDKho=&MaSanPham=&TenSanPham=&DonViTinh=&page=1&pageSize=20
+[Message]         : The controller for path '/undefined' was not found or does not implement IController.
+[InnerException]  : None
+[StackTrace]      : 
+   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)
+   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController& controller, IControllerFactory& factory)
+   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+
+--------------------------------------------------
+[Thời gian]       : 09/07/2026 23:45:08
+[Username]        : 1
+[Controller]      : undefined
+[Action]          : Index
+[URL]             : https://localhost:44326/undefined?TuNgay=2026-01-01&DenNgay=2026-01-31&IDKho=&MaSanPham=&TenSanPham=&DonViTinh=&page=1&pageSize=20
+[Message]         : The controller for path '/undefined' was not found or does not implement IController.
+[InnerException]  : None
+[StackTrace]      : 
+   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)
+   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController& controller, IControllerFactory& factory)
+   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+
+--------------------------------------------------
+[Thời gian]       : 09/07/2026 23:45:10
+[Username]        : 1
+[Controller]      : undefined
+[Action]          : Index
+[URL]             : https://localhost:44326/undefined?TuNgay=2026-10-01&DenNgay=2026-10-31&IDKho=&MaSanPham=&TenSanPham=&DonViTinh=&page=1&pageSize=20
+[Message]         : The controller for path '/undefined' was not found or does not implement IController.
+[InnerException]  : None
+[StackTrace]      : 
+   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)
+   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController& controller, IControllerFactory& factory)
+   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+
+--------------------------------------------------
+[Thời gian]       : 09/07/2026 23:45:40
+[Username]        : 1
+[Controller]      : undefined
+[Action]          : Index
+[URL]             : https://localhost:44326/undefined?TuNgay=2026-07-01&DenNgay=2026-07-09&IDKho=&MaSanPham=&TenSanPham=&DonViTinh=&page=1&pageSize=20
+[Message]         : The controller for path '/undefined' was not found or does not implement IController.
+[InnerException]  : None
+[StackTrace]      : 
+   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)
+   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController& controller, IControllerFactory& factory)
+   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+
+--------------------------------------------------
+[Thời gian]       : 09/07/2026 23:45:48
+[Username]        : 1
+[Controller]      : undefined
+[Action]          : Index
+[URL]             : https://localhost:44326/undefined?TuNgay=2026-01-01&DenNgay=2026-01-31&IDKho=&MaSanPham=&TenSanPham=&DonViTinh=&page=1&pageSize=20
+[Message]         : The controller for path '/undefined' was not found or does not implement IController.
+[InnerException]  : None
+[StackTrace]      : 
+   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)
+   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController& controller, IControllerFactory& factory)
+   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)
+   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
+   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+--------------------------------------------------
+

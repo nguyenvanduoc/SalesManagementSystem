@@ -114,3 +114,68 @@ $container.find('.btn-reset').on('click', function() {
     $form.trigger('submit'); 
 });
 ```
+
+## 4. Quy tắc đồng bộ cơ chế Loading trên lưới (Grid/Table Loader)
+
+Để đảm bảo hiệu ứng loading tự động hiển thị mượt mà ở trung tâm lưới dữ liệu mà không làm mờ/khóa các bộ lọc tìm kiếm ở trên, tất cả các màn hình BẮT BUỘC phải tuân thủ cấu trúc HTML và thiết kế sau:
+
+### A. Cấu trúc HTML chuẩn của một Tab Danh sách
+Vùng chứa bảng/lưới dữ liệu BẮT BUỘC phải được đặt trong một thẻ `div` bao ngoài có một trong các ID hoặc Class chuẩn:
+- ID chuẩn: `id="listContainer"` hoặc `id="table-container"` hoặc `id="gridData"`.
+- Class chuẩn: `class="grid-container"` hoặc `class="table-container"` hoặc `class="table-responsive"`.
+
+**Ví dụ cấu trúc chuẩn:**
+```html
+<div id="tenManHinh-container">
+    <!-- 1. Bộ lọc tìm kiếm đầu trang -->
+    <div class="card shadow-sm mb-3">
+        <form id="searchForm" action="...">
+            ...
+        </form>
+    </div>
+
+    <!-- 2. Vùng chứa lưới dữ liệu (Sẽ tự động phủ Loading khi tải AJAX) -->
+    <div id="table-container" class="grid-container table-responsive">
+        @Html.Partial("_ListPartial", Model)
+    </div>
+</div>
+```
+
+### B. Cơ chế vận hành toàn cục (Global AJAX Loader)
+Hệ thống sử dụng sự kiện AJAX toàn cục của jQuery (`ajaxSend` và `ajaxComplete` đếm request tại `_Layout.cshtml`) để tự động tìm vùng lưới của Tab active và phủ vòng xoay đa sắc lên đó:
+- **Tự động bắt**: Bất kỳ request AJAX nào được gửi đi (tìm kiếm, reload, phân trang, sắp xếp) sẽ tăng biến đếm `loadingRequestCount` và hiển thị vòng xoay đa sắc ở chính giữa lưới.
+- **Không nhấp nháy**: Đảm bảo hiển thị tối thiểu **500ms** để tránh mỏi mắt cho người dùng.
+- **Không làm mờ hết màn hình**: Chỉ làm mờ đúng vùng dữ liệu bảng, người dùng vẫn có thể thao tác ở sidebar, topbar hoặc chuyển tab khác bình thường.
+
+### C. Trường hợp tự viết AJAX riêng (Local AJAX)
+Nếu màn hình danh sách có logic tự gọi AJAX riêng không qua TabManager (ví dụ: màn hình Nhập kho có hàm submit tự viết), BẮT BUỘC phải:
+- Để mặc định `global: true` trong cấu hình `$.ajax` để kích hoạt Loading tự động.
+- Nếu cần can thiệp hoặc hiển thị thủ công, hãy gọi cặp hàm toàn cục:
+  - `showLoading()`: Gọi trước khi gửi request AJAX.
+  - `hideLoading()`: Gọi bên trong cả hai callback `success` và `error` để tắt vòng xoay.
+
+**Mã mẫu tự viết AJAX chuẩn:**
+```javascript
+$form.on('submit', function (e) {
+    e.preventDefault();
+    var url = $(this).attr('action') + '?' + $(this).serialize();
+    
+    // Gọi hiển thị loading trước khi tải
+    if (typeof showLoading === 'function') showLoading();
+    
+    $.ajax({
+        url: url,
+        type: 'GET',
+        success: function (res) {
+            // Tắt loading và cập nhật HTML
+            if (typeof hideLoading === 'function') hideLoading();
+            $('#table-container').html(res);
+        },
+        error: function () {
+            // Tắt loading kể cả khi lỗi
+            if (typeof hideLoading === 'function') hideLoading();
+            showToast('error', 'Lỗi tải dữ liệu');
+        }
+    });
+});
+```
