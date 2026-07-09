@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -23,6 +23,8 @@ namespace SalesManagementSystem.Models.Entities
         public string NguoiDaiDien { get; set; }
 
         public int? STT { get; set; }
+
+        public bool? IsKhoChinh { get; set; }
 
         public DateTime? NgayTao { get; set; }
 

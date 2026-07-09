@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Web.Mvc;
 using SalesManagementSystem.Models.Entities;
@@ -107,6 +107,7 @@ namespace SalesManagementSystem.Controllers
                     DiaChi = model.DiaChi,
                     NguoiDaiDien = model.NguoiDaiDien,
                     STT = model.STT,
+                    IsKhoChinh = model.IsKhoChinh,
                     NgayTao = DateTime.Now,
                     NguoiTao = userId
                 };
@@ -131,7 +132,8 @@ namespace SalesManagementSystem.Controllers
                 TenKhoHang = kh.TenKhoHang,
                 DiaChi = kh.DiaChi,
                 NguoiDaiDien = kh.NguoiDaiDien,
-                STT = kh.STT
+                STT = kh.STT,
+                IsKhoChinh = kh.IsKhoChinh ?? false
             };
             return PartialView(model);
         }
@@ -170,6 +172,7 @@ namespace SalesManagementSystem.Controllers
                     DiaChi = model.DiaChi,
                     NguoiDaiDien = model.NguoiDaiDien,
                     STT = model.STT,
+                    IsKhoChinh = model.IsKhoChinh,
                     NgayCapNhat = DateTime.Now,
                     NguoiCapNhat = userId
                 };

@@ -1,4 +1,4 @@
-﻿@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DmKhoHangViewModel>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DmKhoHangViewModel>
 
 <div class="card shadow-sm">
     <div class="card-body p-0">
@@ -13,6 +13,7 @@
                         <th>Tên kho hàng</th>
                         <th>Địa chỉ</th>
                         <th>Người đại diện</th>
+                        <th class="text-center">Kho chính</th>
                         <th class="text-center">Người tạo</th>
                         <th class="text-center">Ngày tạo</th>
                     </tr>
@@ -59,6 +60,9 @@
                                 <td class="align-middle">@item.TenKhoHang</td>
                                 <td class="align-middle">@item.DiaChi</td>
                                 <td class="align-middle">@item.NguoiDaiDien</td>
+                                <td class="text-center align-middle">
+                                    <input type="checkbox" class="form-check-input" disabled @(item.IsKhoChinh == true ? "checked" : "") />
+                                </td>
                                 <td class="text-center align-middle">@item.TenNguoiTao</td>
                                 <td class="text-center align-middle">@(item.NgayTao.HasValue ? item.NgayTao.Value.ToString("dd/MM/yyyy HH:mm") : "")</td>
                             </tr>
@@ -67,7 +71,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="9" class="text-center py-4 text-muted">
+                            <td colspan="10" class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox fs-2 d-block mb-2"></i>
                                 Chưa có dữ liệu kho hàng.
                             </td>

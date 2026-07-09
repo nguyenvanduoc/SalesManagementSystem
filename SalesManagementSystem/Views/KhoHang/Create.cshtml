@@ -1,4 +1,4 @@
-﻿@model SalesManagementSystem.Models.ViewModels.DmKhoHangCreateEditViewModel
+@model SalesManagementSystem.Models.ViewModels.DmKhoHangCreateEditViewModel
 
 @{
     Layout = null;
@@ -46,6 +46,12 @@
             <div class="col-md-12">
                 <label class="form-label text-muted fw-semibold">Thứ tự</label>
                 @Html.TextBoxFor(m => m.STT, new { @class = "form-control", type = "number", placeholder = "Thứ tự sắp xếp" })
+            </div>
+            <div class="col-md-12">
+                <div class="form-check mt-1">
+                    @Html.CheckBoxFor(m => m.IsKhoChinh, new { @class = "form-check-input", id = "IsKhoChinhCreate" })
+                    <label class="form-check-label fw-semibold" for="IsKhoChinhCreate">Kho chính</label>
+                </div>
             </div>
         </div>
     </div>

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace SalesManagementSystem.Models.ViewModels
 {
@@ -21,5 +21,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public string NguoiDaiDien { get; set; }
 
         public int? STT { get; set; }
+
+        public bool IsKhoChinh { get; set; }
     }
 }

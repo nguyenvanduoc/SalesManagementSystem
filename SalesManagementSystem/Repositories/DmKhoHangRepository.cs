@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Dapper;
 using SalesManagementSystem.Data;
@@ -62,8 +62,8 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
             {
                 var sql = @"
-                    INSERT INTO DM_KhoHang (TenKhoHang, MaKhoHang, DiaChi, NguoiDaiDien, STT, NgayTao, NguoiTao) 
-                    VALUES (@TenKhoHang, @MaKhoHang, @DiaChi, @NguoiDaiDien, @STT, @NgayTao, @NguoiTao);
+                    INSERT INTO DM_KhoHang (TenKhoHang, MaKhoHang, DiaChi, NguoiDaiDien, STT, IsKhoChinh, NgayTao, NguoiTao) 
+                    VALUES (@TenKhoHang, @MaKhoHang, @DiaChi, @NguoiDaiDien, @STT, @IsKhoChinh, @NgayTao, @NguoiTao);
                     SELECT CAST(SCOPE_IDENTITY() as int);";
                 return conn.ExecuteScalar<int>(sql, kh);
             }
@@ -79,7 +79,8 @@ namespace SalesManagementSystem.Repositories
                         MaKhoHang = @MaKhoHang, 
                         DiaChi = @DiaChi,
                         NguoiDaiDien = @NguoiDaiDien,
-                        STT = @STT, 
+                        STT = @STT,
+                        IsKhoChinh = @IsKhoChinh,
                         NgayCapNhat = @NgayCapNhat, 
                         NguoiCapNhat = @NguoiCapNhat
                     WHERE ID = @ID";
