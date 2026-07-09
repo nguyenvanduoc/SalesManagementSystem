@@ -211,7 +211,8 @@ namespace SalesManagementSystem.Repositories
                                         @TongSoLuong = ISNULL(SUM(SoLuongNhap),0) - ISNULL(SUM(SoLuongXuat),0),
                                         @TongGiaTri = ISNULL(SUM(SoLuongNhap * DonGia),0) - ISNULL(SUM(SoLuongXuat * ISNULL(DonGiaVon, 0)),0)
                                     FROM KHO_GiaoDichKho
-                                    WHERE IDSanPham = @IDSanPham AND NgayChungTu <= @NgayChungTu;
+                                    WHERE IDSanPham = @IDSanPham AND NgayChungTu <= @NgayChungTu
+                                      AND IDKho IN (SELECT ID FROM DM_KhoHang WHERE ISNULL(IsKhoChinh, 0) = 1); -- Chỉ tính giá vốn từ kho chính
                                     
                                     IF @TongSoLuong > 0
                                         SELECT CAST(@TongGiaTri / @TongSoLuong AS DECIMAL(18,2));
@@ -301,7 +302,8 @@ namespace SalesManagementSystem.Repositories
                                         @TongSoLuong = ISNULL(SUM(SoLuongNhap),0) - ISNULL(SUM(SoLuongXuat),0),
                                         @TongGiaTri = ISNULL(SUM(SoLuongNhap * DonGia),0) - ISNULL(SUM(SoLuongXuat * ISNULL(DonGiaVon, 0)),0)
                                     FROM KHO_GiaoDichKho
-                                    WHERE IDSanPham = @IDSanPham AND NgayChungTu <= @NgayChungTu;
+                                    WHERE IDSanPham = @IDSanPham AND NgayChungTu <= @NgayChungTu
+                                      AND IDKho IN (SELECT ID FROM DM_KhoHang WHERE ISNULL(IsKhoChinh, 0) = 1); -- Chỉ tính giá vốn từ kho chính
                                     
                                     IF @TongSoLuong > 0
                                         SELECT CAST(@TongGiaTri / @TongSoLuong AS DECIMAL(18,2));
@@ -469,7 +471,8 @@ namespace SalesManagementSystem.Repositories
                                         @TongSoLuong = ISNULL(SUM(SoLuongNhap),0) - ISNULL(SUM(SoLuongXuat),0),
                                         @TongGiaTri = ISNULL(SUM(SoLuongNhap * DonGia),0) - ISNULL(SUM(SoLuongXuat * ISNULL(DonGiaVon, 0)),0)
                                     FROM KHO_GiaoDichKho
-                                    WHERE IDSanPham = @IDSanPham AND NgayChungTu <= @NgayChungTu;
+                                    WHERE IDSanPham = @IDSanPham AND NgayChungTu <= @NgayChungTu
+                                      AND IDKho IN (SELECT ID FROM DM_KhoHang WHERE ISNULL(IsKhoChinh, 0) = 1); -- Chỉ tính giá vốn từ kho chính
                                     
                                     IF @TongSoLuong > 0
                                         SELECT CAST(@TongGiaTri / @TongSoLuong AS DECIMAL(18,2));
@@ -623,7 +626,8 @@ namespace SalesManagementSystem.Repositories
                                         @TongSoLuong = ISNULL(SUM(SoLuongNhap),0) - ISNULL(SUM(SoLuongXuat),0),
                                         @TongGiaTri = ISNULL(SUM(SoLuongNhap * DonGia),0) - ISNULL(SUM(SoLuongXuat * ISNULL(DonGiaVon, 0)),0)
                                     FROM KHO_GiaoDichKho
-                                    WHERE IDSanPham = @IDSanPham AND NgayChungTu <= @NgayChungTu;
+                                    WHERE IDSanPham = @IDSanPham AND NgayChungTu <= @NgayChungTu
+                                      AND IDKho IN (SELECT ID FROM DM_KhoHang WHERE ISNULL(IsKhoChinh, 0) = 1); -- Chỉ tính giá vốn từ kho chính
                                     
                                     IF @TongSoLuong > 0
                                         SELECT CAST(@TongGiaTri / @TongSoLuong AS DECIMAL(18,2));

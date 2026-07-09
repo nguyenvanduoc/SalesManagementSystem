@@ -40,6 +40,7 @@ BEGIN
             SUM(pn_ct.SoLuong * ISNULL(pn_ct.DonGiaVanChuyen, 0)) / NULLIF(SUM(pn_ct.SoLuong), 0) AS AvgDonGiaVanChuyen
         FROM KHO_PhieuNhap_ChiTiet pn_ct
         INNER JOIN KHO_PhieuNhap pn ON pn_ct.IDPhieuNhap = pn.ID
+        INNER JOIN DM_KhoHang kh_pn ON pn.IDKho = kh_pn.ID AND kh_pn.IsKhoChinh = 1  -- Chỉ tính giá vốn từ kho chính
         WHERE pn_ct.IDSanPham = ct.IDSanPham 
           AND pn.TrangThai = 2 AND pn.IsDeleted = 0
           AND pn.NgayNhap <= @DenNgay

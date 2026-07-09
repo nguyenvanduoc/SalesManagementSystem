@@ -19,11 +19,11 @@ class Program
             {
                 using (IDbCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "SELECT OBJECT_DEFINITION(OBJECT_ID('sp_Dashboard_GetData'))";
+                    string sql = File.ReadAllText(@"c:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\QuanLyBanHang\SalesManagementSystem\SalesManagementSystem\App_Data\sp_Dashboard_GetData_ALTER.sql");
+                    cmd.CommandText = sql;
                     conn.Open();
-                    object def = cmd.ExecuteScalar();
-                    File.WriteAllText(@"c:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\QuanLyBanHang\SalesManagementSystem\SalesManagementSystem\App_Data\sp_Dashboard_GetData.sql", def != null ? def.ToString() : "NOT FOUND");
-                    Console.WriteLine("Done");
+                    cmd.ExecuteNonQuery();
+                    Console.WriteLine("Altered SP successfully!");
                 }
             }
         }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -205,6 +205,7 @@ namespace SalesManagementSystem.Controllers
                             ISNULL(ct.TienVanChuyen, 0) AS TienVanChuyen
                         FROM KHO_PhieuNhap_ChiTiet ct
                         INNER JOIN KHO_PhieuNhap p ON ct.IDPhieuNhap = p.ID
+                        INNER JOIN DM_KhoHang kh ON p.IDKho = kh.ID AND kh.IsKhoChinh = 1  -- Chỉ kho chính mới có giá vốn thực
                         WHERE p.IsDeleted = 0 
                           AND p.TrangThai = 2
                           AND ct.IDSanPham = @IDSanPham

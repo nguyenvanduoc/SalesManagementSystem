@@ -16,7 +16,7 @@
                 <div class="col-md-3">
                     <label class="form-label">Thời gian</label>
                     <select class="form-select ddl-thoi-gian" id="ThoiGian">
-                                <option value="current_month">Đầu tháng đến hiện tại</option>
+                        <option value="current_month">Đầu tháng đến hiện tại</option>
                         <option value="month_1">Tháng 1</option>
                         <option value="month_2">Tháng 2</option>
                         <option value="month_3">Tháng 3</option>
@@ -33,7 +33,7 @@
                         <option value="quarter_2">Quý 2</option>
                         <option value="quarter_3">Quý 3</option>
                         <option value="quarter_4">Quý 4</option>
-                            <option value="current_year">Từ đầu năm đến hiện tại</option>
+                        <option value="current_year" selected="selected">Từ đầu năm đến hiện tại</option>
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -83,8 +83,8 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            loadData();
             syncThoiGian();
+            loadData();
 
             $('#btnSearch').click(function () {
                 loadData();
@@ -143,6 +143,9 @@
                 var endM = startM + 2;
                 s = fDate(y, startM, 1);
                 e = fDate(y, endM, getDays(y, endM));
+            } else if (val === 'current_year') {
+                s = fDate(y, 1, 1);
+                e = fDate(y, now.getMonth() + 1, now.getDate());
             }
 
             return s && e ? { tuNgay: s, denNgay: e } : null;
