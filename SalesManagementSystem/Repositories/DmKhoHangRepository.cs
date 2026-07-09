@@ -17,6 +17,14 @@ namespace SalesManagementSystem.Repositories
             _db = db;
         }
 
+        public IEnumerable<DM_KhoHang> GetAll()
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                return conn.Query<DM_KhoHang>("SELECT * FROM DM_KhoHang ORDER BY ISNULL(STT, 9999), TenKhoHang").ToList();
+            }
+        }
+
         public IEnumerable<DmKhoHangViewModel> GetPaged(int page, int pageSize, string keyword, out int totalRecords)
         {
             using (var conn = _db.CreateConnection())

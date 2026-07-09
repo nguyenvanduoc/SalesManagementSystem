@@ -4,7 +4,7 @@
 -- Description: Retrieve all dashboard statistics, charts, warnings, and recent orders in a single database call.
 -- =============================================
 
-CREATE   PROCEDURE sp_Dashboard_GetData
+CREATE PROCEDURE sp_Dashboard_GetData
     @TuNgay DATETIME,
     @DenNgay DATETIME,
     @TuNgayKyTruoc DATETIME,
@@ -142,9 +142,10 @@ BEGIN
     SELECT 
         gd.IDSanPham,
         SUM(gd.SoLuongNhap - gd.SoLuongXuat) AS SoLuongTon,
-        ISNULL((SELECT TOP 1 DonGia FROM KHO_GiaoDichKho WHERE IDSanPham = gd.IDSanPham AND SoLuongNhap > 0 AND IsHuy = 0 ORDER BY NgayChungTu DESC, ID DESC), 0) AS DonGiaTon
+        ISNULL((SELECT TOP 1 gd2.DonGia FROM KHO_GiaoDichKho gd2 INNER JOIN DM_KhoHang kh2 ON gd2.IDKho = kh2.ID AND ISNULL(kh2.IsKhoChinh, 0) = 1 WHERE gd2.IDSanPham = gd.IDSanPham AND gd2.SoLuongNhap > 0 AND gd2.IsHuy = 0 ORDER BY gd2.NgayChungTu DESC, gd2.ID DESC), 0) AS DonGiaTon
     INTO #TempStock
     FROM KHO_GiaoDichKho gd
+    INNER JOIN DM_KhoHang kh ON gd.IDKho = kh.ID AND ISNULL(kh.IsKhoChinh, 0) = 1
     WHERE gd.IsHuy = 0 AND gd.NgayChungTu <= @DenNgay
     GROUP BY gd.IDSanPham;
 
@@ -228,6 +229,7 @@ BEGIN
             gd.IDSanPham,
             SUM(gd.SoLuongNhap - gd.SoLuongXuat) AS SoLuongTon
         FROM KHO_GiaoDichKho gd
+        INNER JOIN DM_KhoHang kh ON gd.IDKho = kh.ID AND ISNULL(kh.IsKhoChinh, 0) = 1
         WHERE gd.IsHuy = 0 AND gd.NgayChungTu <= @DenNgay
         GROUP BY gd.IDSanPham
     )

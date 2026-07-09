@@ -1,0 +1,214 @@
+@model SalesManagementSystem.Models.ViewModels.HaoHutHangHoaViewModel
+@{
+    Layout = null;
+    var isBanHang = Model.LoaiHaoHut == 1;
+}
+<div class="modal fade" id="modalEdit" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header text-white" style="background-color: #0b5b84;">
+                <h5 class="modal-title fw-bold text-uppercase"><i class="bi bi-pencil-square me-2"></i> Cập nhật hao hụt: @Model.SoChungTu</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body bg-light">
+                <form id="frmEdit">
+                    <input type="hidden" id="eID" name="ID" value="@Model.ID" />
+                    <input type="hidden" id="eSoChungTu" name="SoChungTu" value="@Model.SoChungTu" />
+                    <input type="hidden" id="eIDChungTuBanHang" name="IDChungTuBanHang" value="@Model.IDChungTuBanHang" />
+                    <input type="hidden" id="eIDKhachHang" name="IDKhachHang" value="@Model.IDKhachHang" />
+                    
+                    <div class="row g-3 mb-3 p-3 bg-white rounded shadow-sm">
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small mb-1">Ngày hao hụt <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="eNgayHaoHut" name="NgayHaoHut" value="@Model.NgayHaoHut.ToString("yyyy-MM-dd")" required />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small mb-1">Loại hao hụt <span class="text-danger">*</span></label>
+                            <select class="form-select fw-bold" id="eLoaiHaoHut" name="LoaiHaoHut" disabled>
+                                <option value="1" @(Model.LoaiHaoHut == 1 ? "selected" : "")>Hao hụt bán hàng</option>
+                                <option value="2" @(Model.LoaiHaoHut == 2 ? "selected" : "")>Hao hụt tồn kho</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 @(Model.LoaiHaoHut == 1 ? "d-none" : "")">
+                            <label class="form-label text-muted small mb-1">Kho <span class="text-danger">*</span></label>
+                            <select class="form-select select2-modal" id="eIDKho" name="IDKho" disabled>
+                                @if (ViewBag.KhoHangs != null)
+                                {
+                                    foreach (var item in ViewBag.KhoHangs)
+                                    {
+                                        <option value="@item.ID" @(Model.IDKho == item.ID ? "selected" : "")>@item.TenKhoHang</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6 @(Model.LoaiHaoHut == 2 ? "d-none" : "")">
+                            <label class="form-label text-muted small mb-1">Đơn hàng đã giao <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control fw-bold text-primary" value="@Model.SoDonHang - @Model.TenKhachHang" readonly />
+                            <input type="hidden" id="eIDDonHang" name="IDDonHang" value="@Model.IDDonHang" />
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label text-muted small mb-1">Lý do <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="eLyDo" name="LyDo" value="@Model.LyDo" required />
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label text-muted small mb-1">Ghi chú</label>
+                            <textarea class="form-control" id="eGhiChu" name="GhiChu" rows="2">@Model.GhiChu</textarea>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-white rounded shadow-sm mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-bold text-primary mb-0"><i class="bi bi-list-check me-2"></i>Chi tiết hàng hóa hao hụt</h6>
+                            @if (Model.LoaiHaoHut == 2)
+                            {
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="addDSRow_Edit()">
+                                    <i class="bi bi-plus-lg me-1"></i> Thêm dòng
+                                </button>
+                            }
+                        </div>
+                        <div class="table-responsive" style="max-height: 300px;">
+                            <table class="table table-bordered table-hover align-middle" id="tblChiTietEdit">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>Mã SP</th>
+                                        <th>Tên SP</th>
+                                        <th class="text-end text-success">SL hiện tại</th>
+                                        <th class="text-end text-danger">SL hao hụt</th>
+                                        <th class="text-end text-danger">Đơn giá hao hụt</th>
+                                        <th class="text-end text-danger fw-bold">Tiền hao hụt</th>
+                                        @if(isBanHang){
+                                            <th class="text-end">Đơn giá bán</th>
+                                            <th class="text-end text-warning">Doanh thu giảm</th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Render via JS to allow editing SoLuongHaoHut -->
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-light fw-bold">
+                                        <td colspan="3" class="text-end">TỔNG CỘNG:</td>
+                                        <td class="text-end text-danger" id="esumSL">0</td>
+                                        <td></td>
+                                        <td class="text-end text-danger" id="esumTien">0</td>
+                                        @if(isBanHang){
+                                            <td></td>
+                                            <td class="text-end text-warning" id="esumGiam">0</td>
+                                        }
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-white">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><i class="bi bi-x-lg me-1"></i> Đóng</button>
+                <button type="button" class="btn btn-primary px-4" onclick="updateHaoHut(1)"><i class="bi bi-save me-1"></i> Lưu thay đổi</button>
+                <button type="button" class="btn btn-success px-4" onclick="updateHaoHut(2)"><i class="bi bi-check-circle me-1"></i> Ghi nhận ngay</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var listChiTietEdit = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Details));
+    var isBanHangEdit = @(isBanHang ? "true" : "false");
+
+    $('#modalEdit').on('shown.bs.modal', function () {
+        $('.select2-modal').select2({
+            theme: 'bootstrap-5',
+            dropdownParent: $('#modalEdit'),
+            width: '100%'
+        });
+        renderChiTietEdit();
+    });
+
+    function renderChiTietEdit() {
+        var html = '';
+        var sumSL = 0, sumTien = 0, sumGiam = 0;
+
+        $.each(listChiTietEdit, function (i, x) {
+            sumSL += parseFloat(x.SoLuongHaoHut || 0);
+            sumTien += parseFloat(x.TienHaoHut || 0);
+            sumGiam += parseFloat(x.DoanhThuGiam || 0);
+
+            html += '<tr>';
+            html += '<td>' + x.MaSanPham + '</td>';
+            html += '<td>' + x.TenSanPham + '</td>';
+            html += '<td class="text-end text-success fw-bold">' + formatNumber(x.SLHienTai) + '</td>';
+            html += '<td><input type="number" class="form-control form-control-sm text-end text-danger fw-bold" value="' + x.SoLuongHaoHut + '" onchange="changeSLEdit(' + i + ', this.value)" min="0" /></td>';
+            html += '<td class="text-end">' + formatNumber(x.DonGiaHaoHut) + '</td>';
+            html += '<td class="text-end text-danger fw-bold">' + formatNumber(x.TienHaoHut) + '</td>';
+            if (isBanHangEdit) {
+                html += '<td class="text-end">' + formatNumber(x.DonGiaBan) + '</td>';
+                html += '<td class="text-end text-warning fw-bold">' + formatNumber(x.DoanhThuGiam) + '</td>';
+            }
+            html += '</tr>';
+        });
+
+        $('#tblChiTietEdit tbody').html(html);
+        $('#esumSL').text(formatNumber(sumSL));
+        $('#esumTien').text(formatNumber(sumTien));
+        $('#esumGiam').text(formatNumber(sumGiam));
+    }
+
+    function changeSLEdit(index, val) {
+        var sl = parseFloat(val) || 0;
+        var x = listChiTietEdit[index];
+        x.SoLuongHaoHut = sl;
+        x.TienHaoHut = sl * x.DonGiaHaoHut;
+        x.DoanhThuGiam = sl * (x.DonGiaBan || 0);
+        renderChiTietEdit();
+    }
+
+    function updateHaoHut(type) {
+        if (!$('#eNgayHaoHut').val()) { showToast('warning', 'Nhập ngày hao hụt'); return; }
+        if (!$('#eLyDo').val()) { showToast('warning', 'Nhập lý do hao hụt'); return; }
+        
+        var loai = $('#eLoaiHaoHut').val();
+        if (loai == '2' && !$('#eIDKho').val()) { showToast('warning', 'Chọn kho'); return; }
+
+        var data = {
+            ID: $('#eID').val(),
+            NgayHaoHut: $('#eNgayHaoHut').val(),
+            LoaiHaoHut: loai,
+            IDKho: loai == '2' ? $('#eIDKho').val() : null,
+            IDDonHang: $('#eIDDonHang').val(),
+            IDChungTuBanHang: $('#eIDChungTuBanHang').val(),
+            IDKhachHang: $('#eIDKhachHang').val(),
+            LyDo: $('#eLyDo').val(),
+            GhiChu: $('#eGhiChu').val(),
+            Details: listChiTietEdit.filter(x => x.SoLuongHaoHut > 0)
+        };
+
+        $.ajax({
+            url: '@Url.Action("Save", "KHO_HaoHut")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function(res) {
+                if (res.success) {
+                    if (type == 2) {
+                        $.post('@Url.Action("GhiNhan", "KHO_HaoHut")', { id: res.id }, function(res2) {
+                            if (res2.success) {
+                                showToast('success', 'Ghi nhận thành công!');
+                                $('#modalEdit').modal('hide');
+                                loadData();
+                            } else {
+                                showToast('error', res2.message);
+                                loadData();
+                            }
+                        });
+                    } else {
+                        showToast('success', res.message);
+                        $('#modalEdit').modal('hide');
+                        loadData();
+                    }
+                } else {
+                    showToast('error', res.message);
+                }
+            }
+        });
+    }
+</script>

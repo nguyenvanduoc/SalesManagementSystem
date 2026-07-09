@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Models.ViewModels;
 
@@ -6,6 +6,7 @@ namespace SalesManagementSystem.Repositories.Interfaces
 {
     public interface IDmKhoHangRepository
     {
+        IEnumerable<DM_KhoHang> GetAll();
         IEnumerable<DmKhoHangViewModel> GetPaged(int page, int pageSize, string keyword, out int totalRecords);
         DM_KhoHang GetById(int id);
         int Insert(DM_KhoHang kh);

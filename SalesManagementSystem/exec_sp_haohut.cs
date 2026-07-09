@@ -20,20 +20,24 @@ class Program
                 conn.Open();
                 Console.WriteLine("Connection opened successfully.");
                 
-                string sqlPath = @"c:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\QuanLyBanHang\SalesManagementSystem\SalesManagementSystem\App_Data\schema_haohut.sql";
-                string sql = File.ReadAllText(sqlPath);
-                string[] batches = sql.Split(new[] { "\r\nGO", "\nGO", "GO\r", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
-                
-                foreach(string batch in batches)
+                string[] files = { "insert_menu.sql" };
+                foreach (var f in files)
                 {
-                    if(string.IsNullOrWhiteSpace(batch)) continue;
-                    using (IDbCommand cmd = conn.CreateCommand())
+                    string sqlPath = @"c:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\QuanLyBanHang\SalesManagementSystem\SalesManagementSystem\App_Data\" + f;
+                    string sql = File.ReadAllText(sqlPath);
+                    string[] batches = sql.Split(new[] { "\r\nGO", "\nGO", "GO\r", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    
+                    foreach(string batch in batches)
                     {
-                        cmd.CommandText = batch;
-                        cmd.ExecuteNonQuery();
+                        if(string.IsNullOrWhiteSpace(batch)) continue;
+                        using (IDbCommand cmd = conn.CreateCommand())
+                        {
+                            cmd.CommandText = batch;
+                            cmd.ExecuteNonQuery();
+                        }
                     }
+                    Console.WriteLine(f + " executed successfully.");
                 }
-                Console.WriteLine("SP Executed successfully.");
             }
         }
         catch(Exception ex)

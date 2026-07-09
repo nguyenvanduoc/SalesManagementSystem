@@ -1,0 +1,75 @@
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'NS_DonDatHang' AND COLUMN_NAME = 'IsHaoHut')
+BEGIN
+    ALTER TABLE NS_DonDatHang ADD IsHaoHut BIT NOT NULL DEFAULT(0);
+END
+GO
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'KHO_GiaoDichKho' AND COLUMN_NAME = 'IDHaoHut')
+BEGIN
+    ALTER TABLE KHO_GiaoDichKho ADD IDHaoHut INT NULL;
+END
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[KHO_HaoHutHangHoa]') AND type in (N'U'))
+BEGIN
+CREATE TABLE KHO_HaoHutHangHoa
+(
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    SoChungTu NVARCHAR(50) NOT NULL,
+    NgayHaoHut DATETIME NOT NULL,
+    LoaiHaoHut INT NOT NULL,
+    IDKho INT NULL,
+    IDDonHang INT NULL,
+    IDChungTuBanHang INT NULL,
+    IDKhachHang INT NULL,
+    LyDo NVARCHAR(1000) NULL,
+    GhiChu NVARCHAR(1000) NULL,
+    TongSoLuong DECIMAL(18,2) NULL DEFAULT(0),
+    TongTienHaoHut DECIMAL(18,2) NULL DEFAULT(0),
+    TrangThai INT NOT NULL DEFAULT(1),
+    NgayTao DATETIME NULL,
+    NguoiTao INT NULL,
+    NgayCapNhat DATETIME NULL,
+    NguoiCapNhat INT NULL
+)
+END
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[KHO_HaoHutHangHoa_ChiTiet]') AND type in (N'U'))
+BEGIN
+CREATE TABLE KHO_HaoHutHangHoa_ChiTiet
+(
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    IDHaoHut INT NOT NULL,
+    IDSanPham INT NOT NULL,
+    SoLuongHaoHut DECIMAL(18,2) NOT NULL,
+    DonGiaHaoHut DECIMAL(18,2) NOT NULL,
+    TienHaoHut DECIMAL(18,2) NOT NULL,
+    DonGiaBan DECIMAL(18,2) NULL,
+    DoanhThuGiam DECIMAL(18,2) NULL,
+    GhiChu NVARCHAR(1000) NULL,
+    NgayTao DATETIME NULL,
+    NguoiTao INT NULL,
+    NgayCapNhat DATETIME NULL,
+    NguoiCapNhat INT NULL
+)
+END
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[KHO_HaoHutHangHoa_File]') AND type in (N'U'))
+BEGIN
+CREATE TABLE KHO_HaoHutHangHoa_File
+(
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    IDHaoHut INT NOT NULL,
+    TenFile NVARCHAR(255) NULL,
+    LoaiFile NVARCHAR(100) NULL,
+    NoiDungFile VARBINARY(MAX) NULL,
+    GhiChu NVARCHAR(1000) NULL,
+    NgayTao DATETIME NULL,
+    NguoiTao INT NULL,
+    NgayCapNhat DATETIME NULL,
+    NguoiCapNhat INT NULL
+)
+END
+GO

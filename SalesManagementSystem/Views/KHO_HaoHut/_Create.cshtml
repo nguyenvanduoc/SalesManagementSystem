@@ -1,0 +1,326 @@
+@model SalesManagementSystem.Models.ViewModels.HaoHutHangHoaViewModel
+@{
+    Layout = null;
+}
+<div class="modal fade" id="modalCreate" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header text-white" style="background-color: #0b5b84;">
+                <h5 class="modal-title fw-bold text-uppercase"><i class="bi bi-plus-circle me-2"></i> Thêm mới hao hụt</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body bg-light">
+                <form id="frmCreate">
+                    <div class="row g-3 mb-3 p-3 bg-white rounded shadow-sm">
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small mb-1">Ngày hao hụt <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="cNgayHaoHut" name="NgayHaoHut" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small mb-1">Loại hao hụt <span class="text-danger">*</span></label>
+                            <select class="form-select fw-bold" id="cLoaiHaoHut" name="LoaiHaoHut" onchange="changeLoaiHaoHut()">
+                                <option value="1">Hao hụt bán hàng</option>
+                                <option value="2">Hao hụt tồn kho</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 box-kho d-none">
+                            <label class="form-label text-muted small mb-1">Kho <span class="text-danger">*</span></label>
+                            <select class="form-select select2-modal" id="cIDKho" name="IDKho">
+                                <option value="">-- Chọn kho --</option>
+                                @if (ViewBag.KhoHangs != null)
+                                {
+                                    foreach (var item in ViewBag.KhoHangs)
+                                    {
+                                        <option value="@item.ID">@item.TenKhoHang</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3 box-donhang">
+                            <label class="form-label text-muted small mb-1">Đơn hàng đã giao <span class="text-danger">*</span></label>
+                            <select class="form-select" id="cIDDonHang" name="IDDonHang">
+                                <option value="">-- Tìm đơn hàng --</option>
+                            </select>
+                            <input type="hidden" id="cIDKhachHang" name="IDKhachHang" />
+                            <input type="hidden" id="cIDChungTuBanHang" name="IDChungTuBanHang" />
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label text-muted small mb-1">Lý do <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="cLyDo" name="LyDo" placeholder="Nhập lý do hao hụt..." required />
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label text-muted small mb-1">Ghi chú</label>
+                            <textarea class="form-control" id="cGhiChu" name="GhiChu" rows="2" placeholder="Ghi chú thêm..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- BOX CHI TIET -->
+                    <div class="p-3 bg-white rounded shadow-sm mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-bold text-primary mb-0"><i class="bi bi-list-check me-2"></i>Chi tiết hàng hóa hao hụt</h6>
+                            <button type="button" class="btn btn-outline-primary btn-sm box-kho d-none" onclick="addDSRow()">
+                                <i class="bi bi-plus-lg me-1"></i> Thêm dòng
+                            </button>
+                        </div>
+                        <div class="table-responsive" style="max-height: 300px;">
+                            <table class="table table-bordered table-hover align-middle" id="tblChiTiet">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>Mã SP</th>
+                                        <th>Tên SP</th>
+                                        <th class="text-end">SL hiện tại</th>
+                                        <th class="text-end text-danger">SL hao hụt</th>
+                                        <th class="text-end text-danger">Đơn giá hao hụt</th>
+                                        <th class="text-end text-danger fw-bold">Tiền hao hụt</th>
+                                        <th class="text-end box-donhang">Đơn giá bán</th>
+                                        <th class="text-end box-donhang text-warning">Doanh thu giảm</th>
+                                        <th class="text-center" style="width: 50px;">Xóa</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Dữ liệu render qua JS -->
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-light fw-bold">
+                                        <td colspan="3" class="text-end">TỔNG CỘNG:</td>
+                                        <td class="text-end text-danger" id="sumSL">0</td>
+                                        <td></td>
+                                        <td class="text-end text-danger" id="sumTien">0</td>
+                                        <td class="box-donhang"></td>
+                                        <td class="text-end box-donhang text-warning" id="sumGiam">0</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-white">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><i class="bi bi-x-lg me-1"></i> Đóng</button>
+                <button type="button" class="btn btn-primary px-4" onclick="saveHaoHut(1)"><i class="bi bi-save me-1"></i> Lưu nháp</button>
+                <button type="button" class="btn btn-success px-4" onclick="saveHaoHut(2)"><i class="bi bi-check-circle me-1"></i> Ghi nhận ngay</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var listChiTiet = [];
+
+    $('#modalCreate').on('shown.bs.modal', function () {
+        $('.select2-modal').select2({
+            theme: 'bootstrap-5',
+            dropdownParent: $('#modalCreate'),
+            width: '100%'
+        });
+
+        // Setup select2 cho Đơn hàng
+        $('#cIDDonHang').select2({
+            theme: 'bootstrap-5',
+            dropdownParent: $('#modalCreate'),
+            width: '100%',
+            placeholder: '-- Tìm đơn hàng --',
+            ajax: {
+                url: '@Url.Action("GetDonHang", "KHO_HaoHut")',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return { keyword: params.term };
+                },
+                processResults: function (data) {
+                    if (data.success) {
+                        return {
+                            results: $.map(data.data, function (item) {
+                                return {
+                                    id: item.ID,
+                                    text: item.SoDonHang + ' - ' + item.TenKhachHang,
+                                    itemData: item
+                                }
+                            })
+                        };
+                    }
+                    return { results: [] };
+                },
+                cache: true
+            }
+        });
+
+        $('#cIDDonHang').on('select2:select', function (e) {
+            var data = e.params.data;
+            $('#cIDKhachHang').val(data.itemData.IDKhachHang);
+            $('#cIDChungTuBanHang').val(data.itemData.IDChungTuBanHang);
+            loadChiTietDonHang(data.id);
+        });
+
+        changeLoaiHaoHut();
+    });
+
+    function changeLoaiHaoHut() {
+        var loai = $('#cLoaiHaoHut').val();
+        listChiTiet = [];
+        renderChiTiet();
+
+        if (loai == '1') {
+            $('.box-donhang').removeClass('d-none');
+            $('.box-kho').addClass('d-none');
+        } else {
+            $('.box-donhang').addClass('d-none');
+            $('.box-kho').removeClass('d-none');
+            $('#cIDDonHang').val(null).trigger('change');
+            $('#cIDKhachHang').val('');
+            $('#cIDChungTuBanHang').val('');
+        }
+    }
+
+    function loadChiTietDonHang(idDonHang) {
+        if (!idDonHang) return;
+        $.get('@Url.Action("GetChiTietDonHang", "KHO_HaoHut")?id=' + idDonHang, function (res) {
+            if (res.success) {
+                listChiTiet = res.data.map(function (x) {
+                    return {
+                        IDSanPham: x.IDSanPham,
+                        MaSanPham: x.MaSanPham,
+                        TenSanPham: x.TenSanPham,
+                        SLHienTai: x.SoLuongHienTai,
+                        DonGiaBan: x.DonGiaBan,
+                        DonGiaHaoHut: x.DonGiaHaoHut,
+                        SoLuongHaoHut: 0,
+                        TienHaoHut: 0,
+                        DoanhThuGiam: 0
+                    };
+                });
+                renderChiTiet();
+            }
+        });
+    }
+
+    // Function for Hao Hut Ton Kho manual add (placeholder for simplicity)
+    function addDSRow() {
+        var idKho = $('#cIDKho').val();
+        if (!idKho) {
+            showToast('warning', 'Vui lòng chọn kho trước khi thêm sản phẩm');
+            return;
+        }
+        showToast('warning', 'Tính năng chọn sản phẩm thủ công cho hao hụt tồn kho sẽ được cập nhật thêm.');
+    }
+
+    function renderChiTiet() {
+        var html = '';
+        var sumSL = 0, sumTien = 0, sumGiam = 0;
+        var isBanHang = $('#cLoaiHaoHut').val() == '1';
+
+        $.each(listChiTiet, function (i, x) {
+            sumSL += parseFloat(x.SoLuongHaoHut || 0);
+            sumTien += parseFloat(x.TienHaoHut || 0);
+            sumGiam += parseFloat(x.DoanhThuGiam || 0);
+
+            html += '<tr>';
+            html += '<td>' + x.MaSanPham + '</td>';
+            html += '<td>' + x.TenSanPham + '</td>';
+            html += '<td class="text-end text-success fw-bold">' + formatNumber(x.SLHienTai) + '</td>';
+            html += '<td><input type="number" class="form-control form-control-sm text-end text-danger fw-bold" value="' + x.SoLuongHaoHut + '" onchange="changeSL(' + i + ', this.value)" min="0" max="' + (isBanHang ? x.SLHienTai : 999999) + '" /></td>';
+            html += '<td class="text-end">' + formatNumber(x.DonGiaHaoHut) + '</td>';
+            html += '<td class="text-end text-danger fw-bold">' + formatNumber(x.TienHaoHut) + '</td>';
+            if (isBanHang) {
+                html += '<td class="text-end">' + formatNumber(x.DonGiaBan) + '</td>';
+                html += '<td class="text-end text-warning fw-bold">' + formatNumber(x.DoanhThuGiam) + '</td>';
+            } else {
+                html += '<td class="d-none"></td><td class="d-none"></td>';
+            }
+            html += '<td class="text-center"><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRow(' + i + ')"><i class="bi bi-trash"></i></button></td>';
+            html += '</tr>';
+        });
+
+        $('#tblChiTiet tbody').html(html);
+        $('#sumSL').text(formatNumber(sumSL));
+        $('#sumTien').text(formatNumber(sumTien));
+        $('#sumGiam').text(formatNumber(sumGiam));
+    }
+
+    function changeSL(index, val) {
+        var sl = parseFloat(val) || 0;
+        var x = listChiTiet[index];
+        var isBanHang = $('#cLoaiHaoHut').val() == '1';
+        
+        if (isBanHang && sl > x.SLHienTai) {
+            showToast('error', 'Số lượng hao hụt không được lớn hơn số lượng hiện tại!');
+            sl = x.SLHienTai;
+        }
+
+        x.SoLuongHaoHut = sl;
+        x.TienHaoHut = sl * x.DonGiaHaoHut;
+        x.DoanhThuGiam = sl * (x.DonGiaBan || 0);
+        renderChiTiet();
+    }
+
+    function removeRow(index) {
+        listChiTiet.splice(index, 1);
+        renderChiTiet();
+    }
+
+    function formatNumber(num) {
+        if (num == null) return '0';
+        return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+    }
+
+    function saveHaoHut(type) {
+        var loai = $('#cLoaiHaoHut').val();
+        if (!$('#cNgayHaoHut').val()) { showToast('warning', 'Nhập ngày hao hụt'); return; }
+        if (!$('#cLyDo').val()) { showToast('warning', 'Nhập lý do hao hụt'); return; }
+        
+        if (loai == '1' && !$('#cIDDonHang').val()) { showToast('warning', 'Chọn đơn hàng'); return; }
+        if (loai == '2' && !$('#cIDKho').val()) { showToast('warning', 'Chọn kho'); return; }
+
+        var totalHaoHut = 0;
+        $.each(listChiTiet, function(i, x) { totalHaoHut += x.SoLuongHaoHut; });
+        if (totalHaoHut <= 0) {
+            showToast('warning', 'Vui lòng nhập số lượng hao hụt > 0 cho ít nhất 1 sản phẩm');
+            return;
+        }
+
+        var data = {
+            ID: 0,
+            NgayHaoHut: $('#cNgayHaoHut').val(),
+            LoaiHaoHut: loai,
+            IDKho: loai == '2' ? $('#cIDKho').val() : null,
+            IDDonHang: loai == '1' ? $('#cIDDonHang').val() : null,
+            IDChungTuBanHang: loai == '1' ? $('#cIDChungTuBanHang').val() : null,
+            IDKhachHang: loai == '1' ? $('#cIDKhachHang').val() : null,
+            LyDo: $('#cLyDo').val(),
+            GhiChu: $('#cGhiChu').val(),
+            Details: listChiTiet.filter(x => x.SoLuongHaoHut > 0) // Chỉ lưu những dòng có hao hụt
+        };
+
+        $.ajax({
+            url: '@Url.Action("Save", "KHO_HaoHut")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function(res) {
+                if (res.success) {
+                    if (type == 2) {
+                        // Gọi Ghi nhận
+                        $.post('@Url.Action("GhiNhan", "KHO_HaoHut")', { id: res.id }, function(res2) {
+                            if (res2.success) {
+                                showToast('success', 'Ghi nhận thành công!');
+                                $('#modalCreate').modal('hide');
+                                loadData();
+                            } else {
+                                showToast('error', 'Lưu nháp thành công nhưng ghi nhận lỗi: ' + res2.message);
+                                $('#modalCreate').modal('hide');
+                                loadData();
+                            }
+                        });
+                    } else {
+                        showToast('success', res.message);
+                        $('#modalCreate').modal('hide');
+                        loadData();
+                    }
+                } else {
+                    showToast('error', res.message);
+                }
+            }
+        });
+    }
+</script>

@@ -1,0 +1,6 @@
+ID - int
+TenManHinh - nvarchar
+NhomChaManHinh - nvarchar
+IsSuDung - bit
+IDThamChieu - int
+STT - int

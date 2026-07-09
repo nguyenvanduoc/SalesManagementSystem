@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -566,6 +566,14 @@
     <Content Include="Views\PhieuThuKhachHang\_DetailInline.cshtml" />
     <Content Include="Views\PhieuThuKhachHang\_Form.cshtml" />
     <Content Include="Views\PhieuThuKhachHang\_PhieuThuFileList.cshtml" />
+    <Compile Include="Models\ViewModels\HaoHutHangHoaViewModel.cs" />
+    <Compile Include="Repositories\IKhoHaoHutRepository.cs" />
+    <Compile Include="Repositories\KhoHaoHutRepository.cs" />
+    <Compile Include="Controllers\KHO_HaoHutController.cs" />
+    <Content Include="Views\KHO_HaoHut\Index.cshtml" />
+    <Content Include="Views\KHO_HaoHut\_Create.cshtml" />
+    <Content Include="Views\KHO_HaoHut\_Edit.cshtml" />
+    <Content Include="Views\KHO_HaoHut\_Detail.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />
