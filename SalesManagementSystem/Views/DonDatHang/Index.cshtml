@@ -246,6 +246,7 @@
                 $.ajax({
                     url: '@Url.Action("GetDetailInline", "DonDatHang")',
                     type: 'GET',
+                    global: false,
                     data: { id: id },
                     success: function (html) {
                         $detailRow.find('td').html(html);

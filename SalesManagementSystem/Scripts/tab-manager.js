@@ -616,7 +616,7 @@ var TabManager = (function () {
         });
 
         li.append(btn);
-        $('#mainTabHeader').append(li);
+        li.insertAfter($('#mainTabHeader .nav-item').first());
 
         // Tạo tab-pane
         var pane = $('<div>', {
@@ -908,7 +908,7 @@ var TabManager = (function () {
                                 
                                 var $li = $btn.closest('li');
                                 if ($li.length > 0) {
-                                    $('#mainTabHeader').append($li);
+                                    $li.insertAfter($('#mainTabHeader .nav-item').first());
                                 }
                             }
                             

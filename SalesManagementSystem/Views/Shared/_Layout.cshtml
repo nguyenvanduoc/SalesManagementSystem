@@ -8,7 +8,11 @@
 
     <!-- Bootstrap 5 -->
     <link rel="stylesheet" href="@Url.Content("~/Content/bootstrap.min.css")" />
-    <!-- Font: dùng system fonts hỗ trợ tiếng Việt, không cần internet -->
+    <!-- ASC Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+
     <!-- Bootstrap Icons (local - không cần internet) -->
     <link rel="stylesheet" href="@Url.Content("~/Content/bootstrap-icons.min.css")" />
     <!-- Global Search CSS -->
@@ -29,18 +33,50 @@
             --topbar-height:    44px;
             --topbar-bg:        #17202a;
             --accent:           #1abc9c;
-            --body-bg:          #f0f3f7;
+            --body-bg:          #f6f7f8; /* ASC body background */
         }
 
         /* ─── Reset & Base ───────────────────────────────── */
         *, *::before, *::after { box-sizing: border-box; }
         html, body { height: 100%; margin: 0; }
         body {
-            font-family: 'Segoe UI', Tahoma, 'Arial Unicode MS', Arial, sans-serif;
+            font-family: 'Roboto', 'Open Sans', 'Segoe UI', Arial, sans-serif; /* ASC Font Family */
+            font-size: 13.5px; /* ASC Global Font Size */
             background: var(--body-bg);
-            color: #2c3e50;
+            color: #464646; /* ASC text color */
             display: flex;
             flex-direction: column;
+        }
+
+        /* Force font family, size and compact layout on form fields globally */
+        input, select, textarea, button, 
+        .form-control, .form-select, .form-label, .btn,
+        .select2-container, .select2-selection, .select2-results__option,
+        .flatpickr-calendar, .flatpickr-input, .readonly-cell {
+            font-family: 'Roboto', 'Open Sans', 'Segoe UI', Arial, sans-serif !important;
+            font-size: 13.5px !important;
+        }
+
+        /* Compact sizing for inputs */
+        .form-control, .form-select, .readonly-cell {
+            height: 33px !important;
+            padding: 4px 8px !important;
+            line-height: 1.42857143 !important;
+        }
+
+        textarea.form-control {
+            height: auto !important;
+        }
+
+        .form-label {
+            color: #464646;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        /* Prevent shrinking via Bootstrap 'small' class on labels */
+        .form-label.small, .form-label.text-muted {
+            font-size: 13px !important;
         }
 
         /* ─── Top Bar ─────────────────────────────────────── */
@@ -60,7 +96,7 @@
             align-items: center;
             gap: 10px;
             color: #fff;
-            font-size: 1.05rem;
+            font-size: 16px;
             font-weight: 700;
             text-decoration: none;
             letter-spacing: .3px;
@@ -89,7 +125,7 @@
             align-items: center;
             gap: 9px;
             color: #ced4da;
-            font-size: .88rem;
+            font-size: 13px;
         }
         .topbar-right .user-info .avatar {
             width: 34px; height: 34px;
@@ -139,7 +175,7 @@
             padding: 12px 18px;
             color: var(--sidebar-text);
             text-decoration: none;
-            font-size: 1.05rem; /* Tăng font size */
+            font-size: 13.5px; 
             font-weight: 600;
             transition: background .2s, color .2s;
         }
@@ -166,7 +202,7 @@
             padding: 14px 18px;
             color: var(--sidebar-text);
             text-decoration: none;
-            font-size: 1.05rem; /* Tăng font size */
+            font-size: 13.5px; 
             font-weight: 600;
             cursor: pointer;
             transition: background .2s, color .2s;
@@ -186,9 +222,8 @@
 
         /* Tree lines for child items */
         .sidebar .nav-group-collapse ul {
-            list-style: none;
             padding: 0;
-            margin: 0;
+            list-style: none;
             /* Vertical line */
             border-left: 1px solid rgba(255, 255, 255, 0.5);
             margin-left: 26px; /* align with the icon above */
@@ -227,7 +262,7 @@
         .sidebar .nav-group-collapse .nav-link {
             padding: 8px 15px 8px 20px; /* Thu nhỏ khoảng cách */
             border-left: none;
-            font-size: 0.95rem; /* Tăng chữ to lên */
+            font-size: 13.5px; /* Chuẩn ASC */
             font-weight: 500; 
             white-space: normal;
             color: var(--sidebar-text); /* Mặc định menu sáng */
@@ -654,6 +689,14 @@
     </style>
 </head>
 <body>
+    <!-- ASC Tabs SVG Clip Path Definition -->
+    <svg width="0" height="0" style="position:absolute">
+        <defs>
+            <clipPath id="tabs" clipPathUnits="objectBoundingBox">
+                <path d="M 0,0 C 0.5,0 0.8,1 1,1 L 0,1 Z"></path>
+            </clipPath>
+        </defs>
+    </svg>
 
 <!-- ═══════════════ TOP BAR ═══════════════ -->
 <header class="topbar">
@@ -673,7 +716,7 @@
                 <span class="d-none d-sm-block">@hoTen</span>
                 <i class="bi bi-caret-down-fill ms-1 me-3" style="font-size: 0.8rem;"></i>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="dropdownUser" style="margin-top: 15px; border-radius: 8px; font-size: 0.9rem;">
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="dropdownUser" style="margin-top: 15px; border-radius: 8px; font-size: 13px;">
                 <li>
                     <a class="dropdown-item d-flex align-items-center py-2" href="@Url.Action("ClearCache", "Home")">
                         <i class="bi bi-arrow-repeat me-3 text-muted"></i> Xóa cache
@@ -1627,7 +1670,7 @@
 
             if (loadingRequestCount === 0) {
                 var elapsed = Date.now() - loadingStartTime;
-                var remaining = 500 - elapsed; // Đảm bảo hiển thị ít nhất 500ms để tránh nhấp nháy
+                var remaining = 150 - elapsed; // Hiển thị ít nhất 150ms để tránh nhấp nháy
 
                 function hideActual() {
                     var $overlay = $('.global-tab-loading-overlay');

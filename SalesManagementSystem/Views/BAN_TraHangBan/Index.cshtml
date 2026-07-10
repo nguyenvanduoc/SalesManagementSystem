@@ -1,4 +1,4 @@
-@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.TraHangBanViewModel>
+﻿@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.TraHangBanViewModel>
 
 @{
     ViewBag.Title = "Trả hàng bán";
@@ -101,12 +101,6 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            $('#searchForm').submit(function (e) {
-                e.preventDefault();
-                var url = $(this).attr('action') + '?' + $(this).serialize();
-                $.get(url, function (res) {
-                    $('#table-container').html(res);
-                });
             });
         });
         

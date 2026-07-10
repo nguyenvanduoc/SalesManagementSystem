@@ -35,7 +35,7 @@
 @section Scripts {
     <script>
         (function() {
-            var $pane = $('#searchForm').closest('.tab-pane');
+            var $pane = $(.tab-pane.active);
             if ($pane.length === 0) $pane = $('body');
 
         })();

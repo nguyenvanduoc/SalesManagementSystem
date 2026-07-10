@@ -35,6 +35,7 @@
     border-radius: 4px;
 }
 
+/* Ensure tabs container is styled nicely */
 #mainTabHeader .nav-item {
     margin-bottom: 0;
     white-space: nowrap;
@@ -43,48 +44,58 @@
     align-items: center;
 }
 
-/* Vertical Separator between inactive tabs */
-#mainTabHeader .nav-item:not(:last-child)::after {
-    content: "";
-    height: 14px;
-    width: 1px;
-    background-color: #adb5bd;
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
+/* The actual link styling matching ASC */
 #mainTabHeader .nav-link {
-    background-color: transparent;
+    background-color: transparent !important;
     border: none;
-    color: #495057;
-    border-radius: 8px 8px 0 0;
-    padding: 10px 18px;
+    color: #464646 !important; /* ASC inactive color */
+    font-size: 13.5px; /* ASC font size */
+    border-radius: 10px 10px 0 0 !important;
+    padding: 5px 20px 5px 18px; /* EXACT ASC padding: 5px top/bottom, 20px right, 18px left */
+    margin-right: 10px; /* EXACT ASC margin to prevent wing overlap on text */
     display: flex;
     align-items: center;
-    font-size: 14.5px;
-    font-weight: 500;
-    min-width: 120px;
-    max-width: 220px;
+    min-width: 110px;
+    max-width: 200px;
     transition: all 0.2s ease;
+    position: relative;
+    z-index: 1;
 }
 
 #mainTabHeader .nav-link:hover {
-    color: #0b5b84;
+    color: #0b5b84 !important;
 }
 
 #mainTabHeader .nav-link.active {
-    background-color: #fff;
-    color: #0b5b84;
-    font-weight: 600;
-    box-shadow: 0 -2px 5px rgba(0,0,0,0.03);
+    background-color: #fff !important;
+    color: #0b5b84 !important;
 }
 
-/* Remove separator if this tab or the next tab is active */
-#mainTabHeader .nav-item:has(.nav-link.active)::after,
-#mainTabHeader .nav-item:has(.nav-link.active) + .nav-item::after {
-    display: none;
+/* ASC Clip Path Wings */
+#mainTabHeader .nav-item:has(.nav-link.active) {
+    z-index: 100; /* ASC exact z-index */
+}
+
+#mainTabHeader .nav-link.active::after,
+#mainTabHeader .nav-link.active::before {
+    content: "";
+    background-color: #fff;
+    width: 20px; /* Matches the right: -20px distance */
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    clip-path: url(#tabs);
+    z-index: 2; /* Sits on top of the margin space */
+}
+
+#mainTabHeader .nav-link.active::after {
+    right: -20px;
+    /* Default origin, normal shape */
+}
+
+#mainTabHeader .nav-link.active::before {
+    left: -20px;
+    transform: scaleX(-1); /* Flips for the left side perfectly */
 }
 
 #mainTabHeader .nav-link .tab-title {
@@ -146,3 +157,55 @@
     z-index: 10;
     border-radius: 4px;
 }
+
+/* ─── ASC FORM & MODAL POPUP STYLES ───────────────────────── */
+/* Standardize all input controls, buttons, selects, labels, and textareas to 13px */
+.tab-pane .form-control,
+.tab-pane .form-select,
+.tab-pane .form-label,
+.tab-pane .btn,
+.tab-pane textarea,
+.modal .form-control,
+.modal .form-select,
+.modal .form-label,
+.modal .btn,
+.modal textarea,
+.modal-body {
+    font-size: 13.5px !important;
+}
+
+/* Fix for Select2 inside tabs and modal popups */
+.select2-container .select2-selection--single,
+.select2-container--default .select2-selection--single .select2-selection__rendered,
+.select2-container .select2-search__field,
+.select2-dropdown,
+.select2-results__option {
+    font-size: 13.5px !important;
+}
+
+/* Fix heights for select2 selection box to look neat at 13px */
+.select2-container--default .select2-selection--single {
+    height: 32px !important;
+    line-height: 30px !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 30px !important;
+    padding-left: 10px !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 30px !important;
+}
+
+/* Adjust labels on forms to not shrink via bootstrap 'small' */
+.form-label.small, .form-label.text-muted {
+    font-size: 13px !important;
+}
+
+/* Align modal titles and headers to be neat */
+.modal-title {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+}
+

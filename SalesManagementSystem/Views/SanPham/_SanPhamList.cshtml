@@ -1,4 +1,4 @@
-﻿@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DmSanPhamViewModel>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.DmSanPhamViewModel>
 
 <div class="card shadow-sm">
     <div class="card-body p-0">
@@ -19,6 +19,7 @@
                 <tbody>
                     @if (Model.Items != null && Model.Items.Any())
                     {
+                        int stt = (Model.CurrentPage - 1) * Model.PageSize + 1;
                         foreach (var item in Model.Items)
                         {
                             <tr>
@@ -52,7 +53,7 @@
                                         </ul>
                                     </div>
                                 </td>
-                                <td class="text-center align-middle">@item.STT</td>
+                                <td class="text-center align-middle">@(stt++)</td>
                                 <td class="align-middle">@item.MaSanPham</td>
                                 <td class="align-middle">@item.TenSanPham</td>
                                 <td class="text-center align-middle">@item.DVT</td>

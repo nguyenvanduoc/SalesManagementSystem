@@ -48,29 +48,10 @@
 @section Scripts {
     <script>
         (function() {
-            var $pane = $('#searchForm').closest('.tab-pane');
+            var $pane = $(.tab-pane.active);
             if ($pane.length === 0) $pane = $('body');
 
-            $pane.find('#searchForm').on('submit', function(e) {
-                e.preventDefault();
-                var keyword = $pane.find('#keyword').val();
-                var pageSize = $pane.find('.page-size-select').length > 0 ? $pane.find('.page-size-select').last().val() : 10;
-                
-                $.ajax({
-                    url: '@Url.Action("GetNguoiDung", "NguoiDung")',
-                    type: 'GET',
-                    data: { page: 1, pageSize: pageSize, keyword: keyword },
-                    success: function (result) {
-                        $pane.find('#table-container').html(result);
-                    },
-                    error: function () {
-                        if (typeof showToast === "function") {
-                            showToast('error', 'Lỗi khi tải dữ liệu.');
-                        } else {
-                            alert('Lỗi khi tải dữ liệu.');
-                        }
-                    }
-                });
+            
             });
 
         })();
