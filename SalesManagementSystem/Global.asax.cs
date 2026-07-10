@@ -24,6 +24,13 @@ namespace SalesManagementSystem
             var ex = Server.GetLastError();
             if (ex != null)
             {
+                if (ex is System.Web.Mvc.HttpAntiForgeryException)
+                {
+                    Server.ClearError();
+                    Response.Redirect("~/Login");
+                    return;
+                }
+                
                 SalesManagementSystem.Helpers.LogHelper.WriteErrorLog(ex, HttpContext.Current);
             }
         }

@@ -177,7 +177,7 @@
                             }
                         }
                     </select>
-                </div>
+                </div>
                 <div class="col-auto d-flex gap-2">
                     <button type="submit" class="btn btn-sm text-white px-3 d-flex align-items-center gap-1" style="background-color:#2998e4;border:none;height:31px;">
                         <i class="bi bi-search"></i> Tìm kiếm
@@ -199,10 +199,8 @@
 @section Scripts {
     <script>
         (function () {
-            var $script = $('script').last();
-            var $pane = $script.closest('.tab-pane');
-            if ($pane.length === 0) $pane = $('body');
-
+            var $pane = $('.tab-pane.active');
+            if ($pane.length === 0) $pane = $(document);
 
             $pane.off('click.phieuchi_export', '.btn-export-excel');
             $pane.on('click.phieuchi_export', '.btn-export-excel', function () {
@@ -212,45 +210,11 @@
 
             var $form = $pane.find('#searchForm');
             
-            $form.on('submit', function (e) {
-                e.preventDefault();
-                var params = $(this).serialize();
-                // Ensure page=1 on search
-                params = params.replace(/&?page=[^&]*/, '') + '&page=1';
-                var url = '@Url.Action("GetList", "PhieuChi")?' + params;
-                
-                var $grid = $pane.find('#table-container');
-                if (typeof showLoadingLocal === 'function') showLoadingLocal($grid);
-                
-                // Visual blink effect for user feedback
-                $grid.css({ 'opacity': '0.2', 'transition': 'none' });
-                
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                    success: function (res) {
-                        if (typeof hideLoadingLocal === 'function') hideLoadingLocal($grid);
-                        $grid.html(res);
-                        if (typeof reInitPlugins === 'function') reInitPlugins($pane.attr('id'));
-                        
-                        setTimeout(function() {
-                            $grid.css({ 'transition': 'opacity 0.2s', 'opacity': '1' });
-                        }, 100);
-                    },
-                    error: function(xhr) {
-                        if (typeof hideLoadingLocal === 'function') hideLoadingLocal($grid);
-                        $grid.css({ 'transition': 'opacity 0.2s', 'opacity': '1' });
-                        if (xhr.status !== 404) { // Let global handler handle 404 if it really is one
-                            if (typeof showToast === 'function') showToast('error', 'Lỗi khi tải dữ liệu');
-                        }
-                    }
-                });
-            });
-
-            $pane.find('.btn-reset').on('click', function() {
+            $pane.off('click.phieuchi_reset', '.btn-reset');
+            $pane.on('click.phieuchi_reset', '.btn-reset', function() {
                 $form[0].reset();
-                $form.find('.select2').val('').trigger('change');
+                $form.find('select').not('.ddl-thoi-gian').val('').trigger('change');
+                $form.find('.ddl-thoi-gian').val('current_year').trigger('change');
                 $form.trigger('submit');
             });
 

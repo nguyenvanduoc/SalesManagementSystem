@@ -17,6 +17,7 @@ namespace SalesManagementSystem.Controllers
         }
 
         [HttpGet]
+        [OutputCache(NoStore = true, Duration = 0, VaryByParam = "None")]
         public ActionResult Index()
         {
             return View();

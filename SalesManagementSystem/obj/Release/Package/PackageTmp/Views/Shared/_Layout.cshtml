@@ -468,8 +468,8 @@
         .tabs-wrapper {
             display: flex;
             align-items: flex-end;
-            background-color: #e9ecef; /* Nền xám nhạt */
-            border-bottom: 1px solid #dce4ec;
+            background-color: #e4ebf1;
+            border-bottom: none; /* Bỏ border để màu trắng của tab active nối liền với nội dung bên dưới */
             position: sticky;
             top: var(--topbar-height);
             z-index: 1020;
@@ -479,9 +479,9 @@
             background: transparent;
             border: none;
             color: #6c757d;
-            padding: 8px 12px;
+            padding: 4px 8px; /* Thu nhỏ nút cuộn */
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -497,15 +497,15 @@
 
         .tabs-container {
             flex: 1;
-            padding: 8px 0 0 0;
+            padding: 1px 8px 0 8px; /* Gần như chạm sát vào khung trên */
             overflow-x: auto;
             overflow-y: hidden;
-            -ms-overflow-style: none;  /* IE/Edge */
-            scrollbar-width: none;  /* Firefox */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
         
         .tabs-container::-webkit-scrollbar { 
-            display: none; /* Chrome, Safari, Opera */
+            display: none;
         }
 
         .tabs-container .nav-tabs {
@@ -514,20 +514,24 @@
             display: inline-flex;
             margin-bottom: 0;
             width: max-content;
+            gap: 0;
         }
 
         .tabs-container .nav-item {
             display: flex;
             align-items: center;
+            position: relative;
         }
 
-        /* Dấu phân cách | */
+        /* Dấu phân cách | bằng vạch dọc */
         .tabs-container .nav-item + .nav-item::before {
-            content: "|";
-            color: #adb5bd; /* Xám nhạt */
-            margin: 0 6px;
-            font-size: 13px;
-            font-weight: 300;
+            content: "";
+            width: 1px;
+            height: 14px; /* Giảm chiều cao vạch ngăn cách cho hợp với tab nhỏ */
+            background-color: #b5c2cf;
+            margin: 0 2px;
+            z-index: 1;
+            transition: opacity 0.2s;
         }
 
         .tabs-container .nav-link {
@@ -535,32 +539,48 @@
             background-color: transparent !important;
             color: #555555 !important;
             font-size: 13.5px;
-            padding: 6px 14px;
-            border-radius: 8px 8px 0 0 !important;
+            padding: 9px 20px; /* Tăng thêm chiều cao cho khung trắng */
             display: flex;
             align-items: center;
             gap: 6px;
-            transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+            transition: color 0.2s;
             max-width: 250px;
+            position: relative;
+            z-index: 1;
         }
         
+        /* Hình thang Chrome-style */
+        .tabs-container .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -1;
+            background-color: transparent;
+            transform: perspective(50px) rotateX(18deg); /* Điều chỉnh góc vát cho tab mỏng */
+            transform-origin: bottom;
+            border-radius: 10px 10px 0 0;
+            transition: background-color 0.2s;
+        }
+
         .tabs-container .nav-link .tab-title {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .tabs-container .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.4) !important;
-            color: #333333 !important;
+        .tabs-container .nav-link:hover::before {
+            background-color: rgba(255, 255, 255, 0.4);
         }
 
         .tabs-container .nav-link.active {
-            background-color: #ffffff !important;
-            color: #111111 !important;
+            color: #0b5b84 !important;
             font-weight: 600;
-            box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.05);
-            z-index: 1;
+            z-index: 3;
+        }
+        
+        .tabs-container .nav-link.active::before {
+            background-color: #ffffff;
+            box-shadow: none; /* Khớp với hình, hòa lẫn với nền dưới */
         }
 
         /* Ẩn dấu | trước hoặc sau tab active */
@@ -595,6 +615,41 @@
             justify-content: center;
             align-items: center;
             z-index: 10;
+        }
+
+        /* ─── CUSTOM MULTI-COLOR LOADER SPINNER ───────────────── */
+        .global-tab-loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(1px);
+            -webkit-backdrop-filter: blur(1px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .custom-multi-spinner {
+            width: 2.8rem;
+            height: 2.8rem;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            /* Phối màu chuẩn theo ảnh của người dùng */
+            border-top-color: #3498db;    /* Xanh dương */
+            border-right-color: #f1948a;  /* Hồng đào / đỏ nhạt */
+            border-bottom-color: #9cca3b; /* Xanh lá / Lime */
+            border-left-color: #f5e6a9;   /* Vàng nhạt / Beige */
+            animation: custom-spin 1s linear infinite;
+        }
+
+        @@keyframes custom-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -1197,21 +1252,7 @@
         }
     });
 
-    /* ================================================================
-       GLOBAL AJAX SEND HANDLER (Blink effect cho màn hình tìm kiếm)
-    ================================================================ */
-    $(document).ajaxSend(function (event, jqxhr, settings) {
-        if (settings.url && (settings.url.toLowerCase().indexOf('getlist') !== -1 || settings.url.toLowerCase().indexOf('search') !== -1)) {
-            var $tableContainer = $('.tab-pane.active #table-container, .tab-pane.active [id^="table-container-"]');
-            if ($tableContainer.length === 0) {
-                $tableContainer = $('#table-container, [id^="table-container-"]'); 
-            }
-            if ($tableContainer.length > 0) {
-                $tableContainer.css('opacity', '0.5');
-                setTimeout(function() { $tableContainer.css('opacity', '1'); }, 100);
-            }
-        }
-    });
+
 
     /* ================================================================
        GLOBAL FORM RESET HANDLER (Chuẩn SKILL.md)
@@ -1225,29 +1266,39 @@
         }
         
         if ($form.length > 0) {
-            // 1. Clear form cơ bản
+            // 1. Clear form cơ bản (khôi phục giá trị ban đầu của các thẻ HTML)
             $form[0].reset();
             
-            // 2. Clear thư viện Select2 (nếu có)
+            // 2. Đồng bộ hóa lại thư viện Select2 về giá trị mặc định của HTML sau reset
             var $select2 = $form.find('.select2, .select2-hidden-accessible');
             if ($select2.length > 0) {
-                $select2.val(null).trigger('change');
+                $select2.each(function() {
+                    // Lấy giá trị được chọn mặc định trong thẻ native select sau khi reset
+                    var $defaultOption = $(this).find('option[selected]');
+                    var val = $defaultOption.length > 0 ? $defaultOption.val() : $(this).find('option').first().val();
+                    $(this).val(val).trigger('change');
+                });
             }
 
-            // 3. Xử lý giá trị flatpickr (đặt lại mặc định cho Từ ngày/Đến ngày)
-            var today = new Date();
-            var firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-            var lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-
+            // 3. Xử lý giá trị flatpickr về giá trị khởi tạo ban đầu
             $form.find('.flatpickr-input').each(function() {
                 if (this._flatpickr) {
-                    var name = $(this).attr('name');
-                    if (name === 'tuNgay') {
-                        this._flatpickr.setDate(firstDay);
-                    } else if (name === 'denNgay') {
-                        this._flatpickr.setDate(lastDay);
+                    var initialVal = $(this).data('initial-value') || '';
+                    if (initialVal) {
+                        this._flatpickr.setDate(initialVal);
                     } else {
-                        this._flatpickr.clear();
+                        var name = $(this).attr('name');
+                        var today = new Date();
+                        var firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+                        var lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+                        if (name === 'tuNgay') {
+                            this._flatpickr.setDate(firstDay);
+                        } else if (name === 'denNgay') {
+                            this._flatpickr.setDate(lastDay);
+                        } else {
+                            this._flatpickr.clear();
+                        }
                     }
                 }
             });
@@ -1281,6 +1332,9 @@
                 if (name === 'denNgay') val = flatpickr.formatDate(lastDay, "Y-m-d");
                 $this.val(val); // Set value immediately so normal form submit works
             }
+
+            // Lưu lại giá trị khởi tạo ban đầu để phục vụ chức năng "Làm mới" (Reset)
+            $this.data('initial-value', val);
 
             // Đổi type thành text để trình duyệt không hiện lịch mặc định
             $this.attr('type', 'text');
@@ -1338,8 +1392,8 @@
             $(this).data('synced', true);
             
             var $form = $(this).closest('form');
-            var txtTu = $form.find('input[name="tuNgay"]').val();
-            var txtDen = $form.find('input[name="denNgay"]').val();
+            var txtTu = $form.find('input[name="tuNgay"], input[name="TuNgay"]').val();
+            var txtDen = $form.find('input[name="denNgay"], input[name="DenNgay"]').val();
             if (!txtTu || !txtDen) {
                 // Nếu không có giá trị (load lần đầu), trigger change để set về Đầu tháng đến hiện tại
                 $(this).val('current_month').trigger('change');
@@ -1417,8 +1471,8 @@
                 var $form = $(this).closest('form');
                 if ($form.length === 0) return;
                 
-                var txtTuNgay = $form.find('input[name="tuNgay"]')[0];
-                var txtDenNgay = $form.find('input[name="denNgay"]')[0];
+                var txtTuNgay = $form.find('input[name="tuNgay"], input[name="TuNgay"]')[0];
+                var txtDenNgay = $form.find('input[name="denNgay"], input[name="DenNgay"]')[0];
                 
                 if (txtTuNgay && txtDenNgay) {
                     if (txtTuNgay._flatpickr) txtTuNgay._flatpickr.setDate(s);
@@ -1428,9 +1482,11 @@
                     else { $(txtDenNgay).val(e).trigger('change'); }
                     
                     setTimeout(function() {
-                        var btn = $form.find('button[type="submit"]')[0];
+                        var btn = $form.find('button[type="submit"], #btnSearch, .btn-search')[0];
                         if (btn) {
                             btn.click();
+                        } else if (typeof TabManager !== 'undefined') {
+                            TabManager.reloadActiveTabGrid(false);
                         } else {
                             $form.trigger('submit');
                         }
@@ -1461,6 +1517,7 @@
             $.ajax({
                 url: keepAliveUrl,
                 type: 'POST',
+                global: false,
                 headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
                 success: function (res) {
                     if (!res.alive) {
@@ -1509,6 +1566,111 @@
 
         // Kiểm tra 40 tiếng mỗi 30 giây
         setInterval(checkTimeout, 30000);
+    })();
+</script>
+
+<!-- Global Loading Overlay Manager script -->
+<script>
+    (function () {
+        var loadingStartTime = 0;
+        var loadingTimeoutId = null;
+        var loadingRequestCount = 0;
+
+        function showLoading() {
+            loadingRequestCount++;
+            if (loadingRequestCount === 1) {
+                if (loadingTimeoutId) {
+                    clearTimeout(loadingTimeoutId);
+                    loadingTimeoutId = null;
+                }
+                loadingStartTime = Date.now();
+
+                // Tìm tab-pane đang hoạt động
+                var $activePane = $('.tab-pane.active');
+                if ($activePane.length === 0) {
+                    $activePane = $('body');
+                }
+
+                // Tìm vùng hiển thị lưới/bảng dữ liệu bên trong tab active
+                var $target = $activePane.find('#listContainer, #table-container, [id^="table-container-"], #grid-container, [id^="grid-container-"], #gridData, [id^="gridData-"], .table-responsive, .grid-container, .table-container').first();
+                if ($target.length === 0) {
+                    $target = $activePane; // Fallback nếu không tìm thấy grid container
+                }
+
+                if ($target.css('position') === 'static') {
+                    $target.css('position', 'relative');
+                }
+
+                // Đảm bảo chiều cao tối thiểu để spinner hiển thị đẹp mắt khi bảng trống
+                var currentHeight = $target.height();
+                if (currentHeight < 150) {
+                    $target.data('original-min-height', $target.css('min-height'));
+                    $target.css('min-height', '150px');
+                }
+
+                // Gỡ bỏ loading cũ nếu có
+                $target.find('.global-tab-loading-overlay').remove();
+
+                // Chèn loading mới vào vùng grid/table
+                var overlayHtml = 
+                    '<div class="global-tab-loading-overlay">' +
+                    '    <div class="custom-multi-spinner"></div>' +
+                    '</div>';
+
+                $target.append(overlayHtml);
+            }
+        }
+
+        function hideLoading() {
+            loadingRequestCount--;
+            if (loadingRequestCount < 0) loadingRequestCount = 0;
+
+            if (loadingRequestCount === 0) {
+                var elapsed = Date.now() - loadingStartTime;
+                var remaining = 500 - elapsed; // Đảm bảo hiển thị ít nhất 500ms để tránh nhấp nháy
+
+                function hideActual() {
+                    var $overlay = $('.global-tab-loading-overlay');
+                    if ($overlay.length > 0) {
+                        var $parent = $overlay.parent();
+                        var originalMin = $parent.data('original-min-height');
+                        if (originalMin !== undefined) {
+                            $parent.css('min-height', originalMin);
+                        }
+                        $overlay.remove();
+                    }
+                    loadingTimeoutId = null;
+                }
+
+                if (remaining > 0) {
+                    loadingTimeoutId = setTimeout(hideActual, remaining);
+                } else {
+                    hideActual();
+                }
+            }
+        }
+
+        // Đăng ký toàn cục
+        window.showLoading = showLoading;
+        window.hideLoading = hideLoading;
+
+        // Bắt sự kiện AJAX toàn cục của jQuery qua ajaxSend và ajaxComplete để tránh xung đột với các request chạy ngầm
+        $(document).on('ajaxSend', function (event, xhr, settings) {
+            // Chỉ hiện loading cho các request tải lại bảng/lưới dữ liệu (trả về HTML)
+            // Không hiện loading cho Select2, Autocomplete (trả về JSON) hoặc khi đang mở Modal
+            if (settings.global === false) return;
+            if (settings.dataType === 'json' || settings.dataType === 'jsonp') return;
+            if ($('.modal.show').length > 0 || $('body').hasClass('modal-open')) return;
+
+            showLoading();
+        });
+
+        $(document).on('ajaxComplete', function (event, xhr, settings) {
+            if (settings.global === false) return;
+            if (settings.dataType === 'json' || settings.dataType === 'jsonp') return;
+
+            hideLoading();
+        });
     })();
 </script>
 </body>

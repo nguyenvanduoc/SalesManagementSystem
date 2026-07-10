@@ -271,7 +271,8 @@
 
 <script>
 (function () {
-    var $pane = $('#phieuchi-table-container').closest('.tab-pane');
+    var $pane = $('#tblPhieuChiList').closest('.tab-pane');
+    if ($pane.length === 0) $pane = $('.tab-pane.active');
     if ($pane.length === 0) $pane = $('body');
     var currentUploadPhieuChiId = 0;
     var currentUploadPhieuChiSo = '';
