@@ -127,5 +127,51 @@ namespace SalesManagementSystem.Controllers
 
         protected UserLoginViewModel GetCurrentUser()
             => (UserLoginViewModel)Session[CommonConstants.USER_SESSION];
+
+        protected ActionResult ExportDanhMucToExcel<T>(
+            string maBieuMau,
+            System.Collections.Generic.IEnumerable<T> data,
+            string tenManHinh,
+            string fileNamePrefix)
+        {
+            var excelExportService = System.Web.Mvc.DependencyResolver.Current.GetService(typeof(SalesManagementSystem.Services.Interfaces.IExcelExportService)) as SalesManagementSystem.Services.Interfaces.IExcelExportService;
+            if (excelExportService == null)
+            {
+                throw new Exception("Không thể resolve IExcelExportService.");
+            }
+
+            var session = GetCurrentUser();
+            string nguoiLapBieu = session != null ? (session.HoDem + " " + session.Ten).Trim() : "";
+            if (string.IsNullOrEmpty(nguoiLapBieu)) nguoiLapBieu = session?.UserName ?? "";
+
+            var variables = new System.Collections.Generic.Dictionary<string, object>
+            {
+                { "TenManHinh", tenManHinh },
+                { "Ngay", DateTime.Now.ToString("dd") },
+                { "Thang", DateTime.Now.ToString("MM") },
+                { "Nam", DateTime.Now.ToString("yyyy") },
+                { "NguoiLapBieu", nguoiLapBieu }
+            };
+
+            string fileExtension;
+            var fileBytes = excelExportService.Export(maBieuMau, data, out fileExtension, variables);
+
+            // Ghi cookie để thông báo cho Client tắt spinner loading
+            var downloadToken = Request["downloadToken"];
+            if (!string.IsNullOrEmpty(downloadToken))
+            {
+                var cookie = new System.Web.HttpCookie("downloadToken", downloadToken)
+                {
+                    Path = "/"
+                };
+                Response.Cookies.Add(cookie);
+            }
+
+            string contentType = fileExtension == "xls" 
+                ? "application/vnd.ms-excel" 
+                : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+            return File(fileBytes, contentType, fileNamePrefix + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + "." + fileExtension);
+        }
     }
 }

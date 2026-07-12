@@ -207,6 +207,7 @@
                 $.ajax({
                     url: url,
                     type: 'GET',
+                    global: false,
                     success: function (res) {
                         var html = '<tr class="pt-detail-row" data-parent-id="' + id + '"><td colspan="16" class="p-0 border-0 shadow-inner"><div class="detail-container p-2" style="background-color: #f8f9fa;">' + res + '</div></td></tr>';
                         $row.next('.pt-detail-row').replaceWith(html);

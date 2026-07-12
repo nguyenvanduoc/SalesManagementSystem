@@ -286,14 +286,12 @@
                                         soPhieuNhap: d.SoPhieuNhap,
                                         ngayNhap: d.NgayNhap ? d.NgayNhap.substring(0,10) : '',
                                         tongTien: d.TongTien,
-                                        daThanhToan: (d.DaThanhToan || 0) - d.SoTienPhanBo,
-                                        conLai: (d.ConLai || 0) + d.SoTienPhanBo // Reconstruct original debt before this payment
+                                        daThanhToan: d.DaThanhToan || 0,
+                                        conLai: d.ConLai || 0 // Do not reconstruct original debt
                                     });
                                 } else {
-                                    // Adjust conLai to include the amount this PhieuChi already paid
+                                    // Do not adjust conLai to include the amount this PhieuChi already paid
                                     var pn = listPhieuNhap.find(x => x.id === d.IDPhieuNhap);
-                                    pn.conLai += d.SoTienPhanBo;
-                                    pn.daThanhToan -= d.SoTienPhanBo;
                                 }
                             }
                         });
@@ -329,11 +327,7 @@
         $modal.find('#btnChiToanBo').on('click', function(e) {
             e.preventDefault();
             if (isView) return;
-            var totalDebt = 0;
-            $modal.find('.row-conlai').each(function() {
-                totalDebt += parseFloat($(this).data('val')) || 0;
-            });
-            $modal.find('#SoTienChi').val(formatCurrency(totalDebt));
+            // Chỉ thực hiện autoAllocate() trên số tiền chi đã nhập, không tự lấy tổng nợ
             autoAllocate();
         });
 
@@ -358,14 +352,7 @@
                 }
             });
             var tienDu = tongChi - tongPhanBo;
-            if(tienDu > 0) {
-                chiTiets.push({
-                    IDPhieuNhap: null,
-                    LoaiChi: 2, // 2: Tiền dư trả trước
-                    SoTienPhanBo: tienDu,
-                    DienGiai: 'Tiền dư chuyển thành trả trước'
-                });
-            } else if(tienDu < 0) {
+            if(tienDu < 0) {
                 chiTiets.push({
                     IDPhieuNhap: null,
                     LoaiChi: 3, // 3: Sử dụng tiền trả trước
@@ -394,6 +381,16 @@
                 }
                 return false;
             }
+            
+            if (tongChi > tongPhanBo) {
+                if (typeof showToast === 'function') {
+                    showToast('warning', 'Số tiền chi (' + formatCurrency(tongChi) + ' đ) không được lớn hơn Tổng tiền phân bổ cho chứng từ (' + formatCurrency(tongPhanBo) + ' đ). Không được phép chi dư cho nhà cung cấp.');
+                } else {
+                    alert('Số tiền chi (' + formatCurrency(tongChi) + ' đ) không được lớn hơn Tổng tiền phân bổ cho chứng từ (' + formatCurrency(tongPhanBo) + ' đ). Không được phép chi dư cho nhà cung cấp.');
+                }
+                return false;
+            }
+            
             return true;
         }
 

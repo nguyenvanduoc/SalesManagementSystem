@@ -4,6 +4,7 @@ using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Repositories.Interfaces;
 using SalesManagementSystem.Helpers;
 using SalesManagementSystem.Models.ViewModels;
+using System.Linq;
 
 namespace SalesManagementSystem.Controllers
 {
@@ -146,6 +147,35 @@ namespace SalesManagementSystem.Controllers
                 }
             }
             return Json(new { success = true, message = "Xóa dữ liệu thành công" });
+        }
+
+        // GET: PhuongTien/ExportExcel
+        public ActionResult ExportExcel(string keyword = "")
+        {
+            try
+            {
+                int totalRecords;
+                var data = _phuongTienRepo.GetPaged(1, 10000, keyword, out totalRecords);
+
+                int stt = 1;
+                var exportData = data.Select(x => new
+                {
+                    STT = stt++,
+                    ID = x.ID,
+                    MaPhuongTien = x.MaPhuongTien,
+                    TenPhuongTien = x.TenPhuongTien,
+                    NgayTao = x.NgayTao.HasValue ? x.NgayTao.Value.ToString("dd/MM/yyyy HH:mm") : "",
+                    NgayCapNhat = x.NgayCapNhat.HasValue ? x.NgayCapNhat.Value.ToString("dd/MM/yyyy HH:mm") : ""
+                });
+
+                return ExportDanhMucToExcel("PT01", exportData, "Danh mục phương tiện", "DanhMucPhuongTien");
+            }
+            catch (Exception ex)
+            {
+                TempData["ToastMessage"] = "Lỗi xuất excel: " + ex.Message;
+                TempData["ToastType"] = "error";
+                return RedirectToAction("GetPhuongTien", new { keyword = keyword });
+            }
         }
     }
 }

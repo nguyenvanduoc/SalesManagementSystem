@@ -291,14 +291,12 @@
                                         soChungTu: d.SoChungTu,
                                         ngayChungTu: d.NgayChungTu ? d.NgayChungTu.substring(0,10) : '',
                                         tongTien: d.TongTien,
-                                        daThanhToan: (d.DaThanhToan || 0) - d.SoTienPhanBo,
-                                        conLai: (d.ConLai || 0) + d.SoTienPhanBo // Reconstruct original debt before this payment
+                                        daThanhToan: d.DaThanhToan || 0,
+                                        conLai: d.ConLai || 0 // Do not reconstruct original debt
                                     });
                                 } else {
-                                    // Adjust conLai to include the amount this PhieuThu already paid
+                                    // Do not adjust conLai to include the amount this PhieuThu already paid
                                     var pn = listChungTu.find(x => x.id === d.IDChungTuBanHang);
-                                    pn.conLai += d.SoTienPhanBo;
-                                    pn.daThanhToan -= d.SoTienPhanBo;
                                 }
                             }
                         });

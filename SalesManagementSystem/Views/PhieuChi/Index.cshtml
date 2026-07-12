@@ -177,7 +177,8 @@
                             }
                         }
                     </select>
-                </div>
+
+                </div>
                 <div class="col-auto d-flex gap-2">
                     <button type="submit" class="btn btn-sm text-white px-3 d-flex align-items-center gap-1" style="background-color:#2998e4;border:none;height:31px;">
                         <i class="bi bi-search"></i> Tìm kiếm
@@ -260,6 +261,7 @@
                 $.ajax({
                     url: url,
                     type: 'GET',
+                    global: false,
                     success: function (res) {
                         var html = `
                             <tr class="pc-detail-row" data-parent-id="${id}">

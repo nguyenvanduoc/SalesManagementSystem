@@ -178,7 +178,8 @@
                 {
                     <tfoot>
                         <tr class="fw-bold" style="background-color: #f8f9fa;">
-                            <td colspan="10" class="text-end">Tổng cộng</td>
+                            <td colspan="11" class="text-end">Tổng cộng</td>
+                            <td class="d-none"></td>
                             <td class="text-end">@(Model.Items.Sum(x => x.TongSoLuong).ToString("N0"))</td>
                             <td class="text-end d-none">@(Model.Items.Sum(x => x.TongTienThue).ToString("N0"))</td>
                             <td class="text-end">@(Model.Items.Sum(x => x.TienVanChuyen).ToString("N0"))</td>

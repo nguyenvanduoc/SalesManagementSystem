@@ -5,7 +5,8 @@ GO
 CREATE PROCEDURE sp_BaoCao_DoiChieuNhapNhaCungCap
     @IDNhaCungCap INT = NULL,
     @TuNgay DATETIME,
-    @DenNgay DATETIME
+    @DenNgay DATETIME,
+    @SoChungTu NVARCHAR(50) = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -95,6 +96,7 @@ BEGIN
     WHERE pn.IsDeleted = 0 
       AND pn.TrangThai IN (1, 2)
       AND (@IDNhaCungCap IS NULL OR pn.IDNhaCungCap = @IDNhaCungCap)
+      AND (@SoChungTu IS NULL OR @SoChungTu = '' OR pn.SoChungTu LIKE '%' + @SoChungTu + '%')
       AND CAST(pn.NgayNhap AS DATE) >= CAST(@TuNgay AS DATE)
       AND CAST(pn.NgayNhap AS DATE) <= CAST(@DenNgay AS DATE);
 
@@ -126,6 +128,7 @@ BEGIN
     WHERE pc.IsDeleted = 0 
       AND pc.TrangThai = 2
       AND (@IDNhaCungCap IS NULL OR pc.IDNhaCungCap = @IDNhaCungCap)
+      AND (@SoChungTu IS NULL OR @SoChungTu = '' OR pc.SoPhieuChi LIKE '%' + @SoChungTu + '%')
       AND CAST(pc.NgayChi AS DATE) >= CAST(@TuNgay AS DATE)
       AND CAST(pc.NgayChi AS DATE) <= CAST(@DenNgay AS DATE);
 

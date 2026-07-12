@@ -8,12 +8,18 @@
     <h4 class="mb-0 fw-bold text-uppercase" style="color:#0b5b84;font-size:1.25rem;">
         @ViewBag.Title
     </h4>
-    @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("TaiKhoanThanhToan", SalesManagementSystem.Helpers.LoaiPhanQuyen.Them))
-    {
-        <button type="button" class="btn btn-primary" style="background-color: #3498db; border-color: #3498db;" onclick="openFormModal('@Url.Action("Create", "TaiKhoanThanhToan")')">
-            <i class="bi bi-plus-lg fw-bold me-1"></i>Thêm mới
+    <div class="d-flex gap-2">
+        @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("TaiKhoanThanhToan", SalesManagementSystem.Helpers.LoaiPhanQuyen.Them))
+        {
+            <button type="button" class="btn btn-primary" style="background-color: #3498db; border-color: #3498db;" onclick="openFormModal('@Url.Action("Create", "TaiKhoanThanhToan")')">
+                <i class="bi bi-plus-lg fw-bold me-1"></i>Thêm mới
+            </button>
+        }
+        <button type="button" class="btn btn-success" style="background-color: #2ecc71; border-color: #2ecc71;" 
+                onclick="exportExcel('@Url.Action("ExportExcel", "TaiKhoanThanhToan")', '@Url.Action("GetList", "TaiKhoanThanhToan")')">
+            <i class="bi bi-file-earmark-excel fw-bold me-1"></i>Xuất Excel (TKTT01)
         </button>
-    }
+    </div>
 </div>
 
 <!-- Bộ lọc tìm kiếm -->
@@ -54,7 +60,7 @@
 @section Scripts {
     <script>
         (function() {
-            var $pane = $(.tab-pane.active);
+            var $pane = $('.tab-pane.active');
             if ($pane.length === 0) $pane = $('body');
 
         })();

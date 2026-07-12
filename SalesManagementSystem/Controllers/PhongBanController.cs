@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Web.Mvc;
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Repositories;
 using SalesManagementSystem.Repositories.Interfaces;
 using SalesManagementSystem.Helpers;
 using SalesManagementSystem.Models.ViewModels;
+using System.Linq;
 
 namespace SalesManagementSystem.Controllers
 {
@@ -147,6 +148,35 @@ namespace SalesManagementSystem.Controllers
                 }
             }
             return Json(new { success = true, message = "Xóa dữ liệu thành công" });
+        }
+
+        // GET: PhongBan/ExportExcel
+        public ActionResult ExportExcel(string keyword = "")
+        {
+            try
+            {
+                int totalRecords;
+                var data = _phongBanRepo.GetPaged(1, 10000, keyword, out totalRecords);
+
+                int stt = 1;
+                var exportData = data.Select(x => new
+                {
+                    STT = stt++,
+                    ID = x.ID,
+                    MaPhongBan = x.MaPhongBan,
+                    TenPhongBan = x.TenPhongBan,
+                    NgayTao = x.NgayTao.HasValue ? x.NgayTao.Value.ToString("dd/MM/yyyy HH:mm") : "",
+                    NgayCapNhat = x.NgayCapNhat.HasValue ? x.NgayCapNhat.Value.ToString("dd/MM/yyyy HH:mm") : ""
+                });
+
+                return ExportDanhMucToExcel("PB01", exportData, "Danh mục phòng ban", "DanhMucPhongBan");
+            }
+            catch (Exception ex)
+            {
+                TempData["ToastMessage"] = "Lỗi xuất excel: " + ex.Message;
+                TempData["ToastType"] = "error";
+                return RedirectToAction("GetPhongBan", new { keyword = keyword });
+            }
         }
     }
 }

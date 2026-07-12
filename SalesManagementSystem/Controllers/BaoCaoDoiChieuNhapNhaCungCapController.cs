@@ -36,20 +36,26 @@ namespace SalesManagementSystem.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetList(int? idNhaCungCap, DateTime? tuNgay, DateTime? denNgay, int page = 1, int pageSize = 20)
+        public ActionResult GetList(int? idNhaCungCap, string tuNgay, string denNgay, string soChungTu = null, int page = 1, int pageSize = 20)
         {
-            if (!tuNgay.HasValue)
-                return Content("<div class='alert alert-warning text-center mt-3'>Vui lòng chọn từ ngày</div>");
+            DateTime? parsedTuNgay = null;
+            DateTime? parsedDenNgay = null;
 
-            if (!denNgay.HasValue)
-                return Content("<div class='alert alert-warning text-center mt-3'>Vui lòng chọn đến ngày</div>");
+            if (DateTime.TryParse(tuNgay, out DateTime dTu)) parsedTuNgay = dTu;
+            if (DateTime.TryParse(denNgay, out DateTime dDen)) parsedDenNgay = dDen;
 
-            if (tuNgay.Value > denNgay.Value)
+            if (!parsedTuNgay.HasValue)
+                return Content("<div class='alert alert-warning text-center mt-3'>Vui lòng chọn từ ngày hợp lệ</div>");
+
+            if (!parsedDenNgay.HasValue)
+                return Content("<div class='alert alert-warning text-center mt-3'>Vui lòng chọn đến ngày hợp lệ</div>");
+
+            if (parsedTuNgay.Value > parsedDenNgay.Value)
                 return Content("<div class='alert alert-danger text-center mt-3'>Từ ngày không được lớn hơn đến ngày</div>");
 
             try
             {
-                var data = _repo.GetList(idNhaCungCap, tuNgay.Value, denNgay.Value).ToList();
+                var data = _repo.GetList(idNhaCungCap, parsedTuNgay.Value, parsedDenNgay.Value, soChungTu).ToList();
                 var totalRecords = data.Count;
                 var pagedItems = data.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
@@ -229,13 +235,19 @@ namespace SalesManagementSystem.Controllers
 
 
         [HttpGet]
-        public ActionResult ExportExcel(int? idNhaCungCap, DateTime? tuNgay, DateTime? denNgay)
+        public ActionResult ExportExcel(int? idNhaCungCap, string tuNgay, string denNgay, string soChungTu = null)
         {
-            if (!tuNgay.HasValue || !denNgay.HasValue) return Content("Vui lòng chọn từ ngày và đến ngày");
+            DateTime? parsedTuNgay = null;
+            DateTime? parsedDenNgay = null;
+
+            if (DateTime.TryParse(tuNgay, out DateTime dTu)) parsedTuNgay = dTu;
+            if (DateTime.TryParse(denNgay, out DateTime dDen)) parsedDenNgay = dDen;
+
+            if (!parsedTuNgay.HasValue || !parsedDenNgay.HasValue) return Content("Vui lòng chọn từ ngày và đến ngày");
 
             try
             {
-                var data = _repo.GetList(idNhaCungCap, tuNgay.Value, denNgay.Value).ToList();
+                var data = _repo.GetList(idNhaCungCap, parsedTuNgay.Value, parsedDenNgay.Value, soChungTu).ToList();
 
                 string nhaCungCapName = "Tất cả";
                 if (idNhaCungCap.HasValue)
@@ -246,8 +258,8 @@ namespace SalesManagementSystem.Controllers
 
                 var variables = new Dictionary<string, object>
                 {
-                    { "TuNgay", tuNgay.Value.ToString("dd/MM/yyyy") },
-                    { "DenNgay", denNgay.Value.ToString("dd/MM/yyyy") },
+                    { "TuNgay", parsedTuNgay.Value.ToString("dd/MM/yyyy") },
+                    { "DenNgay", parsedDenNgay.Value.ToString("dd/MM/yyyy") },
                     { "NhaCungCap", nhaCungCapName },
                     { "Ngay", DateTime.Now.Day.ToString("00") },
                     { "Thang", DateTime.Now.Month.ToString("00") },

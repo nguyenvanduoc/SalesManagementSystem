@@ -14,6 +14,10 @@
                 <i class="bi bi-plus-lg fw-bold"></i> Thêm mới
             </button>
         }
+        <button type="button" class="btn btn-success" style="background-color: #2ecc71; border-color: #2ecc71;" 
+                onclick="exportExcel('@Url.Action("ExportExcel", "NhaCungCap")', '@Url.Action("GetList", "NhaCungCap")')">
+            <i class="bi bi-file-earmark-excel fw-bold"></i> Xuất Excel (NCC01)
+        </button>
         @if (PermissionHelper.HasPermission("NhaCungCap", LoaiPhanQuyen.Xoa))
         {
             <button type="button" class="btn btn-danger" style="background-color: #e74c3c; border-color: #e74c3c;" onclick="deleteSelectedNhaCungCap()">
@@ -64,7 +68,7 @@
 @section Scripts {
     <script>
         (function() {
-            var $pane = $(.tab-pane.active);
+            var $pane = $('.tab-pane.active');
             if ($pane.length === 0) $pane = $('body');
 
             // Check/Uncheck all checkboxes

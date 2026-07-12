@@ -5,6 +5,7 @@ using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories.Interfaces;
 using SalesManagementSystem.Helpers;
+using System.Linq;
 
 namespace SalesManagementSystem.Controllers
 {
@@ -226,6 +227,35 @@ namespace SalesManagementSystem.Controllers
                 }
             }
             return Json(new { success = true, message = "Xóa dữ liệu thành công" });
+        }
+
+        // GET: DmKhoanMucChi/ExportExcel
+        public ActionResult ExportExcel(string keyword = "")
+        {
+            try
+            {
+                int totalRecords;
+                var data = _khoanMucChiRepo.GetPaged(1, 10000, keyword, out totalRecords);
+
+                int stt = 1;
+                var exportData = data.Select(x => new
+                {
+                    STT = stt++,
+                    MaKhoanMuc = x.MaKhoanMuc,
+                    TenKhoanMuc = x.TenKhoanMuc,
+                    TrangThai = x.IsHoatDong ? "Hoạt động" : "Ngừng hoạt động",
+                    TenNguoiTao = x.TenNguoiTao,
+                    NgayTao = x.NgayTao.HasValue ? x.NgayTao.Value.ToString("dd/MM/yyyy HH:mm") : ""
+                });
+
+                return ExportDanhMucToExcel("KMC01", exportData, "Danh mục khoản mục chi", "DanhMucKhoanMucChi");
+            }
+            catch (Exception ex)
+            {
+                TempData["ToastMessage"] = "Lỗi xuất excel: " + ex.Message;
+                TempData["ToastType"] = "error";
+                return RedirectToAction("Index", new { keyword = keyword });
+            }
         }
     }
 }

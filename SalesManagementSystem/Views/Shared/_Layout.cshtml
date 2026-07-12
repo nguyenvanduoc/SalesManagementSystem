@@ -430,12 +430,17 @@
         .dropdown-hover > .dropdown-menu::before {
             content: "";
             position: absolute;
-            top: -20px;
-            bottom: -20px;
-            left: -20px;
-            right: -20px;
+            top: -10px;
+            bottom: -10px;
+            left: -10px;
+            right: -10px;
             background: transparent;
             z-index: -1;
+        }
+
+        /* Thêm scrollbar-gutter cho table-responsive để tránh bị giật (flicker) khi thanh cuộn dọc xuất hiện/biến mất */
+        .table-responsive {
+            scrollbar-gutter: stable;
         }
 
         /* Fix: 4 dòng cuối cùng sẽ hiển thị menu hướng lên trên (Dropup) đè ngược lên grid để không bị che bởi footer.
@@ -1696,6 +1701,69 @@
         // Đăng ký toàn cục
         window.showLoading = showLoading;
         window.hideLoading = hideLoading;
+
+        window.exportExcel = function (url, checkUrl, formSelector) {
+            var $form = formSelector ? $(formSelector) : $('.tab-pane.active #searchForm');
+            if ($form.length === 0) $form = $('#searchForm');
+            
+            var data = $form.length > 0 ? $form.serialize() : "";
+            
+            var ajaxCheckUrl = checkUrl;
+            if (ajaxCheckUrl.indexOf("?") === -1) {
+                ajaxCheckUrl += "?" + data;
+            } else {
+                ajaxCheckUrl += "&" + data;
+            }
+            ajaxCheckUrl += "&page=1&pageSize=1"; // Chỉ lấy 1 bản ghi để kiểm tra nhanh
+            
+            showLoading();
+            
+            $.ajax({
+                url: ajaxCheckUrl,
+                type: 'GET',
+                global: false,
+                success: function (res) {
+                    var $tempDom = $('<div>').html(res);
+                    var rowCount = $tempDom.find('tbody tr').length;
+                    var hasNoDataText = $tempDom.text().indexOf('Chưa có dữ liệu') !== -1;
+                    
+                    if (rowCount === 0 || (rowCount === 1 && hasNoDataText)) {
+                        hideLoading();
+                        showToast('warning', 'Không có dữ liệu phù hợp để xuất.');
+                        return;
+                    }
+                    
+                    var token = new Date().getTime();
+                    var downloadUrl = url;
+                    if (downloadUrl.indexOf("?") === -1) {
+                        downloadUrl += "?" + data;
+                    } else {
+                        downloadUrl += "&" + data;
+                    }
+                    downloadUrl += "&downloadToken=" + token;
+                    
+                    var checkTimer = setInterval(function() {
+                        var cookieName = "downloadToken=" + token;
+                        if (document.cookie.indexOf(cookieName) !== -1) {
+                            clearInterval(checkTimer);
+                            document.cookie = cookieName + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                            hideLoading();
+                        }
+                    }, 500);
+                    
+                    setTimeout(function() {
+                        clearInterval(checkTimer);
+                        hideLoading();
+                    }, 25000); // 25s timeout
+                    
+                    window.location.href = downloadUrl;
+                },
+                error: function () {
+                    hideLoading();
+                    showToast('error', 'Có lỗi xảy ra khi kiểm tra dữ liệu.');
+                }
+            });
+        };
 
         // Bắt sự kiện AJAX toàn cục của jQuery qua ajaxSend và ajaxComplete để tránh xung đột với các request chạy ngầm
         $(document).on('ajaxSend', function (event, xhr, settings) {

@@ -40,6 +40,10 @@
                         <label class="form-label text-muted small mb-1">Nhà cung cấp</label>
                         @Html.DropDownList("idNhaCungCap", (SelectList)ViewBag.NhaCungCapList, "-- Chọn nhà cung cấp --", new { @class = "form-select form-select-sm select2", @id = "idNhaCungCap_" + uid })
                     </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Số chứng từ</label>
+                        <input type="text" class="form-control form-control-sm" id="soChungTu_@uid" name="soChungTu" placeholder="Số PC, PN..." />
+                    </div>
                     
                     <div class="col-md-2">
                         <label class="form-label text-muted small mb-1">Thời gian</label>
@@ -72,7 +76,7 @@
                         <label class="form-label text-muted small mb-1">Đến ngày <span class="text-danger">*</span></label>
                         <input type="date" class="form-control form-control-sm" id="denNgay_@uid" name="denNgay" value="@ViewBag.DenNgay" />
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-12 mt-2 text-end">
                         <button type="button" class="btn btn-primary btn-sm px-3 shadow-sm" id="btnSearch_@uid" style="background-color: #3498db; border-color: #3498db;">
                             <i class="bi bi-search me-1"></i> Tìm kiếm
                         </button>
@@ -111,6 +115,7 @@
             // Hàm load dữ liệu
             function loadData() {
                 var idNhaCungCap = $container.find('#idNhaCungCap_@uid').val();
+                var soChungTu = $container.find('#soChungTu_@uid').val();
                 var tuNgay = $container.find('#tuNgay_@uid').val();
                 var denNgay = $container.find('#denNgay_@uid').val();
 
@@ -137,6 +142,7 @@
                     type: 'GET',
                     data: {
                         idNhaCungCap: idNhaCungCap,
+                        soChungTu: soChungTu,
                         tuNgay: tuNgay,
                         denNgay: denNgay
                     },
@@ -158,6 +164,7 @@
             // Sự kiện làm mới
             $container.find('#btnReset_@uid').on('click', function () {
                 $container.find('#idNhaCungCap_@uid').val('').trigger('change');
+                $container.find('#soChungTu_@uid').val('');
                 $container.find('#tuNgay_@uid').val('@ViewBag.TuNgay');
                 $container.find('#denNgay_@uid').val('@ViewBag.DenNgay');
                 $container.find('#table-container-@uid').html('<div class="alert alert-info text-center mt-3">Ấn <b>Tìm kiếm</b> để xem báo cáo.</div>');
@@ -172,7 +179,8 @@
                     return;
                 }
                 var idNhaCungCap = $container.find('#idNhaCungCap_@uid').val() || '';
-                var url = '@Url.Action("ExportExcel", "BaoCaoDoiChieuNhapNhaCungCap")' + '?tuNgay=' + tuNgay + '&denNgay=' + denNgay + '&idNhaCungCap=' + idNhaCungCap;
+                var soChungTu = $container.find('#soChungTu_@uid').val() || '';
+                var url = '@Url.Action("ExportExcel", "BaoCaoDoiChieuNhapNhaCungCap")' + '?tuNgay=' + tuNgay + '&denNgay=' + denNgay + '&idNhaCungCap=' + idNhaCungCap + '&soChungTu=' + encodeURIComponent(soChungTu);
                 window.location.href = url;
             });
 

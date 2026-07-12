@@ -18,7 +18,7 @@ namespace SalesManagementSystem.Repositories
             _db = db;
         }
 
-        public IEnumerable<BaoCaoDoiChieuNhapNhaCungCapViewModel> GetList(int? idNhaCungCap, DateTime tuNgay, DateTime denNgay)
+        public IEnumerable<BaoCaoDoiChieuNhapNhaCungCapViewModel> GetList(int? idNhaCungCap, DateTime tuNgay, DateTime denNgay, string soChungTu = null)
         {
             using (var conn = _db.CreateConnection())
             {
@@ -34,6 +34,9 @@ namespace SalesManagementSystem.Repositories
                             }
                         }
                         // Sau khi chạy xong đổi tên file hoặc xoá để tránh chạy lại lần sau
+                        if (System.IO.File.Exists(sqlPath + ".executed")) {
+                            System.IO.File.Delete(sqlPath + ".executed");
+                        }
                         System.IO.File.Move(sqlPath, sqlPath + ".executed");
                     }
                     
@@ -55,6 +58,7 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@IDNhaCungCap", idNhaCungCap);
                 p.Add("@TuNgay", tuNgay);
                 p.Add("@DenNgay", denNgay);
+                p.Add("@SoChungTu", soChungTu);
 
                 return conn.Query<BaoCaoDoiChieuNhapNhaCungCapViewModel>(
                     "sp_BaoCao_DoiChieuNhapNhaCungCap",

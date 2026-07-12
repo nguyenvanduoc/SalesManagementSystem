@@ -42,11 +42,13 @@ BEGIN
         DECLARE @TongCong DECIMAL(18,2) = 0;
 
         -- Tính tổng số tiền chi của các phiếu chi đã ghi sổ (TrangThai = 2) và không bị xóa
-        SELECT @DaThanhToan = ISNULL(SUM(SoTienChi), 0)
-        FROM KT_PhieuChi
-        WHERE IDPhieuNhap = @IDPhieuNhap 
-          AND TrangThai = 2 
-          AND IsDeleted = 0;
+        SELECT @DaThanhToan = ISNULL(SUM(ct.SoTienPhanBo), 0)
+        FROM KT_PhieuChiChiTiet ct
+        INNER JOIN KT_PhieuChi pc ON ct.IDPhieuChi = pc.ID
+        WHERE ct.IDPhieuNhap = @IDPhieuNhap 
+          AND ct.LoaiChi = 1
+          AND pc.TrangThai = 2 
+          AND pc.IsDeleted = 0;
 
         -- Lấy tổng cộng của phiếu nhập kho
         SELECT @TongCong = ISNULL(TongCong, 0)

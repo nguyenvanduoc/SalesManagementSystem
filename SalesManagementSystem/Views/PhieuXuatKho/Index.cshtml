@@ -152,6 +152,7 @@
                     $.ajax({
                         url: '@Url.Action("GetDetailInline", "PhieuXuatKho")',
                         type: 'GET',
+                        global: false,
                         data: { id: id },
                         success: function (res) {
                             $detailRow.find('td').html('<div class="detail-container p-2" style="display:none;">' + res + '</div>');

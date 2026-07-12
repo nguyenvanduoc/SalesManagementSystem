@@ -6,6 +6,7 @@ using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories.Interfaces;
 using SalesManagementSystem.Helpers;
+using System.Linq;
 
 namespace SalesManagementSystem.Controllers
 {
@@ -206,6 +207,38 @@ namespace SalesManagementSystem.Controllers
         {
             var data = _nhaCungCapRepo.GetForDropdown(q);
             return Json(data.Select(x => new { id = x.ID, text = x.MaNhaCungCap + " - " + x.TenNhaCungCap }), JsonRequestBehavior.AllowGet);
+        }
+
+        // GET: NhaCungCap/ExportExcel
+        public ActionResult ExportExcel(string ma = "", string ten = "", string dt = "", string email = "")
+        {
+            try
+            {
+                int totalRecords;
+                var data = _nhaCungCapRepo.GetPaged(1, 10000, ma, ten, dt, email, out totalRecords);
+
+                int stt = 1;
+                var exportData = data.Select(x => new
+                {
+                    STT = stt++,
+                    MaNhaCungCap = x.MaNhaCungCap,
+                    TenNhaCungCap = x.TenNhaCungCap,
+                    DienThoai = x.DienThoai,
+                    Email = x.Email,
+                    MaSoThue = x.MaSoThue,
+                    DiaChi = x.DiaChi,
+                    NgayTao = x.NgayTao.HasValue ? x.NgayTao.Value.ToString("dd/MM/yyyy HH:mm") : "",
+                    TenNguoiTao = x.TenNguoiTao
+                });
+
+                return ExportDanhMucToExcel("NCC01", exportData, "Danh mục nhà cung cấp", "DanhMucNhaCungCap");
+            }
+            catch (Exception ex)
+            {
+                TempData["ToastMessage"] = "Lỗi xuất excel: " + ex.Message;
+                TempData["ToastType"] = "error";
+                return RedirectToAction("Index", new { ma = ma, ten = ten, dt = dt, email = email });
+            }
         }
     }
 }

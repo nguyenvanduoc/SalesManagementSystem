@@ -6,6 +6,7 @@ using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories.Interfaces;
 using SalesManagementSystem.Helpers;
+using System.Linq;
 
 namespace SalesManagementSystem.Controllers
 {
@@ -162,11 +163,42 @@ namespace SalesManagementSystem.Controllers
             try
             {
                 _repo.Delete(id);
-                return Json(new { success = true, message = "Xóa thành công." });
+                return Json(new { success = true, message = "Xóa dữ liệu thành công" });
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "Đã xảy ra lỗi: " + ex.Message });
+            }
+        }
+
+        // GET: TaiKhoanThanhToan/ExportExcel
+        public ActionResult ExportExcel(string keyword = "", int? isHoatDong = null)
+        {
+            try
+            {
+                int totalRecords;
+                var data = _repo.GetList(1, 10000, keyword, isHoatDong, out totalRecords);
+
+                int stt = 1;
+                var exportData = data.Select(x => new
+                {
+                    STT = stt++,
+                    MaTaiKhoan = x.MaTaiKhoan,
+                    TenTaiKhoan = x.TenTaiKhoan,
+                    SoTaiKhoan = x.SoTaiKhoan,
+                    NganHang = x.NganHang,
+                    ChuTaiKhoan = x.ChuTaiKhoan,
+                    TaiKhoanKeToan = string.IsNullOrEmpty(x.SoTaiKhoanKeToan) ? "" : x.SoTaiKhoanKeToan + " - " + x.TenTaiKhoanKeToan,
+                    TrangThai = x.IsHoatDong ? "Hoạt động" : "Ngừng hoạt động"
+                });
+
+                return ExportDanhMucToExcel("TKTT01", exportData, "Danh mục tài khoản thanh toán", "DanhMucTaiKhoanThanhToan");
+            }
+            catch (Exception ex)
+            {
+                TempData["ToastMessage"] = "Lỗi xuất excel: " + ex.Message;
+                TempData["ToastType"] = "error";
+                return RedirectToAction("Index", new { keyword = keyword, isHoatDong = isHoatDong });
             }
         }
     }

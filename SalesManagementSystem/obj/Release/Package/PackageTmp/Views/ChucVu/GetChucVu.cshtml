@@ -14,6 +14,10 @@
                 <i class="bi bi-plus-lg fw-bold"></i> Thêm mới
             </button>
         }
+        <button type="button" class="btn btn-success" style="background-color: #2ecc71; border-color: #2ecc71;" 
+                onclick="exportExcel('@Url.Action("ExportExcel", "ChucVu")', '@Url.Action("GetChucVu", "ChucVu")')">
+            <i class="bi bi-file-earmark-excel fw-bold"></i> Xuất Excel (CV01)
+        </button>
         @if (PermissionHelper.HasPermission("ChucVu", LoaiPhanQuyen.Xoa))
         {
             <button type="button" class="btn btn-danger" style="background-color: #e74c3c; border-color: #e74c3c;" onclick="deleteSelectedChucVu()">
@@ -50,7 +54,7 @@
 @section Scripts {
     <script>
         (function() {
-            var $pane = $('#searchForm').closest('.tab-pane');
+            var $pane = $('.tab-pane.active');
             if ($pane.length === 0) $pane = $('body');
 
             // Check/Uncheck all checkboxes

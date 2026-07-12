@@ -200,6 +200,7 @@
                 $.ajax({
                     url: '@Url.Action("GetDetailInline", "ChungTuBanHang")',
                     type: 'GET',
+                    global: false,
                     data: { id: id, idDonDatHang: idDonDatHang },
                     success: function (html) {
                         $detailRow.find('td').html(html);
