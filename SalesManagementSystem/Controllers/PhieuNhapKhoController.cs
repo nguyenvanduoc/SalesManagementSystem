@@ -49,16 +49,22 @@ namespace SalesManagementSystem.Controllers
             return new SelectList(items, "ID", "Name", selectedId);
         }
 
+        private SelectList GetSanPhamList(int? selectedId = null)
+        {
+            var items = _repo.GetSanPhamForDropdown("").Select(x => new { ID = x.ID, Name = x.MaSanPham + " - " + x.TenSanPham }).ToList();
+            return new SelectList(items, "ID", "Name", selectedId);
+        }
+
         public ActionResult Index(int page = 1, int pageSize = 20, 
             string tuNgay = null, string denNgay = null,
             string soChungTu = null, int? idKho = null, int? idNhaCungCap = null, 
             int? trangThai = null, string tenNguoiNhan = null,
-            string tenNguoiGiao = null, int? idPhuongTien = null, string hoTenTaiXe = null)
+            string tenNguoiGiao = null, int? idPhuongTien = null, string hoTenTaiXe = null, int? idSanPham = null)
         {
             if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.Xem)) return View("AccessDenied");
 
             int totalRecords;
-            var list = _repo.GetPaged(page, pageSize, tuNgay, denNgay, soChungTu, idKho, idNhaCungCap, trangThai, tenNguoiNhan, tenNguoiGiao, idPhuongTien, hoTenTaiXe, out totalRecords);
+            var list = _repo.GetPaged(page, pageSize, tuNgay, denNgay, soChungTu, idKho, idNhaCungCap, trangThai, tenNguoiNhan, tenNguoiGiao, idPhuongTien, hoTenTaiXe, idSanPham, out totalRecords);
 
             var model = new PagedListViewModel<PhieuNhapKhoListViewModel>
             {
@@ -75,6 +81,7 @@ namespace SalesManagementSystem.Controllers
             ViewBag.Khos = GetKhoList(idKho);
             ViewBag.NhaCungCaps = GetNhaCungCapList(idNhaCungCap);
             ViewBag.PhuongTiens = GetPhuongTienList(idPhuongTien);
+            ViewBag.SanPhams = GetSanPhamList(idSanPham);
             ViewBag.TrangThai = trangThai;
             ViewBag.TenNguoiGiao = tenNguoiGiao;
             ViewBag.TenNguoiNhan = tenNguoiNhan;
@@ -86,13 +93,13 @@ namespace SalesManagementSystem.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetList(int page = 1, int pageSize = 20, string tuNgay = "", string denNgay = "", string soChungTu = "", int? idKho = null, int? idNhaCungCap = null, int? trangThai = null, string tenNguoiNhan = "", string tenNguoiGiao = "", int? idPhuongTien = null, string hoTenTaiXe = null)
+        public ActionResult GetList(int page = 1, int pageSize = 20, string tuNgay = "", string denNgay = "", string soChungTu = "", int? idKho = null, int? idNhaCungCap = null, int? trangThai = null, string tenNguoiNhan = "", string tenNguoiGiao = "", int? idPhuongTien = null, string hoTenTaiXe = null, int? idSanPham = null)
         {
             if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.Xem)) return Content("<div class='alert alert-danger'>Không có quyền truy cập</div>");
 
             try 
             {
-                var list = _repo.GetPaged(page, pageSize, tuNgay, denNgay, soChungTu, idKho, idNhaCungCap, trangThai, tenNguoiNhan, tenNguoiGiao, idPhuongTien, hoTenTaiXe, out int totalRecords);
+                var list = _repo.GetPaged(page, pageSize, tuNgay, denNgay, soChungTu, idKho, idNhaCungCap, trangThai, tenNguoiNhan, tenNguoiGiao, idPhuongTien, hoTenTaiXe, idSanPham, out int totalRecords);
 
                 var model = new PagedListViewModel<PhieuNhapKhoListViewModel>
                 {
@@ -112,14 +119,14 @@ namespace SalesManagementSystem.Controllers
         }
 
         [HttpGet]
-        public ActionResult ExportExcel(string tuNgay = "", string denNgay = "", string soChungTu = "", int? idKho = null, int? idNhaCungCap = null, int? trangThai = null, string tenNguoiNhan = "", string tenNguoiGiao = "", int? idPhuongTien = null, string hoTenTaiXe = null)
+        public ActionResult ExportExcel(string tuNgay = "", string denNgay = "", string soChungTu = "", int? idKho = null, int? idNhaCungCap = null, int? trangThai = null, string tenNguoiNhan = "", string tenNguoiGiao = "", int? idPhuongTien = null, string hoTenTaiXe = null, int? idSanPham = null)
         {
             if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.Xem)) 
                 return View("AccessDenied");
 
             try
             {
-                var list = _repo.GetPaged(1, 100000, tuNgay, denNgay, soChungTu, idKho, idNhaCungCap, trangThai, tenNguoiNhan, tenNguoiGiao, idPhuongTien, hoTenTaiXe, out int totalRecords);
+                var list = _repo.GetPaged(1, 100000, tuNgay, denNgay, soChungTu, idKho, idNhaCungCap, trangThai, tenNguoiNhan, tenNguoiGiao, idPhuongTien, hoTenTaiXe, idSanPham, out int totalRecords);
 
                 var session = (UserLoginViewModel)Session[CommonConstants.USER_SESSION];
                 string nguoiLapBieu = session != null ? (session.HoDem + " " + session.Ten).Trim() : "Hệ thống";
@@ -227,7 +234,7 @@ namespace SalesManagementSystem.Controllers
             };
 
             int total;
-            var list = _repo.GetPaged(1, 1, null, null, entity.SoChungTu, null, null, null, null, null, null, null, out total);
+            var list = _repo.GetPaged(1, 1, null, null, entity.SoChungTu, null, null, null, null, null, null, null, null, out total);
             var item = list.FirstOrDefault();
             if (item != null)
             {
@@ -312,7 +319,7 @@ namespace SalesManagementSystem.Controllers
             };
 
             int total;
-            var list = _repo.GetPaged(1, 1, null, null, entity.SoChungTu, null, null, null, null, null, null, null, out total);
+            var list = _repo.GetPaged(1, 1, null, null, entity.SoChungTu, null, null, null, null, null, null, null, null, out total);
             var item = list.FirstOrDefault();
             if (item != null)
             {
@@ -529,7 +536,7 @@ namespace SalesManagementSystem.Controllers
             };
 
             int total;
-            var list = _repo.GetPaged(1, 1, null, null, entity.SoChungTu, null, null, null, null, null, null, null, out total);
+            var list = _repo.GetPaged(1, 1, null, null, entity.SoChungTu, null, null, null, null, null, null, null, null, out total);
             var item = list.FirstOrDefault();
             if (item != null)
             {

@@ -13,6 +13,7 @@ namespace SalesManagementSystem.Repositories.Interfaces
             string soChungTu, int? idKho, int? idNhaCungCap, 
             int? trangThai, string tenNguoiNhan,
             string tenNguoiGiao, int? idPhuongTien, string hoTenTaiXe,
+            int? idSanPham,
             out int totalRecords);
 
         KHO_PhieuNhap GetByID(int id);

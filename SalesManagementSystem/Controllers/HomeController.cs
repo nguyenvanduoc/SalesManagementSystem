@@ -20,6 +20,10 @@ namespace SalesManagementSystem.Controllers
 
         public ActionResult Index()
         {
+            if (PermissionHelper.HasPermission("Dashboard", LoaiPhanQuyen.Xem))
+            {
+                return RedirectToAction("Index", "Dashboard");
+            }
             return View();
         }
 

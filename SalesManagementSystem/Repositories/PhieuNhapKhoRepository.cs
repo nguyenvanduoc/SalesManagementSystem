@@ -26,6 +26,7 @@ namespace SalesManagementSystem.Repositories
             string soChungTu, int? idKho, int? idNhaCungCap, 
             int? trangThai, string tenNguoiNhan,
             string tenNguoiGiao, int? idPhuongTien, string hoTenTaiXe,
+            int? idSanPham,
             out int totalRecords)
         {
             using (var conn = _db.CreateConnection())
@@ -53,6 +54,7 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@TenNguoiNhan", tenNguoiNhan);
                 p.Add("@TenNguoiGiao", tenNguoiGiao);
                 p.Add("@IDPhuongTien", idPhuongTien);
+                p.Add("@IDSanPham", idSanPham);
                 p.Add("@Offset", (page - 1) * pageSize);
                 p.Add("@PageSize", pageSize);
                 p.Add("@TotalRecords", dbType: DbType.Int32, direction: ParameterDirection.Output);

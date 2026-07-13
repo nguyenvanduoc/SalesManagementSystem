@@ -137,6 +137,11 @@
                                             }
                                             <li><hr class="dropdown-divider"></li>
                                             <li>
+                                                <button type="button" class="dropdown-item py-2 text-info" onclick="window.location.href='@Url.Action("ExportWord", "PhieuChi", new { id = item.ID })'">
+                                                    <i class="bi bi-file-earmark-word text-info me-2"></i>In phiếu chi (Word)
+                                                </button>
+                                            </li>
+                                            <li>
                                                 <button type="button" class="dropdown-item py-2 text-secondary btn-view-pc-files"
                                                         data-id="@item.ID" data-so="@item.SoPhieuChi">
                                                     <i class="bi bi-paperclip text-secondary me-2"></i>Xem file &#273;&#237;nh k&#232;m

@@ -19,7 +19,7 @@ namespace SalesManagementSystem.Controllers
         public ActionResult Index()
         {
             // Kiểm tra quyền truy cập Dashboard
-            bool hasPermission = PermissionHelper.HasActionPermission("Dashboard", "Index");
+            bool hasPermission = PermissionHelper.HasPermission("Dashboard", LoaiPhanQuyen.Xem);
             if (!hasPermission)
             {
                 var user = GetCurrentUser();
@@ -36,7 +36,7 @@ namespace SalesManagementSystem.Controllers
         {
             try
             {
-                bool hasPermission = PermissionHelper.HasActionPermission("Dashboard", "Index");
+                bool hasPermission = PermissionHelper.HasPermission("Dashboard", LoaiPhanQuyen.Xem);
                 if (!hasPermission)
                 {
                     return Json(new { success = false, message = "Không có quyền truy cập" });

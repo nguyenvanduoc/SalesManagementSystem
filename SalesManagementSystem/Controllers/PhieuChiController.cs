@@ -16,11 +16,13 @@ namespace SalesManagementSystem.Controllers
     {
         private readonly IPhieuChiRepository _repo;
         private readonly IExcelExportService _excelExportService;
+        private readonly IWordExportService _wordExportService;
 
-        public PhieuChiController(IPhieuChiRepository repo, IExcelExportService excelExportService)
+        public PhieuChiController(IPhieuChiRepository repo, IExcelExportService excelExportService, IWordExportService wordExportService)
         {
             _repo = repo;
             _excelExportService = excelExportService;
+            _wordExportService = wordExportService;
         }
 
         // GET: /phieu-chi
@@ -707,6 +709,41 @@ namespace SalesManagementSystem.Controllers
                 result.Add("ERROR: " + ex.Message);
             }
             return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public ActionResult ExportWord(int id)
+        {
+            var phieuChi = _repo.GetByID(id);
+            if (phieuChi == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy phiếu chi.";
+                return RedirectToAction("Index");
+            }
+
+            var userInfo = Session["UserInfo"] as AclLoginViewModel;
+            string nguoiTao = userInfo?.HoTen ?? userInfo?.TenDangNhap ?? "";
+
+            var exportData = new Dictionary<string, object>
+            {
+                { "NgayChi", phieuChi.NgayChi.ToString("dd/MM/yyyy") },
+                { "SoChungTu", phieuChi.SoPhieuChi },
+                { "TenNguoiNhan", phieuChi.NguoiNhanTien ?? "" },
+                { "DienGiai", phieuChi.DienGiai ?? "" },
+                { "TongTien", phieuChi.SoTienChi.ToString("N0") },
+                { "TienBangChu", SalesManagementSystem.Helpers.NumberToTextHelper.DocTienBangChu(phieuChi.SoTienChi) },
+                { "NguoiTao", nguoiTao }
+            };
+            
+            var result = _wordExportService.ExportWord("PhieuChi01", exportData, null, isPdf: false);
+            
+            if (result.Success)
+            {
+                return File(result.FileBytes, result.ContentType, result.FileName);
+            }
+
+            TempData["ErrorMessage"] = result.Message;
+            return RedirectToAction("Index");
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -96,9 +96,9 @@ namespace SalesManagementSystem.Services
             {
                 foreach (var kvp in dict)
                 {
-                    string findText = "@" + kvp.Key;
                     string replaceText = FormatValue(kvp.Value);
-                    document.ReplaceText(findText, replaceText);
+                    document.ReplaceText("@" + kvp.Key, replaceText);
+                    document.ReplaceText("«" + kvp.Key + "»", replaceText);
                 }
             }
             else
@@ -106,9 +106,9 @@ namespace SalesManagementSystem.Services
                 PropertyInfo[] properties = data.GetType().GetProperties();
                 foreach (var prop in properties)
                 {
-                    string findText = "@" + prop.Name;
                     string replaceText = FormatValue(prop.GetValue(data));
-                    document.ReplaceText(findText, replaceText);
+                    document.ReplaceText("@" + prop.Name, replaceText);
+                    document.ReplaceText("«" + prop.Name + "»", replaceText);
                 }
             }
 

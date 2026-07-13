@@ -136,23 +136,36 @@
                             <option value="current_year">Từ đầu năm đến hiện tại</option>
                     </select>
                 </div>
-                <div class="col-md col-sm-6">
+                <div class="col-md-2 col-sm-6">
                     <label class="form-label text-muted small mb-1 fw-semibold">Từ ngày</label>
                     <input type="date" class="form-control form-control-sm" name="tuNgay" value="@ViewBag.TuNgay" />
                 </div>
-                <div class="col-md col-sm-6">
+                <div class="col-md-2 col-sm-6">
                     <label class="form-label text-muted small mb-1 fw-semibold">Đến ngày</label>
                     <input type="date" class="form-control form-control-sm" name="denNgay" value="@ViewBag.DenNgay" />
                 </div>
-                <div class="col-md col-sm-6">
+                <div class="col-md-2 col-sm-6">
                     <label class="form-label text-muted small mb-1 fw-semibold">Số phiếu</label>
                     <input type="text" class="form-control form-control-sm" name="soPhieuChi" value="@ViewBag.SoPhieuChi" placeholder="Nhập số phiếu..." />
                 </div>
-                <div class="col-md col-sm-6">
+                <div class="col-md-2 col-sm-6">
                     <label class="form-label text-muted small mb-1 fw-semibold">Người nhận</label>
                     <input type="text" class="form-control form-control-sm" name="nguoiNhanTien" value="@ViewBag.NguoiNhanTien" placeholder="Họ tên..." />
                 </div>
-                <div class="col-md col-sm-6">
+                <div class="col-md-2 col-sm-6">
+                    <label class="form-label text-muted small mb-1 fw-semibold">Nhà cung cấp</label>
+                    <select class="form-select form-select-sm" name="idNhaCungCap">
+                        <option value="">Tất cả</option>
+                        @if (ViewBag.NhaCungCapList != null)
+                        {
+                            foreach (SelectListItem item in ViewBag.NhaCungCapList)
+                            {
+                                <option value="@item.Value" @(item.Value == (ViewBag.IDNhaCungCap != null ? ViewBag.IDNhaCungCap.ToString() : "") ? "selected" : "")>@item.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2 col-sm-6">
                     <label class="form-label text-muted small mb-1 fw-semibold">Khoản mục chi</label>
                     <select class="form-select form-select-sm" name="idKhoanMucChi">
                         <option value="">Tất cả</option>
@@ -165,7 +178,7 @@
                         }
                     </select>
                 </div>
-                <div class="col-md col-sm-6">
+                <div class="col-md-2 col-sm-6">
                     <label class="form-label text-muted small mb-1 fw-semibold">Tài khoản chi</label>
                     <select class="form-select form-select-sm" name="idTaiKhoanThanhToan">
                         <option value="">Tất cả</option>
@@ -179,7 +192,7 @@
                     </select>
 
                 </div>
-                <div class="col-auto d-flex gap-2">
+                <div class="col-md-2 col-sm-6 d-flex gap-2">
                     <button type="submit" class="btn btn-sm text-white px-3 d-flex align-items-center gap-1" style="background-color:#2998e4;border:none;height:31px;">
                         <i class="bi bi-search"></i> Tìm kiếm
                     </button>

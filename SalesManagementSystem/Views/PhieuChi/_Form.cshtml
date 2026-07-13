@@ -166,18 +166,16 @@
 
         function calculatePhanBo() {
             var tongChi = parseCurrency($('#SoTienChi').val());
-            var tienHienTai = tongChi; // Start with total money from user input
+            var tienTraTruoc = parseFloat(window.tienTraTruoc) || 0;
             var tongPhanBo = 0;
             
             // Loop through inputs and adjust values
             $modal.find('.input-phanbo').each(function() {
-                var $input = $(this);
-                var isAuto = $input.data('auto'); // Not used right now, user can just type
-                var val = parseCurrency($input.val());
+                var val = parseCurrency($(this).val());
                 tongPhanBo += val;
             });
             
-            var tienDu = tongChi - tongPhanBo;
+            var tienDu = (tongChi + tienTraTruoc) - tongPhanBo;
             $modal.find('#TongPhanBo').text(formatCurrency(tongPhanBo));
             $modal.find('#TienDuTraTruoc').text(formatCurrency(tienDu >= 0 ? tienDu : 0));
         }
@@ -359,6 +357,13 @@
                     SoTienPhanBo: Math.abs(tienDu),
                     DienGiai: 'Sử dụng tiền trả trước nhà cung cấp'
                 });
+            } else if (tienDu > 0) {
+                chiTiets.push({
+                    IDPhieuNhap: null,
+                    LoaiChi: 2, // 2: Tiền dư chuyển trả trước
+                    SoTienPhanBo: tienDu,
+                    DienGiai: 'Tiền dư chuyển thành trả trước cho nhà cung cấp'
+                });
             }
             $('#chiTietJson').val(JSON.stringify(chiTiets));
             var $soTien = $modal.find('#SoTienChi');
@@ -382,14 +387,7 @@
                 return false;
             }
             
-            if (tongChi > tongPhanBo) {
-                if (typeof showToast === 'function') {
-                    showToast('warning', 'Số tiền chi (' + formatCurrency(tongChi) + ' đ) không được lớn hơn Tổng tiền phân bổ cho chứng từ (' + formatCurrency(tongPhanBo) + ' đ). Không được phép chi dư cho nhà cung cấp.');
-                } else {
-                    alert('Số tiền chi (' + formatCurrency(tongChi) + ' đ) không được lớn hơn Tổng tiền phân bổ cho chứng từ (' + formatCurrency(tongPhanBo) + ' đ). Không được phép chi dư cho nhà cung cấp.');
-                }
-                return false;
-            }
+
             
             return true;
         }
