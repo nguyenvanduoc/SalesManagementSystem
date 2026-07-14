@@ -83,7 +83,6 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@DienThoai", ncc.SoDienThoai?.Trim());
                 p.Add("@Email", ncc.Email?.Trim());
                 p.Add("@DiaChi", ncc.DiaChi?.Trim());
-                p.Add("@MaSoThue", ncc.MaSoThue?.Trim());
                 p.Add("@NguoiTao", ncc.NguoiTao);
 
                 return conn.ExecuteScalar<int>(

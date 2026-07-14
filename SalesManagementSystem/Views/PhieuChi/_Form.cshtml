@@ -50,7 +50,22 @@
                 <label class="form-label fw-bold">Số ĐT</label>
                 @Html.TextBoxFor(m => m.SoDienThoaiNguoiNhan, new { @class = "form-control", @placeholder = "Số điện thoại..." })
             </div>
-            <div class="col-md-8">
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Loại chi tiền <span class="text-danger">*</span></label>
+                <select name="IDLoaiChiTien" id="IDLoaiChiTien" class="form-select select2" required>
+                    <option value="">-- Chọn loại chi --</option>
+                    @if (ViewBag.LoaiChiTienList != null)
+                    {
+                        foreach (SelectListItem item in ViewBag.LoaiChiTienList)
+                        {
+                            <option value="@item.Value" @(item.Value == Model.IDLoaiChiTien?.ToString() ? "selected" : "")>@item.Text</option>
+                        }
+                    }
+                </select>
+                <input type="hidden" id="MaLoaiChiTien" name="MaLoaiChiTien" value="@Model.MaLoaiChiTien" />
+            </div>
+
+            <div class="col-md-4" id="divNhaCungCap" style="display:none;">
                 <label class="form-label fw-bold">Nhà cung cấp</label>
                 <select name="IDNhaCungCap" id="IDNhaCungCap" class="form-select select2">
                     <option value="">-- Chọn nhà cung cấp --</option>
@@ -63,14 +78,28 @@
                     }
                 </select>
             </div>
+
+            <div class="col-md-4" id="divPhuongTien" style="display:none;">
+                <label class="form-label fw-bold">Phương tiện</label>
+                <select name="IDPhuongTien" id="IDPhuongTien" class="form-select select2">
+                    <option value="">-- Chọn phương tiện --</option>
+                    @if (ViewBag.PhuongTienList != null)
+                    {
+                        foreach (SelectListItem item in ViewBag.PhuongTienList)
+                        {
+                            <option value="@item.Value" @(item.Value == Model.IDPhuongTien?.ToString() ? "selected" : "")>@item.Text</option>
+                        }
+                    }
+                </select>
+            </div>
             <div class="col-md-4">
                 <label class="form-label fw-bold w-100">
                     Tổng số tiền chi <span class="text-danger">*</span>
                     <button type="button" class="btn btn-sm btn-outline-primary float-end" id="btnChiToanBo" style="padding: 0 5px; font-size: 11px; line-height: 1.2;">Chi toàn bộ</button>
                 </label>
-                <div class="input-group">
-                    @Html.TextBoxFor(m => m.SoTienChi, "{0:N0}", new { @class = "form-control text-end fw-bold text-primary fs-5", @id = "SoTienChi", @placeholder = "", @Value = Model.SoTienChi == 0 ? "" : Model.SoTienChi.ToString("N0") })
-                    <span class="input-group-text bg-light fw-bold text-muted">đ</span>
+                <div class="input-group input-group-lg">
+                    <input type="text" id="SoTienChi" name="SoTienChi" class="form-control text-end fw-bold text-primary" placeholder="" value="@(Model.SoTienChi == 0 ? "" : Model.SoTienChi.ToString("N0"))" />
+                    <span class="input-group-text bg-light fw-bold text-muted" style="font-size: 1rem;">đ</span>
                 </div>
                 @Html.ValidationMessageFor(m => m.SoTienChi, "", new { @class = "text-danger small" })
             </div>
@@ -152,16 +181,19 @@
         
         // Populate existing details if Edit mode
         var existingDetails = @Html.Raw(Model.ChiTiets != null ? Newtonsoft.Json.JsonConvert.SerializeObject(Model.ChiTiets) : "[]");
+        var isInitializing = true;
 
         if ($modal.length > 0) {
             $modal.find('.modal-dialog').removeClass('modal-lg modal-dialog-centered').addClass('modal-xl').css('margin-top', '30px');
             if (isView) {
                 $modal.find('input, select, textarea').prop('disabled', true);
             }
-            $modal.find('.select2').select2({ dropdownParent: $modal, width: '100%' });
+            $modal.find('.select2').each(function() {
+                $(this).select2({ dropdownParent: $(this).parent(), width: '100%' });
+            });
         }
 
-        function formatCurrency(num) { return parseFloat(num || 0).toLocaleString('vi-VN'); }
+        function formatCurrency(num) { return parseFloat(num || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
         function parseCurrency(str) { return parseFloat(str.replace(/\./g, '').replace(/,/g, '')) || 0; }
 
         function calculatePhanBo() {
@@ -181,7 +213,7 @@
         }
 
         function autoAllocate() {
-            var val = parseCurrency($('#SoTienChi').val());
+            var val = parseCurrency($modal.find('#SoTienChi').val());
             var available = val + (parseFloat(window.tienTraTruoc) || 0);
             var remaining = available;
             $modal.find('.input-phanbo').each(function() {
@@ -251,6 +283,30 @@
             }
         }
 
+        function handleLoaiChiTienChange() {
+            var selectedText = $modal.find('#IDLoaiChiTien option:selected').text();
+            $modal.find('#divNhaCungCap').hide();
+            $modal.find('#divPhuongTien').hide();
+            $modal.find('#divPhanBo').hide();
+            
+            if (selectedText.includes('nhập hàng')) {
+                $modal.find('#divNhaCungCap').show();
+                $modal.find('#IDNhaCungCap').trigger('change');
+            } else if (selectedText.includes('vận chuyển')) {
+                $modal.find('#divPhuongTien').show();
+                $modal.find('#IDPhuongTien').trigger('change');
+            }
+        }
+
+        $modal.find('#IDLoaiChiTien').on('change', function () {
+            if (!isInitializing) {
+                existingDetails = [];
+                $modal.find('#SoTienChi').val(''); // clear total amount
+                handleLoaiChiTienChange();
+                autoAllocate(); // recalculate distribution (which sets it to 0)
+            }
+        });
+
         function loadNccData(idNcc) {
             if(!idNcc) {
                 $modal.find('#divPhanBo').hide();
@@ -272,28 +328,26 @@
             // Load Phieu Nhap Nợ
             $.getJSON('@Url.Action("GetPhieuNhapCongNo", "PhieuChi")', { idNhaCungCap: idNcc }, function (res) {
                 if(res.success) {
-                    // If edit mode, we might need to inject the phieu nhap that are fully paid by this very PhieuChi!
-                    // GetPhieuNhapCongNo only returns unpaid. If we are editing, we must also add the ones in existingDetails if not present.
                     listPhieuNhap = res.data;
                     if(existingDetails && existingDetails.length > 0) {
                         $.each(existingDetails, function(i, d) {
-                            if(d.LoaiChi === 1 && d.IDPhieuNhap) {
-                                if(!listPhieuNhap.find(x => x.id === d.IDPhieuNhap)) {
+                            if(d.IDPhieuNhap) {
+                                var found = listPhieuNhap.find(x => x.id === d.IDPhieuNhap);
+                                if(found) {
+                                    found.daThanhToan = (found.daThanhToan || 0) - d.SoTienPhanBo;
+                                    found.conLai = (found.conLai || 0) + d.SoTienPhanBo;
+                                } else {
                                     listPhieuNhap.push({
                                         id: d.IDPhieuNhap,
                                         soPhieuNhap: d.SoPhieuNhap,
                                         ngayNhap: d.NgayNhap ? d.NgayNhap.substring(0,10) : '',
                                         tongTien: d.TongTien,
                                         daThanhToan: d.DaThanhToan || 0,
-                                        conLai: d.ConLai || 0 // Do not reconstruct original debt
+                                        conLai: d.ConLai || 0 
                                     });
-                                } else {
-                                    // Do not adjust conLai to include the amount this PhieuChi already paid
-                                    var pn = listPhieuNhap.find(x => x.id === d.IDPhieuNhap);
                                 }
                             }
                         });
-                        // sort list by id
                         listPhieuNhap.sort((a, b) => a.id - b.id);
                     }
                     renderTable(listPhieuNhap);
@@ -303,10 +357,82 @@
             });
         }
 
+        function loadPhuongTienData(idPhuongTien) {
+            if(!idPhuongTien) {
+                $modal.find('#divPhanBo').hide();
+                return;
+            }
+            
+            window.tienTraTruoc = 0;
+            $modal.find('#lblTienTraTruoc').text('Tiền trả trước hiện có: 0 đ');
+            
+            $.getJSON('@Url.Action("GetPhieuNhapVanChuyen", "PhieuChi")', { idPhuongTien: idPhuongTien }, function (res) {
+                var data = res.data || res;
+                listPhieuNhap = [];
+                if(data && data.length > 0) {
+                    $.each(data, function(i, d) {
+                        listPhieuNhap.push({
+                            id: d.IDPhieuNhap,
+                            soPhieuNhap: d.SoPhieuNhap,
+                            ngayNhap: d.NgayNhap ? new Date(parseInt(d.NgayNhap.substr(6))).toISOString().substring(0,10) : '',
+                            tongTien: d.TongTienVanChuyen,
+                            daThanhToan: d.DaThanhToanVanChuyen || 0,
+                            conLai: d.ConLaiVanChuyen || 0
+                        });
+                    });
+                }
+                
+                if(existingDetails && existingDetails.length > 0) {
+                    $.each(existingDetails, function(i, d) {
+                        if(d.IDPhieuNhap) {
+                            var found = listPhieuNhap.find(x => x.id === d.IDPhieuNhap);
+                            if(found) {
+                                found.daThanhToan = (found.daThanhToan || 0) - d.SoTienPhanBo;
+                                found.conLai = (found.conLai || 0) + d.SoTienPhanBo;
+                            } else {
+                                listPhieuNhap.push({
+                                    id: d.IDPhieuNhap,
+                                    soPhieuNhap: d.SoPhieuNhap,
+                                    ngayNhap: d.NgayNhap ? d.NgayNhap.substring(0,10) : '',
+                                    tongTien: d.TongTien,
+                                    daThanhToan: d.DaThanhToan || 0,
+                                    conLai: d.ConLai || 0
+                                });
+                            }
+                        }
+                    });
+                    listPhieuNhap.sort((a, b) => a.id - b.id);
+                }
+                
+                renderTable(listPhieuNhap);
+                if(existingDetails.length === 0) autoAllocate();
+            });
+        }
+
         $modal.find('#IDNhaCungCap').on('change', function () {
-            existingDetails = []; // Clear if changed manually
-            loadNccData($(this).val());
+            if (!isInitializing) {
+                existingDetails = []; 
+                loadNccData($(this).val());
+            }
         });
+
+        $modal.find('#IDPhuongTien').on('change', function () {
+            if (!isInitializing) {
+                existingDetails = []; 
+                loadPhuongTienData($(this).val());
+            }
+        });
+
+        // Initialize display
+        handleLoaiChiTienChange();
+        var idNcc = '@(Model.IDNhaCungCap)';
+        var idPhuongTien = '@(Model.IDPhuongTien)';
+        if (idNcc) {
+            loadNccData(idNcc);
+        } else if (idPhuongTien) {
+            loadPhuongTienData(idPhuongTien);
+        }
+        isInitializing = false;
 
         // Auto allocate when SoTienChi changes
         $modal.find('#SoTienChi').on('input', function () {

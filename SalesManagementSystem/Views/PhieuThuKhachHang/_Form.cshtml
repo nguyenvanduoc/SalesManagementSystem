@@ -164,10 +164,12 @@
             if (isView) {
                 $modal.find('input, select, textarea').prop('disabled', true);
             }
-            $modal.find('.select2').select2({ dropdownParent: $modal, width: '100%' });
+            $modal.find('.select2').each(function() {
+                $(this).select2({ dropdownParent: $(this).parent(), width: '100%' });
+            });
         }
 
-        function formatCurrency(num) { return parseFloat(num || 0).toLocaleString('vi-VN'); }
+        function formatCurrency(num) { return parseFloat(num || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
         function parseCurrency(str) { return parseFloat(str.replace(/\./g, '').replace(/,/g, '')) || 0; }
 
         function calculatePhanBo() {
@@ -189,7 +191,7 @@
         }
 
         function autoAllocate() {
-            var val = parseCurrency($('#SoTienThu').val());
+            var val = parseCurrency($modal.find('#SoTienThu').val());
             var available = val + (parseFloat(window.tienTraTruoc) || 0);
             var remaining = available;
             $modal.find('.input-phanbo').each(function() {

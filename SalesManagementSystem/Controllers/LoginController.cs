@@ -66,7 +66,7 @@ namespace SalesManagementSystem.Controllers
                     Response.Cookies.Add(cookie);
 
                     // Kiểm tra quyền Dashboard
-                    bool hasDashboardPerm = SalesManagementSystem.Helpers.PermissionHelper.HasActionPermission("Dashboard", "Index");
+                    bool hasDashboardPerm = SalesManagementSystem.Helpers.PermissionHelper.HasActionPermission("Dashboard", "Index") || SalesManagementSystem.Helpers.PermissionHelper.HasPermission("Dashboard", SalesManagementSystem.Helpers.LoaiPhanQuyen.Xem);
                     if (hasDashboardPerm)
                     {
                         return RedirectToAction("Index", "Dashboard");

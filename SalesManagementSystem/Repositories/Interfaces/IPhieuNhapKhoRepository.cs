@@ -24,6 +24,7 @@ namespace SalesManagementSystem.Repositories.Interfaces
         void BoGhiSo(int id, int userId);
         void HuyPhieu(int id, string lyDoHuy, int userId);
         void Delete(int id, int userId);
+        void DeletePhanQuyenPhu(int id, int userId);
         string GenerateSoChungTu();
 
         IEnumerable<dynamic> GetKhoForDropdown(string keyword);

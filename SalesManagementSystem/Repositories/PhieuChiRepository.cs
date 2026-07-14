@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using Dapper;
 using SalesManagementSystem.Data;
+
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories.Interfaces;
@@ -27,7 +28,9 @@ namespace SalesManagementSystem.Repositories
             int? idKhoanMucChi,
             int? trangThai,
             string nguoiNhanTien = null,
-            int? idTaiKhoanThanhToan = null)
+            int? idTaiKhoanThanhToan = null,
+            int? idLoaiChiTien = null,
+            int? idPhuongTien = null)
         {
             using (var conn = _db.CreateConnection())
             {
@@ -54,6 +57,8 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@TrangThai",     trangThai);
                 p.Add("@NguoiNhanTien",  string.IsNullOrEmpty(nguoiNhanTien) ? null : nguoiNhanTien);
                 p.Add("@IDTaiKhoanThanhToan", idTaiKhoanThanhToan);
+                p.Add("@IDLoaiChiTien", idLoaiChiTien);
+                p.Add("@IDPhuongTien", idPhuongTien);
 
                 var list = conn.Query<PhieuChiListViewModel>(
                     "sp_KT_PhieuChi_GetList",
@@ -86,6 +91,21 @@ namespace SalesManagementSystem.Repositories
         {
             using (var conn = _db.CreateConnection())
             {
+                // TODO: Remove this after running once
+                try {
+                    string sqlPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App_Data", "update_vanchuyen_db.sql");
+                    if (System.IO.File.Exists(sqlPath)) {
+                        string sql = System.IO.File.ReadAllText(sqlPath);
+                        var parts = sql.Split(new[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
+                        foreach(var part in parts) {
+                            if (!string.IsNullOrWhiteSpace(part)) {
+                                conn.Execute(part);
+                            }
+                        }
+                        System.IO.File.Delete(sqlPath);
+                    }
+                } catch { }
+
                 var model = conn.QueryFirstOrDefault<PhieuChiViewModel>(
                     "sp_KT_PhieuChi_GetByID",
                     new { ID = id },
@@ -106,6 +126,7 @@ namespace SalesManagementSystem.Repositories
         public int Save(PhieuChiViewModel model, int userId)
         {
             using (var conn = _db.CreateConnection())
+
             {
                 var p = new DynamicParameters();
                 p.Add("@ID",                    model.ID == 0 ? (int?)null : model.ID);
@@ -117,6 +138,8 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@NguoiNhanTien",         model.NguoiNhanTien);
                 p.Add("@SoDienThoaiNguoiNhan",  model.SoDienThoaiNguoiNhan);
                 p.Add("@IDNhaCungCap",          model.IDNhaCungCap);
+                p.Add("@IDPhuongTien",          model.IDPhuongTien);
+                p.Add("@IDLoaiChiTien",         model.IDLoaiChiTien);
                 p.Add("@IDPhieuNhap",           model.IDPhieuNhap);
                 p.Add("@SoTienChi",             model.SoTienChi);
                 p.Add("@DienGiai",              model.DienGiai);
@@ -307,8 +330,20 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
             {
                 return conn.Query<PhieuChiChiTietViewModel>(
-                    @"SELECT ct.*, pn.SoChungTu AS SoPhieuNhap, pn.NgayNhap, pn.TongCong AS TongTien, pn.DaThanhToan, pn.ConLai 
+                    @"SELECT ct.*, pn.SoChungTu AS SoPhieuNhap, pn.NgayNhap, 
+                             CASE WHEN pc.IDPhuongTien IS NOT NULL THEN pn.TienVanChuyen ELSE pn.TongCong END AS TongTien, 
+                             CASE WHEN pc.IDPhuongTien IS NULL THEN pn.DaThanhToan - ct.SoTienPhanBo
+                                  ELSE (SELECT ISNULL(SUM(ct2.SoTienPhanBo), 0) FROM KT_PhieuChiChiTiet ct2 
+                                        INNER JOIN KT_PhieuChi pc2 ON ct2.IDPhieuChi = pc2.ID 
+                                        WHERE ct2.IDPhieuNhap = ct.IDPhieuNhap AND ct2.LoaiChi = 1 AND pc2.IsDeleted = 0 AND pc2.TrangThai = 2 AND pc2.IDPhuongTien IS NOT NULL AND pc2.ID <> @IDPhieuChi) 
+                             END AS DaThanhToan, 
+                             CASE WHEN pc.IDPhuongTien IS NULL THEN pn.ConLai + ct.SoTienPhanBo
+                                  ELSE pn.TienVanChuyen - (SELECT ISNULL(SUM(ct2.SoTienPhanBo), 0) FROM KT_PhieuChiChiTiet ct2 
+                                        INNER JOIN KT_PhieuChi pc2 ON ct2.IDPhieuChi = pc2.ID 
+                                        WHERE ct2.IDPhieuNhap = ct.IDPhieuNhap AND ct2.LoaiChi = 1 AND pc2.IsDeleted = 0 AND pc2.TrangThai = 2 AND pc2.IDPhuongTien IS NOT NULL AND pc2.ID <> @IDPhieuChi) 
+                             END AS ConLai 
                       FROM KT_PhieuChiChiTiet ct 
+                      LEFT JOIN KT_PhieuChi pc ON ct.IDPhieuChi = pc.ID
                       LEFT JOIN KHO_PhieuNhap pn ON ct.IDPhieuNhap = pn.ID 
                       WHERE ct.IDPhieuChi = @IDPhieuChi 
                       ORDER BY ct.ID ASC", 
@@ -347,7 +382,9 @@ namespace SalesManagementSystem.Repositories
             int? idKhoanMucChi,
             int? trangThai,
             string nguoiNhanTien = null,
-            int? idTaiKhoanThanhToan = null)
+            int? idTaiKhoanThanhToan = null,
+            int? idLoaiChiTien = null,
+            int? idPhuongTien = null)
         {
             var cultureVi = new System.Globalization.CultureInfo("vi-VN");
             
@@ -762,6 +799,90 @@ namespace SalesManagementSystem.Repositories
                         NguoiCapNhat = @NguoiThaoTac
                     WHERE ID = @ID",
                     new { ID = id, NguoiThaoTac = nguoiThaoTac });
+            }
+        }
+
+        public IEnumerable<dynamic> GetPhuongTienDropdown()
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                return conn.Query(@"
+                    SELECT ID AS Value, TenPhuongTien AS Text 
+                    FROM DM_PhuongTien 
+                    ORDER BY TenPhuongTien");
+            }
+        }
+
+        public IEnumerable<dynamic> GetPhieuNhapThanhToanVanChuyen(int? idPhuongTien = null, string tuNgay = "", string denNgay = "", string soPhieuNhap = "", int? trangThaiThanhToan = null, int pageIndex = 1, int pageSize = 20)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                string sql = @"
+                    WITH CTE AS (
+                        SELECT 
+                            pn.ID AS IDPhieuNhap,
+                            pn.SoChungTu AS SoPhieuNhap,
+                            pn.NgayNhap,
+                            ISNULL(pn.TienVanChuyen, 0) AS TongTienVanChuyen,
+                            pt.TenPhuongTien AS TenPhuongTien,
+                            ISNULL((
+                                SELECT SUM(ct.SoTienPhanBo)
+                                FROM KT_PhieuChiChiTiet ct
+                                INNER JOIN KT_PhieuChi pc ON ct.IDPhieuChi = pc.ID
+                                WHERE ct.IDPhieuNhap = pn.ID 
+                                  AND ct.LoaiChi = 1
+                                  AND pc.IsDeleted = 0 
+                                  AND pc.TrangThai = 2
+                                  AND pc.IDPhuongTien IS NOT NULL
+                            ), 0) AS DaThanhToanVanChuyen,
+                            (
+                                SELECT STRING_AGG(pc.SoPhieuChi, ', ')
+                                FROM KT_PhieuChiChiTiet ct
+                                INNER JOIN KT_PhieuChi pc ON ct.IDPhieuChi = pc.ID
+                                WHERE ct.IDPhieuNhap = pn.ID 
+                                  AND ct.LoaiChi = 1
+                                  AND pc.IsDeleted = 0 
+                                  AND pc.TrangThai = 2
+                                  AND pc.IDPhuongTien IS NOT NULL
+                            ) AS SoPhieuChiList
+                        FROM KHO_PhieuNhap pn
+                        LEFT JOIN DM_PhuongTien pt ON pn.IDPhuongTien = pt.ID
+                        WHERE (@IDPhuongTien IS NULL OR pn.IDPhuongTien = @IDPhuongTien)
+                          AND pn.IsDeleted = 0
+                          AND pn.TrangThai IN (1, 2)
+                          AND (@SoPhieuNhap IS NULL OR pn.SoChungTu LIKE '%' + @SoPhieuNhap + '%')
+                          AND (@TuNgay IS NULL OR CAST(pn.NgayNhap AS DATE) >= @TuNgay)
+                          AND (@DenNgay IS NULL OR CAST(pn.NgayNhap AS DATE) <= @DenNgay)
+                    )
+                    SELECT *, (TongTienVanChuyen - DaThanhToanVanChuyen) AS ConLaiVanChuyen, COUNT(1) OVER() AS TotalRow
+                    FROM CTE
+                    WHERE TongTienVanChuyen > 0 
+                      AND (@TrangThaiThanhToan IS NULL OR 
+                           (@TrangThaiThanhToan = 0 AND DaThanhToanVanChuyen = 0) OR
+                           (@TrangThaiThanhToan = 1 AND DaThanhToanVanChuyen > 0 AND (TongTienVanChuyen - DaThanhToanVanChuyen) > 0) OR
+                           (@TrangThaiThanhToan = 2 AND (TongTienVanChuyen - DaThanhToanVanChuyen) <= 0))
+                    ORDER BY NgayNhap ASC, SoPhieuNhap ASC
+                    OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY
+                ";
+
+                var p = new DynamicParameters();
+                p.Add("@IDPhuongTien", idPhuongTien);
+                p.Add("@TuNgay", string.IsNullOrEmpty(tuNgay) ? (DateTime?)null : DateTime.Parse(tuNgay));
+                p.Add("@DenNgay", string.IsNullOrEmpty(denNgay) ? (DateTime?)null : DateTime.Parse(denNgay));
+                p.Add("@SoPhieuNhap", string.IsNullOrEmpty(soPhieuNhap) ? null : soPhieuNhap);
+                p.Add("@TrangThaiThanhToan", trangThaiThanhToan);
+                p.Add("@Offset", (pageIndex - 1) * pageSize);
+                p.Add("@PageSize", pageSize);
+
+                return conn.Query(sql, p);
+            }
+        }
+
+        public dynamic GetCongNoVanChuyenTheoPhieuNhap(int idPhieuNhap)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                return conn.QueryFirstOrDefault("sp_KT_PhieuChi_GetCongNoVanChuyenTheoPhieuNhap", new { IDPhieuNhap = idPhieuNhap }, commandType: CommandType.StoredProcedure);
             }
         }
     }

@@ -14,7 +14,9 @@ namespace SalesManagementSystem.Repositories.Interfaces
             int? idKhoanMucChi,
             int? trangThai,
             string nguoiNhanTien = null,
-            int? idTaiKhoanThanhToan = null);
+            int? idTaiKhoanThanhToan = null,
+            int? idLoaiChiTien = null,
+            int? idPhuongTien = null);
 
         PhieuChiViewModel GetByID(int id);
         int Save(PhieuChiViewModel model, int userId);
@@ -26,7 +28,10 @@ namespace SalesManagementSystem.Repositories.Interfaces
         IEnumerable<dynamic> GetKhoanMucDropdown();
         IEnumerable<dynamic> GetTaiKhoanDropdown();
         IEnumerable<dynamic> GetNhaCungCapDropdown();
+        IEnumerable<dynamic> GetPhuongTienDropdown();
         IEnumerable<dynamic> GetPhieuNhapDropdown(int? idNhaCungCap, int? currentPhieuNhapId = null);
+        IEnumerable<dynamic> GetPhieuNhapThanhToanVanChuyen(int? idPhuongTien = null, string tuNgay = "", string denNgay = "", string soPhieuNhap = "", int? trangThaiThanhToan = null, int pageIndex = 1, int pageSize = 20);
+        dynamic GetCongNoVanChuyenTheoPhieuNhap(int idPhieuNhap);
         IEnumerable<dynamic> GetNhanSuDropdown();
 
         // New methods for multiple allocations
@@ -45,7 +50,9 @@ namespace SalesManagementSystem.Repositories.Interfaces
             int? idKhoanMucChi,
             int? trangThai,
             string nguoiNhanTien = null,
-            int? idTaiKhoanThanhToan = null);
+            int? idTaiKhoanThanhToan = null,
+            int? idLoaiChiTien = null,
+            int? idPhuongTien = null);
 
         IEnumerable<PhieuChiFile> File_GetList(int idPhieuChi);
         PhieuChiFile File_GetByID(int id);

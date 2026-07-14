@@ -20,6 +20,13 @@ namespace SalesManagementSystem.Models.ViewModels
         public string TenNhaCungCap { get; set; }
         public int? IDPhieuNhap { get; set; }
         public string SoPhieuNhap { get; set; }
+        
+        public int? IDLoaiChiTien { get; set; }
+        public string MaLoaiChiTien { get; set; }
+        public string TenLoaiChiTien { get; set; }
+        public int? IDPhuongTien { get; set; }
+        public string TenPhuongTien { get; set; }
+
         public decimal SoTienChi { get; set; }
         public decimal SoTienPhanBo { get; set; }
         public decimal TonDauKy { get; set; }

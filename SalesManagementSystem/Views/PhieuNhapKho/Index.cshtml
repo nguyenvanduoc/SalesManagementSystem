@@ -468,6 +468,20 @@
         });
     };
 
+    window.deletePhanQuyenPhu = function(btn, id) {
+        var $form = getPnkContainer(btn).find('#searchForm');
+        showConfirm('Bạn có chắc chắn muốn xóa phiếu này và tính lại tồn kho?', function() {
+            $.post('@Url.Action("DeletePhanQuyenPhu")', { id: id }, function (res) {
+                if (res.success) { 
+                    showToast('success', res.message); 
+                    $form.trigger('submit');
+                } else {
+                    showToast('error', res.message);
+                }
+            });
+        });
+    };
+
     window.moHuyPhieu = function(btn, id) {
         var $container = getPnkContainer(btn);
         $container.find('.pnk-huy-id').val(id);

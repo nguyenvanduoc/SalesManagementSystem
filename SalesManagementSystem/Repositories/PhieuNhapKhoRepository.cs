@@ -396,6 +396,27 @@ namespace SalesManagementSystem.Repositories
             }
         }
 
+        public void DeletePhanQuyenPhu(int id, int userId)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                // Lấy SoChungTu
+                string soChungTu = conn.QueryFirstOrDefault<string>("SELECT SoChungTu FROM KHO_PhieuNhap WHERE ID = @ID", new { ID = id });
+                
+                // Xóa khỏi tồn kho
+                if (!string.IsNullOrEmpty(soChungTu)) {
+                    conn.Execute("DELETE FROM KHO_GiaoDichKho WHERE LoaiChungTu = 1 AND SoChungTu = @SoChungTu", new { SoChungTu = soChungTu });
+                }
+
+                // Xóa chi tiết phân bổ phiếu chi nếu có
+                conn.Execute("DELETE FROM KT_PhieuChiChiTiet WHERE IDPhieuNhap = @ID", new { ID = id });
+
+                // Xóa chi tiết và phiếu nhập
+                conn.Execute("DELETE FROM KHO_PhieuNhap_ChiTiet WHERE IDPhieuNhap = @ID", new { ID = id });
+                conn.Execute("DELETE FROM KHO_PhieuNhap WHERE ID = @ID", new { ID = id });
+            }
+        }
+
         public string GenerateSoChungTu()
         {
             using (var conn = _db.CreateConnection())

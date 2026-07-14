@@ -1,0 +1,210 @@
+@{
+    ViewBag.Title = "Báo cáo công nợ vận chuyển";
+    Layout = null;
+    var uid = Guid.NewGuid().ToString("N");
+}
+
+<style>
+    /* Fix height for Select2 to match form-control-sm */
+    #baocao-@uid .select2-container--default .select2-selection--single { height: 31px; border: 1px solid #ced4da; border-radius: 0.25rem; }
+    #baocao-@uid .select2-container--default .select2-selection--single .select2-selection__rendered { font-size: 0.875rem; color: #495057; line-height: 29px; padding-left: 8px; }
+    #baocao-@uid .select2-container--default .select2-selection--single .select2-selection__arrow { height: 29px; }
+</style>
+
+<div id="baocao-@uid">
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-2">
+        <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">
+            <i class="bi bi-file-earmark-bar-graph me-2"></i>@ViewBag.Title
+        </h4>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body py-2">
+            <form id="searchForm_@uid" action="@Url.Action("GetList", "BaoCaoCongNoVanChuyen")" method="get" onsubmit="return false;">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Thời gian</label>
+                        <select class="form-select form-select-sm ddl-thoi-gian">
+                            <option value="current_month">Đầu tháng đến hiện tại</option>
+                            <option value="month_1">Tháng 1</option>
+                            <option value="month_2">Tháng 2</option>
+                            <option value="month_3">Tháng 3</option>
+                            <option value="month_4">Tháng 4</option>
+                            <option value="month_5">Tháng 5</option>
+                            <option value="month_6">Tháng 6</option>
+                            <option value="month_7">Tháng 7</option>
+                            <option value="month_8">Tháng 8</option>
+                            <option value="month_9">Tháng 9</option>
+                            <option value="month_10">Tháng 10</option>
+                            <option value="month_11">Tháng 11</option>
+                            <option value="month_12">Tháng 12</option>
+                            <option value="quarter_1">Quý 1</option>
+                            <option value="quarter_2">Quý 2</option>
+                            <option value="quarter_3">Quý 3</option>
+                            <option value="quarter_4">Quý 4</option>
+                            <option value="current_year">Từ đầu năm đến hiện tại</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Từ ngày</label>
+                        <input type="date" class="form-control form-control-sm" name="tuNgay" value="@DateTime.Now.ToString("yyyy-MM-01")" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Đến ngày</label>
+                        <input type="date" class="form-control form-control-sm" name="denNgay" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Số phiếu nhập</label>
+                        <input type="text" class="form-control form-control-sm" name="soPhieuNhap" placeholder="Nhập số phiếu..." />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Phương tiện</label>
+                        <select class="form-select form-select-sm select2" name="idPhuongTien">
+                            <option value="">-- Chọn phương tiện --</option>
+                            @if (ViewBag.PhuongTienList != null)
+                            {
+                                foreach (SelectListItem item in ViewBag.PhuongTienList)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Trạng thái thanh toán</label>
+                        <select class="form-select form-select-sm" name="trangThaiThanhToan">
+                            <option value="">Tất cả</option>
+                            <option value="0">Chưa thanh toán</option>
+                            <option value="1">Đã thanh toán một phần</option>
+                            <option value="2">Đã thanh toán đủ</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-12 mt-2 text-end">
+                        <button type="button" class="btn btn-primary btn-sm px-3 shadow-sm" id="btnSearch_@uid" style="background-color: #3498db; border-color: #3498db;">
+                            <i class="bi bi-search me-1"></i> Tìm kiếm
+                        </button>
+                        <button type="button" class="btn btn-warning btn-sm px-3 ms-2 shadow-sm" id="btnReset_@uid">
+                            <i class="bi bi-arrow-clockwise me-1"></i> Làm mới
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm px-3 ms-2 shadow-sm" id="btnExportExcel_@uid">
+                            <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
+                        </button>
+                    </div>
+                </div>
+                <input type="hidden" name="page" id="page_@uid" value="1" />
+                <input type="hidden" name="pageSize" id="pageSize_@uid" value="20" />
+            </form>
+        </div>
+    </div>
+
+    <div id="table-container-@uid">
+        <div class="alert alert-info text-center mt-3">
+            Ấn <b>Tìm kiếm</b> để xem báo cáo.
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        var $container = $('#baocao-@uid');
+        
+        // Khởi tạo select2
+        if ($container.find('.select2').length) {
+            $container.find('.select2').select2({
+                width: '100%',
+                dropdownParent: $container
+            });
+        }
+
+        function loadGrid() {
+            var $form = $container.find('#searchForm_@uid');
+            var url = $form.attr('action');
+            var data = $form.serialize();
+            
+            var $tableContainer = $container.find('#table-container-@uid');
+            $tableContainer.html('<div class="text-center mt-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted">Đang tải dữ liệu...</p></div>');
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                data: data,
+                success: function (res) {
+                    $tableContainer.html(res);
+                },
+                error: function () {
+                    $tableContainer.html('<div class="alert alert-danger text-center">Lỗi tải dữ liệu</div>');
+                }
+            });
+        }
+
+        $container.find('#btnSearch_@uid').on('click', function () {
+            $container.find('#page_@uid').val(1);
+            loadGrid();
+        });
+
+        $container.find('#btnReset_@uid').on('click', function () {
+            var $form = $container.find('#searchForm_@uid');
+            $form[0].reset();
+            if ($form.find('.select2').length) {
+                $form.find('.select2').val('').trigger('change');
+            }
+            $form.find('.ddl-thoi-gian').val('current_month').trigger('change');
+            $container.find('#page_@uid').val(1);
+            loadGrid();
+        });
+
+        $container.on('click', '.page-link', function (e) {
+            e.preventDefault();
+            var page = $(this).attr('data-page');
+            if (page && !$(this).parent().hasClass('disabled') && !$(this).parent().hasClass('active')) {
+                $container.find('#page_@uid').val(page);
+                loadGrid();
+            }
+        });
+
+        $container.on('change', '.page-size-select', function () {
+            var pageSize = $(this).val();
+            $container.find('#pageSize_@uid').val(pageSize);
+            $container.find('#page_@uid').val(1);
+            loadGrid();
+        });
+        
+        // Xem chi tiết chứng từ
+        $container.on('click', '.btn-xem-chitiet', function () {
+            var idPhatSinh = $(this).data('id');
+            var loaiDong = $(this).data('loai');
+            var activeTabPane = $container.closest('.tab-pane');
+            if (activeTabPane.length === 0) activeTabPane = $('body');
+
+            $('body').append('<div id="loadingModalNCC_@uid" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);z-index:9999;display:flex;justify-content:center;align-items:center;"><div class="spinner-border text-white" role="status"></div></div>');
+
+            $.ajax({
+                url: '@Url.Action("GetDetails", "BaoCaoCongNoVanChuyen")',
+                type: 'GET',
+                data: { idPhatSinh: idPhatSinh, loaiDong: loaiDong },
+                success: function (res) {
+                    $('#loadingModalNCC_@uid').remove();
+                    if (res && res.success === false) {
+                        if (typeof showToast === 'function') showToast('error', res.message || 'Lỗi tải chi tiết');
+                    } else {
+                        activeTabPane.find('#detailsModalNCC').remove();
+                        $('.modal-backdrop').remove();
+
+                        activeTabPane.append(res);
+                        var modalEl = activeTabPane.find('#detailsModalNCC')[0];
+                        var modal = new bootstrap.Modal(modalEl);
+                        modal.show();
+                    }
+                },
+                error: function () {
+                    $('#loadingModalNCC_@uid').remove();
+                    if (typeof showToast === 'function') showToast('error', 'Có lỗi xảy ra khi tải dữ liệu chi tiết');
+                }
+            });
+        });
+        
+        // Tự động load dữ liệu lần đầu
+        loadGrid();
+    });
+</script>

@@ -17,12 +17,16 @@ namespace SalesManagementSystem.Controllers
         private readonly IPhieuChiRepository _repo;
         private readonly IExcelExportService _excelExportService;
         private readonly IWordExportService _wordExportService;
+        private readonly ILoaiChiTienRepository _loaiChiTienRepo;
+        private readonly INhaCungCapRepository _nhaCungCapRepo;
 
-        public PhieuChiController(IPhieuChiRepository repo, IExcelExportService excelExportService, IWordExportService wordExportService)
+        public PhieuChiController(IPhieuChiRepository repo, IExcelExportService excelExportService, IWordExportService wordExportService, ILoaiChiTienRepository loaiChiTienRepo, INhaCungCapRepository nhaCungCapRepo)
         {
             _repo = repo;
             _excelExportService = excelExportService;
             _wordExportService = wordExportService;
+            _loaiChiTienRepo = loaiChiTienRepo;
+            _nhaCungCapRepo = nhaCungCapRepo;
         }
 
         // GET: /phieu-chi
@@ -34,12 +38,14 @@ namespace SalesManagementSystem.Controllers
             int? idKhoanMucChi = null,
             int? trangThai = null,
             string nguoiNhanTien = "",
-            int? idTaiKhoanThanhToan = null)
+            int? idTaiKhoanThanhToan = null,
+            int? idLoaiChiTien = null,
+            int? idPhuongTien = null)
         {
             if (!PermissionHelper.HasPermission("PhieuChi", LoaiPhanQuyen.Xem))
                 return View("AccessDenied");
 
-            var list = _repo.GetList(tuNgay, denNgay, soPhieuChi, idNhaCungCap, idKhoanMucChi, trangThai, nguoiNhanTien, idTaiKhoanThanhToan).ToList();
+            var list = _repo.GetList(tuNgay, denNgay, soPhieuChi, idNhaCungCap, idKhoanMucChi, trangThai, nguoiNhanTien, idTaiKhoanThanhToan, idLoaiChiTien, idPhuongTien).ToList();
             int totalRecords = list.Count;
             var pagedItems = list.Skip((page - 1) * pageSize).Take(pageSize);
 
@@ -65,6 +71,8 @@ namespace SalesManagementSystem.Controllers
             ViewBag.TrangThai            = trangThai;
             ViewBag.NguoiNhanTien        = nguoiNhanTien;
             ViewBag.IDTaiKhoanThanhToan = idTaiKhoanThanhToan;
+            ViewBag.IDLoaiChiTien        = idLoaiChiTien;
+            ViewBag.IDPhuongTien         = idPhuongTien;
             ViewBag.Title                = "Phiếu Chi";
 
             if (Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -82,14 +90,16 @@ namespace SalesManagementSystem.Controllers
             int? idKhoanMucChi = null,
             int? trangThai = null,
             string nguoiNhanTien = "",
-            int? idTaiKhoanThanhToan = null)
+            int? idTaiKhoanThanhToan = null,
+            int? idLoaiChiTien = null,
+            int? idPhuongTien = null)
         {
             if (!PermissionHelper.HasPermission("PhieuChi", LoaiPhanQuyen.Xem))
                 return Content("<div class='alert alert-danger'>Không có quyền truy cập</div>");
 
             try
             {
-                var list = _repo.GetList(tuNgay, denNgay, soPhieuChi, idNhaCungCap, idKhoanMucChi, trangThai, nguoiNhanTien, idTaiKhoanThanhToan).ToList();
+                var list = _repo.GetList(tuNgay, denNgay, soPhieuChi, idNhaCungCap, idKhoanMucChi, trangThai, nguoiNhanTien, idTaiKhoanThanhToan, idLoaiChiTien, idPhuongTien).ToList();
                 int totalRecords = list.Count;
                 var pagedItems   = list.Skip((page - 1) * pageSize).Take(pageSize);
 
@@ -103,7 +113,7 @@ namespace SalesManagementSystem.Controllers
                     Keyword      = soPhieuChi
                 };
 
-                var dashboard = _repo.GetDashboardData(tuNgay, denNgay, soPhieuChi, idNhaCungCap, idKhoanMucChi, trangThai, nguoiNhanTien, idTaiKhoanThanhToan);
+                var dashboard = _repo.GetDashboardData(tuNgay, denNgay, soPhieuChi, idNhaCungCap, idKhoanMucChi, trangThai, nguoiNhanTien, idTaiKhoanThanhToan, idLoaiChiTien, idPhuongTien);
                 ViewBag.Dashboard = dashboard;
 
                 return PartialView("_PhieuChiList", model);
@@ -123,14 +133,16 @@ namespace SalesManagementSystem.Controllers
             int? idKhoanMucChi = null,
             int? trangThai = null,
             string nguoiNhanTien = "",
-            int? idTaiKhoanThanhToan = null)
+            int? idTaiKhoanThanhToan = null,
+            int? idLoaiChiTien = null,
+            int? idPhuongTien = null)
         {
             if (!PermissionHelper.HasPermission("PhieuChi", LoaiPhanQuyen.Xem))
                 return Content("Không có quyền xuất Excel");
 
             try
             {
-                var list = _repo.GetList(tuNgay, denNgay, soPhieuChi, idNhaCungCap, idKhoanMucChi, trangThai, nguoiNhanTien, idTaiKhoanThanhToan).ToList();
+                var list = _repo.GetList(tuNgay, denNgay, soPhieuChi, idNhaCungCap, idKhoanMucChi, trangThai, nguoiNhanTien, idTaiKhoanThanhToan, idLoaiChiTien, idPhuongTien).ToList();
 
                 var variables = new Dictionary<string, object>
                 {
@@ -644,6 +656,14 @@ namespace SalesManagementSystem.Controllers
                 .Select(x => new SelectListItem { Value = ((int)x.ID).ToString(), Text = (string)x.TenHienThi });
             ViewBag.NhaCungCapList = new SelectList(nccs.ToList(), "Value", "Text");
 
+            var phuongTiens = _repo.GetPhuongTienDropdown()
+                .Select(x => new SelectListItem { Value = ((int)x.Value).ToString(), Text = (string)x.Text });
+            ViewBag.PhuongTienList = new SelectList(phuongTiens.ToList(), "Value", "Text");
+
+            var loaiChis = _loaiChiTienRepo.GetAllActive()
+                .Select(x => new SelectListItem { Value = x.ID.ToString(), Text = x.TenLoaiChiTien });
+            ViewBag.LoaiChiTienList = new SelectList(loaiChis.ToList(), "Value", "Text");
+
             var taiKhoans = _repo.GetTaiKhoanDropdown()
                 .Select(x => new SelectListItem { Value = ((int)x.ID).ToString(), Text = (string)x.TenHienThi });
             ViewBag.TaiKhoanList = new SelectList(taiKhoans.ToList(), "Value", "Text");
@@ -666,6 +686,14 @@ namespace SalesManagementSystem.Controllers
             var nhanSus = _repo.GetNhanSuDropdown()
                 .Select(x => new SelectListItem { Value = ((int)x.ID).ToString(), Text = (string)x.TenHienThi });
             ViewBag.NhanSuList = new SelectList(nhanSus.ToList(), "Value", "Text");
+
+            var loaiChis = _loaiChiTienRepo.GetAllActive()
+                .Select(x => new SelectListItem { Value = x.ID.ToString(), Text = x.TenLoaiChiTien });
+            ViewBag.LoaiChiTienList = new SelectList(loaiChis.ToList(), "Value", "Text");
+
+            var phuongTiens = _repo.GetPhuongTienDropdown()
+                .Select(x => new SelectListItem { Value = ((int)x.Value).ToString(), Text = (string)x.Text });
+            ViewBag.PhuongTienList = new SelectList(phuongTiens.ToList(), "Value", "Text");
 
             var phieuNhaps = _repo.GetPhieuNhapDropdown(idNhaCungCap, currentPhieuNhapId)
                 .Select(x => new SelectListItem { Value = ((int)x.ID).ToString(), Text = (string)x.TenHienThi });
@@ -724,15 +752,29 @@ namespace SalesManagementSystem.Controllers
             var userInfo = Session["UserInfo"] as AclLoginViewModel;
             string nguoiTao = userInfo?.HoTen ?? userInfo?.TenDangNhap ?? "";
 
+            string tenNhaCungCap = "";
+            string diaChiNcc = "";
+            if (phieuChi.IDNhaCungCap.HasValue)
+            {
+                var ncc = _nhaCungCapRepo.GetById(phieuChi.IDNhaCungCap.Value);
+                if (ncc != null)
+                {
+                    tenNhaCungCap = ncc.TenNhaCungCap ?? "";
+                    diaChiNcc = ncc.DiaChi ?? "";
+                }
+            }
+
             var exportData = new Dictionary<string, object>
             {
                 { "NgayChi", phieuChi.NgayChi.ToString("dd/MM/yyyy") },
                 { "SoChungTu", phieuChi.SoPhieuChi },
-                { "TenNguoiNhan", phieuChi.NguoiNhanTien ?? "" },
+                { "TenNguoiNhan", string.IsNullOrEmpty(phieuChi.NguoiNhanTien) ? tenNhaCungCap : phieuChi.NguoiNhanTien },
                 { "DienGiai", phieuChi.DienGiai ?? "" },
                 { "TongTien", phieuChi.SoTienChi.ToString("N0") },
                 { "TienBangChu", SalesManagementSystem.Helpers.NumberToTextHelper.DocTienBangChu(phieuChi.SoTienChi) },
-                { "NguoiTao", nguoiTao }
+                { "NguoiTao", nguoiTao },
+                { "NhaCungCap", tenNhaCungCap },
+                { "DiaChiNCC", diaChiNcc }
             };
             
             var result = _wordExportService.ExportWord("PhieuChi01", exportData, null, isPdf: false);
@@ -744,6 +786,53 @@ namespace SalesManagementSystem.Controllers
 
             TempData["ErrorMessage"] = result.Message;
             return RedirectToAction("Index");
+        }
+        public JsonResult GetPhuongTien()
+        {
+            try
+            {
+                var phuongTiens = _repo.GetPhuongTienDropdown();
+                return Json(phuongTiens, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = true, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult GetPhieuNhapVanChuyen(int idPhuongTien)
+        {
+            try
+            {
+                var phieuNhaps = _repo.GetPhieuNhapThanhToanVanChuyen(idPhuongTien, null, null, null, null)
+                    .Where(x => Convert.ToDecimal(x.ConLaiVanChuyen) > 0)
+                    .Select(x => new {
+                        IDPhieuNhap = (int)x.IDPhieuNhap,
+                        SoPhieuNhap = (string)x.SoPhieuNhap,
+                        NgayNhap = x.NgayNhap,
+                        TongTienVanChuyen = (decimal)x.TongTienVanChuyen,
+                        DaThanhToanVanChuyen = (decimal)x.DaThanhToanVanChuyen,
+                        ConLaiVanChuyen = (decimal)x.ConLaiVanChuyen
+                    });
+                return Json(new { success = true, data = phieuNhaps }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = true, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult GetCongNoVanChuyen(int idPhieuNhap)
+        {
+            try
+            {
+                var congNo = _repo.GetCongNoVanChuyenTheoPhieuNhap(idPhieuNhap);
+                return Json(congNo, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = true, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
     }
 }

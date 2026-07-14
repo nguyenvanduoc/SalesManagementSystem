@@ -26,10 +26,11 @@
                         <th width="80" class="text-center fw-bold">Thao tác</th>
                         <th width="40"  class="text-center fw-bold">STT</th>
                         <th width="130" class="text-center fw-bold">Số phiếu chi</th>
-                        <th width="100" class="text-center fw-bold">Ngày chi</th>
+                        <th class="text-center fw-bold">Ngày chi</th>
+                        <th class="text-center fw-bold">Loại chi tiền</th>
                         <th class="text-center fw-bold">Khoản mục chi</th>
                         <th class="text-center fw-bold">Tài khoản TT</th>
-                        <th class="text-center fw-bold">Nhà cung cấp</th>
+                        <th class="text-center fw-bold">Đối tượng (NCC/PT)</th>
                         <th class="text-center fw-bold">Người nhận</th>
                         <th width="130" class="text-center fw-bold">Tồn đầu kỳ</th>
                         <th width="130" class="text-center fw-bold">Số tiền chi</th>
@@ -162,9 +163,10 @@
                                 <td class="text-center align-middle">@(stt++)</td>
                                 <td class="text-center align-middle fw-semibold text-primary">@item.SoPhieuChi</td>
                                 <td class="text-center align-middle">@item.NgayChi.ToString("dd/MM/yyyy")</td>
+                                <td class="align-middle">@item.TenLoaiChiTien</td>
                                 <td class="align-middle">@item.TenKhoanMuc</td>
                                 <td class="align-middle">@item.TenTaiKhoanThanhToan</td>
-                                <td class="align-middle">@item.TenNhaCungCap</td>
+                                <td class="align-middle">@(item.IDNhaCungCap.HasValue ? item.TenNhaCungCap : (item.IDPhuongTien.HasValue ? item.TenPhuongTien : ""))</td>
                                 <td class="align-middle">
                                     @if (!string.IsNullOrEmpty(item.NguoiNhanTien))
                                     {

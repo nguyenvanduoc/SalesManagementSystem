@@ -153,6 +153,19 @@
                     <input type="text" class="form-control form-control-sm" name="nguoiNhanTien" value="@ViewBag.NguoiNhanTien" placeholder="Họ tên..." />
                 </div>
                 <div class="col-md-2 col-sm-6">
+                    <label class="form-label text-muted small mb-1 fw-semibold">Loại chi tiền</label>
+                    <select class="form-select form-select-sm" name="idLoaiChiTien">
+                        <option value="">Tất cả</option>
+                        @if (ViewBag.LoaiChiTienList != null)
+                        {
+                            foreach (SelectListItem item in ViewBag.LoaiChiTienList)
+                            {
+                                <option value="@item.Value" @(item.Value == (ViewBag.IDLoaiChiTien != null ? ViewBag.IDLoaiChiTien.ToString() : "") ? "selected" : "")>@item.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2 col-sm-6">
                     <label class="form-label text-muted small mb-1 fw-semibold">Nhà cung cấp</label>
                     <select class="form-select form-select-sm" name="idNhaCungCap">
                         <option value="">Tất cả</option>
@@ -161,6 +174,19 @@
                             foreach (SelectListItem item in ViewBag.NhaCungCapList)
                             {
                                 <option value="@item.Value" @(item.Value == (ViewBag.IDNhaCungCap != null ? ViewBag.IDNhaCungCap.ToString() : "") ? "selected" : "")>@item.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2 col-sm-6">
+                    <label class="form-label text-muted small mb-1 fw-semibold">Phương tiện</label>
+                    <select class="form-select form-select-sm" name="idPhuongTien">
+                        <option value="">Tất cả</option>
+                        @if (ViewBag.PhuongTienList != null)
+                        {
+                            foreach (SelectListItem item in ViewBag.PhuongTienList)
+                            {
+                                <option value="@item.Value" @(item.Value == (ViewBag.IDPhuongTien != null ? ViewBag.IDPhuongTien.ToString() : "") ? "selected" : "")>@item.Text</option>
                             }
                         }
                     </select>
@@ -260,7 +286,7 @@
                 // Add loading row
                 var loadingHtml = `
                     <tr class="pc-detail-row" data-parent-id="${id}">
-                        <td colspan="16" class="p-0 border-0">
+                        <td colspan="17" class="p-0 border-0">
                             <div class="text-center p-3 text-muted">
                                 <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                 Đang tải chi tiết...
@@ -278,7 +304,7 @@
                     success: function (res) {
                         var html = `
                             <tr class="pc-detail-row" data-parent-id="${id}">
-                                <td colspan="16" class="p-0 border-0 shadow-inner">
+                                <td colspan="17" class="p-0 border-0 shadow-inner">
                                     <div class="detail-container p-2" style="background-color: #f8f9fa;">
                                         ${res}
                                     </div>

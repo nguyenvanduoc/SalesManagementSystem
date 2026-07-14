@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -336,6 +336,10 @@
     <Compile Include="Repositories\Interfaces\ICongNoNCCRepository.cs" />
     <Compile Include="Repositories\CongNoNCCRepository.cs" />
     <Compile Include="Controllers\PhieuChiController.cs" />
+    <Compile Include="Controllers\BaoCaoCongNoVanChuyenController.cs" />
+    <Compile Include="Repositories\Interfaces\ILoaiChiTienRepository.cs" />
+    <Compile Include="Repositories\LoaiChiTienRepository.cs" />
+    <Compile Include="Models\ViewModels\LoaiChiTienViewModel.cs" />
     <Compile Include="Controllers\SoQuyController.cs" />
     <Compile Include="Controllers\CongNoNCCController.cs" />
     <Compile Include="Repositories\Interfaces\ICongNoKhachHangRepository.cs" />
@@ -429,6 +433,7 @@
     <Content Include="node_modules\safer-buffer\package.json" />
     <Content Include="node_modules\safer-buffer\Porting-Buffer.md" />
     <Content Include="node_modules\safer-buffer\Readme.md" />
+    <Content Include="obj\Release\Package\PackageTmp\Views\PhieuNhapKho\_PhieuNhapKhoList.cshtml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -530,6 +535,8 @@
     <Content Include="Views\TaiKhoanThanhToan\_TaiKhoanThanhToanList.cshtml" />
     <Content Include="Views\TaiKhoanThanhToan\_Form.cshtml" />
     <Content Include="Views\PhieuChi\Index.cshtml" />
+    <Content Include="Views\BaoCaoCongNoVanChuyen\Index.cshtml" />
+    <Content Include="Views\BaoCaoCongNoVanChuyen\_List.cshtml" />
     <Content Include="Views\PhieuChi\_PhieuChiList.cshtml" />
     <Content Include="Views\PhieuChi\_PhieuChiFileList.cshtml" />
     <Content Include="Views\PhieuChi\_Form.cshtml" />
@@ -574,6 +581,8 @@
     <Content Include="Views\KHO_HaoHut\_Create.cshtml" />
     <Content Include="Views\KHO_HaoHut\_Edit.cshtml" />
     <Content Include="Views\KHO_HaoHut\_Detail.cshtml" />
+    <Content Include="Views\CongNoNCC\_DetailModal.cshtml" />
+    <Content Include="Views\CongNoNCC\_HistoryModal.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />
@@ -581,6 +590,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\Enums\" />
+    <Folder Include="obj\Release\Package\PackageTmp\obj\Release\Package\PackageTmp\Views\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />

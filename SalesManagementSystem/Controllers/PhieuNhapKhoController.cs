@@ -101,7 +101,7 @@ namespace SalesManagementSystem.Controllers
             {
                 var list = _repo.GetPaged(page, pageSize, tuNgay, denNgay, soChungTu, idKho, idNhaCungCap, trangThai, tenNguoiNhan, tenNguoiGiao, idPhuongTien, hoTenTaiXe, idSanPham, out int totalRecords);
 
-                var model = new PagedListViewModel<PhieuNhapKhoListViewModel>
+                var model = new PagedListViewModel<PhieuNhapKhoListViewModel> 
                 {
                     Items = list,
                     CurrentPage = page,
@@ -494,6 +494,25 @@ namespace SalesManagementSystem.Controllers
 
                 _repo.Delete(id, userId);
                 return Json(new { success = true, message = "Xóa phiếu thành công" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public ActionResult DeletePhanQuyenPhu(int id)
+        {
+            if (!PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.TuyChon)) return Json(new { success = false, message = "Không có quyền xóa (phân quyền phụ)" });
+
+            try
+            {
+                var user = GetCurrentUser();
+                int userId = user?.IDNhanSu ?? 0;
+
+                _repo.DeletePhanQuyenPhu(id, userId);
+                return Json(new { success = true, message = "Xóa phiếu và tính lại tồn kho thành công" });
             }
             catch (Exception ex)
             {

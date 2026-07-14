@@ -35,6 +35,12 @@ namespace SalesManagementSystem.Models.ViewModels
         public int? IDPhieuNhap { get; set; }
         public string SoPhieuNhap { get; set; }
 
+        public int? IDLoaiChiTien { get; set; }
+        public string MaLoaiChiTien { get; set; }
+        public string TenLoaiChiTien { get; set; }
+        public int? IDPhuongTien { get; set; }
+        public string TenPhuongTien { get; set; }
+
         [Required(ErrorMessage = "Vui lòng nhập số tiền chi")]
         public decimal SoTienChi { get; set; }
 

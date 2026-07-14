@@ -98,6 +98,19 @@
                                                     </button>
                                                 </li>
                                             }
+
+                                            @if (SalesManagementSystem.Helpers.PermissionHelper.HasPermission("PhieuNhapKho", SalesManagementSystem.Helpers.LoaiPhanQuyen.Xoa))
+                                            {
+                                                if (!(item.TrangThai == 0 || item.TrangThai == 1))
+                                                {
+                                                    <li><hr class="dropdown-divider"></li>
+                                                }
+                                                <li>
+                                                    <button type="button" class="dropdown-item text-danger fw-bold" onclick="deletePhanQuyenPhu(this, @item.ID)">
+                                                        <i class="bi bi-trash-fill me-2 text-danger"></i> Xóa
+                                                    </button>
+                                                </li>
+                                            }
                                         </ul>
                                     </div>
                                 </td>
