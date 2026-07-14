@@ -76,9 +76,30 @@ namespace SalesManagementSystem.Repositories
                     if (model != null)
                     {
                         model.ChiTiets = multi.Read<PhieuThuKhachHangChiTietViewModel>().ToList();
+                        if (model.TrangThai == 2)
+                        {
+                            foreach (var ct in model.ChiTiets)
+                            {
+                                if (ct.LoaiThu == 1)
+                                {
+                                    ct.DaThanhToan -= ct.SoTienPhanBo;
+                                    ct.ConLai += ct.SoTienPhanBo;
+                                }
+                            }
+                        }
                         if (model.IDKhachHang.HasValue)
                         {
-                            model.TienTraTruocKhachHang = GetTienTraTruocKhachHang(model.IDKhachHang.Value);
+                            var ptTienTraTruoc = GetTienTraTruocKhachHang(model.IDKhachHang.Value);
+                            if (model.TrangThai == 2)
+                            {
+                                var excessCreated = model.ChiTiets.Where(x => x.LoaiThu == 2).Sum(x => x.SoTienPhanBo);
+                                var prepaymentUsed = model.ChiTiets.Where(x => x.LoaiThu == 3).Sum(x => x.SoTienPhanBo);
+                                model.TienTraTruocKhachHang = ptTienTraTruoc - excessCreated + prepaymentUsed;
+                            }
+                            else
+                            {
+                                model.TienTraTruocKhachHang = ptTienTraTruoc;
+                            }
                         }
                     }
                     return model;

@@ -116,7 +116,17 @@ namespace SalesManagementSystem.Repositories
                     model.ChiTiets = GetChiTiet(id).ToList();
                     if (model.IDNhaCungCap.HasValue)
                     {
-                        model.TienTraTruocNCC = GetTienTraTruocNhaCungCap(model.IDNhaCungCap.Value);
+                        var pcTienTraTruoc = GetTienTraTruocNhaCungCap(model.IDNhaCungCap.Value);
+                        if (model.TrangThai == 2)
+                        {
+                            var excessCreated = model.ChiTiets.Where(x => x.LoaiChi == 2).Sum(x => x.SoTienPhanBo);
+                            var prepaymentUsed = model.ChiTiets.Where(x => x.LoaiChi == 3).Sum(x => x.SoTienPhanBo);
+                            model.TienTraTruocNCC = pcTienTraTruoc - excessCreated + prepaymentUsed;
+                        }
+                        else
+                        {
+                            model.TienTraTruocNCC = pcTienTraTruoc;
+                        }
                     }
                 }
                 return model;

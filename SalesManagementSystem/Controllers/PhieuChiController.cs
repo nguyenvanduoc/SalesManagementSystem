@@ -493,11 +493,21 @@ namespace SalesManagementSystem.Controllers
 
         // GET AJAX: /phieu-chi/get-tien-tra-truoc?idNhaCungCap=x
         [HttpGet]
-        public ActionResult GetTienTraTruocNhaCungCap(int idNhaCungCap)
+        public ActionResult GetTienTraTruocNhaCungCap(int idNhaCungCap, int? excludeId = null)
         {
             try
             {
                 var tien = _repo.GetTienTraTruocNhaCungCap(idNhaCungCap);
+                if (excludeId.HasValue && excludeId.Value > 0)
+                {
+                    var phieuChi = _repo.GetByID(excludeId.Value);
+                    if (phieuChi != null && phieuChi.ChiTiets != null)
+                    {
+                        var excessCreated = phieuChi.ChiTiets.Where(x => x.LoaiChi == 2).Sum(x => x.SoTienPhanBo);
+                        var prepaymentUsed = phieuChi.ChiTiets.Where(x => x.LoaiChi == 3).Sum(x => x.SoTienPhanBo);
+                        tien = tien - excessCreated + prepaymentUsed;
+                    }
+                }
                 return Json(new { success = true, data = tien }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)

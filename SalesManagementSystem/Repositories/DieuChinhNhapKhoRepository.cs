@@ -123,6 +123,9 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@NgayHoaDon", model.NgayHoaDon);
                 p.Add("@GhiChu", model.GhiChu);
                 p.Add("@NguoiTao", userId);
+                p.Add("@TenNguoiNhan", model.TenNguoiNhan);
+                p.Add("@TenNguoiGiao", model.TenNguoiGiao);
+                p.Add("@SoDienThoaiNguoiGiao", model.SoDienThoaiNguoiGiao);
 
                 conn.Execute("sp_KHO_DieuChinhPhieuNhap_Save", p, commandType: CommandType.StoredProcedure);
 

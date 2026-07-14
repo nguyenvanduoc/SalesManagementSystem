@@ -92,6 +92,7 @@
                                 <th class="text-end">Đã thu</th>
                                 <th class="text-end">Còn nợ</th>
                                 <th class="text-end" style="width:180px;">Số tiền phân bổ</th>
+                                <th class="text-center" style="width:90px;">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -101,10 +102,12 @@
                             <tr class="bg-light">
                                 <td colspan="6" class="text-end fw-bold">Tổng phân bổ cho chứng từ:</td>
                                 <td class="text-end fw-bold text-success" id="TongPhanBo">0</td>
+                                <td></td>
                             </tr>
                             <tr class="bg-light">
                                 <td colspan="6" class="text-end fw-bold text-danger">Tiền dư (chuyển thành trả trước):</td>
                                 <td class="text-end fw-bold text-danger" id="TienDuTraTruoc">0</td>
+                                <td></td>
                             </tr>
                         </tfoot>
                     </table>
@@ -158,6 +161,7 @@
                 SoTienThu: parseFloat(preSelectedSoTien)
             }];
         }
+        var isInitializing = true;
 
         if ($modal.length > 0) {
             $modal.find('.modal-dialog').removeClass('modal-lg modal-dialog-centered').addClass('modal-xl').css('margin-top', '30px');
@@ -213,7 +217,7 @@
             var tbody = $modal.find('#tblChungTuBanHang tbody');
             tbody.empty();
             if(!data || data.length === 0) {
-                tbody.html('<tr><td colspan="7" class="text-center text-muted">Không có chứng từ nợ</td></tr>');
+                tbody.html('<tr><td colspan="8" class="text-center text-muted">Không có chứng từ nợ</td></tr>');
                 $modal.find('#divPhanBo').show();
                 return;
             }
@@ -233,6 +237,10 @@
                 
                 var input = '<input type="text" class="form-control text-end input-phanbo" data-id="' + item.id + '" value="' + formatCurrency(phanBo) + '" ' + (isView ? 'disabled' : '') + ' />';
                 tr.append('<td class="text-end">' + input + '</td>');
+                
+                var btnThuDu = '<button type="button" class="btn btn-xs btn-outline-success py-0 px-2 btn-thu-du" style="font-size:0.75rem;" ' + (isView ? 'disabled' : '') + '>Thu đủ</button>';
+                tr.append('<td class="text-center">' + btnThuDu + '</td>');
+                
                 tbody.append(tr);
             });
             $modal.find('#divPhanBo').show();
@@ -253,12 +261,7 @@
                 calculatePhanBo();
             });
             
-            // If new mode (no existing details) and SoTienThu > 0, auto allocate
-            if (existingDetails.length === 0 && parseCurrency($('#SoTienThu').val()) > 0) {
-                autoAllocate();
-            } else {
-                calculatePhanBo();
-            }
+            calculatePhanBo();
         }
 
         function loadKhachHangData(idKhachHang) {
@@ -271,7 +274,7 @@
             var loadedPhieu = false;
             
             // Load Tien Tra Truoc
-            $.getJSON('@Url.Action("GetTienTraTruocKhachHang", "PhieuThuKhachHang")', { idKhachHang: idKhachHang }, function (res) {
+            $.getJSON('@Url.Action("GetTienTraTruocKhachHang", "PhieuThuKhachHang")', { idKhachHang: idKhachHang, excludeId: '@Model.ID' }, function (res) {
                 if(res.success) {
                     window.tienTraTruoc = res.data;
                     $modal.find('#lblTienTraTruoc').text('Tiền trả trước hiện có: ' + formatCurrency(window.tienTraTruoc) + ' đ');
@@ -282,23 +285,23 @@
             // Load Phieu Nhap Nợ (ChungTuBanHang)
             $.getJSON('@Url.Action("GetChungTuCongNo", "PhieuThuKhachHang")', { idKhachHang: idKhachHang }, function (res) {
                 if(res.success) {
-                    // If edit mode, we might need to inject the chung tu that are fully paid by this very PhieuThu!
                     listChungTu = res.data;
                     if(existingDetails && existingDetails.length > 0) {
                         $.each(existingDetails, function(i, d) {
                             if(d.LoaiThu === 1 && d.IDChungTuBanHang) {
-                                if(!listChungTu.find(x => x.id === d.IDChungTuBanHang)) {
+                                var found = listChungTu.find(x => x.id === d.IDChungTuBanHang);
+                                if(found) {
+                                    found.daThanhToan = (found.daThanhToan || 0) - d.SoTienPhanBo;
+                                    found.conLai = (found.conLai || 0) + d.SoTienPhanBo;
+                                } else {
                                     listChungTu.push({
                                         id: d.IDChungTuBanHang,
                                         soChungTu: d.SoChungTu,
                                         ngayChungTu: d.NgayChungTu ? d.NgayChungTu.substring(0,10) : '',
                                         tongTien: d.TongTien,
                                         daThanhToan: d.DaThanhToan || 0,
-                                        conLai: d.ConLai || 0 // Do not reconstruct original debt
+                                        conLai: d.ConLai || 0
                                     });
-                                } else {
-                                    // Do not adjust conLai to include the amount this PhieuThu already paid
-                                    var pn = listChungTu.find(x => x.id === d.IDChungTuBanHang);
                                 }
                             }
                         });
@@ -313,8 +316,10 @@
         }
 
         $modal.find('#IDKhachHang').on('change', function () {
-            existingDetails = []; // Clear if changed manually
-            loadKhachHangData($(this).val());
+            if (!isInitializing) {
+                existingDetails = []; // Clear if changed manually
+                loadKhachHangData($(this).val());
+            }
         });
 
         // Auto allocate when SoTienThu changes
@@ -324,27 +329,63 @@
                 val = parseInt(val, 10);
                 $(this).val(formatCurrency(val));
             }
-            autoAllocate();
+            calculatePhanBo();
         });
 
         $modal.find('#SoTienThu').on('blur', function () {
-            autoAllocate();
+            calculatePhanBo();
         });
 
         $modal.find('#btnThuToanBo').on('click', function(e) {
             e.preventDefault();
             if (isView) return;
-            var totalDebt = 0;
-            $modal.find('.row-conlai').each(function() {
-                totalDebt += parseFloat($(this).data('val')) || 0;
-            });
-            $modal.find('#SoTienThu').val(formatCurrency(totalDebt));
+            // Chỉ thực hiện autoAllocate() trên số tiền thu đã nhập, không tự lấy tổng nợ
             autoAllocate();
+        });
+
+        $modal.on('click', '.btn-thu-du', function(e) {
+            e.preventDefault();
+            if (isView) return;
+            
+            var $row = $(this).closest('tr');
+            var $input = $row.find('.input-phanbo');
+            var conLaiNo = parseFloat($row.find('.row-conlai').data('val')) || 0;
+            
+            var currentAllocated = parseCurrency($input.val());
+            if (currentAllocated >= conLaiNo && conLaiNo > 0) {
+                return;
+            }
+
+            var tongThu = parseCurrency($('#SoTienThu').val());
+            var availableTotal = tongThu + (parseFloat(window.tienTraTruoc) || 0);
+            
+            var totalAllocatedOthers = 0;
+            $modal.find('.input-phanbo').not($input).each(function() {
+                totalAllocatedOthers += parseCurrency($(this).val());
+            });
+            
+            var remainingAvailable = availableTotal - totalAllocatedOthers;
+            if (remainingAvailable < 0) remainingAvailable = 0;
+            
+            if (remainingAvailable <= 0) {
+                if (typeof showToast === 'function') {
+                    showToast('warning', 'Đã phân bổ đủ số tiền thu');
+                } else {
+                    alert('Đã phân bổ đủ số tiền thu');
+                }
+                return;
+            }
+
+            var allocateAmount = Math.min(conLaiNo, remainingAvailable);
+            $input.val(formatCurrency(allocateAmount));
+            
+            calculatePhanBo();
         });
 
         if ($modal.find('#IDKhachHang').val()) {
             loadKhachHangData($modal.find('#IDKhachHang').val());
         }
+        isInitializing = false;
 
         function buildSubmitData() {
             var chiTiets = [];

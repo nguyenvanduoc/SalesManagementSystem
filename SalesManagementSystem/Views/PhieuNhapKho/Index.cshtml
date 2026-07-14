@@ -162,8 +162,6 @@
 
         $(document).ready(function() {
             $form.on('submit', function (e) {
-                e.preventDefault();
-                
                 var txtTuNgay = $container.find('input[name="tuNgay"]')[0];
                 var txtDenNgay = $container.find('input[name="denNgay"]')[0];
                 var ddlThoiGian = $container.find('.ddl-thoi-gian')[0];
@@ -173,24 +171,6 @@
                     sessionStorage.setItem('pnk_last_denNgay', txtDenNgay.value);
                     sessionStorage.setItem('pnk_last_thoiGian', ddlThoiGian.value);
                 }
-
-                var params = $(this).serialize();
-                var url = '@Url.Action("GetList")?' + params;
-                if (typeof showLoading === 'function') showLoading();
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function (res) {
-                        if (typeof hideLoading === 'function') hideLoading();
-                        $container.find('#table-container').html(res);
-                    },
-                    error: function () {
-                        if (typeof hideLoading === 'function') hideLoading();
-                        if (typeof showToast === 'function') {
-                            showToast('error', 'Lỗi khi tải dữ liệu.');
-                        }
-                    }
-                });
             });
 
             // Filter: Thời gian

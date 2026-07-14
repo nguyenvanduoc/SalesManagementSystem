@@ -797,47 +797,60 @@ namespace SalesManagementSystem.Controllers
                     { "TongTienBangChu", SalesManagementSystem.Helpers.NumberToTextHelper.DocTienBangChu(totalTongTien) }
                 };
 
-                var flatData = list.SelectMany(order =>
+                var flatList = new List<DH03ExportModel>();
+                int stt = 1;
+                foreach (var order in list)
                 {
                     var details = allDetails.Where(d => d.IDDonDatHang == order.ID).ToList();
-                    string tenGroup = $"{order.SoDonHang} - {order.TenKhachHang}";
                     decimal phiBocXep = orderPhiBocXepDict.ContainsKey(order.ID) ? orderPhiBocXepDict[order.ID] : 0m;
 
                     if (details.Count == 0)
                     {
-                        return new[] { new {
-                            TenGroup = tenGroup,
-                            STT = 1,
-                            TenSanPham = "",
+                        flatList.Add(new DH03ExportModel {
+                            STT = stt++,
+                            SoChungTu = order.SoDonHang,
+                            SoDonHang = order.SoDonHang,
+                            TenKhachHang = order.TenKhachHang,
+                            KhachHang = order.TenKhachHang,
                             MaDonHang = "",
+                            TenSanPham = "",
                             DVT = "",
                             SoLuong = 0m,
+                            TenPhuongTien = order.TenPhuongTien ?? "",
                             DonGia = 0m,
+                            PhiBocXep = phiBocXep,
                             ThanhTienHang = 0m,
-                            GhiChu = "",
-                            TongTienTungGroup = order.TongTien,
-                            PhiBocXepTungGroup = phiBocXep
-                        } }.AsEnumerable();
+                            TrangThai = order.TenTrangThai ?? "",
+                            GhiChu = order.GhiChu ?? ""
+                        });
                     }
-                    return details.Select((d, i) => new {
-                        TenGroup = tenGroup,
-                        STT = i + 1,
-                        TenSanPham = d.TenSanPham ?? "",
-                        MaDonHang = d.TenSanPham ?? "",
-                        DVT = d.DVT ?? "",
-                        SoLuong = d.SoLuong,
-                        DonGia = d.DonGia,
-                        ThanhTienHang = d.ThanhTien,
-                        GhiChu = d.GhiChu ?? "",
-                        TongTienTungGroup = order.TongTien,
-                        PhiBocXepTungGroup = phiBocXep
-                    });
-                }).ToList();
-
-                var groupedData = flatData.GroupBy(x => x.TenGroup);
+                    else
+                    {
+                        foreach (var d in details)
+                        {
+                            flatList.Add(new DH03ExportModel {
+                                STT = stt++,
+                                SoChungTu = order.SoDonHang,
+                                SoDonHang = order.SoDonHang,
+                                TenKhachHang = order.TenKhachHang,
+                                KhachHang = order.TenKhachHang,
+                                MaDonHang = d.TenSanPham ?? "",
+                                TenSanPham = d.TenSanPham ?? "",
+                                DVT = d.DVT ?? "",
+                                SoLuong = d.SoLuong,
+                                TenPhuongTien = order.TenPhuongTien ?? "",
+                                DonGia = d.DonGia,
+                                PhiBocXep = phiBocXep,
+                                ThanhTienHang = d.ThanhTien,
+                                TrangThai = order.TenTrangThai ?? "",
+                                GhiChu = !string.IsNullOrEmpty(d.GhiChu) ? d.GhiChu : (order.GhiChu ?? "")
+                            });
+                        }
+                    }
+                }
 
                 string ext;
-                var fileBytes = _excelExportService.ExportGrouped("DH03", groupedData, out ext, variables);
+                var fileBytes = _excelExportService.Export("DH03", flatList, out ext, variables);
 
                 string contentType = ext == "xls" 
                     ? "application/vnd.ms-excel" 
@@ -942,6 +955,25 @@ namespace SalesManagementSystem.Controllers
                 ct.ThanhTienThue = Math.Round(ct.ThanhTien * ct.ThueGTGT / 100, 0);
                 ct.ThanhTienSauThue = Math.Round(ct.ThanhTien + (ct.ThanhTienThue ?? 0m), 0);
             }
+        }
+
+        public class DH03ExportModel
+        {
+            public int STT { get; set; }
+            public string SoChungTu { get; set; }
+            public string SoDonHang { get; set; }
+            public string TenKhachHang { get; set; }
+            public string KhachHang { get; set; }
+            public string MaDonHang { get; set; }
+            public string TenSanPham { get; set; }
+            public string DVT { get; set; }
+            public decimal SoLuong { get; set; }
+            public string TenPhuongTien { get; set; }
+            public decimal DonGia { get; set; }
+            public decimal PhiBocXep { get; set; }
+            public decimal ThanhTienHang { get; set; }
+            public string TrangThai { get; set; }
+            public string GhiChu { get; set; }
         }
     }
 }

@@ -105,7 +105,10 @@ CREATE OR ALTER PROCEDURE sp_KHO_DieuChinhPhieuNhap_Save
     @SoHoaDon NVARCHAR(50) = NULL,
     @NgayHoaDon DATETIME = NULL,
     @GhiChu NVARCHAR(500) = NULL,
-    @NguoiTao INT
+    @NguoiTao INT,
+    @TenNguoiNhan NVARCHAR(200) = NULL,
+    @TenNguoiGiao NVARCHAR(200) = NULL,
+    @SoDienThoaiNguoiGiao NVARCHAR(50) = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -293,6 +296,9 @@ BEGIN
             SoHoaDon = @SoHoaDon,
             NgayHoaDon = @NgayHoaDon,
             GhiChu = @GhiChu,
+            TenNguoiNhan = @TenNguoiNhan,
+            TenNguoiGiao = @TenNguoiGiao,
+            SoDienThoaiNguoiGiao = @SoDienThoaiNguoiGiao,
             NgayCapNhat = GETDATE(),
             NguoiCapNhat = @NguoiTao,
             TongTienHang = @newTienHang,

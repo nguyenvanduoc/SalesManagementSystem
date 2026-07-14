@@ -6,16 +6,19 @@ using Dapper;
 using SalesManagementSystem.Data;
 using SalesManagementSystem.Helpers;
 using SalesManagementSystem.Repositories.Interfaces;
+using SalesManagementSystem.Services.Interfaces;
 
 namespace SalesManagementSystem.Controllers
 {
     public class BaoCaoCongNoVanChuyenController : BaseController
     {
         private readonly IPhieuChiRepository _phieuChiRepo;
+        private readonly IExcelExportService _excelExportService;
 
-        public BaoCaoCongNoVanChuyenController(IPhieuChiRepository phieuChiRepo)
+        public BaoCaoCongNoVanChuyenController(IPhieuChiRepository phieuChiRepo, IExcelExportService excelExportService)
         {
             _phieuChiRepo = phieuChiRepo;
+            _excelExportService = excelExportService;
         }
 
         public ActionResult Index()
@@ -189,6 +192,69 @@ namespace SalesManagementSystem.Controllers
             var phuongTiens = _phieuChiRepo.GetPhuongTienDropdown()
                 .Select(x => new SelectListItem { Value = ((int)x.Value).ToString(), Text = (string)x.Text });
             ViewBag.PhuongTienList = new SelectList(phuongTiens.ToList(), "Value", "Text");
+        }
+
+        [HttpGet]
+        public ActionResult ExportExcel(int? idPhuongTien = null, string tuNgay = "", string denNgay = "", string soPhieuNhap = "", int? trangThaiThanhToan = null)
+        {
+            if (!PermissionHelper.HasPermission("BaoCaoCongNoVanChuyen", LoaiPhanQuyen.Xem))
+                return Content("Không có quyền xuất Excel");
+
+            try
+            {
+                // Get all rows by specifying a large page size (1,000,000)
+                var data = _phieuChiRepo.GetPhieuNhapThanhToanVanChuyen(idPhuongTien, tuNgay, denNgay, soPhieuNhap, trangThaiThanhToan, 1, 1000000).ToList();
+
+                string phuongTienName = "Tất cả";
+                if (idPhuongTien.HasValue)
+                {
+                    using (var conn = new DbConnectionFactory().CreateConnection())
+                    {
+                        phuongTienName = conn.ExecuteScalar<string>(
+                            "SELECT TenPhuongTien FROM DM_PhuongTien WHERE ID = @ID",
+                            new { ID = idPhuongTien.Value }
+                        ) ?? "Tất cả";
+                    }
+                }
+
+                string strTuNgay = "";
+                string strDenNgay = "";
+                if (DateTime.TryParse(tuNgay, out DateTime dTu)) strTuNgay = dTu.ToString("dd/MM/yyyy");
+                if (DateTime.TryParse(denNgay, out DateTime dDen)) strDenNgay = dDen.ToString("dd/MM/yyyy");
+
+                var variables = new Dictionary<string, object>
+                {
+                    { "TuNgay", strTuNgay },
+                    { "DenNgay", strDenNgay },
+                    { "KhachHang", phuongTienName },
+                    { "Ngay", DateTime.Now.ToString("dd") },
+                    { "Thang", DateTime.Now.ToString("MM") },
+                    { "Nam", DateTime.Now.ToString("yyyy") }
+                };
+
+                var exportData = data.Select((x, idx) => new {
+                    STT = idx + 1,
+                    SoPhieuNhap = (string)x.SoPhieuNhap,
+                    NgayNhap = x.NgayNhap != null ? ((DateTime)x.NgayNhap).ToString("dd/MM/yyyy") : "",
+                    TenPhuongTien = (string)x.TenPhuongTien,
+                    SoPhieuChi = (string)x.SoPhieuChiList,
+                    TongTien = Convert.ToDecimal(x.TongTienVanChuyen),
+                    DaThanhToan = Convert.ToDecimal(x.DaThanhToanVanChuyen),
+                    ConLai = Convert.ToDecimal(x.ConLaiVanChuyen),
+                    TenTrangThai = Convert.ToDecimal(x.DaThanhToanVanChuyen) >= Convert.ToDecimal(x.TongTienVanChuyen) && Convert.ToDecimal(x.TongTienVanChuyen) > 0 
+                        ? "Đã thanh toán đủ" 
+                        : (Convert.ToDecimal(x.DaThanhToanVanChuyen) > 0 ? "Thanh toán một phần" : "Chưa thanh toán")
+                }).ToList();
+
+                string fileExtension;
+                var bytes = _excelExportService.Export("CNVC", exportData, out fileExtension, variables);
+                string contentType = fileExtension == "xls" ? "application/vnd.ms-excel" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                return File(bytes, contentType, $"BaoCaoCongNoVanChuyen_{DateTime.Now:yyyyMMddHHmmss}.{fileExtension}");
+            }
+            catch (Exception ex)
+            {
+                return Content($"Lỗi xuất Excel: {ex.Message}");
+            }
         }
     }
 }

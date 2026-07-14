@@ -125,6 +125,7 @@
                                 <th class="text-end">Đã trả</th>
                                 <th class="text-end">Còn nợ</th>
                                 <th class="text-end" style="width:180px;">Số tiền phân bổ</th>
+                                <th class="text-center" style="width:90px;">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -134,10 +135,12 @@
                             <tr class="bg-light">
                                 <td colspan="6" class="text-end fw-bold">Tổng phân bổ cho phiếu nhập:</td>
                                 <td class="text-end fw-bold text-success" id="TongPhanBo">0</td>
+                                <td></td>
                             </tr>
                             <tr class="bg-light">
                                 <td colspan="6" class="text-end fw-bold text-danger">Tiền dư (chuyển thành trả trước):</td>
                                 <td class="text-end fw-bold text-danger" id="TienDuTraTruoc">0</td>
+                                <td></td>
                             </tr>
                         </tfoot>
                     </table>
@@ -235,7 +238,7 @@
             var tbody = $modal.find('#tblPhieuNhap tbody');
             tbody.empty();
             if(!data || data.length === 0) {
-                tbody.html('<tr><td colspan="7" class="text-center text-muted">Không có phiếu nhập nợ</td></tr>');
+                tbody.html('<tr><td colspan="8" class="text-center text-muted">Không có phiếu nhập nợ</td></tr>');
                 $modal.find('#divPhanBo').show();
                 return;
             }
@@ -255,6 +258,10 @@
                 
                 var input = '<input type="text" class="form-control text-end input-phanbo" data-id="' + item.id + '" value="' + formatCurrency(phanBo) + '" ' + (isView ? 'disabled' : '') + ' />';
                 tr.append('<td class="text-end">' + input + '</td>');
+                
+                var btnChiDu = '<button type="button" class="btn btn-xs btn-outline-success py-0 px-2 btn-chi-du" style="font-size:0.75rem;" ' + (isView ? 'disabled' : '') + '>Chi đủ</button>';
+                tr.append('<td class="text-center">' + btnChiDu + '</td>');
+                
                 tbody.append(tr);
             });
             $modal.find('#divPhanBo').show();
@@ -275,12 +282,7 @@
                 calculatePhanBo();
             });
             
-            // If new mode (no existing details) and SoTienChi > 0, auto allocate
-            if (existingDetails.length === 0 && parseCurrency($('#SoTienChi').val()) > 0) {
-                autoAllocate();
-            } else {
-                calculatePhanBo();
-            }
+            calculatePhanBo();
         }
 
         function handleLoaiChiTienChange() {
@@ -317,7 +319,7 @@
             var loadedPhieu = false;
             
             // Load Tien Tra Truoc
-            $.getJSON('@Url.Action("GetTienTraTruocNhaCungCap", "PhieuChi")', { idNhaCungCap: idNcc }, function (res) {
+            $.getJSON('@Url.Action("GetTienTraTruocNhaCungCap", "PhieuChi")', { idNhaCungCap: idNcc, excludeId: '@Model.ID' }, function (res) {
                 if(res.success) {
                     window.tienTraTruoc = res.data;
                     $modal.find('#lblTienTraTruoc').text('Tiền trả trước hiện có: ' + formatCurrency(window.tienTraTruoc) + ' đ');
@@ -441,11 +443,11 @@
                 val = parseInt(val, 10);
                 $(this).val(formatCurrency(val));
             }
-            autoAllocate();
+            calculatePhanBo();
         });
 
         $modal.find('#SoTienChi').on('blur', function () {
-            autoAllocate();
+            calculatePhanBo();
         });
 
         $modal.find('#btnChiToanBo').on('click', function(e) {
@@ -453,6 +455,45 @@
             if (isView) return;
             // Chỉ thực hiện autoAllocate() trên số tiền chi đã nhập, không tự lấy tổng nợ
             autoAllocate();
+        });
+
+        $modal.on('click', '.btn-chi-du', function(e) {
+            e.preventDefault();
+            if (isView) return;
+            
+            var $row = $(this).closest('tr');
+            var $input = $row.find('.input-phanbo');
+            var conLaiNo = parseFloat($row.find('.row-conlai').data('val')) || 0;
+            
+            var currentAllocated = parseCurrency($input.val());
+            if (currentAllocated >= conLaiNo && conLaiNo > 0) {
+                return;
+            }
+
+            var tongChi = parseCurrency($('#SoTienChi').val());
+            var availableTotal = tongChi + (parseFloat(window.tienTraTruoc) || 0);
+            
+            var totalAllocatedOthers = 0;
+            $modal.find('.input-phanbo').not($input).each(function() {
+                totalAllocatedOthers += parseCurrency($(this).val());
+            });
+            
+            var remainingAvailable = availableTotal - totalAllocatedOthers;
+            if (remainingAvailable < 0) remainingAvailable = 0;
+            
+            if (remainingAvailable <= 0) {
+                if (typeof showToast === 'function') {
+                    showToast('warning', 'Đã phân bổ đủ số tiền chi');
+                } else {
+                    alert('Đã phân bổ đủ số tiền chi');
+                }
+                return;
+            }
+
+            var allocateAmount = Math.min(conLaiNo, remainingAvailable);
+            $input.val(formatCurrency(allocateAmount));
+            
+            calculatePhanBo();
         });
 
         if ($modal.find('#IDNhaCungCap').val()) {

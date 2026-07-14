@@ -65,6 +65,9 @@
                         </select>
                     </div>
                     <div class="col-12 d-flex gap-2 mt-3 justify-content-end">
+                        <button type="button" onclick="exportPhieuXuatExcel()" class="btn btn-sm text-white px-3" style="background-color: #27ae60; border: none;">
+                            <i class="bi bi-file-earmark-excel"></i> Xuất Excel
+                        </button>
                         <button type="submit" class="btn btn-sm text-white px-3" style="background-color: #2998e4; border: none;">
                             <i class="bi bi-search"></i> Tìm kiếm
                         </button>
@@ -93,22 +96,13 @@
 
             $(document).ready(function() {
                 $form.on('submit', function (e) {
-                    e.preventDefault();
-                    var params = $(this).serialize();
-                    var url = '@Url.Action("GetList")?' + params;
-                    $.ajax({
-                        url: url,
-                        type: 'GET',
-                        success: function (res) {
-                            $container.find('#table-container').html(res);
-                        },
-                        error: function () {
-                            if (typeof showToast === 'function') {
-                                showToast('error', 'Lỗi khi tải dữ liệu.');
-                            }
-                        }
-                    });
+                    // Bubble up to tab-manager.js for standard search & loading overlay
                 });
+
+                window.exportPhieuXuatExcel = function() {
+                    var params = $form.serialize();
+                    window.location.href = '@Url.Action("ExportExcel", "PhieuXuatKho")?' + params;
+                };
 
                 // Delegate row clicks for inline detail view
                 $container.on('click', '.pxk-row', function (e) {

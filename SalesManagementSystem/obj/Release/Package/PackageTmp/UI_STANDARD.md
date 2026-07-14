@@ -434,6 +434,15 @@ Bắt buộc AJAX:
 
 ---
 
+## Hiệu ứng Loading khi tìm kiếm (Search Loading Overlay)
+
+* Bắt buộc hiển thị spinner xoay tròn đa sắc (`custom-multi-spinner`) dạng overlay làm mờ trên vùng lưới dữ liệu trong suốt quá trình tải AJAX tìm kiếm.
+* **Quy chuẩn thực hiện:**
+  * Tránh việc tự viết bắt sự kiện `$form.on('submit')` cục bộ ở từng View rồi gọi hàm `$.ajax` thủ công kèm theo `e.preventDefault()`.
+  * Thay vào đó, hãy để sự kiện submit form tự động nổi bọt (bubble) lên `document` để tập trung xử lý bởi [tab-manager.js](file:///c:/Users/duoc0/OneDrive/Desktop/WEB_QLBH/QuanLyBanHang/SalesManagementSystem/SalesManagementSystem/Scripts/tab-manager.js). Hệ thống quản lý tab sẽ tự động áp dụng hàm `ajaxLoadGrid` cùng hiệu ứng loading nháy mượt mà chuẩn tương tự màn hình Đơn đặt hàng.
+
+---
+
 ## Controller
 
 ```csharp

@@ -1133,6 +1133,7 @@
         $.ajax({
             url: url,
             type: 'GET',
+            cache: false,
             success: function(res) {
                 // Đảm bảo kích thước mặc định là modal-lg
                 $modal.find('.modal-dialog').removeClass('modal-xl modal-sm').addClass('modal-lg');

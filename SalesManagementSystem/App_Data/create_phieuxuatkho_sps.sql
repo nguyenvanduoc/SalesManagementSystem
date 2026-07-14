@@ -38,10 +38,13 @@ BEGIN
         kh.TenKhachHang
     INTO #TempList
     FROM KHO_PhieuXuat px
+    INNER JOIN BAN_ChungTuBanHang ctbh ON px.IDChungTuBanHang = ctbh.ID
     LEFT JOIN DM_KhoHang k ON px.IDKho = k.ID
     LEFT JOIN NS_DonDatHang dh ON px.IDDonDatHang = dh.ID
     LEFT JOIN NS_KhachHang kh ON dh.IDKhachHang = kh.ID
     WHERE px.IsDeleted = 0
+      AND ctbh.IsDeleted = 0
+      AND ctbh.TrangThai IN (1, 2)
       AND (@TuNgay IS NULL OR px.NgayXuat >= @TuNgay)
       AND (@DenNgay IS NULL OR px.NgayXuat <= @DenNgay)
       AND (@SoChungTu IS NULL OR px.SoChungTu LIKE '%' + @SoChungTu + '%')

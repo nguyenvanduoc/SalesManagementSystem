@@ -392,11 +392,21 @@ namespace SalesManagementSystem.Controllers
 
         // GET AJAX: /phieu-thu-khach-hang/get-tien-tra-truoc?idKhachHang=x
         [HttpGet]
-        public ActionResult GetTienTraTruocKhachHang(int idKhachHang)
+        public ActionResult GetTienTraTruocKhachHang(int idKhachHang, int? excludeId = null)
         {
             try
             {
                 var tien = _repo.GetTienTraTruocKhachHang(idKhachHang);
+                if (excludeId.HasValue && excludeId.Value > 0)
+                {
+                    var phieuThu = _repo.GetByID(excludeId.Value);
+                    if (phieuThu != null && phieuThu.ChiTiets != null)
+                    {
+                        var excessCreated = phieuThu.ChiTiets.Where(x => x.LoaiThu == 2).Sum(x => x.SoTienPhanBo);
+                        var prepaymentUsed = phieuThu.ChiTiets.Where(x => x.LoaiThu == 3).Sum(x => x.SoTienPhanBo);
+                        tien = tien - excessCreated + prepaymentUsed;
+                    }
+                }
                 return Json(new { success = true, data = tien }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)

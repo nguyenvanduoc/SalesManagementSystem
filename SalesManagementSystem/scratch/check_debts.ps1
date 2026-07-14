@@ -12,29 +12,29 @@ try {
     $conn.Open()
     $cmd = $conn.CreateCommand()
     
-    Write-Output "--- Test STRING_AGG in SQL Server ---"
+    Write-Output "--- Query PT000003 in Database ---"
     $cmd.CommandText = @"
-        SELECT 
-            pn.ID,
-            pn.SoChungTu,
-            (
-                SELECT STRING_AGG(pc.SoPhieuChi, ', ')
-                FROM KT_PhieuChiChiTiet ct
-                INNER JOIN KT_PhieuChi pc ON ct.IDPhieuChi = pc.ID
-                WHERE ct.IDPhieuNhap = pn.ID
-                  AND ct.LoaiChi = 1
-                  AND pc.IsDeleted = 0
-                  AND pc.TrangThai = 2
-                  AND pc.IDPhuongTien IS NOT NULL
-            ) AS SoPhieuChiList
-        FROM KHO_PhieuNhap pn
-        WHERE pn.ID IN (19, 20, 30)
+        SELECT ID, SoPhieuThu, SoTienThu, TrangThai
+        FROM KT_PhieuThu
+        WHERE SoPhieuThu = 'PT000003'
 "@
     $reader = $cmd.ExecuteReader()
-    while ($reader.Read()) {
-        Write-Output ("ID: {0} | So: {1} | PhieuChiList: {2}" -f $reader[0], $reader[1], $reader[2])
+    $id = $null
+    if ($reader.Read()) {
+        Write-Output ("ID: {0} | SoPhieuThu: {1} | SoTienThu: {2} | TrangThai: {3}" -f $reader[0], $reader[1], $reader[2], $reader[3])
+        $id = $reader[0]
     }
     $reader.Close()
+
+    if ($id) {
+        Write-Output "--- Query KT_PhieuThuChiTiet for ID = $id ---"
+        $cmd.CommandText = "SELECT ID, IDChungTuBanHang, LoaiThu, SoTienPhanBo FROM KT_PhieuThuChiTiet WHERE IDPhieuThu = $id"
+        $reader = $cmd.ExecuteReader()
+        while ($reader.Read()) {
+            Write-Output ("ID: {0} | IDChungTuBanHang: {1} | LoaiThu: {2} | SoTienPhanBo: {3}" -f $reader[0], $reader[1], $reader[2], $reader[3])
+        }
+        $reader.Close()
+    }
 
 } catch {
     Write-Error $_.Exception.Message

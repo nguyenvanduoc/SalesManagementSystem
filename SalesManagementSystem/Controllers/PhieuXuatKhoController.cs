@@ -3,7 +3,9 @@ using SalesManagementSystem.Helpers.Security;
 using SalesManagementSystem.Models.Entities;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories.Interfaces;
+using SalesManagementSystem.Services.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using Dapper;
@@ -17,17 +19,23 @@ namespace SalesManagementSystem.Controllers
         private readonly IDonDatHangRepository _donDatHangRepo;
         private readonly INhatKyChungRepository _nhatKyRepo;
         private readonly IDmKhoHangRepository _khoHangRepo;
+        private readonly IExcelExportService _excelExportService;
+        private readonly DbConnectionFactory _db;
 
         public PhieuXuatKhoController(
             IPhieuXuatKhoRepository repo,
             IDonDatHangRepository donDatHangRepo,
             INhatKyChungRepository nhatKyRepo,
-            IDmKhoHangRepository khoHangRepo)
+            IDmKhoHangRepository khoHangRepo,
+            IExcelExportService excelExportService,
+            DbConnectionFactory db)
         {
             _repo = repo;
             _donDatHangRepo = donDatHangRepo;
             _nhatKyRepo = nhatKyRepo;
             _khoHangRepo = khoHangRepo;
+            _excelExportService = excelExportService;
+            _db = db;
         }
 
         public ActionResult Index(int page = 1, int pageSize = 20, string tuNgay = "", string denNgay = "", string soChungTu = "", int? idKho = null, int? trangThai = null, int? idNhanSuNhan = null)
@@ -155,6 +163,120 @@ namespace SalesManagementSystem.Controllers
             {
                 return Content($"<div class='text-danger p-3'>Lỗi: {ex.Message}</div>");
             }
+        }
+
+        public ActionResult ExportExcel(string tuNgay = "", string denNgay = "", string soChungTu = "", int? idKho = null, int? trangThai = null, int? idNhanSuNhan = null)
+        {
+            if (!PermissionHelper.HasPermission("PhieuXuatKho", LoaiPhanQuyen.Xem)) return Content("Không có quyền truy cập");
+
+            try
+            {
+                int totalRecords;
+                var list = _repo.GetList(1, int.MaxValue, tuNgay, denNgay, soChungTu, idKho, trangThai, idNhanSuNhan, out totalRecords);
+
+                var ids = list.Select(x => x.ID).ToList();
+                List<PhieuXuatKhoChiTietViewModel> allDetails = new List<PhieuXuatKhoChiTietViewModel>();
+
+                if (ids.Count > 0)
+                {
+                    using (var conn = _db.CreateConnection())
+                    {
+                        string sql = @"
+                            SELECT
+                                ct.ID, ct.IDPhieuXuat, ct.IDSanPham,
+                                sp.MaSanPham, sp.TenSanPham, sp.DVT,
+                                ct.SoLuong, ct.DonGia, ct.ThanhTien
+                            FROM KHO_PhieuXuat_ChiTiet ct
+                            LEFT JOIN DM_SanPham sp ON ct.IDSanPham = sp.ID
+                            WHERE ct.IDPhieuXuat IN @IDs
+                            ORDER BY ct.ID";
+                        allDetails = conn.Query<PhieuXuatKhoChiTietViewModel>(sql, new { IDs = ids }).ToList();
+                    }
+                }
+
+                var flatList = new List<XuatKho01ExportModel>();
+                int stt = 1;
+                foreach (var px in list)
+                {
+                    var details = allDetails.Where(d => d.IDPhieuXuat == px.ID).ToList();
+
+                    if (details.Count == 0)
+                    {
+                        flatList.Add(new XuatKho01ExportModel
+                        {
+                            STT = stt++,
+                            SoChungTu = px.SoChungTu ?? "",
+                            NgayXuat = px.NgayXuat.ToString("dd/MM/yyyy"),
+                            SoDonHang = px.SoDonHang ?? "",
+                            TenKhachHang = px.TenKhachHang ?? "",
+                            TenKho = px.TenKhoHang ?? "",
+                            TenKhoHang = px.TenKhoHang ?? "",
+                            MaSanPham = "",
+                            TenSanPham = "",
+                            DVT = "",
+                            SoLuong = 0m
+                        });
+                    }
+                    else
+                    {
+                        foreach (var d in details)
+                        {
+                            flatList.Add(new XuatKho01ExportModel
+                            {
+                                STT = stt++,
+                                SoChungTu = px.SoChungTu ?? "",
+                                NgayXuat = px.NgayXuat.ToString("dd/MM/yyyy"),
+                                SoDonHang = px.SoDonHang ?? "",
+                                TenKhachHang = px.TenKhachHang ?? "",
+                                TenKho = px.TenKhoHang ?? "",
+                                TenKhoHang = px.TenKhoHang ?? "",
+                                MaSanPham = d.MaSanPham ?? "",
+                                TenSanPham = d.TenSanPham ?? "",
+                                DVT = d.DVT ?? "",
+                                SoLuong = d.SoLuong
+                            });
+                        }
+                    }
+                }
+
+                var variables = new Dictionary<string, object>
+                {
+                    { "TuNgay", tuNgay },
+                    { "DenNgay", denNgay },
+                    { "KhachHang", "Tất cả" },
+                    { "Ngay", DateTime.Now.ToString("dd") },
+                    { "Thang", DateTime.Now.ToString("MM") },
+                    { "Nam", DateTime.Now.ToString("yyyy") }
+                };
+
+                string ext;
+                var fileBytes = _excelExportService.Export("PhieuXuat01", flatList, out ext, variables);
+
+                string contentType = ext == "xls" 
+                    ? "application/vnd.ms-excel" 
+                    : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                return File(fileBytes, contentType, $"PhieuXuatKho_{DateTime.Now:yyyyMMddHHmmss}.{ext}");
+            }
+            catch (Exception ex)
+            {
+                return Content($"Lỗi xuất Excel: {ex.Message}");
+            }
+        }
+
+        public class XuatKho01ExportModel
+        {
+            public int STT { get; set; }
+            public string SoChungTu { get; set; }
+            public string NgayXuat { get; set; }
+            public string SoDonHang { get; set; }
+            public string TenKhachHang { get; set; }
+            public string TenKho { get; set; }
+            public string TenKhoHang { get; set; }
+            public string MaSanPham { get; set; }
+            public string TenSanPham { get; set; }
+            public string DVT { get; set; }
+            public decimal SoLuong { get; set; }
         }
     }
 }

@@ -5,6 +5,8 @@ using System.Web.Mvc;
 using SalesManagementSystem.Helpers;
 using SalesManagementSystem.Models.ViewModels;
 using SalesManagementSystem.Repositories.Interfaces;
+using Dapper;
+using SalesManagementSystem.Data;
 using SalesManagementSystem.Services.Interfaces;
 
 namespace SalesManagementSystem.Controllers
@@ -128,12 +130,47 @@ namespace SalesManagementSystem.Controllers
             {
                 var list = _repo.GetPaged(1, 100000, tuNgay, denNgay, soChungTu, idKho, idNhaCungCap, trangThai, tenNguoiNhan, tenNguoiGiao, idPhuongTien, hoTenTaiXe, idSanPham, out int totalRecords);
 
+                var phieuIds = list.Select(x => x.ID).ToList();
+                List<dynamic> details = new List<dynamic>();
+                if (phieuIds.Any())
+                {
+                    using (var conn = new DbConnectionFactory().CreateConnection())
+                    {
+                        details = conn.Query(@"
+                            SELECT c.IDPhieuNhap, s.MaSanPham, s.TenSanPham, s.DVT, c.SoLuong, c.DonGia, c.ThanhTien 
+                            FROM KHO_PhieuNhap_ChiTiet c
+                            LEFT JOIN DM_SanPham s ON c.IDSanPham = s.ID
+                            WHERE c.IDPhieuNhap IN @IDs",
+                            new { IDs = phieuIds }).ToList();
+                    }
+                }
+
+                string nhaCungCapName = "Tất cả";
+                if (idNhaCungCap.HasValue)
+                {
+                    using (var conn = new DbConnectionFactory().CreateConnection())
+                    {
+                        nhaCungCapName = conn.ExecuteScalar<string>(
+                            "SELECT TenNhaCungCap FROM DM_NhaCungCap WHERE ID = @ID",
+                            new { ID = idNhaCungCap.Value }
+                        ) ?? "Tất cả";
+                    }
+                }
+
+                string strTuNgay = "";
+                string strDenNgay = "";
+                if (DateTime.TryParse(tuNgay, out DateTime dTu)) strTuNgay = dTu.ToString("dd/MM/yyyy");
+                if (DateTime.TryParse(denNgay, out DateTime dDen)) strDenNgay = dDen.ToString("dd/MM/yyyy");
+
                 var session = (UserLoginViewModel)Session[CommonConstants.USER_SESSION];
                 string nguoiLapBieu = session != null ? (session.HoDem + " " + session.Ten).Trim() : "Hệ thống";
                 if (string.IsNullOrEmpty(nguoiLapBieu)) nguoiLapBieu = session?.UserName ?? "Hệ thống";
 
                 var variables = new Dictionary<string, object>
                 {
+                    { "TuNgay", strTuNgay },
+                    { "DenNgay", strDenNgay },
+                    { "KhachHang", nhaCungCapName },
                     { "Ngay", DateTime.Now.ToString("dd") },
                     { "Thang", DateTime.Now.ToString("MM") },
                     { "Nam", DateTime.Now.ToString("yyyy") },
@@ -141,25 +178,49 @@ namespace SalesManagementSystem.Controllers
                 };
 
                 int stt = 1;
-                var exportData = list.Select(item => new {
-                    STT = stt++,
-                    SoChungTu = item.SoChungTu,
-                    NgayNhap = item.NgayNhap,
-                    TenKho = item.TenKho,
-                    TenNhaCungCap = item.TenNhaCungCap,
-                    SoHoaDon = item.SoHoaDon,
-                    NgayHoaDon = item.NgayHoaDon,
-                    TenNguoiGiao = item.TenNguoiGiao,
-                    SoDienThoaiNguoiGiao = item.SoDienThoaiNguoiGiao,
-                    TenNguoiNhan = item.TenNguoiNhan,
-                    TongTienHang = item.TongTienHang,
-                    TongTienThue = item.TongTienThue,
-                    TienVanChuyen = item.TienVanChuyen,
-                    TongCong = item.TongCong,
-                    TrangThai = item.TrangThai == 1 ? "Đề nghị ghi" : (item.TrangThai == 2 ? "Đã ghi" : (item.TrangThai == 3 ? "Đã hủy" : "")),
-                    NguoiTao = item.NguoiTaoText,
-                    NgayTao = item.NgayTao
-                }).ToList();
+                var exportData = new List<PhieuNhapExcelModel>();
+
+                foreach (var item in list)
+                {
+                    var itemDetails = details.Where(d => (int)d.IDPhieuNhap == item.ID).ToList();
+                    if (!itemDetails.Any())
+                    {
+                        exportData.Add(new PhieuNhapExcelModel {
+                            STT = stt++,
+                            SoChungTu = item.SoChungTu,
+                            NgayNhap = item.NgayNhap != null ? ((DateTime)item.NgayNhap).ToString("dd/MM/yyyy") : "",
+                            TenKho = item.TenKho,
+                            TenPhuongTien = item.TenPhuongTien,
+                            TenNhaCungCap = item.TenNhaCungCap,
+                            MaSanPham = "",
+                            TenSanPham = "",
+                            DVT = "",
+                            SoLuong = 0M,
+                            DonGia = 0M,
+                            TongTien = 0M
+                        });
+                    }
+                    else
+                    {
+                        foreach (var d in itemDetails)
+                        {
+                            exportData.Add(new PhieuNhapExcelModel {
+                                STT = stt++,
+                                SoChungTu = item.SoChungTu,
+                                NgayNhap = item.NgayNhap != null ? ((DateTime)item.NgayNhap).ToString("dd/MM/yyyy") : "",
+                                TenKho = item.TenKho,
+                                TenPhuongTien = item.TenPhuongTien,
+                                TenNhaCungCap = item.TenNhaCungCap,
+                                MaSanPham = (string)(d.MaSanPham ?? ""),
+                                TenSanPham = (string)(d.TenSanPham ?? ""),
+                                DVT = (string)(d.DVT ?? ""),
+                                SoLuong = Convert.ToDecimal(d.SoLuong ?? 0m),
+                                DonGia = Convert.ToDecimal(d.DonGia ?? 0m),
+                                TongTien = Convert.ToDecimal(d.ThanhTien ?? 0m)
+                            });
+                        }
+                    }
+                }
 
                 string fileExtension;
                 var fileBytes = _excelExportService.Export("PN01", exportData, out fileExtension, variables);
@@ -632,6 +693,22 @@ namespace SalesManagementSystem.Controllers
         {
             var data = _repo.GetKhachHangForDropdown(q);
             return Json(data.Select(x => new { id = (int)x.ID, text = (string)x.MaKhachHang + " - " + (string)x.TenKhachHang }), JsonRequestBehavior.AllowGet);
+        }
+
+        private class PhieuNhapExcelModel
+        {
+            public int STT { get; set; }
+            public string SoChungTu { get; set; }
+            public string NgayNhap { get; set; }
+            public string TenKho { get; set; }
+            public string TenPhuongTien { get; set; }
+            public string TenNhaCungCap { get; set; }
+            public string MaSanPham { get; set; }
+            public string TenSanPham { get; set; }
+            public string DVT { get; set; }
+            public decimal SoLuong { get; set; }
+            public decimal DonGia { get; set; }
+            public decimal TongTien { get; set; }
         }
     }
 }
