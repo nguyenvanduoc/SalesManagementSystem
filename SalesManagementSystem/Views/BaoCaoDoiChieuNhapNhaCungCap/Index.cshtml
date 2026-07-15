@@ -188,19 +188,20 @@
             loadData();
 
             // Xem chi tiết chứng từ
-            $(document).on('click', '.btn-xem-chitiet', function () {
+            $container.on('click', '.btn-xem-chitiet', function () {
                 var idPhatSinh = $(this).data('id');
                 var loaiDong = $(this).data('loai');
-                var activeTabPane = $('#searchForm').closest('.tab-pane');
+                var activeTabPane = $container.closest('.tab-pane');
+                if (activeTabPane.length === 0) activeTabPane = $('body');
 
-                $('body').append('<div id="loadingModalNCC" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);z-index:9999;display:flex;justify-content:center;align-items:center;"><div class="spinner-border text-white" role="status"></div></div>');
+                $('body').append('<div id="loadingModalNCC_@uid" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);z-index:9999;display:flex;justify-content:center;align-items:center;"><div class="spinner-border text-white" role="status"></div></div>');
 
                 $.ajax({
                     url: '@Url.Action("GetDetails", "BaoCaoDoiChieuNhapNhaCungCap")',
                     type: 'GET',
                     data: { idPhatSinh: idPhatSinh, loaiDong: loaiDong },
                     success: function (res) {
-                        $('#loadingModalNCC').remove();
+                        $('#loadingModalNCC_@uid').remove();
                         if (res && res.success === false) {
                             if (typeof showToast === 'function') showToast('error', res.message || 'Lỗi tải chi tiết');
                         } else {
@@ -214,7 +215,7 @@
                         }
                     },
                     error: function () {
-                        $('#loadingModalNCC').remove();
+                        $('#loadingModalNCC_@uid').remove();
                         if (typeof showToast === 'function') showToast('error', 'Có lỗi xảy ra khi tải dữ liệu chi tiết');
                     }
                 });

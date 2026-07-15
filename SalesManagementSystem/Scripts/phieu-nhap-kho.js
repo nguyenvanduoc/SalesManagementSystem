@@ -92,6 +92,9 @@ function _formatNumber(n) {
             // Re-apply selected value if it exists
             if (config.selectedLoaiNhapKhoId) {
                 $loaiSelect.val(config.selectedLoaiNhapKhoId).trigger('change');
+            } else {
+                // Trigger change to set correct visibility even when no value selected
+                $loaiSelect.trigger('change');
             }
         });
 
@@ -183,8 +186,10 @@ function _formatNumber(n) {
             var $selectedOpt = $(this).find('option:selected');
             var maLoai = $selectedOpt.attr('data-ma') || '';
             
-            if (!maLoai && config.selectedLoaiNhapKhoMa) {
-                maLoai = config.selectedLoaiNhapKhoMa;
+            // Only use selectedLoaiNhapKhoMa as fallback on initial load (same value as original)
+            // Do NOT keep using it after user selects a different option
+            if (!maLoai && $(this).val() && config.selectedLoaiNhapKhoId && $(this).val() == config.selectedLoaiNhapKhoId) {
+                maLoai = config.selectedLoaiNhapKhoMa || '';
             }
             
             getEl('#colKhoNguon, #colKhachHang, #colNhaCungCap').hide();
@@ -198,9 +203,6 @@ function _formatNumber(n) {
                 getEl('#colNhaCungCap').show();
             }
         });
-        
-        // Trigger change to set correct visibility on load
-        setTimeout(function() { getEl('.sel-IDLoaiNhapKho').trigger('change'); }, 100);
     }
 
     function _initSanPhamSelect2($row, ctData) {

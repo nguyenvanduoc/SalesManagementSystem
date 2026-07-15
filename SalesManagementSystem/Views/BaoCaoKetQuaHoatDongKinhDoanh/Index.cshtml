@@ -190,41 +190,47 @@
         }
 
         function loadData() {
-            var tuNgay = $('#TuNgay').val();
-            var denNgay = $('#DenNgay').val();
+            var $form = $('#filterForm');
+            var tuNgay = $form.find('#TuNgay').val();
+            var denNgay = $form.find('#DenNgay').val();
             
-            var $btn = $('#btnSearch');
+            var $btn = $form.find('#btnSearch');
             var originalHtml = $btn.html();
             $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Tìm...');
-            $('#listContainer').html('<div class="text-center p-5"><div class="spinner-border text-primary" role="status"></div><div class="mt-2 text-muted">Đang tải dữ liệu...</div></div>');
+            
+            var activeTabPane = $form.closest('.tab-pane');
+            var $listContainer = activeTabPane.length ? activeTabPane.find('#listContainer') : $('#listContainer');
+            $listContainer.html('<div class="text-center p-5"><div class="spinner-border text-primary" role="status"></div><div class="mt-2 text-muted">Đang tải dữ liệu...</div></div>');
 
             $.ajax({
                 url: '@Url.Action("GetList", "BaoCaoKetQuaHoatDongKinhDoanh")',
                 type: 'POST',
-                data: $('#searchForm').serialize(),
+                data: $form.serialize(),
                 success: function (res) {
                     $btn.prop('disabled', false).html(originalHtml);
                     if (typeof res === 'object' && res.success === false) {
-                        $('#listContainer').html('<div class="alert alert-danger">Lỗi từ máy chủ: ' + (res.message || '') + '</div>');
+                        $listContainer.html('<div class="alert alert-danger">Lỗi từ máy chủ: ' + (res.message || '') + '</div>');
                         if (typeof showToast === 'function') { showToast('error', res.message || 'Lỗi dữ liệu'); }
                     } else {
-                        $('#listContainer').html(res);
+                        $listContainer.html(res);
                     }
                 },
                 error: function (xhr, status, error) {
                     $btn.prop('disabled', false).html(originalHtml);
-                    $('#listContainer').html('<div class="alert alert-danger">Lỗi kết nối server: ' + error + '</div>');
+                    $listContainer.html('<div class="alert alert-danger">Lỗi kết nối server: ' + error + '</div>');
                     if (typeof showToast === 'function') { showToast('error', 'Có lỗi xảy ra khi gọi server'); }
                 }
             });
         }
 
         function xemChiTiet(idSanPham) {
-            var tuNgay = $('#TuNgay').val();
-            var denNgay = $('#DenNgay').val();
-            var idKho = $('#IDKho').val();
+            var $form = $('#filterForm');
+            var tuNgay = $form.find('#TuNgay').val();
+            var denNgay = $form.find('#DenNgay').val();
+            var idKho = $form.find('#IDKho').val();
 
-            var activeTabPane = $('#searchForm').closest('.tab-pane');
+            var activeTabPane = $form.closest('.tab-pane');
+            if (activeTabPane.length === 0) activeTabPane = $('body');
 
             $('body').append('<div id="loadingModal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);z-index:9999;display:flex;justify-content:center;align-items:center;"><div class="spinner-border text-white" role="status"></div></div>');
 

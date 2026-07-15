@@ -189,8 +189,11 @@ namespace SalesManagementSystem.Controllers
                             STT = stt++,
                             SoChungTu = item.SoChungTu,
                             NgayNhap = item.NgayNhap != null ? ((DateTime)item.NgayNhap).ToString("dd/MM/yyyy") : "",
+                            NgayGiao = item.NgayGiaoHang != null ? ((DateTime)item.NgayGiaoHang).ToString("dd/MM/yyyy") : "",
+                            TenNguoiNhanHang = item.TenNguoiNhan ?? "",
                             TenKho = item.TenKho,
                             TenPhuongTien = item.TenPhuongTien,
+                            TenNguoiGiaoHang = item.TenNguoiGiao ?? "",
                             TenNhaCungCap = item.TenNhaCungCap,
                             MaSanPham = "",
                             TenSanPham = "",
@@ -208,8 +211,11 @@ namespace SalesManagementSystem.Controllers
                                 STT = stt++,
                                 SoChungTu = item.SoChungTu,
                                 NgayNhap = item.NgayNhap != null ? ((DateTime)item.NgayNhap).ToString("dd/MM/yyyy") : "",
+                                NgayGiao = item.NgayGiaoHang != null ? ((DateTime)item.NgayGiaoHang).ToString("dd/MM/yyyy") : "",
+                                TenNguoiNhanHang = item.TenNguoiNhan ?? "",
                                 TenKho = item.TenKho,
                                 TenPhuongTien = item.TenPhuongTien,
+                                TenNguoiGiaoHang = item.TenNguoiGiao ?? "",
                                 TenNhaCungCap = item.TenNhaCungCap,
                                 MaSanPham = (string)(d.MaSanPham ?? ""),
                                 TenSanPham = (string)(d.TenSanPham ?? ""),
@@ -464,16 +470,8 @@ namespace SalesManagementSystem.Controllers
                 var user = GetCurrentUser();
                 int userId = user?.IDNhanSu ?? 0;
 
-                if (model.ID > 0)
-                {
-                    _repo.Save(model, userId);
-                    return Json(new { success = true, message = model.TrangThai == 0 ? "Lưu nháp thành công" : "Cập nhật phiếu nhập kho thành công" });
-                }
-                else
-                {
-                    int newId = _repo.Save(model, userId);
-                    return Json(new { success = true, id = newId, soChungTu = model.SoChungTu, message = model.TrangThai == 0 ? "Lưu nháp thành công" : "Đề nghị ghi thành công" });
-                }
+                int newId = _repo.Save(model, userId);
+                return Json(new { success = true, id = newId, soChungTu = model.SoChungTu, message = model.TrangThai == 0 ? (model.ID > 0 ? "Lưu nháp thành công" : "Lưu nháp thành công") : (model.ID > 0 ? "Cập nhật phiếu nhập kho thành công" : "Đề nghị ghi thành công") });
             }
             catch (Exception ex)
             {
@@ -700,8 +698,11 @@ namespace SalesManagementSystem.Controllers
             public int STT { get; set; }
             public string SoChungTu { get; set; }
             public string NgayNhap { get; set; }
+            public string NgayGiao { get; set; }
+            public string TenNguoiNhanHang { get; set; }
             public string TenKho { get; set; }
             public string TenPhuongTien { get; set; }
+            public string TenNguoiGiaoHang { get; set; }
             public string TenNhaCungCap { get; set; }
             public string MaSanPham { get; set; }
             public string TenSanPham { get; set; }

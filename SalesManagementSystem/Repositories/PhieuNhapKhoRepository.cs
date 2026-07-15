@@ -192,27 +192,60 @@ namespace SalesManagementSystem.Repositories
             if (trangThai == 1 || trangThai == 2)
             {
                 conn.Execute("DELETE FROM KHO_GiaoDichKho WHERE LoaiChungTu = 1 AND SoChungTu = @SoChungTu", new { SoChungTu = soChungTu });
-                string sqlGiaoDich = @"
+                
+                // Sinh dòng Nhập (và xử lý riêng biệt cho loại Điều chỉnh kho có số lượng âm)
+                string sqlGiaoDichNhap = @"
                     INSERT INTO KHO_GiaoDichKho (NgayChungTu, SoChungTu, LoaiChungTu, IDChiTietKho, IDKho, IDSanPham, SoLuongNhap, SoLuongXuat, DonGia, ThanhTien, DienGiai, NgayTao, NguoiTao)
                     SELECT 
-                        p.NgayNhap,
-                        p.SoChungTu,
-                        1,
-                        ct.ID,
-                        p.IDKho,
-                        ct.IDSanPham,
-                        ct.SoLuong,
-                        0,
-                        ct.DonGia,
-                        ct.ThanhTien,
-                        p.GhiChu,
-                        GETDATE(),
+                        p.NgayNhap, 
+                        p.SoChungTu, 
+                        1, 
+                        ct.ID, 
+                        p.IDKho, 
+                        ct.IDSanPham, 
+                        CASE 
+                            WHEN ln.MaLoaiNhap = 'DIEU_CHINH' AND ct.SoLuong < 0 THEN 0 
+                            ELSE ct.SoLuong 
+                        END, 
+                        CASE 
+                            WHEN ln.MaLoaiNhap = 'DIEU_CHINH' AND ct.SoLuong < 0 THEN ABS(ct.SoLuong) 
+                            ELSE 0 
+                        END, 
+                        ct.DonGia, 
+                        ct.ThanhTien, 
+                        p.GhiChu, 
+                        GETDATE(), 
                         @UserId
                     FROM KHO_PhieuNhap_ChiTiet ct
                     INNER JOIN KHO_PhieuNhap p ON ct.IDPhieuNhap = p.ID
+                    LEFT JOIN DM_LoaiNhapKho ln ON p.IDLoaiNhapKho = ln.ID
                     WHERE p.ID = @ID;
                 ";
-                conn.Execute(sqlGiaoDich, new { ID = id, UserId = userId });
+                conn.Execute(sqlGiaoDichNhap, new { ID = id, UserId = userId });
+
+                // Nếu là CHUYEN_KHO, sinh thêm dòng Xuất cho Kho nguồn
+                string sqlGiaoDichXuat = @"
+                    INSERT INTO KHO_GiaoDichKho (NgayChungTu, SoChungTu, LoaiChungTu, IDChiTietKho, IDKho, IDSanPham, SoLuongNhap, SoLuongXuat, DonGia, ThanhTien, DienGiai, NgayTao, NguoiTao)
+                    SELECT 
+                        p.NgayNhap, 
+                        p.SoChungTu, 
+                        1, 
+                        ct.ID, 
+                        p.IDKhoNguon, 
+                        ct.IDSanPham, 
+                        0, 
+                        ct.SoLuong, 
+                        ct.DonGia, 
+                        ct.ThanhTien, 
+                        N'Chuyển kho đi', 
+                        GETDATE(), 
+                        @UserId
+                    FROM KHO_PhieuNhap_ChiTiet ct
+                    INNER JOIN KHO_PhieuNhap p ON ct.IDPhieuNhap = p.ID
+                    INNER JOIN DM_LoaiNhapKho ln ON p.IDLoaiNhapKho = ln.ID
+                    WHERE p.ID = @ID AND ln.MaLoaiNhap = 'CHUYEN_KHO' AND p.IDKhoNguon IS NOT NULL;
+                ";
+                conn.Execute(sqlGiaoDichXuat, new { ID = id, UserId = userId });
             }
             else
             {

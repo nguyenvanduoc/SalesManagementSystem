@@ -180,6 +180,9 @@
     <Compile Include="Models\Entities\AclPhanQuyen.cs" />
     <Compile Include="Models\Entities\KHO_DieuChinhPhieuNhap.cs" />
     <Compile Include="Models\Entities\KHO_DieuChinhPhieuNhapChiTiet.cs" />
+    <Compile Include="Models\ViewModels\CongNoNCCDashboardViewModel.cs" />
+    <Compile Include="Models\ViewModels\CongNoNCCDetailViewModel.cs" />
+    <Compile Include="Models\ViewModels\CongNoNCCHistoryViewModel.cs" />
     <Compile Include="Models\ViewModels\DmSanPhamViewModel.cs" />
     <Compile Include="Models\ViewModels\DmSanPhamCreateEditViewModel.cs" />
     <Compile Include="Models\ViewModels\DmKhoHangViewModel.cs" />

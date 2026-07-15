@@ -88,7 +88,10 @@ GO
 -- =============================================
 -- 4. STORED PROCEDURE: sp_KHO_DieuChinhPhieuNhap_Save
 -- =============================================
-CREATE OR ALTER PROCEDURE sp_KHO_DieuChinhPhieuNhap_Save
+IF OBJECT_ID('sp_KHO_DieuChinhPhieuNhap_Save', 'P') IS NOT NULL
+    DROP PROCEDURE sp_KHO_DieuChinhPhieuNhap_Save;
+GO
+CREATE PROCEDURE sp_KHO_DieuChinhPhieuNhap_Save
     @IDPhieuNhap INT,
     @LyDoDieuChinh NVARCHAR(1000),
     @ChiTietsJson NVARCHAR(MAX),
@@ -351,7 +354,10 @@ BEGIN
     END CATCH
 END
 GO
-CREATE OR ALTER PROCEDURE sp_KHO_DieuChinhPhieuNhap_GetPaged
+IF OBJECT_ID('sp_KHO_DieuChinhPhieuNhap_GetPaged', 'P') IS NOT NULL
+    DROP PROCEDURE sp_KHO_DieuChinhPhieuNhap_GetPaged;
+GO
+CREATE PROCEDURE sp_KHO_DieuChinhPhieuNhap_GetPaged
     @TuNgay DATETIME = NULL,
     @DenNgay DATETIME = NULL,
     @IDLoaiNhapKho INT = NULL,
@@ -374,7 +380,7 @@ BEGIN
         AND (@TuNgay IS NULL OR pn.NgayNhap >= @TuNgay)
         AND (@DenNgay IS NULL OR pn.NgayNhap <= @DenNgay)
         AND (@IDLoaiNhapKho IS NULL OR pn.IDLoaiNhapKho = @IDLoaiNhapKho)
-        AND (@IDKho IS NULL OR pn.IDKho = @IDKho)
+        AND (@IDKho IS NULL OR pn.IDKho = @IDKho OR pn.IDKhoNguon = @IDKho)
         AND (@IDNhaCungCap IS NULL OR pn.IDNhaCungCap = @IDNhaCungCap)
         AND (@IDKhachHang IS NULL OR pn.IDKhachHang = @IDKhachHang)
         AND (@SoChungTu IS NULL OR pn.SoChungTu LIKE '%' + @SoChungTu + '%')
@@ -420,7 +426,10 @@ BEGIN
     DROP TABLE #FilteredPhieuNhap;
 END
 GO
-CREATE OR ALTER PROCEDURE sp_KHO_DieuChinhPhieuNhap_GetHistory
+IF OBJECT_ID('sp_KHO_DieuChinhPhieuNhap_GetHistory', 'P') IS NOT NULL
+    DROP PROCEDURE sp_KHO_DieuChinhPhieuNhap_GetHistory;
+GO
+CREATE PROCEDURE sp_KHO_DieuChinhPhieuNhap_GetHistory
     @IDPhieuNhap INT
 AS
 BEGIN
@@ -442,7 +451,10 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE sp_KHO_DieuChinhPhieuNhap_GetHistoryDetail
+IF OBJECT_ID('sp_KHO_DieuChinhPhieuNhap_GetHistoryDetail', 'P') IS NOT NULL
+    DROP PROCEDURE sp_KHO_DieuChinhPhieuNhap_GetHistoryDetail;
+GO
+CREATE PROCEDURE sp_KHO_DieuChinhPhieuNhap_GetHistoryDetail
     @IDDieuChinh INT
 AS
 BEGIN
