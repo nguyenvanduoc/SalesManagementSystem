@@ -107,7 +107,7 @@ BEGIN
     INNER JOIN BAN_ChungTuBanHang c ON d.ID = c.IDDonDatHang
     WHERE d.TrangThaiDon = 3 -- Đã giao
       AND c.IsDeleted = 0 
-      AND c.TrangThai = 2 -- Đã ghi sổ
+      AND c.TrangThai IN (1, 2) -- Đề nghị ghi và Đã ghi sổ
       AND (@Keyword IS NULL OR @Keyword = '' OR d.SoDonHang LIKE '%' + @Keyword + '%' OR k.TenKhachHang LIKE N'%' + @Keyword + '%')
     ORDER BY d.NgayTaoDon DESC, d.ID DESC;
 END

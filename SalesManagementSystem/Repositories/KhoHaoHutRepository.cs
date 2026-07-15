@@ -123,6 +123,7 @@ namespace SalesManagementSystem.Repositories
                 parameters.Add("@LoaiHaoHut", filter.LoaiHaoHut);
                 parameters.Add("@IDKho", filter.IDKho);
                 parameters.Add("@IDKhachHang", filter.IDKhachHang);
+                parameters.Add("@IDSanPham", filter.IDSanPham);
                 parameters.Add("@SoChungTu", filter.SoChungTu ?? "");
                 parameters.Add("@TrangThai", filter.TrangThai);
                 parameters.Add("@Skip", filter.Skip);
@@ -266,6 +267,14 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _dbConnectionFactory.CreateConnection())
             {
                 return conn.ExecuteScalar<decimal>("sp_KHO_HaoHutHangHoa_GetTonKho", new { IDKho = idKho, IDSanPham = idSanPham }, commandType: CommandType.StoredProcedure);
+            }
+        }
+
+        public List<dynamic> GetAllTonKhoByKho(int idKho)
+        {
+            using (var conn = _dbConnectionFactory.CreateConnection())
+            {
+                return conn.Query<dynamic>("sp_KHO_HaoHutHangHoa_GetAllTonKhoByKho", new { IDKho = idKho }, commandType: CommandType.StoredProcedure).ToList();
             }
         }
 

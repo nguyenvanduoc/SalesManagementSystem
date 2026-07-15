@@ -96,6 +96,19 @@
                 <input type="text" class="form-control form-control-sm" id="SoChungTu" name="SoChungTu" placeholder="Nhập số CT..." />
             </div>
             <div class="col-md-2">
+                <label class="form-label text-muted small mb-1">Sản phẩm</label>
+                <select class="form-select form-select-sm select2" id="IDSanPham" name="IDSanPham">
+                    <option value="0">Tất cả</option>
+                    @if (ViewBag.SanPhams != null)
+                    {
+                        foreach (var item in ViewBag.SanPhams)
+                        {
+                            <option value="@item.ID">@item.TenSanPham</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
                 <label class="form-label text-muted small mb-1">Trạng thái</label>
                 <select class="form-select form-select-sm" id="TrangThai" name="TrangThai">
                     <option value="0">Tất cả</option>
@@ -138,6 +151,13 @@
 
         function loadData(page) {
             if (page) currentPage = page;
+            var pageSize = $('#PageSize').length > 0 ? $('#PageSize').val() : 20;
+
+            var $tbody = $('#tblHaoHut tbody');
+            if ($tbody.length > 0) {
+                $tbody.html('<tr><td colspan="11" class="text-center p-5"><div class="spinner-border text-primary me-2" role="status"></div><span class="text-muted">Đang tải dữ liệu...</span></td></tr>');
+            }
+
             var tuNgay = $('#TuNgay').val();
             var denNgay = $('#DenNgay').val();
             
@@ -150,12 +170,14 @@
                 DenNgay: denNgay,
                 LoaiHaoHut: $('#LoaiHaoHut').val(),
                 IDKho: $('#IDKho').val(),
+                IDSanPham: $('#IDSanPham').val(),
                 SoChungTu: $('#SoChungTu').val(),
                 TrangThai: $('#TrangThai').val(),
                 Skip: (currentPage - 1) * pageSize,
                 Take: pageSize
             };
 
+            showLoading();
             $.ajax({
                 url: '@Url.Action("GetList", "KHO_HaoHut")',
                 type: 'POST',
@@ -166,6 +188,9 @@
                     } else {
                         showToast('error', res.message);
                     }
+                },
+                complete: function () {
+                    hideLoading();
                 }
             });
         }
@@ -336,29 +361,64 @@
             $('.ddl-thoi-gian').val('current_month');
             $('#LoaiHaoHut').val('0');
             $('#IDKho').val('0').trigger('change');
+            $('#IDSanPham').val('0').trigger('change');
             $('#SoChungTu').val('');
             $('#TrangThai').val('0');
             loadData(1);
         }
 
+        var isOpeningModal = false;
+
+        function disposeOldModal(modalId) {
+            var oldModalEl = document.getElementById(modalId);
+            if (oldModalEl) {
+                var oldModal = bootstrap.Modal.getInstance(oldModalEl);
+                if (oldModal) oldModal.dispose();
+            }
+        }
+
         function openCreateModal() {
+            if (isOpeningModal) return;
+            isOpeningModal = true;
+            disposeOldModal('modalCreate');
             $.get('@Url.Action("_Create", "KHO_HaoHut")', function (html) {
                 $('#modalContainer').html(html);
-                $('#modalCreate').modal('show');
+                var modal = new bootstrap.Modal(document.getElementById('modalCreate'));
+                modal.show();
+                isOpeningModal = false;
+            }).fail(function() {
+                isOpeningModal = false;
+                showToast('error', 'Lỗi khi tải form thêm mới');
             });
         }
 
         function openEdit(id) {
+            if (isOpeningModal) return;
+            isOpeningModal = true;
+            disposeOldModal('modalEdit');
             $.get('@Url.Action("_Edit", "KHO_HaoHut")?id=' + id, function (html) {
                 $('#modalContainer').html(html);
-                $('#modalEdit').modal('show');
+                var modal = new bootstrap.Modal(document.getElementById('modalEdit'));
+                modal.show();
+                isOpeningModal = false;
+            }).fail(function() {
+                isOpeningModal = false;
+                showToast('error', 'Lỗi khi tải form cập nhật');
             });
         }
 
         function openDetail(id) {
+            if (isOpeningModal) return;
+            isOpeningModal = true;
+            disposeOldModal('modalDetail');
             $.get('@Url.Action("_Detail", "KHO_HaoHut")?id=' + id, function (html) {
                 $('#modalContainer').html(html);
-                $('#modalDetail').modal('show');
+                var modal = new bootstrap.Modal(document.getElementById('modalDetail'));
+                modal.show();
+                isOpeningModal = false;
+            }).fail(function() {
+                isOpeningModal = false;
+                showToast('error', 'Lỗi khi tải form chi tiết');
             });
         }
 

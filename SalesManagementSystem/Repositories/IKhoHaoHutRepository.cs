@@ -18,6 +18,7 @@ namespace SalesManagementSystem.Repositories
         List<dynamic> GetDonHang(string keyword);
         List<dynamic> GetChiTietDonHang(int idDonHang);
         decimal GetTonKho(int idKho, int idSanPham);
+        List<dynamic> GetAllTonKhoByKho(int idKho);
         decimal GetGiaNhapGanNhat(int idSanPham);
     }
 }

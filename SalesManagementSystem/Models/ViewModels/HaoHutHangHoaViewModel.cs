@@ -60,6 +60,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public int LoaiHaoHut { get; set; }
         public int IDKho { get; set; }
         public int IDKhachHang { get; set; }
+        public int IDSanPham { get; set; }
         public string SoChungTu { get; set; }
         public int TrangThai { get; set; }
         public int Skip { get; set; }

@@ -16,12 +16,14 @@ namespace SalesManagementSystem.Controllers
     {
         private readonly IKhoHaoHutRepository _haoHutRepo;
         private readonly IDmKhoHangRepository _khoHangRepo;
+        private readonly IDmSanPhamRepository _sanPhamRepo;
 
         // Constructor Injection
-        public KHO_HaoHutController(IKhoHaoHutRepository haoHutRepo, IDmKhoHangRepository khoHangRepo)
+        public KHO_HaoHutController(IKhoHaoHutRepository haoHutRepo, IDmKhoHangRepository khoHangRepo, IDmSanPhamRepository sanPhamRepo)
         {
             _haoHutRepo = haoHutRepo;
             _khoHangRepo = khoHangRepo;
+            _sanPhamRepo = sanPhamRepo;
         }
 
         // GET: KHO_HaoHut
@@ -29,6 +31,8 @@ namespace SalesManagementSystem.Controllers
         public ActionResult Index()
         {
             ViewBag.KhoHangs = _khoHangRepo.GetAll();
+            int totalSP = 0;
+            ViewBag.SanPhams = _sanPhamRepo.GetPaged(1, 10000, "", out totalSP);
             return View();
         }
 
@@ -227,6 +231,26 @@ namespace SalesManagementSystem.Controllers
                 var tonKho = _haoHutRepo.GetTonKho(idKho, idSanPham);
                 var giaNhap = _haoHutRepo.GetGiaNhapGanNhat(idSanPham);
                 return Json(new { success = true, tonKho = tonKho, giaNhap = giaNhap }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult GetAllTonKhoByKho(int idKho)
+        {
+            try
+            {
+                var data = _haoHutRepo.GetAllTonKhoByKho(idKho).Select(x => new {
+                    IDSanPham = x.IDSanPham,
+                    MaSanPham = x.MaSanPham,
+                    TenSanPham = x.TenSanPham,
+                    SoLuongHienTai = x.SoLuongHienTai,
+                    DonGiaHaoHut = x.DonGiaHaoHut
+                }).ToList();
+                return Json(new { success = true, data = data }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {

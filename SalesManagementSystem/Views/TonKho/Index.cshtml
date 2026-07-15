@@ -266,6 +266,8 @@
 
                 var params = $form.serialize();
 
+                if (typeof showLoadingLocal === 'function') showLoadingLocal($container);
+
                 $.get('/TonKho/GetDashboard', params, function (res) {
                     if (res.success && res.data) {
                         $container.find('.lblTongSP').text(formatNumber(res.data.TongSoSanPham));
@@ -279,6 +281,9 @@
                 var url = urlOverride || ('/TonKho/GetList?' + params);
                 $.get(url, function (html) {
                     $container.find('#table-container').html(html);
+                    if (typeof hideLoadingLocal === 'function') hideLoadingLocal($container);
+                }).fail(function() {
+                    if (typeof hideLoadingLocal === 'function') hideLoadingLocal($container);
                 });
             }
 
