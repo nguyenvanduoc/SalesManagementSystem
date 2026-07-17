@@ -12,6 +12,7 @@
                 <th class="text-center" style="width: 50px;">STT</th>
                 <th class="text-center">Số phiếu nhập</th>
                 <th class="text-center">Ngày nhập</th>
+                <th class="text-center">Người giao hàng</th>
                 <th class="text-center">Phương tiện</th>
                 <th class="text-center">Số phiếu chi</th>
                 <th class="text-end">Tổng tiền vận chuyển</th>
@@ -54,6 +55,7 @@
                         <td class="text-center">@(stt++)</td>
                         <td class="text-center"><span class="badge bg-primary">@item.SoPhieuNhap</span></td>
                         <td class="text-center">@(((DateTime)item.NgayNhap).ToString("dd/MM/yyyy"))</td>
+                        <td class="text-center">@item.TenNguoiGiao</td>
                         <td class="text-center">@item.TenPhuongTien</td>
                         <td class="text-center">
                             @if (!string.IsNullOrEmpty(item.SoPhieuChiList))
@@ -97,7 +99,7 @@
         {
             <tfoot>
                 <tr style="background-color: #f4f6f9; font-weight: bold;">
-                    <td colspan="5" class="text-end">TỔNG CỘNG TRANG:</td>
+                    <td colspan="6" class="text-end">TỔNG CỘNG TRANG:</td>
                     <td class="text-end">@sumTongTien.ToString("N0")</td>
                     <td class="text-end">@sumDaThanhToan.ToString("N0")</td>
                     <td class="text-end text-danger">@sumConLai.ToString("N0")</td>

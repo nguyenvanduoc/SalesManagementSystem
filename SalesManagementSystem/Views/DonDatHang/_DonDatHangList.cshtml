@@ -22,7 +22,7 @@
                         <th>Tên khách hàng</th>
                         <th>Nhân sự phụ trách</th>
                         <th>Phương tiện</th>
-                        <th>Họ tên tài xế</th>
+                        <th>Thông tin xe</th>
                         <th class="d-none">SĐT tài xế</th>
                         <th>Người tạo</th>
                         <th class="text-center">Hạn giao</th>
@@ -60,7 +60,7 @@
                                                         <i class="bi bi-eye me-2 text-primary"></i> Xem chi tiết
                                                     </a>
                                                 </li>
-                                                if (item.TrangThaiDon == 1)
+                                                if (item.TrangThaiDon == 1 || item.TrangThaiDon == 0 || item.TrangThaiDon == null)
                                                 {
                                                     <li>
                                                         <a class="dropdown-item"
@@ -108,7 +108,7 @@
                                 </td>
                                 <td class="text-center align-middle">@(stt++)</td>
                                 <td class="align-middle fw-bold">
-                                    @if (item.TrangThaiDon == 1)
+                                    @if (item.TrangThaiDon == 1 || item.TrangThaiDon == 0 || item.TrangThaiDon == null)
                                     {
                                         <a href="@Url.Action("Edit", "DonDatHang", new { id = item.ID })" class="text-decoration-none">@item.SoDonHang</a>
                                     }
@@ -157,6 +157,18 @@
                         </tr>
                     }
                 </tbody>
+                @if (Model.Items != null && Model.Items.Any())
+                {
+                    <tfoot>
+                        <tr style="background:#f4f6f9; font-weight:bold;">
+                            <td colspan="11" class="text-end">Tổng cộng:</td>
+                            <td class="d-none"></td>
+                            <td colspan="2"></td>
+                            <td class="text-end" style="color: #1a5276; font-size: 1.1em;">@(Model.Items.Sum(x => x.TongTien).ToString("N0"))</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                }
             </table>
         </div>
     </div>

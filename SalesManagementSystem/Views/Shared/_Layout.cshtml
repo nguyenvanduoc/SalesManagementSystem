@@ -63,6 +63,35 @@
             padding: 4px 8px !important;
             line-height: 1.42857143 !important;
         }
+        
+        /* Force Select2 comboboxes to match textbox size globally */
+        .select2-container .select2-selection--single {
+            height: 33px !important;
+            border: 1px solid #ced4da !important;
+            border-radius: 0.25rem !important;
+        }
+        .select2-container--default .select2-selection--single {
+            position: relative;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 31px !important;
+            padding-left: 8px !important;
+            padding-right: 42px !important; /* 42px from right stops the text precisely before the 'x' */
+            color: #212529 !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 31px !important;
+            width: 24px !important; /* Fixed width for arrow */
+        }
+        .select2-container--default .select2-selection--single .select2-selection__clear {
+            position: absolute !important;
+            right: 28px !important; /* Fixed distance from right, placing it exactly between arrow and text */
+            top: 0 !important;
+            height: 31px !important;
+            line-height: 31px !important;
+            margin: 0 !important;
+            float: none !important;
+        }
 
         textarea.form-control {
             height: auto !important;
@@ -915,6 +944,35 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/vn.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    if ($.fn.select2) {
+        $.fn.select2.defaults.set("allowClear", true);
+        $.fn.select2.defaults.set("placeholder", "Chọn...");
+
+        // Ghi đè hàm select2 để tự động thêm option rỗng cho combobox đơn (để allowClear hoạt động)
+        var originalSelect2 = $.fn.select2;
+        $.fn.select2 = function () {
+            if (arguments.length === 0 || typeof arguments[0] === 'object') {
+                this.each(function () {
+                    var $this = $(this);
+                    if ($this.is('select') && !$this.prop('multiple') && $this.find('option[value=""]').length === 0) {
+                        $this.prepend('<option value=""></option>');
+                    }
+                });
+            }
+            return originalSelect2.apply(this, arguments);
+        };
+        $.extend($.fn.select2, originalSelect2);
+        
+        // Khắc phục lỗi Select2 tự động mở dropdown khi click vào nút X (clear)
+        $(document).on('select2:unselecting', 'select', function(e) {
+            $(this).data('unselecting', true);
+        }).on('select2:opening', 'select', function(e) {
+            if ($(this).data('unselecting')) {
+                $(this).removeData('unselecting');
+                e.preventDefault();
+            }
+        });
+    }
     // Sidebar toggle
     const toggleBtn   = document.getElementById('sidebarToggle');
     const body        = document.body;
@@ -1306,7 +1364,11 @@
     /* ================================================================
        GLOBAL FORM RESET HANDLER (Chuẩn SKILL.md)
     ================================================================ */
-    $(document).on('click', '.btn-reset, [id^="btnReset"]', function () {
+    $(document).on('click', '.btn-reset, [id^="btnReset"]', function (e) {
+        if ($(this).attr('onclick') || e.isImmediatePropagationStopped()) {
+            return;
+        }
+
         var $form = $(this).closest('form');
         if ($form.length === 0) {
             // Trường hợp nút không nằm trong form, tìm form gần nhất trong tab
@@ -1364,8 +1426,8 @@
     ================================================================ */
     function initGlobalDatePickers(context) {
         var today = new Date();
-        var firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-        var lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        var firstDay = new Date(today.getFullYear(), 0, 1); // 1st of Jan
+        var lastDay = today; // Today
 
         $(context).find('input[type="date"]').each(function () {
             var $this = $(this);
@@ -1465,9 +1527,9 @@
             var isLastDay = dDen === daysInMonth;
             
             if (yTu === yDen && mTu === 1 && dTu === 1 && dDen === new Date().getDate() && mDen === (new Date().getMonth() + 1) && yDen === new Date().getFullYear()) {
-                $(this).val('current_year');
+                $(this).val('current_year').trigger('change.select2');
             } else if (yTu === yDen && mTu === mDen && isFirstDay && isLastDay) {
-                $(this).val('month_' + mTu);
+                $(this).val('month_' + mTu).trigger('change.select2');
             }
         });
     }

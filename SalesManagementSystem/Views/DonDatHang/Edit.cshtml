@@ -137,8 +137,8 @@
                             new { @class = "form-select" })
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label text-muted fw-semibold small">Họ tên tài xế</label>
-                        @Html.TextBoxFor(m => m.HoTenTaiXe, new { @class = "form-control", placeholder = "Họ tên tài xế" })
+                        <label class="form-label text-muted fw-semibold small">Thông tin xe</label>
+                        @Html.TextBoxFor(m => m.HoTenTaiXe, new { @class = "form-control", placeholder = "Thông tin xe" })
                     </div>
                     <div class="col-md-3">
                         <label class="form-label text-muted fw-semibold small">SĐT tài xế</label>
@@ -263,6 +263,11 @@
             $('body').append(confirmHtml);
             var $modal = $('#' + confirmModalId);
             $modal.find('#btnConfirmSaveAction').on('click', function() {
+                var currentStatus = $form.find('[name="TrangThaiDon"]').val();
+                if (currentStatus == '0') {
+                    $form.find('[name="TrangThaiDon"]').val('1');
+                }
+                
                 $modal.modal('hide');
                 setTimeout(function() {
                     $form.submit();

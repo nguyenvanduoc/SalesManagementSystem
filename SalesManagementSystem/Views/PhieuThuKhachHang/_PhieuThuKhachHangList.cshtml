@@ -218,20 +218,20 @@
             }
 
             var $grid = $pane.find('#table-container');
-            if (typeof showLoadingLocal === 'function') showLoadingLocal($grid);
+            if (window.showLoadingLocal) window.showLoadingLocal($pane);
             
             $.ajax({
                 url: url,
                 type: 'GET',
                 headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 success: function (res) {
-                    if (typeof hideLoadingLocal === 'function') hideLoadingLocal($grid);
+                    if (window.hideLoadingLocal) window.hideLoadingLocal($pane);
                     $grid.html(res);
                     if (typeof reInitPlugins === 'function') reInitPlugins($pane.attr('id'));
                 },
                 error: function() {
-                    if (typeof hideLoadingLocal === 'function') hideLoadingLocal($grid);
-                    if (typeof showToast === 'function') showToast('error', 'L?i khi t?i d? li?u.');
+                    if (window.hideLoadingLocal) window.hideLoadingLocal($pane);
+                    if (typeof showToast === 'function') showToast('error', 'Lỗi khi tải dữ liệu.');
                 }
             });
         });
@@ -262,20 +262,20 @@
             }
 
             var $grid = $pane.find('#table-container');
-            if (typeof showLoadingLocal === 'function') showLoadingLocal($grid);
+            if (window.showLoadingLocal) window.showLoadingLocal($pane);
             
             $.ajax({
                 url: url,
                 type: 'GET',
                 headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 success: function (res) {
-                    if (typeof hideLoadingLocal === 'function') hideLoadingLocal($grid);
+                    if (window.hideLoadingLocal) window.hideLoadingLocal($pane);
                     $grid.html(res);
                     if (typeof reInitPlugins === 'function') reInitPlugins($pane.attr('id'));
                 },
                 error: function() {
-                    if (typeof hideLoadingLocal === 'function') hideLoadingLocal($grid);
-                    if (typeof showToast === 'function') showToast('error', 'L?i khi t?i d? li?u.');
+                    if (window.hideLoadingLocal) window.hideLoadingLocal($pane);
+                    if (typeof showToast === 'function') showToast('error', 'Lỗi khi tải dữ liệu.');
                 }
             });
         });

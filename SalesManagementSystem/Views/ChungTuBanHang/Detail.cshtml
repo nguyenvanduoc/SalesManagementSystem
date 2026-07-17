@@ -98,9 +98,17 @@
                         <label class="form-label text-muted fw-semibold small">Nhân viên phụ trách</label>
                         @Html.DropDownListFor(m => m.IDNhanVien, (SelectList)ViewBag.NhanVienList, "-- Không có --", new { @class = "form-select readonly-cell", disabled = "disabled" })
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label text-muted fw-semibold small">Trạng thái đơn</label>
                         @Html.DropDownListFor(m => m.TrangThaiDon, (SelectList)ViewBag.TrangThaiList, "-- Không có --", new { @class = "form-select readonly-cell", disabled = "disabled" })
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted fw-semibold small">SĐT Tài xế</label>
+                        <input type="text" class="form-control readonly-cell" value="@Model.SoDienThoaiTaiXe" readonly />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted fw-semibold small">Thông tin xe</label>
+                        <input type="text" class="form-control readonly-cell" value="@Model.HoTenTaiXe" readonly />
                     </div>
                 </div>
             </div>

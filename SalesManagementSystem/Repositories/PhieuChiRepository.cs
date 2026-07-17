@@ -835,6 +835,7 @@ namespace SalesManagementSystem.Repositories
                             pn.NgayNhap,
                             ISNULL(pn.TienVanChuyen, 0) AS TongTienVanChuyen,
                             pt.TenPhuongTien AS TenPhuongTien,
+                            pn.TenNguoiGiao,
                             ISNULL((
                                 SELECT SUM(ct.SoTienPhanBo)
                                 FROM KT_PhieuChiChiTiet ct

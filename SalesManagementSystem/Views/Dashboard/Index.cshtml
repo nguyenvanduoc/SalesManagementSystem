@@ -746,12 +746,12 @@
 
         function formatMoney(n) {
             if (!n) return "0₫";
-            return n.toLocaleString('vi-VN') + '₫';
+            return Math.round(n).toLocaleString('vi-VN') + '₫';
         }
 
         function formatNumber(n) {
             if (!n && n !== 0) return "0";
-            return Number(n).toLocaleString('vi-VN');
+            return Math.round(Number(n)).toLocaleString('vi-VN');
         }
 
         function formatDate(dStr) {

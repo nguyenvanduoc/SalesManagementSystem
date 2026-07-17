@@ -38,7 +38,9 @@ BEGIN
         b.ConLai,
         b.TrangThai,
         b.NgayTao,
-        b.NguoiTao
+        b.NguoiTao,
+        d.SoDienThoaiTaiXe,
+        d.HoTenTaiXe
     FROM BAN_ChungTuBanHang b
     LEFT JOIN NS_DonDatHang d ON b.IDDonDatHang = d.ID
     LEFT JOIN NS_KhachHang k ON b.IDKhachHang = k.ID
@@ -61,7 +63,10 @@ AS
 BEGIN
     SET NOCOUNT ON;
     
-    SELECT * FROM BAN_ChungTuBanHang WHERE ID = @ID AND IsDeleted = 0;
+    SELECT c.*, d.SoDienThoaiTaiXe, d.HoTenTaiXe 
+    FROM BAN_ChungTuBanHang c
+    LEFT JOIN NS_DonDatHang d ON c.IDDonDatHang = d.ID
+    WHERE c.ID = @ID AND c.IsDeleted = 0;
 END
 GO
 

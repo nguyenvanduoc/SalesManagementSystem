@@ -17,7 +17,10 @@ BEGIN
         c.ID AS IDChungTuBanHang,
         c.SoChungTu,
         c.NgayChungTu,
-        c.TrangThai AS TrangThaiChungTu
+        c.TrangThai AS TrangThaiChungTu,
+        d.PhiBocXep,
+        d.SoDienThoaiTaiXe,
+        d.HoTenTaiXe
     FROM NS_DonDatHang d
     LEFT JOIN NS_KhachHang k ON d.IDKhachHang = k.ID
     LEFT JOIN BAN_ChungTuBanHang c ON c.IDDonDatHang = d.ID

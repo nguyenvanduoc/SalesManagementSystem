@@ -803,7 +803,22 @@ var TabManager = (function () {
         var container = $('#' + paneId);
 
         if ($.fn.select2) {
-            container.find('.select2').select2({ width: '100%' });
+            // Khởi tạo Select2 cho tất cả các combobox (.form-select) trừ dropdown phân trang
+            var $comboboxes = container.find('select.form-select:not(.page-size-select):not(.no-select2), .select2');
+            
+            $comboboxes.each(function() {
+                var $this = $(this);
+                // Đảm bảo có option rỗng đầu tiên để allowClear hoạt động
+                if ($this.find('option[value=""]').length === 0 && !$this.prop('multiple')) {
+                    $this.prepend('<option value=""></option>');
+                }
+            });
+            
+            $comboboxes.select2({ 
+                width: '100%',
+                allowClear: true,
+                placeholder: 'Chọn...'
+            });
         }
 
         var tooltipTriggerList = [].slice.call(container[0].querySelectorAll('[data-bs-toggle="tooltip"]'));

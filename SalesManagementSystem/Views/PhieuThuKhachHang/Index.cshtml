@@ -7,15 +7,21 @@
 @using SalesManagementSystem.Helpers
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">@ViewBag.Title</h4>
+    @if (PermissionHelper.HasPermission("PhieuThuKhachHang", LoaiPhanQuyen.Them))
+    {
+        <button class="btn btn-sm btn-primary fw-bold px-3 shadow-sm" onclick="openFormModal('@Url.Action("Create")')">
+            <i class="bi bi-plus-circle me-1"></i> Tạo phiếu thu
+        </button>
+    }
 </div>
 
 <!-- Bộ lọc tìm kiếm theo chuẩn UI compact trên 1 dòng -->
 <div class="card shadow-sm mb-4">
     <div class="card-body py-2">
         <form method="get" action="@Url.Action("GetList")" id="searchFormPhieuThu">
-            <div class="d-flex flex-wrap align-items-end gap-2">
+            <div class="row g-2 align-items-end">
                 
-                <div class="flex-grow-1" style="min-width: 140px; max-width: 170px;">
+                <div class="col-md-2">
                     <label class="form-label text-muted small mb-1">Thời gian</label>
                     <select class="form-select form-select-sm ddl-thoi-gian">
                                 <option value="current_month">Đầu tháng đến hiện tại</option>
@@ -39,22 +45,22 @@
                     </select>
                 </div>
                 
-                <div class="flex-grow-1" style="min-width: 120px; max-width: 140px;">
+                <div class="col-md-2">
                     <label class="form-label text-muted small mb-1">Từ ngày</label>
                     <input type="date" name="tuNgay" class="form-control form-control-sm" value="@ViewBag.TuNgay">
                 </div>
                 
-                <div class="flex-grow-1" style="min-width: 120px; max-width: 140px;">
+                <div class="col-md-2">
                     <label class="form-label text-muted small mb-1">Đến ngày</label>
                     <input type="date" name="denNgay" class="form-control form-control-sm" value="@ViewBag.DenNgay">
                 </div>
                 
-                <div class="flex-grow-1" style="min-width: 130px; max-width: 160px;">
+                <div class="col-md-2">
                     <label class="form-label text-muted small mb-1">Số chứng từ</label>
                     <input type="text" name="soPhieuThu" class="form-control form-control-sm" placeholder="Mã chứng từ..." value="@ViewBag.SoPhieuThu">
                 </div>
                 
-                <div class="flex-grow-1" style="min-width: 180px; max-width: 260px;">
+                <div class="col-md-2">
                     <label class="form-label text-muted small mb-1">Khách hàng</label>
                     <select name="idKhachHang" id="idKhachHang_PhieuThu" class="form-select form-select-sm select2">
                         <option value="">Tất cả khách hàng</option>
@@ -68,12 +74,11 @@
                     </select>
                 </div>
                 
-
-                <div class="d-flex gap-2 ms-auto" style="padding-bottom: 2px;">
-                    <button type="submit" class="btn btn-sm text-white px-3 shadow-sm" style="background-color: #2998e4; border: none; height: 31px;">
+                <div class="col-md-2 d-flex gap-2" style="padding-bottom: 2px;">
+                    <button type="submit" class="btn btn-sm text-white px-3 w-100 shadow-sm" style="background-color: #2998e4; border: none; height: 31px;">
                         <i class="bi bi-search me-1"></i> Tìm kiếm
                     </button>
-                    <button type="button" class="btn btn-sm text-white px-3 btn-reset shadow-sm" style="background-color: #f1c40f; border: none; height: 31px;">
+                    <button type="button" class="btn btn-sm text-white px-3 btn-reset w-100 shadow-sm" style="background-color: #f1c40f; border: none; height: 31px;">
                         <i class="bi bi-arrow-clockwise me-1"></i> Làm mới
                     </button>
                 </div>
@@ -136,25 +141,24 @@
                 var url = action + '?' + $.param(params);
                 
                 var $grid = $pane.find('#table-container');
-                if (typeof showLoadingLocal === 'function') showLoadingLocal($grid);
+                if (window.showLoadingLocal) window.showLoadingLocal($pane);
                 
                 $.ajax({
                     url: url,
                     type: 'GET',
                     headers: { 'X-Requested-With': 'XMLHttpRequest' },
                     success: function (res) {
-                        if (typeof hideLoadingLocal === 'function') hideLoadingLocal($grid);
+                        if (window.hideLoadingLocal) window.hideLoadingLocal($pane);
                         $grid.html(res);
                         if (typeof reInitPlugins === 'function') reInitPlugins($pane.attr('id'));
                     },
                     error: function() {
-                        if (typeof hideLoadingLocal === 'function') hideLoadingLocal($grid);
-                        if (typeof showToast === 'function') showToast('error', 'L?i khi t?i d? li?u.');
+                        if (window.hideLoadingLocal) window.hideLoadingLocal($pane);
+                        if (typeof showToast === 'function') showToast('error', 'Lỗi khi tải dữ liệu.');
                     }
                 });
             });
 
-            // Bind local reset button specifically for PhieuThu
             $pane.off('click.phieuthu_reset', '.btn-reset');
             $pane.on('click.phieuthu_reset', '.btn-reset', function(e) {
                 e.preventDefault();
@@ -163,20 +167,16 @@
                 var $form = $pane.find('#searchFormPhieuThu');
                 if ($form.length > 0) {
                     $form[0].reset();
-                    $form.find('.select2').val('').trigger('change');
                     
-                    // Reset flatpickr if any
-                    $form.find('.flatpickr-input').each(function() {
-                        if (this._flatpickr) {
-                            var name = $(this).attr('name');
-                            var today = new Date();
-                            var firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-                            var lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-                            if (name === 'tuNgay') this._flatpickr.setDate(firstDay);
-                            else if (name === 'denNgay') this._flatpickr.setDate(lastDay);
-                            else this._flatpickr.clear();
-                        }
-                    });
+                    // Xóa trắng các input text (bao gồm cả flatpickr)
+                    $form.find('input[type="text"]').val('');
+                    
+                    // Reset Khách hàng (bỏ qua ddl-thoi-gian)
+                    $form.find('.select2-hidden-accessible').not('.ddl-thoi-gian').val('').trigger('change');
+                    
+                    // Set thời gian về current_year và trigger change cho cả native select và select2
+                    $form.find('.ddl-thoi-gian').val('current_year').trigger('change').trigger('change.select2');
+                    
                     $form.trigger('submit');
                 }
             });

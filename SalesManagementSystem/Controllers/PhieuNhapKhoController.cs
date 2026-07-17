@@ -137,7 +137,7 @@ namespace SalesManagementSystem.Controllers
                     using (var conn = new DbConnectionFactory().CreateConnection())
                     {
                         details = conn.Query(@"
-                            SELECT c.IDPhieuNhap, s.MaSanPham, s.TenSanPham, s.DVT, c.SoLuong, c.DonGia, c.ThanhTien 
+                            SELECT c.IDPhieuNhap, s.MaSanPham, s.TenSanPham, s.DVT, c.SoLuong, c.DonGia, c.ThanhTien, c.DonGiaVanChuyen, c.TienVanChuyen 
                             FROM KHO_PhieuNhap_ChiTiet c
                             LEFT JOIN DM_SanPham s ON c.IDSanPham = s.ID
                             WHERE c.IDPhieuNhap IN @IDs",
@@ -200,7 +200,9 @@ namespace SalesManagementSystem.Controllers
                             DVT = "",
                             SoLuong = 0M,
                             DonGia = 0M,
-                            TongTien = 0M
+                            TongTien = 0M,
+                            DonGiaVanChuyen = 0M,
+                            ThanhTienVanChuyen = 0M
                         });
                     }
                     else
@@ -222,7 +224,9 @@ namespace SalesManagementSystem.Controllers
                                 DVT = (string)(d.DVT ?? ""),
                                 SoLuong = Convert.ToDecimal(d.SoLuong ?? 0m),
                                 DonGia = Convert.ToDecimal(d.DonGia ?? 0m),
-                                TongTien = Convert.ToDecimal(d.ThanhTien ?? 0m)
+                                TongTien = Convert.ToDecimal(d.ThanhTien ?? 0m),
+                                DonGiaVanChuyen = Convert.ToDecimal(d.DonGiaVanChuyen),
+                                ThanhTienVanChuyen = Convert.ToDecimal(d.TienVanChuyen)
                             });
                         }
                     }
@@ -710,6 +714,8 @@ namespace SalesManagementSystem.Controllers
             public decimal SoLuong { get; set; }
             public decimal DonGia { get; set; }
             public decimal TongTien { get; set; }
+            public decimal DonGiaVanChuyen { get; set; }
+            public decimal ThanhTienVanChuyen { get; set; }
         }
     }
 }

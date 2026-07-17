@@ -236,6 +236,7 @@ namespace SalesManagementSystem.Controllers
                     STT = idx + 1,
                     SoPhieuNhap = (string)x.SoPhieuNhap,
                     NgayNhap = x.NgayNhap != null ? ((DateTime)x.NgayNhap).ToString("dd/MM/yyyy") : "",
+                    NguoiGiaoHang = (string)x.TenNguoiGiao,
                     TenPhuongTien = (string)x.TenPhuongTien,
                     SoPhieuChi = (string)x.SoPhieuChiList,
                     TongTien = Convert.ToDecimal(x.TongTienVanChuyen),

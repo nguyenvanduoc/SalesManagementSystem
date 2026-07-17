@@ -16,5 +16,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public DateTime? NgayChungTu { get; set; }
         public int? TrangThaiChungTu { get; set; }
         public decimal PhiBocXep { get; set; }
+        public string SoDienThoaiTaiXe { get; set; }
+        public string HoTenTaiXe { get; set; }
     }
 }

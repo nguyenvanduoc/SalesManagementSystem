@@ -3,7 +3,7 @@
 <Project>
   <PropertyGroup>
     <_PublishTargetUrl>C:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\Public</_PublishTargetUrl>
-    <History>True|2026-07-15T15:38:57.8124776Z||;False|2026-07-15T22:37:55.2171832+07:00||;True|2026-07-15T21:17:58.4016848+07:00||;True|2026-07-15T19:56:40.4707195+07:00||;True|2026-07-15T14:58:33.6290996+07:00||;True|2026-07-14T23:59:50.2370327+07:00||;True|2026-07-14T22:12:00.5839576+07:00||;True|2026-07-13T22:58:16.8933269+07:00||;True|2026-07-12T23:34:52.1971955+07:00||;True|2026-07-12T22:57:13.7024735+07:00||;True|2026-07-10T17:36:45.2561678+07:00||;True|2026-07-10T00:06:22.0490891+07:00||;True|2026-07-09T22:18:06.1725563+07:00||;True|2026-07-09T22:10:36.2308410+07:00||;True|2026-07-08T23:22:14.8703696+07:00||;True|2026-07-08T12:51:15.4974316+07:00||;True|2026-07-08T12:44:07.2041014+07:00||;True|2026-07-07T10:25:42.5940974+07:00||;True|2026-07-07T10:24:44.9985266+07:00||;True|2026-07-06T23:15:31.3419168+07:00||;True|2026-07-06T23:15:10.7587386+07:00||;True|2026-07-06T21:06:28.7008765+07:00||;True|2026-07-06T18:34:58.2161151+07:00||;True|2026-07-06T18:26:51.4670313+07:00||;True|2026-07-06T17:37:33.3071569+07:00||;True|2026-07-05T12:43:29.6817382+07:00||;True|2026-07-05T12:43:20.1539700+07:00||;True|2026-07-05T11:11:14.5511280+07:00||;True|2026-07-05T10:03:35.8519241+07:00||;True|2026-07-05T09:54:34.2326110+07:00||;True|2026-07-04T23:07:55.3524050+07:00||;True|2026-07-04T22:58:07.6110627+07:00||;True|2026-07-04T22:18:06.0637270+07:00||;True|2026-07-04T22:06:57.1264915+07:00||;False|2026-07-04T22:04:29.8622640+07:00||;False|2026-07-04T22:04:13.0066127+07:00||;False|2026-07-04T22:03:25.3431610+07:00||;True|2026-07-03T23:58:12.1099433+07:00||;True|2026-07-03T23:34:07.4504310+07:00||;True|2026-07-03T23:12:59.8321679+07:00||;True|2026-07-03T23:02:16.5921439+07:00||;True|2026-07-03T22:20:38.3915049+07:00||;True|2026-07-03T15:05:33.3263101+07:00||;True|2026-07-03T15:01:47.0139073+07:00||;True|2026-07-03T14:55:07.0537106+07:00||;True|2026-07-02T23:28:43.4229391+07:00||;True|2026-07-02T20:46:56.1168340+07:00||;True|2026-07-02T20:46:37.1087463+07:00||;True|2026-07-02T18:49:36.1158410+07:00||;True|2026-06-30T18:00:44.7861050+07:00||;True|2026-06-29T11:08:37.0024888+07:00||;True|2026-06-26T12:41:39.6923721+07:00||;True|2026-06-26T12:38:22.8065003+07:00||;True|2026-06-26T12:19:24.2160105+07:00||;True|2026-06-24T21:44:52.4579263+07:00||;True|2026-06-24T21:41:41.4000991+07:00||;True|2026-06-24T21:39:46.8456877+07:00||;True|2026-06-24T20:51:50.9530345+07:00||;True|2026-06-24T13:03:37.9964234+07:00||;True|2026-06-24T10:02:57.1305147+07:00||;True|2026-06-24T09:58:03.5056357+07:00||;True|2026-06-23T18:53:15.6543897+07:00||;True|2026-06-23T18:37:34.8035972+07:00||;True|2026-06-21T13:13:34.3164666+07:00||;True|2026-06-20T11:16:44.2419481+07:00||;True|2026-06-18T12:40:42.5211394+07:00||;True|2026-06-17T22:08:57.7238354+07:00||;True|2026-06-17T22:08:34.5086111+07:00||;True|2026-06-17T16:29:34.0173532+07:00||;False|2026-06-17T16:28:38.8818574+07:00||;False|2026-06-17T16:28:15.5645262+07:00||;False|2026-06-17T16:28:05.2424622+07:00||;False|2026-06-17T16:27:58.2755341+07:00||;False|2026-06-17T16:27:25.0763427+07:00||;False|2026-06-17T16:26:46.9867423+07:00||;False|2026-06-17T16:24:46.7897824+07:00||;False|2026-06-17T16:20:05.4808715+07:00||;False|2026-06-17T16:19:35.7609632+07:00||;False|2026-06-17T16:18:37.8550928+07:00||;False|2026-06-17T16:18:18.3832192+07:00||;False|2026-06-17T16:14:35.9609549+07:00||;False|2026-06-17T16:14:25.8063578+07:00||;False|2026-06-17T16:14:02.3358264+07:00||;True|2026-06-06T15:29:51.4345355+07:00||;True|2026-06-05T17:25:32.7233419+07:00||;</History>
+    <History>True|2026-07-17T05:39:26.0177593Z||;True|2026-07-15T23:12:43.8062578+07:00||;True|2026-07-15T22:51:55.7162645+07:00||;True|2026-07-15T22:44:17.8255769+07:00||;True|2026-07-15T22:38:57.8124776+07:00||;False|2026-07-15T22:37:55.2171832+07:00||;True|2026-07-15T21:17:58.4016848+07:00||;True|2026-07-15T19:56:40.4707195+07:00||;True|2026-07-15T14:58:33.6290996+07:00||;True|2026-07-14T23:59:50.2370327+07:00||;True|2026-07-14T22:12:00.5839576+07:00||;True|2026-07-13T22:58:16.8933269+07:00||;True|2026-07-12T23:34:52.1971955+07:00||;True|2026-07-12T22:57:13.7024735+07:00||;True|2026-07-10T17:36:45.2561678+07:00||;True|2026-07-10T00:06:22.0490891+07:00||;True|2026-07-09T22:18:06.1725563+07:00||;True|2026-07-09T22:10:36.2308410+07:00||;True|2026-07-08T23:22:14.8703696+07:00||;True|2026-07-08T12:51:15.4974316+07:00||;True|2026-07-08T12:44:07.2041014+07:00||;True|2026-07-07T10:25:42.5940974+07:00||;True|2026-07-07T10:24:44.9985266+07:00||;True|2026-07-06T23:15:31.3419168+07:00||;True|2026-07-06T23:15:10.7587386+07:00||;True|2026-07-06T21:06:28.7008765+07:00||;True|2026-07-06T18:34:58.2161151+07:00||;True|2026-07-06T18:26:51.4670313+07:00||;True|2026-07-06T17:37:33.3071569+07:00||;True|2026-07-05T12:43:29.6817382+07:00||;True|2026-07-05T12:43:20.1539700+07:00||;True|2026-07-05T11:11:14.5511280+07:00||;True|2026-07-05T10:03:35.8519241+07:00||;True|2026-07-05T09:54:34.2326110+07:00||;True|2026-07-04T23:07:55.3524050+07:00||;True|2026-07-04T22:58:07.6110627+07:00||;True|2026-07-04T22:18:06.0637270+07:00||;True|2026-07-04T22:06:57.1264915+07:00||;False|2026-07-04T22:04:29.8622640+07:00||;False|2026-07-04T22:04:13.0066127+07:00||;False|2026-07-04T22:03:25.3431610+07:00||;True|2026-07-03T23:58:12.1099433+07:00||;True|2026-07-03T23:34:07.4504310+07:00||;True|2026-07-03T23:12:59.8321679+07:00||;True|2026-07-03T23:02:16.5921439+07:00||;True|2026-07-03T22:20:38.3915049+07:00||;True|2026-07-03T15:05:33.3263101+07:00||;True|2026-07-03T15:01:47.0139073+07:00||;True|2026-07-03T14:55:07.0537106+07:00||;True|2026-07-02T23:28:43.4229391+07:00||;True|2026-07-02T20:46:56.1168340+07:00||;True|2026-07-02T20:46:37.1087463+07:00||;True|2026-07-02T18:49:36.1158410+07:00||;True|2026-06-30T18:00:44.7861050+07:00||;True|2026-06-29T11:08:37.0024888+07:00||;True|2026-06-26T12:41:39.6923721+07:00||;True|2026-06-26T12:38:22.8065003+07:00||;True|2026-06-26T12:19:24.2160105+07:00||;True|2026-06-24T21:44:52.4579263+07:00||;True|2026-06-24T21:41:41.4000991+07:00||;True|2026-06-24T21:39:46.8456877+07:00||;True|2026-06-24T20:51:50.9530345+07:00||;True|2026-06-24T13:03:37.9964234+07:00||;True|2026-06-24T10:02:57.1305147+07:00||;True|2026-06-24T09:58:03.5056357+07:00||;True|2026-06-23T18:53:15.6543897+07:00||;True|2026-06-23T18:37:34.8035972+07:00||;True|2026-06-21T13:13:34.3164666+07:00||;True|2026-06-20T11:16:44.2419481+07:00||;True|2026-06-18T12:40:42.5211394+07:00||;True|2026-06-17T22:08:57.7238354+07:00||;True|2026-06-17T22:08:34.5086111+07:00||;True|2026-06-17T16:29:34.0173532+07:00||;False|2026-06-17T16:28:38.8818574+07:00||;False|2026-06-17T16:28:15.5645262+07:00||;False|2026-06-17T16:28:05.2424622+07:00||;False|2026-06-17T16:27:58.2755341+07:00||;False|2026-06-17T16:27:25.0763427+07:00||;False|2026-06-17T16:26:46.9867423+07:00||;False|2026-06-17T16:24:46.7897824+07:00||;False|2026-06-17T16:20:05.4808715+07:00||;False|2026-06-17T16:19:35.7609632+07:00||;False|2026-06-17T16:18:37.8550928+07:00||;False|2026-06-17T16:18:18.3832192+07:00||;False|2026-06-17T16:14:35.9609549+07:00||;False|2026-06-17T16:14:25.8063578+07:00||;False|2026-06-17T16:14:02.3358264+07:00||;True|2026-06-06T15:29:51.4345355+07:00||;True|2026-06-05T17:25:32.7233419+07:00||;</History>
     <LastFailureDetails />
   </PropertyGroup>
   <ItemGroup>
@@ -239,13 +239,13 @@
       <publishTime>08/08/2018 12:18:16</publishTime>
     </File>
     <File Include="bin/SalesManagementSystem.dll">
-      <publishTime>07/15/2026 21:17:57</publishTime>
+      <publishTime>07/17/2026 12:39:25</publishTime>
     </File>
     <File Include="bin/SalesManagementSystem.dll.config">
       <publishTime>06/05/2026 22:46:06</publishTime>
     </File>
     <File Include="bin/SalesManagementSystem.pdb">
-      <publishTime>07/15/2026 21:17:57</publishTime>
+      <publishTime>07/17/2026 12:39:25</publishTime>
     </File>
     <File Include="bin/System.Runtime.CompilerServices.Unsafe.dll">
       <publishTime>09/19/2018 02:38:10</publishTime>
@@ -623,7 +623,7 @@
       <publishTime>06/19/2026 18:24:06</publishTime>
     </File>
     <File Include="Scripts/tab-manager.js">
-      <publishTime>07/10/2026 11:01:10</publishTime>
+      <publishTime>07/17/2026 09:28:26</publishTime>
     </File>
     <File Include="UI_STANDARD.md">
       <publishTime>07/14/2026 22:59:16</publishTime>
@@ -671,7 +671,7 @@
       <publishTime>07/14/2026 23:56:10</publishTime>
     </File>
     <File Include="Views/BaoCaoCongNoVanChuyen/_List.cshtml">
-      <publishTime>07/14/2026 17:33:41</publishTime>
+      <publishTime>07/16/2026 16:08:49</publishTime>
     </File>
     <File Include="Views/BaoCaoDoiChieuNhapNhaCungCap/Index.cshtml">
       <publishTime>07/15/2026 18:45:17</publishTime>
@@ -707,10 +707,10 @@
       <publishTime>06/29/2026 12:30:37</publishTime>
     </File>
     <File Include="Views/ChungTuBanHang/Create.cshtml">
-      <publishTime>07/07/2026 12:01:00</publishTime>
+      <publishTime>07/17/2026 11:57:45</publishTime>
     </File>
     <File Include="Views/ChungTuBanHang/Detail.cshtml">
-      <publishTime>07/02/2026 18:08:26</publishTime>
+      <publishTime>07/17/2026 11:57:45</publishTime>
     </File>
     <File Include="Views/ChungTuBanHang/Index.cshtml">
       <publishTime>07/11/2026 10:54:10</publishTime>
@@ -719,7 +719,7 @@
       <publishTime>06/29/2026 12:30:37</publishTime>
     </File>
     <File Include="Views/ChungTuBanHang/_ChungTuBanHangList.cshtml">
-      <publishTime>06/30/2026 17:52:44</publishTime>
+      <publishTime>07/17/2026 12:11:09</publishTime>
     </File>
     <File Include="Views/ChungTuBanHang/_DetailInline.cshtml">
       <publishTime>07/07/2026 10:43:44</publishTime>
@@ -752,7 +752,7 @@
       <publishTime>06/21/2026 11:36:14</publishTime>
     </File>
     <File Include="Views/Dashboard/Index.cshtml">
-      <publishTime>07/08/2026 21:42:26</publishTime>
+      <publishTime>07/16/2026 15:51:36</publishTime>
     </File>
     <File Include="Views/DieuChinhNhapKho/Adjust.cshtml">
       <publishTime>07/14/2026 23:53:26</publishTime>
@@ -788,13 +788,13 @@
       <publishTime>06/30/2026 19:05:05</publishTime>
     </File>
     <File Include="Views/DonDatHang/Create.cshtml">
-      <publishTime>07/06/2026 23:00:57</publishTime>
+      <publishTime>07/17/2026 11:48:21</publishTime>
     </File>
     <File Include="Views/DonDatHang/Detail.cshtml">
       <publishTime>07/02/2026 18:27:02</publishTime>
     </File>
     <File Include="Views/DonDatHang/Edit.cshtml">
-      <publishTime>07/07/2026 12:00:13</publishTime>
+      <publishTime>07/17/2026 12:04:21</publishTime>
     </File>
     <File Include="Views/DonDatHang/Index.cshtml">
       <publishTime>07/10/2026 15:14:45</publishTime>
@@ -803,7 +803,7 @@
       <publishTime>07/07/2026 10:43:44</publishTime>
     </File>
     <File Include="Views/DonDatHang/_DonDatHangList.cshtml">
-      <publishTime>07/06/2026 23:02:13</publishTime>
+      <publishTime>07/17/2026 12:13:30</publishTime>
     </File>
     <File Include="Views/DonDieuChinhDonHang/Adjust.cshtml">
       <publishTime>07/07/2026 12:01:47</publishTime>
@@ -860,7 +860,7 @@
       <publishTime>07/09/2026 11:54:34</publishTime>
     </File>
     <File Include="Views/KHO_HaoHut/Index.cshtml">
-      <publishTime>07/15/2026 22:37:09</publishTime>
+      <publishTime>07/15/2026 22:50:54</publishTime>
     </File>
     <File Include="Views/KHO_HaoHut/_Create.cshtml">
       <publishTime>07/15/2026 22:08:36</publishTime>
@@ -980,7 +980,7 @@
       <publishTime>07/03/2026 16:22:10</publishTime>
     </File>
     <File Include="Views/PhieuThuKhachHang/Index.cshtml">
-      <publishTime>07/11/2026 10:53:54</publishTime>
+      <publishTime>07/17/2026 11:22:31</publishTime>
     </File>
     <File Include="Views/PhieuThuKhachHang/_DetailInline.cshtml">
       <publishTime>07/07/2026 13:32:01</publishTime>
@@ -995,7 +995,7 @@
       <publishTime>07/06/2026 12:10:55</publishTime>
     </File>
     <File Include="Views/PhieuThuKhachHang/_PhieuThuKhachHangList.cshtml">
-      <publishTime>07/08/2026 11:56:09</publishTime>
+      <publishTime>07/17/2026 09:53:23</publishTime>
     </File>
     <File Include="Views/PhieuXuatKho/Details.cshtml">
       <publishTime>06/22/2026 12:24:36</publishTime>
@@ -1055,7 +1055,7 @@
       <publishTime>06/18/2026 21:50:58</publishTime>
     </File>
     <File Include="Views/Shared/_Layout.cshtml">
-      <publishTime>07/14/2026 14:41:59</publishTime>
+      <publishTime>07/17/2026 10:09:12</publishTime>
     </File>
     <File Include="Views/Shared/_Pagination.cshtml">
       <publishTime>06/18/2026 21:52:58</publishTime>

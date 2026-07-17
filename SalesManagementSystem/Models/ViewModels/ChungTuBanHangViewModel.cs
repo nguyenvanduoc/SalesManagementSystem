@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace SalesManagementSystem.Models.ViewModels
@@ -23,6 +23,8 @@ namespace SalesManagementSystem.Models.ViewModels
         public string MaSoThue { get; set; }
         public string DiaChi { get; set; }
         public string SoDienThoai { get; set; }
+        public string SoDienThoaiTaiXe { get; set; }
+        public string HoTenTaiXe { get; set; }
         
         public int IDKho { get; set; }
         public string TenKhoHang { get; set; }

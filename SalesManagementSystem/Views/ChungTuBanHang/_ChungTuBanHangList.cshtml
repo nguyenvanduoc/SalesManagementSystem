@@ -12,6 +12,8 @@
                         <th>Số đơn hàng</th>
                         <th class="text-center">Ngày lập đơn hàng</th>
                         <th>Khách hàng</th>
+                        <th>Thông tin xe</th>
+                        <th>SĐT Tài xế</th>
                         <th class="text-end">Tổng tiền hàng</th>
                         <th class="text-end">Phí bốc xếp</th>
                         <th class="text-end">Tổng thanh toán</th>
@@ -99,6 +101,8 @@
                                 </td>
                                 <td class="text-center align-middle">@(item.NgayTaoDon?.ToString("dd/MM/yyyy"))</td>
                                 <td class="align-middle">@item.TenKhachHang</td>
+                                <td class="align-middle">@item.HoTenTaiXe</td>
+                                <td class="align-middle">@item.SoDienThoaiTaiXe</td>
                                 <td class="text-end align-middle text-dark">@(item.ThanhTienHang > 0 ? item.ThanhTienHang.ToString("N0") : "0")</td>
                                 <td class="text-end align-middle text-dark">@(item.PhiBocXep > 0 ? item.PhiBocXep.ToString("N0") : "0")</td>
                                 <td class="text-end align-middle text-dark">@(item.TongTien > 0 ? item.TongTien.ToString("N0") : "0")</td>
@@ -135,6 +139,18 @@
                         </tr>
                     }
                 </tbody>
+                @if (Model.Items != null && Model.Items.Any())
+                {
+                    <tfoot>
+                        <tr style="background:#f4f6f9; font-weight:bold;">
+                            <td colspan="8" class="text-end">Tổng cộng:</td>
+                            <td class="text-end" style="color: #1a5276; font-size: 1.1em;">@(Model.Items.Sum(x => x.ThanhTienHang).ToString("N0"))</td>
+                            <td class="text-end" style="color: #1a5276; font-size: 1.1em;">@(Model.Items.Sum(x => x.PhiBocXep).ToString("N0"))</td>
+                            <td class="text-end" style="color: #1a5276; font-size: 1.1em;">@(Model.Items.Sum(x => x.TongTien).ToString("N0"))</td>
+                            <td colspan="3"></td>
+                        </tr>
+                    </tfoot>
+                }
             </table>
         </div>
     </div>

@@ -83,6 +83,8 @@ namespace SalesManagementSystem.Repositories
                         c.SoChungTu,
                         c.NgayChungTu,
                         ISNULL(c.PhiBocXep, d.PhiBocXep) AS PhiBocXep,
+                        d.HoTenTaiXe,
+                        d.SoDienThoaiTaiXe,
                         CASE WHEN d.TrangThaiDon = 4 THEN 3 ELSE c.TrangThai END AS TrangThaiChungTu
                     FROM NS_DonDatHang d
                     LEFT JOIN NS_KhachHang k ON d.IDKhachHang = k.ID

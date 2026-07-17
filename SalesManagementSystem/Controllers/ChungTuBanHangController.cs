@@ -215,6 +215,8 @@ namespace SalesManagementSystem.Controllers
             model.IDNhanVien = donHang.IDNhanVien;
             model.TenNhanVien = "";
             model.TrangThaiDon = donHang.TrangThaiDon;
+            model.SoDienThoaiTaiXe = donHang.SoDienThoaiTaiXe;
+            model.HoTenTaiXe = donHang.HoTenTaiXe;
 
             model.MaKhachHang = khachHang?.MaKhachHang ?? "";
             model.MaSoThue = khachHang?.MaSoThue ?? "";
@@ -256,6 +258,8 @@ namespace SalesManagementSystem.Controllers
                     model.IDNhanVien = donHang.IDNhanVien;
                     model.TrangThaiDon = donHang.TrangThaiDon;
                     model.PhiBocXep = donHang.PhiBocXep;
+                    model.SoDienThoaiTaiXe = donHang.SoDienThoaiTaiXe;
+                    model.HoTenTaiXe = donHang.HoTenTaiXe;
                 }
             }
             
@@ -305,6 +309,8 @@ namespace SalesManagementSystem.Controllers
                     model.IDNhanVien = donHang.IDNhanVien;
                     model.TrangThaiDon = donHang.TrangThaiDon;
                     model.PhiBocXep = donHang.PhiBocXep;
+                    model.SoDienThoaiTaiXe = donHang.SoDienThoaiTaiXe;
+                    model.HoTenTaiXe = donHang.HoTenTaiXe;
                 }
             }
             
