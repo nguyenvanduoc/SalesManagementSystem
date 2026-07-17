@@ -114,6 +114,16 @@ namespace SalesManagementSystem.Controllers
 
         // ── Adjust (GET) ──────────────────────────────────────────────────────
 
+        private SelectList GetPhuongTienList(int? selectedId = null)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                var items = conn.Query("SELECT ID, ISNULL(MaPhuongTien, '') + ' - ' + ISNULL(TenPhuongTien, '') AS Name FROM DM_PhuongTien ORDER BY STT, TenPhuongTien")
+                    .Select(x => new { ID = (int)x.ID, Name = (string)x.Name }).ToList();
+                return new SelectList(items, "ID", "Name", selectedId);
+            }
+        }
+
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult Adjust(int id)
         {
@@ -178,10 +188,13 @@ namespace SalesManagementSystem.Controllers
                 ThanhTienHang = don.ThanhTienHang ?? 0,
                 ThanhTienThue = don.ThanhTienThue ?? 0,
                 GhiChu = don.GhiChu,
+                HoTenTaiXe = don.HoTenTaiXe,
+                IDPhuongTien = don.IDPhuongTien,
                 ChiTiets = chiTiets
             };
             model.NhanVienList = GetNhanVienList(don.IDNhanVien);
             model.TrangThaiList = GetTrangThaiList(don.TrangThaiDon);
+            model.PhuongTienList = GetPhuongTienList(don.IDPhuongTien);
 
             // Truy vấn ngày giao hàng (ngày xuất kho hoặc ngày chứng từ bán hàng)
             DateTime? ngayGiaoHang = null;
@@ -247,6 +260,13 @@ namespace SalesManagementSystem.Controllers
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
         public ActionResult Adjust(DonDieuChinhPostModel model)
         {
+            try
+            {
+                System.IO.File.AppendAllText(Server.MapPath("~/App_Data/adjust_log.txt"), 
+                    $"[{DateTime.Now}] Adjust POST: IDDonHang={model.IDDonHang}, GhiChu={model.GhiChu}, HoTenTaiXe={model.HoTenTaiXe}, IDPhuongTien={model.IDPhuongTien}\n");
+            }
+            catch {}
+
             if (string.IsNullOrWhiteSpace(model.LyDoDieuChinh))
             {
                 ModelState.AddModelError("LyDoDieuChinh", "Vui lòng nhập lý do điều chỉnh");

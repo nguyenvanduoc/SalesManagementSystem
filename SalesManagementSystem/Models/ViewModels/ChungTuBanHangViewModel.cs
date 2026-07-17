@@ -25,6 +25,8 @@ namespace SalesManagementSystem.Models.ViewModels
         public string SoDienThoai { get; set; }
         public string SoDienThoaiTaiXe { get; set; }
         public string HoTenTaiXe { get; set; }
+        public int? IDPhuongTien { get; set; }
+        public string GhiChuDonHang { get; set; }
         
         public int IDKho { get; set; }
         public string TenKhoHang { get; set; }

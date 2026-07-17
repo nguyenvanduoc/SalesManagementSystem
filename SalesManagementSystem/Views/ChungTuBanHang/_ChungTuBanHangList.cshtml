@@ -13,7 +13,6 @@
                         <th class="text-center">Ngày lập đơn hàng</th>
                         <th>Khách hàng</th>
                         <th>Thông tin xe</th>
-                        <th>SĐT Tài xế</th>
                         <th class="text-end">Tổng tiền hàng</th>
                         <th class="text-end">Phí bốc xếp</th>
                         <th class="text-end">Tổng thanh toán</th>
@@ -102,7 +101,6 @@
                                 <td class="text-center align-middle">@(item.NgayTaoDon?.ToString("dd/MM/yyyy"))</td>
                                 <td class="align-middle">@item.TenKhachHang</td>
                                 <td class="align-middle">@item.HoTenTaiXe</td>
-                                <td class="align-middle">@item.SoDienThoaiTaiXe</td>
                                 <td class="text-end align-middle text-dark">@(item.ThanhTienHang > 0 ? item.ThanhTienHang.ToString("N0") : "0")</td>
                                 <td class="text-end align-middle text-dark">@(item.PhiBocXep > 0 ? item.PhiBocXep.ToString("N0") : "0")</td>
                                 <td class="text-end align-middle text-dark">@(item.TongTien > 0 ? item.TongTien.ToString("N0") : "0")</td>
@@ -132,7 +130,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="12" class="text-center py-4 text-muted">
+                            <td colspan="11" class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox fs-2 d-block mb-2"></i>
                                 Không có dữ liệu
                             </td>

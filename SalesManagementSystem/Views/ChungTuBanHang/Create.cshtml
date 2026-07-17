@@ -97,21 +97,29 @@
                         <label class="form-label text-muted fw-semibold small">Hạn giao hàng</label>
                         @Html.TextBoxFor(m => m.ThoiHanGiaoHang, "{0:yyyy-MM-dd}", new { @class = "form-control readonly-cell", type = "date", @readonly = "readonly" })
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label text-muted fw-semibold small">Nhân viên phụ trách</label>
                         @Html.DropDownListFor(m => m.IDNhanVien, (SelectList)ViewBag.NhanVienList, "-- Không có --", new { @class = "form-select readonly-cell", disabled = "disabled" })
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label text-muted fw-semibold small">Trạng thái đơn</label>
                         @Html.DropDownListFor(m => m.TrangThaiDon, (SelectList)ViewBag.TrangThaiList, "-- Không có --", new { @class = "form-select readonly-cell", disabled = "disabled" })
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Phương tiện</label>
+                        @Html.DropDownListFor(m => m.IDPhuongTien, (SelectList)ViewBag.PhuongTienList, "-- Không có --", new { @class = "form-select readonly-cell", disabled = "disabled" })
+                    </div>
+                    <div class="col-md-2 d-none">
                         <label class="form-label text-muted fw-semibold small">SĐT Tài xế</label>
                         <input type="text" class="form-control readonly-cell" value="@Model.SoDienThoaiTaiXe" readonly />
                     </div>
                     <div class="col-md-2">
                         <label class="form-label text-muted fw-semibold small">Thông tin xe</label>
                         <input type="text" class="form-control readonly-cell" value="@Model.HoTenTaiXe" readonly />
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label text-muted fw-semibold small">Ghi chú</label>
+                        @Html.TextAreaFor(m => m.GhiChuDonHang, new { @class = "form-control readonly-cell", rows = 1, @readonly = "readonly" })
                     </div>
                 </div>
             </div>

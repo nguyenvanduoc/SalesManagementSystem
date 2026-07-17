@@ -20,6 +20,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public int SoLanDieuChinh { get; set; }
         public DateTime? NgayDieuChinh { get; set; }
         public string NguoiDieuChinh { get; set; }
+        public string HoTenTaiXe { get; set; }
     }
 
     public class DonDieuChinhHistoryViewModel
@@ -62,5 +63,8 @@ namespace SalesManagementSystem.Models.ViewModels
         public DateTime? NgayTaoDon { get; set; }
         public DateTime? NgayGiaoHang { get; set; }
         public DateTime? ThoiHanGiaoHang { get; set; }
+        public string GhiChu { get; set; }
+        public string HoTenTaiXe { get; set; }
+        public int? IDPhuongTien { get; set; }
     }
 }

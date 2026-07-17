@@ -139,9 +139,17 @@
                             <button class="btn btn-outline-secondary btn-sm" type="button" id="CTBH_btnShowKhoTonKho"><i class="bi bi-search"></i> Chọn kho</button>
                         </div>
                     </div>
-                    <div class="col-md-12">
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Phương tiện</label>
+                        @Html.DropDownListFor(m => m.IDPhuongTien, Model.PhuongTienList, "-- Chọn phương tiện --", new { @class = "form-select" })
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted fw-semibold small">Thông tin xe</label>
+                        @Html.TextBoxFor(m => m.HoTenTaiXe, new { @class = "form-control", placeholder = "Thông tin xe" })
+                    </div>
+                    <div class="col-md-6">
                         <label class="form-label text-muted fw-semibold small">Ghi chú</label>
-                        @Html.TextAreaFor(m => m.GhiChu, new { @class = "form-control readonly-cell", @readonly = "readonly", rows = 2 })
+                        @Html.TextAreaFor(m => m.GhiChu, new { @class = "form-control", rows = 1, placeholder = "Ghi chú..." })
                     </div>
                 </div>
             </div>

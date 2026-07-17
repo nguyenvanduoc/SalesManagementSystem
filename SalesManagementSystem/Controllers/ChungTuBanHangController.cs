@@ -217,6 +217,8 @@ namespace SalesManagementSystem.Controllers
             model.TrangThaiDon = donHang.TrangThaiDon;
             model.SoDienThoaiTaiXe = donHang.SoDienThoaiTaiXe;
             model.HoTenTaiXe = donHang.HoTenTaiXe;
+            model.IDPhuongTien = donHang.IDPhuongTien;
+            model.GhiChuDonHang = donHang.GhiChu;
 
             model.MaKhachHang = khachHang?.MaKhachHang ?? "";
             model.MaSoThue = khachHang?.MaSoThue ?? "";
@@ -231,6 +233,13 @@ namespace SalesManagementSystem.Controllers
                 ViewBag.NhanVienList = new SelectList(nvItems, "ID", "TenNhanVien", model.IDNhanVien);
             }
             ViewBag.TrangThaiList = new SelectList(_donDatHangRepo.GetTrangThaiList(), "ID", "TenTrangThai", model.TrangThaiDon);
+            
+            using (var conn = (new Data.DbConnectionFactory()).CreateConnection())
+            {
+                var ptItems = conn.Query("SELECT ID, ISNULL(MaPhuongTien, '') + ' - ' + ISNULL(TenPhuongTien, '') AS Name FROM DM_PhuongTien ORDER BY STT, TenPhuongTien")
+                    .Select(x => new { ID = (int)x.ID, Name = (string)x.Name }).ToList();
+                ViewBag.PhuongTienList = new SelectList(ptItems, "ID", "Name", model.IDPhuongTien);
+            }
 
             ViewBag.TaiKhoanThanhToanList = _taiKhoanRepo.GetActive().ToList();
             ViewBag.KhoList = new SelectList(khos, "ID", "TenKhoHang", model.IDKho);
@@ -260,6 +269,8 @@ namespace SalesManagementSystem.Controllers
                     model.PhiBocXep = donHang.PhiBocXep;
                     model.SoDienThoaiTaiXe = donHang.SoDienThoaiTaiXe;
                     model.HoTenTaiXe = donHang.HoTenTaiXe;
+                    model.IDPhuongTien = donHang.IDPhuongTien;
+                    model.GhiChuDonHang = donHang.GhiChu;
                 }
             }
             
@@ -280,6 +291,13 @@ namespace SalesManagementSystem.Controllers
                 ViewBag.NhanVienList = new SelectList(nvItems, "ID", "TenNhanVien", model.IDNhanVien);
             }
             ViewBag.TrangThaiList = new SelectList(_donDatHangRepo.GetTrangThaiList(), "ID", "TenTrangThai", model.TrangThaiDon);
+
+            using (var conn = (new Data.DbConnectionFactory()).CreateConnection())
+            {
+                var ptItems = conn.Query("SELECT ID, ISNULL(MaPhuongTien, '') + ' - ' + ISNULL(TenPhuongTien, '') AS Name FROM DM_PhuongTien ORDER BY STT, TenPhuongTien")
+                    .Select(x => new { ID = (int)x.ID, Name = (string)x.Name }).ToList();
+                ViewBag.PhuongTienList = new SelectList(ptItems, "ID", "Name", model.IDPhuongTien);
+            }
 
             ViewBag.TaiKhoanThanhToanList = _taiKhoanRepo.GetActive().ToList();
             ViewBag.KhoList = new SelectList(khos, "ID", "TenKhoHang", model.IDKho);

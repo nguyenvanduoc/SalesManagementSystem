@@ -116,7 +116,7 @@
                         <label class="form-label text-muted fw-semibold small">Hạn giao hàng</label>
                         @Html.TextBoxFor(m => m.ThoiHanGiaoHang, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <label class="form-label text-muted fw-semibold small">
                             Nhân sự phụ trách <span class="text-danger">*</span>
                         </label>
@@ -136,17 +136,17 @@
                             "-- Chọn phương tiện --",
                             new { @class = "form-select" })
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label text-muted fw-semibold small">Thông tin xe</label>
                         @Html.TextBoxFor(m => m.HoTenTaiXe, new { @class = "form-control", placeholder = "Thông tin xe" })
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4 d-none">
                         <label class="form-label text-muted fw-semibold small">SĐT tài xế</label>
                         @Html.TextBoxFor(m => m.SoDienThoaiTaiXe, new { @class = "form-control", placeholder = "SĐT tài xế" })
                     </div>
-                    <div class="col-md-9">
+                    <div class="col-md-12">
                         <label class="form-label text-muted fw-semibold small">Ghi chú</label>
-                        @Html.TextAreaFor(m => m.GhiChu, new { @class = "form-control", rows = 1 })
+                        @Html.TextAreaFor(m => m.GhiChu, new { @class = "form-control", rows = 1, placeholder = "Ghi chú cho đơn hàng..." })
                     </div>
                 </div>
             </div>

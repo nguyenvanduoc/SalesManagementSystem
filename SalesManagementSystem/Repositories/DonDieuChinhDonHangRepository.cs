@@ -466,7 +466,7 @@ END;
 
                 string sql = $@"
                     SELECT
-                        d.ID, d.SoDonHang, d.NgayTaoDon, d.TrangThaiDon,
+                        d.ID, d.SoDonHang, d.NgayTaoDon, d.TrangThaiDon, d.HoTenTaiXe,
                         k.TenKhachHang,
                         d.TongTien,
                         ISNULL((
@@ -564,6 +564,10 @@ END;
                 p.Add("@ThoiHanGiaoHang", model.ThoiHanGiaoHang);
 
                 conn.Execute("sp_DON_DieuChinhDonHang_Save", p, commandType: CommandType.StoredProcedure);
+
+                // Update additional info
+                conn.Execute("UPDATE NS_DonDatHang SET GhiChu = @GhiChu, HoTenTaiXe = @HoTenTaiXe, IDPhuongTien = @IDPhuongTien WHERE ID = @ID", 
+                    new { GhiChu = model.GhiChu, HoTenTaiXe = model.HoTenTaiXe, IDPhuongTien = model.IDPhuongTien, ID = model.IDDonHang });
             }
         }
     }

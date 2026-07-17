@@ -13,6 +13,7 @@
                         <th>Số đơn hàng</th>
                         <th class="text-center">Ngày đơn hàng</th>
                         <th>Khách hàng</th>
+                        <th>Thông tin xe</th>
                         <th class="text-end" style="min-width:120px;">Tổng tiền hiện tại</th>
                         <th class="text-end" style="min-width:120px;">Đã thanh toán</th>
                         <th class="text-end" style="min-width:120px;">Công nợ hiện tại</th>
@@ -73,6 +74,7 @@
                                     @(item.NgayTaoDon.HasValue ? item.NgayTaoDon.Value.ToString("dd/MM/yyyy") : "")
                                 </td>
                                 <td class="align-middle">@item.TenKhachHang</td>
+                                <td class="align-middle text-dark">@item.HoTenTaiXe</td>
                                 <td class="text-end align-middle text-dark">
                                     @item.TongTien.ToString("N0")
                                 </td>
