@@ -25,7 +25,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public string SoDienThoaiNguoiNop { get; set; }
 
         [Required(ErrorMessage = "Số tiền thu không được để trống")]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Số tiền thu phải lớn hơn 0")]
+
         public decimal SoTienThu { get; set; }
 
         public string DienGiai { get; set; }

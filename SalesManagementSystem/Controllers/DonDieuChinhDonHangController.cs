@@ -125,10 +125,12 @@ namespace SalesManagementSystem.Controllers
         }
 
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
-        public ActionResult Adjust(int id)
+        public ActionResult Adjust(int? id)
         {
-            var don = _orderRepo.GetById(id);
-            if (don == null) return HttpNotFound();
+            if (!id.HasValue) return new HttpStatusCodeResult(400, "Thiếu tham số mã đơn hàng.");
+            
+            var don = _orderRepo.GetById(id.Value);
+            if (don == null) return HttpNotFound("Đơn hàng không tồn tại.");
 
             // Chỉ cho phép điều chỉnh các đơn: đã lập CTBH hoặc xuất kho hoặc đã thu tiền
             using (var conn = _db.CreateConnection())
@@ -141,14 +143,14 @@ namespace SalesManagementSystem.Controllers
                                       FROM BAN_PhieuThuKhachHang pt 
                                       INNER JOIN BAN_ChungTuBanHang c2 ON pt.IDChungTuBanHang = c2.ID 
                                       WHERE c2.IDDonDatHang = @ID AND pt.TrangThai = 2 AND pt.IsDeleted = 0 AND c2.IsDeleted = 0
-                                  ) THEN 1 ELSE 0 END", new { ID = id });
+                                  ) THEN 1 ELSE 0 END", new { ID = id.Value });
                 if (!eligible)
                 {
                     return new HttpStatusCodeResult(400, "Đơn hàng chưa đủ điều kiện để thực hiện điều chỉnh (Chưa có chứng từ, chưa xuất kho hoặc chưa thanh toán).");
                 }
             }
 
-            var chiTiets = _orderRepo.GetChiTietByDonId(id);
+            var chiTiets = _orderRepo.GetChiTietByDonId(id.Value);
 
             string maKH = "", tenKH = "", maST = "", diaChi = "", sdT = "";
             if (don.IDKhachHang.HasValue)
@@ -211,7 +213,7 @@ namespace SalesManagementSystem.Controllers
                         FROM BAN_ChungTuBanHang c
                         WHERE c.IDDonDatHang = @ID AND c.IsDeleted = 0
                     ) t
-                    ORDER BY Priority", new { ID = id });
+                    ORDER BY Priority", new { ID = id.Value });
                 if (ngayInfo != null)
                 {
                     ngayGiaoHang = (DateTime?)ngayInfo.NgayGiao;
@@ -237,7 +239,7 @@ namespace SalesManagementSystem.Controllers
                         INNER JOIN DM_KhoHang kh ON c.IDKho = kh.ID
                         WHERE c.IDDonDatHang = @ID AND c.IsDeleted = 0
                     ) t
-                    ORDER BY Priority", new { ID = id });
+                    ORDER BY Priority", new { ID = id.Value });
                 if (khoInfo != null)
                 {
                     currentKhoId = (int)khoInfo.IDKho;

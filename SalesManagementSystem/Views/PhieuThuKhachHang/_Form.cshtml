@@ -173,8 +173,20 @@
             });
         }
 
-        function formatCurrency(num) { return parseFloat(num || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
-        function parseCurrency(str) { return parseFloat(str.replace(/\./g, '').replace(/,/g, '')) || 0; }
+        function formatCurrency(num) {
+            var n = parseFloat(num || 0);
+            var isNegative = n < 0;
+            var str = Math.abs(n).toString();
+            var formatted = str.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            return isNegative ? '-' + formatted : formatted;
+        }
+        function parseCurrency(str) {
+            if (str === null || str === undefined || str === '') return 0;
+            str = str.toString();
+            var isNegative = str.startsWith('-');
+            var val = parseFloat(str.replace(/[^0-9]/g, '')) || 0;
+            return isNegative ? -val : val;
+        }
 
         function calculatePhanBo() {
             var tongThu = parseCurrency($('#SoTienThu').val());
@@ -196,6 +208,7 @@
 
         function autoAllocate() {
             var val = parseCurrency($modal.find('#SoTienThu').val());
+            if (val < 0) return;
             var available = val + (parseFloat(window.tienTraTruoc) || 0);
             var remaining = available;
             $modal.find('.input-phanbo').each(function() {
@@ -216,9 +229,10 @@
         function renderTable(data) {
             var tbody = $modal.find('#tblChungTuBanHang tbody');
             tbody.empty();
+            var tongThu = parseCurrency($('#SoTienThu').val());
             if(!data || data.length === 0) {
                 tbody.html('<tr><td colspan="8" class="text-center text-muted">Không có chứng từ nợ</td></tr>');
-                $modal.find('#divPhanBo').show();
+                if (tongThu >= 0) $modal.find('#divPhanBo').show();
                 return;
             }
             $.each(data, function(i, item) {
@@ -243,7 +257,8 @@
                 
                 tbody.append(tr);
             });
-            $modal.find('#divPhanBo').show();
+            if (tongThu >= 0) $modal.find('#divPhanBo').show();
+            else $modal.find('#divPhanBo').hide();
             
             // Attach events
             $modal.find('.input-phanbo').on('input', function() {
@@ -324,10 +339,26 @@
 
         // Auto allocate when SoTienThu changes
         $modal.find('#SoTienThu').on('input', function () {
-            var val = $(this).val().replace(/[^0-9]/g, '');
+            var rawVal = $(this).val();
+            var isNegative = rawVal.startsWith('-');
+            var val = rawVal.replace(/[^0-9]/g, '');
             if (val !== '') {
                 val = parseInt(val, 10);
+                if (isNegative) val = -val;
                 $(this).val(formatCurrency(val));
+            } else {
+                if (isNegative) $(this).val('-');
+                else $(this).val('');
+            }
+            
+            var tongThu = parseCurrency($(this).val());
+            if (tongThu < 0) {
+                $modal.find('.input-phanbo').val('0');
+                $modal.find('#divPhanBo').hide();
+            } else {
+                if ($modal.find('#IDKhachHang').val()) {
+                    $modal.find('#divPhanBo').show();
+                }
             }
             calculatePhanBo();
         });
@@ -412,12 +443,22 @@
                     DienGiai: 'Tiền dư chuyển thành trả trước'
                 });
             } else if(tienDu < 0) {
-                chiTiets.push({
-                    IDChungTu: null,
-                    LoaiThu: 3, // 3: Sử dụng tiền trả trước
-                    SoTienPhanBo: Math.abs(tienDu),
-                    DienGiai: 'Sử dụng tiền trả trước khách hàng'
-                });
+                if (tongThu >= 0) {
+                    chiTiets.push({
+                        IDChungTu: null,
+                        LoaiThu: 3, // 3: Sử dụng tiền trả trước
+                        SoTienPhanBo: Math.abs(tienDu),
+                        DienGiai: 'Sử dụng tiền trả trước khách hàng'
+                    });
+                } else {
+                    // tongThu < 0
+                    chiTiets.push({
+                        IDChungTu: null,
+                        LoaiThu: 2, // 2: Tiền dư trả trước (giá trị âm để trừ tiền trả trước)
+                        SoTienPhanBo: tienDu,
+                        DienGiai: 'Trừ tiền trả trước và ghi nhận nợ'
+                    });
+                }
             }
             $('#chiTietJson').val(JSON.stringify(chiTiets));
             var $soTien = $modal.find('#SoTienThu');
@@ -426,6 +467,8 @@
 
         function validatePhanBo() {
             var tongThu = parseCurrency($('#SoTienThu').val());
+            if (tongThu < 0) return true;
+
             var tongPhanBo = 0;
             $modal.find('.input-phanbo').each(function() {
                 tongPhanBo += parseCurrency($(this).val());
