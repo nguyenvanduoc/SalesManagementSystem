@@ -84,6 +84,12 @@ namespace SalesManagementSystem.Models.ViewModels
         public decimal TongThu { get; set; }
         public decimal TongChi { get; set; }
         public decimal SoDuHienTai => TongThu - TongChi;
+
+        public decimal SoDuDauKy { get; set; }
+        public decimal ThuTrongKy { get; set; }
+        public decimal ChiTrongKy { get; set; }
+        public decimal SoDuCuoiKy { get; set; }
+        public string GhiChu { get; set; }
     }
 
     public class DashboardCongNoQuaHanViewModel

@@ -303,12 +303,52 @@ BEGIN
     SELECT tk.ID, tk.TenTaiKhoan,
            ISNULL(tk.NganHang, '') AS NganHang,
            ISNULL(tk.SoTaiKhoan, '') AS SoTaiKhoan,
-           ISNULL((SELECT SUM(pth.SoTienThu) FROM BAN_PhieuThuKhachHang pth WHERE pth.IDTaiKhoanThanhToan = tk.ID AND pth.TrangThai = 2 AND pth.IsDeleted = 0 AND pth.NgayThu <= @DenNgay), 0) AS TongThu,
-           ISNULL((SELECT SUM(pc.SoTienChi) FROM KT_PhieuChi pc WHERE pc.IDTaiKhoanThanhToan = tk.ID AND pc.TrangThai = 2 AND pc.IsDeleted = 0 AND pc.NgayChi <= @DenNgay), 0) AS TongChi
+           
+           -- TongThu, TongChi (Toàn thời gian đến DenNgay)
+           ISNULL((SELECT SUM(g.SoTienThu) FROM QUY_GiaoDichTien g WHERE g.IDTaiKhoanThanhToan = tk.ID AND g.NgayGiaoDich <= @DenNgay AND g.IsHuy = 0), 0) AS TongThu,
+           ISNULL((SELECT SUM(g.SoTienChi) FROM QUY_GiaoDichTien g WHERE g.IDTaiKhoanThanhToan = tk.ID AND g.NgayGiaoDich <= @DenNgay AND g.IsHuy = 0), 0) AS TongChi,
+           
+           -- Số dư đầu kỳ
+           ISNULL((
+               SELECT SUM(g.SoTienThu) - SUM(g.SoTienChi)
+               FROM QUY_GiaoDichTien g
+               WHERE g.IDTaiKhoanThanhToan = tk.ID 
+                 AND g.NgayGiaoDich < @TuNgay 
+                 AND g.IsHuy = 0
+           ), 0) AS SoDuDauKy,
+           
+           -- Thu trong kỳ
+           ISNULL((
+               SELECT SUM(g.SoTienThu)
+               FROM QUY_GiaoDichTien g
+               WHERE g.IDTaiKhoanThanhToan = tk.ID 
+                 AND g.NgayGiaoDich >= @TuNgay AND g.NgayGiaoDich <= @DenNgay 
+                 AND g.IsHuy = 0
+           ), 0) AS ThuTrongKy,
+           
+           -- Chi trong kỳ
+           ISNULL((
+               SELECT SUM(g.SoTienChi)
+               FROM QUY_GiaoDichTien g
+               WHERE g.IDTaiKhoanThanhToan = tk.ID 
+                 AND g.NgayGiaoDich >= @TuNgay AND g.NgayGiaoDich <= @DenNgay 
+                 AND g.IsHuy = 0
+           ), 0) AS ChiTrongKy,
+           
+           -- Số dư cuối kỳ
+           ISNULL((
+               SELECT SUM(g.SoTienThu) - SUM(g.SoTienChi)
+               FROM QUY_GiaoDichTien g
+               WHERE g.IDTaiKhoanThanhToan = tk.ID 
+                 AND g.NgayGiaoDich <= @DenNgay 
+                 AND g.IsHuy = 0
+           ), 0) AS SoDuCuoiKy,
+           
+           '' AS GhiChu
+           
     FROM DM_TaiKhoanThanhToan tk
     WHERE tk.IsHoatDong = 1
-    ORDER BY (ISNULL((SELECT SUM(pth2.SoTienThu) FROM BAN_PhieuThuKhachHang pth2 WHERE pth2.IDTaiKhoanThanhToan = tk.ID AND pth2.TrangThai = 2 AND pth2.IsDeleted = 0), 0)
-             - ISNULL((SELECT SUM(pc2.SoTienChi) FROM KT_PhieuChi pc2 WHERE pc2.IDTaiKhoanThanhToan = tk.ID AND pc2.TrangThai = 2 AND pc2.IsDeleted = 0), 0)) DESC;
+    ORDER BY SoDuCuoiKy DESC;
 
     -- 9. Công nợ khách hàng quá hạn (Summary & Top 10)
     SELECT 

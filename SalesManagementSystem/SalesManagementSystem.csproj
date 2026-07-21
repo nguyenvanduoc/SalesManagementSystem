@@ -348,6 +348,7 @@
     <Compile Include="Repositories\Interfaces\ICongNoKhachHangRepository.cs" />
     <Compile Include="Repositories\CongNoKhachHangRepository.cs" />
     <Compile Include="Models\ViewModels\CongNoKhachHangViewModel.cs" />
+    <Compile Include="Models\ViewModels\CongNoKhachHangSP02ViewModel.cs" />
     <Compile Include="Models\ViewModels\CongNoKhachHangDetailViewModel.cs" />
     <Compile Include="Models\ViewModels\CongNoKhachHangDashboardViewModel.cs" />
     <Compile Include="Controllers\CongNoKhachHangController.cs" />

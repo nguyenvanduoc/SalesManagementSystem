@@ -475,7 +475,7 @@
                 <div class="tab-content" id="productTabContent">
                     <div class="tab-pane fade show active" id="sales-pane" role="tabpanel">
                         <div class="table-responsive scroll-box" style="height: 160px; overflow-y: auto; border: 1px solid #f1f5f9;">
-                            <table class="table table-sm table-bordered table-hover align-middle mb-0 text-center" style="font-size:0.75rem">
+                            <table class="table table-sm table-bordered table-hover align-middle mb-0 text-center text-nowrap" style="font-size:0.75rem">
                                 <thead class="table-light sticky-top">
                                     <tr>
                                         <th>Mã SP</th>
@@ -533,20 +533,43 @@
         </div>
     </div>
 
-    <!-- Row 5: Tài khoản, Cảnh báo, Hoạt động -->
+    <!-- Row 4b: Tài khoản thanh toán (Full width) -->
     <div class="row g-2 mt-1">
-        <!-- TÀI KHOẢN THANH TOÁN -->
-        <div class="col-md-4">
+        <div class="col-12">
             <div class="panel-card">
-                <div class="panel-title">TÀI KHOẢN THANH TOÁN</div>
-                <div class="scroll-box" id="listTaiKhoan_@uid">
-                    <!-- Render by JS -->
+                <div class="panel-title d-flex justify-content-between align-items-center mb-0 border-bottom-0 pb-0">
+                    <span class="fw-bold text-primary"><i class="bi bi-bank"></i> TÀI KHOẢN NGÂN HÀNG</span>
+                </div>
+                <div class="table-responsive mt-3" style="max-height: 350px; overflow-y: auto;">
+                    <table class="table table-sm table-bordered table-hover align-middle text-center mb-0 text-nowrap" style="font-size:0.85rem">
+                        <thead class="sticky-top" style="background-color: #e0ebf3; color: #2c3e50; font-weight: bold;">
+                            <tr>
+                                <th style="background-color: #9ac2e6; color: #153243; vertical-align: middle;">Tài khoản</th>
+                                <th style="background-color: #9ac2e6; color: #153243; vertical-align: middle;">Ngân hàng</th>
+                                <th style="background-color: #9ac2e6; color: #153243; vertical-align: middle;">Số dư đầu kỳ</th>
+                                <th style="background-color: #9ac2e6; color: #153243; vertical-align: middle;">Thu</th>
+                                <th style="background-color: #9ac2e6; color: #153243; vertical-align: middle;">Chi</th>
+                                <th style="background-color: #9ac2e6; color: #153243; vertical-align: middle;">Số dư tài khoản</th>
+                                <th style="background-color: #9ac2e6; color: #153243; vertical-align: middle;">Ghi chú</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbTaiKhoan_@uid">
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-3">Đang tải dữ liệu...</td>
+                            </tr>
+                        </tbody>
+                        <tfoot id="tfTaiKhoan_@uid" class="fw-bold" style="background-color: #9ac2e6; color: #153243;">
+                        </tfoot>
+                    </table>
                 </div>
             </div>
         </div>
-        
+    </div>
+
+    <!-- Row 5: Cảnh báo, Hoạt động -->
+    <div class="row g-2 mt-1">
         <!-- CẢNH BÁO HỆ THỐNG -->
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="panel-card" style="background-color: #fffaf0; border: 1px solid #ffe8cc;">
                 <div class="panel-title text-warning"><i class="bi bi-exclamation-triangle-fill me-1"></i> CẢNH BÁO HỆ THỐNG</div>
                 <div class="scroll-box">
@@ -562,7 +585,7 @@
         </div>
         
         <!-- HOẠT ĐỘNG GẦN ĐÂY -->
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="panel-card">
                 <div class="panel-title">HOẠT ĐỘNG GẦN ĐÂY</div>
                 <div class="scroll-box">
@@ -600,7 +623,7 @@
                             <div class="col-4">Nợ lớn nhất: <strong class="text-danger d-block" id="cnkhNoLonNhat_@uid">0₫</strong><span class="text-truncate d-block" style="max-width:100%" id="cnkhTenNoLonNhat_@uid">-</span></div>
                         </div>
                         <div class="table-responsive" style="max-height: 180px; overflow-y: auto;">
-                            <table class="table table-sm table-bordered table-hover align-middle mb-0" style="font-size:0.8rem">
+                            <table class="table table-sm table-bordered table-hover align-middle mb-0 text-nowrap" style="font-size:0.8rem">
                                 <thead class="table-light sticky-top">
                                     <tr>
                                         <th>Khách hàng</th>
@@ -623,7 +646,7 @@
                             <div class="col-4">Nợ lớn nhất: <strong class="text-danger d-block" id="cnnccNoLonNhat_@uid">0₫</strong><span class="text-truncate d-block" style="max-width:100%" id="cnnccTenNoLonNhat_@uid">-</span></div>
                         </div>
                         <div class="table-responsive" style="max-height: 180px; overflow-y: auto;">
-                            <table class="table table-sm table-bordered table-hover align-middle mb-0" style="font-size:0.8rem">
+                            <table class="table table-sm table-bordered table-hover align-middle mb-0 text-nowrap" style="font-size:0.8rem">
                                 <thead class="table-light sticky-top">
                                     <tr>
                                         <th>Nhà cung cấp</th>
@@ -661,7 +684,7 @@
                     <!-- KHỐI 11: Top KH -->
                     <div class="tab-pane fade show active" id="top-cust-pane" role="tabpanel">
                         <div class="table-responsive" style="max-height: 220px; overflow-y: auto;">
-                            <table class="table table-sm table-bordered table-hover align-middle mb-0" style="font-size:0.8rem">
+                            <table class="table table-sm table-bordered table-hover align-middle mb-0 text-nowrap" style="font-size:0.8rem">
                                 <thead class="table-light sticky-top">
                                     <tr>
                                         <th>Tên Khách Hàng</th>
@@ -676,7 +699,7 @@
                     <!-- KHỐI 12: Top NCC -->
                     <div class="tab-pane fade" id="top-vend-pane" role="tabpanel">
                         <div class="table-responsive" style="max-height: 220px; overflow-y: auto;">
-                            <table class="table table-sm table-bordered table-hover align-middle mb-0" style="font-size:0.8rem">
+                            <table class="table table-sm table-bordered table-hover align-middle mb-0 text-nowrap" style="font-size:0.8rem">
                                 <thead class="table-light sticky-top">
                                     <tr>
                                         <th>Tên Nhà Cung Cấp</th>
@@ -896,34 +919,54 @@
             $('#valDongTien_@uid').text(formatMoney(data.ThuChi.DongTienThuan));
             renderBarChart('chartThuChi_@uid', data.ThuChi.ThuChiTheoNgay, 'Dòng tiền thuần', '#3498db');
 
-            // KHỐI 7: TÀI KHOẢN THANH TOÁN
+            // KHỐI 7: TÀI KHOẢN
             var tkHtml = '';
+            var totalDauKy = 0;
+            var totalThu = 0;
+            var totalChi = 0;
+            var totalCuoiKy = 0;
+
             if (data.TaiKhoanThanhToan && data.TaiKhoanThanhToan.length > 0) {
                 data.TaiKhoanThanhToan.forEach(function(tk) {
-                    var amQuy = tk.SoDuHienTai < 0 ? '<span class="badge-amquy float-end">ÂM QUỸ</span>' : '';
-                    var soDuColor = tk.SoDuHienTai < 0 ? 'text-danger' : 'text-success';
-                    var nganHang = tk.NganHang || '';
-                    var soTK = tk.SoTaiKhoan || '';
-                    var subLine = '';
-                    if (nganHang && soTK) subLine = nganHang + ' - ' + soTK;
-                    else if (nganHang) subLine = nganHang;
-                    else if (soTK) subLine = soTK;
-                    var subHtml = subLine ? `<div class="text-muted small" style="font-size:0.75rem">${subLine}</div>` : '';
+                    var amQuyColor = tk.SoDuCuoiKy < 0 ? 'text-danger fw-bold' : 'fw-bold';
+                    var thuStr = tk.ThuTrongKy === 0 ? '-' : formatNumber(tk.ThuTrongKy);
+                    var chiStr = tk.ChiTrongKy === 0 ? '-' : formatNumber(tk.ChiTrongKy);
+                    
+                    totalDauKy += tk.SoDuDauKy;
+                    totalThu += tk.ThuTrongKy;
+                    totalChi += tk.ChiTrongKy;
+                    totalCuoiKy += tk.SoDuCuoiKy;
+
                     tkHtml += `
-                        <div class="account-card" onclick="alert('Tính năng xem chi tiết Sổ Quỹ có sẵn trong menu Sổ Quỹ')">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="fw-bold" style="font-size:0.85rem">${tk.TenTaiKhoan}</span>
-                                ${amQuy}
-                            </div>
-                            ${subHtml}
-                            <div class="text-end fw-bold ${soDuColor}" style="font-size:0.95rem">${formatMoney(tk.SoDuHienTai)}</div>
-                        </div>
+                        <tr style="background-color: #fff;">
+                            <td class="text-center" style="color: #2c3e50;">${tk.TenTaiKhoan}</td>
+                            <td class="text-center" style="color: #2c3e50;">${tk.NganHang || ''}</td>
+                            <td class="text-end" style="color: #2c3e50;">${formatNumber(tk.SoDuDauKy)}</td>
+                            <td class="text-end" style="color: #2c3e50;">${thuStr}</td>
+                            <td class="text-end" style="color: #2c3e50;">${chiStr}</td>
+                            <td class="text-end ${amQuyColor}">${formatNumber(tk.SoDuCuoiKy)}</td>
+                            <td>${tk.GhiChu || ''}</td>
+                        </tr>
                     `;
                 });
+                
+                var tfHtml = `
+                    <tr>
+                        <td class="text-center">Tổng</td>
+                        <td></td>
+                        <td class="text-end">${formatNumber(totalDauKy)}</td>
+                        <td class="text-end">${formatNumber(totalThu)}</td>
+                        <td class="text-end">${formatNumber(totalChi)}</td>
+                        <td class="text-end">${formatNumber(totalCuoiKy)}</td>
+                        <td></td>
+                    </tr>
+                `;
+                $('#tfTaiKhoan_@uid').html(tfHtml);
             } else {
-                tkHtml = '<div class="text-center text-muted small py-3">Không có tài khoản hoạt động.</div>';
+                tkHtml = '<tr><td colspan="7" class="text-center text-muted small py-3">Không có tài khoản hoạt động.</td></tr>';
+                $('#tfTaiKhoan_@uid').empty();
             }
-            $('#listTaiKhoan_@uid').html(tkHtml);
+            $('#tbTaiKhoan_@uid').html(tkHtml);
 
             // KHỐI 8: CẢNH BÁO
             $('#wDonHang_@uid').text(data.CanhBao.DonHangQuaHanGiao);

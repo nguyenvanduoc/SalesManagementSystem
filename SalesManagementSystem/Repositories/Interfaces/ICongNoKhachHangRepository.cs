@@ -11,6 +11,11 @@ namespace SalesManagementSystem.Repositories.Interfaces
             int? idKhachHang,
             int? trangThaiCongNo
         );
+        
+        IEnumerable<CongNoKhachHangSP02ViewModel> GetExportSP02(
+            string tuNgay,
+            string denNgay
+        );
 
         CongNoKhachHangDashboardViewModel GetDashboard(
             string tuNgay,

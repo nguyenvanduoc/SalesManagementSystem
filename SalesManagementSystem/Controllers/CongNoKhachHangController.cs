@@ -187,6 +187,67 @@ namespace SalesManagementSystem.Controllers
             }
         }
 
+        [HttpGet]
+        public ActionResult ExportSP02(string tuNgay = "", string denNgay = "")
+        {
+            if (!PermissionHelper.HasPermission("CongNoKhachHang", LoaiPhanQuyen.Xem))
+            {
+                TempData["ToastType"] = "error";
+                TempData["ToastMessage"] = "Bạn không có quyền thực hiện chức năng này.";
+                return RedirectToAction("Index");
+            }
+
+            try
+            {
+                var list = _repo.GetExportSP02(tuNgay, denNgay).ToList();
+
+                var exportData = list.Select((item, index) => new
+                {
+                    STT = index + 1,
+                    TinhThanh = item.TinhThanh,
+                    TenKhachHang = item.TenKhachHang,
+                    DuDauKy = item.DuDauKy,
+                    DoanhThu = item.DoanhThu,
+                    ThanhToan = item.ThanhToan,
+                    DuCuoiKy = item.DuCuoiKy > 0 ? item.DuCuoiKy : 0,
+                    KhachThanhToanTruoc = item.KhachThanhToanTruoc,
+                    HangChoGiao = item.HangChoGiao,
+                    GhiChu = item.GhiChu
+                }).ToList();
+
+                var variables = new Dictionary<string, object>
+                {
+                    { "TuNgay", string.IsNullOrEmpty(tuNgay) ? "..." : DateTime.Parse(tuNgay).ToString("dd/MM/yyyy") },
+                    { "DenNgay", string.IsNullOrEmpty(denNgay) ? "..." : DateTime.Parse(denNgay).ToString("dd/MM/yyyy") },
+                    { "Ngay", DateTime.Now.Day.ToString("00") },
+                    { "Thang", DateTime.Now.Month.ToString("00") },
+                    { "Nam", DateTime.Now.Year.ToString() }
+                };
+
+                string fileExtension;
+                var fileBytes = _excelExportService.Export(BieuMauConstants.CNKH_SP02, exportData, out fileExtension, variables);
+
+                if (fileBytes == null || fileBytes.Length == 0)
+                {
+                    TempData["ToastType"] = "error";
+                    TempData["ToastMessage"] = "Không tìm thấy biểu mẫu hoặc lỗi khi tạo Excel.";
+                    return RedirectToAction("Index");
+                }
+
+                string contentType = fileExtension == "xls" 
+                    ? "application/vnd.ms-excel" 
+                    : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                return File(fileBytes, contentType, $"BangCongNoPhaiThu_{DateTime.Now:yyyyMMddHHmmss}.{fileExtension}");
+            }
+            catch (Exception ex)
+            {
+                TempData["ToastType"] = "error";
+                TempData["ToastMessage"] = "Lỗi khi xuất excel: " + ex.Message;
+                return RedirectToAction("Index");
+            }
+        }
+
         // GET: /CongNoKhachHang/GetDetail
         public ActionResult GetDetail(int idKhachHang, string tuNgay = "", string denNgay = "")
         {

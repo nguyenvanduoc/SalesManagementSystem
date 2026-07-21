@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Data;
+using System.Data.SqlClient;
 using System.Reflection;
 
 class Program
@@ -16,21 +17,13 @@ class Program
             MethodInfo createConnMethod = factoryType.GetMethod("CreateConnection");
             using (IDbConnection conn = (IDbConnection)createConnMethod.Invoke(factory, null))
             {
-                conn.Open();
-                
                 using (IDbCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "sp_helptext 'sp_KT_PhieuThu_GetTienTraTruocKhachHang'";
-                    using (IDataReader reader = cmd.ExecuteReader())
-                    {
-                        using (StreamWriter writer = new StreamWriter(@"c:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\QuanLyBanHang\SalesManagementSystem\SalesManagementSystem\sp_out2.txt"))
-                        {
-                            while (reader.Read())
-                            {
-                                writer.WriteLine(reader[0].ToString());
-                            }
-                        }
-                    }
+                    string sql = File.ReadAllText(@"c:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\QuanLyBanHang\SalesManagementSystem\SalesManagementSystem\App_Data\sp_CongNoKhachHang_ExportSP02.sql");
+                    cmd.CommandText = sql;
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+                    Console.WriteLine("Altered SP successfully!");
                 }
             }
         }
