@@ -310,7 +310,7 @@
             };
 
             // Hàm mở popup xem sổ chi tiết công nợ
-            window.openCongNoDetail = function (idKhachHang) {
+            window.openCongNoDetail = function (btn, idKhachHang) {
                 var tuNgay = $pane.find('[name="tuNgay"]').val() || '';
                 var denNgay = $pane.find('[name="denNgay"]').val() || '';
                 var $modal = $pane.find('#modalCongNoDetail');
@@ -327,7 +327,7 @@
             };
 
             // Hàm mở popup xem lịch sử thanh toán
-            window.openPaymentHistory = function (idChungTuBanHang) {
+            window.openPaymentHistory = function (btn, idChungTuBanHang) {
                 var $modal = $pane.find('#modalPaymentHistory');
                 var $content = $pane.find('#modalPaymentHistoryContent');
 

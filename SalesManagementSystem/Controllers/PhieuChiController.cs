@@ -501,7 +501,7 @@ namespace SalesManagementSystem.Controllers
                 if (excludeId.HasValue && excludeId.Value > 0)
                 {
                     var phieuChi = _repo.GetByID(excludeId.Value);
-                    if (phieuChi != null && phieuChi.ChiTiets != null)
+                    if (phieuChi != null && phieuChi.ChiTiets != null && phieuChi.TrangThai == 2)
                     {
                         var excessCreated = phieuChi.ChiTiets.Where(x => x.LoaiChi == 2).Sum(x => x.SoTienPhanBo);
                         var prepaymentUsed = phieuChi.ChiTiets.Where(x => x.LoaiChi == 3).Sum(x => x.SoTienPhanBo);

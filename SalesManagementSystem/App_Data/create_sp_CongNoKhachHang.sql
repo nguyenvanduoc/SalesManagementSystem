@@ -239,18 +239,16 @@ BEGIN
         FROM #Ledger
     )
     SELECT 
-        s1.Ngay,
-        s1.SoChungTu,
-        s1.LoaiChungTu,
-        s1.DienGiai,
-        s1.PhaiThu,
-        s1.ThanhToan,
-        -- Running balance calculation
-        @StartBalance + SUM(s2.PhaiThu - s2.ThanhToan) AS ConLai
-    FROM Sorted s1
-    INNER JOIN Sorted s2 ON s2.RowNum <= s1.RowNum
-    GROUP BY s1.RowNum, s1.Ngay, s1.SoChungTu, s1.LoaiChungTu, s1.DienGiai, s1.PhaiThu, s1.ThanhToan
-    ORDER BY s1.RowNum ASC;
+        Ngay,
+        SoChungTu,
+        LoaiChungTu,
+        DienGiai,
+        PhaiThu,
+        ThanhToan,
+        -- Running balance calculation using window function for O(N) performance
+        @StartBalance + SUM(PhaiThu - ThanhToan) OVER (ORDER BY RowNum ROWS UNBOUNDED PRECEDING) AS ConLai
+    FROM Sorted
+    ORDER BY RowNum ASC;
 
     DROP TABLE #Ledger;
 END

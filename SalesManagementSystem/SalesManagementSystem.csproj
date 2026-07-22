@@ -587,6 +587,7 @@
     <Content Include="Views\KHO_HaoHut\_Detail.cshtml" />
     <Content Include="Views\CongNoNCC\_DetailModal.cshtml" />
     <Content Include="Views\CongNoNCC\_HistoryModal.cshtml" />
+    <Content Include="Views\BaoCaoCongNoVanChuyen\_DetailsModal.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />

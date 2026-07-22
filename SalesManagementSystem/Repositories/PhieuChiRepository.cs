@@ -223,6 +223,30 @@ namespace SalesManagementSystem.Repositories
         {
             using (var conn = _db.CreateConnection())
             {
+                // Rollback allocation to PhieuNhap here
+                var trangThai = conn.QueryFirstOrDefault<int?>("SELECT TrangThai FROM KT_PhieuChi WHERE ID = @ID", new { ID = id });
+                if (trangThai.HasValue && trangThai.Value == 2)
+                {
+                    var chiTiets = conn.Query<PhieuChiChiTietViewModel>("SELECT * FROM KT_PhieuChiChiTiet WHERE IDPhieuChi = @ID", new { ID = id }).ToList();
+                    foreach (var ct in chiTiets)
+                    {
+                        if (ct.LoaiChi == 1 && ct.IDPhieuNhap.HasValue)
+                        {
+                            conn.Execute(@"
+                                UPDATE KHO_PhieuNhap
+                                SET DaThanhToan = ISNULL(DaThanhToan, 0) - @SoTienPhanBo,
+                                    ConLai = ISNULL(TongCong, 0) - (ISNULL(DaThanhToan, 0) - @SoTienPhanBo),
+                                    TrangThaiThanhToan = CASE 
+                                        WHEN ISNULL(TongCong, 0) - (ISNULL(DaThanhToan, 0) - @SoTienPhanBo) <= 0 THEN 2 
+                                        WHEN ISNULL(DaThanhToan, 0) - @SoTienPhanBo <= 0 THEN 0 
+                                        ELSE 1 
+                                    END
+                                WHERE ID = @IDPhieuNhap
+                            ", new { SoTienPhanBo = ct.SoTienPhanBo, IDPhieuNhap = ct.IDPhieuNhap });
+                        }
+                    }
+                }
+
                 conn.Execute(
                     "sp_KT_PhieuChi_Huy",
                     new { ID = id, NguoiHuy = userId, LyDoHuy = lyDo },
