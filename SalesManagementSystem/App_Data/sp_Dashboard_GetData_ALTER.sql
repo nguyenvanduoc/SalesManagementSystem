@@ -527,4 +527,19 @@ BEGIN
     LEFT JOIN NS_KhachHang kh ON d.IDKhachHang = kh.ID
     ORDER BY d.NgayTaoDon DESC, d.ID DESC;
 
+    -- 17. DonHangDangDiDuong (Orders on the way)
+    SELECT
+        d.ID,
+        d.SoDonHang,
+        d.NgayTaoDon,
+        kh.TenKhachHang,
+        pt.TenPhuongTien,
+        ISNULL((SELECT SUM(SoLuong) FROM NS_DonDatHangChiTiet WHERE IDDonDatHang = d.ID), 0) AS TongSoLuong,
+        d.TongTien
+    FROM NS_DonDatHang d
+    LEFT JOIN NS_KhachHang kh ON d.IDKhachHang = kh.ID
+    LEFT JOIN DM_PhuongTien pt ON d.IDPhuongTien = pt.ID
+    WHERE d.TrangThaiDon = 2
+    ORDER BY d.NgayTaoDon DESC, d.ID DESC;
+
 END

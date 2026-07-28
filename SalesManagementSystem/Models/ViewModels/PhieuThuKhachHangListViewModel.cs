@@ -23,6 +23,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public int TrangThai { get; set; }
         public DateTime? NgayTao { get; set; }
         public int? NguoiTao { get; set; }
+        public string TenNguoiTao { get; set; }
         public DateTime? NgayCapNhat { get; set; }
         public bool HasDinhKem { get; set; }
         

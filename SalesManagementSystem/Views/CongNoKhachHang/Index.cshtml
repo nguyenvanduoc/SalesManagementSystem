@@ -29,7 +29,7 @@
 <!-- Bộ lọc tìm kiếm -->
 <div class="card shadow-sm mb-4">
     <div class="card-body py-2.5">
-        <form method="get" action="@Url.Action("GetList","CongNoKhachHang")" id="searchFormCongNoKH">
+        <form method="get" action="@Url.Action("GetList","CongNoKhachHang")" id="searchForm">
             <div class="d-flex flex-wrap align-items-end gap-2">
                 
                 <div class="flex-grow-1" style="min-width: 140px; max-width: 170px;">
@@ -211,71 +211,39 @@
                 dropdownParent: $pane
             });
 
-            // Lắng nghe sự kiện Submit bộ lọc
-            $pane.off('submit.cnkh_search', '#searchFormCongNoKH');
-            $pane.on('submit.cnkh_search', '#searchFormCongNoKH', function(e) {
-                e.preventDefault();
-                e.stopImmediatePropagation();
+            // Cập nhật dashboard sau khi lưới dữ liệu thay đổi
+            $(document).off('ajaxComplete.cnkh');
+            $(document).on('ajaxComplete.cnkh', function (e, xhr, settings) {
+                if (settings.url && settings.url.indexOf('/CongNoKhachHang/GetList') !== -1) {
+                    var $pane = $('.tab-pane.active');
+                    var $card = $pane.find('#divCongNoKhachHangListCard');
+                    if ($card.length > 0) {
+                        var tongPhaiThu = parseFloat($card.attr('data-tong-phai-thu') || 0);
+                        var daThu = parseFloat($card.attr('data-da-thu') || 0);
+                        var conPhaiThu = parseFloat($card.attr('data-con-phai-thu') || 0);
+                        var khachTraTruoc = parseFloat($card.attr('data-khach-tra-truoc') || 0);
+                        var congNoQuaHan = parseFloat($card.attr('data-cong-no-qua-han') || 0);
 
-                var $form = $(this);
-                var action = $form.attr('action');
-                var pageSize = $pane.find('.page-size-select').val() || 20;
+                        var formatMoney = function (num) {
+                            return Math.round(num).toLocaleString('vi-VN');
+                        };
 
-                var params = $form.serializeArray();
-                params = params.filter(function (item) {
-                    return item.name !== 'page' && item.name !== 'pageSize';
-                });
-                params.push({ name: 'page', value: 1 });
-                params.push({ name: 'pageSize', value: pageSize });
-                var url = action + '?' + $.param(params);
-
-                var $grid = $pane.find('#table-container');
-                if (typeof showLoadingLocal === 'function') showLoadingLocal($grid);
-
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                    success: function (res) {
-                        if (typeof hideLoadingLocal === 'function') hideLoadingLocal($grid);
-                        $grid.html(res);
-
-                        // Cập nhật các thẻ Dashboard từ dữ liệu mới của Ajax
-                        var $card = $grid.find('#divCongNoKhachHangListCard');
-                        if ($card.length > 0) {
-                            var tongPhaiThu = parseFloat($card.attr('data-tong-phai-thu') || 0);
-                            var daThu = parseFloat($card.attr('data-da-thu') || 0);
-                            var conPhaiThu = parseFloat($card.attr('data-con-phai-thu') || 0);
-                            var khachTraTruoc = parseFloat($card.attr('data-khach-tra-truoc') || 0);
-                            var congNoQuaHan = parseFloat($card.attr('data-cong-no-qua-han') || 0);
-
-                            var formatMoney = function (num) {
-                                return Math.round(num).toLocaleString('vi-VN');
-                            };
-
-                            $pane.find('#lblTongPhaiThu').html(formatMoney(tongPhaiThu) + ' <small class="fs-6 fw-normal text-muted">VND</small>');
-                            $pane.find('#lblDaThu').html(formatMoney(daThu) + ' <small class="fs-6 fw-normal text-muted">VND</small>');
-                            $pane.find('#lblConPhaiThu').html(formatMoney(conPhaiThu) + ' <small class="fs-6 fw-normal text-muted">VND</small>');
-                            $pane.find('#lblKhachTraTruoc').html(formatMoney(khachTraTruoc) + ' <small class="fs-6 fw-normal text-muted">VND</small>');
-                            $pane.find('#lblCongNoQuaHan').html(formatMoney(congNoQuaHan) + ' <small class="fs-6 fw-normal text-muted">VND</small>');
-                        }
-
-                        if (typeof reInitPlugins === 'function') reInitPlugins($pane.attr('id'));
-                    },
-                    error: function() {
-                        if (typeof hideLoadingLocal === 'function') hideLoadingLocal($grid);
-                        if (typeof showToast === 'function') showToast('error', 'Lỗi khi nạp dữ liệu công nợ.');
+                        $pane.find('#lblTongPhaiThu').html(formatMoney(tongPhaiThu) + ' <small class="fs-6 fw-normal text-muted">VND</small>');
+                        $pane.find('#lblDaThu').html(formatMoney(daThu) + ' <small class="fs-6 fw-normal text-muted">VND</small>');
+                        $pane.find('#lblConPhaiThu').html(formatMoney(conPhaiThu) + ' <small class="fs-6 fw-normal text-muted">VND</small>');
+                        $pane.find('#lblKhachTraTruoc').html(formatMoney(khachTraTruoc) + ' <small class="fs-6 fw-normal text-muted">VND</small>');
+                        $pane.find('#lblCongNoQuaHan').html(formatMoney(congNoQuaHan) + ' <small class="fs-6 fw-normal text-muted">VND</small>');
                     }
-                });
+                }
             });
 
             // Nút Làm mới bộ lọc
-            $pane.off('click.cnkh_reset', '.btn-reset');
-            $pane.on('click.cnkh_reset', '.btn-reset', function(e) {
+            $(document).off('click.cnkh_reset', '.tab-pane.active .btn-reset');
+            $(document).on('click.cnkh_reset', '.tab-pane.active .btn-reset', function(e) {
                 e.preventDefault();
                 e.stopImmediatePropagation();
 
-                var $form = $pane.find('#searchFormCongNoKH');
+                var $form = $(this).closest('.tab-pane').find('#searchForm');
                 if ($form.length > 0) {
                     $form[0].reset();
                     $form.find('.select2').val('').trigger('change');
@@ -284,21 +252,21 @@
             });
 
             // Sự kiện xuất Excel
-            $pane.off('click.cnkh_export', '.btn-export-excel');
-            $pane.on('click.cnkh_export', '.btn-export-excel', function(e) {
+            $(document).off('click.cnkh_export', '.tab-pane.active .btn-export-excel');
+            $(document).on('click.cnkh_export', '.tab-pane.active .btn-export-excel', function(e) {
                 e.preventDefault();
                 e.stopImmediatePropagation();
-                var $form = $pane.find('#searchFormCongNoKH');
+                var $form = $(this).closest('.tab-pane').find('#searchForm');
                 var params = $form.serialize();
                 window.location.href = '@Url.Action("ExportExcel", "CongNoKhachHang")?' + params;
             });
             
             // Sự kiện xuất SP02
-            $pane.off('click.cnkh_export_sp02', '.btn-export-sp02');
-            $pane.on('click.cnkh_export_sp02', '.btn-export-sp02', function(e) {
+            $(document).off('click.cnkh_export_sp02', '.tab-pane.active .btn-export-sp02');
+            $(document).on('click.cnkh_export_sp02', '.tab-pane.active .btn-export-sp02', function(e) {
                 e.preventDefault();
                 e.stopImmediatePropagation();
-                var $form = $pane.find('#searchFormCongNoKH');
+                var $form = $(this).closest('.tab-pane').find('#searchForm');
                 var params = $form.serialize();
                 window.location.href = '@Url.Action("ExportSP02", "CongNoKhachHang")?' + params;
             });
@@ -306,7 +274,10 @@
             // Gắn sự kiện khi form submit qua XHR hoặc khi click tìm kiếm
             // Override window.loadData để tự động reload
             window.loadData = function() {
-                $pane.find('#searchFormCongNoKH').submit();
+                var $activePane = $('.tab-pane.active');
+                if ($activePane.length > 0) {
+                    $activePane.find('#searchForm').trigger('submit');
+                }
             };
 
             // Hàm mở popup xem sổ chi tiết công nợ

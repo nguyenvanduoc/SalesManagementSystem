@@ -23,6 +23,7 @@ namespace SalesManagementSystem.Repositories
                     conn.Execute("IF COL_LENGTH('BAN_ChungTuBanHang_ChiTiet', 'DonGiaBocXep') IS NULL ALTER TABLE BAN_ChungTuBanHang_ChiTiet ADD DonGiaBocXep DECIMAL(18,2) NULL");
                     conn.Execute("IF COL_LENGTH('BAN_ChungTuBanHang_ChiTiet', 'ThanhTienBocXep') IS NULL ALTER TABLE BAN_ChungTuBanHang_ChiTiet ADD ThanhTienBocXep DECIMAL(18,2) NULL");
                     conn.Execute("IF COL_LENGTH('BAN_ChungTuBanHang_ChiTiet', 'ThanhTienHang') IS NULL ALTER TABLE BAN_ChungTuBanHang_ChiTiet ADD ThanhTienHang DECIMAL(18,2) NULL");
+
                 }
             }
             catch { }

@@ -130,7 +130,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="11" class="text-center py-4 text-muted">
+                            <td colspan="13" class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox fs-2 d-block mb-2"></i>
                                 Không có dữ liệu
                             </td>
@@ -141,7 +141,7 @@
                 {
                     <tfoot>
                         <tr style="background:#f4f6f9; font-weight:bold;">
-                            <td colspan="8" class="text-end">Tổng cộng:</td>
+                            <td colspan="7" class="text-end">Tổng cộng:</td>
                             <td class="text-end" style="color: #1a5276; font-size: 1.1em;">@(Model.Items.Sum(x => x.ThanhTienHang).ToString("N0"))</td>
                             <td class="text-end" style="color: #1a5276; font-size: 1.1em;">@(Model.Items.Sum(x => x.PhiBocXep).ToString("N0"))</td>
                             <td class="text-end" style="color: #1a5276; font-size: 1.1em;">@(Model.Items.Sum(x => x.TongTien).ToString("N0"))</td>

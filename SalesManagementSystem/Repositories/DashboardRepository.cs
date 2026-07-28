@@ -133,6 +133,9 @@ namespace SalesManagementSystem.Repositories
 
                     // 16. DonHangGanDay (Recent Orders)
                     data.DonHangGanDay = multi.Read<DonDatHangViewModel>().ToList();
+
+                    // 17. DonHangDangDiDuong
+                    data.DonHangDangDiDuong = multi.Read<DonDatHangViewModel>().ToList();
                 }
             }
 

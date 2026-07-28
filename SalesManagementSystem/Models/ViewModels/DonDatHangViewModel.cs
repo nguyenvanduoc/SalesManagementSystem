@@ -32,5 +32,6 @@ namespace SalesManagementSystem.Models.ViewModels
         public string HoTenTaiXe { get; set; }
         public int? IDPhuongTien { get; set; }
         public string TenPhuongTien { get; set; }
+        public decimal TongSoLuong { get; set; }
     }
 }

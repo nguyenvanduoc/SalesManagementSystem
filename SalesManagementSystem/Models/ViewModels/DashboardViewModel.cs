@@ -185,5 +185,6 @@ namespace SalesManagementSystem.Models.ViewModels
         public List<DashboardChartItem> TopBanChay { get; set; } = new List<DashboardChartItem>();
         public List<DashboardChartItem> GiaVonTheoThoiGian { get; set; } = new List<DashboardChartItem>();
         public List<DonDatHangViewModel> DonHangGanDay { get; set; } = new List<DonDatHangViewModel>();
+        public List<DonDatHangViewModel> DonHangDangDiDuong { get; set; } = new List<DonDatHangViewModel>();
     }
 }

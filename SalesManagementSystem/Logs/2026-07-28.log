@@ -1,0 +1,25 @@
+﻿--------------------------------------------------
+[Thời gian]       : 28/07/2026 21:44:02
+[Username]        : 1
+[Controller]      : Dashboard
+[Action]          : GetData
+[URL]             : https://localhost:44326/Dashboard/GetData
+[Message]         : Invalid object name 'DM_PhuongTienVanTai'.
+[InnerException]  : None
+[StackTrace]      : 
+   at System.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at System.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at System.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at System.Data.SqlClient.SqlDataReader.TryHasMoreRows(Boolean& moreRows)
+   at System.Data.SqlClient.SqlDataReader.TryReadInternal(Boolean setTimeout, Boolean& more)
+   at System.Data.SqlClient.SqlDataReader.TryNextResult(Boolean& more)
+   at System.Data.SqlClient.SqlDataReader.NextResult()
+   at Dapper.SqlMapper.GridReader.OnAfterGrid(Int32 index) in /_/Dapper/SqlMapper.GridReader.cs:line 450
+   at Dapper.SqlMapper.GridReader.<ReadDeferred>d__58`1.MoveNext() in /_/Dapper/SqlMapper.GridReader.cs:line 406
+   at System.Collections.Generic.List`1..ctor(IEnumerable`1 collection)
+   at System.Linq.Enumerable.ToList[TSource](IEnumerable`1 source)
+   at Dapper.SqlMapper.GridReader.ReadImpl[T](Type type, Boolean buffered) in /_/Dapper/SqlMapper.GridReader.cs:line 205
+   at SalesManagementSystem.Repositories.DashboardRepository.GetDashboardData(Nullable`1 tuNgay, Nullable`1 denNgay) in C:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\QuanLyBanHang\SalesManagementSystem\SalesManagementSystem\Repositories\DashboardRepository.cs:line 135
+   at SalesManagementSystem.Controllers.DashboardController.GetData(String tuNgay, String denNgay) in C:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\QuanLyBanHang\SalesManagementSystem\SalesManagementSystem\Controllers\DashboardController.cs:line 48
+--------------------------------------------------
+
