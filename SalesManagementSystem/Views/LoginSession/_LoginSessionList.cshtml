@@ -30,7 +30,33 @@
                         <td class="text-center">
                             @if (!item.ThoiGianLogout.HasValue)
                             {
-                                <span class="badge bg-success">Đang trực tuyến</span>
+                                bool isReallyActive = true;
+                                if (item.LastActiveTime.HasValue)
+                                {
+                                    var timeSinceLastActive = DateTime.Now - item.LastActiveTime.Value;
+                                    if (timeSinceLastActive.TotalMinutes > 5)
+                                    {
+                                        isReallyActive = false;
+                                    }
+                                }
+                                else
+                                {
+                                    // Không có ping nào, xem như đang hoạt động hoặc dùng login time (ít hơn 5 phút trước)
+                                    var timeSinceLogin = DateTime.Now - item.ThoiGianLogin;
+                                    if (timeSinceLogin.TotalMinutes > 5)
+                                    {
+                                        isReallyActive = false;
+                                    }
+                                }
+
+                                if (isReallyActive)
+                                {
+                                    <span class="badge bg-success">Đang trực tuyến</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark" title="Hết tương tác / Treo máy">Treo máy (Away)</span>
+                                }
                             }
                             else
                             {

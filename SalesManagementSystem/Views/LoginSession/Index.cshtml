@@ -1,4 +1,4 @@
-﻿@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.AclLoginSessionViewModel>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.AclLoginSessionViewModel>
 @{
     ViewBag.Title = "Lịch sử đăng nhập";
 }
@@ -41,7 +41,7 @@
             // Xử lý nút Kích
             $pane.on('click', '.btn-kick', function () {
                 var id = $(this).data('id');
-                if (confirm('Bạn có chắc chắn muốn ngắt phiên đăng nhập của người dùng này? Họ sẽ bị văng ra ngoài ngay lập tức.')) {
+                showConfirm('Bạn có chắc chắn muốn ngắt phiên đăng nhập của người dùng này? Họ sẽ bị văng ra ngoài ngay lập tức.', function() {
                     $.ajax({
                         url: '@Url.Action("KickUser", "LoginSession")',
                         type: 'POST',
@@ -58,7 +58,7 @@
                             showToast('error', 'Lỗi hệ thống khi ngắt phiên.');
                         }
                     });
-                }
+                });
             });
         })();
     </script>

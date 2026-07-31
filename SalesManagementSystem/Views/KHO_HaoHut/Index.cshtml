@@ -1,5 +1,7 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.HaoHutHangHoaViewModel>
 @{
     ViewBag.Title = "Quản lý hao hụt hàng hóa";
+    var uid = Guid.NewGuid().ToString("N");
 }
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
@@ -38,133 +40,103 @@
 
 <div class="card shadow-sm mb-3">
     <div class="card-body py-2">
-        <form id="frmFilter" class="row g-2 align-items-end">
-            <div class="col-md-2">
-                <label class="form-label text-muted small mb-1">Thời gian</label>
-                <select class="form-select form-select-sm ddl-thoi-gian">
-                    <option value="current_month">Đầu tháng đến hiện tại</option>
-                    <option value="month_1">Tháng 1</option>
-                    <option value="month_2">Tháng 2</option>
-                    <option value="month_3">Tháng 3</option>
-                    <option value="month_4">Tháng 4</option>
-                    <option value="month_5">Tháng 5</option>
-                    <option value="month_6">Tháng 6</option>
-                    <option value="month_7">Tháng 7</option>
-                    <option value="month_8">Tháng 8</option>
-                    <option value="month_9">Tháng 9</option>
-                    <option value="month_10">Tháng 10</option>
-                    <option value="month_11">Tháng 11</option>
-                    <option value="month_12">Tháng 12</option>
-                    <option value="quarter_1">Quý 1</option>
-                    <option value="quarter_2">Quý 2</option>
-                    <option value="quarter_3">Quý 3</option>
-                    <option value="quarter_4">Quý 4</option>
-                    <option value="current_year">Từ đầu năm đến hiện tại</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label text-muted small mb-1">Từ ngày</label>
-                <input type="date" class="form-control form-control-sm" id="TuNgay" name="TuNgay" value="@(new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).ToString("yyyy-MM-dd"))" />
-            </div>
-            <div class="col-md-2">
-                <label class="form-label text-muted small mb-1">Đến ngày</label>
-                <input type="date" class="form-control form-control-sm" id="DenNgay" name="DenNgay" value="@(DateTime.Now.ToString("yyyy-MM-dd"))" />
-            </div>
-            <div class="col-md-2">
-                <label class="form-label text-muted small mb-1">Loại hao hụt</label>
-                <select class="form-select form-select-sm" id="LoaiHaoHut" name="LoaiHaoHut">
-                    <option value="0">Tất cả</option>
-                    <option value="1">Hao hụt bán hàng</option>
-                    <option value="2">Hao hụt tồn kho</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label text-muted small mb-1">Kho</label>
-                <select class="form-select form-select-sm select2" id="IDKho" name="IDKho">
-                    <option value="0">Tất cả</option>
-                    @if (ViewBag.KhoHangs != null)
-                    {
-                        foreach (var item in ViewBag.KhoHangs)
+        <form id="searchForm" action="@Url.Action("GetList")" method="get">
+            <div class="row gx-2 gy-2 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label text-muted small mb-1">Thời gian</label>
+                    <select class="form-select form-select-sm ddl-thoi-gian">
+                        <option value="current_month">Đầu tháng đến hiện tại</option>
+                        <option value="month_1">Tháng 1</option>
+                        <option value="month_2">Tháng 2</option>
+                        <option value="month_3">Tháng 3</option>
+                        <option value="month_4">Tháng 4</option>
+                        <option value="month_5">Tháng 5</option>
+                        <option value="month_6">Tháng 6</option>
+                        <option value="month_7">Tháng 7</option>
+                        <option value="month_8">Tháng 8</option>
+                        <option value="month_9">Tháng 9</option>
+                        <option value="month_10">Tháng 10</option>
+                        <option value="month_11">Tháng 11</option>
+                        <option value="month_12">Tháng 12</option>
+                        <option value="quarter_1">Quý 1</option>
+                        <option value="quarter_2">Quý 2</option>
+                        <option value="quarter_3">Quý 3</option>
+                        <option value="quarter_4">Quý 4</option>
+                        <option value="current_year">Từ đầu năm đến hiện tại</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small mb-1">Từ ngày</label>
+                    <input type="date" class="form-control form-control-sm" name="tuNgay" value="@ViewBag.TuNgay" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small mb-1">Đến ngày</label>
+                    <input type="date" class="form-control form-control-sm" name="denNgay" value="@ViewBag.DenNgay" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small mb-1">Loại hao hụt</label>
+                    <select class="form-select form-select-sm" name="loaiHaoHut">
+                        <option value="0" @(ViewBag.LoaiHaoHut == 0 ? "selected" : "")>Tất cả</option>
+                        <option value="1" @(ViewBag.LoaiHaoHut == 1 ? "selected" : "")>Hao hụt bán hàng</option>
+                        <option value="2" @(ViewBag.LoaiHaoHut == 2 ? "selected" : "")>Hao hụt tồn kho</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small mb-1">Kho</label>
+                    <select class="form-select form-select-sm select2" name="idKho">
+                        <option value="0">Tất cả</option>
+                        @if (ViewBag.KhoHangs != null)
                         {
-                            <option value="@item.ID">@item.TenKhoHang</option>
+                            foreach (var item in ViewBag.KhoHangs)
+                            {
+                                <option value="@item.ID" @(ViewBag.IDKho == item.ID ? "selected" : "")>@item.TenKhoHang</option>
+                            }
                         }
-                    }
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label text-muted small mb-1">Số chứng từ</label>
-                <input type="text" class="form-control form-control-sm" id="SoChungTu" name="SoChungTu" placeholder="Nhập số CT..." />
-            </div>
-            <div class="col-md-2">
-                <label class="form-label text-muted small mb-1">Sản phẩm</label>
-                <select class="form-select form-select-sm select2" id="IDSanPham" name="IDSanPham">
-                    <option value="0">Tất cả</option>
-                    @if (ViewBag.SanPhams != null)
-                    {
-                        foreach (var item in ViewBag.SanPhams)
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small mb-1">Số chứng từ</label>
+                    <input type="text" class="form-control form-control-sm" name="soChungTu" placeholder="Nhập số CT..." value="@ViewBag.SoChungTu" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small mb-1">Sản phẩm</label>
+                    <select class="form-select form-select-sm select2" name="idSanPham">
+                        <option value="0">Tất cả</option>
+                        @if (ViewBag.SanPhams != null)
                         {
-                            <option value="@item.ID">@item.TenSanPham</option>
+                            foreach (var item in ViewBag.SanPhams)
+                            {
+                                <option value="@item.ID" @(ViewBag.IDSanPham == item.ID ? "selected" : "")>@item.TenSanPham</option>
+                            }
                         }
-                    }
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label text-muted small mb-1">Trạng thái</label>
-                <select class="form-select form-select-sm" id="TrangThai" name="TrangThai">
-                    <option value="0">Tất cả</option>
-                    <option value="1">Lưu nháp</option>
-                    <option value="2">Đã ghi nhận</option>
-                    <option value="3">Đã hủy</option>
-                </select>
-            </div>
-            <div class="col-md-auto d-flex gap-2">
-                <button type="button" class="btn btn-sm text-white px-3"
-                        style="background-color:#2998e4;border:none;" onclick="loadData()">
-                    <i class="bi bi-search"></i> Tìm kiếm
-                </button>
-                <button type="button" onclick="resetFilter()" class="btn btn-sm text-white px-3 btn-reset"
-                        style="background-color:#f1c40f;border:none;">
-                    Làm mới
-                </button>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted small mb-1">Trạng thái</label>
+                    <select class="form-select form-select-sm" name="trangThai">
+                        <option value="0" @(ViewBag.TrangThai == 0 ? "selected" : "")>Tất cả</option>
+                        <option value="1" @(ViewBag.TrangThai == 1 ? "selected" : "")>Lưu nháp</option>
+                        <option value="2" @(ViewBag.TrangThai == 2 ? "selected" : "")>Đã ghi nhận</option>
+                        <option value="3" @(ViewBag.TrangThai == 3 ? "selected" : "")>Đã hủy</option>
+                    </select>
+                </div>
+                <div class="col-md-auto d-flex gap-2">
+                    <button type="submit" class="btn btn-sm text-white px-3 shadow-sm"
+                            style="background-color:#2998e4;border:none;">
+                        <i class="bi bi-search"></i> Tìm kiếm
+                    </button>
+                    <button type="button" class="btn btn-sm text-white px-3 btn-reset shadow-sm"
+                            style="background-color:#f1c40f;border:none;">
+                        Làm mới
+                    </button>
+                </div>
             </div>
         </form>
     </div>
 </div>
 
-<div id="listContainer">
-    <div class="card shadow-sm border-0">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table id="tblHaoHut" class="table table-custom table-bordered table-hover mb-0 align-middle" style="width:100%; min-width:1000px;">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="text-center" style="width:100px;">Thao tác</th>
-                            <th class="text-center" style="width:50px;">STT</th>
-                            <th>Số chứng từ</th>
-                            <th>Ngày hao hụt</th>
-                            <th>Loại hao hụt</th>
-                            <th>Kho</th>
-                            <th>Khách hàng</th>
-                            <th>Đơn hàng</th>
-                            <th class="text-end">Tổng SL</th>
-                            <th class="text-end">Tổng tiền</th>
-                            <th class="text-center">Trạng thái</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td colspan="11" class="text-center p-5">
-                                <div class="spinner-border text-primary me-2" role="status"></div>
-                                <span class="text-muted">Đang tải dữ liệu...</span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="card-footer bg-white py-2" id="paginationContainer">
-        </div>
-    </div>
+<div id="table-container">
+    @Html.Partial("_HaoHutList", Model)
 </div>
 
 <!-- Modal container -->
@@ -172,224 +144,75 @@
 
 @section Scripts {
     <script>
-        var currentPage = 1;
-        var pageSize = 20;
-
+    <script>
         $(document).ready(function () {
             $('.select2').select2({ theme: 'bootstrap-5' });
 
-            loadData();
-        });
-
-        function loadData(page) {
-            if (page) currentPage = page;
-            var pageSize = $('#PageSize').length > 0 ? $('#PageSize').val() : 20;
-
-            var $tbody = $('#tblHaoHut tbody');
-            if ($tbody.length > 0) {
-                $tbody.html('<tr><td colspan="11" class="text-center p-5"><div class="spinner-border text-primary me-2" role="status"></div><span class="text-muted">Đang tải dữ liệu...</span></td></tr>');
-            }
-
-            var tuNgay = $('#TuNgay').val();
-            var denNgay = $('#DenNgay').val();
-            
-            if (denNgay && !denNgay.includes(':')) {
-                denNgay = denNgay + ' 23:59:59';
-            }
-
-            var filter = {
-                TuNgay: tuNgay,
-                DenNgay: denNgay,
-                LoaiHaoHut: $('#LoaiHaoHut').val(),
-                IDKho: $('#IDKho').val(),
-                IDSanPham: $('#IDSanPham').val(),
-                SoChungTu: $('#SoChungTu').val(),
-                TrangThai: $('#TrangThai').val(),
-                Skip: (currentPage - 1) * pageSize,
-                Take: pageSize
-            };
-
-            showLoading();
-            $.ajax({
-                url: '@Url.Action("GetList", "KHO_HaoHut")',
-                type: 'POST',
-                data: filter,
-                success: function (res) {
-                    if (res.success) {
-                        renderGrid(res.data, res.total);
-                    } else {
-                        showToast('error', res.message);
-                    }
-                },
-                complete: function () {
-                    hideLoading();
-                }
+            var $form = $('#searchForm');
+            $('.btn-reset').on('click', function() {
+                $form[0].reset();
+                $form.find('select').val('0').trigger('change');
+                $form.find('.ddl-thoi-gian').val('current_month');
+                $form.find('input[name="tuNgay"]').val('@(new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).ToString("yyyy-MM-dd"))');
+                $form.find('input[name="denNgay"]').val('@(DateTime.Now.ToString("yyyy-MM-dd"))');
+                $form.trigger('submit');
             });
-        }
+            
+            // Xử lý thay đổi thời gian tương tự PhieuNhapKho
+            var ddlThoiGian = $('.ddl-thoi-gian')[0];
+            var txtTuNgay = $('input[name="tuNgay"]')[0];
+            var txtDenNgay = $('input[name="denNgay"]')[0];
+            
+            function fDate(y, m, d) {
+                var sm = m < 10 ? '0' + m : m;
+                var sd = d < 10 ? '0' + d : d;
+                return y + '-' + sm + '-' + sd;
+            }
 
-        function renderGrid(data, total) {
-            var html = '';
+            function getDays(y, m) {
+                var days = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+                if (m === 2 && ((y % 4 === 0 && y % 100 !== 0) || y % 400 === 0)) return 29;
+                return days[m];
+            }
 
-            if (data && data.length > 0) {
-                $.each(data, function (i, item) {
-                    html += '<tr>';
-                    html += '<td class="text-center align-middle">';
-                    html += '<div class="dropdown dropdown-hover d-inline-block">';
-                    html += '  <button class="btn btn-sm btn-light border dropdown-toggle-hide-arrow shadow-sm" type="button" data-bs-toggle="dropdown" data-bs-boundary="window" style="padding:2px 6px;">';
-                    html += '    <i class="bi bi-grid-3x3-gap-fill text-dark"></i>';
-                    html += '  </button>';
-                    html += '  <ul class="dropdown-menu shadow">';
-                    html += '    <li><h6 class="dropdown-header text-uppercase fw-bold text-dark">Thao tác</h6></li>';
-                    html += '    <li><hr class="dropdown-divider"></li>';
+            if (ddlThoiGian && txtTuNgay && txtDenNgay) {
+                $(ddlThoiGian).on('change', function() {
+                    var val = this.value;
+                    if (!val) return;
                     
-                    // 1. Xem chi tiết
-                    html += '    <li><a class="dropdown-item" href="javascript:void(0)" onclick="openDetail(' + item.ID + ')"><i class="bi bi-eye me-2 text-primary"></i> Xem chi tiết</a></li>';
+                    var now = new Date();
+                    var y = now.getFullYear();
+                    var s = '', e = '';
                     
-                    // 2. Cập nhật (Nháp)
-                    if (item.TrangThai == 1) {
-                        html += '    <li><a class="dropdown-item" href="javascript:void(0)" onclick="openEdit(' + item.ID + ')"><i class="bi bi-pencil me-2 text-warning"></i> Cập nhật</a></li>';
+                    if (val === 'current_year') {
+                        s = fDate(y, 1, 1);
+                        e = fDate(now.getFullYear(), now.getMonth() + 1, now.getDate());
+                    } else if (val === 'current_month') {
+                        var cm = now.getMonth() + 1;
+                        s = fDate(y, cm, 1);
+                        e = fDate(now.getFullYear(), now.getMonth() + 1, now.getDate());
+                    } else if (val.indexOf('month_') === 0) {
+                        var m = parseInt(val.replace('month_', ''), 10);
+                        s = fDate(y, m, 1);
+                        e = fDate(y, m, getDays(y, m));
+                    } else if (val.indexOf('quarter_') === 0) {
+                        var q = parseInt(val.replace('quarter_', ''), 10);
+                        var startM = (q - 1) * 3 + 1;
+                        var endM = startM + 2;
+                        s = fDate(y, startM, 1);
+                        e = fDate(y, endM, getDays(y, endM));
                     }
-                    
-                    // 3. Xóa (Nháp)
-                    if (item.TrangThai == 1) {
-                        html += '    <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="deleteHaoHut(' + item.ID + ')"><i class="bi bi-trash me-2 text-danger"></i> Xóa</a></li>';
+
+                    if (s && e) {
+                        if (txtTuNgay._flatpickr) txtTuNgay._flatpickr.setDate(s);
+                        else { $(txtTuNgay).val(s).trigger('change'); }
+                        
+                        if (txtDenNgay._flatpickr) txtDenNgay._flatpickr.setDate(e);
+                        else { $(txtDenNgay).val(e).trigger('change'); }
                     }
-                    
-                    // 4. Hủy ghi nhận (Đã ghi nhận)
-                    if (item.TrangThai == 2) {
-                        html += '    <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="cancelHaoHut(' + item.ID + ')"><i class="bi bi-x-circle me-2 text-danger"></i> Hủy ghi nhận</a></li>';
-                    }
-                    
-                    html += '  </ul>';
-                    html += '</div>';
-                    html += '</td>';
-                    html += '<td class="text-center">' + ((currentPage - 1) * pageSize + i + 1) + '</td>';
-                    html += '<td><span class="fw-bold text-primary">' + item.SoChungTu + '</span></td>';
-                    html += '<td>' + formatJsonDate(item.NgayHaoHut) + '</td>';
-                    html += '<td>' + (item.LoaiHaoHut == 1 ? '<span class="badge bg-info text-dark">Hao hụt bán hàng</span>' : '<span class="badge bg-warning text-dark">Hao hụt tồn kho</span>') + '</td>';
-                    html += '<td>' + (item.TenKho || '') + '</td>';
-                    html += '<td>' + (item.TenKhachHang || '') + '</td>';
-                    html += '<td>' + (item.SoDonHang || '') + '</td>';
-                    html += '<td class="text-end fw-bold">' + formatNumber(item.TongSoLuong) + '</td>';
-                    html += '<td class="text-end fw-bold text-danger">' + formatNumber(item.TongTienHaoHut) + '</td>';
-                    
-                    var tt = '';
-                    if (item.TrangThai == 1) tt = '<span class="badge bg-secondary">Lưu nháp</span>';
-                    else if (item.TrangThai == 2) tt = '<span class="badge bg-success">Đã ghi nhận</span>';
-                    else if (item.TrangThai == 3) tt = '<span class="badge bg-danger">Đã hủy</span>';
-                    
-                    html += '<td class="text-center">' + tt + '</td>';
-                    html += '</tr>';
                 });
-            } else {
-                html += '<tr><td colspan="11" class="text-center p-5 text-muted"><i class="bi bi-inbox fs-2 d-block mb-2"></i> Không tìm thấy dữ liệu</td></tr>';
             }
-
-            $('#tblHaoHut tbody').html(html);
-            $('#paginationContainer').html(renderPagination(total, currentPage, pageSize));
-            
-            // Khởi tạo lại các plugin nếu cần (dropdown, tooltip, etc.)
-            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
-            popoverTriggerList.map(function (popoverTriggerEl) {
-                return new bootstrap.Popover(popoverTriggerEl)
-            });
-            initTableResizer('tblHaoHut');
-        }
-
-        function renderPagination(total, page, pageSize) {
-            if (total <= pageSize) return '';
-            var totalPages = Math.ceil(total / pageSize);
-            var html = '<nav><ul class="pagination justify-content-end mb-0">';
-            
-            // Prev
-            if (page > 1) {
-                html += '<li class="page-item"><a class="page-link" href="javascript:void(0)" onclick="loadData(' + (page - 1) + ')">Trước</a></li>';
-            } else {
-                html += '<li class="page-item disabled"><span class="page-link">Trước</span></li>';
-            }
-            
-            // Pages
-            for (var i = 1; i <= totalPages; i++) {
-                if (i == page) {
-                    html += '<li class="page-item active"><span class="page-link">' + i + '</span></li>';
-                } else {
-                    html += '<li class="page-item"><a class="page-link" href="javascript:void(0)" onclick="loadData(' + i + ')">' + i + '</a></li>';
-                }
-            }
-            
-            // Next
-            if (page < totalPages) {
-                html += '<li class="page-item"><a class="page-link" href="javascript:void(0)" onclick="loadData(' + (page + 1) + ')">Sau</a></li>';
-            } else {
-                html += '<li class="page-item disabled"><span class="page-link">Sau</span></li>';
-            }
-            
-            html += '</ul></nav>';
-            return html;
-        }
-
-        function formatJsonDate(jsonDate) {
-            if (!jsonDate) return "";
-            if (typeof jsonDate === 'string' && jsonDate.includes('T')) {
-                var parts = jsonDate.split('T')[0].split('-');
-                return parts[2] + '/' + parts[1] + '/' + parts[0];
-            }
-            if (typeof jsonDate === 'string' && jsonDate.startsWith('/Date')) {
-                var dateString = jsonDate.substr(6);
-                var currentTime = new Date(parseInt(dateString));
-                var month = (currentTime.getMonth() + 1).toString().padStart(2, '0');
-                var day = currentTime.getDate().toString().padStart(2, '0');
-                var year = currentTime.getFullYear();
-                return day + "/" + month + "/" + year;
-            }
-            var d = new Date(jsonDate);
-            if (!isNaN(d.getTime())) {
-                var month = (d.getMonth() + 1).toString().padStart(2, '0');
-                var day = d.getDate().toString().padStart(2, '0');
-                var year = d.getFullYear();
-                return day + "/" + month + "/" + year;
-            }
-            return jsonDate;
-        }
-
-        function formatNumber(num) {
-            if (num == null) return '0';
-            return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
-        }
-
-        function resetFilter() {
-            var date = new Date();
-            var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-            
-            var y = date.getFullYear();
-            var m = (date.getMonth() + 1).toString().padStart(2, '0');
-            var d = date.getDate().toString().padStart(2, '0');
-            
-            var fy = firstDay.getFullYear();
-            var fm = (firstDay.getMonth() + 1).toString().padStart(2, '0');
-            var fd = firstDay.getDate().toString().padStart(2, '0');
-
-            var s = `${fy}-${fm}-${fd}`;
-            var e = `${y}-${m}-${d}`;
-
-            // Reset Flatpickr
-            var tuNgay = $('#TuNgay')[0];
-            var denNgay = $('#DenNgay')[0];
-            if (tuNgay && tuNgay._flatpickr) tuNgay._flatpickr.setDate(s);
-            else $('#TuNgay').val(s);
-
-            if (denNgay && denNgay._flatpickr) denNgay._flatpickr.setDate(e);
-            else $('#DenNgay').val(e);
-
-            // Reset dropdowns
-            $('.ddl-thoi-gian').val('current_month');
-            $('#LoaiHaoHut').val('0');
-            $('#IDKho').val('0').trigger('change');
-            $('#IDSanPham').val('0').trigger('change');
-            $('#SoChungTu').val('');
-            $('#TrangThai').val('0');
-            loadData(1);
-        }
+        });
 
         var isOpeningModal = false;
 
@@ -451,7 +274,7 @@
                 $.post('@Url.Action("Delete", "KHO_HaoHut")', { id: id }, function (res) {
                     if (res.success) {
                         showToast('success', 'Xóa thành công!');
-                        loadData();
+                        $('#searchForm').trigger('submit');
                     } else {
                         showToast('error', res.message);
                     }
@@ -464,7 +287,7 @@
                 $.post('@Url.Action("Huy", "KHO_HaoHut")', { id: id }, function (res) {
                     if (res.success) {
                         showToast('success', 'Hủy thành công!');
-                        loadData();
+                        $('#searchForm').trigger('submit');
                     } else {
                         showToast('error', res.message);
                     }

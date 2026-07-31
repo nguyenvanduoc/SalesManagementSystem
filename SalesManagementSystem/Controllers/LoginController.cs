@@ -58,9 +58,9 @@ namespace SalesManagementSystem.Controllers
                     });
                     Session["LoginSessionID"] = sessionId;
 
-                    // Set persistent cookie to survive AppDomain restarts (IIS file changes)
+                    // Set persistent cookie to survive AppDomain restarts (IIS file changes) - Auto-login for 7 days
                     string userData = Newtonsoft.Json.JsonConvert.SerializeObject(userSession);
-                    var ticket = new System.Web.Security.FormsAuthenticationTicket(1, result.TenDangNhap, System.DateTime.Now, System.DateTime.Now.AddDays(30), true, userData);
+                    var ticket = new System.Web.Security.FormsAuthenticationTicket(1, result.TenDangNhap, System.DateTime.Now, System.DateTime.Now.AddDays(7), true, userData);
                     var encryptedTicket = System.Web.Security.FormsAuthentication.Encrypt(ticket);
                     var cookie = new System.Web.HttpCookie("SMS_AutoLogin", encryptedTicket) { HttpOnly = true, Expires = ticket.Expiration };
                     Response.Cookies.Add(cookie);

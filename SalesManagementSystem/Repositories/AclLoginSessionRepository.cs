@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dapper;
@@ -70,6 +70,15 @@ namespace SalesManagementSystem.Repositories
             {
                 string sql = "SELECT IsDangHoatDong FROM ACL_LoginSession WHERE ID = @ID";
                 return conn.ExecuteScalar<bool>(sql, new { ID = id });
+            }
+        }
+
+        public void UpdateLastActive(int sessionId)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                string sql = "UPDATE ACL_LoginSession SET LastActiveTime = GETDATE() WHERE ID = @ID AND IsDangHoatDong = 1";
+                conn.Execute(sql, new { ID = sessionId });
             }
         }
 

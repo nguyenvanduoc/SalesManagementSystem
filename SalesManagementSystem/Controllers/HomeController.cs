@@ -100,6 +100,18 @@ namespace SalesManagementSystem.Controllers
 
             // Cập nhật timestamp để session không bị coi là idle
             Session["KeepAliveAt"] = System.DateTime.Now;
+            
+            // Cập nhật thời gian hoạt động thực tế vào DB
+            var sessionId = Session["LoginSessionID"];
+            if (sessionId != null && (int)sessionId > 0)
+            {
+                var sessionRepo = System.Web.Mvc.DependencyResolver.Current.GetService(typeof(SalesManagementSystem.Repositories.Interfaces.IAclLoginSessionRepository)) as SalesManagementSystem.Repositories.Interfaces.IAclLoginSessionRepository;
+                if (sessionRepo != null)
+                {
+                    sessionRepo.UpdateLastActive((int)sessionId);
+                }
+            }
+            
             return Json(new { alive = true, user = userSession.UserName });
         }
     }

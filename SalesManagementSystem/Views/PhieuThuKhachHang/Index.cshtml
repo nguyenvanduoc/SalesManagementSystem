@@ -18,12 +18,12 @@
 <!-- Bộ lọc tìm kiếm theo chuẩn UI compact trên 1 dòng -->
 <div class="card shadow-sm mb-4">
     <div class="card-body py-2">
-        <form method="get" action="@Url.Action("GetList")" id="searchFormPhieuThu">
+        <form method="get" action="@Url.Action("GetList")" id="searchForm">
             <div class="row g-2 align-items-end">
                 
                 <div class="col-md-2">
                     <label class="form-label text-muted small mb-1">Thời gian</label>
-                    <select class="form-select form-select-sm ddl-thoi-gian">
+                    <select class="form-select form-select-sm ddl-thoi-gian no-select2">
                                 <option value="current_month">Đầu tháng đến hiện tại</option>
                         <option value="month_1">Tháng 1</option>
                         <option value="month_2">Tháng 2</option>
@@ -122,49 +122,12 @@
                 dropdownParent: $pane
             });
         
-            // Bind local search form submit specifically for PhieuThu to prevent global conflicts
-            $pane.off('submit.phieuthu_search', '#searchFormPhieuThu');
-            $pane.on('submit.phieuthu_search', '#searchFormPhieuThu', function(e) {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                
-                var $form = $(this);
-                var action = $form.attr('action');
-                var pageSize = $pane.find('.page-size-select').val() || 20;
-                
-                var params = $form.serializeArray();
-                params = params.filter(function (item) {
-                    return item.name !== 'page' && item.name !== 'pageSize';
-                });
-                params.push({ name: 'page', value: 1 });
-                params.push({ name: 'pageSize', value: pageSize });
-                var url = action + '?' + $.param(params);
-                
-                var $grid = $pane.find('#table-container');
-                if (window.showLoadingLocal) window.showLoadingLocal($pane);
-                
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                    success: function (res) {
-                        if (window.hideLoadingLocal) window.hideLoadingLocal($pane);
-                        $grid.html(res);
-                        if (typeof reInitPlugins === 'function') reInitPlugins($pane.attr('id'));
-                    },
-                    error: function() {
-                        if (window.hideLoadingLocal) window.hideLoadingLocal($pane);
-                        if (typeof showToast === 'function') showToast('error', 'Lỗi khi tải dữ liệu.');
-                    }
-                });
-            });
-
             $pane.off('click.phieuthu_reset', '.btn-reset');
             $pane.on('click.phieuthu_reset', '.btn-reset', function(e) {
                 e.preventDefault();
                 e.stopImmediatePropagation();
                 
-                var $form = $pane.find('#searchFormPhieuThu');
+                var $form = $pane.find('#searchForm');
                 if ($form.length > 0) {
                     $form[0].reset();
                     
@@ -183,7 +146,7 @@
 
             // Local reload grid function
             window.loadData = function() {
-                $pane.find('#searchFormPhieuThu').submit();
+                $pane.find('#searchForm').submit();
             };
 
             // Handle row click to expand details - delegate to document to survive AJAX grid reloads

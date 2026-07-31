@@ -8,6 +8,7 @@ using SalesManagementSystem.Models.ViewModels;
 namespace SalesManagementSystem.Controllers
 {
     [CustomAuthorize(AuthorizeTypes.AuthorizedUsers)]
+    [System.Web.Mvc.SessionState(System.Web.SessionState.SessionStateBehavior.ReadOnly)]
     public class BaseController : Controller
     {
         protected AuditHelper AuditLog { get; private set; }
@@ -15,7 +16,9 @@ namespace SalesManagementSystem.Controllers
         protected override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             var sessionId = Session["LoginSessionID"];
-            if (sessionId != null && (int)sessionId > 0)
+            var userSession = Session[CommonConstants.USER_SESSION] as UserLoginViewModel;
+
+            if (sessionId != null && (int)sessionId > 0 && userSession != null)
             {
                 var sessionRepo = System.Web.Mvc.DependencyResolver.Current.GetService(typeof(SalesManagementSystem.Repositories.Interfaces.IAclLoginSessionRepository)) as SalesManagementSystem.Repositories.Interfaces.IAclLoginSessionRepository;
                 if (sessionRepo != null)
@@ -23,16 +26,34 @@ namespace SalesManagementSystem.Controllers
                     bool isActive = sessionRepo.IsSessionActive((int)sessionId);
                     if (!isActive)
                     {
-                        Session.Clear();
-                        if (filterContext.HttpContext.Request.IsAjaxRequest())
+                        var authCookie = filterContext.HttpContext.Request.Cookies["SMS_AutoLogin"];
+                        if (authCookie != null && !string.IsNullOrEmpty(authCookie.Value))
                         {
-                            filterContext.Result = new JsonResult { Data = new { success = false, message = "Phiên làm việc của bạn đã bị ngắt bởi quản trị viên." }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                            // Refresh login session ID seamlessly for auto-login user
+                            int newSessionId = sessionRepo.LogLogin(new SalesManagementSystem.Models.Entities.AclLoginSession
+                            {
+                                IDLogin = userSession.UserID,
+                                HoTen = (userSession.HoDem + " " + userSession.Ten).Trim(),
+                                HostName = filterContext.HttpContext.Request.UserHostName,
+                                HostAddress = filterContext.HttpContext.Request.UserHostAddress,
+                                TrinhDuyet = filterContext.HttpContext.Request.Browser != null ? filterContext.HttpContext.Request.Browser.Browser + " " + filterContext.HttpContext.Request.Browser.Version : "Unknown",
+                                IP = filterContext.HttpContext.Request.ServerVariables["REMOTE_ADDR"] ?? filterContext.HttpContext.Request.UserHostAddress
+                            });
+                            Session["LoginSessionID"] = newSessionId;
                         }
                         else
                         {
-                            filterContext.Result = new RedirectResult("/Login/Index");
+                            Session.Abandon();
+                            if (filterContext.HttpContext.Request.IsAjaxRequest())
+                            {
+                                filterContext.Result = new JsonResult { Data = new { success = false, message = "Phiên làm việc của bạn đã bị ngắt bởi quản trị viên." }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                            }
+                            else
+                            {
+                                filterContext.Result = new RedirectResult("/Login/Index");
+                            }
+                            return;
                         }
-                        return;
                     }
                 }
             }

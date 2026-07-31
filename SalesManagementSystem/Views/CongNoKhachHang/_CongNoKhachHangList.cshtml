@@ -19,16 +19,13 @@
                     <tr>
                         <th width="80" class="text-center fw-bold">Thao tác</th>
                         <th width="45" class="text-center fw-bold">STT</th>
-                        <th width="125" class="text-center fw-bold">Số chứng từ</th>
-                        <th width="105" class="text-center fw-bold">Ngày chứng từ</th>
                         <th class="text-center fw-bold">Khách hàng</th>
                         <th width="100" class="text-center fw-bold">Điện thoại</th>
                         <th width="125" class="text-center fw-bold">Dư đầu kỳ</th>
                         <th width="125" class="text-center fw-bold">Doanh thu</th>
-                        <th width="125" class="text-center fw-bold">Lũy kế</th>
+                        <th width="125" class="text-center fw-bold">Nợ cuối kỳ</th>
                         <th width="125" class="text-center fw-bold">Đã thu</th>
                         <th width="125" class="text-center fw-bold">Còn phải thu</th>
-                        <th width="120" class="text-center fw-bold">Quá hạn</th>
                         <th width="130" class="text-center fw-bold">Trạng thái</th>
                     </tr>
                 </thead>
@@ -80,10 +77,6 @@
                                     </div>
                                 </td>
                                 <td class="text-center align-middle">@(stt++)</td>
-                                <td class="text-center align-middle fw-semibold text-dark">
-                                    @item.SoChungTu
-                                </td>
-                                <td class="text-center align-middle">@item.NgayChungTu.ToString("dd/MM/yyyy")</td>
                                 <td class="align-middle fw-semibold text-dark">@item.TenKhachHang</td>
                                 <td class="text-center align-middle">@item.DienThoai</td>
                                 <td class="text-end align-middle fw-semibold text-secondary">@item.TonDauKy.ToString("N0")</td>
@@ -92,17 +85,6 @@
                                 <td class="text-end align-middle text-success fw-semibold">@item.DaThu.ToString("N0")</td>
                                 <td class="text-end align-middle @(item.ConPhaiThu > 0 ? "text-danger fw-bold" : "text-muted")">
                                     @item.ConPhaiThu.ToString("N0")
-                                </td>
-                                <td class="text-end align-middle @(item.TienQuaHan > 0 ? "text-danger fw-bold" : "text-muted")">
-                                    @if (item.TienQuaHan > 0)
-                                    {
-                                        <i class="bi bi-exclamation-triangle-fill text-warning me-1" title="Quá hạn thanh toán"></i>
-                                        @item.TienQuaHan.ToString("N0")
-                                    }
-                                    else
-                                    {
-                                        <span>0</span>
-                                    }
                                 </td>
                                 <td class="text-center align-middle">
                                     @if (item.TienQuaHan > 0)
@@ -119,20 +101,19 @@
 
                         <!-- Dòng tổng -->
                         <tr class="fw-bold" style="background:#f4f6f9;">
-                            <td colspan="6" class="text-end align-middle">Tổng cộng:</td>
+                            <td colspan="4" class="text-end align-middle">Tổng cộng:</td>
                             <td class="text-end align-middle text-secondary"></td>
                             <td class="text-end align-middle text-dark">@tongPhaiThu.ToString("N0")</td>
                             <td class="text-end align-middle"></td>
                             <td class="text-end align-middle text-success">@tongDaThu.ToString("N0")</td>
                             <td class="text-end align-middle text-danger">@tongConLai.ToString("N0")</td>
-                            <td class="text-end align-middle text-danger"></td>
                             <td></td>
                         </tr>
                     }
                     else
                     {
                         <tr>
-                            <td colspan="13" class="text-center text-muted py-4">
+                            <td colspan="10" class="text-center text-muted py-4">
                                 <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
                                 Không có dữ liệu công nợ khách hàng
                             </td>

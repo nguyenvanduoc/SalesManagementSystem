@@ -190,20 +190,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 4,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "Adjust.cshtml",
-              "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\DonDieuChinhDonHang\\Adjust.cshtml",
-              "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\DonDieuChinhDonHang\\Adjust.cshtml",
-              "ToolTip": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\DonDieuChinhDonHang\\Adjust.cshtml",
-              "RelativeToolTip": "SalesManagementSystem\\Views\\DonDieuChinhDonHang\\Adjust.cshtml",
-              "ViewState": "AgIAAGoAAAAAAAAAAAAwwIEAAABhAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-07-06T15:33:56.27Z"
-            },
             {
               "$type": "Document",
               "DocumentIndex": 11,
@@ -260,10 +248,22 @@
               "RelativeDocumentMoniker": "SalesManagementSystem\\Web.config",
               "ToolTip": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Web.config",
               "RelativeToolTip": "SalesManagementSystem\\Web.config",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAMAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAA4AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000601|",
               "WhenOpened": "2026-07-15T08:47:39.234Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Adjust.cshtml",
+              "DocumentMoniker": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\DonDieuChinhDonHang\\Adjust.cshtml",
+              "RelativeDocumentMoniker": "SalesManagementSystem\\Views\\DonDieuChinhDonHang\\Adjust.cshtml",
+              "ToolTip": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Views\\DonDieuChinhDonHang\\Adjust.cshtml",
+              "RelativeToolTip": "SalesManagementSystem\\Views\\DonDieuChinhDonHang\\Adjust.cshtml",
+              "ViewState": "AgIAAGoAAAAAAAAAAAAwwIEAAABhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-07-06T15:33:56.27Z"
             },
             {
               "$type": "Document",

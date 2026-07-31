@@ -10,58 +10,110 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- CTE to calculate DaThu for each ChungTuBanHang
-    ;WITH Paid AS (
+    DECLARE @TuNgayDate DATE = CAST(@TuNgay AS DATE);
+    DECLARE @DenNgayDate DATE = CAST(@DenNgay AS DATE);
+
+    ;WITH InvoicePaid AS (
         SELECT 
-            bh.ID,
-            ISNULL(
-                (SELECT SUM(ct.SoTienPhanBo)
-                 FROM KT_PhieuThuChiTiet ct
-                 INNER JOIN KT_PhieuThu pt ON ct.IDPhieuThu = pt.ID
-                 WHERE ct.IDChungTuBanHang = bh.ID 
-                   AND ct.LoaiThu IN (1, 3)
-                   AND pt.TrangThai = 2),
-                0
-            ) AS DaThu
+            bh.ID AS IDChungTuBanHang,
+            bh.IDKhachHang,
+            bh.NgayChungTu,
+            bh.TongCong,
+            ISNULL((
+                SELECT SUM(ct.SoTienPhanBo)
+                FROM KT_PhieuThuChiTiet ct
+                INNER JOIN KT_PhieuThu pt ON ct.IDPhieuThu = pt.ID
+                WHERE ct.IDChungTuBanHang = bh.ID AND pt.TrangThai = 2 AND ct.LoaiThu IN (1, 3)
+            ), 0) AS DaThuInvoice
         FROM BAN_ChungTuBanHang bh
-        WHERE bh.IsDeleted = 0
-    )
-    SELECT
-        bh.ID               AS IDChungTuBanHang,
-        bh.IDDonDatHang,
-        bh.SoChungTu,
-        bh.NgayChungTu,
-        bh.IDKhachHang,
-        kh.TenKhachHang,
-        kh.SoDienThoai      AS DienThoai,
-        bh.TongCong         AS DoanhThu,
-        pd.DaThu,
-        bh.TongCong - pd.DaThu AS ConPhaiThu,
-        (CASE WHEN bh.IDKhachHang IS NOT NULL THEN
-            ISNULL((SELECT SUM(bh2.TongCong) FROM BAN_ChungTuBanHang bh2 WHERE bh2.IDKhachHang = bh.IDKhachHang AND bh2.IsDeleted = 0 AND bh2.TrangThai IN (1, 2) AND (bh2.NgayChungTu < bh.NgayChungTu OR (bh2.NgayChungTu = bh.NgayChungTu AND bh2.ID < bh.ID))), 0)
+        WHERE bh.IsDeleted = 0 AND bh.TrangThai IN (1, 2)
+    ),
+    OverduePerCustomer AS (
+        SELECT 
+            IDKhachHang,
+            SUM(CASE WHEN DATEDIFF(day, NgayChungTu, GETDATE()) > 30 AND (TongCong - DaThuInvoice) > 0 THEN (TongCong - DaThuInvoice) ELSE 0 END) AS TienQuaHan
+        FROM InvoicePaid
+        GROUP BY IDKhachHang
+    ),
+    CustomerSummary AS (
+        SELECT 
+            kh.ID AS IDKhachHang,
+            kh.TenKhachHang,
+            kh.SoDienThoai AS DienThoai,
+
+            -- 1. Tồn đầu kỳ: (Tổng nợ bán hàng trước @TuNgay) - (Tổng đã thu trước @TuNgay)
+            ISNULL((
+                SELECT SUM(bh.TongCong) 
+                FROM BAN_ChungTuBanHang bh 
+                WHERE bh.IDKhachHang = kh.ID 
+                  AND bh.IsDeleted = 0 
+                  AND bh.TrangThai IN (1, 2) 
+                  AND (@TuNgayDate IS NOT NULL AND CAST(bh.NgayChungTu AS DATE) < @TuNgayDate)
+            ), 0)
             -
-            ISNULL((SELECT SUM(pt.SoTienThu) FROM KT_PhieuThu pt WHERE pt.IDKhachHang = bh.IDKhachHang AND pt.TrangThai = 2 AND (pt.NgayThu < bh.NgayChungTu)), 0)
-        ELSE 0 END) AS TonDauKy,
-        (CASE WHEN DATEDIFF(day, bh.NgayChungTu, GETDATE()) > 30 AND (bh.TongCong - pd.DaThu) > 0 THEN (bh.TongCong - pd.DaThu) ELSE 0 END) AS TienQuaHan
-    FROM BAN_ChungTuBanHang bh
-    INNER JOIN Paid pd ON bh.ID = pd.ID
-    LEFT JOIN NS_KhachHang kh ON bh.IDKhachHang = kh.ID
-    WHERE bh.IsDeleted = 0
-      AND bh.TrangThai IN (1, 2)
-      AND (@TuNgay IS NULL OR CAST(bh.NgayChungTu AS DATE) >= CAST(@TuNgay AS DATE))
-      AND (@DenNgay IS NULL OR CAST(bh.NgayChungTu AS DATE) <= CAST(@DenNgay AS DATE))
-      AND (@IDKhachHang IS NULL OR bh.IDKhachHang = @IDKhachHang)
-      AND (
-          @TrangThaiCongNo IS NULL
-          OR (@TrangThaiCongNo = 1 AND (bh.TongCong - pd.DaThu) > 0 AND DATEDIFF(day, bh.NgayChungTu, GETDATE()) <= 30 AND pd.DaThu = 0)
-          -- Thanh toán một phần
-          OR (@TrangThaiCongNo = 2 AND pd.DaThu > 0 AND (bh.TongCong - pd.DaThu) > 0)
-          -- Đã thanh toán
-          OR (@TrangThaiCongNo = 3 AND (bh.TongCong - pd.DaThu) <= 0)
-          -- Quá hạn
-          OR (@TrangThaiCongNo = 4 AND (bh.TongCong - pd.DaThu) > 0 AND DATEDIFF(day, bh.NgayChungTu, GETDATE()) > 30)
-      )
-    ORDER BY bh.NgayChungTu DESC, bh.ID DESC;
+            ISNULL((
+                SELECT SUM(pt.SoTienThu) 
+                FROM KT_PhieuThu pt 
+                WHERE pt.IDKhachHang = kh.ID 
+                  AND pt.TrangThai = 2 
+                  AND (@TuNgayDate IS NOT NULL AND CAST(pt.NgayThu AS DATE) < @TuNgayDate)
+            ), 0) AS TonDauKy,
+
+            -- 2. Doanh thu trong kỳ: Phát sinh nợ bán hàng từ @TuNgay đến @DenNgay
+            ISNULL((
+                SELECT SUM(bh.TongCong) 
+                FROM BAN_ChungTuBanHang bh 
+                WHERE bh.IDKhachHang = kh.ID 
+                  AND bh.IsDeleted = 0 
+                  AND bh.TrangThai IN (1, 2) 
+                  AND (@TuNgayDate IS NULL OR CAST(bh.NgayChungTu AS DATE) >= @TuNgayDate)
+                  AND (@DenNgayDate IS NULL OR CAST(bh.NgayChungTu AS DATE) <= @DenNgayDate)
+            ), 0) AS DoanhThu,
+
+            -- 3. Đã thu trong kỳ: Phát sinh có từ @TuNgay đến @DenNgay
+            ISNULL((
+                SELECT SUM(pt.SoTienThu) 
+                FROM KT_PhieuThu pt 
+                WHERE pt.IDKhachHang = kh.ID 
+                  AND pt.TrangThai = 2 
+                  AND (@TuNgayDate IS NULL OR CAST(pt.NgayThu AS DATE) >= @TuNgayDate)
+                  AND (@DenNgayDate IS NULL OR CAST(pt.NgayThu AS DATE) <= @DenNgayDate)
+            ), 0) AS DaThu,
+
+            -- 4. Tiền quá hạn (> 30 ngày)
+            ISNULL(od.TienQuaHan, 0) AS TienQuaHan
+
+        FROM NS_KhachHang kh
+        LEFT JOIN OverduePerCustomer od ON kh.ID = od.IDKhachHang
+        WHERE (@IDKhachHang IS NULL OR kh.ID = @IDKhachHang)
+    ),
+    Calculated AS (
+        SELECT 
+            0 AS IDChungTuBanHang,
+            CAST(NULL AS INT) AS IDDonDatHang,
+            '' AS SoChungTu,
+            CAST('1900-01-01' AS DATETIME) AS NgayChungTu,
+            IDKhachHang,
+            TenKhachHang,
+            DienThoai,
+            DoanhThu,
+            DaThu,
+            (TonDauKy + DoanhThu - DaThu) AS ConPhaiThu,
+            TonDauKy,
+            TienQuaHan
+        FROM CustomerSummary
+        WHERE TonDauKy <> 0 OR DoanhThu <> 0 OR DaThu <> 0 OR (TonDauKy + DoanhThu - DaThu) <> 0
+    )
+    SELECT *
+    FROM Calculated
+    WHERE (
+        @TrangThaiCongNo IS NULL
+        OR (@TrangThaiCongNo = 1 AND ConPhaiThu > 0 AND TienQuaHan = 0)
+        OR (@TrangThaiCongNo = 2 AND DaThu > 0 AND ConPhaiThu > 0)
+        OR (@TrangThaiCongNo = 3 AND ConPhaiThu <= 0)
+        OR (@TrangThaiCongNo = 4 AND TienQuaHan > 0)
+    )
+    ORDER BY ConPhaiThu DESC, TenKhachHang ASC;
 END
 GO
 

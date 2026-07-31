@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace SalesManagementSystem.Models.Entities
 {
@@ -14,5 +14,6 @@ namespace SalesManagementSystem.Models.Entities
         public string TrinhDuyet { get; set; }
         public string IP { get; set; }
         public bool IsDangHoatDong { get; set; }
+        public DateTime? LastActiveTime { get; set; }
     }
 }

@@ -66,7 +66,28 @@ namespace SalesManagementSystem
                                 if (userSession != null)
                                 {
                                     HttpContext.Current.Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION] = userSession;
-                                    HttpContext.Current.Session["LoginSessionID"] = 0; // Dummy or unlogged re-session
+                                    
+                                    var sessionRepo = System.Web.Mvc.DependencyResolver.Current.GetService(typeof(SalesManagementSystem.Repositories.Interfaces.IAclLoginSessionRepository)) as SalesManagementSystem.Repositories.Interfaces.IAclLoginSessionRepository;
+                                    if (sessionRepo != null)
+                                    {
+                                        var req = HttpContext.Current.Request;
+                                        int sessionId = sessionRepo.LogLogin(new SalesManagementSystem.Models.Entities.AclLoginSession
+                                        {
+                                            IDLogin = userSession.UserID,
+                                            HoTen = userSession.HoDem + " " + userSession.Ten,
+                                            HostName = req.UserHostName,
+                                            HostAddress = req.UserHostAddress,
+                                            TrinhDuyet = req.Browser != null ? req.Browser.Browser + " " + req.Browser.Version : "Unknown",
+                                            IP = req.ServerVariables["REMOTE_ADDR"] ?? req.UserHostAddress
+                                        });
+                                        HttpContext.Current.Session["LoginSessionID"] = sessionId;
+                                    }
+                                    
+                                    // Renew auto-login cookie for 7 days
+                                    var newTicket = new System.Web.Security.FormsAuthenticationTicket(1, ticket.Name, System.DateTime.Now, System.DateTime.Now.AddDays(7), true, ticket.UserData);
+                                    var encryptedTicket = System.Web.Security.FormsAuthentication.Encrypt(newTicket);
+                                    var newCookie = new System.Web.HttpCookie("SMS_AutoLogin", encryptedTicket) { HttpOnly = true, Expires = newTicket.Expiration };
+                                    HttpContext.Current.Response.Cookies.Add(newCookie);
                                 }
                             }
                         }

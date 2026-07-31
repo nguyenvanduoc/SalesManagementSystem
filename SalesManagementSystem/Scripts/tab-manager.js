@@ -499,6 +499,8 @@ var TabManager = (function () {
                     if (url) {
                         loadTabContent(tabId, url);
                     }
+                } else if (typeof syncThoiGianFilter === 'function') {
+                    syncThoiGianFilter($pane);
                 }
                 
                 // Vô hiệu hóa cập nhật URL trình duyệt để ẩn địa chỉ chi tiết lộ liễu
@@ -802,9 +804,13 @@ var TabManager = (function () {
     function reInitPlugins(paneId) {
         var container = $('#' + paneId);
 
+        if (typeof syncThoiGianFilter === 'function') {
+            syncThoiGianFilter(container);
+        }
+
         if ($.fn.select2) {
-            // Khởi tạo Select2 cho tất cả các combobox (.form-select) trừ dropdown phân trang
-            var $comboboxes = container.find('select.form-select:not(.page-size-select):not(.no-select2), .select2');
+            // Khởi tạo Select2 cho tất cả các combobox (.form-select) trừ dropdown phân trang, no-select2, và ddl-thoi-gian
+            var $comboboxes = container.find('select.form-select:not(.page-size-select):not(.no-select2):not(.ddl-thoi-gian), .select2:not(.ddl-thoi-gian)');
             
             $comboboxes.each(function() {
                 var $this = $(this);

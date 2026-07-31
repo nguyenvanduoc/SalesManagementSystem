@@ -92,7 +92,7 @@ namespace SalesManagementSystem.Repositories
                     LEFT JOIN BAN_ChungTuBanHang c ON c.IDDonDatHang = d.ID
                     WHERE (@TuNgay IS NULL OR d.NgayTaoDon >= @TuNgay)
                       AND (@DenNgay IS NULL OR d.NgayTaoDon <= @DenNgay)
-                      AND (@SoDonHang IS NULL OR d.SoDonHang LIKE '%' + @SoDonHang + '%')
+                      AND (@SoDonHang IS NULL OR d.SoDonHang LIKE '%' + @SoDonHang + '%' OR c.SoChungTu LIKE '%' + @SoDonHang + '%')
                       AND (@IDKhachHang IS NULL OR d.IDKhachHang = @IDKhachHang)
                       AND (@TrangThaiChungTu IS NULL OR (CASE WHEN d.TrangThaiDon = 4 THEN 3 ELSE ISNULL(c.TrangThai, 0) END) = @TrangThaiChungTu)
                       AND ISNULL(d.TrangThaiDon, 1) <> 0

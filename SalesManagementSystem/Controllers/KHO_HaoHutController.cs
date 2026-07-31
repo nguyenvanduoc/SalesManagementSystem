@@ -28,49 +28,87 @@ namespace SalesManagementSystem.Controllers
 
         // GET: KHO_HaoHut
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]
-        public ActionResult Index()
+        public ActionResult Index(int page = 1, int pageSize = 20, string tuNgay = null, string denNgay = null, int? loaiHaoHut = null, int? idKho = null, int? idSanPham = null, string soChungTu = null, int? trangThai = null)
         {
             ViewBag.KhoHangs = _khoHangRepo.GetAll();
             int totalSP = 0;
             ViewBag.SanPhams = _sanPhamRepo.GetPaged(1, 10000, "", out totalSP);
-            return View();
+
+            ViewBag.TuNgay = tuNgay ?? new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).ToString("yyyy-MM-dd");
+            ViewBag.DenNgay = denNgay ?? DateTime.Now.ToString("yyyy-MM-dd");
+            ViewBag.SoChungTu = soChungTu;
+            ViewBag.LoaiHaoHut = loaiHaoHut;
+            ViewBag.IDKho = idKho;
+            ViewBag.IDSanPham = idSanPham;
+            ViewBag.TrangThai = trangThai;
+
+            var filter = new HaoHutHangHoaFilter
+            {
+                TuNgay = ViewBag.TuNgay,
+                DenNgay = ViewBag.DenNgay,
+                LoaiHaoHut = loaiHaoHut ?? 0,
+                IDKho = idKho ?? 0,
+                IDSanPham = idSanPham ?? 0,
+                SoChungTu = soChungTu,
+                TrangThai = trangThai ?? 0,
+                Skip = (page - 1) * pageSize,
+                Take = pageSize
+            };
+
+            var data = _haoHutRepo.GetList(filter);
+            int totalRecords = data.Count > 0 ? data[0].TotalRecords : 0;
+
+            var model = new PagedListViewModel<HaoHutHangHoaViewModel>
+            {
+                Items = data,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalRecords = totalRecords,
+                ActionName = "GetList"
+            };
+
+            if (Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                return PartialView("_HaoHutList", model);
+
+            return View(model);
         }
 
-        [HttpPost]
-        public ActionResult GetList(HaoHutHangHoaFilter filter)
+        [HttpGet]
+        public ActionResult GetList(int page = 1, int pageSize = 20, string tuNgay = "", string denNgay = "", int loaiHaoHut = 0, int idKho = 0, int idSanPham = 0, string soChungTu = "", int trangThai = 0)
         {
             try
             {
+                var filter = new HaoHutHangHoaFilter
+                {
+                    TuNgay = tuNgay,
+                    DenNgay = denNgay,
+                    LoaiHaoHut = loaiHaoHut,
+                    IDKho = idKho,
+                    IDSanPham = idSanPham,
+                    SoChungTu = soChungTu,
+                    TrangThai = trangThai,
+                    Skip = (page - 1) * pageSize,
+                    Take = pageSize
+                };
+
                 var data = _haoHutRepo.GetList(filter);
                 int totalRecords = data.Count > 0 ? data[0].TotalRecords : 0;
                 
-                var mappedData = data.Select(x => new {
-                    ID = x.ID,
-                    SoChungTu = x.SoChungTu,
-                    NgayHaoHut = x.NgayHaoHut,
-                    LoaiHaoHut = x.LoaiHaoHut,
-                    IDKho = x.IDKho,
-                    TenKho = x.TenKho,
-                    IDDonHang = x.IDDonHang,
-                    SoDonHang = x.SoDonHang,
-                    IDKhachHang = x.IDKhachHang,
-                    TenKhachHang = x.TenKhachHang,
-                    TongSoLuong = x.TongSoLuong,
-                    TongTienHaoHut = x.TongTienHaoHut,
-                    TrangThai = x.TrangThai
-                }).ToList();
+                var model = new PagedListViewModel<HaoHutHangHoaViewModel>
+                {
+                    Items = data,
+                    CurrentPage = page,
+                    PageSize = pageSize,
+                    TotalRecords = totalRecords,
+                    ActionName = "GetList"
+                };
 
-                return Json(new { success = true, data = mappedData, total = totalRecords });
+                return PartialView("_HaoHutList", model);
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                return Content($"<div class='alert alert-danger'>Lỗi Server: {ex.Message} <br/> {ex.StackTrace}</div>");
             }
-        }
-
-        public ActionResult _List()
-        {
-            return PartialView();
         }
 
         [CustomAuthorize(AuthorizeTypes.MustHavePermission)]

@@ -17,13 +17,12 @@
 
 <div class="card shadow-sm mb-4">
     <div class="card-body">
-        <form id="searchForm">
+        <form id="searchForm" method="get" action="@Url.Action("Index", "DieuChinhNhapKho")">
             <div class="row g-3">
-                
                 <div class="col-md-2">
                     <label class="form-label text-muted small mb-1">Thời gian</label>
-                    <select class="form-select form-select-sm ddl-thoi-gian">
-                                <option value="current_month">Đầu tháng đến hiện tại</option>
+                    <select class="form-select form-select-sm ddl-thoi-gian no-select2">
+                        <option value="current_month">Đầu tháng đến hiện tại</option>
                         <option value="month_1">Tháng 1</option>
                         <option value="month_2">Tháng 2</option>
                         <option value="month_3">Tháng 3</option>
@@ -40,7 +39,7 @@
                         <option value="quarter_2">Quý 2</option>
                         <option value="quarter_3">Quý 3</option>
                         <option value="quarter_4">Quý 4</option>
-                            <option value="current_year">Từ đầu năm đến hiện tại</option>
+                        <option value="current_year">Từ đầu năm đến hiện tại</option>
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -82,13 +81,13 @@
                     </div>
                 </div>
                 <div class="col-md-8 d-flex align-items-end pb-1 gap-2 justify-content-end">
-                    <button type="button" class="btn text-white btn-sm px-3" onclick="searchData()" style="background:#2998e4;">
+                    <button type="submit" class="btn text-white btn-sm px-3 shadow-sm" style="background:#2998e4;">
                         <i class="bi bi-search"></i> Tìm kiếm
                     </button>
-                    <button type="button" class="btn text-white btn-sm px-3" onclick="resetForm()" style="background:#f1c40f;">
+                    <button type="button" class="btn text-white btn-sm px-3 btn-reset shadow-sm" style="background:#f1c40f;">
                         Làm mới
                     </button>
-                    <button type="button" class="btn text-white btn-sm px-3" onclick="exportExcel()" style="background:#2ecc71;">
+                    <button type="button" class="btn text-white btn-sm px-3 btn-export shadow-sm" style="background:#2ecc71;">
                         <i class="bi bi-file-earmark-excel"></i> Xuất Excel
                     </button>
                 </div>
@@ -117,91 +116,73 @@
 
 @section Scripts {
     <script>
-        function initSelect2Ajax(selector) {
-            if (!$.fn.select2) return;
-            $(selector).each(function () {
-                var $el = $(this);
-                var url = $el.data('url');
-                var placeholder = $el.data('placeholder') || 'Chọn...';
+        (function() {
+            var $pane = $('script').last().closest('.tab-pane');
+            if ($pane.length === 0) $pane = $('body');
+
+            if ($.fn.select2) {
+                $pane.find('.select2-ajax').each(function () {
+                    var $el = $(this);
+                    var url = $el.data('url');
+                    var placeholder = $el.data('placeholder') || 'Chọn...';
+                    
+                    $el.select2({
+                        placeholder: placeholder,
+                        allowClear: true,
+                        dropdownParent: $pane,
+                        ajax: {
+                            url: url,
+                            dataType: 'json',
+                            delay: 250,
+                            data: function (params) {
+                                return { q: params.term || '' };
+                            },
+                            processResults: function (data) {
+                                return { results: data };
+                            },
+                            cache: true
+                        }
+                    });
+                });
+            }
+
+            $pane.on('click', '.btn-reset', function(e) {
+                e.preventDefault();
+                var $form = $pane.find('#searchForm');
+                $form[0].reset();
                 
-                $el.select2({
-                    placeholder: placeholder,
-                    allowClear: true,
-                    ajax: {
-                        url: url,
-                        dataType: 'json',
-                        delay: 250,
-                        data: function (params) {
-                            return { q: params.term || '' };
-                        },
-                        processResults: function (data) {
-                            return { results: data };
-                        },
-                        cache: true
+                var date = new Date();
+                var firstDay = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
+                var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0];
+                $form.find('input[name="tuNgay"]').val(firstDay);
+                $form.find('input[name="denNgay"]').val(lastDay);
+                
+                $pane.find('.select2-ajax').val(null).trigger('change');
+                $pane.find('.ddl-thoi-gian').val('current_month').trigger('change');
+                
+                $form.trigger('submit');
+            });
+
+            $pane.on('click', '.btn-export', function(e) {
+                e.preventDefault();
+                var data = $pane.find('#searchForm').serialize();
+                window.location.href = '/DieuChinhNhapKho/ExportExcel?' + data;
+            });
+
+            window.viewHistory = function(id) {
+                $('#historyModal').modal('show');
+                $('#historyModalBody').html('<div class="text-center"><div class="spinner-border text-primary" role="status"></div></div>');
+                $.ajax({
+                    url: '/DieuChinhNhapKho/History/' + id,
+                    type: 'GET',
+                    success: function (res) {
+                        $('#historyModalBody').html(res);
+                    },
+                    error: function () {
+                        $('#historyModalBody').html('<div class="alert alert-danger">Có lỗi xảy ra khi tải lịch sử.</div>');
                     }
                 });
-            });
-        }
-
-        $(document).ready(function () {
-            initSelect2Ajax('.select2-ajax');
-        });
-
-        function searchData(page = 1) {
-            var $listContainer = $('#listContainer');
-            $listContainer.css({ 'opacity': '0.5', 'transition': 'opacity 0.1s' });
-            setTimeout(function() { $listContainer.css('opacity', '1'); }, 100);
-
-            var data = $('#searchForm').serialize() + '&page=' + page;
-            $.ajax({
-                url: '@Url.Action("Index", "DieuChinhNhapKho")',
-                type: 'GET',
-                data: data,
-                success: function (res) {
-                    $('#listContainer').html(res);
-                },
-                error: function () {
-                    showToast('error', 'Có lỗi xảy ra khi tìm kiếm');
-                }
-            });
-        }
-
-        function resetForm() {
-            var $btn = $('button[onclick="resetForm()"]');
-            $btn.css({ 'opacity': '0.5', 'transition': 'opacity 0.1s' });
-            setTimeout(function() { $btn.css('opacity', '1'); }, 100);
-
-            var $form = $('#searchForm');
-            $form[0].reset();
-            // Đưa từ ngày đến ngày về mặc định (đầu tháng và cuối tháng)
-            var date = new Date();
-            var firstDay = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
-            var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0];
-            $form.find('input[name="tuNgay"]').val(firstDay);
-            $form.find('input[name="denNgay"]').val(lastDay);
-
-            $('.select2-ajax').val(null).trigger('change');
-            searchData();
-        }
-
-        function exportExcel() {
-            var data = $('#searchForm').serialize();
-            window.location.href = '/DieuChinhNhapKho/ExportExcel?' + data;
-        }
-
-        function viewHistory(id) {
-            $('#historyModal').modal('show');
-            $('#historyModalBody').html('<div class="text-center"><div class="spinner-border text-primary" role="status"></div></div>');
-            $.ajax({
-                url: '/DieuChinhNhapKho/History/' + id,
-                type: 'GET',
-                success: function (res) {
-                    $('#historyModalBody').html(res);
-                },
-                error: function () {
-                    $('#historyModalBody').html('<div class="alert alert-danger">Có lỗi xảy ra khi tải lịch sử.</div>');
-                }
-            });
-        }
+            };
+        })();
     </script>
 }

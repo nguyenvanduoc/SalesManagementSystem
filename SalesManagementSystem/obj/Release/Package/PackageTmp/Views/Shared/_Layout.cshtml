@@ -1499,37 +1499,74 @@
     function syncThoiGianFilter(context) {
         var $ctx = $(context || document);
         $ctx.find('.ddl-thoi-gian').each(function() {
-            if ($(this).data('synced')) return;
-            $(this).data('synced', true);
+            var $ddl = $(this);
+            var $form = $ddl.closest('form');
+            if ($form.length === 0) return;
             
-            var $form = $(this).closest('form');
             var txtTu = $form.find('input[name="tuNgay"], input[name="TuNgay"]').val();
             var txtDen = $form.find('input[name="denNgay"], input[name="DenNgay"]').val();
-            if (!txtTu || !txtDen) {
-                // Nếu không có giá trị (load lần đầu), trigger change để set về Đầu tháng đến hiện tại
-                $(this).val('current_month').trigger('change');
-                return;
+            if (!txtTu || !txtDen) return;
+            
+            var now = new Date();
+            var yNow = now.getFullYear();
+            var mNow = now.getMonth() + 1;
+            
+            function pad(n) { return n < 10 ? '0' + n : '' + n; }
+            function getDays(year, month) {
+                var days = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+                if (month === 2 && ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0)) return 29;
+                return days[month];
             }
             
-            var tuDate = new Date(txtTu);
-            var denDate = new Date(txtDen);
+            var sStr = txtTu.trim();
+            var eStr = txtDen.trim();
+            var matchedVal = null;
             
-            var yTu = tuDate.getFullYear();
-            var mTu = tuDate.getMonth() + 1;
-            var dTu = tuDate.getDate();
+            // Check current_year: starts at YYYY-01-01
+            var sCurrentYear = yNow + '-01-01';
+            if (sStr === sCurrentYear) {
+                matchedVal = 'current_year';
+            }
             
-            var yDen = denDate.getFullYear();
-            var mDen = denDate.getMonth() + 1;
-            var dDen = denDate.getDate();
+            // Check current_month: YYYY-MM-01
+            var sCurrentMonth = yNow + '-' + pad(mNow) + '-01';
+            if (!matchedVal && sStr === sCurrentMonth) {
+                matchedVal = 'current_month';
+            }
             
-            var isFirstDay = dTu === 1;
-            var daysInMonth = new Date(yDen, mDen, 0).getDate();
-            var isLastDay = dDen === daysInMonth;
+            // Check month_1 .. month_12
+            if (!matchedVal) {
+                for (var m = 1; m <= 12; m++) {
+                    var sM = yNow + '-' + pad(m) + '-01';
+                    var eM = yNow + '-' + pad(m) + '-' + pad(getDays(yNow, m));
+                    if (sStr === sM && eStr === eM) {
+                        matchedVal = 'month_' + m;
+                        break;
+                    }
+                }
+            }
             
-            if (yTu === yDen && mTu === 1 && dTu === 1 && dDen === new Date().getDate() && mDen === (new Date().getMonth() + 1) && yDen === new Date().getFullYear()) {
-                $(this).val('current_year').trigger('change.select2');
-            } else if (yTu === yDen && mTu === mDen && isFirstDay && isLastDay) {
-                $(this).val('month_' + mTu).trigger('change.select2');
+            // Check quarter_1 .. quarter_4
+            if (!matchedVal) {
+                for (var q = 1; q <= 4; q++) {
+                    var startM = (q - 1) * 3 + 1;
+                    var endM = startM + 2;
+                    var sQ = yNow + '-' + pad(startM) + '-01';
+                    var eQ = yNow + '-' + pad(endM) + '-' + pad(getDays(yNow, endM));
+                    if (sStr === sQ && eStr === eQ) {
+                        matchedVal = 'quarter_' + q;
+                        break;
+                    }
+                }
+            }
+            
+            if (!matchedVal) {
+                matchedVal = 'current_year';
+            }
+            
+            $ddl.val(matchedVal);
+            if ($.fn.select2 && $ddl.hasClass('select2-hidden-accessible')) {
+                $ddl.trigger('change.select2');
             }
         });
     }
