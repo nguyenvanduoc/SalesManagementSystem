@@ -136,6 +136,12 @@ namespace SalesManagementSystem.Repositories
 
                     // 17. DonHangDangDiDuong
                     data.DonHangDangDiDuong = multi.Read<DonDatHangViewModel>().ToList();
+
+                    // 18. PhieuNhapDangDiDuong (Trạng thái = 1: Nháp / Đề nghị ghi / Đang đi đường)
+                    data.PhieuNhapDangDiDuong = multi.Read<PhieuNhapKhoViewModel>().ToList();
+
+                    // 19. PhieuNhapGanDay (Đã ghi)
+                    data.PhieuNhapGanDay = multi.Read<PhieuNhapKhoViewModel>().ToList();
                 }
             }
 

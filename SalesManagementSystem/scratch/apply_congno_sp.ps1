@@ -9,19 +9,20 @@ $conn = $factory.CreateConnection()
 try {
     $conn.Open()
     $sqlPath = "c:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\QuanLyBanHang\SalesManagementSystem\SalesManagementSystem\App_Data\create_sp_CongNoKhachHang.sql"
-    $script = [System.IO.File]::ReadAllText($sqlPath)
+    $text = [System.IO.File]::ReadAllText($sqlPath)
     
-    $batches = $script -split "(?m)^GO\s*$"
+    $opts = [System.Text.RegularExpressions.RegexOptions]::IgnoreCase -bor [System.Text.RegularExpressions.RegexOptions]::Multiline
+    $statements = [System.Text.RegularExpressions.Regex]::Split($text, "(?m)^\s*GO\s*$", $opts)
     
-    foreach ($batch in $batches) {
-        $cmdText = $batch.Trim()
-        if (-not [string]::IsNullOrWhiteSpace($cmdText)) {
+    foreach ($stmt in $statements) {
+        $trimmed = $stmt.Trim()
+        if (![string]::IsNullOrWhiteSpace($trimmed)) {
             $cmd = $conn.CreateCommand()
-            $cmd.CommandText = $cmdText
+            $cmd.CommandText = $trimmed
             $cmd.ExecuteNonQuery() | Out-Null
         }
     }
-    Write-Output "SUCCESS: Applied sp_CongNoKhachHang_GetList procedure!"
+    Write-Output "SUCCESS: Updated sp_CongNoKhachHang stored procedures!"
 } catch {
     Write-Error $_.Exception.Message
 } finally {

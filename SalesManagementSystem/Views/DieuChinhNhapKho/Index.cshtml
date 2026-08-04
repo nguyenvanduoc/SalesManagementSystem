@@ -56,23 +56,19 @@
                 </div>
                 <div class="col-md-2">
                     <label class="form-label text-muted small fw-bold">Loại nhập kho</label>
-                    <select class="form-select form-select-sm select2-ajax" name="idLoaiNhap" data-url="/PhieuNhapKho/SearchLoaiNhapKho" data-placeholder="Chọn loại nhập">
-                    </select>
+                    @Html.DropDownList("idLoaiNhap", (SelectList)ViewBag.LoaiNhaps, "-- Tất cả --", new { @class = "form-select form-select-sm" })
                 </div>
                 <div class="col-md-2">
                     <label class="form-label text-muted small fw-bold">Kho hàng</label>
-                    <select class="form-select form-select-sm select2-ajax" name="idKho" data-url="/PhieuNhapKho/SearchKhoHang" data-placeholder="Chọn kho">
-                    </select>
+                    @Html.DropDownList("idKho", (SelectList)ViewBag.Khos, "-- Tất cả --", new { @class = "form-select form-select-sm" })
                 </div>
                 <div class="col-md-2">
                     <label class="form-label text-muted small fw-bold">Nhà cung cấp</label>
-                    <select class="form-select form-select-sm select2-ajax" name="idNhaCungCap" data-url="/PhieuNhapKho/SearchNhaCungCap" data-placeholder="Chọn nhà cung cấp">
-                    </select>
+                    @Html.DropDownList("idNhaCungCap", (SelectList)ViewBag.NhaCungCaps, "-- Tất cả --", new { @class = "form-select form-select-sm" })
                 </div>
                 <div class="col-md-2">
                     <label class="form-label text-muted small fw-bold">Khách hàng</label>
-                    <select class="form-select form-select-sm select2-ajax" name="idKhachHang" data-url="/PhieuNhapKho/SearchKhachHang" data-placeholder="Chọn khách hàng">
-                    </select>
+                    @Html.DropDownList("idKhachHang", (SelectList)ViewBag.KhachHangs, "-- Tất cả --", new { @class = "form-select form-select-sm" })
                 </div>
                 <div class="col-md-2 d-flex align-items-end pb-1">
                     <div class="form-check form-switch mb-2">
@@ -96,7 +92,7 @@
     </div>
 </div>
 
-<div id="listContainer">
+<div id="table-container">
     @Html.Partial("_AdjustList", Model)
 </div>
 
@@ -120,32 +116,6 @@
             var $pane = $('script').last().closest('.tab-pane');
             if ($pane.length === 0) $pane = $('body');
 
-            if ($.fn.select2) {
-                $pane.find('.select2-ajax').each(function () {
-                    var $el = $(this);
-                    var url = $el.data('url');
-                    var placeholder = $el.data('placeholder') || 'Chọn...';
-                    
-                    $el.select2({
-                        placeholder: placeholder,
-                        allowClear: true,
-                        dropdownParent: $pane,
-                        ajax: {
-                            url: url,
-                            dataType: 'json',
-                            delay: 250,
-                            data: function (params) {
-                                return { q: params.term || '' };
-                            },
-                            processResults: function (data) {
-                                return { results: data };
-                            },
-                            cache: true
-                        }
-                    });
-                });
-            }
-
             $pane.on('click', '.btn-reset', function(e) {
                 e.preventDefault();
                 var $form = $pane.find('#searchForm');
@@ -157,7 +127,7 @@
                 $form.find('input[name="tuNgay"]').val(firstDay);
                 $form.find('input[name="denNgay"]').val(lastDay);
                 
-                $pane.find('.select2-ajax').val(null).trigger('change');
+                $pane.find('select.form-select').val('').trigger('change');
                 $pane.find('.ddl-thoi-gian').val('current_month').trigger('change');
                 
                 $form.trigger('submit');

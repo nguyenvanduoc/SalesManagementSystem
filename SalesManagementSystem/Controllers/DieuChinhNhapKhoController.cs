@@ -43,6 +43,11 @@ namespace SalesManagementSystem.Controllers
             ViewBag.SoChungTu = soChungTu;
             ViewBag.ChiDonDieuChinh = chiDonDieuChinh;
 
+            ViewBag.LoaiNhaps = new SelectList(_phieuNhapRepo.GetLoaiNhapKhoForDropdown().Select(x => new { ID = (int)x.ID, Name = (string)x.TenLoaiNhap }), "ID", "Name", idLoaiNhap);
+            ViewBag.Khos = new SelectList(_phieuNhapRepo.GetKhoForDropdown("").Select(x => new { ID = (int)x.ID, Name = (string)x.MaKhoHang + " - " + (string)x.TenKhoHang }), "ID", "Name", idKho);
+            ViewBag.NhaCungCaps = new SelectList(_phieuNhapRepo.GetNhaCungCapForDropdown("").Select(x => new { ID = (int)x.ID, Name = (string)x.MaNhaCungCap + " - " + (string)x.TenNhaCungCap }), "ID", "Name", idNhaCungCap);
+            ViewBag.KhachHangs = new SelectList(_phieuNhapRepo.GetKhachHangForDropdown("").Select(x => new { ID = (int)x.ID, Name = (string)x.MaKhachHang + " - " + (string)x.TenKhachHang }), "ID", "Name", idKhachHang);
+
             if (Request.IsAjaxRequest())
             {
                 int totalRecords = 0;
@@ -180,7 +185,7 @@ namespace SalesManagementSystem.Controllers
                         var loaiNhapDict = (IDictionary<string, object>)loaiNhap;
                         if (loaiNhapDict.ContainsKey("MaLoaiNhap") && (string)loaiNhapDict["MaLoaiNhap"] == "CHUYEN_KHO")
                         {
-                            var invalidItemsDynamic = _phieuNhapRepo.CheckTonKhoChuyenKho(model.IDKhoNguon.Value, model.ChiTietsJson).ToList();
+                            var invalidItemsDynamic = _phieuNhapRepo.CheckTonKhoChuyenKho(model.IDKhoNguon.Value, model.ChiTietsJson, model.IDPhieuNhap).ToList();
                             if (invalidItemsDynamic.Any())
                             {
                                 var msg = "Kho nguồn không đủ số lượng cho các sản phẩm:\n";

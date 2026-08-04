@@ -136,6 +136,8 @@ namespace SalesManagementSystem.Controllers
                     SoChungTu = item.SoChungTu,
                     NgayChungTu = item.NgayChungTu.ToString("dd/MM/yyyy"),
                     TenKhachHang = item.TenKhachHang,
+                    TenNhanVienPhuTrach = item.TenNhanVienPhuTrach,
+                    TenTinh = item.TenTinh,
                     SoDienThoai = item.DienThoai,
                     DuDauKy = item.TonDauKy,
                     DoanhThu = item.DoanhThu,

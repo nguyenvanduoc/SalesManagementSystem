@@ -628,6 +628,7 @@ namespace SalesManagementSystem.Controllers
                 string tenKhachHang = "";
                 string soDienThoai = "";
                 string diaChiGiaoHang = "";
+                decimal congNoCu = 0m;
 
                 if (don.IDKhachHang.HasValue)
                 {
@@ -641,8 +642,19 @@ namespace SalesManagementSystem.Controllers
                             soDienThoai = kh.SoDienThoai;
                             diaChiGiaoHang = kh.DiaChi;
                         }
+
+                        // Tính công nợ cũ của khách hàng (chỉ tính chứng từ đã ghi sổ TrangThai = 2)
+                        string sqlCongNo = @"
+                            SELECT 
+                                ISNULL((SELECT SUM(TongCong) FROM BAN_ChungTuBanHang WHERE IDKhachHang = @IDKhachHang AND IsDeleted = 0 AND TrangThai = 2), 0)
+                                -
+                                ISNULL((SELECT SUM(pt.SoTienThu) FROM KT_PhieuThu pt WHERE pt.IDKhachHang = @IDKhachHang AND pt.TrangThai = 2), 0)";
+                        
+                        congNoCu = conn.QueryFirstOrDefault<decimal>(sqlCongNo, new { IDKhachHang = don.IDKhachHang.Value });
                     }
                 }
+
+                decimal tongTienThanhToan = totalThanhTien + congNoCu;
 
                 var variables = new System.Collections.Generic.Dictionary<string, object>
                 {
@@ -659,9 +671,10 @@ namespace SalesManagementSystem.Controllers
                     { "TongThanhTien", totalThanhTien },
                     { "PhiBocXep", don.PhiBocXep },
                     { "DonGiaBocXep", donGiaBocXep > 0 ? donGiaBocXep.ToString("N0"): "" },
-                    { "TongTienThanhToan", totalThanhTien },
+                    { "TongTienThanhToan", tongTienThanhToan },
                     { "ThoiGianGiaoHang", don.ThoiHanGiaoHang?.ToString("dd/MM/yyyy") },
-                    { "SoTienBangChu", SalesManagementSystem.Helpers.NumberToTextHelper.DocTienBangChu(totalThanhTien) }
+                    { "SoTienBangChu", SalesManagementSystem.Helpers.NumberToTextHelper.DocTienBangChu(tongTienThanhToan) },
+                    { "CongNoCu", congNoCu }
                 };
 
                 // The prefix will be %DH01. since we use maBieuMau = "DH01"

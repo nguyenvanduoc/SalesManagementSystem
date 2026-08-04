@@ -542,4 +542,35 @@ BEGIN
     WHERE d.TrangThaiDon = 2
     ORDER BY d.NgayTaoDon DESC, d.ID DESC;
 
+    -- 18. PhieuNhapDangDiDuong (Phiếu nhập kho trạng thái 1 - Nháp / Đang đi đường / Đề nghị ghi)
+    SELECT
+        pn.ID,
+        pn.SoChungTu,
+        pn.NgayNhap,
+        pn.TrangThai,
+        ncc.TenNhaCungCap,
+        pt.TenPhuongTien,
+        pn.HoTenTaiXe,
+        pn.TongCong
+    FROM KHO_PhieuNhap pn
+    LEFT JOIN DM_NhaCungCap ncc ON pn.IDNhaCungCap = ncc.ID
+    LEFT JOIN DM_PhuongTien pt ON pn.IDPhuongTien = pt.ID
+    WHERE pn.IsDeleted = 0 AND pn.TrangThai = 1
+    ORDER BY pn.NgayNhap DESC, pn.ID DESC;
+
+    -- 19. PhieuNhapGanDay (Phiếu nhập kho đã ghi gần đây)
+    SELECT TOP 5
+        pn.ID,
+        pn.SoChungTu,
+        pn.NgayNhap,
+        pn.TrangThai,
+        ncc.TenNhaCungCap,
+        pt.TenPhuongTien,
+        pn.TongCong
+    FROM KHO_PhieuNhap pn
+    LEFT JOIN DM_NhaCungCap ncc ON pn.IDNhaCungCap = ncc.ID
+    LEFT JOIN DM_PhuongTien pt ON pn.IDPhuongTien = pt.ID
+    WHERE pn.IsDeleted = 0 AND pn.TrangThai = 2
+    ORDER BY pn.NgayGhiSo DESC, pn.ID DESC;
+
 END

@@ -106,7 +106,7 @@ namespace SalesManagementSystem.Repositories
                 FROM ACL_LoginSession ls 
                 LEFT JOIN ACL_Login al ON ls.IDLogin = al.ID 
                 {whereClause}
-                ORDER BY ls.ThoiGianLogin DESC
+                ORDER BY ls.IsDangHoatDong DESC, ls.ThoiGianLogin DESC
                 OFFSET @Offset ROWS 
                 FETCH NEXT @PageSize ROWS ONLY";
 

@@ -26,7 +26,7 @@ BEGIN
                 WHERE ct.IDChungTuBanHang = bh.ID AND pt.TrangThai = 2 AND ct.LoaiThu IN (1, 3)
             ), 0) AS DaThuInvoice
         FROM BAN_ChungTuBanHang bh
-        WHERE bh.IsDeleted = 0 AND bh.TrangThai IN (1, 2)
+        WHERE bh.IsDeleted = 0 AND bh.TrangThai = 2
     ),
     OverduePerCustomer AS (
         SELECT 
@@ -39,6 +39,8 @@ BEGIN
         SELECT 
             kh.ID AS IDKhachHang,
             kh.TenKhachHang,
+            ISNULL(nv.HoTen, ISNULL(LTRIM(RTRIM(ISNULL(ns.HoDem, '') + ' ' + ISNULL(ns.Ten, ''))), '')) AS TenNhanVienPhuTrach,
+            ISNULL(tt.TenTinhThanh, '') AS TenTinh,
             kh.SoDienThoai AS DienThoai,
 
             -- 1. Tồn đầu kỳ: (Tổng nợ bán hàng trước @TuNgay) - (Tổng đã thu trước @TuNgay)
@@ -47,7 +49,7 @@ BEGIN
                 FROM BAN_ChungTuBanHang bh 
                 WHERE bh.IDKhachHang = kh.ID 
                   AND bh.IsDeleted = 0 
-                  AND bh.TrangThai IN (1, 2) 
+                  AND bh.TrangThai = 2 
                   AND (@TuNgayDate IS NOT NULL AND CAST(bh.NgayChungTu AS DATE) < @TuNgayDate)
             ), 0)
             -
@@ -65,7 +67,7 @@ BEGIN
                 FROM BAN_ChungTuBanHang bh 
                 WHERE bh.IDKhachHang = kh.ID 
                   AND bh.IsDeleted = 0 
-                  AND bh.TrangThai IN (1, 2) 
+                  AND bh.TrangThai = 2 
                   AND (@TuNgayDate IS NULL OR CAST(bh.NgayChungTu AS DATE) >= @TuNgayDate)
                   AND (@DenNgayDate IS NULL OR CAST(bh.NgayChungTu AS DATE) <= @DenNgayDate)
             ), 0) AS DoanhThu,
@@ -84,6 +86,9 @@ BEGIN
             ISNULL(od.TienQuaHan, 0) AS TienQuaHan
 
         FROM NS_KhachHang kh
+        LEFT JOIN NS_NhanVien nv ON kh.IDNhanVien = nv.ID
+        LEFT JOIN NS_NhanSu ns ON kh.IDNhanVien = ns.ID
+        LEFT JOIN DM_TinhThanh tt ON kh.IDTinhThanh = tt.ID
         LEFT JOIN OverduePerCustomer od ON kh.ID = od.IDKhachHang
         WHERE (@IDKhachHang IS NULL OR kh.ID = @IDKhachHang)
     ),
@@ -95,6 +100,8 @@ BEGIN
             CAST('1900-01-01' AS DATETIME) AS NgayChungTu,
             IDKhachHang,
             TenKhachHang,
+            TenNhanVienPhuTrach,
+            TenTinh,
             DienThoai,
             DoanhThu,
             DaThu,
@@ -139,7 +146,7 @@ BEGIN
     SELECT @TongPhaiThu = ISNULL(SUM(bh.TongCong), 0)
     FROM BAN_ChungTuBanHang bh
     WHERE bh.IsDeleted = 0 
-      AND bh.TrangThai IN (1, 2)
+      AND bh.TrangThai = 2
       AND (@TuNgay IS NULL OR CAST(bh.NgayChungTu AS DATE) >= CAST(@TuNgay AS DATE))
       AND (@DenNgay IS NULL OR CAST(bh.NgayChungTu AS DATE) <= CAST(@DenNgay AS DATE))
       AND (@IDKhachHang IS NULL OR bh.IDKhachHang = @IDKhachHang);
@@ -151,7 +158,7 @@ BEGIN
     INNER JOIN BAN_ChungTuBanHang bh ON ct.IDChungTuBanHang = bh.ID
     WHERE pt.TrangThai = 2
       AND bh.IsDeleted = 0 
-      AND bh.TrangThai IN (1, 2)
+      AND bh.TrangThai = 2
       AND (@TuNgay IS NULL OR CAST(bh.NgayChungTu AS DATE) >= CAST(@TuNgay AS DATE))
       AND (@DenNgay IS NULL OR CAST(bh.NgayChungTu AS DATE) <= CAST(@DenNgay AS DATE))
       AND (@IDKhachHang IS NULL OR bh.IDKhachHang = @IDKhachHang)
@@ -187,7 +194,7 @@ BEGIN
             ), 0) AS ConLai
         FROM BAN_ChungTuBanHang bh
         WHERE bh.IsDeleted = 0
-          AND bh.TrangThai IN (1, 2)
+          AND bh.TrangThai = 2
           AND DATEDIFF(day, bh.NgayChungTu, GETDATE()) > 30
           AND (@IDKhachHang IS NULL OR bh.IDKhachHang = @IDKhachHang)
     )
@@ -219,7 +226,7 @@ BEGIN
     DECLARE @StartBalance DECIMAL(18,0) = 0;
 
     SELECT @StartBalance = 
-        ISNULL((SELECT SUM(bh.TongCong) FROM BAN_ChungTuBanHang bh WHERE bh.IDKhachHang = @IDKhachHang AND bh.IsDeleted = 0 AND bh.TrangThai IN (1, 2) AND (@TuNgay IS NULL OR CAST(bh.NgayChungTu AS DATE) < CAST(@TuNgay AS DATE))), 0)
+        ISNULL((SELECT SUM(bh.TongCong) FROM BAN_ChungTuBanHang bh WHERE bh.IDKhachHang = @IDKhachHang AND bh.IsDeleted = 0 AND bh.TrangThai = 2 AND (@TuNgay IS NULL OR CAST(bh.NgayChungTu AS DATE) < CAST(@TuNgay AS DATE))), 0)
         -
         ISNULL((SELECT SUM(pt.SoTienThu) FROM KT_PhieuThu pt WHERE pt.IDKhachHang = @IDKhachHang AND pt.TrangThai = 2 AND (@TuNgay IS NULL OR CAST(pt.NgayThu AS DATE) < CAST(@TuNgay AS DATE))), 0);
 
@@ -262,7 +269,7 @@ BEGIN
     FROM BAN_ChungTuBanHang bh
     WHERE bh.IDKhachHang = @IDKhachHang
       AND bh.IsDeleted = 0
-      AND bh.TrangThai IN (1, 2)
+      AND bh.TrangThai = 2
       AND (@TuNgay IS NULL OR CAST(bh.NgayChungTu AS DATE) >= CAST(@TuNgay AS DATE))
       AND (@DenNgay IS NULL OR CAST(bh.NgayChungTu AS DATE) <= CAST(@DenNgay AS DATE));
 

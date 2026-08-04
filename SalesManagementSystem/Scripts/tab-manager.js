@@ -781,6 +781,13 @@ var TabManager = (function () {
                 hideLoadingLocal($pane);
                 delete activeRequests[paneId];
                 
+                // Nếu phản hồi chứa trang đăng nhập (do bị mất Session / hết hạn), redirect ra Login
+                if (typeof res === 'string' && (res.indexOf('login-card') !== -1 || res.indexOf('login-title') !== -1 || res.indexOf('ĐĂNG NHẬP HỆ THỐNG') !== -1 || res.indexOf('name="UserName"') !== -1)) {
+                    try { localStorage.removeItem('tabManagerState'); } catch(e){}
+                    window.top.location.href = '/Login/Index';
+                    return;
+                }
+
                 $pane.html(res);
                 reInitPlugins(paneId);
             },
@@ -790,6 +797,12 @@ var TabManager = (function () {
                 hideLoadingLocal($pane);
                 delete activeRequests[paneId];
                 
+                if (err.status === 401 || err.status === 403) {
+                    try { localStorage.removeItem('tabManagerState'); } catch(e){}
+                    window.top.location.href = '/Login/Index';
+                    return;
+                }
+
                 console.error('Lỗi nạp nội dung tab:', err);
                 $pane.html('<div class="alert alert-danger m-3">Lỗi kết nối máy chủ khi nạp giao diện. Vui lòng thử lại.</div>');
             }

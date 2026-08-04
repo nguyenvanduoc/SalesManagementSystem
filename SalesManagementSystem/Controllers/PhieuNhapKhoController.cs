@@ -454,7 +454,7 @@ namespace SalesManagementSystem.Controllers
                         if (loaiNhapDict.ContainsKey("MaLoaiNhap") && (string)loaiNhapDict["MaLoaiNhap"] == "CHUYEN_KHO")
                         {
                             var chiTietsJson = Newtonsoft.Json.JsonConvert.SerializeObject(model.ChiTiets);
-                            var invalidItemsDynamic = _repo.CheckTonKhoChuyenKho(model.IDKhoNguon.Value, chiTietsJson).ToList();
+                            var invalidItemsDynamic = _repo.CheckTonKhoChuyenKho(model.IDKhoNguon.Value, chiTietsJson, model.ID).ToList();
                             if (invalidItemsDynamic.Any())
                             {
                                 var msg = "Kho nguồn không đủ số lượng cho các sản phẩm:\n";

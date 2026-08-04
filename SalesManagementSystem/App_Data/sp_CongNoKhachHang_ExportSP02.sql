@@ -51,13 +51,13 @@ BEGIN
               AND (@DenNgay IS NULL OR pt.NgayThu <= @DenNgay)
         ), 0) AS KhachThanhToanTruoc,
         
-        -- Hàng chờ giao
+        -- Hàng chờ giao (Phiếu bán hàng ở trạng thái Đề nghị ghi / đang đi đường)
         ISNULL((
-            SELECT SUM(ddh.TongTien)
-            FROM NS_DonDatHang ddh
-            WHERE ddh.IDKhachHang = kh.ID AND ddh.TrangThaiDon = 1 -- 1: Chờ giao
-              AND (@TuNgay IS NULL OR ddh.NgayTaoDon >= @TuNgay)
-              AND (@DenNgay IS NULL OR ddh.NgayTaoDon <= @DenNgay)
+            SELECT SUM(ct.TongCong)
+            FROM BAN_ChungTuBanHang ct
+            WHERE ct.IDKhachHang = kh.ID AND ct.IsDeleted = 0 AND ct.TrangThai = 1
+              AND (@TuNgay IS NULL OR ct.NgayChungTu >= @TuNgay)
+              AND (@DenNgay IS NULL OR ct.NgayChungTu <= @DenNgay)
         ), 0) AS HangChoGiao,
         
         '' AS GhiChu

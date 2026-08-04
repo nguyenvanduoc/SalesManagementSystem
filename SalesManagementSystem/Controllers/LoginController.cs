@@ -20,6 +20,59 @@ namespace SalesManagementSystem.Controllers
         [OutputCache(NoStore = true, Duration = 0, VaryByParam = "None")]
         public ActionResult Index()
         {
+            var cookie = Request.Cookies["SMS_AutoLogin"];
+            if (cookie != null && !string.IsNullOrEmpty(cookie.Value))
+            {
+                try
+                {
+                    var ticket = System.Web.Security.FormsAuthentication.Decrypt(cookie.Value);
+                    if (ticket != null && !ticket.Expired)
+                    {
+                        var userSession = Newtonsoft.Json.JsonConvert.DeserializeObject<UserLoginViewModel>(ticket.UserData);
+                        if (userSession != null && userSession.UserID > 0)
+                        {
+                            // AN TOÀN BẢO MẬT: Kiểm tra lại CSDL xem tài khoản có tồn tại và đang hoạt động (IsActive) hay không
+                            var dbUser = _loginRepo.GetById(userSession.UserID);
+                            if (dbUser != null && dbUser.IsActive == true)
+                            {
+                                userSession.UserName = dbUser.TenDangNhap;
+                                userSession.HoDem = dbUser.HoDem;
+                                userSession.Ten = dbUser.Ten;
+                                userSession.IDNhanSu = dbUser.IDNhanSu;
+
+                                Session.Add(CommonConstants.USER_SESSION, userSession);
+
+                                int sessionId = _sessionRepo.LogLogin(new SalesManagementSystem.Models.Entities.AclLoginSession
+                                {
+                                    IDLogin = userSession.UserID,
+                                    HoTen = ((userSession.HoDem ?? "") + " " + (userSession.Ten ?? "")).Trim(),
+                                    HostName = Request.UserHostName,
+                                    HostAddress = Request.UserHostAddress,
+                                    TrinhDuyet = Request.Browser != null ? Request.Browser.Browser + " " + Request.Browser.Version : "Unknown",
+                                    IP = Request.ServerVariables["REMOTE_ADDR"] ?? Request.UserHostAddress
+                                });
+                                Session["LoginSessionID"] = sessionId;
+
+                                bool hasDashboardPerm = SalesManagementSystem.Helpers.PermissionHelper.HasActionPermission("Dashboard", "Index") || SalesManagementSystem.Helpers.PermissionHelper.HasPermission("Dashboard", SalesManagementSystem.Helpers.LoaiPhanQuyen.Xem);
+                                if (hasDashboardPerm)
+                                {
+                                    return RedirectToAction("Index", "Dashboard");
+                                }
+                                return RedirectToAction("Index", "Home");
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    // Ignore exception, fall through to remove cookie
+                }
+
+                // Nếu cookie hết hạn, bị lỗi mã hóa, hoặc tài khoản đã bị vô hiệu hóa trong CSDL => Hủy cookie ngay
+                var expiredCookie = new System.Web.HttpCookie("SMS_AutoLogin", "") { Expires = System.DateTime.Now.AddDays(-1) };
+                Response.Cookies.Add(expiredCookie);
+            }
+
             return View();
         }
 

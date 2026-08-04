@@ -388,58 +388,138 @@
         </div>
     </div>
 
-    <!-- KHỐI 2 & MỚI: ĐƠN HÀNG -->
+    <!-- KHỐI 2: BÁN HÀNG & NHẬP HÀNG (TABS) -->
     <div class="row g-2 mb-3">
+        <!-- KHỐI BÁN HÀNG -->
         <div class="col-md-6">
-            <div class="panel-card h-100 mb-0">
-                <div class="panel-title d-flex justify-content-between align-items-center mb-2.5">
-                    <span class="d-flex align-items-center gap-2"><i class="bi bi-clock-history text-success"></i> ĐƠN HÀNG GẦN ĐÂY</span>
-                    <a href="#" onclick="TabManager.openTab('DonDatHang', 'Đơn đặt hàng', '@Url.Action("Index", "DonDatHang")')" class="text-success text-decoration-none small fw-bold">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+            <div class="panel-card h-100 mb-0 p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                    <ul class="nav nav-pills card-header-pills gap-1" id="tabBanHang_@uid" role="tablist" style="font-size: 0.85rem;">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active py-1 px-2.5 fw-semibold d-flex align-items-center gap-1" id="tab-don-diduong-@uid" data-bs-toggle="pill" data-bs-target="#content-don-diduong-@uid" type="button" role="tab">
+                                <i class="bi bi-truck text-primary"></i> Đơn hàng đi đường <span class="badge bg-primary rounded-pill ms-1" id="badgeDonDiDuong_@uid" style="font-size:0.7rem">0</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link py-1 px-2.5 fw-semibold d-flex align-items-center gap-1" id="tab-don-ganday-@uid" data-bs-toggle="pill" data-bs-target="#content-don-ganday-@uid" type="button" role="tab">
+                                <i class="bi bi-clock-history text-success"></i> Đơn hàng gần đây
+                            </button>
+                        </li>
+                    </ul>
+                    <a href="#" onclick="TabManager.openTab('DonDatHang', 'Đơn đặt hàng', '@Url.Action("Index", "DonDatHang")')" class="text-success text-decoration-none small fw-bold ms-2">Xem tất cả <i class="bi bi-arrow-right"></i></a>
                 </div>
-                <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
-                    <table class="table table-hover align-middle mb-0 text-nowrap" style="font-size:0.85rem">
-                        <thead class="table-light sticky-top">
-                            <tr>
-                                <th>MÃ ĐH</th>
-                                <th>NGÀY TẠO</th>
-                                <th>KHÁCH HÀNG</th>
-                                <th>NHÂN SỰ</th>
-                                <th class="text-end">TỔNG TIỀN</th>
-                                <th class="text-center">TRẠNG THÁI</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbRecentOrders_@uid">
-                            <tr>
-                                <td colspan="6" class="text-center text-muted py-3">Đang tải dữ liệu...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="tab-content" id="tabBanHangContent_@uid">
+                    <!-- Tab 1: Đơn đang đi đường -->
+                    <div class="tab-pane fade show active" id="content-don-diduong-@uid" role="tabpanel">
+                        <div class="table-responsive" style="max-height: 230px; overflow-y: auto;">
+                            <table class="table table-hover align-middle mb-0 text-nowrap" style="font-size:0.85rem">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>MÃ ĐH</th>
+                                        <th>NGÀY LÊN ĐƠN</th>
+                                        <th>KHÁCH HÀNG</th>
+                                        <th>PHƯƠNG TIỆN</th>
+                                        <th class="text-end">TỔNG SL</th>
+                                        <th class="text-end">TỔNG TIỀN</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbOrdersOnTheWay_@uid">
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-3">Đang tải dữ liệu...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Tab 2: Đơn hàng gần đây -->
+                    <div class="tab-pane fade" id="content-don-ganday-@uid" role="tabpanel">
+                        <div class="table-responsive" style="max-height: 230px; overflow-y: auto;">
+                            <table class="table table-hover align-middle mb-0 text-nowrap" style="font-size:0.85rem">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>MÃ ĐH</th>
+                                        <th>NGÀY TẠO</th>
+                                        <th>KHÁCH HÀNG</th>
+                                        <th>NHÂN SỰ</th>
+                                        <th class="text-end">TỔNG TIỀN</th>
+                                        <th class="text-center">TRẠNG THÁI</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbRecentOrders_@uid">
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-3">Đang tải dữ liệu...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- KHỐI NHẬP HÀNG -->
         <div class="col-md-6">
-            <div class="panel-card h-100 mb-0">
-                <div class="panel-title d-flex justify-content-between align-items-center mb-2.5">
-                    <span class="d-flex align-items-center gap-2"><i class="bi bi-truck text-primary"></i> ĐƠN HÀNG ĐANG ĐI ĐƯỜNG</span>
+            <div class="panel-card h-100 mb-0 p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                    <ul class="nav nav-pills card-header-pills gap-1" id="tabNhapHang_@uid" role="tablist" style="font-size: 0.85rem;">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active py-1 px-2.5 fw-semibold d-flex align-items-center gap-1" id="tab-nhap-diduong-@uid" data-bs-toggle="pill" data-bs-target="#content-nhap-diduong-@uid" type="button" role="tab">
+                                <i class="bi bi-box-seam-fill text-warning"></i> Nhập kho đi đường<span class="badge bg-warning text-dark rounded-pill ms-1" id="badgeNhapDiDuong_@uid" style="font-size:0.7rem">0</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link py-1 px-2.5 fw-semibold d-flex align-items-center gap-1" id="tab-nhap-ganday-@uid" data-bs-toggle="pill" data-bs-target="#content-nhap-ganday-@uid" type="button" role="tab">
+                                <i class="bi bi-journal-check text-info"></i> Nhập kho gần đây
+                            </button>
+                        </li>
+                    </ul>
+                    <a href="#" onclick="TabManager.openTab('PhieuNhapKho', 'Phiếu nhập kho', '@Url.Action("Index", "PhieuNhapKho")')" class="text-warning text-decoration-none small fw-bold ms-2">Xem tất cả <i class="bi bi-arrow-right"></i></a>
                 </div>
-                <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
-                    <table class="table table-hover align-middle mb-0 text-nowrap" style="font-size:0.85rem">
-                        <thead class="table-light sticky-top">
-                            <tr>
-                                <th>MÃ ĐH</th>
-                                <th>NGÀY LÊN ĐƠN</th>
-                                <th>KHÁCH HÀNG</th>
-                                <th>PHƯƠNG TIỆN</th>
-                                <th class="text-end">TỔNG SL</th>
-                                <th class="text-end">TỔNG TIỀN</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbOrdersOnTheWay_@uid">
-                            <tr>
-                                <td colspan="6" class="text-center text-muted py-3">Đang tải dữ liệu...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="tab-content" id="tabNhapHangContent_@uid">
+                    <!-- Tab 1: Nhập kho đang đi đường (Đề nghị ghi) -->
+                    <div class="tab-pane fade show active" id="content-nhap-diduong-@uid" role="tabpanel">
+                        <div class="table-responsive" style="max-height: 230px; overflow-y: auto;">
+                            <table class="table table-hover align-middle mb-0 text-nowrap" style="font-size:0.85rem">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>MÃ PHIẾU</th>
+                                        <th>NGÀY NHẬP</th>
+                                        <th>NHÀ CUNG CẤP</th>
+                                        <th>TÀI XẾ / PT</th>
+                                        <th class="text-end">TỔNG TIỀN</th>
+                                        <th class="text-center">TRẠNG THÁI</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbNhapKhoOnTheWay_@uid">
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-3">Đang tải dữ liệu...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Tab 2: Nhập kho đã ghi gần đây -->
+                    <div class="tab-pane fade" id="content-nhap-ganday-@uid" role="tabpanel">
+                        <div class="table-responsive" style="max-height: 230px; overflow-y: auto;">
+                            <table class="table table-hover align-middle mb-0 text-nowrap" style="font-size:0.85rem">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>MÃ PHIẾU</th>
+                                        <th>NGÀY NHẬP</th>
+                                        <th>NHÀ CUNG CẤP</th>
+                                        <th>PHƯƠNG TIỆN</th>
+                                        <th class="text-end">TỔNG TIỀN</th>
+                                        <th class="text-center">TRẠNG THÁI</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbRecentNhapKho_@uid">
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-3">Đang tải dữ liệu...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -904,6 +984,9 @@
             }
             $('#tbRecentOrders_@uid').html(ordHtml);
 
+            var countDonDiDuong = data.DonHangDangDiDuong ? data.DonHangDangDiDuong.length : 0;
+            $('#badgeDonDiDuong_@uid').text(countDonDiDuong);
+
             var otwHtml = '';
             if (data.DonHangDangDiDuong && data.DonHangDangDiDuong.length > 0) {
                 data.DonHangDangDiDuong.forEach(function(o) {
@@ -920,6 +1003,52 @@
                 otwHtml = '<tr><td colspan="6" class="text-center text-muted py-3">Không có đơn hàng đang đi đường.</td></tr>';
             }
             $('#tbOrdersOnTheWay_@uid').html(otwHtml);
+
+            // BẢNG NHẬP KHO ĐANG ĐI ĐƯỜNG (ĐỀ NGHỊ GHI)
+            var countNhapDiDuong = data.PhieuNhapDangDiDuong ? data.PhieuNhapDangDiDuong.length : 0;
+            $('#badgeNhapDiDuong_@uid').text(countNhapDiDuong);
+
+            var nhapOtwHtml = '';
+            if (data.PhieuNhapDangDiDuong && data.PhieuNhapDangDiDuong.length > 0) {
+                data.PhieuNhapDangDiDuong.forEach(function(n) {
+                    var taiXeOrPt = n.HoTenTaiXe || n.TenPhuongTien || '<span class="text-muted">—</span>';
+                    var tongTienPhieu = (n.TongCong && n.TongCong > 0) ? n.TongCong : (n.TienVanChuyen || 0);
+                    nhapOtwHtml += `<tr>
+                        <td class="fw-bold text-primary">${n.SoChungTu}</td>
+                        <td>${formatDate(n.NgayNhap)}</td>
+                        <td>${n.TenNhaCungCap || '<span class="text-muted">—</span>'}</td>
+                        <td>${taiXeOrPt}</td>
+                        <td class="text-end fw-bold text-warning">${formatMoney(tongTienPhieu)}</td>
+                        <td class="text-center">
+                            <span class="badge bg-warning text-dark px-2 py-1 rounded" style="font-size:0.75rem">Đang đi đường</span>
+                        </td>
+                    </tr>`;
+                });
+            } else {
+                nhapOtwHtml = '<tr><td colspan="6" class="text-center text-muted py-3">Không có phiếu nhập kho đang đi đường.</td></tr>';
+            }
+            $('#tbNhapKhoOnTheWay_@uid').html(nhapOtwHtml);
+
+            // BẢNG NHẬP KHO GẦN ĐÂY (ĐÃ GHI)
+            var recentNhapHtml = '';
+            if (data.PhieuNhapGanDay && data.PhieuNhapGanDay.length > 0) {
+                data.PhieuNhapGanDay.forEach(function(n) {
+                    var tongTienPhieu = (n.TongCong && n.TongCong > 0) ? n.TongCong : (n.TienVanChuyen || 0);
+                    recentNhapHtml += `<tr>
+                        <td class="fw-bold text-dark">${n.SoChungTu}</td>
+                        <td>${formatDate(n.NgayNhap)}</td>
+                        <td>${n.TenNhaCungCap || '<span class="text-muted">—</span>'}</td>
+                        <td>${n.TenPhuongTien || '<span class="text-muted">—</span>'}</td>
+                        <td class="text-end fw-bold text-success">${formatMoney(tongTienPhieu)}</td>
+                        <td class="text-center">
+                            <span class="badge bg-success px-2 py-1 rounded" style="font-size:0.75rem">Đã ghi sổ</span>
+                        </td>
+                    </tr>`;
+                });
+            } else {
+                recentNhapHtml = '<tr><td colspan="6" class="text-center text-muted py-3">Không có phiếu nhập kho gần đây.</td></tr>';
+            }
+            $('#tbRecentNhapKho_@uid').html(recentNhapHtml);
 
             // KHỐI 3: BIỂU ĐỒ BÁN HÀNG & GIÁ VỐN
             renderBusinessChart(data.DoanhThuTheoThoiGian, data.GiaVonTheoThoiGian, 'chartDoanhThu_@uid');

@@ -438,6 +438,7 @@
     <Content Include="node_modules\safer-buffer\Porting-Buffer.md" />
     <Content Include="node_modules\safer-buffer\Readme.md" />
     <Content Include="obj\Release\Package\PackageTmp\Views\PhieuNhapKho\_PhieuNhapKhoList.cshtml" />
+    <Content Include="obj\Release\Package\PackageTmp\Views\CongNoKhachHang\_CongNoKhachHangList.cshtml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -588,6 +589,7 @@
     <Content Include="Views\CongNoNCC\_DetailModal.cshtml" />
     <Content Include="Views\CongNoNCC\_HistoryModal.cshtml" />
     <Content Include="Views\BaoCaoCongNoVanChuyen\_DetailsModal.cshtml" />
+    <Content Include="Views\KHO_HaoHut\_HaoHutList.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />

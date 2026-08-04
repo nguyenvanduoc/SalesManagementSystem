@@ -530,13 +530,14 @@ namespace SalesManagementSystem.Repositories
             }
         }
 
-        public IEnumerable<dynamic> CheckTonKhoChuyenKho(int idKhoNguon, string chiTietsJson)
+        public IEnumerable<dynamic> CheckTonKhoChuyenKho(int idKhoNguon, string chiTietsJson, int idPhieuNhap = 0)
         {
             using (var conn = _db.CreateConnection())
             {
                 var p = new DynamicParameters();
                 p.Add("@IDKhoNguon", idKhoNguon);
                 p.Add("@ChiTietsJson", chiTietsJson);
+                p.Add("@IDPhieuNhap", idPhieuNhap);
 
                 return conn.Query("sp_KHO_TonKho_CheckChuyenKho", p, commandType: CommandType.StoredProcedure);
             }

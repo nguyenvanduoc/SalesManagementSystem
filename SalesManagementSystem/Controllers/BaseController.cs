@@ -26,34 +26,32 @@ namespace SalesManagementSystem.Controllers
                     bool isActive = sessionRepo.IsSessionActive((int)sessionId);
                     if (!isActive)
                     {
-                        var authCookie = filterContext.HttpContext.Request.Cookies["SMS_AutoLogin"];
-                        if (authCookie != null && !string.IsNullOrEmpty(authCookie.Value))
+                        Session.Abandon();
+                        Session.Clear();
+
+                        // Xóa cookie tự động đăng nhập khi phiên bị ngắt bởi quản trị viên
+                        var expiredCookie = new System.Web.HttpCookie("SMS_AutoLogin", "")
                         {
-                            // Refresh login session ID seamlessly for auto-login user
-                            int newSessionId = sessionRepo.LogLogin(new SalesManagementSystem.Models.Entities.AclLoginSession
+                            Expires = DateTime.Now.AddDays(-1),
+                            HttpOnly = true
+                        };
+                        filterContext.HttpContext.Response.Cookies.Add(expiredCookie);
+
+                        if (filterContext.HttpContext.Request.IsAjaxRequest())
+                        {
+                            filterContext.HttpContext.Response.StatusCode = 401;
+                            filterContext.HttpContext.Response.TrySkipIisCustomErrors = true;
+                            filterContext.Result = new JsonResult
                             {
-                                IDLogin = userSession.UserID,
-                                HoTen = (userSession.HoDem + " " + userSession.Ten).Trim(),
-                                HostName = filterContext.HttpContext.Request.UserHostName,
-                                HostAddress = filterContext.HttpContext.Request.UserHostAddress,
-                                TrinhDuyet = filterContext.HttpContext.Request.Browser != null ? filterContext.HttpContext.Request.Browser.Browser + " " + filterContext.HttpContext.Request.Browser.Version : "Unknown",
-                                IP = filterContext.HttpContext.Request.ServerVariables["REMOTE_ADDR"] ?? filterContext.HttpContext.Request.UserHostAddress
-                            });
-                            Session["LoginSessionID"] = newSessionId;
+                                Data = new { success = false, message = "Phiên làm việc của bạn đã bị ngắt bởi quản trị viên." },
+                                JsonRequestBehavior = JsonRequestBehavior.AllowGet
+                            };
                         }
                         else
                         {
-                            Session.Abandon();
-                            if (filterContext.HttpContext.Request.IsAjaxRequest())
-                            {
-                                filterContext.Result = new JsonResult { Data = new { success = false, message = "Phiên làm việc của bạn đã bị ngắt bởi quản trị viên." }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
-                            }
-                            else
-                            {
-                                filterContext.Result = new RedirectResult("/Login/Index");
-                            }
-                            return;
+                            filterContext.Result = new RedirectResult("/Login/Index");
                         }
+                        return;
                     }
                 }
             }
