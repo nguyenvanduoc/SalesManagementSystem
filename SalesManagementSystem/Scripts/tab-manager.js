@@ -139,6 +139,8 @@ var TabManager = (function () {
     function initPaginationHandler() {
         $(document).off('click.tabmanager', '.ajax-link');
         $(document).on('click.tabmanager', '.ajax-link', function (e) {
+            if ($(this).closest('.modal').length > 0) return;
+
             e.preventDefault();
             e.stopImmediatePropagation();
 
@@ -199,6 +201,8 @@ var TabManager = (function () {
     function initPageSizeHandler() {
         $(document).off('change.tabmanager', '.page-size-select');
         $(document).on('change.tabmanager', '.page-size-select', function (e) {
+            if ($(this).closest('.modal').length > 0) return;
+
             e.preventDefault();
             e.stopImmediatePropagation();
 

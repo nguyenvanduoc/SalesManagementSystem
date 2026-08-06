@@ -37,12 +37,7 @@
             </button>
         }
     }
-    @if (Model.TrangThai == 2 && Model.ConPhaiHoan > 0)
-    {
-        <a href="@Url.Action("Create", "PhieuChi", new { loaiChi = "HOAN_TIEN", idTraHang = Model.ID, idKhachHang = Model.IDKhachHang, soTien = Model.ConPhaiHoan })" class="btn btn-sm btn-warning fw-bold text-dark">
-            <i class="bi bi-cash-coin me-1"></i> Lập phiếu chi hoàn tiền
-        </a>
-    }
+
     @if (Model.TrangThai == 2 && SalesManagementSystem.Helpers.PermissionHelper.HasPermission("BAN_TraHangBan", SalesManagementSystem.Helpers.LoaiPhanQuyen.Xoa))
     {
         <button type="button" class="btn btn-sm btn-danger ms-auto" onclick="confirmHuy()">
@@ -347,9 +342,10 @@
                             if (typeof TabManager !== 'undefined') {
                                 var paneId = $('#ID').closest('.tab-pane').attr('id');
                                 var key = paneId ? paneId.replace('-pane', '').replace('tab-', '') : 'BAN_TraHangBan';
+                                var editUrl = '@Url.Action("Edit", "BAN_TraHangBan", new { id = 0 })'.replace('/0', '/' + $('#ID').val());
                                 if (paneId) $('#' + paneId).attr('data-url', '');
                                 setTimeout(function() {
-                                    TabManager.openTab(key, 'Chi tiết trả hàng bán', '@Url.Action("Edit", "BAN_TraHangBan")/' + $('#ID').val());
+                                    TabManager.openTab(key, 'Chi tiết trả hàng bán', editUrl);
                                 }, 1500);
                             } else {
                                 setTimeout(() => location.reload(), 1500);
@@ -370,9 +366,10 @@
                         if (typeof TabManager !== 'undefined') {
                             var paneId = $('#ID').closest('.tab-pane').attr('id');
                             var key = paneId ? paneId.replace('-pane', '').replace('tab-', '') : 'BAN_TraHangBan';
+                            var editUrl = '@Url.Action("Edit", "BAN_TraHangBan", new { id = 0 })'.replace('/0', '/' + $('#ID').val());
                             if (paneId) $('#' + paneId).attr('data-url', '');
                             setTimeout(function() {
-                                TabManager.openTab(key, 'Chi tiết trả hàng bán', '@Url.Action("Edit", "BAN_TraHangBan")/' + $('#ID').val());
+                                TabManager.openTab(key, 'Chi tiết trả hàng bán', editUrl);
                             }, 1500);
                         } else {
                             setTimeout(() => location.reload(), 1500);

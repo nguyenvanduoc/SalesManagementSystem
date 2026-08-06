@@ -19,7 +19,7 @@ namespace SalesManagementSystem.Repositories.Interfaces
         void GhiSo(int id, int nguoiThucHien);
         void Huy(int id, int nguoiThucHien);
         
-        IEnumerable<TraHangBanViewModel> LoadDonHangTra(string tuNgay, string denNgay, string soDonHang);
+        IEnumerable<TraHangBanViewModel> LoadDonHangTra(string tuNgay, string denNgay, string soDonHang, int page, int pageSize, out int totalRecords);
         IEnumerable<TraHangBanChiTietViewModel> LoadChiTietDonHang(int idDonDatHang);
     }
 }

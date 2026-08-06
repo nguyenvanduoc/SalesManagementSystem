@@ -282,7 +282,7 @@ namespace SalesManagementSystem.Repositories
             }
         }
         
-        public IEnumerable<TraHangBanViewModel> LoadDonHangTra(string tuNgay, string denNgay, string soDonHang)
+        public IEnumerable<TraHangBanViewModel> LoadDonHangTra(string tuNgay, string denNgay, string soDonHang, int page, int pageSize, out int totalRecords)
         {
             DateTime? tn = null;
             if (!string.IsNullOrEmpty(tuNgay))
@@ -302,7 +302,17 @@ namespace SalesManagementSystem.Repositories
 
             using (var conn = _db.CreateConnection())
             {
-                return conn.Query<TraHangBanViewModel>("sp_BAN_TraHangBan_LoadDonHangTra", new { TuNgay = tn, DenNgay = dn, SoDonHang = soDonHang }, commandType: CommandType.StoredProcedure).ToList();
+                var p = new DynamicParameters();
+                p.Add("@TuNgay", tn);
+                p.Add("@DenNgay", dn);
+                p.Add("@SoDonHang", soDonHang);
+                p.Add("@Page", page);
+                p.Add("@PageSize", pageSize);
+                p.Add("@TotalRecords", dbType: DbType.Int32, direction: ParameterDirection.Output);
+
+                var list = conn.Query<TraHangBanViewModel>("sp_BAN_TraHangBan_LoadDonHangTra", p, commandType: CommandType.StoredProcedure).ToList();
+                totalRecords = p.Get<int>("@TotalRecords");
+                return list;
             }
         }
         

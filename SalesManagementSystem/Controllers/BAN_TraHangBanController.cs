@@ -320,10 +320,21 @@ namespace SalesManagementSystem.Controllers
         
         // ── Ajax Load Don Hang ────────────────────────────────────────────────
 
-        public ActionResult LoadDonHangTra(string tuNgay = "", string denNgay = "", string soDonHang = "")
+        public ActionResult LoadDonHangTra(string tuNgay = "", string denNgay = "", string soDonHang = "", int page = 1, int pageSize = 10)
         {
-            var list = _repo.LoadDonHangTra(tuNgay, denNgay, soDonHang);
-            return PartialView("_ChonDonHangPopup", list);
+            int totalRecords;
+            var list = _repo.LoadDonHangTra(tuNgay, denNgay, soDonHang, page, pageSize, out totalRecords);
+
+            var model = new PagedListViewModel<TraHangBanViewModel>
+            {
+                Items = list,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalRecords = totalRecords,
+                ActionName = "LoadDonHangTra"
+            };
+
+            return PartialView("_ChonDonHangPopup", model);
         }
         
         public JsonResult LoadChiTietDonHang(int idDonDatHang)

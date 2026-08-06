@@ -1,4 +1,4 @@
-﻿@model SalesManagementSystem.Models.ViewModels.LoginViewModel
+@model SalesManagementSystem.Models.ViewModels.LoginViewModel
 @{
     Layout = null;
 }
@@ -9,6 +9,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập hệ thống - Sài Gòn Cửu Long</title>
+    <script>
+        if (window.self !== window.top || document.getElementById('mainTabContent') || (window.parent && window.parent.document.getElementById('mainTabContent'))) {
+            try { localStorage.removeItem('tabManagerState'); } catch(e){}
+            window.top.location.href = '@Url.Action("Index", "Login")';
+        }
+    </script>
     <!-- Bootstrap CSS -->
     <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">

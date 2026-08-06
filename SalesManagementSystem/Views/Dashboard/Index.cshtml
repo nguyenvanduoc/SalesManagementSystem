@@ -428,6 +428,13 @@
                                         <td colspan="6" class="text-center text-muted py-3">Đang tải dữ liệu...</td>
                                     </tr>
                                 </tbody>
+                                <tfoot id="tfOrdersOnTheWay_@uid" class="table-light sticky-bottom fw-bold" style="display:none;">
+                                    <tr>
+                                        <td colspan="4" class="text-end text-uppercase">Tổng cộng:</td>
+                                        <td class="text-end text-primary" id="sumOrdersOnTheWaySL_@uid">0</td>
+                                        <td class="text-end text-success" id="sumOrdersOnTheWayTien_@uid">0₫</td>
+                                    </tr>
+                                </tfoot>
                             </table>
                         </div>
                     </div>
@@ -485,16 +492,25 @@
                                         <th>MÃ PHIẾU</th>
                                         <th>NGÀY NHẬP</th>
                                         <th>NHÀ CUNG CẤP</th>
-                                        <th>TÀI XẾ / PT</th>
+                                        <th>NGƯỜI GIAO HÀNG</th>
+                                        <th class="text-end">TỔNG SL</th>
                                         <th class="text-end">TỔNG TIỀN</th>
                                         <th class="text-center">TRẠNG THÁI</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tbNhapKhoOnTheWay_@uid">
                                     <tr>
-                                        <td colspan="6" class="text-center text-muted py-3">Đang tải dữ liệu...</td>
+                                        <td colspan="7" class="text-center text-muted py-3">Đang tải dữ liệu...</td>
                                     </tr>
                                 </tbody>
+                                <tfoot id="tfNhapKhoOnTheWay_@uid" class="table-light sticky-bottom fw-bold" style="display:none;">
+                                    <tr>
+                                        <td colspan="4" class="text-end text-uppercase">Tổng cộng:</td>
+                                        <td class="text-end text-primary" id="sumNhapKhoOnTheWaySL_@uid">0</td>
+                                        <td class="text-end text-warning" id="sumNhapKhoOnTheWayTien_@uid">0₫</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
                             </table>
                         </div>
                     </div>
@@ -988,19 +1004,31 @@
             $('#badgeDonDiDuong_@uid').text(countDonDiDuong);
 
             var otwHtml = '';
+            var totalDonDiDuongSL = 0;
+            var totalDonDiDuongTien = 0;
+
             if (data.DonHangDangDiDuong && data.DonHangDangDiDuong.length > 0) {
                 data.DonHangDangDiDuong.forEach(function(o) {
+                    var sl = o.TongSoLuong || 0;
+                    var tien = o.TongTien || 0;
+                    totalDonDiDuongSL += sl;
+                    totalDonDiDuongTien += tien;
+
                     otwHtml += `<tr>
                         <td class="fw-bold text-dark">${o.SoDonHang}</td>
                         <td>${formatDate(o.NgayTaoDon)}</td>
                         <td>${o.TenKhachHang || '<span class="text-muted">—</span>'}</td>
                         <td>${o.TenPhuongTien || '<span class="text-muted">—</span>'}</td>
-                        <td class="text-end fw-bold">${formatNumber(o.TongSoLuong)}</td>
-                        <td class="text-end fw-bold text-success">${formatMoney(o.TongTien)}</td>
+                        <td class="text-end fw-bold">${formatNumber(sl)}</td>
+                        <td class="text-end fw-bold text-success">${formatMoney(tien)}</td>
                     </tr>`;
                 });
+                $('#sumOrdersOnTheWaySL_@uid').text(formatNumber(totalDonDiDuongSL));
+                $('#sumOrdersOnTheWayTien_@uid').text(formatMoney(totalDonDiDuongTien));
+                $('#tfOrdersOnTheWay_@uid').show();
             } else {
                 otwHtml = '<tr><td colspan="6" class="text-center text-muted py-3">Không có đơn hàng đang đi đường.</td></tr>';
+                $('#tfOrdersOnTheWay_@uid').hide();
             }
             $('#tbOrdersOnTheWay_@uid').html(otwHtml);
 
@@ -1009,23 +1037,35 @@
             $('#badgeNhapDiDuong_@uid').text(countNhapDiDuong);
 
             var nhapOtwHtml = '';
+            var totalNhapDiDuongSL = 0;
+            var totalNhapDiDuongTien = 0;
+
             if (data.PhieuNhapDangDiDuong && data.PhieuNhapDangDiDuong.length > 0) {
                 data.PhieuNhapDangDiDuong.forEach(function(n) {
-                    var taiXeOrPt = n.HoTenTaiXe || n.TenPhuongTien || '<span class="text-muted">—</span>';
+                    var nguoiGiaoHang = n.TenNguoiGiao || n.HoTenTaiXe || n.TenPhuongTien || '<span class="text-muted">—</span>';
+                    var sl = n.TongSoLuong || 0;
                     var tongTienPhieu = (n.TongCong && n.TongCong > 0) ? n.TongCong : (n.TienVanChuyen || 0);
+                    totalNhapDiDuongSL += sl;
+                    totalNhapDiDuongTien += tongTienPhieu;
+
                     nhapOtwHtml += `<tr>
                         <td class="fw-bold text-primary">${n.SoChungTu}</td>
                         <td>${formatDate(n.NgayNhap)}</td>
                         <td>${n.TenNhaCungCap || '<span class="text-muted">—</span>'}</td>
-                        <td>${taiXeOrPt}</td>
+                        <td>${nguoiGiaoHang}</td>
+                        <td class="text-end fw-bold">${formatNumber(sl)}</td>
                         <td class="text-end fw-bold text-warning">${formatMoney(tongTienPhieu)}</td>
                         <td class="text-center">
                             <span class="badge bg-warning text-dark px-2 py-1 rounded" style="font-size:0.75rem">Đang đi đường</span>
                         </td>
                     </tr>`;
                 });
+                $('#sumNhapKhoOnTheWaySL_@uid').text(formatNumber(totalNhapDiDuongSL));
+                $('#sumNhapKhoOnTheWayTien_@uid').text(formatMoney(totalNhapDiDuongTien));
+                $('#tfNhapKhoOnTheWay_@uid').show();
             } else {
-                nhapOtwHtml = '<tr><td colspan="6" class="text-center text-muted py-3">Không có phiếu nhập kho đang đi đường.</td></tr>';
+                nhapOtwHtml = '<tr><td colspan="7" class="text-center text-muted py-3">Không có phiếu nhập kho đang đi đường.</td></tr>';
+                $('#tfNhapKhoOnTheWay_@uid').hide();
             }
             $('#tbNhapKhoOnTheWay_@uid').html(nhapOtwHtml);
 

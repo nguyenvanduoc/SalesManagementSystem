@@ -37,6 +37,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public decimal TienVanChuyen { get; set; }
 
         public List<PhieuNhapKhoChiTietViewModel> ChiTiets { get; set; }
+        public decimal TongSoLuong { get; set; }
 
         public PhieuNhapKhoViewModel()
         {

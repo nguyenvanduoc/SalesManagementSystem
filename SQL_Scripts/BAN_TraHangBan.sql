@@ -116,10 +116,22 @@ GO
 CREATE OR ALTER PROCEDURE [dbo].[sp_BAN_TraHangBan_LoadDonHangTra]
     @TuNgay DATETIME = NULL,
     @DenNgay DATETIME = NULL,
-    @SoDonHang NVARCHAR(50) = NULL
+    @SoDonHang NVARCHAR(50) = NULL,
+    @Page INT = 1,
+    @PageSize INT = 10,
+    @TotalRecords INT OUTPUT
 AS
 BEGIN
     SET NOCOUNT ON;
+    
+    DECLARE @Offset INT = (@Page - 1) * @PageSize;
+    
+    SELECT @TotalRecords = COUNT(*)
+    FROM NS_DonDatHang d
+    WHERE ISNULL(d.TrangThaiDon, 0) NOT IN (0, 4)
+      AND (@TuNgay IS NULL OR d.NgayTaoDon >= @TuNgay)
+      AND (@DenNgay IS NULL OR d.NgayTaoDon <= @DenNgay)
+      AND (@SoDonHang IS NULL OR d.SoDonHang LIKE '%' + @SoDonHang + '%');
     
     SELECT d.ID, d.SoDonHang, d.NgayTaoDon as NgayTao, d.IDKhachHang, k.TenKhachHang, k.MaKhachHang,
            d.TongTien as TongTien, 
@@ -133,10 +145,12 @@ BEGIN
            (SELECT TOP 1 IDKho FROM BAN_ChungTuBanHang WHERE IDDonDatHang = d.ID ORDER BY ID DESC) as IDKho
     FROM NS_DonDatHang d
     LEFT JOIN NS_KhachHang k ON d.IDKhachHang = k.ID
-    WHERE d.TrangThaiDon = 2 -- Da ghi
+    WHERE ISNULL(d.TrangThaiDon, 0) NOT IN (0, 4) -- Bo qua luu nhap (0) va da huy (4)
       AND (@TuNgay IS NULL OR d.NgayTaoDon >= @TuNgay)
       AND (@DenNgay IS NULL OR d.NgayTaoDon <= @DenNgay)
       AND (@SoDonHang IS NULL OR d.SoDonHang LIKE '%' + @SoDonHang + '%')
+    ORDER BY d.NgayTaoDon DESC, d.ID DESC
+    OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;
 END
 GO
 

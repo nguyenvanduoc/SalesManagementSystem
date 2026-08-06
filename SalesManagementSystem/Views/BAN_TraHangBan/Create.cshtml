@@ -163,7 +163,7 @@
 </form>
 
 <!-- Modal Chọn Đơn Hàng -->
-<div class="modal fade" id="modalChonDonHang" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modalChonDonHang" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header py-2 bg-light">
@@ -172,22 +172,27 @@
             </div>
             <div class="modal-body p-0">
                 <div class="p-3 bg-white border-bottom">
-                    <div class="row g-2">
+                    <div class="row g-2 align-items-end">
                         <div class="col-md-3">
-                            <input type="text" id="txtSearchSoDon" class="form-control form-control-sm" placeholder="Số đơn hàng..." />
+                            <label class="form-label text-muted fw-semibold small mb-1">Số đơn hàng</label>
+                            <input type="text" id="txtSearchSoDon" class="form-control form-control-sm" placeholder="Nhập số đơn hàng..." />
                         </div>
                         <div class="col-md-3">
+                            <label class="form-label text-muted fw-semibold small mb-1">Từ ngày</label>
                             <input type="date" id="txtSearchTuNgay" class="form-control form-control-sm" />
                         </div>
                         <div class="col-md-3">
+                            <label class="form-label text-muted fw-semibold small mb-1">Đến ngày</label>
                             <input type="date" id="txtSearchDenNgay" class="form-control form-control-sm" />
                         </div>
                         <div class="col-md-2">
-                            <button type="button" class="btn btn-sm btn-primary w-100" onclick="loadDonHang()">Tìm kiếm</button>
+                            <button type="button" class="btn btn-sm btn-primary w-100" onclick="loadDonHang(1)">
+                                <i class="bi bi-search me-1"></i>Tìm kiếm
+                            </button>
                         </div>
                     </div>
                 </div>
-                <div id="donHangContainer" class="p-3" style="max-height:400px; overflow-y:auto;">
+                <div id="donHangContainer" class="p-0">
                     <!-- Content loaded via ajax -->
                 </div>
             </div>
@@ -197,30 +202,73 @@
 
 @section Scripts {
     <script>
-        // Module Logic
+        var currentModalPage = 1;
+        var currentModalPageSize = 10;
+
         function openChonDonHangModal() {
             $('#modalChonDonHang').modal('show');
-            loadDonHang();
+            loadDonHang(1);
         }
 
-        function loadDonHang() {
+        function loadDonHang(page, pageSize) {
+            currentModalPage = page || 1;
+            currentModalPageSize = pageSize || currentModalPageSize || 10;
+
             $.get('@Url.Action("LoadDonHangTra", "BAN_TraHangBan")', {
                 soDonHang: $('#txtSearchSoDon').val(),
                 tuNgay: $('#txtSearchTuNgay').val(),
-                denNgay: $('#txtSearchDenNgay').val()
+                denNgay: $('#txtSearchDenNgay').val(),
+                page: currentModalPage,
+                pageSize: currentModalPageSize
             }, function(res) {
                 $('#donHangContainer').html(res);
             });
         }
 
+        $(document).off('click', '#modalChonDonHang .custom-pagination a')
+                   .on('click', '#modalChonDonHang .custom-pagination a', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            var href = $(this).attr('href');
+            if (href && href !== '#' && href.indexOf('javascript:') !== 0) {
+                var urlParams = new URLSearchParams(href.split('?')[1]);
+                var page = urlParams.get('page') || 1;
+                var pageSize = urlParams.get('pageSize') || currentModalPageSize;
+                loadDonHang(page, pageSize);
+            }
+        });
+
+        $(document).off('change', '#modalChonDonHang .custom-pagination .page-size-select')
+                   .on('change', '#modalChonDonHang .custom-pagination .page-size-select', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            var pageSize = $(this).val() || 10;
+            loadDonHang(1, pageSize);
+        });
+
+        function formatNumber(num) {
+            if (num === null || num === undefined || isNaN(num)) return '0';
+            return Number(num).toLocaleString('en-US');
+        }
+
         function selectDonHang(id, soDon, idKh, tenKh, maKh, idKho, daThanhToan, tongTienDonHang) {
             $('#hdIDDonDatHang').val(id);
-            $('#txtSoDonHang').val(soDon);
-            $('#hdIDKhachHang').val(idKh);
-            $('#txtTenKH').val(maKh + ' - ' + tenKh);
+            $('#txtSoDonHang').val(soDon || '');
+            $('#hdIDKhachHang').val(idKh || 0);
+            
+            var customerText = '';
+            if (maKh && tenKh) {
+                customerText = maKh + ' - ' + tenKh;
+            } else {
+                customerText = tenKh || maKh || '';
+            }
+            $('#txtTenKH').val(customerText);
+            
             if(idKho > 0) $('#IDKho').val(idKho);
-            $('#hdDaThanhToan').val(daThanhToan);
-            $('#hdTongTienDonHang').val(tongTienDonHang);
+            $('#hdDaThanhToan').val(daThanhToan || 0);
+            $('#hdTongTienDonHang').val(tongTienDonHang || 0);
             $('#txtDaThanhToan').val(formatNumber(daThanhToan));
             
             $('#modalChonDonHang').modal('hide');
@@ -231,21 +279,26 @@
             $.get('@Url.Action("LoadChiTietDonHang", "BAN_TraHangBan")', { idDonDatHang: idDon }, function(res) {
                 if(res.success) {
                     var html = '';
-                    if(res.data.length === 0) {
+                    if(!res.data || res.data.length === 0) {
                         html = '<tr><td colspan="11" class="text-center">Đơn hàng không có sản phẩm nào có thể trả.</td></tr>';
                     } else {
                         res.data.forEach(function(item, index) {
+                            var slBan = item.SoLuongBan || 0;
+                            var slDaTra = item.SoLuongDaTra || 0;
+                            var slConLai = item.SoLuongConLai !== undefined && item.SoLuongConLai !== null ? item.SoLuongConLai : (slBan - slDaTra);
+                            var donGia = item.DonGia || 0;
+
                             html += `<tr data-idsp="${item.IDSanPham}">
                                 <td class="text-center">${index + 1}</td>
-                                <td>${item.MaSanPham}</td>
-                                <td>${item.TenSanPham}</td>
+                                <td>${item.MaSanPham || ''}</td>
+                                <td>${item.TenSanPham || ''}</td>
                                 <td class="text-center">${item.DonViTinh || ''}</td>
-                                 <td class="text-end row-sl-ban" data-val="${item.SoLuongBan}">${formatNumber(item.SoLuongBan)}</td>
-                                 <td class="text-end row-sl-da-tra" data-val="${item.SoLuongDaTra}">${formatNumber(item.SoLuongDaTra)}</td>
-                                 <td class="text-end fw-bold text-primary row-con-duoc-tra" data-val="${item.SoLuongConLai}">${formatNumber(item.SoLuongConLai)}</td>
-                                 <td><input type="number" class="form-control form-control-sm text-end row-sl-tra" value="0" min="0" max="${item.SoLuongConLai}" oninput="calcRow(this)" /></td>
-                                 <td class="text-end row-don-gia" data-val="${item.DonGia}">${formatNumber(item.DonGia)}</td>
-                                 <td class="text-end row-thanh-tien fw-bold" data-val="0">0</td>
+                                <td class="text-end row-sl-ban" data-val="${slBan}">${formatNumber(slBan)}</td>
+                                <td class="text-end row-sl-da-tra" data-val="${slDaTra}">${formatNumber(slDaTra)}</td>
+                                <td class="text-end fw-bold text-primary row-con-duoc-tra" data-val="${slConLai}">${formatNumber(slConLai)}</td>
+                                <td><input type="number" class="form-control form-control-sm text-end row-sl-tra" value="0" min="0" max="${slConLai}" oninput="calcRow(this)" onchange="calcRow(this)" /></td>
+                                <td class="text-end row-don-gia" data-val="${donGia}">${formatNumber(donGia)}</td>
+                                <td class="text-end row-thanh-tien fw-bold" data-val="0">0</td>
                                 <td><input type="text" class="form-control form-control-sm row-ghi-chu" /></td>
                             </tr>`;
                         });
@@ -263,6 +316,11 @@
             var slTra = parseFloat($(inp).val()) || 0;
             var conDuocTra = parseFloat($tr.find('.row-con-duoc-tra').attr('data-val')) || 0;
             
+            if(slTra < 0) {
+                slTra = 0;
+                $(inp).val(0);
+            }
+
             if(slTra > conDuocTra) {
                 showToast('warning', "Số lượng trả vượt số lượng còn được trả.");
                 $(inp).val(conDuocTra);
@@ -279,7 +337,7 @@
             var tongSl = 0, tongTien = 0;
             $('#tbChiTietBody tr').each(function() {
                 var sl = parseFloat($(this).find('.row-sl-tra').val()) || 0;
-                var tt = parseFloat($(this).find('.row-thanh-tien').text().replace(/,/g, '')) || 0;
+                var tt = parseFloat($(this).find('.row-thanh-tien').attr('data-val')) || 0;
                 tongSl += sl;
                 tongTien += tt;
             });
@@ -402,12 +460,14 @@
                             if (typeof TabManager !== 'undefined') {
                                 var paneId = $('#IDKho').closest('.tab-pane').attr('id');
                                 var key = paneId ? paneId.replace('-pane', '').replace('tab-', '') : 'BAN_TraHangBan';
+                                var editUrl = '@Url.Action("Edit", "BAN_TraHangBan", new { id = 0 })'.replace('/0', '/' + res.id);
                                 if (paneId) $('#' + paneId).attr('data-url', '');
                                 setTimeout(function() {
-                                    TabManager.openTab(key, 'Chi tiết trả hàng bán', '@Url.Action("Edit", "BAN_TraHangBan")/' + res.id);
+                                    TabManager.openTab(key, 'Chi tiết trả hàng bán', editUrl);
                                 }, 1500);
                             } else {
-                                setTimeout(() => window.location.href = '@Url.Action("Edit", "BAN_TraHangBan")/' + res.id, 1500);
+                                var editUrl = '@Url.Action("Edit", "BAN_TraHangBan", new { id = 0 })'.replace('/0', '/' + res.id);
+                                setTimeout(() => window.location.href = editUrl, 1500);
                             }
                         } else {
                             showToast('error', res.message || "Lỗi ghi sổ");

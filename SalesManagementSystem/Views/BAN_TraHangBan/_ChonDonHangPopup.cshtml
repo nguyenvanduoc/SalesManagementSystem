@@ -1,10 +1,12 @@
-@model IEnumerable<SalesManagementSystem.Models.ViewModels.TraHangBanViewModel>
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.TraHangBanViewModel>
 
-<div class="table-responsive">
-    <table class="table table-custom table-bordered table-hover mb-0" id="tblChonDonHang" style="width:100%; min-width:800px;">
-        <thead class="table-light">
+<div class="px-3 pt-2">
+    <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
+        <table class="table table-custom table-bordered table-hover mb-0" id="tblChonDonHang" style="width:100%; min-width:800px;">
+        <thead class="table-light style-sticky-header">
             <tr>
-                <th class="text-center" style="width:40px;">#</th>
+                <th class="text-center" style="width:45px;">STT</th>
+                <th class="text-center" style="width:65px;">#</th>
                 <th>Số đơn hàng</th>
                 <th class="text-center">Ngày lên đơn</th>
                 <th>Khách hàng</th>
@@ -16,18 +18,31 @@
             </tr>
         </thead>
         <tbody>
-            @if (Model != null && Model.Any())
+            @if (Model != null && Model.Items != null && Model.Items.Any())
             {
-                foreach (var item in Model)
+                int stt = (Model.CurrentPage - 1) * Model.PageSize + 1;
+                foreach (var item in Model.Items)
                 {
                     decimal conDuocTra = item.TongSoLuong.GetValueOrDefault() - item.DaTraHang;
-                    <tr style="cursor:pointer;" onclick="selectDonHang(@item.ID, '@item.SoDonHang', @item.IDKhachHang, '@item.TenKhachHang', '@item.MaKhachHang', @(item.IDKho ?? 0), @item.DaThanhToan, @item.TongTien)">
+                    string tenKh = item.TenKhachHang ?? "";
+                    string maKh = item.MaKhachHang ?? "";
+                    string soDon = item.SoDonHang ?? "";
+                    <tr class="row-donhang-item"
+                        data-id="@item.ID"
+                        data-sodon="@soDon"
+                        data-idkh="@(item.IDKhachHang ?? 0)"
+                        data-tenkh="@tenKh"
+                        data-makh="@maKh"
+                        data-idkho="@(item.IDKho ?? 0)"
+                        data-dathanhtoan="@item.DaThanhToan"
+                        data-tongtien="@item.TongTien">
+                        <td class="text-center text-muted fw-semibold">@(stt++)</td>
                         <td class="text-center">
-                            <button type="button" class="btn btn-sm btn-primary py-0 px-2">Chọn</button>
+                            <button type="button" class="btn btn-sm btn-primary py-0 px-2 btn-select-donhang">Chọn</button>
                         </td>
-                        <td class="fw-bold text-primary">@item.SoDonHang</td>
+                        <td class="fw-bold text-primary">@soDon</td>
                         <td class="text-center">@(item.NgayTao?.ToString("dd/MM/yyyy"))</td>
-                        <td>@item.TenKhachHang</td>
+                        <td>@tenKh</td>
                         <td class="text-end fw-bold">@item.TongTien.ToString("N0")</td>
                         <td class="text-end text-success">@item.DaThanhToan.ToString("N0")</td>
                         <td class="text-end text-danger">@item.DaTraHang.ToString("N0")</td>
@@ -41,15 +56,48 @@
             else
             {
                 <tr>
-                    <td colspan="9" class="text-center py-3 text-muted">Không tìm thấy đơn hàng nào có thể trả.</td>
+                    <td colspan="10" class="text-center py-3 text-muted">Không tìm thấy đơn hàng nào có thể trả.</td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
+</div>
+
+@if (Model != null && Model.TotalRecords > 0)
+{
+    @Html.Partial("_Pagination", Model)
+}
+
+<script>
+    $(document).off('click', '.btn-select-donhang').on('click', '.btn-select-donhang', function(e) {
+        e.stopPropagation();
+        var $tr = $(this).closest('tr');
+        var id = $tr.data('id');
+        var soDon = $tr.data('sodon');
+        var idKh = $tr.data('idkh');
+        var tenKh = $tr.data('tenkh');
+        var maKh = $tr.data('makh');
+        var idKho = $tr.data('idkho');
+        var daThanhToan = parseFloat($tr.data('dathanhtoan')) || 0;
+        var tongTien = parseFloat($tr.data('tongtien')) || 0;
+
+        if (typeof selectDonHang === 'function') {
+            selectDonHang(id, soDon, idKh, tenKh, maKh, idKho, daThanhToan, tongTien);
+        }
+    });
+</script>
 
 <style>
-    #tblChonDonHang th {
+    #tblChonDonHang thead th {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 10 !important;
+        background-color: #f8f9fa !important;
+        box-shadow: inset 0 -1px 0 #dee2e6, inset 0 1px 0 #dee2e6 !important;
+    }
+    #tblChonDonHang tbody th,
+    #tblChonDonHang th:not(thead th) {
         position: relative;
         background-clip: padding-box;
     }

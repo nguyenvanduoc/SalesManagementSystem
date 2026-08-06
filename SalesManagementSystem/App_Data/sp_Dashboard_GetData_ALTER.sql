@@ -551,6 +551,8 @@ BEGIN
         ncc.TenNhaCungCap,
         pt.TenPhuongTien,
         pn.HoTenTaiXe,
+        pn.TenNguoiGiao,
+        ISNULL((SELECT SUM(SoLuong) FROM KHO_PhieuNhap_ChiTiet WHERE IDPhieuNhap = pn.ID), 0) AS TongSoLuong,
         pn.TongCong
     FROM KHO_PhieuNhap pn
     LEFT JOIN DM_NhaCungCap ncc ON pn.IDNhaCungCap = ncc.ID
