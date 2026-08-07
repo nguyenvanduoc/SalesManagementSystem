@@ -17,5 +17,6 @@ namespace SalesManagementSystem.Helpers
         public const string DS_SO_QUY = "SQ01";
         public const string CNKH = "CNKH";
         public const string CNKH_SP02 = "CNKH02";
+        public const string DCKH01 = "DCKH01";
     }
 }

@@ -214,8 +214,7 @@
               "RelativeToolTip": "SalesManagementSystem\\Helpers\\BieuMauConstants.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAvAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-02T14:20:28.558Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-02T14:20:28.558Z"
             },
             {
               "$type": "Document",
@@ -227,8 +226,7 @@
               "RelativeToolTip": "SalesManagementSystem\\Controllers\\CongNoKhachHangController.cs",
               "ViewState": "AgIAAMgAAAAAAAAAAAAAAPYAAABUAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-21T07:42:41.584Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-21T07:42:41.584Z"
             },
             {
               "$type": "Document",
@@ -250,7 +248,7 @@
               "RelativeDocumentMoniker": "SalesManagementSystem\\Web.config",
               "ToolTip": "C:\\Users\\duoc0\\OneDrive\\Desktop\\WEB_QLBH\\QuanLyBanHang\\SalesManagementSystem\\SalesManagementSystem\\Web.config",
               "RelativeToolTip": "SalesManagementSystem\\Web.config",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAABYAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAABHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000601|",
               "WhenOpened": "2026-07-15T08:47:39.234Z",
               "EditorCaption": ""
@@ -349,7 +347,8 @@
               "RelativeToolTip": "SalesManagementSystem\\get_sp_def.aspx",
               "LogicalView": "7651a703-06e5-11d1-8ebd-00a0c90f26ea",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000195|",
-              "WhenOpened": "2026-07-09T08:34:50.579Z"
+              "WhenOpened": "2026-07-09T08:34:50.579Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",

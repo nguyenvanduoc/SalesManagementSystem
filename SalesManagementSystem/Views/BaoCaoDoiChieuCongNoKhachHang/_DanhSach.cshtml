@@ -1,0 +1,201 @@
+@model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.BaoCaoDoiChieuCongNoKhachHangViewModel>
+@{
+    Layout = null;
+
+    decimal tongSoLuongBan = ViewBag.TongSoLuongBan != null ? (decimal)ViewBag.TongSoLuongBan : 0;
+    decimal tongPhaiThu = ViewBag.TongPhaiThu != null ? (decimal)ViewBag.TongPhaiThu : 0;
+    decimal tongDaThanhToan = ViewBag.TongDaThanhToan != null ? (decimal)ViewBag.TongDaThanhToan : 0;
+    decimal conNoCuoiKy = ViewBag.ConNoCuoiKy != null ? (decimal)ViewBag.ConNoCuoiKy : 0;
+}
+
+<div class="table-responsive">
+    <table id="tblBaoCaoDoiChieuCongNoKhachHang" class="table table-bordered table-hover table-custom" style="width: 100%; min-width: 1350px; white-space: nowrap;">
+        <thead>
+            <tr style="background-color: #f4f6f9; color: #333;">
+                <th class="text-center" style="width: 50px;">STT</th>
+                <th class="text-center">Ngày phát sinh</th>
+                <th class="text-center">Số chứng từ</th>
+                <th class="text-center">Khách hàng</th>
+                <th class="text-center">Loại phát sinh</th>
+                <th class="text-center">Mã SP</th>
+                <th>Tên sản phẩm / Diễn giải</th>
+                <th class="text-end">Số lượng</th>
+                <th class="text-end">Đơn giá</th>
+                <th class="text-end">Phải thu</th>
+                <th class="text-end">Đã thanh toán</th>
+                <th class="text-end">Còn nợ lũy kế</th>
+                <th>Ghi chú</th>
+                <th class="text-center" style="width:65px;">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Items != null && Model.Items.Any())
+            {
+                int rowIdx = 0;
+                foreach (var item in Model.Items)
+                {
+                    rowIdx++;
+                    var trClass = rowIdx % 2 == 0 ? "table-secondary-custom" : "";
+                    var isNoDauKy = item.LoaiDong == 0;
+                    var isPhieuThu = item.LoaiDong == 3;
+                    var isTraHang = item.LoaiDong == 2;
+                    var isBanHang = item.LoaiDong == 1;
+                    var fontWeight = isNoDauKy ? "font-weight: bold;" : "";
+                    
+                    <tr class="@trClass" style="@fontWeight">
+                        <td class="text-center">@item.STT</td>
+                        <td class="text-center">@((item.NgayPhatSinh.HasValue && !isNoDauKy) ? item.NgayPhatSinh.Value.ToString("dd/MM/yyyy") : "")</td>
+                        <td class="text-center">
+                            @if (isPhieuThu)
+                            {
+                                <span class="badge bg-success">@item.SoChungTu</span>
+                            }
+                            else if (isTraHang)
+                            {
+                                <span class="badge bg-warning text-dark">@item.SoChungTu</span>
+                            }
+                            else if (isBanHang)
+                            {
+                                <span class="badge bg-primary">@item.SoChungTu</span>
+                            }
+                            else
+                            {
+                                @item.SoChungTu
+                            }
+                        </td>
+                        <td>@item.TenKhachHang</td>
+                        <td class="text-center">
+                            @if (isNoDauKy) { <span class="text-danger fw-bold">@item.LoaiPhatSinh</span> }
+                            else { @item.LoaiPhatSinh }
+                        </td>
+                        <td class="text-center">@item.MaSanPham</td>
+                        <td>@item.TenSanPham</td>
+                        <td class="text-end">@(item.SoLuongBan != 0 ? item.SoLuongBan.ToString("N0") : "-")</td>
+                        <td class="text-end">@(item.DonGiaBan > 0 ? item.DonGiaBan.ToString("N0") : "-")</td>
+                        <td class="text-end">@(item.PhaiThu != 0 ? item.PhaiThu.ToString("N0") : "-")</td>
+                        <td class="text-end">@(item.DaThanhToan > 0 ? item.DaThanhToan.ToString("N0") : "-")</td>
+                        <td class="text-end text-danger fw-bold">@item.ConNoLuyKe.ToString("N0")</td>
+                        <td>@item.GhiChu</td>
+                        <td class="text-center">
+                            @if (item.LoaiDong == 1 || item.LoaiDong == 2 || item.LoaiDong == 3)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 btn-xem-chitiet"
+                                        style="font-size:0.75rem;"
+                                        data-id="@item.IDPhatSinh"
+                                        data-loai="@item.LoaiDong"
+                                        title="Xem chi tiết">
+                                    <i class="bi bi-eye"></i> Xem
+                                </button>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="14" class="text-center text-muted">Không có dữ liệu phát sinh trong khoảng thời gian này</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr style="background-color: #f4f6f9; font-weight: bold;">
+                <td colspan="7" class="text-end">TỔNG CỘNG:</td>
+                <td class="text-end">@tongSoLuongBan.ToString("N0")</td>
+                <td class="text-end"></td>
+                <td class="text-end">@tongPhaiThu.ToString("N0")</td>
+                <td class="text-end">@tongDaThanhToan.ToString("N0")</td>
+                <td class="text-end text-danger">@conNoCuoiKy.ToString("N0")</td>
+                <td></td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+@if (Model != null && Model.Items != null && Model.Items.Any())
+{
+    @Html.Partial("_Pagination", Model)
+}
+
+<style>
+    .table-custom thead th {
+        vertical-align: middle;
+        background-color: #f4f6f9;
+        font-weight: bold;
+    }
+    .table-custom tbody tr:nth-child(even) {
+        background-color: #dbe6ef !important;
+    }
+    .table-custom tbody tr:hover {
+        background-color: #c9d9e8 !important;
+    }
+    .pagination-custom .page-item.active .page-link {
+        background-color: #0b5b84;
+        border-color: #0b5b84;
+        color: white;
+    }
+    .pagination-custom .page-link {
+        color: #0b5b84;
+        cursor: pointer;
+    }
+    #tblBaoCaoDoiChieuCongNoKhachHang th {
+        position: relative;
+        background-clip: padding-box;
+    }
+    #tblBaoCaoDoiChieuCongNoKhachHang th .resizer {
+        position: absolute;
+        top: 0;
+        right: -3px;
+        width: 6px;
+        height: 100%;
+        cursor: col-resize;
+        user-select: none;
+        z-index: 10;
+        background-color: transparent;
+    }
+    #tblBaoCaoDoiChieuCongNoKhachHang th .resizer:hover, #tblBaoCaoDoiChieuCongNoKhachHang th .resizer.resizing {
+        background-color: rgba(11, 91, 132, 0.5);
+    }
+</style>
+
+<script>
+    (function() {
+        var table = document.getElementById('tblBaoCaoDoiChieuCongNoKhachHang');
+        if (!table) return;
+
+        var ths = table.querySelectorAll('th');
+        ths.forEach(function(th) {
+            if(th.innerText.trim() === '' && (th.style.width === '35px' || th.style.width === '40px' || th.style.width === '50px')) return;
+            if(th.innerText.trim() === 'Thao tác' || th.innerText.trim() === 'STT') return;
+            if(th.querySelector('.resizer')) return;
+
+            var resizer = document.createElement('div');
+            resizer.classList.add('resizer');
+            th.appendChild(resizer);
+
+            var startX, startWidth;
+            resizer.addEventListener('mousedown', function(e) {
+                startX = e.pageX;
+                startWidth = th.offsetWidth;
+                resizer.classList.add('resizing');
+                var doDrag = function(e) {
+                    var newWidth = startWidth + (e.pageX - startX);
+                    if(newWidth > 30) {
+                        th.style.width = newWidth + 'px';
+                        th.style.minWidth = newWidth + 'px';
+                        th.style.maxWidth = newWidth + 'px';
+                    }
+                };
+                var stopDrag = function(e) {
+                    resizer.classList.remove('resizing');
+                    document.removeEventListener('mousemove', doDrag);
+                    document.removeEventListener('mouseup', stopDrag);
+                };
+                document.addEventListener('mousemove', doDrag);
+                document.addEventListener('mouseup', stopDrag);
+                e.preventDefault();
+            });
+        });
+    })();
+</script>

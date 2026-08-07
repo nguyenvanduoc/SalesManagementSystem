@@ -369,6 +369,11 @@
     <Compile Include="Repositories\Interfaces\IBaoCaoDoiChieuNhapNhaCungCapRepository.cs" />
     <Compile Include="Repositories\BaoCaoDoiChieuNhapNhaCungCapRepository.cs" />
     <Compile Include="Controllers\BaoCaoDoiChieuNhapNhaCungCapController.cs" />
+    <Compile Include="Models\ViewModels\BaoCaoDoiChieuCongNoKhachHangViewModel.cs" />
+    <Compile Include="Models\ViewModels\BaoCaoDoiChieuCongNoKhachHangDetailViewModel.cs" />
+    <Compile Include="Repositories\Interfaces\IBaoCaoDoiChieuCongNoKhachHangRepository.cs" />
+    <Compile Include="Repositories\BaoCaoDoiChieuCongNoKhachHangRepository.cs" />
+    <Compile Include="Controllers\BaoCaoDoiChieuCongNoKhachHangController.cs" />
     <Content Include="Content\bootstrap-reboot.rtl.min.css" />
     <Content Include="Content\bootstrap-utilities.css" />
     <Content Include="Content\bootstrap-utilities.min.css" />
@@ -590,6 +595,9 @@
     <Content Include="Views\CongNoNCC\_HistoryModal.cshtml" />
     <Content Include="Views\BaoCaoCongNoVanChuyen\_DetailsModal.cshtml" />
     <Content Include="Views\KHO_HaoHut\_HaoHutList.cshtml" />
+    <Content Include="Views\BaoCaoDoiChieuCongNoKhachHang\Index.cshtml" />
+    <Content Include="Views\BaoCaoDoiChieuCongNoKhachHang\_DanhSach.cshtml" />
+    <Content Include="Views\BaoCaoDoiChieuCongNoKhachHang\_DetailsModal.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />

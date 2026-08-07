@@ -1,0 +1,223 @@
+@{
+    ViewBag.Title = ViewBag.Title ?? "BÁO CÁO ĐỐI CHIẾU CÔNG NỢ KHÁCH HÀNG";
+    Layout = null;
+    var uid = Guid.NewGuid().ToString("N");
+}
+
+<style>
+    .filter-section {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+        margin-bottom: 20px;
+    }
+    .page-title {
+        color: #0b5b84;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+    }
+    
+    /* Fix height for Select2 to match form-control-sm */
+    #baocao-@uid .select2-container--default .select2-selection--single { height: 31px; border: 1px solid #ced4da; border-radius: 0.25rem; }
+    #baocao-@uid .select2-container--default .select2-selection--single .select2-selection__rendered { font-size: 0.875rem; color: #495057; line-height: 29px; padding-left: 8px; }
+    #baocao-@uid .select2-container--default .select2-selection--single .select2-selection__arrow { height: 29px; }
+</style>
+
+<div id="baocao-@uid">
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-2">
+        <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">
+            <i class="bi bi-file-earmark-bar-graph me-2"></i>@ViewBag.Title
+        </h4>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body py-2">
+            <form id="searchForm" onsubmit="return false;">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label text-muted small mb-1">Khách hàng</label>
+                        @Html.DropDownList("idKhachHang", (SelectList)ViewBag.KhachHangList, "-- Chọn khách hàng --", new { @class = "form-select form-select-sm select2", @id = "idKhachHang_" + uid })
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Số chứng từ</label>
+                        <input type="text" class="form-control form-control-sm" id="soChungTu_@uid" name="soChungTu" placeholder="Số PT, BH, TH..." />
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Thời gian</label>
+                        <select class="form-select form-select-sm ddl-thoi-gian no-select2">
+                            <option value="current_month">Đầu tháng đến hiện tại</option>
+                            <option value="month_1">Tháng 1</option>
+                            <option value="month_2">Tháng 2</option>
+                            <option value="month_3">Tháng 3</option>
+                            <option value="month_4">Tháng 4</option>
+                            <option value="month_5">Tháng 5</option>
+                            <option value="month_6">Tháng 6</option>
+                            <option value="month_7">Tháng 7</option>
+                            <option value="month_8">Tháng 8</option>
+                            <option value="month_9">Tháng 9</option>
+                            <option value="month_10">Tháng 10</option>
+                            <option value="month_11">Tháng 11</option>
+                            <option value="month_12">Tháng 12</option>
+                            <option value="quarter_1">Quý 1</option>
+                            <option value="quarter_2">Quý 2</option>
+                            <option value="quarter_3">Quý 3</option>
+                            <option value="quarter_4">Quý 4</option>
+                            <option value="current_year" selected>Từ đầu năm đến hiện tại</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Từ ngày <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control form-control-sm" id="tuNgay_@uid" name="tuNgay" value="@ViewBag.TuNgay" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Đến ngày <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control form-control-sm" id="denNgay_@uid" name="denNgay" value="@ViewBag.DenNgay" />
+                    </div>
+                    <div class="col-md-12 mt-2 text-end">
+                        <button type="button" class="btn btn-primary btn-sm px-3 shadow-sm btn-search" id="btnSearch_@uid" style="background-color: #3498db; border-color: #3498db;">
+                            <i class="bi bi-search me-1"></i> Tìm kiếm
+                        </button>
+                        <button type="button" class="btn btn-warning btn-sm px-3 ms-2 shadow-sm" id="btnReset_@uid">
+                            <i class="bi bi-arrow-clockwise me-1"></i> Làm mới
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm px-3 ms-2 shadow-sm" id="btnExportExcel_@uid">
+                            <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="table-container-@uid">
+        <div class="alert alert-info text-center mt-3">
+            Ấn <b>Tìm kiếm</b> để xem báo cáo.
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        var $container = $('#baocao-@uid');
+        
+        // Khởi tạo select2
+        if ($container.find('.select2').length) {
+            $container.find('.select2').select2({
+                width: '100%',
+                dropdownParent: $container
+            });
+        }
+
+        // Hàm load dữ liệu
+        function loadData() {
+            var idKhachHang = $container.find('#idKhachHang_@uid').val();
+            var soChungTu = $container.find('#soChungTu_@uid').val();
+            var tuNgay = $container.find('#tuNgay_@uid').val();
+            var denNgay = $container.find('#denNgay_@uid').val();
+
+            // Validate
+            if (!tuNgay) {
+                if (typeof showToast === 'function') showToast('warning', 'Vui lòng chọn từ ngày!');
+                return;
+            }
+            if (!denNgay) {
+                if (typeof showToast === 'function') showToast('warning', 'Vui lòng chọn đến ngày!');
+                return;
+            }
+            if (new Date(tuNgay) > new Date(denNgay)) {
+                if (typeof showToast === 'function') showToast('warning', 'Từ ngày không được lớn hơn đến ngày!');
+                return;
+            }
+
+            var $tableContainer = $container.find('#table-container-@uid');
+            
+            $tableContainer.html('<div class="text-center mt-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted">Đang tải dữ liệu...</p></div>');
+
+            $.ajax({
+                url: '@Url.Action("GetList", "BaoCaoDoiChieuCongNoKhachHang")',
+                type: 'GET',
+                data: {
+                    idKhachHang: idKhachHang,
+                    soChungTu: soChungTu,
+                    tuNgay: tuNgay,
+                    denNgay: denNgay
+                },
+                success: function (res) {
+                    $tableContainer.html(res);
+                },
+                error: function () {
+                    if (typeof showToast === 'function') showToast('error', 'Lỗi khi tải dữ liệu báo cáo');
+                    $tableContainer.html('<div class="alert alert-danger text-center mt-3">Đã xảy ra lỗi khi kết nối với máy chủ.</div>');
+                }
+            });
+        }
+
+        // Sự kiện tìm kiếm
+        $container.find('#btnSearch_@uid').on('click', function () {
+            loadData();
+        });
+
+        // Sự kiện làm mới
+        $container.find('#btnReset_@uid').on('click', function () {
+            $container.find('#idKhachHang_@uid').val('').trigger('change');
+            $container.find('#soChungTu_@uid').val('');
+            $container.find('#tuNgay_@uid').val('@ViewBag.TuNgay');
+            $container.find('#denNgay_@uid').val('@ViewBag.DenNgay');
+            $container.find('#table-container-@uid').html('<div class="alert alert-info text-center mt-3">Ấn <b>Tìm kiếm</b> để xem báo cáo.</div>');
+        });
+
+        // Sự kiện Xuất Excel
+        $container.find('#btnExportExcel_@uid').on('click', function () {
+            var tuNgay = $container.find('#tuNgay_@uid').val();
+            var denNgay = $container.find('#denNgay_@uid').val();
+            if (!tuNgay || !denNgay) {
+                if (typeof showToast === 'function') showToast('warning', 'Vui lòng chọn từ ngày và đến ngày');
+                return;
+            }
+            var idKhachHang = $container.find('#idKhachHang_@uid').val() || '';
+            var soChungTu = $container.find('#soChungTu_@uid').val() || '';
+            var url = '@Url.Action("ExportExcel", "BaoCaoDoiChieuCongNoKhachHang")' + '?tuNgay=' + tuNgay + '&denNgay=' + denNgay + '&idKhachHang=' + idKhachHang + '&soChungTu=' + encodeURIComponent(soChungTu);
+            window.location.href = url;
+        });
+
+        // Tự động load dữ liệu khi mở màn hình
+        loadData();
+
+        // Xem chi tiết chứng từ
+        $container.on('click', '.btn-xem-chitiet', function () {
+            var idPhatSinh = $(this).data('id');
+            var loaiDong = $(this).data('loai');
+            var activeTabPane = $container.closest('.tab-pane');
+            if (activeTabPane.length === 0) activeTabPane = $('body');
+
+            $('body').append('<div id="loadingModalKH_@uid" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);z-index:9999;display:flex;justify-content:center;align-items:center;"><div class="spinner-border text-white" role="status"></div></div>');
+
+            $.ajax({
+                url: '@Url.Action("GetDetails", "BaoCaoDoiChieuCongNoKhachHang")',
+                type: 'GET',
+                data: { idPhatSinh: idPhatSinh, loaiDong: loaiDong },
+                success: function (res) {
+                    $('#loadingModalKH_@uid').remove();
+                    if (res && res.success === false) {
+                        if (typeof showToast === 'function') showToast('error', res.message || 'Lỗi tải chi tiết');
+                    } else {
+                        activeTabPane.find('#detailsModalKH').remove();
+                        $('.modal-backdrop').remove();
+
+                        activeTabPane.append(res);
+                        var modalEl = activeTabPane.find('#detailsModalKH')[0];
+                        var modal = new bootstrap.Modal(modalEl);
+                        modal.show();
+                    }
+                },
+                error: function () {
+                    $('#loadingModalKH_@uid').remove();
+                    if (typeof showToast === 'function') showToast('error', 'Có lỗi xảy ra khi tải dữ liệu chi tiết');
+                }
+            });
+        });
+    });
+</script>

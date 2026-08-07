@@ -244,6 +244,32 @@ namespace SalesManagementSystem.Services
             if (headerRowIndex == -1) return; 
 
             int templateRowIndex = headerRowIndex + 1;
+            for (int r = headerRowIndex + 1; r <= Math.Min(worksheet.LastRowNum, headerRowIndex + 10); r++)
+            {
+                var rowCheck = worksheet.GetRow(r);
+                if (rowCheck == null) continue;
+                bool isTemplate = false;
+                for (int c = rowCheck.FirstCellNum; c < rowCheck.LastCellNum; c++)
+                {
+                    if (c < 0) continue;
+                    var cell = rowCheck.GetCell(c);
+                    if (cell != null && cell.CellType == CellType.String)
+                    {
+                        string val = cell.StringCellValue;
+                        if (val.Contains("%") && (val.Contains("STT") || val.Contains("insertcopystyles") || val.Contains("%" + maBieuMau) || properties.Any(p => val.Contains("." + p.Name))))
+                        {
+                            isTemplate = true;
+                            break;
+                        }
+                    }
+                }
+                if (isTemplate)
+                {
+                    templateRowIndex = r;
+                    break;
+                }
+            }
+
             var templateRow = worksheet.GetRow(templateRowIndex);
             if (templateRow == null) return;
 
