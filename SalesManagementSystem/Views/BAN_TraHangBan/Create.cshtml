@@ -392,6 +392,18 @@
                     success: function(res) {
                         if (res.success) {
                             showToast('success', "Lưu phiếu trả hàng thành công!");
+                            if (typeof TabManager !== 'undefined') {
+                                var paneId = $('#IDKho').closest('.tab-pane').attr('id');
+                                var key = paneId ? paneId.replace('-pane', '').replace('tab-', '') : 'BAN_TraHangBan';
+                                var editUrl = '@Url.Action("Edit", "BAN_TraHangBan", new { id = "PLACEHOLDER" })'.replace('PLACEHOLDER', res.id);
+                                if (paneId) $('#' + paneId).attr('data-url', '');
+                                setTimeout(function() {
+                                    TabManager.openTab(key, 'Chi tiết trả hàng bán', editUrl);
+                                }, 1500);
+                            } else {
+                                var editUrl = '@Url.Action("Edit", "BAN_TraHangBan", new { id = "PLACEHOLDER" })'.replace('PLACEHOLDER', res.id);
+                                setTimeout(() => window.location.href = editUrl, 1500);
+                            }
                         } else {
                             showToast('error', res.message || "Lỗi khi lưu");
                         }
@@ -460,13 +472,13 @@
                             if (typeof TabManager !== 'undefined') {
                                 var paneId = $('#IDKho').closest('.tab-pane').attr('id');
                                 var key = paneId ? paneId.replace('-pane', '').replace('tab-', '') : 'BAN_TraHangBan';
-                                var editUrl = '@Url.Action("Edit", "BAN_TraHangBan", new { id = 0 })'.replace('/0', '/' + res.id);
+                                var editUrl = '@Url.Action("Edit", "BAN_TraHangBan", new { id = "PLACEHOLDER" })'.replace('PLACEHOLDER', res.id);
                                 if (paneId) $('#' + paneId).attr('data-url', '');
                                 setTimeout(function() {
                                     TabManager.openTab(key, 'Chi tiết trả hàng bán', editUrl);
                                 }, 1500);
                             } else {
-                                var editUrl = '@Url.Action("Edit", "BAN_TraHangBan", new { id = 0 })'.replace('/0', '/' + res.id);
+                                var editUrl = '@Url.Action("Edit", "BAN_TraHangBan", new { id = "PLACEHOLDER" })'.replace('PLACEHOLDER', res.id);
                                 setTimeout(() => window.location.href = editUrl, 1500);
                             }
                         } else {

@@ -38,6 +38,8 @@ namespace SalesManagementSystem.Models.ViewModels
 
         public List<PhieuNhapKhoChiTietViewModel> ChiTiets { get; set; }
         public decimal TongSoLuong { get; set; }
+        public decimal TongTienHang { get; set; }
+        public decimal TongCong { get; set; }
 
         public PhieuNhapKhoViewModel()
         {

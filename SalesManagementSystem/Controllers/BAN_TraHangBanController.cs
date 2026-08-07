@@ -86,9 +86,6 @@ namespace SalesManagementSystem.Controllers
             ViewBag.KhachHangs = GetKhachHangList(idKhachHang);
             ViewBag.TrangThais = GetTrangThaiList(trangThai);
             
-            if (Request.IsAjaxRequest())
-                return PartialView("_TraHangBanList", model);
-
             return View("Index", model);
         }
 

@@ -342,7 +342,7 @@
                             if (typeof TabManager !== 'undefined') {
                                 var paneId = $('#ID').closest('.tab-pane').attr('id');
                                 var key = paneId ? paneId.replace('-pane', '').replace('tab-', '') : 'BAN_TraHangBan';
-                                var editUrl = '@Url.Action("Edit", "BAN_TraHangBan", new { id = 0 })'.replace('/0', '/' + $('#ID').val());
+                                var editUrl = '@Url.Action("Edit", "BAN_TraHangBan", new { id = "PLACEHOLDER" })'.replace('PLACEHOLDER', $('#ID').val());
                                 if (paneId) $('#' + paneId).attr('data-url', '');
                                 setTimeout(function() {
                                     TabManager.openTab(key, 'Chi tiết trả hàng bán', editUrl);
@@ -366,7 +366,7 @@
                         if (typeof TabManager !== 'undefined') {
                             var paneId = $('#ID').closest('.tab-pane').attr('id');
                             var key = paneId ? paneId.replace('-pane', '').replace('tab-', '') : 'BAN_TraHangBan';
-                            var editUrl = '@Url.Action("Edit", "BAN_TraHangBan", new { id = 0 })'.replace('/0', '/' + $('#ID').val());
+                            var editUrl = '@Url.Action("Edit", "BAN_TraHangBan", new { id = "PLACEHOLDER" })'.replace('PLACEHOLDER', $('#ID').val());
                             if (paneId) $('#' + paneId).attr('data-url', '');
                             setTimeout(function() {
                                 TabManager.openTab(key, 'Chi tiết trả hàng bán', editUrl);

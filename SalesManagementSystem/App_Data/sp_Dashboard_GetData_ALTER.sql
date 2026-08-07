@@ -533,12 +533,11 @@ BEGIN
         d.SoDonHang,
         d.NgayTaoDon,
         kh.TenKhachHang,
-        pt.TenPhuongTien,
+        CAST(NULL AS NVARCHAR(250)) AS TenPhuongTien,
         ISNULL((SELECT SUM(SoLuong) FROM NS_DonDatHangChiTiet WHERE IDDonDatHang = d.ID), 0) AS TongSoLuong,
         d.TongTien
     FROM NS_DonDatHang d
     LEFT JOIN NS_KhachHang kh ON d.IDKhachHang = kh.ID
-    LEFT JOIN DM_PhuongTien pt ON d.IDPhuongTien = pt.ID
     WHERE d.TrangThaiDon = 2
     ORDER BY d.NgayTaoDon DESC, d.ID DESC;
 
@@ -553,7 +552,7 @@ BEGIN
         pn.HoTenTaiXe,
         pn.TenNguoiGiao,
         ISNULL((SELECT SUM(SoLuong) FROM KHO_PhieuNhap_ChiTiet WHERE IDPhieuNhap = pn.ID), 0) AS TongSoLuong,
-        pn.TongCong
+        ISNULL(NULLIF(pn.TongCong, 0), ISNULL(NULLIF(pn.TongTienHang, 0), ISNULL((SELECT SUM(CASE WHEN ThanhTien > 0 THEN ThanhTien WHEN TongSauThue > 0 THEN TongSauThue ELSE SoLuong * DonGia END) FROM KHO_PhieuNhap_ChiTiet WHERE IDPhieuNhap = pn.ID), 0))) AS TongCong
     FROM KHO_PhieuNhap pn
     LEFT JOIN DM_NhaCungCap ncc ON pn.IDNhaCungCap = ncc.ID
     LEFT JOIN DM_PhuongTien pt ON pn.IDPhuongTien = pt.ID
@@ -568,7 +567,7 @@ BEGIN
         pn.TrangThai,
         ncc.TenNhaCungCap,
         pt.TenPhuongTien,
-        pn.TongCong
+        ISNULL(NULLIF(pn.TongCong, 0), ISNULL(NULLIF(pn.TongTienHang, 0), ISNULL((SELECT SUM(CASE WHEN ThanhTien > 0 THEN ThanhTien WHEN TongSauThue > 0 THEN TongSauThue ELSE SoLuong * DonGia END) FROM KHO_PhieuNhap_ChiTiet WHERE IDPhieuNhap = pn.ID), 0))) AS TongCong
     FROM KHO_PhieuNhap pn
     LEFT JOIN DM_NhaCungCap ncc ON pn.IDNhaCungCap = ncc.ID
     LEFT JOIN DM_PhuongTien pt ON pn.IDPhuongTien = pt.ID

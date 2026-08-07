@@ -209,7 +209,7 @@
         function autoAllocate() {
             var val = parseCurrency($modal.find('#SoTienThu').val());
             if (val < 0) return;
-            var available = val + (parseFloat(window.tienTraTruoc) || 0);
+            var available = val + Math.max(0, parseFloat(window.tienTraTruoc) || 0);
             var remaining = available;
             $modal.find('.input-phanbo').each(function() {
                 var conLai = parseFloat($(this).closest('tr').find('.row-conlai').data('val'));
@@ -388,7 +388,7 @@
             }
 
             var tongThu = parseCurrency($('#SoTienThu').val());
-            var availableTotal = tongThu + (parseFloat(window.tienTraTruoc) || 0);
+            var availableTotal = tongThu + Math.max(0, parseFloat(window.tienTraTruoc) || 0);
             
             var totalAllocatedOthers = 0;
             $modal.find('.input-phanbo').not($input).each(function() {
@@ -473,7 +473,7 @@
             $modal.find('.input-phanbo').each(function() {
                 tongPhanBo += parseCurrency($(this).val());
             });
-            var tienTraTruocHienCo = parseFloat(window.tienTraTruoc) || 0;
+            var tienTraTruocHienCo = Math.max(0, parseFloat(window.tienTraTruoc) || 0);
             
             if (tongThu + tienTraTruocHienCo < tongPhanBo) {
                 if (typeof showToast === 'function') {

@@ -252,21 +252,25 @@
             });
 
             // Sự kiện xuất Excel
-            $(document).off('click.cnkh_export', '.tab-pane.active .btn-export-excel');
-            $(document).on('click.cnkh_export', '.tab-pane.active .btn-export-excel', function(e) {
+            $(document).off('click.cnkh_export', '.btn-export-excel');
+            $(document).on('click.cnkh_export', '.btn-export-excel', function(e) {
                 e.preventDefault();
                 e.stopImmediatePropagation();
-                var $form = $(this).closest('.tab-pane').find('#searchForm');
+                var $container = $(this).closest('.tab-pane');
+                if ($container.length === 0) $container = $(document);
+                var $form = $container.find('#searchForm');
                 var params = $form.serialize();
                 window.location.href = '@Url.Action("ExportExcel", "CongNoKhachHang")?' + params;
             });
             
             // Sự kiện xuất SP02
-            $(document).off('click.cnkh_export_sp02', '.tab-pane.active .btn-export-sp02');
-            $(document).on('click.cnkh_export_sp02', '.tab-pane.active .btn-export-sp02', function(e) {
+            $(document).off('click.cnkh_export_sp02', '.btn-export-sp02');
+            $(document).on('click.cnkh_export_sp02', '.btn-export-sp02', function(e) {
                 e.preventDefault();
                 e.stopImmediatePropagation();
-                var $form = $(this).closest('.tab-pane').find('#searchForm');
+                var $container = $(this).closest('.tab-pane');
+                if ($container.length === 0) $container = $(document);
+                var $form = $container.find('#searchForm');
                 var params = $form.serialize();
                 window.location.href = '@Url.Action("ExportSP02", "CongNoKhachHang")?' + params;
             });

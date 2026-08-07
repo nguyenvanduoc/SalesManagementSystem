@@ -1,9 +1,11 @@
 @model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.CongNoKhachHangViewModel>
 
 @{
-    decimal tongPhaiThu = ViewBag.TongPhaiThu ?? 0M;
-    decimal tongDaThu   = ViewBag.DaThu ?? 0M;
-    decimal tongConLai  = ViewBag.ConPhaiThu ?? 0M;
+    decimal tongPhaiThu   = ViewBag.TongPhaiThu ?? 0M;
+    decimal tongDaThu     = ViewBag.DaThu ?? 0M;
+    decimal tongConLai    = ViewBag.ConPhaiThu ?? 0M;
+    decimal tongTonDauKy  = ViewBag.TongTonDauKy ?? 0M;
+    decimal tongNoCuoiKy  = ViewBag.TongNoCuoiKy ?? 0M;
 }
 
 <div class="card shadow-sm" id="divCongNoKhachHangListCard"
@@ -101,12 +103,12 @@
 
                         <!-- Dòng tổng -->
                         <tr class="fw-bold" style="background:#f4f6f9;">
-                            <td colspan="4" class="text-end align-middle">Tổng cộng:</td>
-                            <td class="text-end align-middle text-secondary"></td>
-                            <td class="text-end align-middle text-dark">@tongPhaiThu.ToString("N0")</td>
-                            <td class="text-end align-middle"></td>
-                            <td class="text-end align-middle text-success">@tongDaThu.ToString("N0")</td>
-                            <td class="text-end align-middle text-danger">@tongConLai.ToString("N0")</td>
+                            <td colspan="4" class="text-end align-middle text-uppercase fw-bold text-dark">Tổng cộng:</td>
+                            <td class="text-end align-middle text-secondary fw-bold">@tongTonDauKy.ToString("N0")</td>
+                            <td class="text-end align-middle text-dark fw-bold">@tongPhaiThu.ToString("N0")</td>
+                            <td class="text-end align-middle text-danger fw-bold">@tongNoCuoiKy.ToString("N0")</td>
+                            <td class="text-end align-middle text-success fw-bold">@tongDaThu.ToString("N0")</td>
+                            <td class="text-end align-middle text-danger fw-bold">@tongConLai.ToString("N0")</td>
                             <td></td>
                         </tr>
                     }

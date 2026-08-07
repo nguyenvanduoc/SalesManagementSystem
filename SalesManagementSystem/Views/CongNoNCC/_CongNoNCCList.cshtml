@@ -19,9 +19,8 @@
                         <th width="100" class="text-center fw-bold">Điện thoại</th>
                         <th width="140" class="text-center fw-bold">Dư đầu kỳ</th>
                         <th width="140" class="text-center fw-bold">Tổng tiền hàng</th>
-                        <th width="140" class="text-center fw-bold">Lũy kế</th>
                         <th width="140" class="text-center fw-bold">Đã thanh toán</th>
-                        <th width="140" class="text-center fw-bold">Còn lại</th>
+                        <th width="140" class="text-center fw-bold">Lũy kế</th>
                         <th width="130" class="text-center fw-bold">Trạng thái</th>
                     </tr>
                 </thead>
@@ -39,11 +38,8 @@
                                 <td class="text-center align-middle">@item.DienThoaiNCC</td>
                                 <td class="text-end align-middle fw-semibold">@item.TonDauKy.ToString("N0")</td>
                                 <td class="text-end align-middle fw-semibold">@item.TongTienHang.ToString("N0")</td>
-                                <td class="text-end align-middle fw-bold text-danger">@item.LuyKe.ToString("N0")</td>
                                 <td class="text-end align-middle text-success fw-semibold">@item.DaThanhToan.ToString("N0")</td>
-                                <td class="text-end align-middle @(item.ConLai > 0 ? "text-danger fw-bold" : "text-muted")">
-                                    @item.ConLai.ToString("N0")
-                                </td>
+                                <td class="text-end align-middle fw-bold text-danger">@item.LuyKe.ToString("N0")</td>
                                 <td class="text-center align-middle">
                                     <span class="@item.CssTrangThaiCongNo">@item.TrangThaiCongNo</span>
                                 </td>
@@ -54,16 +50,15 @@
                         <tr class="fw-bold" style="background:#f4f6f9;">
                             <td colspan="6" class="text-end align-middle">Tổng cộng:</td>
                             <td class="text-end align-middle">@tongPhaiTra.ToString("N0")</td>
-                            <td class="text-end align-middle"></td>
                             <td class="text-end align-middle text-success">@tongDaTra.ToString("N0")</td>
-                            <td class="text-end align-middle text-danger">@tongConLai.ToString("N0")</td>
+                            <td class="text-end align-middle"></td>
                             <td></td>
                         </tr>
                     }
                     else
                     {
                         <tr>
-                            <td colspan="11" class="text-center text-muted py-4">
+                            <td colspan="10" class="text-center text-muted py-4">
                                 <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
                                 Không có dữ liệu công nợ
                             </td>

@@ -42,13 +42,15 @@ namespace SalesManagementSystem.Repositories
 
         public IEnumerable<CongNoKhachHangSP02ViewModel> GetExportSP02(
             string tuNgay,
-            string denNgay)
+            string denNgay,
+            int? idKhachHang = null)
         {
             using (var conn = _db.CreateConnection())
             {
                 var p = new DynamicParameters();
                 p.Add("@TuNgay", string.IsNullOrEmpty(tuNgay) ? (DateTime?)null : DateTime.Parse(tuNgay));
                 p.Add("@DenNgay", string.IsNullOrEmpty(denNgay) ? (DateTime?)null : DateTime.Parse(denNgay));
+                p.Add("@IDKhachHang", idKhachHang);
 
                 var result = conn.Query<CongNoKhachHangSP02ViewModel>(
                     "sp_CongNoKhachHang_ExportSP02",

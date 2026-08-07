@@ -1,6 +1,7 @@
 CREATE OR ALTER PROCEDURE [dbo].[sp_CongNoKhachHang_ExportSP02]
     @TuNgay DATETIME = NULL,
-    @DenNgay DATETIME = NULL
+    @DenNgay DATETIME = NULL,
+    @IDKhachHang INT = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -63,5 +64,6 @@ BEGIN
         '' AS GhiChu
     FROM NS_KhachHang kh
     LEFT JOIN DM_TinhThanh tt ON kh.IDTinhThanh = tt.ID
+    WHERE (@IDKhachHang IS NULL OR kh.ID = @IDKhachHang)
     ORDER BY kh.TenKhachHang;
 END

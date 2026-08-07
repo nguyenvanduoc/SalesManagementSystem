@@ -201,7 +201,7 @@
 
         function calculatePhanBo() {
             var tongChi = parseCurrency($('#SoTienChi').val());
-            var tienTraTruoc = parseFloat(window.tienTraTruoc) || 0;
+            var tienTraTruoc = Math.max(0, parseFloat(window.tienTraTruoc) || 0);
             var tongPhanBo = 0;
             
             // Loop through inputs and adjust values
@@ -217,7 +217,7 @@
 
         function autoAllocate() {
             var val = parseCurrency($modal.find('#SoTienChi').val());
-            var available = val + (parseFloat(window.tienTraTruoc) || 0);
+            var available = val + Math.max(0, parseFloat(window.tienTraTruoc) || 0);
             var remaining = available;
             $modal.find('.input-phanbo').each(function() {
                 var conLai = parseFloat($(this).closest('tr').find('.row-conlai').data('val'));
@@ -471,7 +471,7 @@
             }
 
             var tongChi = parseCurrency($('#SoTienChi').val());
-            var availableTotal = tongChi + (parseFloat(window.tienTraTruoc) || 0);
+            var availableTotal = tongChi + Math.max(0, parseFloat(window.tienTraTruoc) || 0);
             
             var totalAllocatedOthers = 0;
             $modal.find('.input-phanbo').not($input).each(function() {
@@ -543,7 +543,7 @@
             $modal.find('.input-phanbo').each(function() {
                 tongPhanBo += parseCurrency($(this).val());
             });
-            var tienTraTruocHienCo = parseFloat(window.tienTraTruoc) || 0;
+            var tienTraTruocHienCo = Math.max(0, parseFloat(window.tienTraTruoc) || 0);
             
             if (tongChi + tienTraTruocHienCo < tongPhanBo) {
                 if (typeof showToast === 'function') {

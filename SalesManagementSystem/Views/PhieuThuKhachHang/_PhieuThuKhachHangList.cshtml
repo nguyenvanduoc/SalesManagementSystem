@@ -126,10 +126,29 @@
                     else
                     {
                         <tr>
-                            <td colspan="14" class="text-center py-4 text-muted">Ch&#432;a c&#243; phi&#7871;u thu n&#224;o ph&#249; h&#7907;p.</td>
+                            <td colspan="15" class="text-center py-4 text-muted">Ch&#432;a c&#243; phi&#7871;u thu n&#224;o ph&#249; h&#7907;p.</td>
                         </tr>
                     }
                 </tbody>
+                @if (Model.Items != null && Model.Items.Any())
+                {
+                    decimal sumTonDauKy = Model.Items.Sum(x => x.TonDauKy);
+                    decimal sumSoTienThu = Model.Items.Sum(x => x.SoTienThu);
+                    decimal sumSoTienPhanBo = Model.Items.Sum(x => x.SoTienPhanBo);
+                    decimal sumTienTraTruoc = Model.Items.Sum(x => x.TienTraTruoc);
+                    decimal sumLuyKe = Model.Items.Sum(x => x.LuyKe);
+                    <tfoot class="table-light fw-bold" style="position: sticky; bottom: 0; background-color: #f8f9fa; z-index: 5; box-shadow: inset 0 1px 0 #dee2e6, inset 0 -1px 0 #dee2e6;">
+                        <tr>
+                            <td colspan="6" class="text-end text-uppercase fw-bold text-dark align-middle">T&#7893;ng c&#7897;ng:</td>
+                            <td class="text-end align-middle text-secondary fw-bold">@sumTonDauKy.ToString("N0", cultureVi)</td>
+                            <td class="text-end align-middle text-dark fw-bold">@sumSoTienThu.ToString("N0", cultureVi)</td>
+                            <td class="text-end align-middle text-success fw-bold">@sumSoTienPhanBo.ToString("N0", cultureVi)</td>
+                            <td class="text-end align-middle text-primary fw-bold">@sumTienTraTruoc.ToString("N0", cultureVi)</td>
+                            <td class="text-end align-middle text-danger fw-bold">@sumLuyKe.ToString("N0", cultureVi)</td>
+                            <td colspan="4" class="align-middle"></td>
+                        </tr>
+                    </tfoot>
+                }
             </table>
         </div>
     </div>

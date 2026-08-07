@@ -56,6 +56,13 @@ var TabManager = (function () {
         return path + query;
     }
 
+    function sanitizeTabUrl(url) {
+        if (!url) return url;
+        // Tự động làm sạch các URL bị lặp tham số như /BAN_TraHangBan/Edit/1/1 -> /BAN_TraHangBan/Edit/1
+        url = url.replace(/(\/(?:Edit|Create|Detail|Index)\/\d+)(?:\/\d+)+/gi, '$1');
+        return url;
+    }
+
     function areUrlsEquivalent(url1, url2) {
         if (!url1 || !url2) return false;
         var clean1 = cleanUrlForHistory(url1).split('?')[0].toLowerCase();
@@ -569,6 +576,7 @@ var TabManager = (function () {
     // ─── openTab() ──────────────────────────────────────────────────────────
 
     function openTab(key, title, url) {
+        url = sanitizeTabUrl(url);
         var tabId = 'tab-' + key;
         var paneId = tabId + '-pane';
 
@@ -764,6 +772,7 @@ var TabManager = (function () {
     // ─── loadTabContent() ───────────────────────────────────────────────────
 
     function loadTabContent(tabId, url) {
+        url = sanitizeTabUrl(url);
         var paneId = tabId + '-pane';
         var $pane = $('#' + paneId);
 
@@ -808,7 +817,15 @@ var TabManager = (function () {
                 }
 
                 console.error('Lỗi nạp nội dung tab:', err);
-                $pane.html('<div class="alert alert-danger m-3">Lỗi kết nối máy chủ khi nạp giao diện. Vui lòng thử lại.</div>');
+                var ctrlName = tabId.replace('tab-', '').split('_')[0].split('-')[0];
+                var fallbackUrl = ctrlName ? '/' + ctrlName : '';
+                
+                $pane.html(
+                    '<div class="alert alert-danger m-3 d-flex align-items-center justify-content-between shadow-sm" style="border-radius:8px;">' +
+                    '<div><i class="bi bi-exclamation-triangle-fill me-2"></i>Lỗi kết nối máy chủ khi nạp giao diện. Vui lòng thử lại.</div>' +
+                    (fallbackUrl ? '<button type="button" class="btn btn-sm btn-outline-danger ms-3 no-ajax" onclick="TabManager.openTab(\'' + tabId.replace('tab-', '') + '\', \'Giao diện\', \'' + fallbackUrl + '\')"><i class="bi bi-arrow-clockwise me-1"></i> Tải lại trang chính</button>' : '') +
+                    '</div>'
+                );
             }
         });
     }
@@ -913,7 +930,7 @@ var TabManager = (function () {
             var title = $btn.find('.tab-title').text();
             var key = id.replace('tab-', '');
             var paneId = $btn.attr('data-bs-target') ? $btn.attr('data-bs-target').substring(1) : (id + '-pane');
-            var url = $('#' + paneId).attr('data-url');
+            var url = sanitizeTabUrl($('#' + paneId).attr('data-url'));
             tabs.push({ key: key, title: title, url: url });
         });
         var activeTabId = $('#mainTabHeader .nav-link.active').attr('id');
@@ -961,7 +978,7 @@ var TabManager = (function () {
                             return; // Bỏ qua việc tạo mới
                         }
                         
-                        openTab(t.key, t.title, t.url, true);
+                        openTab(t.key, t.title, sanitizeTabUrl(t.url), true);
                     });
                 }
                 

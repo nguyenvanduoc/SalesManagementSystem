@@ -62,6 +62,8 @@ namespace SalesManagementSystem.Controllers
             ViewBag.TongPhaiThu = list.Sum(x => x.DoanhThu);
             ViewBag.DaThu = list.Sum(x => x.DaThu);
             ViewBag.ConPhaiThu = list.Sum(x => x.ConPhaiThu);
+            ViewBag.TongTonDauKy = list.Sum(x => x.TonDauKy);
+            ViewBag.TongNoCuoiKy = list.Sum(x => x.LuyKe);
             ViewBag.KhachTraTruoc = dbModel.KhachTraTruoc;
             ViewBag.CongNoQuaHan = list.Sum(x => x.TienQuaHan);
 
@@ -105,6 +107,8 @@ namespace SalesManagementSystem.Controllers
                 ViewBag.TongPhaiThu = list.Sum(x => x.DoanhThu);
                 ViewBag.DaThu = list.Sum(x => x.DaThu);
                 ViewBag.ConPhaiThu = list.Sum(x => x.ConPhaiThu);
+                ViewBag.TongTonDauKy = list.Sum(x => x.TonDauKy);
+                ViewBag.TongNoCuoiKy = list.Sum(x => x.LuyKe);
                 ViewBag.KhachTraTruoc = dbModel.KhachTraTruoc;
                 ViewBag.CongNoQuaHan = list.Sum(x => x.TienQuaHan);
 
@@ -190,7 +194,7 @@ namespace SalesManagementSystem.Controllers
         }
 
         [HttpGet]
-        public ActionResult ExportSP02(string tuNgay = "", string denNgay = "")
+        public ActionResult ExportSP02(string tuNgay = "", string denNgay = "", int? idKhachHang = null)
         {
             if (!PermissionHelper.HasPermission("CongNoKhachHang", LoaiPhanQuyen.Xem))
             {
@@ -201,20 +205,25 @@ namespace SalesManagementSystem.Controllers
 
             try
             {
-                var list = _repo.GetExportSP02(tuNgay, denNgay).ToList();
+                var list = _repo.GetList(tuNgay, denNgay, idKhachHang, null).ToList();
 
                 var exportData = list.Select((item, index) => new
                 {
                     STT = index + 1,
-                    TinhThanh = item.TinhThanh,
+                    Tinh = item.TenTinh,
+                    TinhThanh = item.TenTinh,
                     TenKhachHang = item.TenKhachHang,
-                    DuDauKy = item.DuDauKy,
+                    DauKy = item.TonDauKy,
+                    DuDauKy = item.TonDauKy,
                     DoanhThu = item.DoanhThu,
-                    ThanhToan = item.ThanhToan,
-                    DuCuoiKy = item.DuCuoiKy > 0 ? item.DuCuoiKy : 0,
-                    KhachThanhToanTruoc = item.KhachThanhToanTruoc,
-                    HangChoGiao = item.HangChoGiao,
-                    GhiChu = item.GhiChu
+                    ThanhToan = item.DaThu,
+                    DaThu = item.DaThu,
+                    SoDuCuoiKy = item.LuyKe,
+                    DuCuoiKy = item.LuyKe,
+                    LuyKe = item.LuyKe,
+                    KhachThanhToanTruoc = 0M,
+                    HangChoGiao = 0M,
+                    GhiChu = ""
                 }).ToList();
 
                 var variables = new Dictionary<string, object>
