@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -53,7 +53,8 @@ namespace SalesManagementSystem.Repositories
                     WHERE (@Keyword = '' 
                            OR LOWER(MaKhachHang) LIKE '%' + @Keyword + '%'
                            OR LOWER(TenKhachHang) LIKE '%' + @Keyword + '%'
-                           OR LOWER(SoDienThoai) LIKE '%' + @Keyword + '%')";
+                           OR LOWER(SoDienThoai) LIKE '%' + @Keyword + '%'
+                           OR LOWER(TenKhuVuc) LIKE '%' + @Keyword + '%')";
 
                 totalRecords = conn.ExecuteScalar<int>(countSql, parameters);
 
@@ -69,7 +70,8 @@ namespace SalesManagementSystem.Repositories
                     WHERE (@Keyword = '' 
                            OR LOWER(k.MaKhachHang) LIKE '%' + @Keyword + '%'
                            OR LOWER(k.TenKhachHang) LIKE '%' + @Keyword + '%'
-                           OR LOWER(k.SoDienThoai) LIKE '%' + @Keyword + '%')
+                           OR LOWER(k.SoDienThoai) LIKE '%' + @Keyword + '%'
+                           OR LOWER(k.TenKhuVuc) LIKE '%' + @Keyword + '%')
                     ORDER BY k.NgayTao DESC
                     OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
 
@@ -99,8 +101,8 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
             {
                 var sql = @"
-                    INSERT INTO NS_KhachHang (MaSoThue, TenKhachHang, MaKhachHang, IDNhomKhachHang, DiaChi, SoDienThoai, Email, IDNhanVien, IDTinhThanh, NguoiTao, NgayTao)
-                    VALUES (@MaSoThue, @TenKhachHang, @MaKhachHang, @IDNhomKhachHang, @DiaChi, @SoDienThoai, @Email, @IDNhanVien, @IDTinhThanh, @NguoiTao, @NgayTao);
+                    INSERT INTO NS_KhachHang (MaSoThue, TenKhachHang, MaKhachHang, IDNhomKhachHang, DiaChi, SoDienThoai, Email, IDNhanVien, IDTinhThanh, TenKhuVuc, NguoiTao, NgayTao)
+                    VALUES (@MaSoThue, @TenKhachHang, @MaKhachHang, @IDNhomKhachHang, @DiaChi, @SoDienThoai, @Email, @IDNhanVien, @IDTinhThanh, @TenKhuVuc, @NguoiTao, @NgayTao);
                     SELECT CAST(SCOPE_IDENTITY() as int);";
 
                 entity.NgayTao = DateTime.Now;
@@ -123,6 +125,7 @@ namespace SalesManagementSystem.Repositories
                         Email = @Email,
                         IDNhanVien = @IDNhanVien,
                         IDTinhThanh = @IDTinhThanh,
+                        TenKhuVuc = @TenKhuVuc,
                         NgayCapNhat = @NgayCapNhat, 
                         NguoiCapNhat = @NguoiCapNhat
                     WHERE ID = @ID";

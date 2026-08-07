@@ -16,6 +16,7 @@
                         <th>Số điện thoại</th>
                         <th>Email</th>
                         <th>Tỉnh thành</th>
+                        <th>Khu vực</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -65,13 +66,14 @@
                                 <td class="align-middle text-center">@item.SoDienThoai</td>
                                 <td class="align-middle">@item.Email</td>
                                 <td class="align-middle">@item.TenTinhThanh</td>
+                                <td class="align-middle">@item.TenKhuVuc</td>
                             </tr>
                         }
                     }
                     else
                     {
                         <tr>
-                            <td colspan="10" class="text-center py-4 text-muted">Chưa có dữ liệu khách hàng.</td>
+                            <td colspan="11" class="text-center py-4 text-muted">Chưa có dữ liệu khách hàng.</td>
                         </tr>
                     }
                 </tbody>

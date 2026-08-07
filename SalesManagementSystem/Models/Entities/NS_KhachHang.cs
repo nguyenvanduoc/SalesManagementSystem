@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace SalesManagementSystem.Models.Entities
 {
@@ -14,6 +14,7 @@ namespace SalesManagementSystem.Models.Entities
         public string Email { get; set; }
         public int? IDNhanVien { get; set; }
         public int? IDTinhThanh { get; set; }
+        public string TenKhuVuc { get; set; }
         public int? NguoiTao { get; set; }
         public DateTime? NgayTao { get; set; } 
         public int? NguoiCapNhat { get; set; } 

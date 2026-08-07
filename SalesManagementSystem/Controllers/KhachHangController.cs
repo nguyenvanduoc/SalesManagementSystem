@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Web.Mvc;
 using Dapper;
@@ -224,6 +224,7 @@ namespace SalesManagementSystem.Controllers
                     SoDienThoai = x.SoDienThoai,
                     Email = x.Email,
                     TenTinhThanh = x.TenTinhThanh,
+                    TenKhuVuc = x.TenKhuVuc,
                     TenNhanVien = x.TenNhanVien
                 });
 

@@ -205,25 +205,33 @@ namespace SalesManagementSystem.Controllers
 
             try
             {
-                var list = _repo.GetList(tuNgay, denNgay, idKhachHang, null).ToList();
+                var list = _repo.GetExportSP02(tuNgay, denNgay, idKhachHang).ToList();
 
                 var exportData = list.Select((item, index) => new
                 {
                     STT = index + 1,
-                    Tinh = item.TenTinh,
-                    TinhThanh = item.TenTinh,
-                    TenKhachHang = item.TenKhachHang,
-                    DauKy = item.TonDauKy,
-                    DuDauKy = item.TonDauKy,
+                    TenNhanVien = item.TenNhanVien ?? "",
+                    NhanVien = item.TenNhanVien ?? "",
+                    PhuTrach = item.TenNhanVien ?? "",
+                    TenKhuVuc = item.TenKhuVuc ?? "",
+                    KhuVuc = item.TenKhuVuc ?? "",
+                    KV = item.TenKhuVuc ?? "",
+                    Tinh = item.TinhThanh ?? "",
+                    TenTinh = item.TinhThanh ?? "",
+                    TinhThanh = item.TinhThanh ?? "",
+                    TenKhachHang = item.TenKhachHang ?? "",
+                    KhachHang = item.TenKhachHang ?? "",
+                    DauKy = item.DuDauKy,
+                    DuDauKy = item.DuDauKy,
                     DoanhThu = item.DoanhThu,
-                    ThanhToan = item.DaThu,
-                    DaThu = item.DaThu,
-                    SoDuCuoiKy = item.LuyKe,
-                    DuCuoiKy = item.LuyKe,
-                    LuyKe = item.LuyKe,
-                    KhachThanhToanTruoc = 0M,
-                    HangChoGiao = 0M,
-                    GhiChu = ""
+                    ThanhToan = item.ThanhToan,
+                    DaThu = item.ThanhToan,
+                    SoDuCuoiKy = item.DuCuoiKy,
+                    DuCuoiKy = item.DuCuoiKy,
+                    LuyKe = item.DuCuoiKy,
+                    KhachThanhToanTruoc = item.KhachThanhToanTruoc,
+                    HangChoGiao = item.HangChoGiao,
+                    GhiChu = item.GhiChu ?? ""
                 }).ToList();
 
                 var variables = new Dictionary<string, object>

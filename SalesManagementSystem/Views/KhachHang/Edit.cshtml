@@ -1,4 +1,4 @@
-﻿@model SalesManagementSystem.Models.Entities.NS_KhachHang
+@model SalesManagementSystem.Models.Entities.NS_KhachHang
 
 @{
     Layout = null;
@@ -54,6 +54,10 @@
             <div class="col-md-6">
                 <label class="form-label text-muted fw-semibold">Email</label>
                 @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email" })
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted fw-semibold">Khu vực</label>
+                @Html.TextBoxFor(m => m.TenKhuVuc, new { @class = "form-control", placeholder = "Khu vực" })
             </div>
             <div class="col-md-12">
                 <label class="form-label text-muted fw-semibold">Địa chỉ</label>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace SalesManagementSystem.Models.ViewModels
 {
@@ -19,6 +19,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public string TenNhomKhachHang { get; set; }
         public string TenNhanVien { get; set; }
         public string TenTinhThanh { get; set; }
+        public string TenKhuVuc { get; set; }
         
         // Audit fields
         public int? NguoiTao { get; set; }

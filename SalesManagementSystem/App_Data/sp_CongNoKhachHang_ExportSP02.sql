@@ -8,6 +8,8 @@ BEGIN
 
     SELECT 
         kh.ID AS IDKhachHang,
+        ISNULL(nv.HoTen, ISNULL(LTRIM(RTRIM(ISNULL(ns.HoDem, '') + ' ' + ISNULL(ns.Ten, ''))), '')) AS TenNhanVien,
+        ISNULL(kh.TenKhuVuc, '') AS TenKhuVuc,
         ISNULL(tt.TenTinhThanh, kh.DiaChi) AS TinhThanh,
         kh.TenKhachHang,
         -- Đầu kỳ: Doanh thu trước TuNgay - Thu trước TuNgay
@@ -63,6 +65,8 @@ BEGIN
         
         '' AS GhiChu
     FROM NS_KhachHang kh
+    LEFT JOIN NS_NhanVien nv ON kh.IDNhanVien = nv.ID
+    LEFT JOIN NS_NhanSu ns ON kh.IDNhanVien = ns.ID
     LEFT JOIN DM_TinhThanh tt ON kh.IDTinhThanh = tt.ID
     WHERE (@IDKhachHang IS NULL OR kh.ID = @IDKhachHang)
     ORDER BY kh.TenKhachHang;
