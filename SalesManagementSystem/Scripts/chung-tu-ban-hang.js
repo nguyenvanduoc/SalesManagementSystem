@@ -71,9 +71,24 @@ var ChungTuBanHang = (function () {
         if (form.length === 0) form = $('#frmSaveCTBH');
         
         var idKho = form.find('input[name="IDKho"]').val();
-        if (!idKho) {
-            if (typeof showToast !== 'undefined') showToast('warning', 'Vui lòng chọn kho xuất!');
-            return;
+        if (!idKho || idKho === '0') {
+            var hasNoDau = false;
+            form.find('.grid-detail tbody tr, table tbody tr').each(function () {
+                var text = $(this).text().toUpperCase();
+                if (text.indexOf('NODAU') !== -1 || text.indexOf('NỢ ĐẦU KỲ') !== -1 || text.indexOf('NO DAU KY') !== -1) {
+                    hasNoDau = true;
+                }
+            });
+
+            if (hasNoDau) {
+                form.find('input[name="IDKho"]').val('1');
+                form.find('#CTBH_TenKhoHang').val('Kho mặc định');
+                idKho = '1';
+                window.tonKhoHasError = false;
+            } else {
+                if (typeof showToast !== 'undefined') showToast('warning', 'Vui lòng chọn kho xuất!');
+                return;
+            }
         }
 
         var actionText = isGhiSo ? "lưu và ghi" : "lưu dữ liệu";

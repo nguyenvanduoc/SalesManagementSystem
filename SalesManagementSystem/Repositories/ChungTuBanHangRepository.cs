@@ -96,7 +96,7 @@ namespace SalesManagementSystem.Repositories
                       AND (@IDKhachHang IS NULL OR d.IDKhachHang = @IDKhachHang)
                       AND (@TrangThaiChungTu IS NULL OR (CASE WHEN d.TrangThaiDon = 4 THEN 3 ELSE ISNULL(c.TrangThai, 0) END) = @TrangThaiChungTu)
                       AND ISNULL(d.TrangThaiDon, 1) <> 0
-                    ORDER BY d.NgayTaoDon DESC, d.ID DESC;";
+                    ORDER BY CASE WHEN c.ID IS NULL THEN 0 ELSE 1 END ASC, d.SoDonHang DESC, d.ID DESC;";
 
                 return conn.Query<DonHangChungTuViewModel>(sql, p);
             }
@@ -163,6 +163,11 @@ namespace SalesManagementSystem.Repositories
                 {
                     try
                     {
+                        if (model.IDKho <= 0)
+                        {
+                            model.IDKho = 1;
+                        }
+
                         // 1. Kiểm tra tồn kho nếu ghi
                         if (ghiSo)
                         {
@@ -398,6 +403,11 @@ namespace SalesManagementSystem.Repositories
                 {
                     try
                     {
+                        if (model.IDKho <= 0)
+                        {
+                            model.IDKho = 1;
+                        }
+
                         // 1. Kiểm tra tồn kho nếu ghi
                         if (ghiSo)
                         {

@@ -13,7 +13,6 @@ BEGIN
     FROM OPENJSON(@ListSanPham);
 
     -- Lấy tồn kho hiện tại cho các sản phẩm trong danh sách tại kho được chọn
-    -- (Yêu cầu: Không lấy tồn kho từ bảng sản phẩm, tính tổng nhập trừ tổng xuất từ KHO_GiaoDichKho)
     SELECT 
         sp.IDSanPham,
         SUM(ISNULL(k.SoLuongNhap, 0)) - SUM(ISNULL(k.SoLuongXuat, 0)) AS SoLuongTon
@@ -22,7 +21,7 @@ BEGIN
     LEFT JOIN KHO_GiaoDichKho k ON sp.IDSanPham = k.IDSanPham AND k.IDKho = @IDKho
     GROUP BY sp.IDSanPham;
 
-    -- Trả kết quả
+    -- Trả kết quả (Miễn trừ kiểm tra tồn kho nếu là Nợ đầu kỳ / Dịch vụ)
     SELECT 
         @IDKho AS IDKho,
         kho.TenKhoHang,
@@ -32,7 +31,13 @@ BEGIN
         sp.SoLuongCanXuat,
         ISNULL(tk.SoLuongTon, 0) AS SoLuongTon,
         ISNULL(tk.SoLuongTon, 0) - sp.SoLuongCanXuat AS ChenhLech,
-        CAST(CASE WHEN ISNULL(tk.SoLuongTon, 0) >= sp.SoLuongCanXuat THEN 1 ELSE 0 END AS BIT) AS IsDuTon
+        CAST(CASE 
+            WHEN UPPER(ISNULL(dmsp.MaSanPham,'')) LIKE '%NODAU%' 
+              OR UPPER(ISNULL(dmsp.TenSanPham,'')) LIKE N'%NỢ ĐẦU KỲ%' 
+              OR ISNULL(dmsp.DVT,'') IN ('', '-', 'DichVu', 'N/A') 
+              OR ISNULL(tk.SoLuongTon, 0) >= sp.SoLuongCanXuat 
+            THEN 1 ELSE 0 
+        END AS BIT) AS IsDuTon
     FROM #TempSanPham sp
     LEFT JOIN #TempTonKho tk ON sp.IDSanPham = tk.IDSanPham
     LEFT JOIN DM_SanPham dmsp ON sp.IDSanPham = dmsp.ID

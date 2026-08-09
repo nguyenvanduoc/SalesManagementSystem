@@ -177,6 +177,7 @@ namespace SalesManagementSystem.Controllers
             model.TenKhachHang = khachHang?.TenKhachHang ?? "";
             model.IDKho = 0;
             model.TenKhoHang = "";
+            model.NgayChungTu = donHang.NgayTaoDon ?? DateTime.Now;
             
             var chiTietsDon = _donDatHangRepo.GetChiTietByDonId(idDonDatHang);
 

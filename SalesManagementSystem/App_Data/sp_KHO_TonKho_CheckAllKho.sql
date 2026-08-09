@@ -31,6 +31,7 @@ BEGIN
         ksp.IDSanPham,
         dmsp.MaSanPham,
         dmsp.TenSanPham,
+        dmsp.DVT,
         ksp.SoLuongCanXuat,
         ISNULL(SUM(ISNULL(g.SoLuongNhap, 0)) - SUM(ISNULL(g.SoLuongXuat, 0)), 0) AS SoLuongTon
     INTO #TempKetQua
@@ -43,9 +44,10 @@ BEGIN
         ksp.IDSanPham,
         dmsp.MaSanPham,
         dmsp.TenSanPham,
+        dmsp.DVT,
         ksp.SoLuongCanXuat;
 
-    -- 5. Trả về kết quả
+    -- 5. Trả về kết quả (Miễn trừ kiểm tra tồn kho nếu là sản phẩm Nợ đầu kỳ / Dịch vụ)
     SELECT 
         IDKho,
         TenKhoHang,
@@ -55,7 +57,13 @@ BEGIN
         SoLuongCanXuat,
         SoLuongTon,
         SoLuongTon - SoLuongCanXuat AS ChenhLech,
-        CAST(CASE WHEN SoLuongTon >= SoLuongCanXuat THEN 1 ELSE 0 END AS BIT) AS IsDuTon
+        CAST(CASE 
+            WHEN UPPER(ISNULL(MaSanPham,'')) LIKE '%NODAU%' 
+              OR UPPER(ISNULL(TenSanPham,'')) LIKE N'%NỢ ĐẦU KỲ%' 
+              OR ISNULL(DVT,'') IN ('', '-', 'DichVu', 'N/A') 
+              OR SoLuongTon >= SoLuongCanXuat 
+            THEN 1 ELSE 0 
+        END AS BIT) AS IsDuTon
     FROM #TempKetQua
     ORDER BY TenKhoHang, TenSanPham;
 

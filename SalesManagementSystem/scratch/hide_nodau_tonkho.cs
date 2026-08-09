@@ -1,8 +1,25 @@
--- =======================================================
--- Author:      Antigravity
--- Create date: 2026-06-12
--- Description: Get list of inventory for Tồn Kho screen
--- =======================================================
+using System;
+using System.Configuration;
+using System.Data;
+using SalesManagementSystem.Data;
+using Dapper;
+
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            ConfigurationManager.AppSettings["ConfigFile"] = @"c:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\QuanLyBanHang\SalesManagementSystem\SalesManagementSystem\App_Config\systemPublic.dat";
+            ConfigurationManager.AppSettings["KeyPart1"] = "VanDuoc@123123!";
+            AppDomain.CurrentDomain.SetData("DataDirectory", @"c:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\QuanLyBanHang\SalesManagementSystem\SalesManagementSystem\App_Data");
+
+            var db = new DbConnectionFactory();
+            using (var conn = db.CreateConnection())
+            {
+                conn.Open();
+
+                string sql = @"
 CREATE OR ALTER PROCEDURE sp_KHO_TonKho_GetList
     @IDKho INT = NULL,
     @IDSanPham INT = NULL,
@@ -58,67 +75,14 @@ BEGIN
       AND UPPER(ISNULL(sp.TenSanPham, '')) NOT LIKE N'%NỢ ĐẦU KỲ%'
     ORDER BY k.TenKhoHang, sp.TenSanPham;
 END
-GO
-
--- =======================================================
--- Author:      Antigravity
--- Create date: 2026-06-12
--- Description: Get inventory history (Thẻ kho)
--- =======================================================
-CREATE OR ALTER PROCEDURE sp_KHO_TheKho_GetList
-    @IDKho INT,
-    @IDSanPham INT,
-    @TuNgay DATETIME = NULL,
-    @DenNgay DATETIME = NULL
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    DECLARE @TonDau DECIMAL(18,2) = 0;
-    
-    IF @TuNgay IS NOT NULL
-    BEGIN
-        SELECT @TonDau = ISNULL(SUM(SoLuongNhap), 0) - ISNULL(SUM(SoLuongXuat), 0)
-        FROM KHO_GiaoDichKho
-        WHERE IsHuy = 0 
-          AND IDKho = @IDKho 
-          AND IDSanPham = @IDSanPham 
-          AND NgayChungTu < @TuNgay;
-    END
-
-    SELECT 
-        CASE 
-            WHEN EXISTS (SELECT 1 FROM KHO_PhieuNhap WHERE SoChungTu = gd.SoChungTu) THEN 
-                ISNULL(
-                    (SELECT TOP 1 IDPhieuNhap FROM KHO_PhieuNhap_ChiTiet WHERE ID = gd.IDChiTietKho),
-                    (SELECT TOP 1 ID FROM KHO_PhieuNhap WHERE SoChungTu = gd.SoChungTu)
-                )
-            WHEN EXISTS (SELECT 1 FROM KHO_PhieuXuat WHERE SoChungTu = gd.SoChungTu) THEN 
-                ISNULL(
-                    (SELECT TOP 1 IDPhieuXuat FROM KHO_PhieuXuat_ChiTiet WHERE ID = gd.IDChiTietKho),
-                    (SELECT TOP 1 ID FROM KHO_PhieuXuat WHERE SoChungTu = gd.SoChungTu)
-                )
-            ELSE gd.ID
-        END AS ID,
-        gd.NgayChungTu,
-        gd.SoChungTu,
-        CASE 
-            WHEN EXISTS (SELECT 1 FROM KHO_PhieuNhap WHERE SoChungTu = gd.SoChungTu) THEN 1
-            WHEN EXISTS (SELECT 1 FROM KHO_PhieuXuat WHERE SoChungTu = gd.SoChungTu) THEN 2
-            ELSE gd.LoaiChungTu
-        END AS LoaiChungTu,
-        gd.DienGiai,
-        gd.SoLuongNhap AS Nhap,
-        gd.SoLuongXuat AS Xuat,
-        gd.DonGia,
-        gd.ThanhTien,
-        @TonDau + SUM(gd.SoLuongNhap - gd.SoLuongXuat) OVER (ORDER BY gd.NgayChungTu ASC, gd.ID ASC) AS TonLuyKe
-    FROM KHO_GiaoDichKho gd
-    WHERE gd.IsHuy = 0
-      AND gd.IDKho = @IDKho
-      AND gd.IDSanPham = @IDSanPham
-      AND (@TuNgay IS NULL OR gd.NgayChungTu >= @TuNgay)
-      AND (@DenNgay IS NULL OR gd.NgayChungTu <= @DenNgay)
-    ORDER BY gd.NgayChungTu ASC, gd.ID ASC;
-END
-GO
+";
+                conn.Execute(sql);
+                Console.WriteLine("UPDATED sp_KHO_TonKho_GetList TO HIDE NODAU PRODUCTS SUCCESSFULLY!");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error: " + ex.Message);
+        }
+    }
+}

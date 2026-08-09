@@ -1,3 +1,25 @@
+using System;
+using System.Configuration;
+using System.Data;
+using SalesManagementSystem.Data;
+using Dapper;
+
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            ConfigurationManager.AppSettings["ConfigFile"] = @"c:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\QuanLyBanHang\SalesManagementSystem\SalesManagementSystem\App_Config\systemPublic.dat";
+            ConfigurationManager.AppSettings["KeyPart1"] = "VanDuoc@123123!";
+            AppDomain.CurrentDomain.SetData("DataDirectory", @"c:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\QuanLyBanHang\SalesManagementSystem\SalesManagementSystem\App_Data");
+
+            var db = new DbConnectionFactory();
+            using (var conn = db.CreateConnection())
+            {
+                conn.Open();
+
+                string sql = @"
 CREATE OR ALTER PROCEDURE sp_BAN_ChungTuBanHang_GetDonHangList
     @TuNgay DATE = NULL,
     @DenNgay DATE = NULL,
@@ -31,4 +53,14 @@ BEGIN
       AND (@TrangThaiChungTu IS NULL OR ISNULL(c.TrangThai, 0) = @TrangThaiChungTu)
     ORDER BY CASE WHEN c.ID IS NULL THEN 0 ELSE 1 END ASC, d.SoDonHang DESC, d.ID DESC;
 END
-GO
+";
+                conn.Execute(sql);
+                Console.WriteLine("UPDATED sp_BAN_ChungTuBanHang_GetDonHangList SUCCESSFULLY!");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error: " + ex.Message);
+        }
+    }
+}
