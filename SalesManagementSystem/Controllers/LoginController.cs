@@ -99,7 +99,7 @@ namespace SalesManagementSystem.Controllers
 
                     Session.Add(CommonConstants.USER_SESSION, userSession);
 
-                    // LOG LOGIN SESSION
+                    // LOG LOGIN SESSION (Explicit user login -> force new session)
                     int sessionId = _sessionRepo.LogLogin(new SalesManagementSystem.Models.Entities.AclLoginSession
                     {
                         IDLogin = result.ID,
@@ -108,7 +108,7 @@ namespace SalesManagementSystem.Controllers
                         HostAddress = Request.UserHostAddress,
                         TrinhDuyet = Request.Browser != null ? Request.Browser.Browser + " " + Request.Browser.Version : "Unknown",
                         IP = Request.ServerVariables["REMOTE_ADDR"] ?? Request.UserHostAddress
-                    });
+                    }, forceNew: true);
                     Session["LoginSessionID"] = sessionId;
 
                     // Set persistent cookie to survive AppDomain restarts (IIS file changes) - Auto-login for 7 days

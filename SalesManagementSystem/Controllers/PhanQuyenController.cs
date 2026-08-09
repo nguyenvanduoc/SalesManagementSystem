@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using SalesManagementSystem.Helpers;
@@ -57,6 +57,7 @@ namespace SalesManagementSystem.Controllers
 
             if (result)
             {
+                PermissionHelper.ClearUserPermissionsCache(idLogin);
                 AuditLog.AddUpdate("ACL_PhanQuyen", idLogin.ToString(), new { Roles = "Old Roles (Many)" }, new { Roles = string.Join(",", checkedActionIds) });
                 return Json(new { success = true, message = "Lưu phân quyền thành công!" });
             }

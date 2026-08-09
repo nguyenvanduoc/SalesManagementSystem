@@ -1,66 +1,107 @@
-﻿using System.Linq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
 using Dapper;
 using SalesManagementSystem.Data;
 using SalesManagementSystem.Models.ViewModels;
-using System.Web;
-using SalesManagementSystem.Helpers;
 
 namespace SalesManagementSystem.Helpers
 {
     public static class PermissionHelper
     {
-        public static bool HasPermission(string controllerName, LoaiPhanQuyen loaiPhanQuyen)
+        private const string PERM_CACHE_PREFIX = "UserPermissions_";
+
+        public static void ClearUserPermissionsCache(int idLogin)
         {
-            var session = HttpContext.Current.Session[CommonConstants.USER_SESSION] as UserLoginViewModel;
-            if (session == null) return false;
-
-            using (var conn = new DbConnectionFactory().CreateConnection())
+            if (HttpRuntime.Cache != null)
             {
-                var sql = @"
-                    SELECT TOP 1 1 
-                    FROM ACL_PhanQuyen pq
-                    INNER JOIN ACL_Action a ON pq.IDAction = a.ID
-                    WHERE pq.IDLogin = @IDLogin 
-                      AND pq.IsChoPhep = 1
-                      AND a.TenController = @Controller
-                      AND a.LoaiPhanQuyen = @LoaiPhanQuyen";
-
-                var result = conn.QueryFirstOrDefault<int?>(sql, new 
-                { 
-                    IDLogin = session.UserID, 
-                    Controller = controllerName, 
-                    LoaiPhanQuyen = (int)loaiPhanQuyen 
-                });
-
-                return result.HasValue;
+                HttpRuntime.Cache.Remove(PERM_CACHE_PREFIX + idLogin);
             }
         }
-        
-        public static bool HasActionPermission(string controllerName, string actionName)
+
+        private static HashSet<string> GetUserPermissions(int idLogin)
         {
-            var session = HttpContext.Current.Session[CommonConstants.USER_SESSION] as UserLoginViewModel;
+            string cacheKey = PERM_CACHE_PREFIX + idLogin;
+            if (HttpRuntime.Cache != null)
+            {
+                if (HttpRuntime.Cache[cacheKey] is HashSet<string> cachedPerms)
+                {
+                    return cachedPerms;
+                }
+            }
+
+            var permissions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            try
+            {
+                using (var conn = new DbConnectionFactory().CreateConnection())
+                {
+                    var sql = @"
+                        SELECT a.TenController, a.TenAction, a.LoaiPhanQuyen 
+                        FROM ACL_PhanQuyen pq
+                        INNER JOIN ACL_Action a ON pq.IDAction = a.ID
+                        WHERE pq.IDLogin = @IDLogin 
+                          AND pq.IsChoPhep = 1";
+
+                    var rows = conn.Query(sql, new { IDLogin = idLogin });
+                    foreach (var r in rows)
+                    {
+                        string controller = r.TenController as string;
+                        string action = r.TenAction as string;
+                        int? loai = r.LoaiPhanQuyen as int?;
+
+                        if (!string.IsNullOrEmpty(controller))
+                        {
+                            if (!string.IsNullOrEmpty(action))
+                            {
+                                permissions.Add($"{controller}:{action}");
+                            }
+                            if (loai.HasValue)
+                            {
+                                permissions.Add($"{controller}:L_{loai.Value}");
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteErrorLog(ex, HttpContext.Current);
+            }
+
+            if (HttpRuntime.Cache != null)
+            {
+                // Cache user permissions in memory for 5 minutes
+                HttpRuntime.Cache.Insert(
+                    cacheKey,
+                    permissions,
+                    null,
+                    DateTime.Now.AddMinutes(5),
+                    System.Web.Caching.Cache.NoSlidingExpiration);
+            }
+
+            return permissions;
+        }
+
+        public static bool HasPermission(string controllerName, LoaiPhanQuyen loaiPhanQuyen)
+        {
+            var session = HttpContext.Current?.Session?[CommonConstants.USER_SESSION] as UserLoginViewModel;
             if (session == null) return false;
 
-            using (var conn = new DbConnectionFactory().CreateConnection())
-            {
-                var sql = @"
-                    SELECT TOP 1 1 
-                    FROM ACL_PhanQuyen pq
-                    INNER JOIN ACL_Action a ON pq.IDAction = a.ID
-                    WHERE pq.IDLogin = @IDLogin 
-                      AND pq.IsChoPhep = 1
-                      AND a.TenController = @Controller
-                      AND a.TenAction = @Action";
+            var userPerms = GetUserPermissions(session.UserID);
+            string key = $"{controllerName}:L_{(int)loaiPhanQuyen}";
+            return userPerms.Contains(key);
+        }
 
-                var result = conn.QueryFirstOrDefault<int?>(sql, new 
-                { 
-                    IDLogin = session.UserID, 
-                    Controller = controllerName, 
-                    Action = actionName 
-                });
+        public static bool HasActionPermission(string controllerName, string actionName)
+        {
+            var session = HttpContext.Current?.Session?[CommonConstants.USER_SESSION] as UserLoginViewModel;
+            if (session == null) return false;
 
-                return result.HasValue;
-            }
+            var userPerms = GetUserPermissions(session.UserID);
+            string key = $"{controllerName}:{actionName}";
+            return userPerms.Contains(key);
         }
 
         public static string GetLoaiPhanQuyenDisplayName(LoaiPhanQuyen loai)

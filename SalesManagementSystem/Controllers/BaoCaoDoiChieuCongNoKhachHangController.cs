@@ -210,15 +210,15 @@ namespace SalesManagementSystem.Controllers
                     {
                         var phieuThu = conn.QueryFirstOrDefault(@"
                             SELECT pt.ID, pt.SoPhieuThu, pt.NgayThu, kh.TenKhachHang,
-                                   pt.SoTienThu, pt.GhiChu,
+                                   pt.SoTienThu, pt.DienGiai AS GhiChu,
                                    tk.TenTaiKhoan, tk.LoaiTaiKhoan,
                                    ISNULL(tk.NganHang, '') AS NganHang,
                                    LTRIM(RTRIM(ISNULL(ns.HoDem, '') + ' ' + ISNULL(ns.Ten, ''))) AS NguoiTaoTen
-                            FROM BAN_PhieuThuKhachHang pt
+                            FROM KT_PhieuThu pt
                             LEFT JOIN NS_KhachHang kh ON pt.IDKhachHang = kh.ID
                             LEFT JOIN DM_TaiKhoanThanhToan tk ON pt.IDTaiKhoanThanhToan = tk.ID
                             LEFT JOIN NS_NhanSu ns ON pt.NguoiTao = ns.ID
-                            WHERE pt.ID = @ID AND pt.IsDeleted = 0", new { ID = idPhatSinh });
+                            WHERE pt.ID = @ID", new { ID = idPhatSinh });
 
                         if (phieuThu != null)
                         {

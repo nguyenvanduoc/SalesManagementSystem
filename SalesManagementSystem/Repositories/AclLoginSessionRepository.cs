@@ -18,10 +18,32 @@ namespace SalesManagementSystem.Repositories
             _db = db;
         }
 
-        public int LogLogin(AclLoginSession session)
+        public int LogLogin(AclLoginSession session, bool forceNew = false)
         {
             using (var conn = _db.CreateConnection())
             {
+                if (!forceNew)
+                {
+                    string checkSql = @"
+                        SELECT TOP 1 ID 
+                        FROM ACL_LoginSession 
+                        WHERE IDLogin = @IDLogin AND IsDangHoatDong = 1 
+                        ORDER BY ID DESC";
+                    int? existingId = conn.QueryFirstOrDefault<int?>(checkSql, new { IDLogin = session.IDLogin });
+                    if (existingId.HasValue && existingId.Value > 0)
+                    {
+                        string updateSql = "UPDATE ACL_LoginSession SET LastActiveTime = GETDATE() WHERE ID = @ID";
+                        conn.Execute(updateSql, new { ID = existingId.Value });
+
+                        if (System.Web.HttpRuntime.Cache != null)
+                        {
+                            string cacheKey = "SessionActive_" + existingId.Value;
+                            System.Web.HttpRuntime.Cache.Insert(cacheKey, true, null, DateTime.Now.AddSeconds(10), System.Web.Caching.Cache.NoSlidingExpiration);
+                        }
+                        return existingId.Value;
+                    }
+                }
+
                 // 1. Đóng các phiên đang mở (nếu có) của tài khoản này
                 string closeOldSessionsSql = @"
                     UPDATE ACL_LoginSession 
@@ -36,7 +58,15 @@ namespace SalesManagementSystem.Repositories
                     SELECT CAST(SCOPE_IDENTITY() AS INT)";
                 
                 session.ThoiGianLogin = DateTime.Now;
-                return conn.ExecuteScalar<int>(insertSql, session);
+                int newId = conn.ExecuteScalar<int>(insertSql, session);
+
+                if (System.Web.HttpRuntime.Cache != null)
+                {
+                    string cacheKey = "SessionActive_" + newId;
+                    System.Web.HttpRuntime.Cache.Insert(cacheKey, true, null, DateTime.Now.AddSeconds(10), System.Web.Caching.Cache.NoSlidingExpiration);
+                }
+
+                return newId;
             }
         }
 
@@ -62,14 +92,38 @@ namespace SalesManagementSystem.Repositories
                     WHERE ID = @ID AND IsDangHoatDong = 1";
                 conn.Execute(sql, new { ID = id });
             }
+
+            // Invalidate cache immediately so kicked user is logged out on next request
+            string cacheKey = "SessionActive_" + id;
+            if (System.Web.HttpRuntime.Cache != null)
+            {
+                System.Web.HttpRuntime.Cache.Insert(cacheKey, false, null, DateTime.Now.AddMinutes(5), System.Web.Caching.Cache.NoSlidingExpiration);
+            }
         }
 
         public bool IsSessionActive(int id)
         {
+            string cacheKey = "SessionActive_" + id;
+            if (System.Web.HttpRuntime.Cache != null)
+            {
+                object cached = System.Web.HttpRuntime.Cache[cacheKey];
+                if (cached is bool isActiveCached)
+                {
+                    return isActiveCached;
+                }
+            }
+
             using (var conn = _db.CreateConnection())
             {
                 string sql = "SELECT IsDangHoatDong FROM ACL_LoginSession WHERE ID = @ID";
-                return conn.ExecuteScalar<bool>(sql, new { ID = id });
+                bool isActive = conn.ExecuteScalar<bool>(sql, new { ID = id });
+
+                if (System.Web.HttpRuntime.Cache != null)
+                {
+                    System.Web.HttpRuntime.Cache.Insert(cacheKey, isActive, null, DateTime.Now.AddSeconds(5), System.Web.Caching.Cache.NoSlidingExpiration);
+                }
+
+                return isActive;
             }
         }
 
