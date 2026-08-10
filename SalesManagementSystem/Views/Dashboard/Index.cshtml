@@ -30,7 +30,37 @@
         .col-stat { flex: 0 0 auto; width: 50%; }        /* 2 cards per row */
     }
     @@media (max-width: 575px) {
-        .col-stat { flex: 0 0 auto; width: 100%; }       /* 1 card per row */
+        .dashboard-container {
+            padding: 4px 0 !important;
+            background: transparent !important;
+        }
+        .filter-bar {
+            padding: 10px 8px !important;
+            border-radius: 8px !important;
+            margin-bottom: 8px !important;
+            width: 100% !important;
+        }
+        .col-stat { 
+            flex: 0 0 100% !important; 
+            width: 100% !important; 
+            max-width: 100% !important;
+            padding-left: 2px !important;
+            padding-right: 2px !important;
+        }
+        .stat-card-new {
+            padding: 12px 12px !important;
+            gap: 10px !important;
+            border-radius: 8px !important;
+            width: 100% !important;
+        }
+        .stat-icon-new {
+            width: 42px !important;
+            height: 42px !important;
+            font-size: 1.15rem !important;
+        }
+        .stat-value-new {
+            font-size: 1.25rem !important;
+        }
     }
     
     /* Metric Cards - Premium Mockup Look */

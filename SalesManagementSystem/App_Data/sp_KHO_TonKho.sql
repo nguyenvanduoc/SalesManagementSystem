@@ -1,6 +1,7 @@
 -- =======================================================
 -- Author:      Antigravity
 -- Create date: 2026-06-12
+-- Update date: 2026-08-10 (Lọc kho VT/TP bằng LIKE & Không hiển thị SP có tồn hiện tại = 0)
 -- Description: Get list of inventory for Tồn Kho screen
 -- =======================================================
 CREATE OR ALTER PROCEDURE sp_KHO_TonKho_GetList
@@ -12,6 +13,13 @@ CREATE OR ALTER PROCEDURE sp_KHO_TonKho_GetList
 AS
 BEGIN
     SET NOCOUNT ON;
+
+    -- Lấy Mã Kho của kho hàng được chọn
+    DECLARE @MaKhoSelected NVARCHAR(50) = NULL;
+    IF @IDKho IS NOT NULL
+    BEGIN
+        SELECT TOP 1 @MaKhoSelected = UPPER(TRIM(MaKhoHang)) FROM DM_KhoHang WHERE ID = @IDKho;
+    END
 
     ;WITH CTE_GiaoDich AS (
         SELECT 
@@ -53,9 +61,20 @@ BEGIN
     LEFT JOIN CTE_GiaoDich gd ON sp.ID = gd.IDSanPham
     LEFT JOIN DM_KhoHang k ON ISNULL(gd.IDKho, @IDKho) = k.ID
     WHERE (@IDSanPham IS NULL OR sp.ID = @IDSanPham)
-      AND (@ChiConTon = 0 OR ISNULL(gd.TonKho, 0) > 0)
+      -- 1. Nếu không chọn checkbox "Chỉ hiển thị SP còn tồn" (@ChiConTon = 0) -> Không hiển thị SP có tồn hiện tại = 0
+      -- 2. Nếu tích chọn checkbox (@ChiConTon = 1) -> Chỉ hiển thị SP có tồn hiện tại > 0
+      AND (
+          (@ChiConTon = 0 AND ISNULL(gd.TonKho, 0) <> 0)
+          OR (@ChiConTon = 1 AND ISNULL(gd.TonKho, 0) > 0)
+      )
       AND UPPER(ISNULL(sp.MaSanPham, '')) NOT LIKE '%NODAU%'
       AND UPPER(ISNULL(sp.TenSanPham, '')) NOT LIKE N'%NỢ ĐẦU KỲ%'
+      -- Logic lọc mã sản phẩm VT theo mã Kho bằng LIKE:
+      AND (
+          @MaKhoSelected IS NULL 
+          OR (@MaKhoSelected LIKE 'VT%' AND UPPER(LTRIM(sp.MaSanPham)) LIKE 'VT%')
+          OR (@MaKhoSelected NOT LIKE 'VT%' AND UPPER(LTRIM(sp.MaSanPham)) NOT LIKE 'VT%')
+      )
     ORDER BY k.TenKhoHang, sp.TenSanPham;
 END
 GO

@@ -323,12 +323,12 @@
 
         /* ─── Main content ───────────────────────────────── */
         .main-wrapper {
-            margin-top: var(--topbar-height);
+            margin-top: calc(var(--topbar-height) + 36px);
             margin-left: var(--sidebar-width);
             flex: 1;
             display: flex;
             flex-direction: column;
-            min-height: calc(100vh - var(--topbar-height));
+            min-height: calc(100vh - var(--topbar-height) - 36px);
             transition: margin-left .28s ease;
         }
         .page-content {
@@ -390,6 +390,7 @@
         body.sidebar-collapsed .sidebar .nav-link i,
         body.sidebar-collapsed .sidebar .nav-group-toggle i { width: auto; font-size: 1.2rem; margin: 0; }
         body.sidebar-collapsed .main-wrapper { margin-left: 60px; }
+        body.sidebar-collapsed .tabs-wrapper { left: 60px; }
 
         /* 🚀 Modal centering relative to main-wrapper 🚀 */
         .modal-backdrop {
@@ -409,9 +410,65 @@
 
         /* ─── Responsive ─────────────────────────────────── */
         @@media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); }
-            body.sidebar-open .sidebar { transform: translateX(0); }
-            .main-wrapper { margin-left: 0 !important; }
+            html, body {
+                width: 100% !important;
+                max-width: 100vw !important;
+                overflow-x: hidden !important;
+            }
+            .topbar {
+                padding: 0 10px !important;
+                width: 100% !important;
+                left: 0 !important;
+                right: 0 !important;
+            }
+            .topbar .brand {
+                width: auto !important;
+                font-size: 14px !important;
+                gap: 6px !important;
+            }
+            .topbar-right {
+                gap: 8px !important;
+            }
+            .topbar-right .user-info span {
+                display: none !important;
+            }
+            .sidebar {
+                transform: translateX(-100%);
+                width: 260px !important;
+            }
+            body.sidebar-open .sidebar {
+                transform: translateX(0);
+            }
+            .main-wrapper { 
+                margin-left: 0 !important;
+                margin-top: calc(var(--topbar-height) + 36px) !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+            }
+            .tabs-wrapper {
+                left: 0 !important;
+                right: 0 !important;
+                width: 100% !important;
+                top: var(--topbar-height) !important;
+                position: fixed !important;
+                z-index: 1040 !important;
+            }
+            .page-content {
+                padding: 4px 2px !important;
+                width: 100% !important;
+            }
+            #mainTabContent {
+                border-radius: 0 !important;
+                box-shadow: none !important;
+                background: transparent !important;
+                border: none !important;
+                width: 100% !important;
+            }
+            #mainTabContent > .tab-pane {
+                padding: 4px 2px !important;
+                width: 100% !important;
+            }
             .modal {
                 left: 0 !important;
                 width: 100% !important;
@@ -538,10 +595,15 @@
             display: flex;
             align-items: flex-end;
             background-color: #e4ebf1;
-            border-bottom: none; /* Bỏ border để màu trắng của tab active nối liền với nội dung bên dưới */
-            position: sticky;
+            border-bottom: 1px solid #cbd5e1;
+            position: fixed;
             top: var(--topbar-height);
-            z-index: 1020;
+            left: var(--sidebar-width);
+            right: 0;
+            height: 36px;
+            z-index: 1040;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            transition: left .28s ease;
         }
 
         .tab-scroll-btn {

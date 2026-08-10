@@ -88,7 +88,7 @@ namespace SalesManagementSystem.Repositories
                       AND (@TrangThai   IS NULL OR d.TrangThaiDon = @TrangThai)
                       AND (@IDPhuongTien IS NULL OR d.IDPhuongTien = @IDPhuongTien)
                       AND (@HoTenTaiXe  IS NULL OR d.HoTenTaiXe LIKE '%' + @HoTenTaiXe + '%')
-                      AND (@SoDonHang   IS NULL OR d.SoDonHang LIKE '%' + @SoDonHang + '%')";
+                      AND (@SoDonHang   IS NULL OR d.SoDonHang LIKE '%' + @SoDonHang + '%' OR EXISTS (SELECT 1 FROM BAN_ChungTuBanHang c WHERE c.IDDonDatHang = d.ID AND c.SoChungTu LIKE '%' + @SoDonHang + '%'))";
 
                 totalRecords = conn.ExecuteScalar<int>(countSql, p);
 
@@ -120,7 +120,7 @@ namespace SalesManagementSystem.Repositories
                       AND (@TrangThai   IS NULL OR d.TrangThaiDon = @TrangThai)
                       AND (@IDPhuongTien IS NULL OR d.IDPhuongTien = @IDPhuongTien)
                       AND (@HoTenTaiXe  IS NULL OR d.HoTenTaiXe LIKE '%' + @HoTenTaiXe + '%')
-                      AND (@SoDonHang   IS NULL OR d.SoDonHang LIKE '%' + @SoDonHang + '%')
+                      AND (@SoDonHang   IS NULL OR d.SoDonHang LIKE '%' + @SoDonHang + '%' OR EXISTS (SELECT 1 FROM BAN_ChungTuBanHang c WHERE c.IDDonDatHang = d.ID AND c.SoChungTu LIKE '%' + @SoDonHang + '%'))
                     ORDER BY d.ID DESC
                     OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
 

@@ -35,12 +35,12 @@ var TabManager = (function () {
         var parts = url.split('?');
         var path = parts[0];
         var query = parts.length > 1 ? '?' + parts[1] : '';
-        
+
         var pathSegments = path.split('/');
         while (pathSegments.length > 0 && pathSegments[pathSegments.length - 1] === '') {
             pathSegments.pop();
         }
-        
+
         if (pathSegments.length > 0) {
             var lastSegment = pathSegments[pathSegments.length - 1];
             var lastSegmentLower = lastSegment.toLowerCase();
@@ -48,7 +48,7 @@ var TabManager = (function () {
                 pathSegments.pop();
             }
         }
-        
+
         path = pathSegments.join('/');
         if (path === '') {
             path = '/';
@@ -79,7 +79,7 @@ var TabManager = (function () {
         if ($container.css('position') === 'static') {
             $container.css('position', 'relative');
         }
-        
+
         $container.find('.tab-loading-overlay').remove();
         var overlay = $('<div>', { class: 'tab-loading-overlay' });
         overlay.html('<div class="custom-multi-spinner"></div>');
@@ -378,7 +378,7 @@ var TabManager = (function () {
                         }
                         if (res.closeTab) {
                             closeTab('tab-' + key);
-                            setTimeout(function() { reloadActiveTabGrid(false); }, 100);
+                            setTimeout(function () { reloadActiveTabGrid(false); }, 100);
                         } else if (res.redirectUrl) {
                             loadTabContent(key, res.redirectUrl);
                             var baseUrl = res.redirectBaseUrl || res.redirectUrl;
@@ -435,20 +435,20 @@ var TabManager = (function () {
         // Xử lý Modal khi chuyển Tab
         $(document).on('hide.bs.tab', 'button[data-bs-toggle="tab"]', function (e) {
             var previousTabId = $(e.target).attr('data-bs-target');
-            
+
             // Tìm tất cả các modal đang mở trong tab cũ và tạm ẩn nó
             if (previousTabId) {
-                $(previousTabId).find('.modal.show').each(function() {
+                $(previousTabId).find('.modal.show').each(function () {
                     $(this).data('hidden-by-tab-switch', true);
                     var modalInstance = bootstrap.Modal.getOrCreateInstance(this);
                     if (modalInstance) {
                         modalInstance.hide();
                     }
                 });
-                
+
                 // Fallback for modals that might be placed outside but have data-owner-tab
                 var prevIdWithoutHash = previousTabId.replace('#', '');
-                $('.form-modal.show').each(function() {
+                $('.form-modal.show').each(function () {
                     var modalOwner = $(this).attr('data-owner-tab');
                     if (modalOwner && modalOwner === prevIdWithoutHash) {
                         $(this).data('hidden-by-tab-switch', true);
@@ -463,10 +463,10 @@ var TabManager = (function () {
 
         $(document).on('show.bs.tab', 'button[data-bs-toggle="tab"]', function (e) {
             var targetTabId = $(e.target).attr('data-bs-target');
-            
+
             // Hiện lại modal của tab mới nếu trước đó nó bị ẩn do chuyển tab
             if (targetTabId) {
-                $(targetTabId).find('.modal').each(function() {
+                $(targetTabId).find('.modal').each(function () {
                     if ($(this).data('hidden-by-tab-switch') === true) {
                         $(this).data('hidden-by-tab-switch', false);
                         var modalInstance = bootstrap.Modal.getOrCreateInstance(this);
@@ -480,7 +480,7 @@ var TabManager = (function () {
 
                 // Fallback for modals outside
                 var targetIdWithoutHash = targetTabId.replace('#', '');
-                $('.form-modal').each(function() {
+                $('.form-modal').each(function () {
                     var modalOwner = $(this).attr('data-owner-tab');
                     if (modalOwner && modalOwner === targetIdWithoutHash) {
                         if ($(this).data('hidden-by-tab-switch') === true) {
@@ -504,7 +504,7 @@ var TabManager = (function () {
             if (paneId) {
                 var $pane = $(paneId);
                 var url = $pane.attr('data-url');
-                
+
                 // Nếu pane rỗng (chưa có nội dung) thì gọi AJAX để nạp
                 if ($pane.html().trim() === '') {
                     if (url) {
@@ -513,7 +513,7 @@ var TabManager = (function () {
                 } else if (typeof syncThoiGianFilter === 'function') {
                     syncThoiGianFilter($pane);
                 }
-                
+
                 // Vô hiệu hóa cập nhật URL trình duyệt để ẩn địa chỉ chi tiết lộ liễu
                 // if (url && window.history && window.history.replaceState) {
                 //     window.history.replaceState(null, '', cleanUrlForHistory(url));
@@ -537,7 +537,7 @@ var TabManager = (function () {
             var tabId = $(this).attr('id');
             var paneId = $(this).attr('data-bs-target') ? $(this).attr('data-bs-target').substring(1) : (tabId + '-pane');
             var url = $('#' + paneId).attr('data-url');
-            
+
             if (url) {
                 // Đảm bảo tab được chọn nếu chưa chọn
                 if (!$(this).hasClass('active')) {
@@ -648,10 +648,10 @@ var TabManager = (function () {
         var preventFocus = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
         if (!preventFocus) {
             setActiveTab(tabId);
-            
+
             // Trì hoãn việc gọi Ajax 50ms để trình duyệt kịp vẽ (paint) Tab và Loading Spinner ra màn hình
             // Tránh tình trạng bị "đơ" không chuyển tab ngay khi request chậm
-            setTimeout(function() {
+            setTimeout(function () {
                 loadTabContent(tabId, url);
             }, 50);
         } else {
@@ -670,15 +670,15 @@ var TabManager = (function () {
             tab.show();
 
             // Tự động cuộn Tab đang được chọn vào vùng nhìn thấy (nếu bị khuất)
-            setTimeout(function() {
+            setTimeout(function () {
                 var container = document.getElementById('tabsContainerScroll');
                 if (!container) return;
                 var li = triggerEl.closest('li');
                 if (!li) return;
-                
+
                 var containerRect = container.getBoundingClientRect();
                 var liRect = li.getBoundingClientRect();
-                
+
                 // Trừ hao 30px để nhìn thấy 1 chút của tab kế bên
                 if (liRect.left < containerRect.left) {
                     // Khuất bên trái
@@ -711,29 +711,29 @@ var TabManager = (function () {
                 if (collapseGroup.length > 0) {
                     // Thêm text-faded cho các menu khác trong cùng nhóm
                     collapseGroup.find('.nav-link').not(activeSidebarLink).addClass('text-faded');
-                    
+
                     // Xổ mở nhóm
                     if (!collapseGroup.hasClass('show')) {
                         var bsCollapse = bootstrap.Collapse.getOrCreateInstance(collapseGroup[0]);
                         bsCollapse.show();
                         var toggleBtn = collapseGroup.siblings('.nav-group-toggle');
                         toggleBtn.removeClass('collapsed').attr('aria-expanded', 'true');
-                        
+
                         // Đợi animation xổ xong rồi cuộn
-                        setTimeout(function() { scrollSidebarToActive(activeSidebarLink); }, 350);
+                        setTimeout(function () { scrollSidebarToActive(activeSidebarLink); }, 350);
                     } else {
-                        setTimeout(function() { scrollSidebarToActive(activeSidebarLink); }, 50);
+                        setTimeout(function () { scrollSidebarToActive(activeSidebarLink); }, 50);
                     }
                 } else {
-                    setTimeout(function() { scrollSidebarToActive(activeSidebarLink); }, 50);
+                    setTimeout(function () { scrollSidebarToActive(activeSidebarLink); }, 50);
                 }
-                
+
                 function scrollSidebarToActive(link) {
                     var sidebar = $('#sidebar');
                     if (sidebar.length > 0 && link.length > 0) {
                         var sidebarRect = sidebar[0].getBoundingClientRect();
                         var linkRect = link[0].getBoundingClientRect();
-                        
+
                         // Nếu menu bị khuất phía trên hoặc phía dưới
                         if (linkRect.top < sidebarRect.top || linkRect.bottom > sidebarRect.bottom) {
                             var itemTop = link.offset().top - sidebar.offset().top + sidebar.scrollTop();
@@ -793,10 +793,10 @@ var TabManager = (function () {
             success: function (res) {
                 hideLoadingLocal($pane);
                 delete activeRequests[paneId];
-                
+
                 // Nếu phản hồi chứa trang đăng nhập (do bị mất Session / hết hạn), redirect ra Login
                 if (typeof res === 'string' && (res.indexOf('login-card') !== -1 || res.indexOf('login-title') !== -1 || res.indexOf('ĐĂNG NHẬP HỆ THỐNG') !== -1 || res.indexOf('name="UserName"') !== -1)) {
-                    try { localStorage.removeItem('tabManagerState'); } catch(e){}
+                    try { localStorage.removeItem('tabManagerState'); } catch (e) { }
                     window.top.location.href = '/Login/Index';
                     return;
                 }
@@ -806,12 +806,12 @@ var TabManager = (function () {
             },
             error: function (err, status) {
                 if (status === 'abort') return;
-                
+
                 hideLoadingLocal($pane);
                 delete activeRequests[paneId];
-                
+
                 if (err.status === 401 || err.status === 403) {
-                    try { localStorage.removeItem('tabManagerState'); } catch(e){}
+                    try { localStorage.removeItem('tabManagerState'); } catch (e) { }
                     window.top.location.href = '/Login/Index';
                     return;
                 }
@@ -819,7 +819,7 @@ var TabManager = (function () {
                 console.error('Lỗi nạp nội dung tab:', err);
                 var ctrlName = tabId.replace('tab-', '').split('_')[0].split('-')[0];
                 var fallbackUrl = ctrlName ? '/' + ctrlName : '';
-                
+
                 $pane.html(
                     '<div class="alert alert-danger m-3 d-flex align-items-center justify-content-between shadow-sm" style="border-radius:8px;">' +
                     '<div><i class="bi bi-exclamation-triangle-fill me-2"></i>Lỗi kết nối máy chủ khi nạp giao diện. Vui lòng thử lại.</div>' +
@@ -845,16 +845,16 @@ var TabManager = (function () {
         if ($.fn.select2) {
             // Khởi tạo Select2 cho tất cả các combobox (.form-select) trừ dropdown phân trang, no-select2, và ddl-thoi-gian
             var $comboboxes = container.find('select.form-select:not(.page-size-select):not(.no-select2):not(.ddl-thoi-gian), .select2:not(.ddl-thoi-gian)');
-            
-            $comboboxes.each(function() {
+
+            $comboboxes.each(function () {
                 var $this = $(this);
                 // Đảm bảo có option rỗng đầu tiên để allowClear hoạt động
                 if ($this.find('option[value=""]').length === 0 && !$this.prop('multiple')) {
                     $this.prepend('<option value=""></option>');
                 }
             });
-            
-            $comboboxes.select2({ 
+
+            $comboboxes.select2({
                 width: '100%',
                 allowClear: true,
                 placeholder: 'Chọn...'
@@ -945,47 +945,47 @@ var TabManager = (function () {
                 var $directLoadPane = $('#tab-direct-load-pane');
                 var directLoadUrl = $directLoadPane.length ? $directLoadPane.attr('data-url') : null;
                 var directLoadMatched = false;
-                
+
                 if (state.tabs && state.tabs.length > 0) {
                     state.tabs.forEach(function (t) {
                         if (t.key === 'direct-load') return; // Không lưu lại tab F5 cũ
-                        
+
                         // Nếu url của tab đang restore trùng với URL của tab được nạp trực tiếp qua F5
                         // Chúng ta sẽ đổi ID của tab trực tiếp đó thành ID của tab đang restore và di chuyển nó về đúng vị trí
                         if (directLoadUrl && t.url && areUrlsEquivalent(t.url, directLoadUrl)) {
                             var $btn = $('#tab-direct-load');
                             var $pane = $('#tab-direct-load-pane');
-                            
+
                             if ($btn.length > 0) {
                                 $btn.attr('id', 'tab-' + t.key)
                                     .attr('data-bs-target', '#tab-' + t.key + '-pane')
                                     .attr('aria-controls', 'tab-' + t.key + '-pane');
-                                
+
                                 var $li = $btn.closest('li');
                                 if ($li.length > 0) {
                                     $li.insertAfter($('#mainTabHeader .nav-item').first());
                                 }
                             }
-                            
+
                             if ($pane.length > 0) {
                                 $pane.attr('id', 'tab-' + t.key + '-pane')
                                     .attr('aria-labelledby', 'tab-' + t.key);
                                 $('#mainTabContent').append($pane);
                             }
-                            
+
                             state.activeTabId = 'tab-' + t.key;
                             directLoadMatched = true;
                             return; // Bỏ qua việc tạo mới
                         }
-                        
+
                         openTab(t.key, t.title, sanitizeTabUrl(t.url), true);
                     });
                 }
-                
+
                 if (directLoadUrl && !directLoadMatched) {
                     state.activeTabId = 'tab-direct-load';
                 }
-                
+
                 // Khôi phục Tab Active
                 if (state.activeTabId) {
                     var $activeTab = $('#' + state.activeTabId);
@@ -993,7 +993,7 @@ var TabManager = (function () {
                         setActiveTab(state.activeTabId);
                     }
                 }
-                
+
                 // Lưu lại trạng thái mới sau khi đã sắp xếp lại
                 saveTabsState();
             } catch (e) {
