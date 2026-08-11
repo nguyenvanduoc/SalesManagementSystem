@@ -116,7 +116,7 @@ namespace SalesManagementSystem.Repositories
                         c.ID, c.IDChungTuBanHang, c.IDSanPham,
                         s.MaSanPham, s.TenSanPham, s.DVT,
                         c.STT, c.SoLuong, c.DonGia,
-                        c.DonGiaBocXep, c.ThanhTienBocXep, c.ThanhTienHang,
+                        c.DonGiaBocXep, c.ThanhTienBocXep, c.SoTienChietKhau, c.ChuongTrinhTichLuySale, c.ThanhTienHang,
                         c.ThanhTien, c.ThueGTGT, c.TienThue, c.TongSauThue, c.GhiChu
                     FROM BAN_ChungTuBanHang_ChiTiet c
                     JOIN DM_SanPham s ON c.IDSanPham = s.ID
@@ -137,6 +137,8 @@ namespace SalesManagementSystem.Repositories
                     TongTienHang = master.TongTienHang,
                     TongTienThue = master.TongTienThue,
                     PhiBocXep = master.PhiBocXep,
+                    TongTienChietKhau = master.TongTienChietKhau,
+                    TongChuongTrinhTichLuySale = master.TongChuongTrinhTichLuySale,
                     TongCong = master.TongCong,
                     DaThanhToan = master.DaThanhToan,
                     ConLai = master.ConLai,
@@ -196,6 +198,8 @@ namespace SalesManagementSystem.Repositories
                         p.Add("@TongTienHang", model.TongTienHang);
                         p.Add("@TongTienThue", model.TongTienThue);
                         p.Add("@PhiBocXep", model.PhiBocXep);
+                        p.Add("@TongTienChietKhau", model.TongTienChietKhau ?? 0m);
+                        p.Add("@TongChuongTrinhTichLuySale", model.TongChuongTrinhTichLuySale ?? 0m);
                         p.Add("@TongCong", model.TongCong);
                         p.Add("@DaThanhToan", model.DaThanhToan);
                         p.Add("@ConLai", model.ConLai);
@@ -240,6 +244,8 @@ namespace SalesManagementSystem.Repositories
                             pCt.Add("@DonGia", ct.DonGia);
                             pCt.Add("@DonGiaBocXep", ct.DonGiaBocXep);
                             pCt.Add("@ThanhTienBocXep", ct.ThanhTienBocXep);
+                            pCt.Add("@SoTienChietKhau", ct.SoTienChietKhau);
+                            pCt.Add("@ChuongTrinhTichLuySale", ct.ChuongTrinhTichLuySale);
                             pCt.Add("@DonGiaVon", ghiSo ? (decimal?)donGiaVon : null);
                             pCt.Add("@ThanhTienVon", ghiSo ? (decimal?)thanhTienVon : null);
                             pCt.Add("@ThanhTienHang", ct.ThanhTienHang);
@@ -251,9 +257,9 @@ namespace SalesManagementSystem.Repositories
 
                             string sqlInsertCt = @"
                                 INSERT INTO BAN_ChungTuBanHang_ChiTiet 
-                                (IDChungTuBanHang, IDSanPham, STT, SoLuong, DonGia, DonGiaBocXep, ThanhTienBocXep, DonGiaVon, ThanhTienVon, ThanhTienHang, ThanhTien, ThueGTGT, TienThue, TongSauThue, GhiChu)
+                                (IDChungTuBanHang, IDSanPham, STT, SoLuong, DonGia, DonGiaBocXep, ThanhTienBocXep, SoTienChietKhau, ChuongTrinhTichLuySale, DonGiaVon, ThanhTienVon, ThanhTienHang, ThanhTien, ThueGTGT, TienThue, TongSauThue, GhiChu)
                                 VALUES 
-                                (@IDChungTuBanHang, @IDSanPham, @STT, @SoLuong, @DonGia, @DonGiaBocXep, @ThanhTienBocXep, @DonGiaVon, @ThanhTienVon, @ThanhTienHang, @ThanhTien, @ThueGTGT, @TienThue, @TongSauThue, @GhiChu);
+                                (@IDChungTuBanHang, @IDSanPham, @STT, @SoLuong, @DonGia, @DonGiaBocXep, @ThanhTienBocXep, @SoTienChietKhau, @ChuongTrinhTichLuySale, @DonGiaVon, @ThanhTienVon, @ThanhTienHang, @ThanhTien, @ThueGTGT, @TienThue, @TongSauThue, @GhiChu);
                             ";
                             conn.Execute(sqlInsertCt, pCt, transaction: tr);
                         }
@@ -433,6 +439,8 @@ namespace SalesManagementSystem.Repositories
                                 IDKho = @IDKho,
                                 IDTaiKhoanThanhToan = @IDTaiKhoanThanhToan,
                                 PhiBocXep = @PhiBocXep,
+                                TongTienChietKhau = @TongTienChietKhau,
+                                TongChuongTrinhTichLuySale = @TongChuongTrinhTichLuySale,
                                 TrangThai = @TrangThai,
                                 NguoiCapNhat = @NguoiCapNhat,
                                 NgayCapNhat = GETDATE()
@@ -442,6 +450,8 @@ namespace SalesManagementSystem.Repositories
                                 IDKho = model.IDKho, 
                                 IDTaiKhoanThanhToan = model.IDTaiKhoanThanhToan, 
                                 PhiBocXep = model.PhiBocXep,
+                                TongTienChietKhau = model.TongTienChietKhau ?? 0m,
+                                TongChuongTrinhTichLuySale = model.TongChuongTrinhTichLuySale ?? 0m,
                                 TrangThai = trangThai, 
                                 NguoiCapNhat = nguoiCapNhat, 
                                 ID = model.ID 

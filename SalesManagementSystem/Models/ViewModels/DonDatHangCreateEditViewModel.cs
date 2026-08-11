@@ -44,6 +44,8 @@ namespace SalesManagementSystem.Models.ViewModels
 
         public decimal TongTien { get; set; }
         public decimal PhiBocXep { get; set; }
+        public decimal TongTienChietKhau { get; set; }
+        public decimal TongChuongTrinhTichLuySale { get; set; }
         public decimal ThanhTienHang { get; set; }
         public decimal ThanhTienThue { get; set; }
 

@@ -79,6 +79,9 @@ CREATE OR ALTER PROCEDURE sp_BAN_ChungTuBanHang_Insert
     @IDTaiKhoanThanhToan INT = NULL,
     @TongTienHang DECIMAL(18,2),
     @TongTienThue DECIMAL(18,2),
+    @PhiBocXep DECIMAL(18,2) = 0,
+    @TongTienChietKhau DECIMAL(18,2) = 0,
+    @TongChuongTrinhTichLuySale DECIMAL(18,2) = 0,
     @TongCong DECIMAL(18,2),
     @DaThanhToan DECIMAL(18,2),
     @ConLai DECIMAL(18,2),
@@ -90,9 +93,9 @@ BEGIN
     SET NOCOUNT ON;
     
     INSERT INTO BAN_ChungTuBanHang (SoChungTu, NgayChungTu, IDDonDatHang, IDKhachHang, IDKho, IDTaiKhoanThanhToan, 
-        TongTienHang, TongTienThue, TongCong, DaThanhToan, ConLai, TrangThai, NgayTao, NguoiTao, IsDeleted)
+        TongTienHang, TongTienThue, PhiBocXep, TongTienChietKhau, TongChuongTrinhTichLuySale, TongCong, DaThanhToan, ConLai, TrangThai, NgayTao, NguoiTao, IsDeleted)
     VALUES (@SoChungTu, @NgayChungTu, @IDDonDatHang, @IDKhachHang, @IDKho, @IDTaiKhoanThanhToan,
-        @TongTienHang, @TongTienThue, @TongCong, @DaThanhToan, @ConLai, @TrangThai, GETDATE(), @NguoiTao, 0);
+        @TongTienHang, @TongTienThue, @PhiBocXep, @TongTienChietKhau, @TongChuongTrinhTichLuySale, @TongCong, @DaThanhToan, @ConLai, @TrangThai, GETDATE(), @NguoiTao, 0);
         
     SET @NewID = SCOPE_IDENTITY();
 END

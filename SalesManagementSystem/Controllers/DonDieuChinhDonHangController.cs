@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web.Hosting;
 using System.Web.Mvc;
 using Dapper;
 using Newtonsoft.Json;
@@ -328,6 +329,14 @@ namespace SalesManagementSystem.Controllers
             }
             catch (Exception ex)
             {
+                // Log lỗi chi tiết
+                try
+                {
+                    var logPath = Server.MapPath("~/App_Data/adjust_error_log.txt");
+                    System.IO.File.AppendAllText(logPath, $"[{DateTime.Now}] ERROR IDDonHang={model.IDDonHang}: {ex}\n\n");
+                }
+                catch { }
+
                 if (Request.IsAjaxRequest() || Request.Headers["X-SPA-Load"] == "true")
                 {
                     return Json(new { success = false, message = "Lỗi điều chỉnh đơn hàng: " + ex.Message });
@@ -336,6 +345,29 @@ namespace SalesManagementSystem.Controllers
                 TempData["ToastMessage"] = "Lỗi: " + ex.Message;
                 TempData["ToastType"] = "error";
                 return RedirectToAction("Adjust", new { id = model.IDDonHang });
+            }
+        }
+
+        // ── ReloadSP (force cập nhật Stored Procedure từ file SQL) ───────────────────
+        [HttpGet]
+        public ActionResult ReloadSP()
+        {
+            try
+            {
+                string spFile = HostingEnvironment.MapPath("~/App_Data/sp_DON_DieuChinhDonHang_Save.sql");
+                if (spFile == null || !System.IO.File.Exists(spFile))
+                    return Content("ERROR: File not found: " + spFile);
+
+                string spSql = System.IO.File.ReadAllText(spFile, System.Text.Encoding.UTF8);
+                using (var conn = _db.CreateConnection())
+                {
+                    conn.Execute(spSql);
+                }
+                return Content("OK: SP updated successfully at " + DateTime.Now);
+            }
+            catch (Exception ex)
+            {
+                return Content("ERROR: " + ex.Message + "\n" + ex.ToString());
             }
         }
 

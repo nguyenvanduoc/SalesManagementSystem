@@ -130,6 +130,8 @@ namespace SalesManagementSystem.Controllers
                             DonGia = ct.DonGia,
                             DonGiaBocXep = ct.DonGiaBocXep,
                             ThanhTienBocXep = ct.ThanhTienBocXep,
+                            SoTienChietKhau = ct.SoTienChietKhau,
+                            ChuongTrinhTichLuySale = ct.ChuongTrinhTichLuySale,
                             ThanhTienHang = ct.ThanhTienHang,
                             ThanhTien = ct.ThanhTien,
                             ThueGTGT = ct.ThueGTGT,
@@ -143,6 +145,8 @@ namespace SalesManagementSystem.Controllers
                         model.TongTienHang = donHang.ThanhTienHang ?? 0m;
                         model.TongTienThue = donHang.ThanhTienThue ?? 0m;
                         model.PhiBocXep = donHang.PhiBocXep;
+                        model.TongTienChietKhau = donHang.TongTienChietKhau;
+                        model.TongChuongTrinhTichLuySale = donHang.TongChuongTrinhTichLuySale;
                         model.TongCong = donHang.TongTien;
                     }
                     
@@ -195,6 +199,8 @@ namespace SalesManagementSystem.Controllers
                     DonGia = ct.DonGia,
                     DonGiaBocXep = ct.DonGiaBocXep,
                     ThanhTienBocXep = ct.ThanhTienBocXep,
+                    SoTienChietKhau = ct.SoTienChietKhau,
+                    ChuongTrinhTichLuySale = ct.ChuongTrinhTichLuySale,
                     ThanhTienHang = ct.ThanhTienHang,
                     ThanhTien = ct.ThanhTien,
                     ThueGTGT = ct.ThueGTGT,
@@ -206,6 +212,8 @@ namespace SalesManagementSystem.Controllers
             model.TongTienHang = model.ChiTiets.Sum(x => x.ThanhTien);
             model.TongTienThue = model.ChiTiets.Sum(x => x.TienThue);
             model.PhiBocXep = donHang.PhiBocXep;
+            model.TongTienChietKhau = donHang.TongTienChietKhau ?? model.ChiTiets.Sum(x => x.SoTienChietKhau ?? 0m);
+            model.TongChuongTrinhTichLuySale = donHang.TongChuongTrinhTichLuySale ?? model.ChiTiets.Sum(x => x.ChuongTrinhTichLuySale ?? 0m);
             model.TongCong = model.ChiTiets.Sum(x => x.TongSauThue);
             model.ConLai = model.TongCong;
             model.DaThanhToan = 0;

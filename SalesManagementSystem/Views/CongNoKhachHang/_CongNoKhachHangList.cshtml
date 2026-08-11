@@ -50,7 +50,7 @@
                                                 </button>
                                             </li>
                                             @if (item.ConPhaiThu > 0)
-                                            {
+                                            { 
                                                 <li>
                                                     <button class="dropdown-item py-2 text-success" type="button" onclick="openFormModal('@Url.Action("Create", "PhieuThuKhachHang", new { idKhachHang = item.IDKhachHang, idChungTuBanHang = item.IDChungTuBanHang, soTien = item.ConPhaiThu })')">
                                                         <i class="bi bi-wallet2 me-2"></i> Thu tiền

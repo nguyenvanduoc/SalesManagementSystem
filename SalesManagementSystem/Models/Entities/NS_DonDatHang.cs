@@ -14,6 +14,8 @@ namespace SalesManagementSystem.Models.Entities
         public decimal TongTien { get; set; }
         public decimal PhiBocXep { get; set; }
         public decimal? TongTienVanChuyen { get; set; }
+        public decimal? TongTienChietKhau { get; set; }
+        public decimal? TongChuongTrinhTichLuySale { get; set; }
         public decimal? ThanhTienHang { get; set; }
         public decimal? ThanhTienThue { get; set; }
         public string GhiChu { get; set; }

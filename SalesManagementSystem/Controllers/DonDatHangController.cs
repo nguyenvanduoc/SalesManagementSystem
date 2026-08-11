@@ -299,6 +299,8 @@ namespace SalesManagementSystem.Controllers
             NormalizeChiTiets(chiTiets);
             decimal thanhTienHang = chiTiets.Sum(x => x.ThanhTienHang ?? 0m);
             decimal phiBocXep = chiTiets.Sum(x => x.ThanhTienBocXep ?? 0m);
+            decimal tongChietKhau = chiTiets.Sum(x => x.SoTienChietKhau ?? 0m);
+            decimal tongTichLuySale = chiTiets.Sum(x => x.ChuongTrinhTichLuySale ?? 0m);
             decimal thanhTienThue = chiTiets.Sum(x => x.ThanhTienThue ?? 0m);
             decimal tong = chiTiets.Sum(x => x.ThanhTienSauThue ?? 0m);
 
@@ -312,6 +314,8 @@ namespace SalesManagementSystem.Controllers
                 TrangThaiDon    = model.TrangThaiDon,
                 TongTien        = tong,
                 PhiBocXep       = phiBocXep,
+                TongTienChietKhau = tongChietKhau,
+                TongChuongTrinhTichLuySale = tongTichLuySale,
                 ThanhTienHang   = thanhTienHang,
                 ThanhTienThue   = thanhTienThue,
                 GhiChu          = model.GhiChu,
@@ -335,6 +339,8 @@ namespace SalesManagementSystem.Controllers
                 GhiChu          = c.GhiChu,
                 DonGiaBocXep    = c.DonGiaBocXep,
                 ThanhTienBocXep = c.ThanhTienBocXep,
+                SoTienChietKhau = c.SoTienChietKhau,
+                ChuongTrinhTichLuySale = c.ChuongTrinhTichLuySale,
                 ThanhTienHang   = c.ThanhTienHang
             }).ToList();
 
@@ -493,6 +499,8 @@ namespace SalesManagementSystem.Controllers
             NormalizeChiTiets(chiTiets);
             decimal thanhTienHang = chiTiets.Sum(x => x.ThanhTienHang ?? 0m);
             decimal phiBocXep = chiTiets.Sum(x => x.ThanhTienBocXep ?? 0m);
+            decimal tongChietKhau = chiTiets.Sum(x => x.SoTienChietKhau ?? 0m);
+            decimal tongTichLuySale = chiTiets.Sum(x => x.ChuongTrinhTichLuySale ?? 0m);
             decimal thanhTienThue = chiTiets.Sum(x => x.ThanhTienThue ?? 0m);
             decimal tong = chiTiets.Sum(x => x.ThanhTienSauThue ?? 0m);
 
@@ -507,6 +515,8 @@ namespace SalesManagementSystem.Controllers
                 TrangThaiDon    = model.TrangThaiDon,
                 TongTien        = tong,
                 PhiBocXep       = phiBocXep,
+                TongTienChietKhau = tongChietKhau,
+                TongChuongTrinhTichLuySale = tongTichLuySale,
                 ThanhTienHang   = thanhTienHang,
                 ThanhTienThue   = thanhTienThue,
                 GhiChu          = model.GhiChu,
@@ -531,6 +541,8 @@ namespace SalesManagementSystem.Controllers
                 GhiChu          = c.GhiChu,
                 DonGiaBocXep    = c.DonGiaBocXep,
                 ThanhTienBocXep = c.ThanhTienBocXep,
+                SoTienChietKhau = c.SoTienChietKhau,
+                ChuongTrinhTichLuySale = c.ChuongTrinhTichLuySale,
                 ThanhTienHang   = c.ThanhTienHang
             }).ToList();
 
@@ -781,6 +793,7 @@ namespace SalesManagementSystem.Controllers
                                 ct.ID, ct.IDDonDatHang, ct.IDSanPham,
                                 sp.MaSanPham, sp.TenSanPham, sp.DVT,
                                 ct.SoLuong, ct.DonGia, ct.ThueGTGT, ct.ThanhTien, ct.ThanhTienThue, ct.ThanhTienSauThue,
+                                ct.SoTienChietKhau, ct.ChuongTrinhTichLuySale,
                                 ct.IsHangKhuyenMai, ct.GhiChu
                             FROM NS_DonDatHangChiTiet ct
                             LEFT JOIN DM_SanPham sp ON ct.IDSanPham = sp.ID
@@ -832,6 +845,8 @@ namespace SalesManagementSystem.Controllers
                             TenPhuongTien = order.TenPhuongTien ?? "",
                             DonGia = 0m,
                             PhiBocXep = phiBocXep,
+                            TongTienChietKhau = 0m,
+                            TongChuongTrinhTichLuySale = 0m,
                             ThanhTienHang = 0m,
                             TrangThai = order.TenTrangThai ?? "",
                             GhiChu = order.GhiChu ?? ""
@@ -854,6 +869,8 @@ namespace SalesManagementSystem.Controllers
                                 TenPhuongTien = order.TenPhuongTien ?? "",
                                 DonGia = d.DonGia,
                                 PhiBocXep = phiBocXep,
+                                TongTienChietKhau = d.SoTienChietKhau ?? 0m,
+                                TongChuongTrinhTichLuySale = d.ChuongTrinhTichLuySale ?? 0m,
                                 ThanhTienHang = d.ThanhTien,
                                 TrangThai = order.TenTrangThai ?? "",
                                 GhiChu = !string.IsNullOrEmpty(d.GhiChu) ? d.GhiChu : (order.GhiChu ?? "")
@@ -963,7 +980,7 @@ namespace SalesManagementSystem.Controllers
                 
                 ct.ThanhTienHang = Math.Round(ct.DonGia * ct.SoLuong, 0);
                 ct.ThanhTienBocXep = Math.Round((ct.DonGiaBocXep ?? 0m) * ct.SoLuong, 0);
-                ct.ThanhTien = Math.Round((ct.ThanhTienHang ?? 0m) - (ct.ThanhTienBocXep ?? 0m), 0);
+                ct.ThanhTien = Math.Round((ct.ThanhTienHang ?? 0m) - (ct.ThanhTienBocXep ?? 0m) - (ct.SoTienChietKhau ?? 0m) - (ct.ChuongTrinhTichLuySale ?? 0m), 0);
                 
                 ct.ThanhTienThue = Math.Round(ct.ThanhTien * ct.ThueGTGT / 100, 0);
                 ct.ThanhTienSauThue = Math.Round(ct.ThanhTien + (ct.ThanhTienThue ?? 0m), 0);
@@ -984,6 +1001,8 @@ namespace SalesManagementSystem.Controllers
             public string TenPhuongTien { get; set; }
             public decimal DonGia { get; set; }
             public decimal PhiBocXep { get; set; }
+            public decimal TongTienChietKhau { get; set; }
+            public decimal TongChuongTrinhTichLuySale { get; set; }
             public decimal ThanhTienHang { get; set; }
             public string TrangThai { get; set; }
             public string GhiChu { get; set; }

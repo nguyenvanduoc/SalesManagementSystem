@@ -161,18 +161,20 @@
                         <thead>
                             <tr>
                                 <th style="width:35px;" class="text-center">#</th>
-                                <th style="min-width:200px;">Sản phẩm</th>
+                                <th style="min-width:180px;">Sản phẩm</th>
                                 <th style="width:65px;" class="text-center">ĐVT</th>
-                                <th style="width:95px;" class="text-end">Số lượng</th>
-                                <th style="width:110px;" class="text-end">Đơn giá</th>
-                                <th style="width:110px;" class="text-end">ĐG bốc xếp</th>
-                                <th style="width:120px;" class="text-end">TT bốc xếp</th>
+                                <th style="width:90px;" class="text-end">Số lượng</th>
+                                <th style="width:105px;" class="text-end">Đơn giá</th>
+                                <th style="width:105px;" class="text-end">ĐG bốc xếp</th>
+                                <th style="width:110px;" class="text-end">TT bốc xếp</th>
+                                <th style="width:110px;" class="text-end">Chiết khấu</th>
+                                <th style="width:110px;" class="text-end">Tích lũy Sale</th>
                                 <th style="width:120px;" class="text-end">Thành tiền</th>
                                 <th style="width:70px;" class="text-center d-none">Thuế %</th>
                                 <th style="width:110px;" class="text-end d-none">Tiền thuế</th>
                                 <th style="width:120px;" class="text-end d-none">Thành tiền sau thuế</th>
                                 <th style="width:80px;" class="text-center">Hàng KM</th>
-                                <th style="min-width:120px;">Ghi chú</th>
+                                <th style="min-width:110px;">Ghi chú</th>
                                 <th style="width:38px;"></th>
                             </tr>
                         </thead>
@@ -187,7 +189,7 @@
                 </div>
             </div>
             <div class="don-header-card p-2 px-3 d-flex flex-wrap justify-content-between align-items-center fw-bold">
-                <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-3 flex-wrap">
                     <div>
                         <span class="text-muted small me-1">Số dòng:</span>
                         <span id="dispSoDong" class="fs-6 text-dark">0</span>
@@ -199,6 +201,14 @@
                     <div>
                         <span class="text-muted small me-1">Cộng tiền hàng:</span>
                         <span id="dispTongTienHang" class="fs-6 text-dark">0</span>
+                    </div>
+                    <div>
+                        <span class="text-muted small me-1">Chiết khấu:</span>
+                        <span id="dispTongChietKhau" class="fs-6 text-danger">0</span>
+                    </div>
+                    <div>
+                        <span class="text-muted small me-1">Tích lũy Sale:</span>
+                        <span id="dispTongTichLuySale" class="fs-6 text-danger">0</span>
                     </div>
                     <div class="d-none">
                         <span class="text-muted small me-1">Tiền thuế:</span>
@@ -222,7 +232,7 @@
 </form>
 
 @section Scripts {
-<script src="@Url.Content("~/Scripts/don-dat-hang.js?v=2.9")"></script>
+<script src="@Url.Content("~/Scripts/don-dat-hang.js?v=3.1")"></script>
 <script>
     $(document).ready(function () {
         var $form = $('#frmDonDatHang').last();
