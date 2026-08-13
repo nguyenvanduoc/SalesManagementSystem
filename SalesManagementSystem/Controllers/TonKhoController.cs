@@ -113,7 +113,15 @@ namespace SalesManagementSystem.Controllers
                     ActionName = "GetList"
                 };
 
-                ViewBag.IsNhanVienKho = CheckIsNhanVienKho();
+                bool isNvk = CheckIsNhanVienKho();
+                ViewBag.IsNhanVienKho = isNvk;
+
+                ViewBag.TongTonDauKy = list.Sum(x => x.TonDauKy);
+                ViewBag.TongTongNhap = list.Sum(x => x.TongNhap);
+                ViewBag.TongTongXuat = list.Sum(x => x.TongXuat);
+                ViewBag.TongTonKho = list.Sum(x => x.TonKho);
+                ViewBag.TongGiaTriTon = isNvk ? 0m : list.Sum(x => x.GiaTriTon);
+
                 return PartialView("_TonKhoList", pagedList);
             }
             catch (Exception ex)
@@ -156,25 +164,49 @@ namespace SalesManagementSystem.Controllers
 
             var list = _tonKhoRepo.GetList(idKho, idSanPham, tuNgay, denNgay, chiConTon).ToList();
             bool isNvk = CheckIsNhanVienKho();
-            if (isNvk)
-            {
-                foreach (var item in list)
-                {
-                    item.DonGiaTon = 0;
-                    item.GiaTriTon = 0;
-                }
-            }
 
             try
             {
+                string strTuNgay = "";
+                string strDenNgay = "";
+                if (DateTime.TryParse(tuNgay, out DateTime dTu)) strTuNgay = dTu.ToString("dd/MM/yyyy");
+                else strTuNgay = tuNgay;
+
+                if (DateTime.TryParse(denNgay, out DateTime dDen)) strDenNgay = dDen.ToString("dd/MM/yyyy");
+                else strDenNgay = denNgay;
+
                 var variables = new System.Collections.Generic.Dictionary<string, object>
                 {
-                    { "TuNgay", string.IsNullOrEmpty(tuNgay) ? "" : $"Từ ngày: {DateTime.Parse(tuNgay):dd/MM/yyyy}" },
-                    { "DenNgay", string.IsNullOrEmpty(denNgay) ? "" : $"Đến ngày: {DateTime.Parse(denNgay):dd/MM/yyyy}" }
+                    { "TuNgay", string.IsNullOrEmpty(strTuNgay) ? "" : $"Từ ngày: {strTuNgay}" },
+                    { "DenNgay", string.IsNullOrEmpty(strDenNgay) ? "" : $"Đến ngày: {strDenNgay}" }
                 };
 
+                int stt = 1;
+                var exportData = list.Select(item => new {
+                    STT = stt++,
+                    MaKho = item.MaKho,
+                    MaKhoHang = item.MaKho,
+                    TenKho = item.TenKho,
+                    TenKhoHang = item.TenKho,
+                    MaSanPham = item.MaSanPham,
+                    TenSanPham = item.TenSanPham,
+                    DVT = item.DVT,
+                    TonDauKy = item.TonDauKy,
+                    TongNhap = item.TongNhap,
+                    TongXuat = item.TongXuat,
+                    TonKho = item.TonKho,
+                    SoLuongTon = item.TonKho,
+                    TonHienTai = item.TonKho,
+                    DonGiaTon = isNvk ? 0m : item.DonGiaTon,
+                    DonGiaCuoi = isNvk ? 0m : item.DonGiaTon,
+                    DonGiaTonCuoi = isNvk ? 0m : item.DonGiaTon,
+                    GiaTriTon = isNvk ? 0m : item.GiaTriTon,
+                    NgayNhapCuoi = item.NgayNhapCuoi.HasValue ? item.NgayNhapCuoi.Value.ToString("dd/MM/yyyy") : "",
+                    NgayXuatCuoi = item.NgayXuatCuoi.HasValue ? item.NgayXuatCuoi.Value.ToString("dd/MM/yyyy") : ""
+                }).ToList();
+
                 string fileExtension;
-                var bytes = _excelExportService.Export("TK01", list, out fileExtension, variables);
+                var bytes = _excelExportService.Export("TK01", exportData, out fileExtension, variables);
                 string contentType = fileExtension == "xls" ? "application/vnd.ms-excel" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 return File(bytes, contentType, $"TonKho_{DateTime.Now:yyyyMMddHHmmss}.{fileExtension}");
             }

@@ -7,6 +7,7 @@ using SalesManagementSystem.Data;
 using SalesManagementSystem.Helpers;
 using SalesManagementSystem.Repositories.Interfaces;
 using SalesManagementSystem.Services.Interfaces;
+using SalesManagementSystem.Models.ViewModels;
 
 namespace SalesManagementSystem.Controllers
 {
@@ -42,29 +43,13 @@ namespace SalesManagementSystem.Controllers
                 {
                     if (loaiDong == 1) // Phiếu nhập kho
                     {
-                        var phieuNhap = conn.QueryFirstOrDefault(@"
-                            SELECT pn.ID, pn.SoChungTu, pn.NgayNhap, ncc.TenNhaCungCap,
-                                   pn.GhiChu, pn.TongTienHang, pn.TongTienThue, pn.TongCong,
-                                   ISNULL(pn.TienVanChuyen, 0) AS TienVanChuyen,
-                                   pt.TenPhuongTien AS TenPhuongTien,
-                                   LTRIM(RTRIM(ISNULL(ns.HoDem, '') + ' ' + ISNULL(ns.Ten, ''))) AS NguoiTaoTen
-                            FROM KHO_PhieuNhap pn
-                            LEFT JOIN DM_NhaCungCap ncc ON pn.IDNhaCungCap = ncc.ID
-                            LEFT JOIN DM_PhuongTien pt ON pn.IDPhuongTien = pt.ID
-                            LEFT JOIN NS_NhanSu ns ON pn.NguoiTao = ns.ID
-                            WHERE pn.ID = @ID AND pn.IsDeleted = 0", new { ID = idPhatSinh });
-
-                        var chiTiets = conn.Query(@"
-                            SELECT ct.IDSanPham, sp.MaSanPham, sp.TenSanPham, sp.DVT,
-                                   ct.SoLuong, ct.DonGia, ct.ThanhTien,
-                                   ISNULL(ct.DonGiaVanChuyen, 0) AS DonGiaVanChuyen,
-                                   ISNULL(ct.TienVanChuyen, 0) AS TienVanChuyen,
-                                   ISNULL(ct.TongSauThue, ct.ThanhTien) AS TongSauThue,
-                                   ct.GhiChu
-                            FROM KHO_PhieuNhap_ChiTiet ct
-                            LEFT JOIN DM_SanPham sp ON ct.IDSanPham = sp.ID
-                            WHERE ct.IDPhieuNhap = @IDPhieuNhap
-                            ORDER BY ct.ID", new { IDPhieuNhap = idPhatSinh }).ToList();
+                        dynamic phieuNhap = null;
+                        IEnumerable<dynamic> chiTiets = null;
+                        using (var multi = conn.QueryMultiple("sp_BaoCao_CongNoVanChuyen_GetDetails", new { IDPhieuNhap = idPhatSinh }, commandType: System.Data.CommandType.StoredProcedure))
+                        {
+                            phieuNhap = multi.ReadFirstOrDefault();
+                            chiTiets = multi.Read().ToList();
+                        }
 
                         if (phieuNhap != null)
                         {
@@ -72,6 +57,7 @@ namespace SalesManagementSystem.Controllers
                             ViewBag.PN_TenNCC = (string)(phieuNhap.TenNhaCungCap ?? "");
                             ViewBag.PN_TenPhuongTien = (string)(phieuNhap.TenPhuongTien ?? "");
                             ViewBag.PN_NgayNhap = (DateTime?)phieuNhap.NgayNhap;
+                            ViewBag.PN_NgayGiaoHang = (DateTime?)phieuNhap.NgayGiaoHang;
                             ViewBag.PN_TongTienHang = (decimal)(phieuNhap.TongTienHang ?? 0m);
                             ViewBag.PN_TongCong = (decimal)(phieuNhap.TongCong ?? 0m);
                             ViewBag.PN_TienVanChuyen = (decimal)(phieuNhap.TienVanChuyen ?? 0m);
@@ -171,12 +157,12 @@ namespace SalesManagementSystem.Controllers
             }
         }
 
-        public ActionResult GetList(int? idPhuongTien = null, string tuNgay = "", string denNgay = "", string soPhieuNhap = "", int? trangThaiThanhToan = null, int page = 1, int pageSize = 20)
+        public ActionResult GetList(int? idPhuongTien = null, string hoTenTaiXe = "", string tuNgay = "", string denNgay = "", string soPhieuNhap = "", int? trangThaiThanhToan = null, int page = 1, int pageSize = 20)
         {
             if (!PermissionHelper.HasPermission("BaoCaoCongNoVanChuyen", LoaiPhanQuyen.Xem))
                 return HttpNotFound();
 
-            var data = _phieuChiRepo.GetPhieuNhapThanhToanVanChuyen(idPhuongTien, tuNgay, denNgay, soPhieuNhap, trangThaiThanhToan, page, pageSize).ToList();
+            var data = _phieuChiRepo.GetPhieuNhapThanhToanVanChuyen(idPhuongTien, hoTenTaiXe, tuNgay, denNgay, soPhieuNhap, trangThaiThanhToan, page, pageSize).ToList();
             
             ViewBag.CurrentPage = page;
             ViewBag.PageSize = pageSize;
@@ -195,7 +181,7 @@ namespace SalesManagementSystem.Controllers
         }
 
         [HttpGet]
-        public ActionResult ExportExcel(int? idPhuongTien = null, string tuNgay = "", string denNgay = "", string soPhieuNhap = "", int? trangThaiThanhToan = null)
+        public ActionResult ExportExcel(int? idPhuongTien = null, string hoTenTaiXe = "", string tuNgay = "", string denNgay = "", string soPhieuNhap = "", int? trangThaiThanhToan = null)
         {
             if (!PermissionHelper.HasPermission("BaoCaoCongNoVanChuyen", LoaiPhanQuyen.Xem))
                 return Content("Không có quyền xuất Excel");
@@ -203,7 +189,7 @@ namespace SalesManagementSystem.Controllers
             try
             {
                 // Get all rows by specifying a large page size (1,000,000)
-                var data = _phieuChiRepo.GetPhieuNhapThanhToanVanChuyen(idPhuongTien, tuNgay, denNgay, soPhieuNhap, trangThaiThanhToan, 1, 1000000).ToList();
+                var data = _phieuChiRepo.GetPhieuNhapThanhToanVanChuyen(idPhuongTien, hoTenTaiXe, tuNgay, denNgay, soPhieuNhap, trangThaiThanhToan, 1, 1000000).ToList();
 
                 string phuongTienName = "Tất cả";
                 if (idPhuongTien.HasValue)
@@ -222,33 +208,65 @@ namespace SalesManagementSystem.Controllers
                 if (DateTime.TryParse(tuNgay, out DateTime dTu)) strTuNgay = dTu.ToString("dd/MM/yyyy");
                 if (DateTime.TryParse(denNgay, out DateTime dDen)) strDenNgay = dDen.ToString("dd/MM/yyyy");
 
+                var session = (UserLoginViewModel)Session[CommonConstants.USER_SESSION];
+                string nguoiLapBieu = session != null ? (session.HoDem + " " + session.Ten).Trim() : "Hệ thống";
+                if (string.IsNullOrEmpty(nguoiLapBieu)) nguoiLapBieu = session?.UserName ?? "Hệ thống";
+
                 var variables = new Dictionary<string, object>
                 {
                     { "TuNgay", strTuNgay },
                     { "DenNgay", strDenNgay },
+                    { "PhuongTien", phuongTienName },
+                    { "TenPhuongTien", phuongTienName },
                     { "KhachHang", phuongTienName },
                     { "Ngay", DateTime.Now.ToString("dd") },
                     { "Thang", DateTime.Now.ToString("MM") },
-                    { "Nam", DateTime.Now.ToString("yyyy") }
+                    { "Nam", DateTime.Now.ToString("yyyy") },
+                    { "NguoiLapBieu", nguoiLapBieu }
                 };
 
-                var exportData = data.Select((x, idx) => new {
-                    STT = idx + 1,
-                    SoPhieuNhap = (string)x.SoPhieuNhap,
-                    NgayNhap = x.NgayNhap != null ? ((DateTime)x.NgayNhap).ToString("dd/MM/yyyy") : "",
-                    NguoiGiaoHang = (string)x.TenNguoiGiao,
-                    TenPhuongTien = (string)x.TenPhuongTien,
-                    SoPhieuChi = (string)x.SoPhieuChiList,
-                    TongTien = Convert.ToDecimal(x.TongTienVanChuyen),
-                    DaThanhToan = Convert.ToDecimal(x.DaThanhToanVanChuyen),
-                    ConLai = Convert.ToDecimal(x.ConLaiVanChuyen),
-                    TenTrangThai = Convert.ToDecimal(x.DaThanhToanVanChuyen) >= Convert.ToDecimal(x.TongTienVanChuyen) && Convert.ToDecimal(x.TongTienVanChuyen) > 0 
-                        ? "Đã thanh toán đủ" 
-                        : (Convert.ToDecimal(x.DaThanhToanVanChuyen) > 0 ? "Thanh toán một phần" : "Chưa thanh toán")
+                int stt = 1;
+                var exportData = data.Select(x => {
+                    decimal tongTien = Convert.ToDecimal(x.TongTienVanChuyen);
+                    decimal daThanhToan = Convert.ToDecimal(x.DaThanhToanVanChuyen);
+                    decimal conLai = Convert.ToDecimal(x.ConLaiVanChuyen);
+
+                    string trangThaiText = "Chưa thanh toán";
+                    if (daThanhToan >= tongTien && tongTien > 0)
+                    {
+                        trangThaiText = "Đã thanh toán đủ";
+                    }
+                    else if (daThanhToan > 0)
+                    {
+                        trangThaiText = "Thanh toán một phần";
+                    }
+
+                    return new {
+                        STT = stt++,
+                        SoPhieu = (string)(x.SoPhieuNhap ?? ""),
+                        SoPhieuNhap = (string)(x.SoPhieuNhap ?? ""),
+                        NgayNhap = x.NgayNhap != null ? ((DateTime)x.NgayNhap).ToString("dd/MM/yyyy") : "",
+                        NgayGiao = x.NgayGiaoHang != null ? ((DateTime)x.NgayGiaoHang).ToString("dd/MM/yyyy") : "",
+                        NgayGiaoHang = x.NgayGiaoHang != null ? ((DateTime)x.NgayGiaoHang).ToString("dd/MM/yyyy") : "",
+                        NguoiGiaoHang = (string)(x.TenNguoiGiao ?? ""),
+                        TenNguoiGiao = (string)(x.TenNguoiGiao ?? ""),
+                        TenPhuongTien = (string)(x.TenPhuongTien ?? ""),
+                        PhuongTien = (string)(x.TenPhuongTien ?? ""),
+                        SoPhieuChi = (string)(x.SoPhieuChiList ?? ""),
+                        SoPhieuChiList = (string)(x.SoPhieuChiList ?? ""),
+                        TongTienVanChuyen = tongTien,
+                        TongTien = tongTien,
+                        DaThanhToan = daThanhToan,
+                        DaThanhToanVanChuyen = daThanhToan,
+                        ConLai = conLai,
+                        ConLaiVanChuyen = conLai,
+                        TenTrangThai = trangThaiText,
+                        TrangThai = trangThaiText
+                    };
                 }).ToList();
 
                 string fileExtension;
-                var bytes = _excelExportService.Export("CNVC", exportData, out fileExtension, variables);
+                var bytes = _excelExportService.Export("CNVC01", exportData, out fileExtension, variables);
                 string contentType = fileExtension == "xls" ? "application/vnd.ms-excel" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 return File(bytes, contentType, $"BaoCaoCongNoVanChuyen_{DateTime.Now:yyyyMMddHHmmss}.{fileExtension}");
             }

@@ -127,6 +127,7 @@ namespace SalesManagementSystem.Controllers
         // GET: /phieu-chi/export-excel
         [HttpGet]
         public ActionResult ExportExcel(
+            int? id = null,
             string tuNgay = "", string denNgay = "",
             string soPhieuChi = "",
             int? idNhaCungCap = null,
@@ -144,26 +145,77 @@ namespace SalesManagementSystem.Controllers
             {
                 var list = _repo.GetList(tuNgay, denNgay, soPhieuChi, idNhaCungCap, idKhoanMucChi, trangThai, nguoiNhanTien, idTaiKhoanThanhToan, idLoaiChiTien, idPhuongTien).ToList();
 
-                var variables = new Dictionary<string, object>
+                if (id.HasValue && id.Value > 0)
                 {
-                    { "TuNgay", string.IsNullOrEmpty(tuNgay) ? "" : $"Từ ngày: {DateTime.Parse(tuNgay):dd/MM/yyyy}" },
-                    { "DenNgay", string.IsNullOrEmpty(denNgay) ? "" : $"Đến ngày: {DateTime.Parse(denNgay):dd/MM/yyyy}" }
-                };
+                    list = list.Where(x => x.ID == id.Value).ToList();
+                }
+
+                var session = (UserLoginViewModel)Session[CommonConstants.USER_SESSION];
+                string nguoiLapBieu = session != null ? (session.HoDem + " " + session.Ten).Trim() : "Hệ thống";
+                if (string.IsNullOrEmpty(nguoiLapBieu)) nguoiLapBieu = session?.UserName ?? "Hệ thống";
+
+                string strTuNgay = "";
+                string strDenNgay = "";
+                if (DateTime.TryParse(tuNgay, out DateTime dTu)) strTuNgay = dTu.ToString("dd/MM/yyyy");
+                if (DateTime.TryParse(denNgay, out DateTime dDen)) strDenNgay = dDen.ToString("dd/MM/yyyy");
 
                 int stt = 1;
                 var exportData = list.Select(item => new {
                     STT = stt++,
+                    ID = item.ID,
                     SoPhieuChi = item.SoPhieuChi,
-                    NgayChi = item.NgayChi,
+                    SoPhieu = item.SoPhieuChi,
+                    NgayChi = item.NgayChi != null ? item.NgayChi.ToString("dd/MM/yyyy") : "",
+                    NgayChiFormat = item.NgayChi != null ? item.NgayChi.ToString("dd/MM/yyyy") : "",
+                    TenKhoanMuc = item.TenKhoanMuc,
                     KhoanMucChi = item.TenKhoanMuc,
+                    KhoanMuc = item.TenKhoanMuc,
+                    TenTaiKhoanThanhToan = item.TenTaiKhoanThanhToan,
                     TaiKhoanTT = item.TenTaiKhoanThanhToan,
+                    TaiKhoan = item.TenTaiKhoanThanhToan,
+                    TenNhaCungCap = item.TenNhaCungCap,
                     NhaCungCap = item.TenNhaCungCap,
+                    NguoiNhanTien = item.NguoiNhanTien,
+                    SoDienThoaiNguoiNhan = item.SoDienThoaiNguoiNhan,
                     NguoiNhan = !string.IsNullOrEmpty(item.NguoiNhanTien) 
                         ? item.NguoiNhanTien + (!string.IsNullOrEmpty(item.SoDienThoaiNguoiNhan) ? $" ({item.SoDienThoaiNguoiNhan})" : "") 
                         : item.TenNguoiNhan,
+                    TenLoaiChiTien = item.TenLoaiChiTien,
+                    LoaiChiTien = item.TenLoaiChiTien,
+                    LoaiChi = item.TenLoaiChiTien,
+                    TenPhuongTien = item.TenPhuongTien,
+                    PhuongTien = item.TenPhuongTien,
                     SoTienChi = item.SoTienChi,
+                    SoTien = item.SoTienChi,
+                    TienChi = item.SoTienChi,
+                    DienGiai = item.DienGiai,
+                    GhiChu = item.DienGiai,
+                    TenTrangThai = item.TenTrangThai,
                     TrangThai = item.TenTrangThai
                 }).ToList();
+
+                var variables = new Dictionary<string, object>
+                {
+                    { "TuNgay", strTuNgay },
+                    { "DenNgay", strDenNgay },
+                    { "NgayLap", DateTime.Now.ToString("dd/MM/yyyy") },
+                    { "NguoiLapBieu", nguoiLapBieu },
+                    { "NguoiLap", nguoiLapBieu },
+                    { "TongSoTien", exportData.Sum(x => x.SoTienChi) },
+                    { "TongTien", exportData.Sum(x => x.SoTienChi) }
+                };
+
+                if (id.HasValue && list.Any())
+                {
+                    var first = list.First();
+                    variables["SoPhieuChi"] = first.SoPhieuChi;
+                    variables["NgayChi"] = first.NgayChi != null ? first.NgayChi.ToString("dd/MM/yyyy") : "";
+                    variables["NguoiNhanTien"] = first.NguoiNhanTien ?? "";
+                    variables["SoTienChi"] = first.SoTienChi;
+                    variables["DienGiai"] = first.DienGiai ?? "";
+                    variables["TenNhaCungCap"] = first.TenNhaCungCap ?? "";
+                    variables["TenTaiKhoanThanhToan"] = first.TenTaiKhoanThanhToan ?? "";
+                }
 
                 string fileExtension;
                 var fileBytes = _excelExportService.Export("PC01", exportData, out fileExtension, variables);
@@ -172,7 +224,7 @@ namespace SalesManagementSystem.Controllers
                     ? "application/vnd.ms-excel" 
                     : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-                return File(fileBytes, contentType, $"DanhSachPhieuChi_{DateTime.Now:yyyyMMddHHmmss}.{fileExtension}");
+                return File(fileBytes, contentType, $"PhieuChi_{DateTime.Now:yyyyMMddHHmmss}.{fileExtension}");
             }
             catch (Exception ex)
             {

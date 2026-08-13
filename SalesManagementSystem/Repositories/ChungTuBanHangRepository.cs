@@ -61,7 +61,7 @@ namespace SalesManagementSystem.Repositories
             }
         }
 
-        public IEnumerable<DonHangChungTuViewModel> GetDonHangList(string tuNgay, string denNgay, string soDonHang, int? idKhachHang, int? trangThaiChungTu)
+        public IEnumerable<DonHangChungTuViewModel> GetDonHangList(string tuNgay, string denNgay, string soDonHang, int? idKhachHang, int? trangThaiChungTu, int? idSanPham = null)
         {
             using (var conn = _db.CreateConnection())
             {
@@ -71,6 +71,7 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@SoDonHang", string.IsNullOrEmpty(soDonHang) ? null : soDonHang);
                 p.Add("@IDKhachHang", idKhachHang);
                 p.Add("@TrangThaiChungTu", trangThaiChungTu);
+                p.Add("@IDSanPham", idSanPham);
 
                 string sql = @"
                     SELECT 
@@ -95,6 +96,7 @@ namespace SalesManagementSystem.Repositories
                       AND (@SoDonHang IS NULL OR d.SoDonHang LIKE '%' + @SoDonHang + '%' OR c.SoChungTu LIKE '%' + @SoDonHang + '%')
                       AND (@IDKhachHang IS NULL OR d.IDKhachHang = @IDKhachHang)
                       AND (@TrangThaiChungTu IS NULL OR (CASE WHEN d.TrangThaiDon = 4 THEN 3 ELSE ISNULL(c.TrangThai, 0) END) = @TrangThaiChungTu)
+                      AND (@IDSanPham IS NULL OR EXISTS (SELECT 1 FROM NS_DonDatHangChiTiet dt WHERE dt.IDDonDatHang = d.ID AND dt.IDSanPham = @IDSanPham) OR EXISTS (SELECT 1 FROM BAN_ChungTuBanHang_ChiTiet ct WHERE ct.IDChungTuBanHang = c.ID AND ct.IDSanPham = @IDSanPham))
                       AND ISNULL(d.TrangThaiDon, 1) <> 0
                     ORDER BY CASE WHEN c.ID IS NULL THEN 0 ELSE 1 END ASC, d.SoDonHang DESC, d.ID DESC;";
 

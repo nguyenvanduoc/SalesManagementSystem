@@ -130,30 +130,18 @@ namespace SalesManagementSystem.Repositories
                 conn.Execute("sp_KHO_DieuChinhPhieuNhap_Save", p, commandType: CommandType.StoredProcedure);
 
                 conn.Execute(@"
-                    ;WITH ChiTiet AS (
-                        SELECT IDSanPham,
-                               CASE WHEN ISNULL(DonGiaVanChuyen, 0) >= 0 THEN ISNULL(DonGiaVanChuyen, 0) ELSE 0 END AS DonGiaVanChuyen
-                        FROM OPENJSON(@ChiTietsJson)
-                        WITH (
-                            IDSanPham INT '$.IDSanPham',
-                            DonGiaVanChuyen DECIMAL(18,2) '$.DonGiaVanChuyen'
-                        )
-                    )
-                    UPDATE ct
-                    SET DonGiaVanChuyen = src.DonGiaVanChuyen,
-                        TienVanChuyen = src.DonGiaVanChuyen * ct.SoLuong
-                    FROM KHO_PhieuNhap_ChiTiet ct
-                    INNER JOIN ChiTiet src ON ct.IDSanPham = src.IDSanPham
-                    WHERE ct.IDPhieuNhap = @IDPhieuNhap;
+                    UPDATE [dbo].[KHO_PhieuNhap_ChiTiet]
+                    SET TienVanChuyen = ISNULL(DonGiaVanChuyen, 0) * ISNULL(SoLuong, 0)
+                    WHERE IDPhieuNhap = @IDPhieuNhap;
 
-                    UPDATE KHO_PhieuNhap
+                    UPDATE [dbo].[KHO_PhieuNhap]
                     SET TienVanChuyen = ISNULL((
                         SELECT SUM(ISNULL(TienVanChuyen, 0))
-                        FROM KHO_PhieuNhap_ChiTiet
+                        FROM [dbo].[KHO_PhieuNhap_ChiTiet]
                         WHERE IDPhieuNhap = @IDPhieuNhap
                     ), 0)
                     WHERE ID = @IDPhieuNhap;",
-                    new { model.IDPhieuNhap, model.ChiTietsJson });
+                    new { model.IDPhieuNhap });
             }
         }
     }

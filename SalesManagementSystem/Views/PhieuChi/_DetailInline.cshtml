@@ -1,4 +1,4 @@
-@model SalesManagementSystem.Models.ViewModels.PhieuChiViewModel
+﻿@model SalesManagementSystem.Models.ViewModels.PhieuChiViewModel
 
 <div class="p-3 bg-light border rounded m-2">
     @if (Model.ChiTiets != null && Model.ChiTiets.Count > 0)
@@ -18,9 +18,16 @@
                     int stt = 1;
                     foreach (var item in Model.ChiTiets)
                     {
+                        var isHuy = (!string.IsNullOrEmpty(item.DienGiai) && item.DienGiai.Contains("(Đã hủy)"));
                         <tr>
                             <td class="text-center align-middle">@(stt++)</td>
-                            <td class="text-center align-middle text-primary fw-semibold">@item.SoPhieuNhap</td>
+                            <td class="text-center align-middle text-primary fw-semibold">
+                                @(string.IsNullOrEmpty(item.SoPhieuNhap) ? "-" : item.SoPhieuNhap)
+                                @if (isHuy)
+                                {
+                                    <span class="badge bg-danger ms-1">Đã hủy</span>
+                                }
+                            </td>
                             <td class="align-middle">
                                 @if (item.LoaiChi == 1)
                                 {
@@ -28,14 +35,21 @@
                                 }
                                 else if (item.LoaiChi == 2)
                                 {
-                                    <span class="badge bg-info text-dark">Trả tiền trước</span>
+                                    if (isHuy)
+                                    {
+                                        <span class="badge bg-warning text-dark">Trả tiền trước (Đã hủy)</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info text-dark">Trả tiền trước</span>
+                                    }
                                 }
                                 else
                                 {
                                     <span class="badge bg-secondary">Khác</span>
                                 }
                             </td>
-                            <td class="align-middle">@item.DienGiai</td>
+                            <td class="align-middle @(isHuy ? "text-danger fw-semibold" : "")">@item.DienGiai</td>
                             <td class="text-end align-middle fw-bold text-success">@item.SoTienPhanBo.ToString("N0")</td>
                         </tr>
                     }
@@ -77,7 +91,7 @@
         var ths = table.querySelectorAll('th');
         ths.forEach(function(th) {
             if(th.innerText.trim() === '' && (th.style.width === '35px' || th.style.width === '40px' || th.style.width === '50px')) return;
-            if(th.innerText.trim() === 'Thao t�c' || th.innerText.trim() === 'STT') return;
+            if(th.innerText.trim() === 'Thao tác' || th.innerText.trim() === 'STT') return;
             if(th.querySelector('.resizer')) return;
             var resizer = document.createElement('div');
             resizer.classList.add('resizer');

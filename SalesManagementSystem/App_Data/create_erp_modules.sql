@@ -49,7 +49,7 @@ BEGIN
     WHERE b.IsDeleted = 0
       AND (@TuNgay IS NULL OR CAST(b.NgayChungTu AS DATE) >= CAST(@TuNgay AS DATE))
       AND (@DenNgay IS NULL OR CAST(b.NgayChungTu AS DATE) <= CAST(@DenNgay AS DATE))
-      AND (@SoChungTu IS NULL OR b.SoChungTu LIKE '%' + @SoChungTu + '%')
+      AND (@SoChungTu IS NULL OR b.SoChungTu LIKE '%' + @SoChungTu + '%' OR d.SoDonHang LIKE '%' + @SoChungTu + '%')
       AND (@IDKhachHang IS NULL OR b.IDKhachHang = @IDKhachHang)
       AND (@IDKho IS NULL OR b.IDKho = @IDKho)
       AND (@TrangThai IS NULL OR b.TrangThai = @TrangThai)

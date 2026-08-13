@@ -59,7 +59,7 @@
                     <div class="col-md-2">
                         <label class="form-label text-muted small mb-1">Phương tiện</label>
                         <select class="form-select form-select-sm select2" name="idPhuongTien">
-                            <option value="">-- Chọn phương tiện --</option>
+                            <option value="">-- Tất cả --</option>
                             @if (ViewBag.PhuongTienList != null)
                             {
                                 foreach (SelectListItem item in ViewBag.PhuongTienList)
@@ -68,6 +68,10 @@
                                 }
                             }
                         </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Thông tin xe</label>
+                        <input type="text" class="form-control form-control-sm" name="hoTenTaiXe" placeholder="Tìm Thông tin xe..." />
                     </div>
                     <div class="col-md-2">
                         <label class="form-label text-muted small mb-1">Trạng thái thanh toán</label>

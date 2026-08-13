@@ -162,12 +162,14 @@ BEGIN
         ThanhTien DECIMAL(18,2),
         TienThue DECIMAL(18,2),
         TongSauThue DECIMAL(18,2),
+        DonGiaVanChuyen DECIMAL(18,2) DEFAULT 0,
+        TienVanChuyen DECIMAL(18,2) DEFAULT 0,
         GhiChu NVARCHAR(500),
         NgaySanXuat DATETIME NULL,
         HanSuDung DATETIME NULL
     );
 
-    INSERT INTO @ChiTietMoi (IDSanPham, SoLuong, DonGia, ThueGTGT, ThanhTien, TienThue, TongSauThue, GhiChu, NgaySanXuat, HanSuDung)
+    INSERT INTO @ChiTietMoi (IDSanPham, SoLuong, DonGia, ThueGTGT, ThanhTien, TienThue, TongSauThue, DonGiaVanChuyen, TienVanChuyen, GhiChu, NgaySanXuat, HanSuDung)
     SELECT 
         ISNULL(IDSanPham, 0),
         ROUND(CASE WHEN SoLuong >= 0 THEN SoLuong ELSE 0 END, 2),
@@ -177,6 +179,8 @@ BEGIN
         ROUND(ROUND(CASE WHEN SoLuong >= 0 THEN SoLuong ELSE 0 END * CASE WHEN DonGia >= 0 THEN DonGia ELSE 0 END, 0) * CASE WHEN ThueGTGT >= 0 THEN ThueGTGT ELSE 0 END / 100, 0) AS TienThue,
         ROUND(CASE WHEN SoLuong >= 0 THEN SoLuong ELSE 0 END * CASE WHEN DonGia >= 0 THEN DonGia ELSE 0 END, 0) + 
         ROUND(ROUND(CASE WHEN SoLuong >= 0 THEN SoLuong ELSE 0 END * CASE WHEN DonGia >= 0 THEN DonGia ELSE 0 END, 0) * CASE WHEN ThueGTGT >= 0 THEN ThueGTGT ELSE 0 END / 100, 0) AS TongSauThue,
+        ISNULL(DonGiaVanChuyen, 0),
+        ISNULL(DonGiaVanChuyen, 0) * ROUND(CASE WHEN SoLuong >= 0 THEN SoLuong ELSE 0 END, 2) AS TienVanChuyen,
         GhiChu,
         NgaySanXuat,
         HanSuDung
@@ -186,6 +190,7 @@ BEGIN
         SoLuong DECIMAL(18,2) '$.SoLuong',
         DonGia DECIMAL(18,2) '$.DonGia',
         ThueGTGT DECIMAL(18,2) '$.ThueGTGT',
+        DonGiaVanChuyen DECIMAL(18,2) '$.DonGiaVanChuyen',
         GhiChu NVARCHAR(500) '$.GhiChu',
         NgaySanXuat DATETIME '$.NgaySanXuat',
         HanSuDung DATETIME '$.HanSuDung'
@@ -307,15 +312,16 @@ BEGIN
             TongTienHang = @newTienHang,
             TongTienThue = @newTienThue,
             TongCong = @newTongTien,
+            TienVanChuyen = ISNULL((SELECT SUM(ISNULL(TienVanChuyen, 0)) FROM @ChiTietMoi), 0),
             ConLai = ISNULL(ConLai, 0) + @ChenhLech
         WHERE ID = @IDPhieuNhap;
 
         DELETE FROM KHO_PhieuNhap_ChiTiet WHERE IDPhieuNhap = @IDPhieuNhap;
 
         INSERT INTO KHO_PhieuNhap_ChiTiet
-            (IDPhieuNhap, IDSanPham, SoLuong, DonGia, ThanhTien, ThueGTGT, TienThue, TongSauThue, GhiChu, NgaySanXuat, HanSuDung)
+            (IDPhieuNhap, IDSanPham, SoLuong, DonGia, ThanhTien, ThueGTGT, TienThue, TongSauThue, DonGiaVanChuyen, TienVanChuyen, GhiChu, NgaySanXuat, HanSuDung)
         SELECT 
-            @IDPhieuNhap, IDSanPham, SoLuong, DonGia, ThanhTien, ThueGTGT, TienThue, TongSauThue, GhiChu, NgaySanXuat, HanSuDung
+            @IDPhieuNhap, IDSanPham, SoLuong, DonGia, ThanhTien, ThueGTGT, TienThue, TongSauThue, ISNULL(DonGiaVanChuyen, 0), ISNULL(TienVanChuyen, 0), GhiChu, NgaySanXuat, HanSuDung
         FROM @ChiTietMoi;
 
         -- 7. Cập nhật lại sổ kho KHO_GiaoDichKho theo đúng dữ liệu cuối cùng (Clean Ledger)

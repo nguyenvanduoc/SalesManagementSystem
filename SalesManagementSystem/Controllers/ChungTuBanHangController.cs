@@ -37,11 +37,21 @@ namespace SalesManagementSystem.Controllers
             _excelExportService = excelExportService;
         }
 
-        public ActionResult Index(int page = 1, int pageSize = 20, string tuNgay = "", string denNgay = "", string soDonHang = "", int? idKhachHang = null, int? trangThai = null)
+        private SelectList GetSanPhamList(int? selectedId = null)
+        {
+            using (var conn = new DbConnectionFactory().CreateConnection())
+            {
+                var items = conn.Query("SELECT ID, MaSanPham, TenSanPham FROM DM_SanPham ORDER BY TenSanPham")
+                    .Select(x => new { ID = (int)x.ID, Name = (string)x.MaSanPham + " - " + (string)x.TenSanPham }).ToList();
+                return new SelectList(items, "ID", "Name", selectedId);
+            }
+        }
+
+        public ActionResult Index(int page = 1, int pageSize = 20, string tuNgay = "", string denNgay = "", string soDonHang = "", int? idKhachHang = null, int? trangThai = null, int? idSanPham = null)
         {
             if (!PermissionHelper.HasPermission("ChungTuBanHang", LoaiPhanQuyen.Xem)) return View("AccessDenied");
 
-            var list = _repo.GetDonHangList(tuNgay, denNgay, soDonHang, idKhachHang, trangThai).ToList();
+            var list = _repo.GetDonHangList(tuNgay, denNgay, soDonHang, idKhachHang, trangThai, idSanPham).ToList();
             int totalRecords = list.Count;
             var pagedItems = list.Skip((page - 1) * pageSize).Take(pageSize);
 
@@ -58,11 +68,13 @@ namespace SalesManagementSystem.Controllers
             int totalKhs;
             var khs = (new SalesManagementSystem.Repositories.KhachHangRepository(new Data.DbConnectionFactory())).GetPaged(1, 1000, "", out totalKhs).ToList();
             ViewBag.KhachHangs = new SelectList(khs, "ID", "TenKhachHang", idKhachHang);
+            ViewBag.SanPhams = GetSanPhamList(idSanPham);
 
             ViewBag.TuNgay = tuNgay;
             ViewBag.DenNgay = denNgay;
             ViewBag.SoDonHang = soDonHang;
             ViewBag.IDKhachHang = idKhachHang;
+            ViewBag.IDSanPham = idSanPham;
             ViewBag.TrangThai = trangThai;
 
             if (Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -71,13 +83,13 @@ namespace SalesManagementSystem.Controllers
             return View("Index", model);
         }
 
-        public ActionResult GetList(int page = 1, int pageSize = 20, string tuNgay = "", string denNgay = "", string soDonHang = "", int? idKhachHang = null, int? trangThai = null)
+        public ActionResult GetList(int page = 1, int pageSize = 20, string tuNgay = "", string denNgay = "", string soDonHang = "", int? idKhachHang = null, int? trangThai = null, int? idSanPham = null)
         {
             if (!PermissionHelper.HasPermission("ChungTuBanHang", LoaiPhanQuyen.Xem)) return Content("<div class='alert alert-danger'>Không có quyền truy cập</div>");
 
             try
             {
-                var list = _repo.GetDonHangList(tuNgay, denNgay, soDonHang, idKhachHang, trangThai).ToList();
+                var list = _repo.GetDonHangList(tuNgay, denNgay, soDonHang, idKhachHang, trangThai, idSanPham).ToList();
                 int totalRecords = list.Count;
                 var pagedItems = list.Skip((page - 1) * pageSize).Take(pageSize);
 
@@ -96,6 +108,24 @@ namespace SalesManagementSystem.Controllers
             catch (Exception ex)
             {
                 return Content("<div class='alert alert-danger'>Lỗi: " + ex.Message + "</div>");
+            }
+        }
+
+        [HttpGet]
+        public ActionResult SearchSanPham(string q)
+        {
+            using (var conn = new DbConnectionFactory().CreateConnection())
+            {
+                string kw = (q ?? "").Trim().ToLower();
+                string sql = @"
+                    SELECT TOP 20 ID, MaSanPham, TenSanPham, DVT
+                    FROM DM_SanPham
+                    WHERE @KW = ''
+                       OR LOWER(MaSanPham)  LIKE '%' + @KW + '%'
+                       OR LOWER(TenSanPham) LIKE '%' + @KW + '%'
+                    ORDER BY TenSanPham";
+                var data = conn.Query(sql, new { KW = kw });
+                return Json(data.Select(x => new { id = (int)x.ID, text = (string)x.MaSanPham + " - " + (string)x.TenSanPham, dvt = (string)x.DVT }), JsonRequestBehavior.AllowGet);
             }
         }
 
@@ -605,6 +635,134 @@ namespace SalesManagementSystem.Controllers
                 TempData["ToastMessage"] = "Lỗi xuất Excel: " + ex.Message;
                 TempData["ToastType"] = "error";
                 return RedirectToAction("Detail", new { id = id });
+            }
+        }
+
+        [HttpGet]
+        public ActionResult ExportExcelList(string tuNgay = "", string denNgay = "", string soDonHang = "", int? idKhachHang = null, int? trangThai = null, int? idSanPham = null)
+        {
+            if (!PermissionHelper.HasPermission("ChungTuBanHang", LoaiPhanQuyen.Xem)) 
+                return View("AccessDenied");
+
+            try
+            {
+                var list = _repo.GetDonHangList(tuNgay, denNgay, soDonHang, idKhachHang, trangThai, idSanPham).ToList();
+
+                var orderIds = list.Select(x => x.IDDonDatHang).Distinct().ToList();
+                var ctbhIds = list.Where(x => x.IDChungTuBanHang.HasValue).Select(x => x.IDChungTuBanHang.Value).Distinct().ToList();
+
+                var orderQtyDict = new Dictionary<int, decimal>();
+                var ctbhQtyDict = new Dictionary<int, decimal>();
+
+                using (var conn = new DbConnectionFactory().CreateConnection())
+                {
+                    if (orderIds.Any())
+                    {
+                        var orderQty = conn.Query(@"
+                            SELECT IDDonDatHang, SUM(SoLuong) AS TongSoLuong 
+                            FROM NS_DonDatHangChiTiet 
+                            WHERE IDDonDatHang IN @IDs 
+                            GROUP BY IDDonDatHang", new { IDs = orderIds });
+                        foreach (var q in orderQty)
+                        {
+                            orderQtyDict[(int)q.IDDonDatHang] = (decimal)(q.TongSoLuong ?? 0m);
+                        }
+                    }
+
+                    if (ctbhIds.Any())
+                    {
+                        var ctbhQty = conn.Query(@"
+                            SELECT IDChungTuBanHang, SUM(SoLuong) AS TongSoLuong 
+                            FROM BAN_ChungTuBanHang_ChiTiet 
+                            WHERE IDChungTuBanHang IN @IDs 
+                            GROUP BY IDChungTuBanHang", new { IDs = ctbhIds });
+                        foreach (var q in ctbhQty)
+                        {
+                            ctbhQtyDict[(int)q.IDChungTuBanHang] = (decimal)(q.TongSoLuong ?? 0m);
+                        }
+                    }
+                }
+
+                string khachHangName = "Tất cả";
+                if (idKhachHang.HasValue)
+                {
+                    using (var conn = new DbConnectionFactory().CreateConnection())
+                    {
+                        khachHangName = conn.ExecuteScalar<string>(
+                            "SELECT TenKhachHang FROM NS_KhachHang WHERE ID = @ID",
+                            new { ID = idKhachHang.Value }
+                        ) ?? "Tất cả";
+                    }
+                }
+
+                string strTuNgay = "";
+                string strDenNgay = "";
+                if (DateTime.TryParse(tuNgay, out DateTime dTu)) strTuNgay = dTu.ToString("dd/MM/yyyy");
+                if (DateTime.TryParse(denNgay, out DateTime dDen)) strDenNgay = dDen.ToString("dd/MM/yyyy");
+
+                var session = (UserLoginViewModel)Session[CommonConstants.USER_SESSION];
+                string nguoiLapBieu = session != null ? (session.HoDem + " " + session.Ten).Trim() : "Hệ thống";
+                if (string.IsNullOrEmpty(nguoiLapBieu)) nguoiLapBieu = session?.UserName ?? "Hệ thống";
+
+                var variables = new Dictionary<string, object>
+                {
+                    { "TuNgay", strTuNgay },
+                    { "DenNgay", strDenNgay },
+                    { "KhachHang", khachHangName },
+                    { "Ngay", DateTime.Now.ToString("dd") },
+                    { "Thang", DateTime.Now.ToString("MM") },
+                    { "Nam", DateTime.Now.ToString("yyyy") },
+                    { "NguoiLapBieu", nguoiLapBieu }
+                };
+
+                int stt = 1;
+                var exportData = list.Select(item => {
+                    decimal sl = 0m;
+                    if (item.IDChungTuBanHang.HasValue && ctbhQtyDict.ContainsKey(item.IDChungTuBanHang.Value))
+                    {
+                        sl = ctbhQtyDict[item.IDChungTuBanHang.Value];
+                    }
+                    else if (orderQtyDict.ContainsKey(item.IDDonDatHang))
+                    {
+                        sl = orderQtyDict[item.IDDonDatHang];
+                    }
+
+                    string trangThaiText = "Chưa lập";
+                    if (item.TrangThaiChungTu == 1) trangThaiText = "Đề nghị ghi";
+                    else if (item.TrangThaiChungTu == 2) trangThaiText = "Đã ghi";
+                    else if (item.TrangThaiChungTu == 3) trangThaiText = "Đã hủy";
+
+                    return new {
+                        STT = stt++,
+                        SoDonHang = item.SoDonHang ?? "",
+                        NgayLapDonHang = item.NgayTaoDon.HasValue ? item.NgayTaoDon.Value.ToString("dd/MM/yyyy") : "",
+                        TenKhachHang = item.TenKhachHang ?? "",
+                        ThongTinXe = item.HoTenTaiXe ?? "",
+                        SoLuong = sl,
+                        TongTienHang = item.ThanhTienHang,
+                        TongPhiBocXep = item.PhiBocXep,
+                        PhiBocXep = item.PhiBocXep,
+                        TongTien = item.TongTien,
+                        SoChungTu = item.SoChungTu ?? "",
+                        NgayChungTu = item.NgayChungTu.HasValue ? item.NgayChungTu.Value.ToString("dd/MM/yyyy") : "",
+                        TenTrangThai = trangThaiText
+                    };
+                }).ToList();
+
+                string fileExtension;
+                var fileBytes = _excelExportService.Export("BH01", exportData, out fileExtension, variables);
+
+                string contentType = fileExtension == "xls" 
+                    ? "application/vnd.ms-excel" 
+                    : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                return File(fileBytes, contentType, $"ChungTuBanHang_{DateTime.Now:yyyyMMddHHmmss}.{fileExtension}");
+            }
+            catch (Exception ex)
+            {
+                TempData["ToastMessage"] = "Lỗi xuất Excel: " + ex.Message;
+                TempData["ToastType"] = "error";
+                return RedirectToAction("Index");
             }
         }
     }

@@ -95,7 +95,9 @@ BEGIN
               SELECT 1 
               FROM KT_PhieuThuChiTiet ct
               INNER JOIN BAN_ChungTuBanHang ct2 ON ct.IDChungTuBanHang = ct2.ID
-              WHERE ct.IDPhieuThu = pt.ID AND ct2.SoChungTu LIKE '%' + @SoPhieuThu + '%'
+              LEFT JOIN NS_DonDatHang d ON ct2.IDDonDatHang = d.ID
+              WHERE ct.IDPhieuThu = pt.ID 
+                AND (ct2.SoChungTu LIKE '%' + @SoPhieuThu + '%' OR d.SoDonHang LIKE '%' + @SoPhieuThu + '%')
           )
       ))
       AND (@IDKhachHang   IS NULL OR pt.IDKhachHang = @IDKhachHang)

@@ -147,28 +147,36 @@ namespace SalesManagementSystem.Repositories
                 // Cập nhật TrangThai
                 conn.Execute("UPDATE KHO_PhieuNhap SET TrangThai = @TrangThai WHERE ID = @ID", new { TrangThai = model.TrangThai, ID = activeId });
 
-                // Cập nhật NgaySanXuat, HanSuDung cho từng chi tiết
+                // Cập nhật NgaySanXuat, HanSuDung, DonGiaVanChuyen, TienVanChuyen cho từng chi tiết
                 if (model.ChiTiets != null && model.ChiTiets.Count > 0)
                 {
                     foreach (var ct in model.ChiTiets)
                     {
-                        string updateDateSql = @"
-                            UPDATE [dbo].[KHO_PhieuNhap_ChiTiet] 
-                            SET NgaySanXuat = @NgaySanXuat,
-                                HanSuDung = @HanSuDung,
-                                DonGiaVanChuyen = @DonGiaVanChuyen,
-                                TienVanChuyen = @TienVanChuyen
-                            WHERE IDPhieuNhap = @IDPhieuNhap AND IDSanPham = @IDSanPham
-                        ";
-                        conn.Execute(updateDateSql, new { 
-                            NgaySanXuat = ct.NgaySanXuat, 
-                            HanSuDung = ct.HanSuDung, 
-                            DonGiaVanChuyen = ct.DonGiaVanChuyen,
-                            TienVanChuyen = ct.TienVanChuyen,
-                            IDPhieuNhap = activeId, 
-                            IDSanPham = ct.IDSanPham 
-                        });
+                        if (ct.ID > 0)
+                        {
+                            string updateDateSql = @"
+                                UPDATE [dbo].[KHO_PhieuNhap_ChiTiet] 
+                                SET NgaySanXuat = @NgaySanXuat,
+                                    HanSuDung = @HanSuDung,
+                                    DonGiaVanChuyen = @DonGiaVanChuyen,
+                                    TienVanChuyen = ISNULL(@DonGiaVanChuyen, 0) * ISNULL(SoLuong, 0)
+                                WHERE ID = @ID
+                            ";
+                            conn.Execute(updateDateSql, new { 
+                                NgaySanXuat = ct.NgaySanXuat, 
+                                HanSuDung = ct.HanSuDung, 
+                                DonGiaVanChuyen = ct.DonGiaVanChuyen,
+                                ID = ct.ID 
+                            });
+                        }
                     }
+
+                    // Đảm bảo tất cả các dòng chi tiết thuộc phiếu nhập có TienVanChuyen = DonGiaVanChuyen * SoLuong
+                    conn.Execute(@"
+                        UPDATE [dbo].[KHO_PhieuNhap_ChiTiet]
+                        SET TienVanChuyen = ISNULL(DonGiaVanChuyen, 0) * ISNULL(SoLuong, 0)
+                        WHERE IDPhieuNhap = @IDPhieuNhap
+                    ", new { IDPhieuNhap = activeId });
                 }
 
                 string updateTotalsSql = @"
@@ -492,7 +500,7 @@ namespace SalesManagementSystem.Repositories
             using (var conn = _db.CreateConnection())
             {
                 string kw = (keyword ?? "").Trim().ToLower();
-                return conn.Query("SELECT ID, MaSanPham, TenSanPham, DVT FROM DM_SanPham WHERE @KW = '' OR LOWER(TenSanPham) LIKE '%' + @KW + '%' ORDER BY TenSanPham", new { KW = kw });
+                return conn.Query("SELECT ID, MaSanPham, TenSanPham, DVT FROM DM_SanPham WHERE @KW = '' OR LOWER(TenSanPham) LIKE '%' + @KW + '%' OR LOWER(MaSanPham) LIKE '%' + @KW + '%' ORDER BY TenSanPham", new { KW = kw });
             }
         }
 

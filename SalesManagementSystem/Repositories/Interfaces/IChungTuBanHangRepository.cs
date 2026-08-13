@@ -7,7 +7,7 @@ namespace SalesManagementSystem.Repositories.Interfaces
     public interface IChungTuBanHangRepository
     {
         IEnumerable<ChungTuBanHangListViewModel> GetList(string tuNgay, string denNgay, string soChungTu, int? idKhachHang, int? idKho, int? trangThai);
-        IEnumerable<DonHangChungTuViewModel> GetDonHangList(string tuNgay, string denNgay, string soDonHang, int? idKhachHang, int? trangThaiChungTu);
+        IEnumerable<DonHangChungTuViewModel> GetDonHangList(string tuNgay, string denNgay, string soDonHang, int? idKhachHang, int? trangThaiChungTu, int? idSanPham = null);
         ChungTuBanHangViewModel GetById(int id);
         string GenerateSoChungTu();
         int Insert(ChungTuBanHangViewModel model, int nguoiTao, bool ghiSo = false);

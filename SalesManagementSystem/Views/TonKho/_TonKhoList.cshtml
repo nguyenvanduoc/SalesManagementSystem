@@ -1,11 +1,11 @@
 @model SalesManagementSystem.Models.ViewModels.PagedListViewModel<SalesManagementSystem.Models.ViewModels.TonKhoListViewModel>
 
 @{
-    decimal tongTonDauKy = Model.Items != null ? Model.Items.Sum(x => x.TonDauKy) : 0M;
-    decimal tongTongNhap = Model.Items != null ? Model.Items.Sum(x => x.TongNhap) : 0M;
-    decimal tongTongXuat = Model.Items != null ? Model.Items.Sum(x => x.TongXuat) : 0M;
-    decimal tongTonKho = Model.Items != null ? Model.Items.Sum(x => x.TonKho) : 0M;
-    decimal tongGiaTriTon = Model.Items != null ? Model.Items.Sum(x => x.GiaTriTon) : 0M;
+    decimal tongTonDauKy = ViewBag.TongTonDauKy != null ? (decimal)ViewBag.TongTonDauKy : (Model.Items != null ? Model.Items.Sum(x => x.TonDauKy) : 0M);
+    decimal tongTongNhap = ViewBag.TongTongNhap != null ? (decimal)ViewBag.TongTongNhap : (Model.Items != null ? Model.Items.Sum(x => x.TongNhap) : 0M);
+    decimal tongTongXuat = ViewBag.TongTongXuat != null ? (decimal)ViewBag.TongTongXuat : (Model.Items != null ? Model.Items.Sum(x => x.TongXuat) : 0M);
+    decimal tongTonKho = ViewBag.TongTonKho != null ? (decimal)ViewBag.TongTonKho : (Model.Items != null ? Model.Items.Sum(x => x.TonKho) : 0M);
+    decimal tongGiaTriTon = ViewBag.TongGiaTriTon != null ? (decimal)ViewBag.TongGiaTriTon : (Model.Items != null ? Model.Items.Sum(x => x.GiaTriTon) : 0M);
 }
 
 <div class="card shadow-sm">

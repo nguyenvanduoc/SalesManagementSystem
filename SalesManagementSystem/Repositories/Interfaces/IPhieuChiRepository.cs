@@ -30,7 +30,7 @@ namespace SalesManagementSystem.Repositories.Interfaces
         IEnumerable<dynamic> GetNhaCungCapDropdown();
         IEnumerable<dynamic> GetPhuongTienDropdown();
         IEnumerable<dynamic> GetPhieuNhapDropdown(int? idNhaCungCap, int? currentPhieuNhapId = null);
-        IEnumerable<dynamic> GetPhieuNhapThanhToanVanChuyen(int? idPhuongTien = null, string tuNgay = "", string denNgay = "", string soPhieuNhap = "", int? trangThaiThanhToan = null, int pageIndex = 1, int pageSize = 20);
+        IEnumerable<dynamic> GetPhieuNhapThanhToanVanChuyen(int? idPhuongTien = null, string hoTenTaiXe = "", string tuNgay = "", string denNgay = "", string soPhieuNhap = "", int? trangThaiThanhToan = null, int pageIndex = 1, int pageSize = 20);
         dynamic GetCongNoVanChuyenTheoPhieuNhap(int idPhieuNhap);
         IEnumerable<dynamic> GetNhanSuDropdown();
 
