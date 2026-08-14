@@ -12,6 +12,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public int TrangThaiDon { get; set; }
         public string TenTrangThai { get; set; }
         public decimal TongTien { get; set; }
+        public decimal? TongTienKhac { get; set; }
         public string GhiChu { get; set; }
 
         // Từ KhachHang

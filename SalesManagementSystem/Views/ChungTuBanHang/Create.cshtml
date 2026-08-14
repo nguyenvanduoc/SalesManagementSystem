@@ -167,6 +167,7 @@
                                 <th style="width:110px;" class="text-end">Đơn giá</th>
                                 <th style="width:110px;" class="text-end">ĐG bốc xếp</th>
                                 <th style="width:120px;" class="text-end">TT bốc xếp</th>
+                                <th style="width:110px;" class="text-end">Số tiền khác</th>
                                 <th style="width:110px;" class="text-end">Chiết khấu</th>
                                 <th style="width:110px;" class="text-end">Tích lũy Sale</th>
                                 <th style="width:120px;" class="text-end">Thành tiền</th>
@@ -201,6 +202,10 @@
                                     <td class="text-end">
                                         @(Model.ChiTiets[i].ThanhTienBocXep.HasValue ? Model.ChiTiets[i].ThanhTienBocXep.Value.ToString("N0") : "0")
                                         <input type="hidden" name="ChiTiets[@i].ThanhTienBocXep" value="@Model.ChiTiets[i].ThanhTienBocXep" />
+                                    </td>
+                                    <td class="text-end">
+                                        @(Model.ChiTiets[i].SoTienKhac.HasValue ? Model.ChiTiets[i].SoTienKhac.Value.ToString("N0") : "0")
+                                        <input type="hidden" name="ChiTiets[@i].SoTienKhac" value="@Model.ChiTiets[i].SoTienKhac" />
                                     </td>
                                     <td class="text-end">
                                         @(Model.ChiTiets[i].SoTienChietKhau.HasValue ? Model.ChiTiets[i].SoTienChietKhau.Value.ToString("N0") : "0")
@@ -245,6 +250,11 @@
                         <span class="text-muted small me-1">Cộng tiền hàng:</span>
                         <span class="fs-6 text-dark" id="dispTongTienHang">@(Model.ChiTiets != null ? Model.ChiTiets.Sum(c => c.ThanhTien).ToString("N0") : "0")</span>
                         <input type="hidden" id="TongTienHang" name="TongTienHang" value="@Model.TongTienHang" />
+                    </div>
+                    <div>
+                        <span class="text-muted small me-1">Số tiền khác:</span>
+                        <span class="fs-6 text-dark" id="dispTongTienKhac">@((Model.TongTienKhac > 0 ? Model.TongTienKhac : (Model.ChiTiets?.Sum(c => c.SoTienKhac ?? 0m) ?? 0m)).ToString("N0"))</span>
+                        <input type="hidden" name="TongTienKhac" value="@Model.TongTienKhac" />
                     </div>
                     <div>
                         <span class="text-muted small me-1">Chiết khấu:</span>

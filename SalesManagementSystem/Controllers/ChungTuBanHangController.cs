@@ -47,11 +47,21 @@ namespace SalesManagementSystem.Controllers
             }
         }
 
-        public ActionResult Index(int page = 1, int pageSize = 20, string tuNgay = "", string denNgay = "", string soDonHang = "", int? idKhachHang = null, int? trangThai = null, int? idSanPham = null)
+        private SelectList GetPhuongTienList(int? selectedId = null)
+        {
+            using (var conn = new DbConnectionFactory().CreateConnection())
+            {
+                var items = conn.Query("SELECT ID, ISNULL(MaPhuongTien, '') + ' - ' + ISNULL(TenPhuongTien, '') AS Name FROM DM_PhuongTien ORDER BY STT, TenPhuongTien")
+                    .Select(x => new { ID = (int)x.ID, Name = (string)x.Name }).ToList();
+                return new SelectList(items, "ID", "Name", selectedId);
+            }
+        }
+
+        public ActionResult Index(int page = 1, int pageSize = 20, string tuNgay = "", string denNgay = "", string soDonHang = "", int? idKhachHang = null, int? trangThai = null, int? idSanPham = null, int? idPhuongTien = null, string hoTenTaiXe = "")
         {
             if (!PermissionHelper.HasPermission("ChungTuBanHang", LoaiPhanQuyen.Xem)) return View("AccessDenied");
 
-            var list = _repo.GetDonHangList(tuNgay, denNgay, soDonHang, idKhachHang, trangThai, idSanPham).ToList();
+            var list = _repo.GetDonHangList(tuNgay, denNgay, soDonHang, idKhachHang, trangThai, idSanPham, idPhuongTien, hoTenTaiXe).ToList();
             int totalRecords = list.Count;
             var pagedItems = list.Skip((page - 1) * pageSize).Take(pageSize);
 
@@ -69,12 +79,15 @@ namespace SalesManagementSystem.Controllers
             var khs = (new SalesManagementSystem.Repositories.KhachHangRepository(new Data.DbConnectionFactory())).GetPaged(1, 1000, "", out totalKhs).ToList();
             ViewBag.KhachHangs = new SelectList(khs, "ID", "TenKhachHang", idKhachHang);
             ViewBag.SanPhams = GetSanPhamList(idSanPham);
+            ViewBag.PhuongTiens = GetPhuongTienList(idPhuongTien);
 
             ViewBag.TuNgay = tuNgay;
             ViewBag.DenNgay = denNgay;
             ViewBag.SoDonHang = soDonHang;
             ViewBag.IDKhachHang = idKhachHang;
             ViewBag.IDSanPham = idSanPham;
+            ViewBag.IDPhuongTien = idPhuongTien;
+            ViewBag.HoTenTaiXe = hoTenTaiXe;
             ViewBag.TrangThai = trangThai;
 
             if (Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -83,13 +96,13 @@ namespace SalesManagementSystem.Controllers
             return View("Index", model);
         }
 
-        public ActionResult GetList(int page = 1, int pageSize = 20, string tuNgay = "", string denNgay = "", string soDonHang = "", int? idKhachHang = null, int? trangThai = null, int? idSanPham = null)
+        public ActionResult GetList(int page = 1, int pageSize = 20, string tuNgay = "", string denNgay = "", string soDonHang = "", int? idKhachHang = null, int? trangThai = null, int? idSanPham = null, int? idPhuongTien = null, string hoTenTaiXe = "")
         {
             if (!PermissionHelper.HasPermission("ChungTuBanHang", LoaiPhanQuyen.Xem)) return Content("<div class='alert alert-danger'>Không có quyền truy cập</div>");
 
             try
             {
-                var list = _repo.GetDonHangList(tuNgay, denNgay, soDonHang, idKhachHang, trangThai, idSanPham).ToList();
+                var list = _repo.GetDonHangList(tuNgay, denNgay, soDonHang, idKhachHang, trangThai, idSanPham, idPhuongTien, hoTenTaiXe).ToList();
                 int totalRecords = list.Count;
                 var pagedItems = list.Skip((page - 1) * pageSize).Take(pageSize);
 
@@ -160,6 +173,7 @@ namespace SalesManagementSystem.Controllers
                             DonGia = ct.DonGia,
                             DonGiaBocXep = ct.DonGiaBocXep,
                             ThanhTienBocXep = ct.ThanhTienBocXep,
+                            SoTienKhac = ct.SoTienKhac,
                             SoTienChietKhau = ct.SoTienChietKhau,
                             ChuongTrinhTichLuySale = ct.ChuongTrinhTichLuySale,
                             ThanhTienHang = ct.ThanhTienHang,
@@ -175,6 +189,7 @@ namespace SalesManagementSystem.Controllers
                         model.TongTienHang = donHang.ThanhTienHang ?? 0m;
                         model.TongTienThue = donHang.ThanhTienThue ?? 0m;
                         model.PhiBocXep = donHang.PhiBocXep;
+                        model.TongTienKhac = donHang.TongTienKhac ?? 0m;
                         model.TongTienChietKhau = donHang.TongTienChietKhau;
                         model.TongChuongTrinhTichLuySale = donHang.TongChuongTrinhTichLuySale;
                         model.TongCong = donHang.TongTien;
@@ -229,6 +244,7 @@ namespace SalesManagementSystem.Controllers
                     DonGia = ct.DonGia,
                     DonGiaBocXep = ct.DonGiaBocXep,
                     ThanhTienBocXep = ct.ThanhTienBocXep,
+                    SoTienKhac = ct.SoTienKhac,
                     SoTienChietKhau = ct.SoTienChietKhau,
                     ChuongTrinhTichLuySale = ct.ChuongTrinhTichLuySale,
                     ThanhTienHang = ct.ThanhTienHang,
@@ -242,6 +258,7 @@ namespace SalesManagementSystem.Controllers
             model.TongTienHang = model.ChiTiets.Sum(x => x.ThanhTien);
             model.TongTienThue = model.ChiTiets.Sum(x => x.TienThue);
             model.PhiBocXep = donHang.PhiBocXep;
+            model.TongTienKhac = donHang.TongTienKhac ?? model.ChiTiets.Sum(x => x.SoTienKhac ?? 0m);
             model.TongTienChietKhau = donHang.TongTienChietKhau ?? model.ChiTiets.Sum(x => x.SoTienChietKhau ?? 0m);
             model.TongChuongTrinhTichLuySale = donHang.TongChuongTrinhTichLuySale ?? model.ChiTiets.Sum(x => x.ChuongTrinhTichLuySale ?? 0m);
             model.TongCong = model.ChiTiets.Sum(x => x.TongSauThue);
@@ -639,14 +656,14 @@ namespace SalesManagementSystem.Controllers
         }
 
         [HttpGet]
-        public ActionResult ExportExcelList(string tuNgay = "", string denNgay = "", string soDonHang = "", int? idKhachHang = null, int? trangThai = null, int? idSanPham = null)
+        public ActionResult ExportExcelList(string tuNgay = "", string denNgay = "", string soDonHang = "", int? idKhachHang = null, int? trangThai = null, int? idSanPham = null, int? idPhuongTien = null, string hoTenTaiXe = "")
         {
             if (!PermissionHelper.HasPermission("ChungTuBanHang", LoaiPhanQuyen.Xem)) 
                 return View("AccessDenied");
 
             try
             {
-                var list = _repo.GetDonHangList(tuNgay, denNgay, soDonHang, idKhachHang, trangThai, idSanPham).ToList();
+                var list = _repo.GetDonHangList(tuNgay, denNgay, soDonHang, idKhachHang, trangThai, idSanPham, idPhuongTien, hoTenTaiXe).ToList();
 
                 var orderIds = list.Select(x => x.IDDonDatHang).Distinct().ToList();
                 var ctbhIds = list.Where(x => x.IDChungTuBanHang.HasValue).Select(x => x.IDChungTuBanHang.Value).Distinct().ToList();

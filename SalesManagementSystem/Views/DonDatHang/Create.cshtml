@@ -167,6 +167,7 @@
                                 <th style="width:105px;" class="text-end">Đơn giá</th>
                                 <th style="width:105px;" class="text-end">ĐG bốc xếp</th>
                                 <th style="width:110px;" class="text-end">TT bốc xếp</th>
+                                <th style="width:110px;" class="text-end">Số tiền khác</th>
                                 <th style="width:110px;" class="text-end">Chiết khấu</th>
                                 <th style="width:110px;" class="text-end">Tích lũy Sale</th>
                                 <th style="width:120px;" class="text-end">Thành tiền</th>
@@ -203,6 +204,10 @@
                         <span id="dispTongTienHang" class="fs-6 text-dark">0</span>
                     </div>
                     <div>
+                        <span class="text-muted small me-1">Số tiền khác:</span>
+                        <span id="dispTongTienKhac" class="fs-6 text-dark">0</span>
+                    </div>
+                    <div>
                         <span class="text-muted small me-1">Chiết khấu:</span>
                         <span id="dispTongChietKhau" class="fs-6 text-danger">0</span>
                     </div>
@@ -232,7 +237,7 @@
 </form>
 
 @section Scripts {
-<script src="@Url.Content("~/Scripts/don-dat-hang.js?v=3.1")"></script>
+<script src="@Url.Content("~/Scripts/don-dat-hang.js?v=3.5")"></script>
 <script>
     $(document).ready(function () {
         var $form = $('#frmDonDatHang').last();

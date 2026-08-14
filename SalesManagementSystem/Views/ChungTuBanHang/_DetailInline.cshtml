@@ -12,6 +12,7 @@
                 <th class="text-end" style="width:110px;">Đơn giá</th>
                 <th class="text-end" style="width:110px;">ĐG bốc xếp</th>
                 <th class="text-end" style="width:120px;">TT bốc xếp</th>
+                <th class="text-end" style="width:110px;">Số tiền khác</th>
                 <th class="text-end" style="width:110px;">Chiết khấu</th>
                 <th class="text-end" style="width:110px;">Tích lũy Sale</th>
                 <th class="text-end" style="width:120px;">Thành tiền</th>
@@ -34,6 +35,7 @@
                         <td class="text-end">@(item.DonGia > 0 ? item.DonGia.ToString("N0") : "0")</td>
                         <td class="text-end">@(item.DonGiaBocXep > 0 ? item.DonGiaBocXep.Value.ToString("N0") : "0")</td>
                         <td class="text-end">@(item.ThanhTienBocXep > 0 ? item.ThanhTienBocXep.Value.ToString("N0") : "0")</td>
+                        <td class="text-end">@(item.SoTienKhac > 0 ? item.SoTienKhac.Value.ToString("N0") : "0")</td>
                         <td class="text-end">@(item.SoTienChietKhau > 0 ? item.SoTienChietKhau.Value.ToString("N0") : "0")</td>
                         <td class="text-end">@(item.ChuongTrinhTichLuySale > 0 ? item.ChuongTrinhTichLuySale.Value.ToString("N0") : "0")</td>
                         <td class="text-end">@(item.ThanhTien > 0 ? item.ThanhTien.ToString("N0") : "0")</td>
@@ -45,7 +47,7 @@
             else
             {
                 <tr>
-                    <td colspan="13" class="text-center py-4 text-muted">Không có dữ liệu chi tiết hàng hóa</td>
+                    <td colspan="14" class="text-center py-4 text-muted">Không có dữ liệu chi tiết hàng hóa</td>
                 </tr>
             }
         </tbody>
@@ -58,6 +60,7 @@
                     <td></td>
                     <td></td>
                     <td class="text-end">@(Model.ChiTiets.Sum(x => x.ThanhTienBocXep ?? 0m).ToString("N0"))</td>
+                    <td class="text-end">@(Model.ChiTiets.Sum(x => x.SoTienKhac ?? 0m).ToString("N0"))</td>
                     <td class="text-end">@(Model.ChiTiets.Sum(x => x.SoTienChietKhau ?? 0m).ToString("N0"))</td>
                     <td class="text-end">@(Model.ChiTiets.Sum(x => x.ChuongTrinhTichLuySale ?? 0m).ToString("N0"))</td>
                     <td class="text-end">@(Model.ChiTiets.Sum(x => x.ThanhTien).ToString("N0"))</td>
@@ -67,12 +70,12 @@
                 @if (Model.PhiBocXep > 0)
                 {
                 <tr class="fw-bold text-dark">
-                    <td colspan="12" class="text-end">Phí bốc xếp</td>
+                    <td colspan="13" class="text-end">Phí bốc xếp</td>
                     <td class="text-end">@(Model.PhiBocXep.ToString("N0"))</td>
                 </tr>
                 }
                 <tr class="fw-bold text-dark">
-                    <td colspan="12" class="text-end">Tổng thanh toán</td>
+                    <td colspan="13" class="text-end">Tổng thanh toán</td>
                     <td class="text-end">@(Model.TongCong > 0 ? Model.TongCong.ToString("N0") : (Model.ChiTiets.Sum(x => x.TongSauThue) - Model.PhiBocXep).ToString("N0"))</td>
                 </tr>
             </tfoot>

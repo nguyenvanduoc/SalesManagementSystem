@@ -299,6 +299,7 @@ namespace SalesManagementSystem.Controllers
             NormalizeChiTiets(chiTiets);
             decimal thanhTienHang = chiTiets.Sum(x => x.ThanhTienHang ?? 0m);
             decimal phiBocXep = chiTiets.Sum(x => x.ThanhTienBocXep ?? 0m);
+            decimal tongSoTienKhac = chiTiets.Sum(x => x.SoTienKhac ?? 0m);
             decimal tongChietKhau = chiTiets.Sum(x => x.SoTienChietKhau ?? 0m);
             decimal tongTichLuySale = chiTiets.Sum(x => x.ChuongTrinhTichLuySale ?? 0m);
             decimal thanhTienThue = chiTiets.Sum(x => x.ThanhTienThue ?? 0m);
@@ -314,6 +315,7 @@ namespace SalesManagementSystem.Controllers
                 TrangThaiDon    = model.TrangThaiDon,
                 TongTien        = tong,
                 PhiBocXep       = phiBocXep,
+                TongTienKhac    = tongSoTienKhac,
                 TongTienChietKhau = tongChietKhau,
                 TongChuongTrinhTichLuySale = tongTichLuySale,
                 ThanhTienHang   = thanhTienHang,
@@ -339,6 +341,7 @@ namespace SalesManagementSystem.Controllers
                 GhiChu          = c.GhiChu,
                 DonGiaBocXep    = c.DonGiaBocXep,
                 ThanhTienBocXep = c.ThanhTienBocXep,
+                SoTienKhac      = c.SoTienKhac,
                 SoTienChietKhau = c.SoTienChietKhau,
                 ChuongTrinhTichLuySale = c.ChuongTrinhTichLuySale,
                 ThanhTienHang   = c.ThanhTienHang
@@ -426,6 +429,7 @@ namespace SalesManagementSystem.Controllers
                 TrangThaiDon    = don.TrangThaiDon,
                 TongTien        = don.TongTien,
                 PhiBocXep       = don.PhiBocXep,
+                TongTienKhac    = don.TongTienKhac ?? 0,
                 ThanhTienHang   = don.ThanhTienHang ?? 0,
                 ThanhTienThue   = don.ThanhTienThue ?? 0,
                 GhiChu          = don.GhiChu,
@@ -499,6 +503,7 @@ namespace SalesManagementSystem.Controllers
             NormalizeChiTiets(chiTiets);
             decimal thanhTienHang = chiTiets.Sum(x => x.ThanhTienHang ?? 0m);
             decimal phiBocXep = chiTiets.Sum(x => x.ThanhTienBocXep ?? 0m);
+            decimal tongSoTienKhac = chiTiets.Sum(x => x.SoTienKhac ?? 0m);
             decimal tongChietKhau = chiTiets.Sum(x => x.SoTienChietKhau ?? 0m);
             decimal tongTichLuySale = chiTiets.Sum(x => x.ChuongTrinhTichLuySale ?? 0m);
             decimal thanhTienThue = chiTiets.Sum(x => x.ThanhTienThue ?? 0m);
@@ -515,6 +520,7 @@ namespace SalesManagementSystem.Controllers
                 TrangThaiDon    = model.TrangThaiDon,
                 TongTien        = tong,
                 PhiBocXep       = phiBocXep,
+                TongTienKhac    = tongSoTienKhac,
                 TongTienChietKhau = tongChietKhau,
                 TongChuongTrinhTichLuySale = tongTichLuySale,
                 ThanhTienHang   = thanhTienHang,
@@ -541,6 +547,7 @@ namespace SalesManagementSystem.Controllers
                 GhiChu          = c.GhiChu,
                 DonGiaBocXep    = c.DonGiaBocXep,
                 ThanhTienBocXep = c.ThanhTienBocXep,
+                SoTienKhac      = c.SoTienKhac,
                 SoTienChietKhau = c.SoTienChietKhau,
                 ChuongTrinhTichLuySale = c.ChuongTrinhTichLuySale,
                 ThanhTienHang   = c.ThanhTienHang
@@ -980,7 +987,7 @@ namespace SalesManagementSystem.Controllers
                 
                 ct.ThanhTienHang = Math.Round(ct.DonGia * ct.SoLuong, 0);
                 ct.ThanhTienBocXep = Math.Round((ct.DonGiaBocXep ?? 0m) * ct.SoLuong, 0);
-                ct.ThanhTien = Math.Round((ct.ThanhTienHang ?? 0m) - (ct.ThanhTienBocXep ?? 0m) - (ct.SoTienChietKhau ?? 0m) - (ct.ChuongTrinhTichLuySale ?? 0m), 0);
+                ct.ThanhTien = Math.Round((ct.ThanhTienHang ?? 0m) + (ct.SoTienKhac ?? 0m) - (ct.ThanhTienBocXep ?? 0m) - (ct.SoTienChietKhau ?? 0m) - (ct.ChuongTrinhTichLuySale ?? 0m), 0);
                 
                 ct.ThanhTienThue = Math.Round(ct.ThanhTien * ct.ThueGTGT / 100, 0);
                 ct.ThanhTienSauThue = Math.Round(ct.ThanhTien + (ct.ThanhTienThue ?? 0m), 0);

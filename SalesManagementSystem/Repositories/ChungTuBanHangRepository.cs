@@ -20,10 +20,11 @@ namespace SalesManagementSystem.Repositories
             {
                 using (var conn = _db.CreateConnection())
                 {
+                    conn.Execute("IF COL_LENGTH('BAN_ChungTuBanHang', 'TongTienKhac') IS NULL ALTER TABLE BAN_ChungTuBanHang ADD TongTienKhac DECIMAL(18,2) NULL");
                     conn.Execute("IF COL_LENGTH('BAN_ChungTuBanHang_ChiTiet', 'DonGiaBocXep') IS NULL ALTER TABLE BAN_ChungTuBanHang_ChiTiet ADD DonGiaBocXep DECIMAL(18,2) NULL");
                     conn.Execute("IF COL_LENGTH('BAN_ChungTuBanHang_ChiTiet', 'ThanhTienBocXep') IS NULL ALTER TABLE BAN_ChungTuBanHang_ChiTiet ADD ThanhTienBocXep DECIMAL(18,2) NULL");
+                    conn.Execute("IF COL_LENGTH('BAN_ChungTuBanHang_ChiTiet', 'SoTienKhac') IS NULL ALTER TABLE BAN_ChungTuBanHang_ChiTiet ADD SoTienKhac DECIMAL(18,2) NULL");
                     conn.Execute("IF COL_LENGTH('BAN_ChungTuBanHang_ChiTiet', 'ThanhTienHang') IS NULL ALTER TABLE BAN_ChungTuBanHang_ChiTiet ADD ThanhTienHang DECIMAL(18,2) NULL");
-
                 }
             }
             catch { }
@@ -61,7 +62,7 @@ namespace SalesManagementSystem.Repositories
             }
         }
 
-        public IEnumerable<DonHangChungTuViewModel> GetDonHangList(string tuNgay, string denNgay, string soDonHang, int? idKhachHang, int? trangThaiChungTu, int? idSanPham = null)
+        public IEnumerable<DonHangChungTuViewModel> GetDonHangList(string tuNgay, string denNgay, string soDonHang, int? idKhachHang, int? trangThaiChungTu, int? idSanPham = null, int? idPhuongTien = null, string hoTenTaiXe = null)
         {
             using (var conn = _db.CreateConnection())
             {
@@ -72,35 +73,10 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@IDKhachHang", idKhachHang);
                 p.Add("@TrangThaiChungTu", trangThaiChungTu);
                 p.Add("@IDSanPham", idSanPham);
+                p.Add("@IDPhuongTien", idPhuongTien);
+                p.Add("@HoTenTaiXe", string.IsNullOrEmpty(hoTenTaiXe) ? null : hoTenTaiXe);
 
-                string sql = @"
-                    SELECT 
-                        d.ID AS IDDonDatHang,
-                        d.SoDonHang,
-                        d.NgayTaoDon,
-                        k.TenKhachHang,
-                        ISNULL(c.TongCong, d.TongTien) AS TongTien,
-                        ISNULL(c.TongTienHang, d.ThanhTienHang) AS ThanhTienHang,
-                        c.ID AS IDChungTuBanHang,
-                        c.SoChungTu,
-                        c.NgayChungTu,
-                        ISNULL(c.PhiBocXep, d.PhiBocXep) AS PhiBocXep,
-                        d.HoTenTaiXe,
-                        d.SoDienThoaiTaiXe,
-                        CASE WHEN d.TrangThaiDon = 4 THEN 3 ELSE c.TrangThai END AS TrangThaiChungTu
-                    FROM NS_DonDatHang d
-                    LEFT JOIN NS_KhachHang k ON d.IDKhachHang = k.ID
-                    LEFT JOIN BAN_ChungTuBanHang c ON c.IDDonDatHang = d.ID
-                    WHERE (@TuNgay IS NULL OR d.NgayTaoDon >= @TuNgay)
-                      AND (@DenNgay IS NULL OR d.NgayTaoDon <= @DenNgay)
-                      AND (@SoDonHang IS NULL OR d.SoDonHang LIKE '%' + @SoDonHang + '%' OR c.SoChungTu LIKE '%' + @SoDonHang + '%')
-                      AND (@IDKhachHang IS NULL OR d.IDKhachHang = @IDKhachHang)
-                      AND (@TrangThaiChungTu IS NULL OR (CASE WHEN d.TrangThaiDon = 4 THEN 3 ELSE ISNULL(c.TrangThai, 0) END) = @TrangThaiChungTu)
-                      AND (@IDSanPham IS NULL OR EXISTS (SELECT 1 FROM NS_DonDatHangChiTiet dt WHERE dt.IDDonDatHang = d.ID AND dt.IDSanPham = @IDSanPham) OR EXISTS (SELECT 1 FROM BAN_ChungTuBanHang_ChiTiet ct WHERE ct.IDChungTuBanHang = c.ID AND ct.IDSanPham = @IDSanPham))
-                      AND ISNULL(d.TrangThaiDon, 1) <> 0
-                    ORDER BY CASE WHEN c.ID IS NULL THEN 0 ELSE 1 END ASC, d.SoDonHang DESC, d.ID DESC;";
-
-                return conn.Query<DonHangChungTuViewModel>(sql, p);
+                return conn.Query<DonHangChungTuViewModel>("sp_BAN_ChungTuBanHang_GetDonHangList", p, commandType: System.Data.CommandType.StoredProcedure);
             }
         }
 
@@ -118,7 +94,7 @@ namespace SalesManagementSystem.Repositories
                         c.ID, c.IDChungTuBanHang, c.IDSanPham,
                         s.MaSanPham, s.TenSanPham, s.DVT,
                         c.STT, c.SoLuong, c.DonGia,
-                        c.DonGiaBocXep, c.ThanhTienBocXep, c.SoTienChietKhau, c.ChuongTrinhTichLuySale, c.ThanhTienHang,
+                        c.DonGiaBocXep, c.ThanhTienBocXep, c.SoTienKhac, c.SoTienChietKhau, c.ChuongTrinhTichLuySale, c.ThanhTienHang,
                         c.ThanhTien, c.ThueGTGT, c.TienThue, c.TongSauThue, c.GhiChu
                     FROM BAN_ChungTuBanHang_ChiTiet c
                     JOIN DM_SanPham s ON c.IDSanPham = s.ID
@@ -139,6 +115,7 @@ namespace SalesManagementSystem.Repositories
                     TongTienHang = master.TongTienHang,
                     TongTienThue = master.TongTienThue,
                     PhiBocXep = master.PhiBocXep,
+                    TongTienKhac = master.TongTienKhac ?? 0m,
                     TongTienChietKhau = master.TongTienChietKhau,
                     TongChuongTrinhTichLuySale = master.TongChuongTrinhTichLuySale,
                     TongCong = master.TongCong,
@@ -200,6 +177,7 @@ namespace SalesManagementSystem.Repositories
                         p.Add("@TongTienHang", model.TongTienHang);
                         p.Add("@TongTienThue", model.TongTienThue);
                         p.Add("@PhiBocXep", model.PhiBocXep);
+                        p.Add("@TongTienKhac", model.TongTienKhac);
                         p.Add("@TongTienChietKhau", model.TongTienChietKhau ?? 0m);
                         p.Add("@TongChuongTrinhTichLuySale", model.TongChuongTrinhTichLuySale ?? 0m);
                         p.Add("@TongCong", model.TongCong);
@@ -246,6 +224,7 @@ namespace SalesManagementSystem.Repositories
                             pCt.Add("@DonGia", ct.DonGia);
                             pCt.Add("@DonGiaBocXep", ct.DonGiaBocXep);
                             pCt.Add("@ThanhTienBocXep", ct.ThanhTienBocXep);
+                            pCt.Add("@SoTienKhac", ct.SoTienKhac);
                             pCt.Add("@SoTienChietKhau", ct.SoTienChietKhau);
                             pCt.Add("@ChuongTrinhTichLuySale", ct.ChuongTrinhTichLuySale);
                             pCt.Add("@DonGiaVon", ghiSo ? (decimal?)donGiaVon : null);
@@ -259,9 +238,9 @@ namespace SalesManagementSystem.Repositories
 
                             string sqlInsertCt = @"
                                 INSERT INTO BAN_ChungTuBanHang_ChiTiet 
-                                (IDChungTuBanHang, IDSanPham, STT, SoLuong, DonGia, DonGiaBocXep, ThanhTienBocXep, SoTienChietKhau, ChuongTrinhTichLuySale, DonGiaVon, ThanhTienVon, ThanhTienHang, ThanhTien, ThueGTGT, TienThue, TongSauThue, GhiChu)
+                                (IDChungTuBanHang, IDSanPham, STT, SoLuong, DonGia, DonGiaBocXep, ThanhTienBocXep, SoTienKhac, SoTienChietKhau, ChuongTrinhTichLuySale, DonGiaVon, ThanhTienVon, ThanhTienHang, ThanhTien, ThueGTGT, TienThue, TongSauThue, GhiChu)
                                 VALUES 
-                                (@IDChungTuBanHang, @IDSanPham, @STT, @SoLuong, @DonGia, @DonGiaBocXep, @ThanhTienBocXep, @SoTienChietKhau, @ChuongTrinhTichLuySale, @DonGiaVon, @ThanhTienVon, @ThanhTienHang, @ThanhTien, @ThueGTGT, @TienThue, @TongSauThue, @GhiChu);
+                                (@IDChungTuBanHang, @IDSanPham, @STT, @SoLuong, @DonGia, @DonGiaBocXep, @ThanhTienBocXep, @SoTienKhac, @SoTienChietKhau, @ChuongTrinhTichLuySale, @DonGiaVon, @ThanhTienVon, @ThanhTienHang, @ThanhTien, @ThueGTGT, @TienThue, @TongSauThue, @GhiChu);
                             ";
                             conn.Execute(sqlInsertCt, pCt, transaction: tr);
                         }
@@ -441,8 +420,13 @@ namespace SalesManagementSystem.Repositories
                                 IDKho = @IDKho,
                                 IDTaiKhoanThanhToan = @IDTaiKhoanThanhToan,
                                 PhiBocXep = @PhiBocXep,
+                                TongTienKhac = @TongTienKhac,
                                 TongTienChietKhau = @TongTienChietKhau,
                                 TongChuongTrinhTichLuySale = @TongChuongTrinhTichLuySale,
+                                TongTienHang = @TongTienHang,
+                                TongTienThue = @TongTienThue,
+                                TongCong = @TongCong,
+                                ConLai = @ConLai,
                                 TrangThai = @TrangThai,
                                 NguoiCapNhat = @NguoiCapNhat,
                                 NgayCapNhat = GETDATE()
@@ -452,8 +436,13 @@ namespace SalesManagementSystem.Repositories
                                 IDKho = model.IDKho, 
                                 IDTaiKhoanThanhToan = model.IDTaiKhoanThanhToan, 
                                 PhiBocXep = model.PhiBocXep,
+                                TongTienKhac = model.TongTienKhac,
                                 TongTienChietKhau = model.TongTienChietKhau ?? 0m,
                                 TongChuongTrinhTichLuySale = model.TongChuongTrinhTichLuySale ?? 0m,
+                                TongTienHang = model.TongTienHang,
+                                TongTienThue = model.TongTienThue,
+                                TongCong = model.TongCong,
+                                ConLai = model.ConLai,
                                 TrangThai = trangThai, 
                                 NguoiCapNhat = nguoiCapNhat, 
                                 ID = model.ID 

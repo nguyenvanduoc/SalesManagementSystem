@@ -82,6 +82,14 @@
                             <option value="3" @(ViewBag.TrangThai == 3 ? "selected" : "")>Đã hủy</option>
                         </select>
                     </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small mb-1">Phương tiện</label>
+                        @Html.DropDownList("idPhuongTien", (SelectList)ViewBag.PhuongTiens, "-- Tất cả --", new { @class = "form-select form-select-sm" })
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted small mb-1">Thông tin xe</label>
+                        <input type="text" name="hoTenTaiXe" class="form-control form-control-sm" placeholder="Tìm thông tin xe, tài xế..." value="@ViewBag.HoTenTaiXe" />
+                    </div>
                     <div class="col-12 d-flex gap-2 mt-3 justify-content-end">
                         <button type="submit" class="btn btn-sm text-white px-3" style="background-color: #2998e4; border: none;">
                             <i class="bi bi-search"></i> Tìm kiếm

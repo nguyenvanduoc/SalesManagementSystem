@@ -91,7 +91,10 @@ namespace SalesManagementSystem.Repositories
                         c.STT, c.SoLuong, c.DonGia, c.ThanhTien, 
                         c.ThueGTGT, c.TienThue, c.TongSauThue,
                         ISNULL(c.DonGiaVanChuyen, 0) AS DonGiaVanChuyen,
-                        ISNULL(c.TienVanChuyen, 0) AS TienVanChuyen,
+                        CASE 
+                            WHEN ISNULL(c.DonGiaVanChuyen, 0) > 0 THEN ISNULL(c.DonGiaVanChuyen, 0) * ISNULL(c.SoLuong, 0)
+                            ELSE ISNULL(c.TienVanChuyen, 0)
+                        END AS TienVanChuyen,
                         c.GhiChu,
                         c.NgaySanXuat, c.HanSuDung
                     FROM KHO_PhieuNhap_ChiTiet c
@@ -147,37 +150,15 @@ namespace SalesManagementSystem.Repositories
                 // Cập nhật TrangThai
                 conn.Execute("UPDATE KHO_PhieuNhap SET TrangThai = @TrangThai WHERE ID = @ID", new { TrangThai = model.TrangThai, ID = activeId });
 
-                // Cập nhật NgaySanXuat, HanSuDung, DonGiaVanChuyen, TienVanChuyen cho từng chi tiết
-                if (model.ChiTiets != null && model.ChiTiets.Count > 0)
-                {
-                    foreach (var ct in model.ChiTiets)
-                    {
-                        if (ct.ID > 0)
-                        {
-                            string updateDateSql = @"
-                                UPDATE [dbo].[KHO_PhieuNhap_ChiTiet] 
-                                SET NgaySanXuat = @NgaySanXuat,
-                                    HanSuDung = @HanSuDung,
-                                    DonGiaVanChuyen = @DonGiaVanChuyen,
-                                    TienVanChuyen = ISNULL(@DonGiaVanChuyen, 0) * ISNULL(SoLuong, 0)
-                                WHERE ID = @ID
-                            ";
-                            conn.Execute(updateDateSql, new { 
-                                NgaySanXuat = ct.NgaySanXuat, 
-                                HanSuDung = ct.HanSuDung, 
-                                DonGiaVanChuyen = ct.DonGiaVanChuyen,
-                                ID = ct.ID 
-                            });
-                        }
-                    }
-
-                    // Đảm bảo tất cả các dòng chi tiết thuộc phiếu nhập có TienVanChuyen = DonGiaVanChuyen * SoLuong
-                    conn.Execute(@"
-                        UPDATE [dbo].[KHO_PhieuNhap_ChiTiet]
-                        SET TienVanChuyen = ISNULL(DonGiaVanChuyen, 0) * ISNULL(SoLuong, 0)
-                        WHERE IDPhieuNhap = @IDPhieuNhap
-                    ", new { IDPhieuNhap = activeId });
-                }
+                // Đảm bảo tất cả các dòng chi tiết thuộc phiếu nhập có TienVanChuyen = DonGiaVanChuyen * SoLuong
+                conn.Execute(@"
+                    UPDATE [dbo].[KHO_PhieuNhap_ChiTiet]
+                    SET TienVanChuyen = CASE 
+                        WHEN ISNULL(DonGiaVanChuyen, 0) > 0 THEN ISNULL(DonGiaVanChuyen, 0) * ISNULL(SoLuong, 0)
+                        ELSE ISNULL(TienVanChuyen, 0)
+                    END
+                    WHERE IDPhieuNhap = @IDPhieuNhap
+                ", new { IDPhieuNhap = activeId });
 
                 string updateTotalsSql = @"
                     UPDATE [dbo].[KHO_PhieuNhap]

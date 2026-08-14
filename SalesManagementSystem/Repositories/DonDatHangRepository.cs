@@ -23,8 +23,10 @@ namespace SalesManagementSystem.Repositories
                 {
                     conn.Execute("IF COL_LENGTH('NS_DonDatHangChiTiet', 'ThanhTienSauThue') IS NULL ALTER TABLE NS_DonDatHangChiTiet ADD ThanhTienSauThue DECIMAL(18,2) NULL");
                     conn.Execute("IF COL_LENGTH('NS_DonDatHang', 'PhiBocXep') IS NULL ALTER TABLE NS_DonDatHang ADD PhiBocXep DECIMAL(18,2) NULL");
+                    conn.Execute("IF COL_LENGTH('NS_DonDatHang', 'TongTienKhac') IS NULL ALTER TABLE NS_DonDatHang ADD TongTienKhac DECIMAL(18,2) NULL");
                     conn.Execute("IF COL_LENGTH('NS_DonDatHangChiTiet', 'DonGiaBocXep') IS NULL ALTER TABLE NS_DonDatHangChiTiet ADD DonGiaBocXep DECIMAL(18,2) NULL");
                     conn.Execute("IF COL_LENGTH('NS_DonDatHangChiTiet', 'ThanhTienBocXep') IS NULL ALTER TABLE NS_DonDatHangChiTiet ADD ThanhTienBocXep DECIMAL(18,2) NULL");
+                    conn.Execute("IF COL_LENGTH('NS_DonDatHangChiTiet', 'SoTienKhac') IS NULL ALTER TABLE NS_DonDatHangChiTiet ADD SoTienKhac DECIMAL(18,2) NULL");
                     conn.Execute("IF COL_LENGTH('NS_DonDatHangChiTiet', 'ThanhTienHang') IS NULL ALTER TABLE NS_DonDatHangChiTiet ADD ThanhTienHang DECIMAL(18,2) NULL");
                     
                     string initTrangThaiSql = @"
@@ -97,7 +99,7 @@ namespace SalesManagementSystem.Repositories
                         d.ID, d.SoDonHang, d.NgayTaoDon, d.ThoiHanGiaoHang,
                         d.TrangThaiDon,
                         ISNULL(tt.TenTrangThai, N'Không xác định') AS TenTrangThai,
-                        d.TongTien, d.GhiChu,
+                        d.TongTien, d.TongTienKhac, d.GhiChu,
                         d.IDKhachHang,
                         k.MaKhachHang,
                         k.TenKhachHang,
@@ -149,7 +151,7 @@ namespace SalesManagementSystem.Repositories
                         sp.MaSanPham, sp.TenSanPham, sp.DVT,
                         ct.SoLuong, ct.DonGia, ct.ThueGTGT, ct.ThanhTien, ct.ThanhTienThue, ct.ThanhTienSauThue,
                         ct.IsHangKhuyenMai, ct.GhiChu,
-                        ct.DonGiaBocXep, ct.ThanhTienBocXep, ct.SoTienChietKhau, ct.ChuongTrinhTichLuySale, ct.ThanhTienHang
+                        ct.DonGiaBocXep, ct.ThanhTienBocXep, ct.SoTienKhac, ct.SoTienChietKhau, ct.ChuongTrinhTichLuySale, ct.ThanhTienHang
                     FROM NS_DonDatHangChiTiet ct
                     LEFT JOIN DM_SanPham sp ON ct.IDSanPham = sp.ID
                     WHERE ct.IDDonDatHang = @IDDon
@@ -205,11 +207,11 @@ namespace SalesManagementSystem.Repositories
                         string headerSql = @"
                             INSERT INTO NS_DonDatHang
                                 (IDKhachHang, NgayTaoDon, SoDonHang, IDNhanVien, ThoiHanGiaoHang,
-                                 TrangThaiDon, TongTien, PhiBocXep, TongTienChietKhau, TongChuongTrinhTichLuySale, ThanhTienHang, ThanhTienThue, GhiChu, 
+                                 TrangThaiDon, TongTien, PhiBocXep, TongTienKhac, TongTienChietKhau, TongChuongTrinhTichLuySale, ThanhTienHang, ThanhTienThue, GhiChu, 
                                  SoDienThoaiTaiXe, HoTenTaiXe, IDPhuongTien, NgayTao, NguoiTao)
                             VALUES
                                 (@IDKhachHang, @NgayTaoDon, @SoDonHang, @IDNhanVien, @ThoiHanGiaoHang,
-                                 @TrangThaiDon, @TongTien, @PhiBocXep, @TongTienChietKhau, @TongChuongTrinhTichLuySale, @ThanhTienHang, @ThanhTienThue, @GhiChu, 
+                                 @TrangThaiDon, @TongTien, @PhiBocXep, @TongTienKhac, @TongTienChietKhau, @TongChuongTrinhTichLuySale, @ThanhTienHang, @ThanhTienThue, @GhiChu, 
                                  @SoDienThoaiTaiXe, @HoTenTaiXe, @IDPhuongTien, @NgayTao, @NguoiTao);
                             SELECT CAST(SCOPE_IDENTITY() as int);";
 
@@ -218,12 +220,12 @@ namespace SalesManagementSystem.Repositories
                         string detailSql = @"
                             INSERT INTO NS_DonDatHangChiTiet
                                 (IDDonDatHang, IDSanPham, SoLuong, DonGia, ThanhTien, ThanhTienSauThue, ThanhTienThue,
-                                 ThueGTGT, IsHangKhuyenMai, GhiChu, DonGiaBocXep, ThanhTienBocXep, SoTienChietKhau, ChuongTrinhTichLuySale, ThanhTienHang,
+                                 ThueGTGT, IsHangKhuyenMai, GhiChu, DonGiaBocXep, ThanhTienBocXep, SoTienKhac, SoTienChietKhau, ChuongTrinhTichLuySale, ThanhTienHang,
                                  NgayTaoDon, SoDonHang, IDNhanVien, ThoiHanGiaoHang, TrangThaiDon,
                                  NgayTao, NguoiTao)
                             VALUES
                                 (@IDDonDatHang, @IDSanPham, @SoLuong, @DonGia, @ThanhTien, @ThanhTienSauThue, @ThanhTienThue,
-                                 @ThueGTGT, @IsHangKhuyenMai, @GhiChu, @DonGiaBocXep, @ThanhTienBocXep, @SoTienChietKhau, @ChuongTrinhTichLuySale, @ThanhTienHang,
+                                 @ThueGTGT, @IsHangKhuyenMai, @GhiChu, @DonGiaBocXep, @ThanhTienBocXep, @SoTienKhac, @SoTienChietKhau, @ChuongTrinhTichLuySale, @ThanhTienHang,
                                  @NgayTaoDon, @SoDonHang, @IDNhanVien, @ThoiHanGiaoHang, @TrangThaiDon,
                                  @NgayTao, @NguoiTao)";
 
@@ -272,6 +274,7 @@ namespace SalesManagementSystem.Repositories
                                 TrangThaiDon    = @TrangThaiDon,
                                 TongTien        = @TongTien,
                                 PhiBocXep       = @PhiBocXep,
+                                TongTienKhac    = @TongTienKhac,
                                 TongTienChietKhau = @TongTienChietKhau,
                                 TongChuongTrinhTichLuySale = @TongChuongTrinhTichLuySale,
                                 ThanhTienHang   = @ThanhTienHang,
@@ -303,12 +306,12 @@ namespace SalesManagementSystem.Repositories
                         string insertDetailSql = @"
                             INSERT INTO NS_DonDatHangChiTiet
                                 (IDDonDatHang, IDSanPham, SoLuong, DonGia, ThanhTien, ThanhTienSauThue, ThanhTienThue,
-                                 ThueGTGT, IsHangKhuyenMai, GhiChu, DonGiaBocXep, ThanhTienBocXep, SoTienChietKhau, ChuongTrinhTichLuySale, ThanhTienHang,
+                                 ThueGTGT, IsHangKhuyenMai, GhiChu, DonGiaBocXep, ThanhTienBocXep, SoTienKhac, SoTienChietKhau, ChuongTrinhTichLuySale, ThanhTienHang,
                                  NgayTaoDon, SoDonHang, IDNhanVien, ThoiHanGiaoHang, TrangThaiDon,
                                  NgayTao, NguoiTao)
                             VALUES
                                 (@IDDonDatHang, @IDSanPham, @SoLuong, @DonGia, @ThanhTien, @ThanhTienSauThue, @ThanhTienThue,
-                                 @ThueGTGT, @IsHangKhuyenMai, @GhiChu, @DonGiaBocXep, @ThanhTienBocXep, @SoTienChietKhau, @ChuongTrinhTichLuySale, @ThanhTienHang,
+                                 @ThueGTGT, @IsHangKhuyenMai, @GhiChu, @DonGiaBocXep, @ThanhTienBocXep, @SoTienKhac, @SoTienChietKhau, @ChuongTrinhTichLuySale, @ThanhTienHang,
                                  @NgayTaoDon, @SoDonHang, @IDNhanVien, @ThoiHanGiaoHang, @TrangThaiDon,
                                  @NgayTao, @NguoiTao)";
 
@@ -325,6 +328,7 @@ namespace SalesManagementSystem.Repositories
                                 GhiChu          = @GhiChu,
                                 DonGiaBocXep    = @DonGiaBocXep,
                                 ThanhTienBocXep = @ThanhTienBocXep,
+                                SoTienKhac      = @SoTienKhac,
                                 SoTienChietKhau = @SoTienChietKhau,
                                 ChuongTrinhTichLuySale = @ChuongTrinhTichLuySale,
                                 ThanhTienHang   = @ThanhTienHang,

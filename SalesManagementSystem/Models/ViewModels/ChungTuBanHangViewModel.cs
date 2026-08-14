@@ -37,6 +37,7 @@ namespace SalesManagementSystem.Models.ViewModels
         public decimal TongTienHang { get; set; }
         public decimal TongTienThue { get; set; }
         public decimal PhiBocXep { get; set; }
+        public decimal TongTienKhac { get; set; }
         public decimal? TongTienChietKhau { get; set; }
         public decimal? TongChuongTrinhTichLuySale { get; set; }
         public decimal TongCong { get; set; }

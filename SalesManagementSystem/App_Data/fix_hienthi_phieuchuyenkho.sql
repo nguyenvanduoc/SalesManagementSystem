@@ -84,7 +84,7 @@ BEGIN
         p.IDPhuongTien,
         pt.TenPhuongTien AS TenPhuongTien,
         ISNULL(sl.TongSoLuong, 0) AS TongSoLuong,
-        ISNULL(p.TienVanChuyen, 0) AS TienVanChuyen,
+        ISNULL(vc.TongTienVanChuyen, ISNULL(p.TienVanChuyen, 0)) AS TienVanChuyen,
         p.HoTenTaiXe,
         p.SoDienThoaiTaiXe,
         p.NgayGiaoHang
@@ -102,6 +102,11 @@ BEGIN
         FROM [dbo].[KHO_PhieuNhap_ChiTiet]
         GROUP BY IDPhieuNhap
     ) sl ON sl.IDPhieuNhap = p.ID
+    LEFT JOIN (
+        SELECT IDPhieuNhap, SUM(ISNULL(TienVanChuyen, ISNULL(DonGiaVanChuyen, 0) * ISNULL(SoLuong, 0))) AS TongTienVanChuyen
+        FROM [dbo].[KHO_PhieuNhap_ChiTiet]
+        GROUP BY IDPhieuNhap
+    ) vc ON vc.IDPhieuNhap = p.ID
     LEFT JOIN [dbo].[DM_KhoHang] k ON p.IDKho = k.ID
     LEFT JOIN [dbo].[DM_KhoHang] kng ON p.IDKhoNguon = kng.ID
     LEFT JOIN [dbo].[DM_LoaiNhapKho] ln ON p.IDLoaiNhapKho = ln.ID
