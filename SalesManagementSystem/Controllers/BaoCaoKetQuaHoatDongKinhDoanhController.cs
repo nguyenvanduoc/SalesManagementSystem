@@ -75,6 +75,14 @@ namespace SalesManagementSystem.Controllers
                     commandType: CommandType.StoredProcedure
                 ).ToList();
 
+                // Mặc định ẩn sản phẩm mã NoDauKy / NODAUKY trừ khi người dùng chủ động lọc mã này
+                if (string.IsNullOrWhiteSpace(filter.MaSanPham))
+                {
+                    data = data.Where(x => x.MaSanPham == null ||
+                        (!x.MaSanPham.Equals("NODAUKY", StringComparison.OrdinalIgnoreCase) &&
+                         !x.MaSanPham.Equals("NoDauKy", StringComparison.OrdinalIgnoreCase))).ToList();
+                }
+
                 return data;
             }
         }
@@ -116,6 +124,15 @@ namespace SalesManagementSystem.Controllers
                 return Content("Bạn không có quyền xuất dữ liệu này");
 
             var data = GetDataFromStoredProcedure(filter);
+            
+            // Mặc định ẩn sản phẩm mã NoDauKy / NODAUKY trừ khi người dùng chủ động lọc mã này
+            if (string.IsNullOrWhiteSpace(filter.MaSanPham))
+            {
+                data = data.Where(x => x.MaSanPham == null ||
+                    (!x.MaSanPham.Equals("NODAUKY", StringComparison.OrdinalIgnoreCase) &&
+                     !x.MaSanPham.Equals("NoDauKy", StringComparison.OrdinalIgnoreCase))).ToList();
+            }
+
             var model = BuildViewModel(filter, data);
             
             var exportData = model.Data.Select((x, index) => new
@@ -124,6 +141,7 @@ namespace SalesManagementSystem.Controllers
                 MaSanPham = x.MaSanPham,
                 TenSanPham = x.TenSanPham,
                 DonViTinh = x.DonViTinh,
+                DVT = x.DonViTinh,
                 SoLuongDoanhThu = x.SoLuongDoanhThu,
                 ThanhTienDoanhThu = x.ThanhTienDoanhThu,
                 SoLuongGiaVon = x.SoLuongGiaVon,
@@ -132,7 +150,8 @@ namespace SalesManagementSystem.Controllers
                 ChiPhiBaoBi = x.ChiPhiBaoBi,
                 LoiNhuanGop = x.LoiNhuanGop,
                 LoiNhuanThuan = x.LoiNhuanThuan,
-                TySuatLoiNhuan = x.TySuatLoiNhuan / 100 // Excel % format
+                TySuatLoiNhuan = x.TySuatLoiNhuan.ToString("N2") + "%",
+                TySuatLN = x.TySuatLoiNhuan.ToString("N2") + "%"
             });
 
             var variables = new Dictionary<string, object>
@@ -145,10 +164,19 @@ namespace SalesManagementSystem.Controllers
                 { "TotalChiPhiBaoBi", model.TotalChiPhiBaoBi },
                 { "TotalLoiNhuanGop", model.TotalLoiNhuanGop },
                 { "TotalLoiNhuanThuan", model.TotalLoiNhuanThuan },
-                { "TotalTySuatLN", model.TotalTySuatLN / 100 }
+                { "TotalTySuatLN", model.TotalTySuatLN.ToString("N2") + "%" }
             };
 
-            var fileBytes = _excelExportService.Export("KQHDKD_BaoCaoKetQuaKinhDoanh", exportData, out string ext, variables);
+            byte[] fileBytes;
+            string ext;
+            try
+            {
+                fileBytes = _excelExportService.Export("BCHDKD", exportData, out ext, variables);
+            }
+            catch
+            {
+                fileBytes = _excelExportService.Export("KQHDKD_BaoCaoKetQuaKinhDoanh", exportData, out ext, variables);
+            }
             
             string fileName = $"BaoCaoKetQuaHDKD_{DateTime.Now:yyyyMMddHHmmss}.{ext}";
             return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);

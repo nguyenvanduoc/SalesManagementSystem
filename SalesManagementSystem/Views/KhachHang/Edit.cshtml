@@ -72,3 +72,15 @@
         </button>
     </div>
 }
+
+<script>
+    setTimeout(function() {
+        var $modal = $('#frmEditKhachHang').closest('.modal');
+        if ($modal.length) {
+            $modal.find('select.form-select').select2({
+                width: '100%',
+                dropdownParent: $modal
+            });
+        }
+    }, 100);
+</script>

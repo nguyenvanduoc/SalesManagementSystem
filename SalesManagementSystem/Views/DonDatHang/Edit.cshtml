@@ -118,7 +118,7 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label text-muted fw-semibold small">
-                            Nhân sự phụ trách <span class="text-danger">*</span>
+                            Nhân sự phụ trách
                         </label>
                         @Html.DropDownListFor(m => m.IDNhanVien, Model.NhanVienList,
                             "-- Chọn nhân viên --",
@@ -237,8 +237,7 @@
     </div>
 </form>
 
-@section Scripts {
-<script src="@Url.Content("~/Scripts/don-dat-hang.js?v=3.5")"></script>
+<script src="@Url.Content("~/Scripts/don-dat-hang.js?v=4.0")"></script>
 <script>
     $(document).ready(function () {
         var $form = $('#frmDonDatHang').last();

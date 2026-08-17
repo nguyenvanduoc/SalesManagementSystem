@@ -64,9 +64,7 @@
             line-height: 1.42857143 !important;
         }
 
-        /* Permanently hide native select elements that get converted to Select2 */
-        select.select2, 
-        select.form-select:not(.no-select2):not(.page-size-select):not(.ddl-thoi-gian),
+        /* Hide native select elements ONLY after Select2 has been initialized on them */
         select.select2-hidden-accessible {
             display: none !important;
             position: absolute !important;
@@ -1408,6 +1406,7 @@
 </script>
 <script src="~/Scripts/tab-manager.js?v=@DateTime.Now.Ticks"></script>
 <script src="~/Scripts/global-search.js?v=@DateTime.Now.Ticks"></script>
+<script src="~/Scripts/don-dat-hang.js?v=@DateTime.Now.Ticks"></script>
 @RenderSection("scripts", required: false)
 
 <script>

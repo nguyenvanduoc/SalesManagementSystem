@@ -69,5 +69,16 @@
         <button type="submit" class="btn text-white px-4" style="background-color: #2998e4; border: none;">
             <i class="bi bi-save me-1"></i> Lưu thông tin
         </button>
-    </div>
 }
+
+<script>
+    setTimeout(function() {
+        var $modal = $('#frmCreateKhachHang').closest('.modal');
+        if ($modal.length) {
+            $modal.find('select.form-select').select2({
+                width: '100%',
+                dropdownParent: $modal
+            });
+        }
+    }, 100);
+</script>

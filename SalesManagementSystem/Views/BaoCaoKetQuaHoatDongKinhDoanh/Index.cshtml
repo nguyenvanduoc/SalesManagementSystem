@@ -239,6 +239,49 @@
             loadData();
         }
 
+        window.xemChiTiet = function (idSanPham) {
+            var $pane = getPane();
+            var tuNgay = $pane.find('[name="tuNgay"], [name="TuNgay"], #TuNgay').val();
+            var denNgay = $pane.find('[name="denNgay"], [name="DenNgay"], #DenNgay').val();
+            var idKho = $pane.find('[name="idKho"], [name="IDKho"], #IDKho').val();
+
+            $('#detailsModal').remove();
+
+            if (typeof showLoading === 'function') showLoading();
+            $.ajax({
+                url: '@Url.Action("GetDetails", "BaoCaoKetQuaHoatDongKinhDoanh")',
+                type: 'POST',
+                data: {
+                    idSanPham: idSanPham,
+                    tuNgay: tuNgay,
+                    denNgay: denNgay,
+                    idKho: idKho
+                },
+                success: function (res) {
+                    if (typeof hideLoading === 'function') hideLoading();
+                    if (typeof res === 'object' && res.success === false) {
+                        if (typeof showToast === 'function') showToast('error', res.message);
+                        else alert(res.message);
+                        return;
+                    }
+
+                    $('body').append(res);
+                    var el = document.getElementById('detailsModal');
+                    if (el) {
+                        var myModal = new bootstrap.Modal(el);
+                        myModal.show();
+                        $(el).on('hidden.bs.modal', function () {
+                            $(this).remove();
+                        });
+                    }
+                },
+                error: function () {
+                    if (typeof hideLoading === 'function') hideLoading();
+                    if (typeof showToast === 'function') showToast('error', 'Không thể tải chi tiết sản phẩm');
+                }
+            });
+        };
+
         $(document).ready(function () {
             initEvents();
         });

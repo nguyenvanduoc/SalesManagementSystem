@@ -27,7 +27,6 @@ namespace SalesManagementSystem.Models.ViewModels
 
         public DateTime? NgayTaoDon { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng chọn nhân viên phụ trách")]
         public int? IDNhanVien { get; set; }
 
         public DateTime? ThoiHanGiaoHang { get; set; }

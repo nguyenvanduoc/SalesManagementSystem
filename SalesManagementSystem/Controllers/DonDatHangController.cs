@@ -267,8 +267,6 @@ namespace SalesManagementSystem.Controllers
             else if (_repo.CheckDuplicateSoDon(model.SoDonHang.Trim()))
                 ModelState.AddModelError("SoDonHang", "Số đơn hàng đã tồn tại trong hệ thống");
 
-            if (!model.IDNhanVien.HasValue || model.IDNhanVien == 0)
-                ModelState.AddModelError("IDNhanVien", "Vui lòng chọn nhân viên phụ trách");
 
             // Validate chi tiết
             if (chiTiets == null || chiTiets.Count == 0)
@@ -472,8 +470,6 @@ namespace SalesManagementSystem.Controllers
             else if (_repo.CheckDuplicateSoDon(model.SoDonHang.Trim(), model.ID))
                 ModelState.AddModelError("SoDonHang", "Số đơn hàng đã tồn tại trong hệ thống");
 
-            if (!model.IDNhanVien.HasValue || model.IDNhanVien == 0)
-                ModelState.AddModelError("IDNhanVien", "Vui lòng chọn nhân viên phụ trách");
 
             if (chiTiets == null || chiTiets.Count == 0)
                 ModelState.AddModelError("", "Vui lÃ²ng thÃªm Ã­t nháº¥t má»™t sáº£n pháº©m vÃ o Ä‘Æ¡n hÃ ng");

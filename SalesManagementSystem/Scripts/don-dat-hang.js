@@ -37,8 +37,8 @@ var DonDatHang = (function () {
 
         if (cfg.selectedKhId && cfg.selectedKhId != 'null' && cfg.selectedKhId != null) {
             var option = new Option(cfg.selectedKhText || '', cfg.selectedKhId, true, true);
-            $form.find('#selKhachHang').append(option).trigger('change');
-            $form.find('#hdIDKhachHang').val(cfg.selectedKhId);
+            $form.find('#selKhachHang, [id$="selKhachHang"]').append(option).trigger('change');
+            $form.find('#hdIDKhachHang, [name="IDKhachHang"], [id$="hdIDKhachHang"]').val(cfg.selectedKhId);
         }
 
         var existing = cfg.chiTietsJson;
@@ -48,12 +48,12 @@ var DonDatHang = (function () {
             _addRowWithData($form, null);
         }
 
-        $form.find('#PhiBocXepDisplay').on('input change blur', function (e) {
+        $form.find('#PhiBocXepDisplay, [id$="PhiBocXepDisplay"]').on('input change blur', function (e) {
             var val = $(this).val();
             if (e.type === 'blur' || e.type === 'change') {
                 $(this).val(_formatNumber(_parseMoney(val)));
             }
-            $form.find('#PhiBocXep').val(_parseMoney(val));
+            $form.find('#PhiBocXep, [name="PhiBocXep"], [id$="PhiBocXep"]').val(_parseMoney(val));
             calcTotal($form);
         });
 
@@ -62,7 +62,8 @@ var DonDatHang = (function () {
 
     function _initKhachHangSelect2($form) {
         var state = getState($form);
-        $form.find('#selKhachHang').select2({
+        var $selKhachHang = $form.find('#selKhachHang, [id$="selKhachHang"]');
+        $selKhachHang.select2({
             placeholder: 'Tìm theo mã, tên, SĐT, MST...',
             allowClear: !state.config.isReadOnly,
             disabled: state.config.isReadOnly,
@@ -80,7 +81,7 @@ var DonDatHang = (function () {
             templateSelection: function (d) { return d.maKH || (d.text ? d.text.split(' - ')[0] : d.text) || d.id; }
         }).on('select2:select', function (e) {
             var d = e.params.data;
-            $form.find('#hdIDKhachHang').val(d.id);
+            $form.find('#hdIDKhachHang, [name="IDKhachHang"], [id$="hdIDKhachHang"]').val(d.id);
             
             // Extract TenKhachHang from text (usually "MaKH - TenKH")
             var tenKH = d.tenKhachHang || d.tenKH || '';
@@ -92,21 +93,21 @@ var DonDatHang = (function () {
                     tenKH = d.text;
                 }
             }
-            $form.find('#txtTenKH').val(tenKH);
+            $form.find('#txtTenKH, [id$="txtTenKH"]').val(tenKH);
             
-            $form.find('#txtMaSoThue').val(d.maSoThue || '');
-            $form.find('#txtDiaChi').val(d.diaChi || '');
-            $form.find('#txtSDT').val(d.sdt || '');
+            $form.find('#txtMaSoThue, [id$="txtMaSoThue"]').val(d.maSoThue || '');
+            $form.find('#txtDiaChi, [id$="txtDiaChi"]').val(d.diaChi || '');
+            $form.find('#txtSDT, [id$="txtSDT"]').val(d.sdt || '');
 
             if (d.idNhanVien) {
-                var $selNV = $form.find('#selNhanVien');
+                var $selNV = $form.find('#selNhanVien, [name="IDNhanVien"], [id$="selNhanVien"]');
                 if ($selNV.find('option[value="' + d.idNhanVien + '"]').length > 0) {
-                    $selNV.val(d.idNhanVien);
+                    $selNV.val(d.idNhanVien).trigger('change');
                 }
             }
         }).on('select2:clear', function () {
-            $form.find('#hdIDKhachHang').val('');
-            $form.find('#txtTenKH,#txtMaSoThue,#txtDiaChi,#txtSDT').val('');
+            $form.find('#hdIDKhachHang, [name="IDKhachHang"], [id$="hdIDKhachHang"]').val('');
+            $form.find('#txtTenKH, [id$="txtTenKH"], #txtMaSoThue, [id$="txtMaSoThue"], #txtDiaChi, [id$="txtDiaChi"], #txtSDT, [id$="txtSDT"]').val('');
         });
     }
 
@@ -402,31 +403,29 @@ var DonDatHang = (function () {
         }
         var ok = true;
 
-        var idKH = $form.find('#hdIDKhachHang').val();
+        var idKH = $form.find('#hdIDKhachHang, [name="IDKhachHang"], [id$="hdIDKhachHang"]').val();
+        var $selKhachHang = $form.find('#selKhachHang, [id$="selKhachHang"]');
         if (!idKH || idKH === '0') {
-            $form.find('#selKhachHang').next('.select2').find('.select2-selection')
+            $selKhachHang.next('.select2').find('.select2-selection')
                 .css('border-color', '#dc3545');
             showToast('warning', 'Vui lòng chọn khách hàng.');
             ok = false;
         } else {
-            $form.find('#selKhachHang').next('.select2').find('.select2-selection')
+            $selKhachHang.next('.select2').find('.select2-selection')
                 .css('border-color', '');
         }
 
-        if (!$form.find('#selNhanVien').val()) {
-            $form.find('#selNhanVien').addClass('field-error');
-            if (ok) showToast('warning', 'Vui lòng chọn nhân viên phụ trách.');
-            ok = false;
-        } else {
-            $form.find('#selNhanVien').removeClass('field-error');
-        }
+        var $selNhanVien = $form.find('#selNhanVien, [name="IDNhanVien"], [id$="selNhanVien"]');
+        $selNhanVien.removeClass('field-error');
 
-        if (!$form.find('#SoDonHang').val().trim()) {
-            $form.find('#SoDonHang').addClass('field-error');
+        var $soDonHang = $form.find('#SoDonHang, [name="SoDonHang"], [id$="SoDonHang"]');
+        var valSoDH = $soDonHang.val() ? $soDonHang.val().trim() : '';
+        if (!valSoDH) {
+            $soDonHang.addClass('field-error');
             if (ok) showToast('warning', 'Vui lòng nhập số đơn hàng.');
             ok = false;
         } else {
-            $form.find('#SoDonHang').removeClass('field-error');
+            $soDonHang.removeClass('field-error');
         }
 
         var rows = $form.find('#tbodyChiTiet tr');
