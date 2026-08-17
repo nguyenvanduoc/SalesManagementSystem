@@ -1,4 +1,4 @@
-﻿using System.Web;
+using System.Web;
 using System.Web.Optimization;
 
 namespace SalesManagementSystem
@@ -22,9 +22,17 @@ namespace SalesManagementSystem
             bundles.Add(new Bundle("~/bundles/bootstrap").Include(
                       "~/Scripts/bootstrap.js"));
 
+            bundles.Add(new ScriptBundle("~/bundles/appscripts").Include(
+                      "~/Scripts/tab-manager.js",
+                      "~/Scripts/global-search.js",
+                      "~/Scripts/don-dat-hang.js"));
+
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
                       "~/Content/site.css"));
+
+            // Bật tự động nén & gộp JS/CSS (Minification & Bundling) trên toàn hệ thống
+            BundleTable.EnableOptimizations = true;
         }
     }
 }

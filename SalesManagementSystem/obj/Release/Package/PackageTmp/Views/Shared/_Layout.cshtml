@@ -857,7 +857,7 @@
             <i class="bi bi-list" style="opacity: 0.85;"></i>
         </button>
     </div>
-    @Html.Action("Menu", "Home")
+    <div id="sidebarMenuContainer"></div>
 </nav>
 
 <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
@@ -920,18 +920,19 @@
         <!-- TAB CONTENT -->
         <div class="tab-content" id="mainTabContent">
             <div class="tab-pane fade @(isHome ? "show active" : "")" id="default-tab-pane" role="tabpanel" aria-labelledby="default-tab" tabindex="0" data-url="@(currentUrl.Contains("/dashboard") ? Url.Action("Index", "Dashboard") : Url.Action("Index", "Home"))">
-                @if (isHome)
-                {
-                    @RenderBody()
-                }
+                <!-- Dashboard content loaded dynamically via AJAX -->
             </div>
             @if (!isHome)
             {
                 <div class="tab-pane fade show active" id="tab-direct-load-pane" role="tabpanel" aria-labelledby="tab-direct-load" tabindex="0" data-url="@Request.Url.PathAndQuery">
-                    @RenderBody()
+                    <!-- Page content loaded dynamically via AJAX -->
                 </div>
             }
         </div>
+        @{
+            // Satisfy ASP.NET MVC RenderBody requirement silently without outputting HTML to initial response payload
+            var dummyRenderBody = RenderBody();
+        }
     </main>
 </div>
 
@@ -1403,10 +1404,45 @@
     }).on('mouseleave', '.table-responsive .dropdown-hover', function() {
         $(this).closest('.table-responsive').css('overflow', '');
     });
+
+    // Dynamic Menu & Page Content Loader (Chống lộ HTML khi bấm Ctrl + U)
+    $(document).ready(function() {
+        // 1. Fetch Sidebar Menu
+        $.ajax({
+            url: '@Url.Action("GetMenu", "Home")',
+            type: 'POST',
+            global: false,
+            success: function (res) {
+                $('#sidebarMenuContainer').html(res);
+            }
+        });
+
+        // 2. Fetch Active Tab Content (Dashboard / Page Content)
+        var $activePane = $('#mainTabContent .tab-pane.active');
+        if ($activePane.length && $.trim($activePane.html()) === '') {
+            var dataUrl = $activePane.attr('data-url');
+            if (dataUrl) {
+                if (typeof showLoading === 'function') showLoading();
+                $.ajax({
+                    url: dataUrl,
+                    type: 'GET',
+                    headers: { 'X-SPA-Load': 'true' },
+                    success: function (html) {
+                        if (typeof hideLoading === 'function') hideLoading();
+                        $activePane.html(html);
+                        if (typeof reInitPlugins === 'function') {
+                            reInitPlugins($activePane.attr('id'));
+                        }
+                    },
+                    error: function () {
+                        if (typeof hideLoading === 'function') hideLoading();
+                    }
+                });
+            }
+        }
+    });
 </script>
-<script src="~/Scripts/tab-manager.js?v=@DateTime.Now.Ticks"></script>
-<script src="~/Scripts/global-search.js?v=@DateTime.Now.Ticks"></script>
-<script src="~/Scripts/don-dat-hang.js?v=@DateTime.Now.Ticks"></script>
+@Scripts.Render("~/bundles/appscripts")
 @RenderSection("scripts", required: false)
 
 <script>

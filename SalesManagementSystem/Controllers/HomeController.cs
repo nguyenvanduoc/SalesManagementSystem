@@ -43,6 +43,21 @@ namespace SalesManagementSystem.Controllers
         /// Render sidebar menu động từ ACL_ManHinh + ACL_Action.
         /// [ChildActionOnly] = chỉ gọi được bằng @Html.Action(), không thể truy cập trực tiếp qua URL.
         /// </summary>
+        [HttpPost]
+        public ActionResult GetMenu()
+        {
+            var groups = _menuRepo.GetSidebarGroups();
+
+            var vm = new SidebarVM
+            {
+                Groups           = groups,
+                ActiveController = RouteData.Values["controller"]?.ToString() ?? "",
+                ActiveAction     = RouteData.Values["action"]?.ToString()     ?? ""
+            };
+
+            return PartialView("_Menu", vm);
+        }
+
         [ChildActionOnly]
         public ActionResult Menu()
         {
