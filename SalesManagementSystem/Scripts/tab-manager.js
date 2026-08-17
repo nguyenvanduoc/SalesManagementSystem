@@ -538,8 +538,12 @@ var TabManager = (function () {
                     if (url) {
                         loadTabContent(tabId, url);
                     }
-                } else if (typeof syncThoiGianFilter === 'function') {
-                    syncThoiGianFilter($pane);
+                } else {
+                    if (typeof syncThoiGianFilter === 'function') {
+                        syncThoiGianFilter($pane);
+                    }
+                    // Re-init plugins để tính toán lại kích thước hiển thị và nạp lại Select2 khi Tab chuyển sang trạng thái HƯỚNG SÁNG (visible)
+                    reInitPlugins(paneId.replace('#', ''));
                 }
 
                 // Giữ sạch thanh địa chỉ trình duyệt ở trang gốc / vì ứng dụng chạy dạng Tab SPA
@@ -865,6 +869,7 @@ var TabManager = (function () {
 
     function reInitPlugins(paneId) {
         var container = $('#' + paneId);
+        if (container.length === 0) return;
 
         if (typeof syncThoiGianFilter === 'function') {
             syncThoiGianFilter(container);
@@ -876,16 +881,43 @@ var TabManager = (function () {
 
             $comboboxes.each(function () {
                 var $this = $(this);
-                // Đảm bảo có option rỗng đầu tiên để allowClear hoạt động
-                if ($this.find('option[value=""]').length === 0 && !$this.prop('multiple')) {
-                    $this.prepend('<option value=""></option>');
-                }
-            });
+                var rawId = $this.attr('id');
 
-            $comboboxes.select2({
-                width: '100%',
-                allowClear: true,
-                placeholder: 'Chọn...'
+                // Đảm bảo ID thẻ duy nhất tuyệt đối trong toàn bộ SPA DOM để tránh xung đột giữa các Tab
+                if (rawId && rawId.indexOf(paneId) === -1) {
+                    var scopedId = paneId + '_' + rawId;
+                    $this.attr('id', scopedId);
+                    var $label = container.find('label[for="' + rawId + '"]');
+                    if ($label.length > 0) {
+                        $label.attr('for', scopedId);
+                    }
+                }
+
+                // Nếu đã khởi tạo Select2 trước đó thì hủy (destroy) sạch trước để tránh hỏng dữ liệu DOM
+                if ($this.hasClass('select2-hidden-accessible')) {
+                    try { $this.select2('destroy'); } catch (e) { }
+                }
+
+                // Chỉ prepend option rỗng nếu thẻ chưa có option giá trị rỗng nào và không phải multiple
+                if ($this.find('option[value=""]').length === 0 && !$this.prop('multiple')) {
+                    var firstOptVal = $this.find('option').first().val();
+                    if (firstOptVal !== '' && firstOptVal !== undefined) {
+                        $this.prepend('<option value=""></option>');
+                    }
+                }
+
+                var placeholderText = 'Chọn...';
+                var emptyOpt = $this.find('option[value=""]').first();
+                if (emptyOpt.length > 0 && emptyOpt.text().trim() !== '') {
+                    placeholderText = emptyOpt.text().trim();
+                }
+
+                $this.select2({
+                    width: '100%',
+                    allowClear: true,
+                    placeholder: placeholderText,
+                    dropdownParent: container
+                });
             });
         }
 

@@ -1010,21 +1010,6 @@
         $.fn.select2.defaults.set("allowClear", true);
         $.fn.select2.defaults.set("placeholder", "Chọn...");
 
-        // Ghi đè hàm select2 để tự động thêm option rỗng cho combobox đơn (để allowClear hoạt động)
-        var originalSelect2 = $.fn.select2;
-        $.fn.select2 = function () {
-            if (arguments.length === 0 || typeof arguments[0] === 'object') {
-                this.each(function () {
-                    var $this = $(this);
-                    if ($this.is('select') && !$this.prop('multiple') && $this.find('option[value=""]').length === 0) {
-                        $this.prepend('<option value=""></option>');
-                    }
-                });
-            }
-            return originalSelect2.apply(this, arguments);
-        };
-        $.extend($.fn.select2, originalSelect2);
-        
         // Khắc phục lỗi Select2 tự động mở dropdown khi click vào nút X (clear)
         $(document).on('select2:unselecting', 'select', function(e) {
             $(this).data('unselecting', true);
