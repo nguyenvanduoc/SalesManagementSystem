@@ -8,6 +8,7 @@ CREATE OR ALTER PROCEDURE dbo.sp_KHO_PhieuNhap_GetList
     @TenNguoiNhan NVARCHAR(200) = NULL,
     @TenNguoiGiao NVARCHAR(200) = NULL,
     @IDPhuongTien INT = NULL,
+    @IDSanPham INT = NULL,
     @Offset INT = 0,
     @PageSize INT = 20,
     @TotalRecords INT OUTPUT
@@ -29,6 +30,7 @@ BEGIN
       AND (LEN(ISNULL(@TenNguoiNhan,'')) = 0 OR ISNULL(NULLIF(p.TenNguoiNhan, ''), ns.Ten) LIKE N'%' + @TenNguoiNhan + N'%')
       AND (LEN(ISNULL(@TenNguoiGiao,'')) = 0 OR p.TenNguoiGiao LIKE N'%' + @TenNguoiGiao + N'%')
       AND (@IDPhuongTien IS NULL OR p.IDPhuongTien = @IDPhuongTien)
+      AND (@IDSanPham IS NULL OR EXISTS (SELECT 1 FROM [dbo].[KHO_PhieuNhap_ChiTiet] ct WHERE ct.IDPhieuNhap = p.ID AND ct.IDSanPham = @IDSanPham))
 
     -- Trở về danh sách
     SELECT 
@@ -38,9 +40,16 @@ BEGIN
         p.IDKho,
         k.TenKhoHang AS TenKho,
         k.MaKhoHang AS MaKhoHang,
+        p.IDKhoNguon,
+        kng.TenKhoHang AS TenKhoNguon,
+        p.IDLoaiNhapKho,
+        ln.TenLoaiNhap AS TenLoaiNhap,
+        ln.MaLoaiNhap AS MaLoaiNhap,
         p.IDNhaCungCap,
         ncc.TenNhaCungCap AS TenNhaCungCap,
         ncc.MaNhaCungCap AS MaNhaCungCap,
+        p.IDKhachHang,
+        kh.TenKhachHang AS TenKhachHang,
         p.SoHoaDon,
         p.NgayHoaDon,
         p.TenNguoiGiao,
@@ -54,7 +63,7 @@ BEGIN
         p.TongCong,
         p.NgayTao,
         p.NguoiTao,
-        NguoiTaoText = nsTao.HoDem + ' ' + ns.Ten,
+        NguoiTaoText = ISNULL(nsTao.HoDem + ' ' + nsTao.Ten, ''),
         TrangThaiThanhToan = CASE 
             WHEN p.TongCong - ISNULL(pay.DaThanhToan, 0) <= 0 THEN 2
             WHEN ISNULL(pay.DaThanhToan, 0) > 0 THEN 1
@@ -65,7 +74,7 @@ BEGIN
         p.IDPhuongTien,
         pt.TenPhuongTien AS TenPhuongTien,
         ISNULL(sl.TongSoLuong, 0) AS TongSoLuong,
-        ISNULL(p.TienVanChuyen, 0) AS TienVanChuyen,
+        ISNULL(vc.TongTienVanChuyen, ISNULL(p.TienVanChuyen, 0)) AS TienVanChuyen,
         p.HoTenTaiXe,
         p.SoDienThoaiTaiXe,
         p.NgayGiaoHang
@@ -83,7 +92,15 @@ BEGIN
         FROM [dbo].[KHO_PhieuNhap_ChiTiet]
         GROUP BY IDPhieuNhap
     ) sl ON sl.IDPhieuNhap = p.ID
+    LEFT JOIN (
+        SELECT IDPhieuNhap, SUM(ISNULL(TienVanChuyen, ISNULL(DonGiaVanChuyen, 0) * ISNULL(SoLuong, 0))) AS TongTienVanChuyen
+        FROM [dbo].[KHO_PhieuNhap_ChiTiet]
+        GROUP BY IDPhieuNhap
+    ) vc ON vc.IDPhieuNhap = p.ID
     LEFT JOIN [dbo].[DM_KhoHang] k ON p.IDKho = k.ID
+    LEFT JOIN [dbo].[DM_KhoHang] kng ON p.IDKhoNguon = kng.ID
+    LEFT JOIN [dbo].[DM_LoaiNhapKho] ln ON p.IDLoaiNhapKho = ln.ID
+    LEFT JOIN [dbo].[NS_KhachHang] kh ON p.IDKhachHang = kh.ID
     LEFT JOIN [dbo].[DM_NhaCungCap] ncc ON p.IDNhaCungCap = ncc.ID
     LEFT JOIN [dbo].[NS_NhanSu] ns ON p.IDNhanSuNhan = ns.ID
     LEFT JOIN [dbo].[NS_NhanSu] nsTao ON p.NguoiTao = nsTao.ID
@@ -98,6 +115,7 @@ BEGIN
       AND (LEN(ISNULL(@TenNguoiNhan,'')) = 0 OR ISNULL(NULLIF(p.TenNguoiNhan, ''), ns.Ten) LIKE N'%' + @TenNguoiNhan + N'%')
       AND (LEN(ISNULL(@TenNguoiGiao,'')) = 0 OR p.TenNguoiGiao LIKE N'%' + @TenNguoiGiao + N'%')
       AND (@IDPhuongTien IS NULL OR p.IDPhuongTien = @IDPhuongTien)
+      AND (@IDSanPham IS NULL OR EXISTS (SELECT 1 FROM [dbo].[KHO_PhieuNhap_ChiTiet] ct WHERE ct.IDPhieuNhap = p.ID AND ct.IDSanPham = @IDSanPham))
     ORDER BY p.NgayNhap DESC, p.ID DESC
     OFFSET @Offset ROWS
     FETCH NEXT @PageSize ROWS ONLY;

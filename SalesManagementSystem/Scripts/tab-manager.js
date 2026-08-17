@@ -289,6 +289,14 @@ var TabManager = (function () {
             params.push({ name: 'pageSize', value: pageSize });
             var url = action + '?' + $.param(params);
 
+            // Lưu URL tìm kiếm có tham số để khi click Quay lại từ chi tiết sẽ khôi phục 100% bộ lọc
+            if (action) {
+                var indexAction = action.replace(/\/GetList/gi, '/Index');
+                var searchIndexUrl = indexAction + (indexAction.indexOf('?') > -1 ? '&' : '?') + $.param(params);
+                $pane.attr('data-last-search-url', searchIndexUrl);
+                $pane.attr('data-url', searchIndexUrl);
+            }
+
             var grid = findGrid($pane);
             if (grid) {
                 ajaxLoadGrid(url, grid);
@@ -315,17 +323,33 @@ var TabManager = (function () {
             }
 
             e.preventDefault();
-            var paneId = $(this).closest('.tab-pane').attr('id');
+            var $pane = $(this).closest('.tab-pane');
+            var paneId = $pane.attr('id');
             var key = paneId.replace('-pane', '');
 
-            var baseUrl = $(this).attr('data-base-url') || href;
-            loadTabContent(key, href);
-            $('#' + paneId).attr('data-url', baseUrl);
+            var linkText = $(this).text().trim().toLowerCase();
+            var isReset = linkText.indexOf('làm mới') !== -1 || $(this).hasClass('btn-reset');
+            var lastSearchUrl = $pane.attr('data-last-search-url');
+            var targetUrl = href;
+
+            if (isReset) {
+                $pane.removeAttr('data-last-search-url');
+            } else if (lastSearchUrl) {
+                var cleanHref = cleanUrlForHistory(href).split('?')[0].toLowerCase();
+                var cleanLast = cleanUrlForHistory(lastSearchUrl).split('?')[0].toLowerCase();
+
+                if (cleanHref.endsWith('/')) cleanHref = cleanHref.slice(0, -1);
+                if (cleanLast.endsWith('/')) cleanLast = cleanLast.slice(0, -1);
+
+                if (cleanHref === cleanLast || linkText.indexOf('quay lại') !== -1) {
+                    targetUrl = lastSearchUrl;
+                }
+            }
+
+            var baseUrl = $(this).attr('data-base-url') || targetUrl;
+            loadTabContent(key, targetUrl);
+            $pane.attr('data-url', baseUrl);
             saveTabsState();
-            // Vô hiệu hóa đổi URL để ẩn địa chỉ chi tiết lộ liễu
-            // if (window.history && window.history.replaceState) {
-            //     window.history.replaceState(null, '', cleanUrlForHistory(href));
-            // }
         });
     }
 
@@ -384,10 +408,9 @@ var TabManager = (function () {
                             var baseUrl = res.redirectBaseUrl || res.redirectUrl;
                             $('#' + paneId).attr('data-url', baseUrl);
                             saveTabsState();
-                            // Vô hiệu hóa đổi URL để ẩn địa chỉ chi tiết lộ liễu
-                            // if (window.history && window.history.replaceState) {
-                            //     window.history.replaceState(null, '', cleanUrlForHistory(res.redirectUrl));
-                            // }
+                            if (window.history && window.history.replaceState) {
+                                window.history.replaceState(null, '', '/');
+                            }
                         }
                     } else {
                         $pane.html(res);
@@ -418,6 +441,11 @@ var TabManager = (function () {
     // ─── init() ─────────────────────────────────────────────────────────────
 
     function init() {
+        // Tự động giữ sạch thanh địa chỉ ở trang gốc / vì ứng dụng chạy dạng SPA Tab
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, '', '/');
+        }
+
         // Phân trang & pageSize — TẬP TRUNG, dùng namespace, luôn scope đúng pane
         initPaginationHandler();
         initPageSizeHandler();
@@ -514,10 +542,10 @@ var TabManager = (function () {
                     syncThoiGianFilter($pane);
                 }
 
-                // Vô hiệu hóa cập nhật URL trình duyệt để ẩn địa chỉ chi tiết lộ liễu
-                // if (url && window.history && window.history.replaceState) {
-                //     window.history.replaceState(null, '', cleanUrlForHistory(url));
-                // }
+                // Giữ sạch thanh địa chỉ trình duyệt ở trang gốc / vì ứng dụng chạy dạng Tab SPA
+                if (window.history && window.history.replaceState) {
+                    window.history.replaceState(null, '', '/');
+                }
             }
             // Đồng bộ sidebar mỗi khi tab được switch (kể cả click trực tiếp vào button tab)
             syncSidebarState(tabId);

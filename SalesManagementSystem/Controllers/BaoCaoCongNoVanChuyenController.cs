@@ -62,6 +62,8 @@ namespace SalesManagementSystem.Controllers
                             ViewBag.PN_TongCong = (decimal)(phieuNhap.TongCong ?? 0m);
                             ViewBag.PN_TienVanChuyen = (decimal)(phieuNhap.TienVanChuyen ?? 0m);
                             ViewBag.PN_GhiChu = (string)(phieuNhap.GhiChu ?? "");
+                            ViewBag.PN_TenNguoiGiao = (string)(phieuNhap.TenNguoiGiao ?? "");
+                            ViewBag.PN_TenNguoiNhan = (string)(phieuNhap.TenNguoiNhan ?? "");
                             ViewBag.PN_NguoiTao = (string)(phieuNhap.NguoiTaoTen ?? "");
                         }
                         else
@@ -71,6 +73,7 @@ namespace SalesManagementSystem.Controllers
                             ViewBag.PN_NgayNhap = null;
                             ViewBag.PN_TongTienHang = 0m; ViewBag.PN_TongCong = 0m;
                             ViewBag.PN_TienVanChuyen = 0m; ViewBag.PN_GhiChu = "";
+                            ViewBag.PN_TenNguoiGiao = ""; ViewBag.PN_TenNguoiNhan = "";
                             ViewBag.PN_NguoiTao = "";
                         }
 
@@ -250,6 +253,10 @@ namespace SalesManagementSystem.Controllers
                         NgayGiaoHang = x.NgayGiaoHang != null ? ((DateTime)x.NgayGiaoHang).ToString("dd/MM/yyyy") : "",
                         NguoiGiaoHang = (string)(x.TenNguoiGiao ?? ""),
                         TenNguoiGiao = (string)(x.TenNguoiGiao ?? ""),
+                        NguoiNhan = (string)(x.TenNguoiNhan ?? ""),
+                        TenNguoiNhan = (string)(x.TenNguoiNhan ?? ""),
+                        NguoiNhanHang = (string)(x.TenNguoiNhan ?? ""),
+                        TenNguoiNhanHang = (string)(x.TenNguoiNhan ?? ""),
                         TenPhuongTien = (string)(x.TenPhuongTien ?? ""),
                         PhuongTien = (string)(x.TenPhuongTien ?? ""),
                         SoPhieuChi = (string)(x.SoPhieuChiList ?? ""),

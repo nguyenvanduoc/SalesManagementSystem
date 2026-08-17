@@ -4,7 +4,7 @@
 -- Description: Retrieve all dashboard statistics, charts, warnings, and recent orders in a single database call.
 -- =============================================
 
-CREATE PROCEDURE sp_Dashboard_GetData
+ALTER PROCEDURE sp_Dashboard_GetData
     @TuNgay DATETIME,
     @DenNgay DATETIME,
     @TuNgayKyTruoc DATETIME,
@@ -100,7 +100,8 @@ BEGIN
 
     -- Tiền hiện có
     DECLARE @TienHienCo DECIMAL(18, 2) = 0;
-    SELECT @TienHienCo = ISNULL((SELECT SUM(SoTienThu) FROM BAN_PhieuThuKhachHang WHERE TrangThai = 2 AND IsDeleted = 0 AND NgayThu <= @DenNgay), 0) -
+    SELECT @TienHienCo = ISNULL((SELECT SUM(SoTienThu) - SUM(SoTienChi) FROM QUY_GiaoDichTien WHERE IsHuy = 0 AND NgayGiaoDich <= @DenNgay), 0) +
+                         ISNULL((SELECT SUM(SoTienThu) FROM BAN_PhieuThuKhachHang WHERE TrangThai = 2 AND IsDeleted = 0 AND NgayThu <= @DenNgay), 0) -
                          ISNULL((SELECT SUM(SoTienChi) FROM KT_PhieuChi WHERE TrangThai = 2 AND IsDeleted = 0 AND NgayChi <= @DenNgay), 0);
 
     -- Số dư tiền mặt (tài khoản ket toan 1111)
@@ -120,14 +121,46 @@ BEGIN
     DECLARE @GiaVon DECIMAL(18, 2) = 0;
     DECLARE @GiaVonKyTruoc DECIMAL(18, 2) = 0;
 
-    SELECT @GiaVon = ISNULL(SUM(ct.DonGia * ct.SoLuong), 0) 
+    SELECT @GiaVon = ISNULL(SUM(
+        CASE 
+            WHEN ISNULL(ct.ThanhTienVon, 0) > 0 THEN ct.ThanhTienVon
+            WHEN ISNULL(ct.DonGiaVon, 0) > 0 THEN ct.SoLuong * ct.DonGiaVon
+            ELSE ct.SoLuong * ISNULL(ap.AvgDonGia, 0)
+        END
+    ), 0) 
     FROM BAN_ChungTuBanHang_ChiTiet ct
-    JOIN BAN_ChungTuBanHang bh ON ct.IDChungTuBanHang = bh.ID
+    INNER JOIN BAN_ChungTuBanHang bh ON ct.IDChungTuBanHang = bh.ID
+    OUTER APPLY (
+        SELECT 
+            SUM(pn_ct.SoLuong * pn_ct.DonGia) / NULLIF(SUM(pn_ct.SoLuong), 0) AS AvgDonGia
+        FROM KHO_PhieuNhap_ChiTiet pn_ct
+        INNER JOIN KHO_PhieuNhap pn ON pn_ct.IDPhieuNhap = pn.ID
+        INNER JOIN DM_KhoHang kh_pn ON pn.IDKho = kh_pn.ID AND ISNULL(kh_pn.IsKhoChinh, 0) = 1
+        WHERE pn_ct.IDSanPham = ct.IDSanPham 
+          AND pn.TrangThai = 2 AND pn.IsDeleted = 0
+          AND pn.NgayNhap <= @DenNgay
+    ) ap
     WHERE bh.TrangThai = 2 AND bh.IsDeleted = 0 AND bh.NgayChungTu >= @TuNgay AND bh.NgayChungTu <= @DenNgay;
 
-    SELECT @GiaVonKyTruoc = ISNULL(SUM(ct.DonGia * ct.SoLuong), 0) 
+    SELECT @GiaVonKyTruoc = ISNULL(SUM(
+        CASE 
+            WHEN ISNULL(ct.ThanhTienVon, 0) > 0 THEN ct.ThanhTienVon
+            WHEN ISNULL(ct.DonGiaVon, 0) > 0 THEN ct.SoLuong * ct.DonGiaVon
+            ELSE ct.SoLuong * ISNULL(ap.AvgDonGia, 0)
+        END
+    ), 0) 
     FROM BAN_ChungTuBanHang_ChiTiet ct
-    JOIN BAN_ChungTuBanHang bh ON ct.IDChungTuBanHang = bh.ID
+    INNER JOIN BAN_ChungTuBanHang bh ON ct.IDChungTuBanHang = bh.ID
+    OUTER APPLY (
+        SELECT 
+            SUM(pn_ct.SoLuong * pn_ct.DonGia) / NULLIF(SUM(pn_ct.SoLuong), 0) AS AvgDonGia
+        FROM KHO_PhieuNhap_ChiTiet pn_ct
+        INNER JOIN KHO_PhieuNhap pn ON pn_ct.IDPhieuNhap = pn.ID
+        INNER JOIN DM_KhoHang kh_pn ON pn.IDKho = kh_pn.ID AND ISNULL(kh_pn.IsKhoChinh, 0) = 1
+        WHERE pn_ct.IDSanPham = ct.IDSanPham 
+          AND pn.TrangThai = 2 AND pn.IsDeleted = 0
+          AND pn.NgayNhap <= @DenNgayKyTruoc
+    ) ap
     WHERE bh.TrangThai = 2 AND bh.IsDeleted = 0 AND bh.NgayChungTu >= @TuNgayKyTruoc AND bh.NgayChungTu <= @DenNgayKyTruoc;
 
     DECLARE @LoiNhuan DECIMAL(18, 2) = @DoanhThu - @GiaVon;
@@ -161,15 +194,17 @@ BEGIN
     -- Thu chi summary
     DECLARE @TongThu DECIMAL(18, 2) = 0;
     DECLARE @TongChi DECIMAL(18, 2) = 0;
-    SELECT @TongThu = ISNULL((SELECT SUM(SoTienThu) FROM BAN_PhieuThuKhachHang WHERE TrangThai = 2 AND IsDeleted = 0 AND NgayThu >= @TuNgay AND NgayThu <= @DenNgay), 0);
-    SELECT @TongChi = ISNULL((SELECT SUM(SoTienChi) FROM KT_PhieuChi WHERE TrangThai = 2 AND IsDeleted = 0 AND NgayChi >= @TuNgay AND NgayChi <= @DenNgay), 0);
+    SELECT @TongThu = ISNULL((SELECT SUM(SoTienThu) FROM QUY_GiaoDichTien WHERE IsHuy = 0 AND NgayGiaoDich >= @TuNgay AND NgayGiaoDich <= @DenNgay), 0) +
+                      ISNULL((SELECT SUM(SoTienThu) FROM BAN_PhieuThuKhachHang WHERE TrangThai = 2 AND IsDeleted = 0 AND NgayThu >= @TuNgay AND NgayThu <= @DenNgay), 0);
+    SELECT @TongChi = ISNULL((SELECT SUM(SoTienChi) FROM KT_PhieuChi WHERE TrangThai = 2 AND IsDeleted = 0 AND NgayChi >= @TuNgay AND NgayChi <= @DenNgay), 0) +
+                      ISNULL((SELECT SUM(SoTienChi) FROM QUY_GiaoDichTien WHERE IsHuy = 0 AND NgayGiaoDich >= @TuNgay AND NgayGiaoDich <= @DenNgay), 0);
 
     -- Cảnh báo
     DECLARE @DonHangQuaHanGiao INT = 0;
     DECLARE @PhieuNhapChuaThanhToan INT = 0;
     DECLARE @ChungTuChuaGhi INT = 0;
     SELECT @DonHangQuaHanGiao = COUNT(1) FROM NS_DonDatHang WHERE TrangThaiDon IN (1, 2) AND ThoiHanGiaoHang < CAST(GETDATE() AS DATE);
-    SELECT @PhieuNhapChuaThanhToan = COUNT(1) FROM KHO_PhieuNhap WHERE IsDeleted = 0 AND TrangThai = 2 AND TongCong > ISNULL((SELECT SUM(SoTienChi) FROM KT_PhieuChi WHERE IDPhieuNhap = KHO_PhieuNhap.ID AND TrangThai = 2 AND IsDeleted = 0), 0);
+    SELECT @PhieuNhapChuaThanhToan = COUNT(1) FROM KHO_PhieuNhap pn INNER JOIN #PaidNCC pd ON pn.ID = pd.IDPhieuNhap WHERE pn.IsDeleted = 0 AND pn.TrangThai = 2 AND (pn.TongCong - pd.DaThanhToan) > 1000 AND pn.NgayNhap <= @DenNgay;
     SELECT @ChungTuChuaGhi = COUNT(1) FROM BAN_ChungTuBanHang WHERE IsDeleted = 0 AND TrangThai = 1;
 
     -- Trả về SELECT Summary đầu tiên
@@ -203,25 +238,38 @@ BEGIN
     ORDER BY CAST(NgayChungTu AS DATE);
 
     -- 3. GiaVonTheoThoiGian
-    SELECT FORMAT(bh.NgayChungTu, 'dd/MM/yyyy') AS Label, SUM(ct.DonGia * ct.SoLuong) AS Value 
+    SELECT FORMAT(bh.NgayChungTu, 'dd/MM/yyyy') AS Label,
+           SUM(
+               CASE 
+                   WHEN ISNULL(ct.ThanhTienVon, 0) > 0 THEN ct.ThanhTienVon
+                   WHEN ISNULL(ct.DonGiaVon, 0) > 0 THEN ct.SoLuong * ct.DonGiaVon
+                   ELSE ct.SoLuong * ISNULL(ap.AvgDonGia, 0)
+               END
+           ) AS Value 
     FROM BAN_ChungTuBanHang_ChiTiet ct
-    JOIN BAN_ChungTuBanHang bh ON ct.IDChungTuBanHang = bh.ID
+    INNER JOIN BAN_ChungTuBanHang bh ON ct.IDChungTuBanHang = bh.ID
+    OUTER APPLY (
+        SELECT 
+            SUM(pn_ct.SoLuong * pn_ct.DonGia) / NULLIF(SUM(pn_ct.SoLuong), 0) AS AvgDonGia
+        FROM KHO_PhieuNhap_ChiTiet pn_ct
+        INNER JOIN KHO_PhieuNhap pn ON pn_ct.IDPhieuNhap = pn.ID
+        INNER JOIN DM_KhoHang kh_pn ON pn.IDKho = kh_pn.ID AND ISNULL(kh_pn.IsKhoChinh, 0) = 1
+        WHERE pn_ct.IDSanPham = ct.IDSanPham 
+          AND pn.TrangThai = 2 AND pn.IsDeleted = 0
+          AND pn.NgayNhap <= @DenNgay
+    ) ap
     WHERE bh.TrangThai = 2 AND bh.IsDeleted = 0 AND bh.NgayChungTu >= @TuNgay AND bh.NgayChungTu <= @DenNgay
     GROUP BY FORMAT(bh.NgayChungTu, 'dd/MM/yyyy'), CAST(bh.NgayChungTu AS DATE)
     ORDER BY CAST(bh.NgayChungTu AS DATE);
 
     -- 4. TrangThaiDonHang
     SELECT 
-        CASE TrangThaiDon
-            WHEN 1 THEN N'Chưa giao'
-            WHEN 2 THEN N'Đang giao'
-            WHEN 3 THEN N'Đã giao'
-            WHEN 4 THEN N'Đã hủy'
-            ELSE N'Khác'
-        END AS Label, COUNT(ID) AS Value
-    FROM NS_DonDatHang
-    WHERE NgayTaoDon >= @TuNgay AND NgayTaoDon <= @DenNgay
-    GROUP BY TrangThaiDon;
+        ISNULL(tt.TenTrangThai, N'Khác') AS Label,
+        COUNT(d.ID) AS Value
+    FROM NS_DonDatHang d
+    LEFT JOIN DM_TrangThaiDonHang tt ON d.TrangThaiDon = tt.ID
+    WHERE d.NgayTaoDon >= @TuNgay AND d.NgayTaoDon <= @DenNgay
+    GROUP BY tt.TenTrangThai, d.TrangThaiDon;
 
     -- 5. TopTonKho (Top 10)
     WITH CurrentStock AS (
@@ -284,6 +332,10 @@ BEGIN
 
     -- 7. ThuChiTheoNgay
     WITH DailyFlow AS (
+        SELECT CAST(NgayGiaoDich AS DATE) AS Ngay, SoTienThu AS Thu, SoTienChi AS Chi
+        FROM QUY_GiaoDichTien
+        WHERE IsHuy = 0 AND NgayGiaoDich >= @TuNgay AND NgayGiaoDich <= @DenNgay
+        UNION ALL
         SELECT CAST(NgayThu AS DATE) AS Ngay, SoTienThu AS Thu, 0 AS Chi
         FROM BAN_PhieuThuKhachHang
         WHERE TrangThai = 2 AND IsDeleted = 0 AND NgayThu >= @TuNgay AND NgayThu <= @DenNgay
@@ -296,19 +348,59 @@ BEGIN
         FORMAT(Ngay, 'dd/MM/yyyy') AS Label,
         SUM(Thu - Chi) AS Value
     FROM DailyFlow
-    GROUP BY Ngay, CAST(Ngay AS DATE)
+    GROUP BY FORMAT(Ngay, 'dd/MM/yyyy'), CAST(Ngay AS DATE)
     ORDER BY CAST(Ngay AS DATE);
 
     -- 8. TaiKhoanThanhToan
     SELECT tk.ID, tk.TenTaiKhoan,
            ISNULL(tk.NganHang, '') AS NganHang,
            ISNULL(tk.SoTaiKhoan, '') AS SoTaiKhoan,
-           ISNULL((SELECT SUM(pth.SoTienThu) FROM BAN_PhieuThuKhachHang pth WHERE pth.IDTaiKhoanThanhToan = tk.ID AND pth.TrangThai = 2 AND pth.IsDeleted = 0 AND pth.NgayThu <= @DenNgay), 0) AS TongThu,
-           ISNULL((SELECT SUM(pc.SoTienChi) FROM KT_PhieuChi pc WHERE pc.IDTaiKhoanThanhToan = tk.ID AND pc.TrangThai = 2 AND pc.IsDeleted = 0 AND pc.NgayChi <= @DenNgay), 0) AS TongChi
+           
+           -- TongThu, TongChi (Toàn thời gian đến DenNgay)
+           ISNULL((SELECT SUM(g.SoTienThu) FROM QUY_GiaoDichTien g WHERE g.IDTaiKhoanThanhToan = tk.ID AND g.NgayGiaoDich <= @DenNgay AND g.IsHuy = 0), 0) AS TongThu,
+           ISNULL((SELECT SUM(g.SoTienChi) FROM QUY_GiaoDichTien g WHERE g.IDTaiKhoanThanhToan = tk.ID AND g.NgayGiaoDich <= @DenNgay AND g.IsHuy = 0), 0) AS TongChi,
+           
+           -- Số dư đầu kỳ
+           ISNULL((
+               SELECT SUM(g.SoTienThu) - SUM(g.SoTienChi)
+               FROM QUY_GiaoDichTien g
+               WHERE g.IDTaiKhoanThanhToan = tk.ID 
+                 AND g.NgayGiaoDich < @TuNgay 
+                 AND g.IsHuy = 0
+           ), 0) AS SoDuDauKy,
+           
+           -- Thu trong kỳ
+           ISNULL((
+               SELECT SUM(g.SoTienThu)
+               FROM QUY_GiaoDichTien g
+               WHERE g.IDTaiKhoanThanhToan = tk.ID 
+                 AND g.NgayGiaoDich >= @TuNgay AND g.NgayGiaoDich <= @DenNgay 
+                 AND g.IsHuy = 0
+           ), 0) AS ThuTrongKy,
+           
+           -- Chi trong kỳ
+           ISNULL((
+               SELECT SUM(g.SoTienChi)
+               FROM QUY_GiaoDichTien g
+               WHERE g.IDTaiKhoanThanhToan = tk.ID 
+                 AND g.NgayGiaoDich >= @TuNgay AND g.NgayGiaoDich <= @DenNgay 
+                 AND g.IsHuy = 0
+           ), 0) AS ChiTrongKy,
+           
+           -- Số dư cuối kỳ
+           ISNULL((
+               SELECT SUM(g.SoTienThu) - SUM(g.SoTienChi)
+               FROM QUY_GiaoDichTien g
+               WHERE g.IDTaiKhoanThanhToan = tk.ID 
+                 AND g.NgayGiaoDich <= @DenNgay 
+                 AND g.IsHuy = 0
+           ), 0) AS SoDuCuoiKy,
+           
+           '' AS GhiChu
+           
     FROM DM_TaiKhoanThanhToan tk
     WHERE tk.IsHoatDong = 1
-    ORDER BY (ISNULL((SELECT SUM(pth2.SoTienThu) FROM BAN_PhieuThuKhachHang pth2 WHERE pth2.IDTaiKhoanThanhToan = tk.ID AND pth2.TrangThai = 2 AND pth2.IsDeleted = 0), 0)
-             - ISNULL((SELECT SUM(pc2.SoTienChi) FROM KT_PhieuChi pc2 WHERE pc2.IDTaiKhoanThanhToan = tk.ID AND pc2.TrangThai = 2 AND pc2.IsDeleted = 0), 0)) DESC;
+    ORDER BY SoDuCuoiKy DESC;
 
     -- 9. Công nợ khách hàng quá hạn (Summary & Top 10)
     SELECT 
@@ -493,13 +585,45 @@ BEGIN
         d.SoDonHang,
         d.NgayTaoDon,
         kh.TenKhachHang,
-        pt.TenPhuongTien,
+        CAST(NULL AS NVARCHAR(250)) AS TenPhuongTien,
         ISNULL((SELECT SUM(SoLuong) FROM NS_DonDatHangChiTiet WHERE IDDonDatHang = d.ID), 0) AS TongSoLuong,
         d.TongTien
     FROM NS_DonDatHang d
     LEFT JOIN NS_KhachHang kh ON d.IDKhachHang = kh.ID
-    LEFT JOIN DM_PhuongTien pt ON d.IDPhuongTien = pt.ID
     WHERE d.TrangThaiDon = 2
     ORDER BY d.NgayTaoDon DESC, d.ID DESC;
+
+    -- 18. PhieuNhapDangDiDuong (Phiếu nhập kho trạng thái 1 - Nháp / Đang đi đường / Đề nghị ghi)
+    SELECT
+        pn.ID,
+        pn.SoChungTu,
+        pn.NgayNhap,
+        pn.TrangThai,
+        ncc.TenNhaCungCap,
+        pt.TenPhuongTien,
+        pn.HoTenTaiXe,
+        pn.TenNguoiGiao,
+        ISNULL((SELECT SUM(SoLuong) FROM KHO_PhieuNhap_ChiTiet WHERE IDPhieuNhap = pn.ID), 0) AS TongSoLuong,
+        ISNULL(NULLIF(pn.TongCong, 0), ISNULL(NULLIF(pn.TongTienHang, 0), ISNULL((SELECT SUM(CASE WHEN ThanhTien > 0 THEN ThanhTien WHEN TongSauThue > 0 THEN TongSauThue ELSE SoLuong * DonGia END) FROM KHO_PhieuNhap_ChiTiet WHERE IDPhieuNhap = pn.ID), 0))) AS TongCong
+    FROM KHO_PhieuNhap pn
+    LEFT JOIN DM_NhaCungCap ncc ON pn.IDNhaCungCap = ncc.ID
+    LEFT JOIN DM_PhuongTien pt ON pn.IDPhuongTien = pt.ID
+    WHERE pn.IsDeleted = 0 AND pn.TrangThai = 1
+    ORDER BY pn.NgayNhap DESC, pn.ID DESC;
+
+    -- 19. PhieuNhapGanDay (Phiếu nhập kho đã ghi gần đây)
+    SELECT TOP 5
+        pn.ID,
+        pn.SoChungTu,
+        pn.NgayNhap,
+        pn.TrangThai,
+        ncc.TenNhaCungCap,
+        pt.TenPhuongTien,
+        ISNULL(NULLIF(pn.TongCong, 0), ISNULL(NULLIF(pn.TongTienHang, 0), ISNULL((SELECT SUM(CASE WHEN ThanhTien > 0 THEN ThanhTien WHEN TongSauThue > 0 THEN TongSauThue ELSE SoLuong * DonGia END) FROM KHO_PhieuNhap_ChiTiet WHERE IDPhieuNhap = pn.ID), 0))) AS TongCong
+    FROM KHO_PhieuNhap pn
+    LEFT JOIN DM_NhaCungCap ncc ON pn.IDNhaCungCap = ncc.ID
+    LEFT JOIN DM_PhuongTien pt ON pn.IDPhuongTien = pt.ID
+    WHERE pn.IsDeleted = 0 AND pn.TrangThai = 2
+    ORDER BY pn.NgayGhiSo DESC, pn.ID DESC;
 
 END

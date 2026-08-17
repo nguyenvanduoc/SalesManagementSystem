@@ -307,11 +307,11 @@
             </div>
             <div class="d-flex align-items-center gap-2">
                 <label class="fw-bold mb-0 text-nowrap text-muted" style="font-size:0.8rem">Từ ngày <span class="text-danger">*</span></label>
-                <input type="date" id="dbTuNgay_@uid" name="tuNgay" class="form-control form-control-sm border-2 rounded-2" style="width:145px; font-size:0.82rem; padding: 4px 8px;" />
+                <input type="date" id="dbTuNgay_@uid" name="tuNgay" value="@DateTime.Now.ToString("yyyy-MM-01")" class="form-control form-control-sm border-2 rounded-2" style="width:145px; font-size:0.82rem; padding: 4px 8px;" />
             </div>
             <div class="d-flex align-items-center gap-2">
                 <label class="fw-bold mb-0 text-nowrap text-muted" style="font-size:0.8rem">Đến ngày <span class="text-danger">*</span></label>
-                <input type="date" id="dbDenNgay_@uid" name="denNgay" class="form-control form-control-sm border-2 rounded-2" style="width:145px; font-size:0.82rem; padding: 4px 8px;" />
+                <input type="date" id="dbDenNgay_@uid" name="denNgay" value="@DateTime.Now.ToString("yyyy-MM-dd")" class="form-control form-control-sm border-2 rounded-2" style="width:145px; font-size:0.82rem; padding: 4px 8px;" />
             </div>
             <button type="submit" id="btnLoadDashboard_@uid" class="btn btn-sm btn-success rounded-2 py-1.5 px-3 fw-bold shadow-sm" style="font-size:0.82rem; height: 32px;"><i class="bi bi-search me-1"></i> Tra cứu</button>
             <button type="button" id="btnResetDashboard_@uid" class="btn btn-sm btn-light border rounded-2 py-1.5 px-2.5" style="font-size:0.82rem; height: 32px;"><i class="bi bi-arrow-clockwise me-1"></i> Làm mới</button>
@@ -891,12 +891,7 @@
             });
 
             $('#btnResetDashboard_@uid').click(function () {
-                var d = new Date();
-                var fd = new Date(d.getFullYear(), d.getMonth(), 1);
-                var ed = new Date(d.getFullYear(), d.getMonth() + 1, 0);
-                $('#dbTuNgay_@uid').val(formatDateLocal(fd));
-                $('#dbDenNgay_@uid').val(formatDateLocal(ed));
-                $('#dashboardFilterForm_@uid').find('.ddl-thoi-gian').val('current_year');
+                initDates();
                 loadDashboardData();
             });
         });
@@ -919,8 +914,27 @@
             var d = new Date();
             var fd = new Date(d.getFullYear(), d.getMonth(), 1);
             var ed = new Date(d.getFullYear(), d.getMonth() + 1, 0);
-            $('#dbTuNgay_@uid').val(formatDateLocal(fd));
-            $('#dbDenNgay_@uid').val(formatDateLocal(ed));
+
+            var $tuInput = $('#dbTuNgay_@uid');
+            var $denInput = $('#dbDenNgay_@uid');
+
+            if ($tuInput.length > 0 && $tuInput[0]._flatpickr) {
+                $tuInput[0]._flatpickr.setDate(fd);
+            } else {
+                $tuInput.val(formatDateLocal(fd));
+            }
+
+            if ($denInput.length > 0 && $denInput[0]._flatpickr) {
+                $denInput[0]._flatpickr.setDate(ed);
+            } else {
+                $denInput.val(formatDateLocal(ed));
+            }
+
+            var $form = $('#dashboardFilterForm_@uid');
+            $form.find('.ddl-thoi-gian').val('current_month');
+            if (typeof syncThoiGianFilter === 'function') {
+                syncThoiGianFilter($form);
+            }
         }
 
         function formatMoney(n) {

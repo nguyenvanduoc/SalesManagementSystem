@@ -1,0 +1,16 @@
+﻿--------------------------------------------------
+[Thời gian]       : 17/08/2026 16:08:27
+[Username]        : admin
+[Controller]      : Dashboard
+[Action]          : GetData
+[URL]             : https://localhost:44326/Dashboard/GetData
+[Message]         : The reader has been disposed; this can happen after all data has been consumed
+Object name: 'Dapper.SqlMapper+GridReader'.
+[InnerException]  : None
+[StackTrace]      : 
+   at Dapper.SqlMapper.GridReader.OnBeforeGrid() in /_/Dapper/SqlMapper.GridReader.cs:line 186
+   at Dapper.SqlMapper.GridReader.ReadImpl[T](Type type, Boolean buffered) in /_/Dapper/SqlMapper.GridReader.cs:line 193
+   at SalesManagementSystem.Repositories.DashboardRepository.GetDashboardData(Nullable`1 tuNgay, Nullable`1 denNgay) in C:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\QuanLyBanHang\SalesManagementSystem\SalesManagementSystem\Repositories\DashboardRepository.cs:line 154
+   at SalesManagementSystem.Controllers.DashboardController.GetData(String tuNgay, String denNgay) in C:\Users\duoc0\OneDrive\Desktop\WEB_QLBH\QuanLyBanHang\SalesManagementSystem\SalesManagementSystem\Controllers\DashboardController.cs:line 48
+--------------------------------------------------
+

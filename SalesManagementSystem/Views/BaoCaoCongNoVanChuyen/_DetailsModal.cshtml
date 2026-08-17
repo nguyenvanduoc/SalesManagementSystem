@@ -13,6 +13,8 @@
                 string soChungTu    = ViewBag.PN_SoChungTu ?? "";
                 string tenNCC       = ViewBag.PN_TenNCC ?? "";
                 string tenPhuongTien = ViewBag.PN_TenPhuongTien ?? "";
+                string tenNguoiGiao = ViewBag.PN_TenNguoiGiao ?? "";
+                string tenNguoiNhan = ViewBag.PN_TenNguoiNhan ?? "";
                 DateTime? ngayNhap  = ViewBag.PN_NgayNhap as DateTime?;
                 DateTime? ngayGiao  = ViewBag.PN_NgayGiaoHang as DateTime?;
                 decimal tienVC      = ViewBag.PN_TienVanChuyen != null ? (decimal)ViewBag.PN_TienVanChuyen : 0m;
@@ -47,49 +49,71 @@
                     <!-- Info header -->
                     <div class="px-4 py-3" style="background: #f0f7ff; border-bottom: 1px solid #dbe9f5;">
                         <div class="row g-3">
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <div class="d-flex align-items-center gap-2">
                                     <div style="width:34px;height:34px;background:#e8f4fd;border-radius:8px;display:flex;align-items:center;justify-content:center;">
                                         <i class="bi bi-building text-primary"></i>
                                     </div>
                                     <div>
                                         <div class="text-muted" style="font-size:0.75rem;">Nhà cung cấp</div>
-                                        <div class="fw-semibold" style="font-size:0.9rem;">@tenNCC</div>
+                                        <div class="fw-semibold text-truncate" style="font-size:0.85rem;" title="@tenNCC">@tenNCC</div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div style="width:34px;height:34px;background:#e8f4fd;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                                        <i class="bi bi-person-badge text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted" style="font-size:0.75rem;">Người giao hàng</div>
+                                        <div class="fw-semibold text-truncate" style="font-size:0.85rem;" title="@tenNguoiGiao">@(string.IsNullOrEmpty(tenNguoiGiao) ? "-" : tenNguoiGiao)</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div style="width:34px;height:34px;background:#e8f4fd;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                                        <i class="bi bi-person-check text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted" style="font-size:0.75rem;">Người nhận</div>
+                                        <div class="fw-semibold text-truncate" style="font-size:0.85rem;" title="@tenNguoiNhan">@(string.IsNullOrEmpty(tenNguoiNhan) ? "-" : tenNguoiNhan)</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
                                 <div class="d-flex align-items-center gap-2">
                                     <div style="width:34px;height:34px;background:#e8f4fd;border-radius:8px;display:flex;align-items:center;justify-content:center;">
                                         <i class="bi bi-truck text-primary"></i>
                                     </div>
                                     <div>
-                                        <div class="text-muted" style="font-size:0.75rem;">Phương tiện vận chuyển</div>
-                                        <div class="fw-semibold" style="font-size:0.9rem;">@(string.IsNullOrEmpty(tenPhuongTien) ? "-" : tenPhuongTien)</div>
+                                        <div class="text-muted" style="font-size:0.75rem;">Phương tiện</div>
+                                        <div class="fw-semibold text-truncate" style="font-size:0.85rem;" title="@tenPhuongTien">@(string.IsNullOrEmpty(tenPhuongTien) ? "-" : tenPhuongTien)</div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <div class="d-flex align-items-center gap-2">
                                     <div style="width:34px;height:34px;background:#e8f4fd;border-radius:8px;display:flex;align-items:center;justify-content:center;">
                                         <i class="bi bi-calendar-event text-primary"></i>
                                     </div>
                                     <div>
                                         <div class="text-muted" style="font-size:0.75rem;">Ngày nhập</div>
-                                        <div class="fw-semibold" style="font-size:0.9rem;">
+                                        <div class="fw-semibold" style="font-size:0.85rem;">
                                             @(ngayNhap.HasValue ? ngayNhap.Value.ToString("dd/MM/yyyy") : "-")
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <div class="d-flex align-items-center gap-2">
                                     <div style="width:34px;height:34px;background:#fff3cd;border-radius:8px;display:flex;align-items:center;justify-content:center;">
                                         <i class="bi bi-sticky text-warning"></i>
                                     </div>
                                     <div>
                                         <div class="text-muted" style="font-size:0.75rem;">Ghi chú</div>
-                                        <div class="fw-semibold" style="font-size:0.9rem;">@(string.IsNullOrEmpty(ghiChu) ? "-" : ghiChu)</div>
+                                        <div class="fw-semibold text-truncate" style="font-size:0.85rem;" title="@ghiChu">@(string.IsNullOrEmpty(ghiChu) ? "-" : ghiChu)</div>
                                     </div>
                                 </div>
                             </div>

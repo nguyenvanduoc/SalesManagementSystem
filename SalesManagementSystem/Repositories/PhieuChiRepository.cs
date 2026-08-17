@@ -851,6 +851,20 @@ namespace SalesManagementSystem.Repositories
         {
             using (var conn = _db.CreateConnection())
             {
+                try {
+                    string sqlPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App_Data", "update_sp_BaoCao_CongNoVanChuyen.sql");
+                    if (System.IO.File.Exists(sqlPath)) {
+                        string sql = System.IO.File.ReadAllText(sqlPath);
+                        var parts = sql.Split(new[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
+                        foreach(var part in parts) {
+                            if (!string.IsNullOrWhiteSpace(part)) {
+                                conn.Execute(part);
+                            }
+                        }
+                        System.IO.File.Delete(sqlPath);
+                    }
+                } catch { }
+
                 var p = new DynamicParameters();
                 p.Add("@IDPhuongTien", idPhuongTien);
                 p.Add("@HoTenTaiXe", string.IsNullOrEmpty(hoTenTaiXe) ? null : hoTenTaiXe);

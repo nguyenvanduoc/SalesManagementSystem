@@ -33,6 +33,7 @@ BEGIN
             ), ISNULL(pn.TienVanChuyen, 0)) AS TongTienVanChuyen,
             pt.TenPhuongTien AS TenPhuongTien,
             pn.TenNguoiGiao,
+            pn.TenNguoiNhan,
             pn.HoTenTaiXe,
             ISNULL((
                 SELECT SUM(ct.SoTienPhanBo)
@@ -57,7 +58,7 @@ BEGIN
         FROM KHO_PhieuNhap pn
         LEFT JOIN DM_PhuongTien pt ON pn.IDPhuongTien = pt.ID
         WHERE (@IDPhuongTien IS NULL OR pn.IDPhuongTien = @IDPhuongTien)
-          AND (@HoTenTaiXe IS NULL OR pn.HoTenTaiXe LIKE '%' + @HoTenTaiXe + '%' OR pn.TenNguoiGiao LIKE '%' + @HoTenTaiXe + '%')
+          AND (@HoTenTaiXe IS NULL OR pn.HoTenTaiXe LIKE '%' + @HoTenTaiXe + '%' OR pn.TenNguoiGiao LIKE '%' + @HoTenTaiXe + '%' OR pn.TenNguoiNhan LIKE '%' + @HoTenTaiXe + '%')
           AND pn.IsDeleted = 0
           AND pn.TrangThai IN (1, 2)
           AND (@SoPhieuNhap IS NULL OR pn.SoChungTu LIKE '%' + @SoPhieuNhap + '%')
@@ -92,6 +93,7 @@ BEGIN
            pt.TenPhuongTien AS TenPhuongTien,
            pn.HoTenTaiXe,
            pn.TenNguoiGiao,
+           pn.TenNguoiNhan,
            LTRIM(RTRIM(ISNULL(ns.HoDem, '') + ' ' + ISNULL(ns.Ten, ''))) AS NguoiTaoTen
     FROM KHO_PhieuNhap pn
     LEFT JOIN DM_NhaCungCap ncc ON pn.IDNhaCungCap = ncc.ID

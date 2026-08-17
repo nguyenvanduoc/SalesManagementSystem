@@ -1476,6 +1476,9 @@
                 }
             });
             
+            // 4. Đồng bộ lại combobox ddl-thoi-gian
+            syncThoiGianFilter($form);
+
             // Đợi một chút để DOM cập nhật xong rồi mới submit
             setTimeout(function() {
                 $form.trigger('submit');
@@ -1488,7 +1491,7 @@
     ================================================================ */
     function initGlobalDatePickers(context) {
         var today = new Date();
-        var firstDay = new Date(today.getFullYear(), 0, 1); // 1st of Jan
+        var firstDay = new Date(today.getFullYear(), today.getMonth(), 1); // 1st of current month
         var lastDay = today; // Today
 
         $(context).find('input[type="date"]').each(function () {

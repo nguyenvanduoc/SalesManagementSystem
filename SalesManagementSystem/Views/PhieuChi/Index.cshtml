@@ -138,11 +138,11 @@
                 </div>
                 <div class="col-md-2 col-sm-6">
                     <label class="form-label text-muted small mb-1 fw-semibold">Từ ngày</label>
-                    <input type="date" class="form-control form-control-sm" name="tuNgay" value="@ViewBag.TuNgay" />
+                    <input type="date" class="form-control form-control-sm" name="tuNgay" value="@(string.IsNullOrEmpty(ViewBag.TuNgay) ? DateTime.Now.ToString("yyyy-MM-01") : ViewBag.TuNgay)" />
                 </div>
                 <div class="col-md-2 col-sm-6">
                     <label class="form-label text-muted small mb-1 fw-semibold">Đến ngày</label>
-                    <input type="date" class="form-control form-control-sm" name="denNgay" value="@ViewBag.DenNgay" />
+                    <input type="date" class="form-control form-control-sm" name="denNgay" value="@(string.IsNullOrEmpty(ViewBag.DenNgay) ? DateTime.Now.ToString("yyyy-MM-dd") : ViewBag.DenNgay)" />
                 </div>
                 <div class="col-md-2 col-sm-6">
                     <label class="form-label text-muted small mb-1 fw-semibold">Số phiếu</label>
