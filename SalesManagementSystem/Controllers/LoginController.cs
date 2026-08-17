@@ -28,7 +28,36 @@ namespace SalesManagementSystem.Controllers
                     var ticket = System.Web.Security.FormsAuthentication.Decrypt(cookie.Value);
                     if (ticket != null && !ticket.Expired)
                     {
-                        var userSession = Newtonsoft.Json.JsonConvert.DeserializeObject<UserLoginViewModel>(ticket.UserData);
+                        UserLoginViewModel userSession = null;
+                        string cookieIp = null;
+                        string cookieAgent = null;
+
+                        if (!string.IsNullOrEmpty(ticket.UserData) && ticket.UserData.Contains("UserSession"))
+                        {
+                            var payload = Newtonsoft.Json.JsonConvert.DeserializeObject<AutoLoginCookiePayload>(ticket.UserData);
+                            if (payload != null)
+                            {
+                                userSession = payload.UserSession;
+                                cookieIp = payload.ClientIP;
+                                cookieAgent = payload.UserAgent;
+                            }
+                        }
+                        else if (!string.IsNullOrEmpty(ticket.UserData))
+                        {
+                            userSession = Newtonsoft.Json.JsonConvert.DeserializeObject<UserLoginViewModel>(ticket.UserData);
+                        }
+
+                        string currentIp = Request.ServerVariables["REMOTE_ADDR"] ?? Request.UserHostAddress ?? "";
+
+                        // BẢO MẬT NÂNG CAO: Kiểm tra Địa chỉ IP đã khóa với Cookie (Chống copy Cookie sang Postman / máy khác)
+                        if (!string.IsNullOrEmpty(cookieIp) && !string.Equals(cookieIp, currentIp, System.StringComparison.OrdinalIgnoreCase))
+                        {
+                            // IP không khớp => Hủy Cookie ngay lập tức
+                            var invalidCookie = new System.Web.HttpCookie("SMS_AutoLogin", "") { Expires = System.DateTime.Now.AddDays(-1) };
+                            Response.Cookies.Add(invalidCookie);
+                            return View();
+                        }
+
                         if (userSession != null && userSession.UserID > 0)
                         {
                             // AN TOÀN BẢO MẬT: Kiểm tra lại CSDL xem tài khoản có tồn tại và đang hoạt động (IsActive) hay không
@@ -49,7 +78,7 @@ namespace SalesManagementSystem.Controllers
                                     HostName = Request.UserHostName,
                                     HostAddress = Request.UserHostAddress,
                                     TrinhDuyet = (Request.Browser != null ? Request.Browser.Browser + " " + Request.Browser.Version : "Unknown") + (string.IsNullOrEmpty(Request.UserAgent) ? "" : " | " + Request.UserAgent),
-                                    IP = Request.ServerVariables["REMOTE_ADDR"] ?? Request.UserHostAddress
+                                    IP = currentIp
                                 });
                                 Session["LoginSessionID"] = sessionId;
 
@@ -94,10 +123,12 @@ namespace SalesManagementSystem.Controllers
                         HoDem = result.HoDem,
                         Ten = result.Ten,
                         IDNhanSu = result.IDNhanSu
-                        
                     };
 
                     Session.Add(CommonConstants.USER_SESSION, userSession);
+
+                    string currentIp = Request.ServerVariables["REMOTE_ADDR"] ?? Request.UserHostAddress ?? "";
+                    string currentAgent = Request.UserAgent ?? "";
 
                     // LOG LOGIN SESSION (Explicit user login -> force new session)
                     int sessionId = _sessionRepo.LogLogin(new SalesManagementSystem.Models.Entities.AclLoginSession
@@ -107,12 +138,18 @@ namespace SalesManagementSystem.Controllers
                         HostName = Request.UserHostName,
                         HostAddress = Request.UserHostAddress,
                         TrinhDuyet = (Request.Browser != null ? Request.Browser.Browser + " " + Request.Browser.Version : "Unknown") + (string.IsNullOrEmpty(Request.UserAgent) ? "" : " | " + Request.UserAgent),
-                        IP = Request.ServerVariables["REMOTE_ADDR"] ?? Request.UserHostAddress
+                        IP = currentIp
                     }, forceNew: true);
                     Session["LoginSessionID"] = sessionId;
 
-                    // Set persistent cookie to survive AppDomain restarts (IIS file changes) - Auto-login for 7 days
-                    string userData = Newtonsoft.Json.JsonConvert.SerializeObject(userSession);
+                    // Set persistent cookie bound to IP & UserAgent for 7 days
+                    var payload = new AutoLoginCookiePayload
+                    {
+                        UserSession = userSession,
+                        ClientIP = currentIp,
+                        UserAgent = currentAgent
+                    };
+                    string userData = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
                     var ticket = new System.Web.Security.FormsAuthenticationTicket(1, result.TenDangNhap, System.DateTime.Now, System.DateTime.Now.AddDays(7), true, userData);
                     var encryptedTicket = System.Web.Security.FormsAuthentication.Encrypt(ticket);
                     var cookie = new System.Web.HttpCookie("SMS_AutoLogin", encryptedTicket) { HttpOnly = true, Expires = ticket.Expiration };

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace SalesManagementSystem.Models.ViewModels
 {
@@ -10,5 +10,13 @@ namespace SalesManagementSystem.Models.ViewModels
         public string HoDem { get; set; }
         public string Ten { get; set; }
         public int IDNhanSu { get; set; }
+    }
+
+    [Serializable]
+    public class AutoLoginCookiePayload
+    {
+        public UserLoginViewModel UserSession { get; set; }
+        public string ClientIP { get; set; }
+        public string UserAgent { get; set; }
     }
 }
