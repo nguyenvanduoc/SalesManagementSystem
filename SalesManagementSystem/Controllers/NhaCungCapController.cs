@@ -41,7 +41,7 @@ namespace SalesManagementSystem.Controllers
             ViewBag.Email = email;
             ViewBag.Title = "Danh mục nhà cung cấp";
 
-            if (Request.IsAjaxRequest())
+            if (Request.IsAjaxRequest() && Request.Headers["X-SPA-Load"] != "true")
             {
                 return PartialView("_NhaCungCapList", model);
             }
@@ -109,6 +109,7 @@ namespace SalesManagementSystem.Controllers
                 };
 
                 _nhaCungCapRepo.Save(ncc);
+                SalesManagementSystem.Helpers.CacheHelper.ClearAllDropdowns();
                 return Json(new { success = true, message = "Thêm mới thành công" });
             }
             return PartialView("Create", model);
@@ -161,6 +162,7 @@ namespace SalesManagementSystem.Controllers
                 };
 
                 _nhaCungCapRepo.Save(ncc);
+                SalesManagementSystem.Helpers.CacheHelper.ClearAllDropdowns();
                 return Json(new { success = true, message = "Cập nhật thành công" });
             }
             return PartialView("Edit", model);

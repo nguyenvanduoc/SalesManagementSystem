@@ -11,6 +11,7 @@
                 <th class="text-center">Thời gian Logout</th>
                 <th class="text-center">Thời lượng</th>
                 <th>Địa chỉ IP</th>
+                <th class="text-center">Thiết bị</th>
                 <th>Trình duyệt</th>
                 <th class="text-center">Thao tác</th>
             </tr>
@@ -64,6 +65,7 @@
                             }
                         </td>
                         <td>@item.IP</td>
+                        <td class="text-center">@Html.Raw(item.ThietBiBadgeHtml)</td>
                         <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="@item.TrinhDuyet">@item.TrinhDuyet</td>
                         <td class="text-center">
                             @if (item.IsDangHoatDong)
@@ -80,7 +82,7 @@
             else
             {
                 <tr>
-                    <td colspan="9" class="text-center py-4">Không có dữ liệu lịch sử đăng nhập.</td>
+                    <td colspan="10" class="text-center py-4">Không có dữ liệu lịch sử đăng nhập.</td>
                 </tr>
             }
         </tbody>

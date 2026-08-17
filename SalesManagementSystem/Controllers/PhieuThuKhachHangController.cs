@@ -63,7 +63,7 @@ namespace SalesManagementSystem.Controllers
             ViewBag.IDTaiKhoanThanhToan  = idTaiKhoanThanhToan;
             ViewBag.Title                = "Phiếu Thu Khách Hàng";
 
-            if (Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            if ((Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest") && Request.Headers["X-SPA-Load"] != "true")
                 return PartialView("_PhieuThuKhachHangList", model);
 
             return View("Index", model);

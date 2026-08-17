@@ -10,7 +10,7 @@
  * toàn cục như $('#gridData') hay $('#table-container').
  */
 var TabManager = (function () {
-    var MAX_TABS = 30;
+    var MAX_TABS = 50;
 
     // ─── Helpers ────────────────────────────────────────────────────────────
 
@@ -394,9 +394,9 @@ var TabManager = (function () {
                     xhr.setRequestHeader('X-SPA-Load', 'true');
                 },
                 success: function (res) {
-                    hideLoadingLocal($pane);
-                    delete activeRequests[paneId];
                     if (typeof res === 'object') {
+                        hideLoadingLocal($pane);
+                        delete activeRequests[paneId];
                         if (res.message && typeof showToast === 'function') {
                             showToast(res.success === false ? 'error' : (res.type || 'success'), res.message);
                         }
@@ -415,6 +415,8 @@ var TabManager = (function () {
                     } else {
                         $pane.html(res);
                         reInitPlugins(paneId);
+                        hideLoadingLocal($pane);
+                        delete activeRequests[paneId];
                     }
                 },
                 error: function (err, status) {
@@ -542,8 +544,9 @@ var TabManager = (function () {
                     if (typeof syncThoiGianFilter === 'function') {
                         syncThoiGianFilter($pane);
                     }
-                    // Re-init plugins để tính toán lại kích thước hiển thị và nạp lại Select2 khi Tab chuyển sang trạng thái HƯỚNG SÁNG (visible)
+                    try { $('select.select2-hidden-accessible').select2('close'); } catch (e) { }
                     reInitPlugins(paneId.replace('#', ''));
+                    $pane.find('.select2-container').css('width', '100%');
                 }
 
                 // Giữ sạch thanh địa chỉ trình duyệt ở trang gốc / vì ứng dụng chạy dạng Tab SPA
@@ -823,18 +826,24 @@ var TabManager = (function () {
                 xhr.setRequestHeader('X-SPA-Load', 'true');
             },
             success: function (res) {
-                hideLoadingLocal($pane);
-                delete activeRequests[paneId];
-
                 // Nếu phản hồi chứa trang đăng nhập (do bị mất Session / hết hạn), redirect ra Login
                 if (typeof res === 'string' && (res.indexOf('login-card') !== -1 || res.indexOf('login-title') !== -1 || res.indexOf('ĐĂNG NHẬP HỆ THỐNG') !== -1 || res.indexOf('name="UserName"') !== -1)) {
+                    hideLoadingLocal($pane);
+                    delete activeRequests[paneId];
                     try { localStorage.removeItem('tabManagerState'); } catch (e) { }
                     window.top.location.href = '/Login/Index';
                     return;
                 }
 
+                // 1. Nạp HTML vào tab-pane trước khi tắt loading overlay
                 $pane.html(res);
+
+                // 2. Khởi tạo toàn bộ Select2, Flatpickr và Plugins khi overlay VẪN ĐANG CHE PHỦ
                 reInitPlugins(paneId);
+
+                // 3. Tắt loading overlay SAU KHI tất cả combobox và plugins đã sẵn sàng 100%
+                hideLoadingLocal($pane);
+                delete activeRequests[paneId];
             },
             error: function (err, status) {
                 if (status === 'abort') return;
@@ -893,9 +902,10 @@ var TabManager = (function () {
                     }
                 }
 
-                // Nếu đã khởi tạo Select2 trước đó thì hủy (destroy) sạch trước để tránh hỏng dữ liệu DOM
-                if ($this.hasClass('select2-hidden-accessible')) {
+                // Hủy sạch instance Select2 cũ (nếu có) để dựng lại 100% chuẩn dữ liệu từ HTML
+                if ($this.hasClass('select2-hidden-accessible') || $this.next('.select2-container').length > 0) {
                     try { $this.select2('destroy'); } catch (e) { }
+                    $this.next('.select2-container').remove();
                 }
 
                 // Chỉ prepend option rỗng nếu thẻ chưa có option giá trị rỗng nào và không phải multiple
@@ -915,8 +925,7 @@ var TabManager = (function () {
                 $this.select2({
                     width: '100%',
                     allowClear: true,
-                    placeholder: placeholderText,
-                    dropdownParent: container
+                    placeholder: placeholderText
                 });
             });
         }

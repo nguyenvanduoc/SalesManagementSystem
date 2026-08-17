@@ -65,7 +65,7 @@ namespace SalesManagementSystem.Controllers
 
             PopulateNhaCungCapDropdown(idNhaCungCap);
 
-            if (Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            if ((Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest") && Request.Headers["X-SPA-Load"] != "true")
                 return PartialView("_CongNoNCCList", model);
 
             return View("Index", model);

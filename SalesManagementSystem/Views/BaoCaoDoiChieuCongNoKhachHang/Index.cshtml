@@ -113,10 +113,10 @@
 
         // Hàm load dữ liệu
         function loadData() {
-            var idKhachHang = $container.find('#idKhachHang_@uid').val();
-            var soChungTu = $container.find('#soChungTu_@uid').val();
-            var tuNgay = $container.find('#tuNgay_@uid').val();
-            var denNgay = $container.find('#denNgay_@uid').val();
+            var idKhachHang = $container.find('[name="idKhachHang"]').val();
+            var soChungTu = $container.find('[name="soChungTu"]').val();
+            var tuNgay = $container.find('[name="tuNgay"]').val();
+            var denNgay = $container.find('[name="denNgay"]').val();
 
             // Validate
             if (!tuNgay) {
@@ -162,23 +162,23 @@
 
         // Sự kiện làm mới
         $container.find('#btnReset_@uid').on('click', function () {
-            $container.find('#idKhachHang_@uid').val('').trigger('change');
-            $container.find('#soChungTu_@uid').val('');
-            $container.find('#tuNgay_@uid').val('@ViewBag.TuNgay');
-            $container.find('#denNgay_@uid').val('@ViewBag.DenNgay');
+            $container.find('[name="idKhachHang"]').val('').trigger('change');
+            $container.find('[name="soChungTu"]').val('');
+            $container.find('[name="tuNgay"]').val('@ViewBag.TuNgay');
+            $container.find('[name="denNgay"]').val('@ViewBag.DenNgay');
             $container.find('#table-container-@uid').html('<div class="alert alert-info text-center mt-3">Ấn <b>Tìm kiếm</b> để xem báo cáo.</div>');
         });
 
         // Sự kiện Xuất Excel
         $container.find('#btnExportExcel_@uid').on('click', function () {
-            var tuNgay = $container.find('#tuNgay_@uid').val();
-            var denNgay = $container.find('#denNgay_@uid').val();
+            var tuNgay = $container.find('[name="tuNgay"]').val();
+            var denNgay = $container.find('[name="denNgay"]').val();
             if (!tuNgay || !denNgay) {
                 if (typeof showToast === 'function') showToast('warning', 'Vui lòng chọn từ ngày và đến ngày');
                 return;
             }
-            var idKhachHang = $container.find('#idKhachHang_@uid').val() || '';
-            var soChungTu = $container.find('#soChungTu_@uid').val() || '';
+            var idKhachHang = $container.find('[name="idKhachHang"]').val() || '';
+            var soChungTu = $container.find('[name="soChungTu"]').val() || '';
             var url = '@Url.Action("ExportExcel", "BaoCaoDoiChieuCongNoKhachHang")' + '?tuNgay=' + tuNgay + '&denNgay=' + denNgay + '&idKhachHang=' + idKhachHang + '&soChungTu=' + encodeURIComponent(soChungTu);
             window.location.href = url;
         });

@@ -90,7 +90,7 @@ namespace SalesManagementSystem.Controllers
             ViewBag.HoTenTaiXe = hoTenTaiXe;
             ViewBag.TrangThai = trangThai;
 
-            if (Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            if ((Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest") && Request.Headers["X-SPA-Load"] != "true")
                 return PartialView("_ChungTuBanHangList", model);
 
             return View("Index", model);

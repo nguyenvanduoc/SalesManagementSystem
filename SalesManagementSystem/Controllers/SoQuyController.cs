@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -70,7 +70,7 @@ namespace SalesManagementSystem.Controllers
 
                 PopulateTaiKhoanDropdown(idTaiKhoanThanhToan);
 
-                if (Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                if ((Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest") && Request.Headers["X-SPA-Load"] != "true")
                     return PartialView("_SoQuyList", emptyModel);
 
                 return View("Index", emptyModel);
@@ -102,7 +102,7 @@ namespace SalesManagementSystem.Controllers
 
             PopulateTaiKhoanDropdown(idTaiKhoanThanhToan);
 
-            if (Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            if ((Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest") && Request.Headers["X-SPA-Load"] != "true")
                 return PartialView("_SoQuyList", model);
 
             return View("Index", model);

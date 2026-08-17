@@ -451,19 +451,39 @@ namespace SalesManagementSystem.Repositories
 
         public IEnumerable<dynamic> GetKhoForDropdown(string keyword)
         {
+            string kw = (keyword ?? "").Trim().ToLower();
+            if (string.IsNullOrEmpty(kw))
+            {
+                return SalesManagementSystem.Helpers.CacheHelper.GetOrSet("ddl_kho_all", () => {
+                    using (var conn = _db.CreateConnection())
+                    {
+                        return conn.Query("SELECT ID, MaKhoHang, TenKhoHang FROM DM_KhoHang ORDER BY TenKhoHang").ToList();
+                    }
+                }, 10);
+            }
+
             using (var conn = _db.CreateConnection())
             {
-                string kw = (keyword ?? "").Trim().ToLower();
-                return conn.Query("SELECT ID, MaKhoHang, TenKhoHang FROM DM_KhoHang WHERE @KW = '' OR LOWER(TenKhoHang) LIKE '%' + @KW + '%' ORDER BY TenKhoHang", new { KW = kw });
+                return conn.Query("SELECT ID, MaKhoHang, TenKhoHang FROM DM_KhoHang WHERE LOWER(TenKhoHang) LIKE '%' + @KW + '%' ORDER BY TenKhoHang", new { KW = kw });
             }
         }
 
         public IEnumerable<dynamic> GetNhaCungCapForDropdown(string keyword)
         {
+            string kw = (keyword ?? "").Trim().ToLower();
+            if (string.IsNullOrEmpty(kw))
+            {
+                return SalesManagementSystem.Helpers.CacheHelper.GetOrSet("ddl_ncc_all", () => {
+                    using (var conn = _db.CreateConnection())
+                    {
+                        return conn.Query("SELECT ID, MaNhaCungCap, TenNhaCungCap FROM DM_NhaCungCap ORDER BY TenNhaCungCap").ToList();
+                    }
+                }, 10);
+            }
+
             using (var conn = _db.CreateConnection())
             {
-                string kw = (keyword ?? "").Trim().ToLower();
-                return conn.Query("SELECT ID, MaNhaCungCap, TenNhaCungCap FROM DM_NhaCungCap WHERE @KW = '' OR LOWER(TenNhaCungCap) LIKE '%' + @KW + '%' ORDER BY TenNhaCungCap", new { KW = kw });
+                return conn.Query("SELECT ID, MaNhaCungCap, TenNhaCungCap FROM DM_NhaCungCap WHERE LOWER(TenNhaCungCap) LIKE '%' + @KW + '%' ORDER BY TenNhaCungCap", new { KW = kw });
             }
         }
 
@@ -478,23 +498,44 @@ namespace SalesManagementSystem.Repositories
 
         public IEnumerable<dynamic> GetSanPhamForDropdown(string keyword)
         {
+            string kw = (keyword ?? "").Trim().ToLower();
+            if (string.IsNullOrEmpty(kw))
+            {
+                return SalesManagementSystem.Helpers.CacheHelper.GetOrSet("ddl_sanpham_all", () => {
+                    using (var conn = _db.CreateConnection())
+                    {
+                        return conn.Query("SELECT ID, MaSanPham, TenSanPham, DVT FROM DM_SanPham ORDER BY TenSanPham").ToList();
+                    }
+                }, 10);
+            }
+
             using (var conn = _db.CreateConnection())
             {
-                string kw = (keyword ?? "").Trim().ToLower();
-                return conn.Query("SELECT ID, MaSanPham, TenSanPham, DVT FROM DM_SanPham WHERE @KW = '' OR LOWER(TenSanPham) LIKE '%' + @KW + '%' OR LOWER(MaSanPham) LIKE '%' + @KW + '%' ORDER BY TenSanPham", new { KW = kw });
+                return conn.Query("SELECT ID, MaSanPham, TenSanPham, DVT FROM DM_SanPham WHERE LOWER(TenSanPham) LIKE '%' + @KW + '%' OR LOWER(MaSanPham) LIKE '%' + @KW + '%' ORDER BY TenSanPham", new { KW = kw });
             }
         }
 
         public IEnumerable<dynamic> GetPhuongTienForDropdown(string keyword)
         {
+            string kw = (keyword ?? "").Trim().ToLower();
+            if (string.IsNullOrEmpty(kw))
+            {
+                return SalesManagementSystem.Helpers.CacheHelper.GetOrSet("ddl_phuongtien_all", () => {
+                    using (var conn = _db.CreateConnection())
+                    {
+                        return conn.Query("SELECT TOP 50 ID, MaPhuongTien, TenPhuongTien FROM DM_PhuongTien ORDER BY STT, TenPhuongTien").ToList();
+                    }
+                }, 10);
+            }
+
             using (var conn = _db.CreateConnection())
             {
                 string sql = @"
                     SELECT TOP 20 ID, MaPhuongTien, TenPhuongTien
                     FROM DM_PhuongTien 
-                    WHERE  (MaPhuongTien LIKE '%' + @Keyword + '%' OR TenPhuongTien LIKE N'%' + @Keyword + '%')
+                    WHERE (MaPhuongTien LIKE '%' + @Keyword + '%' OR TenPhuongTien LIKE N'%' + @Keyword + '%')
                     ORDER BY STT, TenPhuongTien";
-                return conn.Query(sql, new { Keyword = keyword ?? "" });
+                return conn.Query(sql, new { Keyword = kw });
             }
         }
 

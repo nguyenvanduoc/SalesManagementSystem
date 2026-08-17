@@ -48,7 +48,7 @@ namespace SalesManagementSystem.Controllers
                                     HoTen = ((userSession.HoDem ?? "") + " " + (userSession.Ten ?? "")).Trim(),
                                     HostName = Request.UserHostName,
                                     HostAddress = Request.UserHostAddress,
-                                    TrinhDuyet = Request.Browser != null ? Request.Browser.Browser + " " + Request.Browser.Version : "Unknown",
+                                    TrinhDuyet = (Request.Browser != null ? Request.Browser.Browser + " " + Request.Browser.Version : "Unknown") + (string.IsNullOrEmpty(Request.UserAgent) ? "" : " | " + Request.UserAgent),
                                     IP = Request.ServerVariables["REMOTE_ADDR"] ?? Request.UserHostAddress
                                 });
                                 Session["LoginSessionID"] = sessionId;
@@ -106,7 +106,7 @@ namespace SalesManagementSystem.Controllers
                         HoTen = result.HoDem + " " + result.Ten,
                         HostName = Request.UserHostName,
                         HostAddress = Request.UserHostAddress,
-                        TrinhDuyet = Request.Browser != null ? Request.Browser.Browser + " " + Request.Browser.Version : "Unknown",
+                        TrinhDuyet = (Request.Browser != null ? Request.Browser.Browser + " " + Request.Browser.Version : "Unknown") + (string.IsNullOrEmpty(Request.UserAgent) ? "" : " | " + Request.UserAgent),
                         IP = Request.ServerVariables["REMOTE_ADDR"] ?? Request.UserHostAddress
                     }, forceNew: true);
                     Session["LoginSessionID"] = sessionId;

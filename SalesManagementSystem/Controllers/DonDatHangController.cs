@@ -82,6 +82,8 @@ namespace SalesManagementSystem.Controllers
             int? trangThai = null, string soDonHang = "",
             int? idPhuongTien = null, string hoTenTaiXe = "")
         {
+            if (string.IsNullOrEmpty(tuNgay)) tuNgay = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).ToString("yyyy-MM-dd");
+            if (string.IsNullOrEmpty(denNgay)) denNgay = DateTime.Now.ToString("yyyy-MM-dd");
             int totalRecords;
             var list = _repo.GetPaged(page, pageSize,
                 tuNgay, denNgay, idKhachHang, idNhanVien, trangThai, soDonHang,
@@ -107,7 +109,7 @@ namespace SalesManagementSystem.Controllers
             ViewBag.PhuongTiens= GetPhuongTienList(idPhuongTien);
             ViewBag.HoTenTaiXe = hoTenTaiXe;
 
-            if (Request.IsAjaxRequest())
+            if (Request.IsAjaxRequest() && Request.Headers["X-SPA-Load"] != "true")
                 return PartialView("_DonDatHangList", model);
 
             return View("Index", model);
@@ -120,6 +122,8 @@ namespace SalesManagementSystem.Controllers
             int? trangThai = null, string soDonHang = "",
             int? idPhuongTien = null, string hoTenTaiXe = "")
         {
+            if (string.IsNullOrEmpty(tuNgay)) tuNgay = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).ToString("yyyy-MM-dd");
+            if (string.IsNullOrEmpty(denNgay)) denNgay = DateTime.Now.ToString("yyyy-MM-dd");
             int totalRecords;
             var list = _repo.GetPaged(page, pageSize,
                 tuNgay, denNgay, idKhachHang, idNhanVien, trangThai, soDonHang,

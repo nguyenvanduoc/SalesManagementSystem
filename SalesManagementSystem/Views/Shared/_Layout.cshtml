@@ -58,10 +58,25 @@
         }
 
         /* Compact sizing for inputs */
-        .form-control, .form-select, .readonly-cell {
+        .form-control, .readonly-cell {
             height: 33px !important;
             padding: 4px 8px !important;
             line-height: 1.42857143 !important;
+        }
+
+        /* Permanently hide native select elements that get converted to Select2 */
+        select.select2, 
+        select.form-select:not(.no-select2):not(.page-size-select):not(.ddl-thoi-gian),
+        select.select2-hidden-accessible {
+            display: none !important;
+            position: absolute !important;
+            width: 0 !important;
+            height: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
         }
         
         /* Force Select2 comboboxes to match textbox size globally */

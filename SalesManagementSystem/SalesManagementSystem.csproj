@@ -206,6 +206,7 @@
     <Compile Include="Helpers\Encryptor.cs" />
     <Compile Include="Helpers\LogHelper.cs" />
     <Compile Include="Helpers\AuditHelper.cs" />
+    <Compile Include="Helpers\CacheHelper.cs" />
     <Compile Include="Helpers\Security\AesCryptoHelper.cs" />
     <Compile Include="Helpers\Security\ConfigManager.cs" />
     <!-- Data -->

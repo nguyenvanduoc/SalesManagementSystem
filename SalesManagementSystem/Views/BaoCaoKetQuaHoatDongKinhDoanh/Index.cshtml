@@ -80,34 +80,12 @@
     <!-- Dữ liệu sẽ được load qua AJAX vào đây -->
 </div>
 
-@section Scripts {
-    <script>
-        $(document).ready(function () {
-            syncThoiGian();
-            loadData();
-
-            $('#btnSearch').click(function () {
-                loadData();
-            });
-
-            $('#ThoiGian').change(function () {
-                applyThoiGian($(this).val(), true);
-            });
-
-            $('#TuNgay, #DenNgay').change(function () {
-                syncThoiGian();
-            });
-
-            $('#btnReset').click(function () {
-                $('#filterForm')[0].reset();
-                applyThoiGian('current_month', true);
-            });
-
-            $('#btnExcel').click(function () {
-                var url = '@Url.Action("ExportExcel", "BaoCaoKetQuaHoatDongKinhDoanh")?' + $('#filterForm').serialize();
-                window.location.href = url;
-            });
-        });
+<script>
+    (function () {
+        function getPane() {
+            var $pane = $('#filterForm').last().closest('.tab-pane');
+            return $pane.length ? $pane : $(document);
+        }
 
         function fDate(y, m, d) {
             var sm = m < 10 ? '0' + m : m;
@@ -123,7 +101,6 @@
 
         function getThoiGianRange(val) {
             if (!val) return null;
-
             var now = new Date();
             var y = now.getFullYear();
             var s = '';
@@ -147,7 +124,6 @@
                 s = fDate(y, 1, 1);
                 e = fDate(y, now.getMonth() + 1, now.getDate());
             }
-
             return s && e ? { tuNgay: s, denNgay: e } : null;
         }
 
@@ -163,43 +139,41 @@
         function applyThoiGian(val, shouldLoad) {
             var range = getThoiGianRange(val);
             if (!range) return;
-
-            $('#ThoiGian').val(val);
-            setDateInput($('#TuNgay'), range.tuNgay);
-            setDateInput($('#DenNgay'), range.denNgay);
-
+            var $pane = getPane();
+            $pane.find('#ThoiGian').val(val);
+            setDateInput($pane.find('#TuNgay'), range.tuNgay);
+            setDateInput($pane.find('#DenNgay'), range.denNgay);
             if (shouldLoad) {
                 loadData();
             }
         }
 
         function syncThoiGian() {
-            var tuNgay = $('#TuNgay').val();
-            var denNgay = $('#DenNgay').val();
+            var $pane = getPane();
+            var tuNgay = $pane.find('#TuNgay').val();
+            var denNgay = $pane.find('#DenNgay').val();
             var matchedValue = '';
 
-            $('#ThoiGian option').each(function () {
+            $pane.find('#ThoiGian option').each(function () {
                 var range = getThoiGianRange(this.value);
                 if (range && range.tuNgay === tuNgay && range.denNgay === denNgay) {
                     matchedValue = this.value;
                     return false;
                 }
             });
-
-            $('#ThoiGian').val(matchedValue);
+            $pane.find('#ThoiGian').val(matchedValue);
         }
 
         function loadData() {
-            var $form = $('#filterForm');
-            var tuNgay = $form.find('#TuNgay').val();
-            var denNgay = $form.find('#DenNgay').val();
-            
+            var $pane = getPane();
+            var $form = $pane.find('#filterForm');
+            if ($form.length === 0) $form = $('#filterForm').last();
+
             var $btn = $form.find('#btnSearch');
-            var originalHtml = $btn.html();
-            $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Tìm...');
-            
-            var activeTabPane = $form.closest('.tab-pane');
-            var $listContainer = activeTabPane.length ? activeTabPane.find('#listContainer') : $('#listContainer');
+            $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Đang tải...');
+
+            var $listContainer = $pane.find('#listContainer');
+            if ($listContainer.length === 0) $listContainer = $('#listContainer').last();
             $listContainer.html('<div class="text-center p-5"><div class="spinner-border text-primary" role="status"></div><div class="mt-2 text-muted">Đang tải dữ liệu...</div></div>');
 
             $.ajax({
@@ -207,7 +181,6 @@
                 type: 'POST',
                 data: $form.serialize(),
                 success: function (res) {
-                    $btn.prop('disabled', false).html(originalHtml);
                     if (typeof res === 'object' && res.success === false) {
                         $listContainer.html('<div class="alert alert-danger">Lỗi từ máy chủ: ' + (res.message || '') + '</div>');
                         if (typeof showToast === 'function') { showToast('error', res.message || 'Lỗi dữ liệu'); }
@@ -216,52 +189,61 @@
                     }
                 },
                 error: function (xhr, status, error) {
-                    $btn.prop('disabled', false).html(originalHtml);
                     $listContainer.html('<div class="alert alert-danger">Lỗi kết nối server: ' + error + '</div>');
                     if (typeof showToast === 'function') { showToast('error', 'Có lỗi xảy ra khi gọi server'); }
+                },
+                complete: function () {
+                    $btn.prop('disabled', false).html('<i class="bi bi-search"></i> Tìm kiếm');
                 }
             });
         }
 
-        function xemChiTiet(idSanPham) {
-            var $form = $('#filterForm');
-            var tuNgay = $form.find('#TuNgay').val();
-            var denNgay = $form.find('#DenNgay').val();
-            var idKho = $form.find('#IDKho').val();
+        function initEvents() {
+            var $pane = getPane();
 
-            var activeTabPane = $form.closest('.tab-pane');
-            if (activeTabPane.length === 0) activeTabPane = $('body');
-
-            $('body').append('<div id="loadingModal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);z-index:9999;display:flex;justify-content:center;align-items:center;"><div class="spinner-border text-white" role="status"></div></div>');
-
-            $.ajax({
-                url: '@Url.Action("GetDetails", "BaoCaoKetQuaHoatDongKinhDoanh")',
-                type: 'POST',
-                data: {
-                    idSanPham: idSanPham,
-                    tuNgay: tuNgay,
-                    denNgay: denNgay,
-                    idKho: idKho
-                },
-                success: function (res) {
-                    $('#loadingModal').remove();
-                    if (res && res.success === false) {
-                        if (typeof showToast === 'function') { showToast('error', res.message || 'Lỗi tải chi tiết'); }
-                    } else {
-                        activeTabPane.find('#detailsModal').remove();
-                        $('.modal-backdrop').remove();
-                        
-                        activeTabPane.append(res);
-                        var modalEl = activeTabPane.find('#detailsModal')[0];
-                        var modal = new bootstrap.Modal(modalEl);
-                        modal.show();
-                    }
-                },
-                error: function (xhr, status, error) {
-                    $('#loadingModal').remove();
-                    if (typeof showToast === 'function') { showToast('error', 'Có lỗi xảy ra khi tải dữ liệu chi tiết'); }
-                }
+            $pane.find('#filterForm').off('submit').on('submit', function (e) {
+                e.preventDefault();
+                loadData();
             });
+
+            $pane.find('#btnSearch').off('click').on('click', function (e) {
+                e.preventDefault();
+                loadData();
+            });
+
+            $pane.find('#ThoiGian').off('change').on('change', function () {
+                applyThoiGian($(this).val(), true);
+            });
+
+            $pane.find('#TuNgay, #DenNgay').off('change').on('change', function () {
+                syncThoiGian();
+            });
+
+            $pane.find('#btnReset').off('click').on('click', function (e) {
+                e.preventDefault();
+                var $form = $pane.find('#filterForm');
+                if ($form.length === 0) $form = $('#filterForm').last();
+
+                $form.find('input[type="text"]').val('');
+                $form.find('select').not('#ThoiGian').val('').trigger('change');
+                applyThoiGian('current_year', true);
+            });
+
+            $pane.find('#btnExcel').off('click').on('click', function (e) {
+                e.preventDefault();
+                var url = '@Url.Action("ExportExcel", "BaoCaoKetQuaHoatDongKinhDoanh")?' + $pane.find('#filterForm').serialize();
+                window.location.href = url;
+            });
+
+            syncThoiGian();
+            loadData();
         }
-    </script>
-}
+
+        $(document).ready(function () {
+            initEvents();
+        });
+
+        // Tự động khởi chạy khi được nạp qua SPA AJAX
+        setTimeout(initEvents, 50);
+    })();
+</script>
