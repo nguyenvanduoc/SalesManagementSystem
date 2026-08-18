@@ -866,7 +866,7 @@ namespace SalesManagementSystem.Controllers
         {
             try
             {
-                var phieuNhaps = _repo.GetPhieuNhapThanhToanVanChuyen(idPhuongTien, null, null, null, null)
+                var phieuNhaps = _repo.GetPhieuNhapThanhToanVanChuyen(idPhuongTien, null, null, null, null, null, 1, 1000000)
                     .Where(x => Convert.ToDecimal(x.ConLaiVanChuyen) > 0)
                     .Select(x => new {
                         IDPhieuNhap = (int)x.IDPhieuNhap,

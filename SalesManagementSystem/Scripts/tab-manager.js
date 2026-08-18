@@ -536,7 +536,8 @@ var TabManager = (function () {
                 var url = $pane.attr('data-url');
 
                 // Nếu pane rỗng (chưa có nội dung) thì gọi AJAX để nạp
-                if ($pane.html().trim() === '') {
+                var hasContent = $pane.children().length > 0 || $pane.text().trim() !== '';
+                if (!hasContent) {
                     if (url) {
                         loadTabContent(tabId, url);
                     }
@@ -601,10 +602,22 @@ var TabManager = (function () {
         // Khôi phục trạng thái tabs (nếu có) - Cần chạy sau cùng để các sự kiện tab (như shown.bs.tab) đã được đăng ký
         restoreTabsState();
 
-        // Khởi tạo plugins cho Tab active ban đầu (ví dụ: default-tab)
-        var activePaneId = $('.tab-pane.active.show').attr('id');
-        if (activePaneId) {
-            reInitPlugins(activePaneId);
+        // Nạp nội dung hoặc khởi tạo plugins cho Tab active ban đầu (ví dụ: default-tab khi vừa đăng nhập)
+        var $activePane = $('.tab-pane.active.show');
+        if ($activePane.length === 0) {
+            $activePane = $('.tab-pane.active');
+        }
+        if ($activePane.length > 0) {
+            var activePaneId = $activePane.attr('id');
+            var activeTabId = $activePane.attr('aria-labelledby') || (activePaneId ? activePaneId.replace('-pane', '') : null);
+            var url = $activePane.attr('data-url');
+            var hasActiveContent = $activePane.children().length > 0 || $activePane.text().trim() !== '';
+
+            if (!hasActiveContent && activeTabId && url) {
+                loadTabContent(activeTabId, url);
+            } else if (activePaneId) {
+                reInitPlugins(activePaneId);
+            }
         }
     }
 

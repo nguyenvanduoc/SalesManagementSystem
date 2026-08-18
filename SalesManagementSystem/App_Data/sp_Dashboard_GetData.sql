@@ -55,11 +55,11 @@ BEGIN
     WHERE TrangThai = 2 AND IsDeleted = 0 
       AND NgayChungTu >= @TuNgayKyTruoc AND NgayChungTu <= @DenNgayKyTruoc;
 
-    -- Công nợ khách hàng
+    -- Công nợ khách hàng (tính chuẩn theo Tổng bán hàng - Tổng phiếu thu đã ghi sổ)
     DECLARE @CongNoKhachHang DECIMAL(18, 2) = 0;
-    SELECT @CongNoKhachHang = ISNULL(SUM(TongCong - DaThanhToan), 0) 
-    FROM BAN_ChungTuBanHang 
-    WHERE IsDeleted = 0 AND TrangThai = 2 AND NgayChungTu <= @DenNgay;
+    SELECT @CongNoKhachHang = 
+        ISNULL((SELECT SUM(bh.TongCong) FROM BAN_ChungTuBanHang bh WHERE bh.IsDeleted = 0 AND bh.TrangThai = 2 AND bh.NgayChungTu <= @DenNgay), 0)
+        - ISNULL((SELECT SUM(pt.SoTienThu) FROM KT_PhieuThu pt WHERE pt.TrangThai = 2 AND pt.NgayThu <= @DenNgay), 0);
 
     -- Công nợ nhà cung cấp
     DECLARE @TongTienHangNCC DECIMAL(18, 2) = 0;
