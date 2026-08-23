@@ -1618,20 +1618,34 @@
                 return days[month];
             }
             
-            var sStr = txtTu.trim();
-            var eStr = txtDen.trim();
-            var matchedVal = null;
-            
-            // Check current_year: starts at YYYY-01-01
-            var sCurrentYear = yNow + '-01-01';
-            if (sStr === sCurrentYear) {
-                matchedVal = 'current_year';
+            function toYMD(str) {
+                if (!str) return '';
+                str = str.trim();
+                var parts = str.split(/[\/\-]/);
+                if (parts.length === 3) {
+                    if (parts[0].length === 4) {
+                        return parts[0] + '-' + pad(parseInt(parts[1], 10)) + '-' + pad(parseInt(parts[2], 10));
+                    } else if (parts[2].length === 4) {
+                        return parts[2] + '-' + pad(parseInt(parts[1], 10)) + '-' + pad(parseInt(parts[0], 10));
+                    }
+                }
+                return str;
             }
+            
+            var sStr = toYMD(txtTu);
+            var eStr = toYMD(txtDen);
+            var matchedVal = null;
             
             // Check current_month: YYYY-MM-01
             var sCurrentMonth = yNow + '-' + pad(mNow) + '-01';
-            if (!matchedVal && sStr === sCurrentMonth) {
+            if (sStr === sCurrentMonth) {
                 matchedVal = 'current_month';
+            }
+            
+            // Check current_year: starts at YYYY-01-01
+            var sCurrentYear = yNow + '-01-01';
+            if (!matchedVal && sStr === sCurrentYear) {
+                matchedVal = 'current_year';
             }
             
             // Check month_1 .. month_12
@@ -1661,7 +1675,7 @@
             }
             
             if (!matchedVal) {
-                matchedVal = 'current_year';
+                matchedVal = $ddl.val() || 'current_month';
             }
             
             $ddl.val(matchedVal);

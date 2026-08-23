@@ -522,6 +522,7 @@
                                         <th>MÃ PHIẾU</th>
                                         <th>NGÀY NHẬP</th>
                                         <th>NGƯỜI GIAO HÀNG</th>
+                                        <th>NGƯỜI NHẬN</th>
                                         <th class="text-end">TỔNG SL</th>
                                         <th class="text-end">TỔNG TIỀN</th>
                                         <th class="text-center">TRẠNG THÁI</th>
@@ -530,12 +531,12 @@
                                 </thead>
                                 <tbody id="tbNhapKhoOnTheWay_@uid">
                                     <tr>
-                                        <td colspan="7" class="text-center text-muted py-3">Đang tải dữ liệu...</td>
+                                        <td colspan="8" class="text-center text-muted py-3">Đang tải dữ liệu...</td>
                                     </tr>
                                 </tbody>
                                 <tfoot id="tfNhapKhoOnTheWay_@uid" class="table-light sticky-bottom fw-bold" style="display:none;">
                                     <tr>
-                                        <td colspan="3" class="text-end text-uppercase">Tổng cộng:</td>
+                                        <td colspan="4" class="text-end text-uppercase">Tổng cộng:</td>
                                         <td class="text-end text-primary" id="sumNhapKhoOnTheWaySL_@uid">0</td>
                                         <td class="text-end text-warning" id="sumNhapKhoOnTheWayTien_@uid">0₫</td>
                                         <td colspan="2"></td>
@@ -1087,6 +1088,7 @@
             if (data.PhieuNhapDangDiDuong && data.PhieuNhapDangDiDuong.length > 0) {
                 data.PhieuNhapDangDiDuong.forEach(function(n) {
                     var nguoiGiaoHang = n.TenNguoiGiao || n.HoTenTaiXe || n.TenPhuongTien || '<span class="text-muted">—</span>';
+                    var nguoiNhan = n.TenNguoiNhan || '<span class="text-muted">—</span>';
                     var sl = n.TongSoLuong || 0;
                     var tongTienPhieu = (n.TongCong && n.TongCong > 0) ? n.TongCong : ((n.TongTienHang && n.TongTienHang > 0) ? n.TongTienHang : (n.TienVanChuyen || 0));
                     totalNhapDiDuongSL += sl;
@@ -1096,6 +1098,7 @@
                         <td class="fw-bold text-primary">${n.SoChungTu}</td>
                         <td>${formatDate(n.NgayNhap)}</td>
                         <td>${nguoiGiaoHang}</td>
+                        <td>${nguoiNhan}</td>
                         <td class="text-end fw-bold">${formatNumber(sl)}</td>
                         <td class="text-end fw-bold text-warning">${formatMoney(tongTienPhieu)}</td>
                         <td class="text-center">
@@ -1108,7 +1111,7 @@
                 $('#sumNhapKhoOnTheWayTien_@uid').text(formatMoney(totalNhapDiDuongTien));
                 $('#tfNhapKhoOnTheWay_@uid').show();
             } else {
-                nhapOtwHtml = '<tr><td colspan="7" class="text-center text-muted py-3">Không có phiếu nhập kho đang đi đường.</td></tr>';
+                nhapOtwHtml = '<tr><td colspan="8" class="text-center text-muted py-3">Không có phiếu nhập kho đang đi đường.</td></tr>';
                 $('#tfNhapKhoOnTheWay_@uid').hide();
             }
             $('#tbNhapKhoOnTheWay_@uid').html(nhapOtwHtml);

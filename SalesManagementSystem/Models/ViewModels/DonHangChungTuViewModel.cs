@@ -18,5 +18,9 @@ namespace SalesManagementSystem.Models.ViewModels
         public decimal PhiBocXep { get; set; }
         public string SoDienThoaiTaiXe { get; set; }
         public string HoTenTaiXe { get; set; }
+
+        public string MaSanPham { get; set; }
+        public string TenSanPham { get; set; }
+        public decimal SoLuong { get; set; }
     }
 }

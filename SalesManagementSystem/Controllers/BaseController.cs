@@ -67,7 +67,7 @@ namespace SalesManagementSystem.Controllers
                                 
                 if (!hasParam && string.IsNullOrEmpty(tuNgay))
                 {
-                    filterContext.ActionParameters["tuNgay"] = new DateTime(DateTime.Now.Year, 1, 1).ToString("yyyy-MM-dd");
+                    filterContext.ActionParameters["tuNgay"] = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).ToString("yyyy-MM-dd");
                 }
             }
 

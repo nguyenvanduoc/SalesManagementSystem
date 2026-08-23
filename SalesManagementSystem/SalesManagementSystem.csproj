@@ -445,6 +445,7 @@
     <Content Include="node_modules\safer-buffer\Readme.md" />
     <Content Include="obj\Release\Package\PackageTmp\Views\PhieuNhapKho\_PhieuNhapKhoList.cshtml" />
     <Content Include="obj\Release\Package\PackageTmp\Views\CongNoKhachHang\_CongNoKhachHangList.cshtml" />
+    <Content Include="App_Config\systemPublic.dat" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />

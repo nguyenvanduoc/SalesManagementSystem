@@ -337,7 +337,7 @@ var DonDatHang = (function () {
 
         var thanhTienHang = donGia * soLuong;
         var thanhTienBocXep = donGiaBocXep * soLuong;
-        var thanhTien = thanhTienHang + soTienKhac - thanhTienBocXep - soTienChietKhau - chuongTrinhTichLuySale;
+        var thanhTien = thanhTienHang - soTienKhac - thanhTienBocXep - soTienChietKhau - chuongTrinhTichLuySale;
         var tienThue = thanhTien * thue / 100;
         var ttSauThue = thanhTien + tienThue;
 

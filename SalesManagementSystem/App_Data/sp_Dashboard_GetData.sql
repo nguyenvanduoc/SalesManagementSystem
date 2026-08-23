@@ -603,11 +603,13 @@ BEGIN
         pt.TenPhuongTien,
         pn.HoTenTaiXe,
         pn.TenNguoiGiao,
+        ISNULL(NULLIF(pn.TenNguoiNhan, ''), LTRIM(RTRIM(ISNULL(ns.HoDem, '') + ' ' + ISNULL(ns.Ten, '')))) AS TenNguoiNhan,
         ISNULL((SELECT SUM(SoLuong) FROM KHO_PhieuNhap_ChiTiet WHERE IDPhieuNhap = pn.ID), 0) AS TongSoLuong,
         ISNULL(NULLIF(pn.TongCong, 0), ISNULL(NULLIF(pn.TongTienHang, 0), ISNULL((SELECT SUM(CASE WHEN ThanhTien > 0 THEN ThanhTien WHEN TongSauThue > 0 THEN TongSauThue ELSE SoLuong * DonGia END) FROM KHO_PhieuNhap_ChiTiet WHERE IDPhieuNhap = pn.ID), 0))) AS TongCong
     FROM KHO_PhieuNhap pn
     LEFT JOIN DM_NhaCungCap ncc ON pn.IDNhaCungCap = ncc.ID
     LEFT JOIN DM_PhuongTien pt ON pn.IDPhuongTien = pt.ID
+    LEFT JOIN NS_NhanSu ns ON pn.IDNhanSuNhan = ns.ID
     WHERE pn.IsDeleted = 0 AND pn.TrangThai = 1
     ORDER BY pn.NgayNhap DESC, pn.ID DESC;
 

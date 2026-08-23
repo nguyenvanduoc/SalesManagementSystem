@@ -987,7 +987,7 @@ namespace SalesManagementSystem.Controllers
                 
                 ct.ThanhTienHang = Math.Round(ct.DonGia * ct.SoLuong, 0);
                 ct.ThanhTienBocXep = Math.Round((ct.DonGiaBocXep ?? 0m) * ct.SoLuong, 0);
-                ct.ThanhTien = Math.Round((ct.ThanhTienHang ?? 0m) + (ct.SoTienKhac ?? 0m) - (ct.ThanhTienBocXep ?? 0m) - (ct.SoTienChietKhau ?? 0m) - (ct.ChuongTrinhTichLuySale ?? 0m), 0);
+                ct.ThanhTien = Math.Round((ct.ThanhTienHang ?? 0m) - (ct.SoTienKhac ?? 0m) - (ct.ThanhTienBocXep ?? 0m) - (ct.SoTienChietKhau ?? 0m) - (ct.ChuongTrinhTichLuySale ?? 0m), 0);
                 
                 ct.ThanhTienThue = Math.Round(ct.ThanhTien * ct.ThueGTGT / 100, 0);
                 ct.ThanhTienSauThue = Math.Round(ct.ThanhTien + (ct.ThanhTienThue ?? 0m), 0);

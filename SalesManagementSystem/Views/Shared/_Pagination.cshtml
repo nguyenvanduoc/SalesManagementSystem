@@ -37,6 +37,17 @@
                     int startPage = Math.Max(1, currentPage - 2);
                     int endPage = Math.Min(totalPages, currentPage + 2);
 
+                    if (currentPage <= 3)
+                    {
+                        startPage = 1;
+                        endPage = 5;
+                    }
+                    else if (currentPage >= totalPages - 2)
+                    {
+                        startPage = totalPages - 4;
+                        endPage = totalPages;
+                    }
+
                     if (startPage > 1)
                     {
                         <li class="page-item @(currentPage == 1 ? "active" : "")">
@@ -50,7 +61,6 @@
 
                     for (int i = startPage; i <= endPage; i++)
                     {
-                        if (i == 1 || i == totalPages) { continue; }
                         var activeClass = i == currentPage ? "active" : "";
                         <li class="page-item @activeClass">
                             <a class="page-link ajax-link" href="@Url.Action(actionName, new { page = i, pageSize = pageSize, keyword = keyword })">@i</a>

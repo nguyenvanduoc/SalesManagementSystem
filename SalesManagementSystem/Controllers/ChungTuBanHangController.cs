@@ -734,16 +734,6 @@ namespace SalesManagementSystem.Controllers
 
                 int stt = 1;
                 var exportData = list.Select(item => {
-                    decimal sl = 0m;
-                    if (item.IDChungTuBanHang.HasValue && ctbhQtyDict.ContainsKey(item.IDChungTuBanHang.Value))
-                    {
-                        sl = ctbhQtyDict[item.IDChungTuBanHang.Value];
-                    }
-                    else if (orderQtyDict.ContainsKey(item.IDDonDatHang))
-                    {
-                        sl = orderQtyDict[item.IDDonDatHang];
-                    }
-
                     string trangThaiText = "Chưa lập";
                     if (item.TrangThaiChungTu == 1) trangThaiText = "Đề nghị ghi";
                     else if (item.TrangThaiChungTu == 2) trangThaiText = "Đã ghi";
@@ -755,7 +745,9 @@ namespace SalesManagementSystem.Controllers
                         NgayLapDonHang = item.NgayTaoDon.HasValue ? item.NgayTaoDon.Value.ToString("dd/MM/yyyy") : "",
                         TenKhachHang = item.TenKhachHang ?? "",
                         ThongTinXe = item.HoTenTaiXe ?? "",
-                        SoLuong = sl,
+                        MaSanPham = item.MaSanPham ?? "",
+                        TenSanPham = item.TenSanPham ?? "",
+                        SoLuong = item.SoLuong,
                         TongTienHang = item.ThanhTienHang,
                         TongPhiBocXep = item.PhiBocXep,
                         PhiBocXep = item.PhiBocXep,
