@@ -24,7 +24,7 @@ BEGIN
     FROM #TempKho k
     CROSS JOIN #TempSanPham sp;
 
-    -- 4. Tính tồn kho cho từng cặp Kho - Sản phẩm
+    -- 4. Tính tồn kho cho từng cặp Kho - Sản phẩm (bỏ qua giao dịch bị hủy)
     SELECT 
         ksp.IDKho,
         ksp.TenKhoHang,
@@ -37,7 +37,7 @@ BEGIN
     INTO #TempKetQua
     FROM #TempKhoSanPham ksp
     LEFT JOIN DM_SanPham dmsp ON ksp.IDSanPham = dmsp.ID
-    LEFT JOIN KHO_GiaoDichKho g ON ksp.IDKho = g.IDKho AND ksp.IDSanPham = g.IDSanPham
+    LEFT JOIN KHO_GiaoDichKho g ON ksp.IDKho = g.IDKho AND ksp.IDSanPham = g.IDSanPham AND g.IsHuy = 0
     GROUP BY 
         ksp.IDKho,
         ksp.TenKhoHang,

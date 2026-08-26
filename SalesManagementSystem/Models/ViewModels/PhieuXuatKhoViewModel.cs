@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace SalesManagementSystem.Models.ViewModels
@@ -10,24 +10,40 @@ namespace SalesManagementSystem.Models.ViewModels
         public DateTime NgayXuat { get; set; }
         
         public int? IDDonDatHang { get; set; }
+        public int? IDChungTuBanHang { get; set; }
         public string SoDonHang { get; set; }
         public int IDKho { get; set; }
         public string TenKhoHang { get; set; }
+        public int? IDKhachHang { get; set; }
         public string TenKhachHang { get; set; }
         public string MaKhachHang { get; set; }
         public string DiaChiKhachHang { get; set; }
         public string SoDienThoaiKhachHang { get; set; }
         public string MaSoThueKhachHang { get; set; }
+        public int? IDNhaCungCap { get; set; }
+        public string TenNhaCungCap { get; set; }
         
         public int? IDNhanSuNhan { get; set; }
         public string TenNguoiNhan { get; set; }
         public string SoDienThoaiNguoiNhan { get; set; }
+        public string TenNguoiGiao { get; set; }
+        public string SoDienThoaiNguoiGiao { get; set; }
+        
+        public int? IDPhuongTien { get; set; }
+        public string TenPhuongTien { get; set; }
+        public DateTime? NgayGiaoHang { get; set; }
+        public string HoTenTaiXe { get; set; }
+        public string SoDienThoaiTaiXe { get; set; }
+        
+        public string SoHoaDon { get; set; }
+        public DateTime? NgayHoaDon { get; set; }
         public string GhiChu { get; set; }
         
         public decimal TongTienHang { get; set; }
         public decimal TongTienThue { get; set; }
         public decimal TongCong { get; set; }
         public int TrangThai { get; set; }
+        public bool IsReadOnly { get; set; }
         
         public List<PhieuXuatKhoChiTietViewModel> ChiTiets { get; set; } = new List<PhieuXuatKhoChiTietViewModel>();
     }
@@ -47,6 +63,8 @@ namespace SalesManagementSystem.Models.ViewModels
         public decimal ThueGTGT { get; set; }
         public decimal TienThue { get; set; }
         public decimal TongSauThue { get; set; }
+        public string NgaySanXuat { get; set; }
+        public string HanSuDung { get; set; }
         public string GhiChu { get; set; }
     }
 }

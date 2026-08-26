@@ -130,27 +130,192 @@ namespace SalesManagementSystem.Controllers
             return PartialView("_ChonDonDatHangModal");
         }
 
-        public ActionResult Create(int idDonDatHang)
+        public ActionResult Create()
         {
-            return Content("<div class='alert alert-danger'>Màn hình Phiếu xuất kho chỉ để xem. Vui lòng lập chứng từ bán hàng.</div>");
+            if (!PermissionHelper.HasPermission("PhieuXuatKho", LoaiPhanQuyen.Them)) return View("AccessDenied");
+
+            var model = new PhieuXuatKhoViewModel
+            {
+                ID = 0,
+                SoChungTu = _repo.GenerateSoChungTu(),
+                NgayXuat = DateTime.Now,
+                TrangThai = 1,
+                ChiTiets = new List<PhieuXuatKhoChiTietViewModel>()
+            };
+
+            ViewBag.IsView = false;
+            return View("Edit", model);
+        }
+
+        public ActionResult Edit(int id, bool isView = false)
+        {
+            if (!PermissionHelper.HasPermission("PhieuXuatKho", LoaiPhanQuyen.Xem)) return View("AccessDenied");
+
+            var model = _repo.GetById(id);
+            if (model == null) return HttpNotFound();
+
+            model.ChiTiets = _repo.GetChiTiet(id);
+            model.IsReadOnly = isView || model.TrangThai == 2 || model.TrangThai == 3;
+
+            int total;
+            var list = _repo.GetList(1, 1, null, null, model.SoChungTu, null, null, null, null, null, null, null, null, out total);
+            var item = list.FirstOrDefault();
+            if (item != null)
+            {
+                model.TenKhoHang = item.TenKhoHang;
+                model.TenKhachHang = item.TenKhachHang;
+            }
+
+            ViewBag.IsView = isView;
+            return View("Edit", model);
         }
 
         [HttpPost]
         public ActionResult Save(PhieuXuatKhoViewModel model)
         {
-            return Json(new { success = false, message = "Màn hình Phiếu xuất kho chỉ hỗ trợ xem dữ liệu." });
+            if (model.ID == 0 && !PermissionHelper.HasPermission("PhieuXuatKho", LoaiPhanQuyen.Them)) return Json(new { success = false, message = "Không có quyền thêm mới" });
+            if (model.ID > 0 && !PermissionHelper.HasPermission("PhieuXuatKho", LoaiPhanQuyen.CapNhat)) return Json(new { success = false, message = "Không có quyền sửa" });
+
+            try
+            {
+                var user = GetCurrentUser();
+                int userId = user?.IDNhanSu ?? 0;
+
+                int newId = _repo.Save(model, userId);
+                return Json(new { success = true, id = newId, soChungTu = model.SoChungTu, message = model.TrangThai == 1 ? "Lưu nháp phiếu xuất kho thành công" : "Lưu và ghi sổ phiếu xuất kho thành công (đã trừ tồn kho)" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpPost]
         public ActionResult GhiSo(int id)
         {
-            return Json(new { success = false, message = "Thao tác ghi được thực hiện ở màn hình Chứng từ bán hàng." });
+            if (!PermissionHelper.HasPermission("PhieuXuatKho", LoaiPhanQuyen.TuyChon)) return Json(new { success = false, message = "Không có quyền ghi" });
+
+            try
+            {
+                var user = GetCurrentUser();
+                int userId = user?.IDNhanSu ?? 0;
+
+                _repo.GhiSo(id, userId);
+                return Json(new { success = true, message = "Ghi sổ thành công. Đã trừ kho xuất." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpPost]
         public ActionResult Huy(int id, string lyDo)
         {
-            return Json(new { success = false, message = "Thao tác Hủy được thực hiện ở màn hình Chứng từ bán hàng." });
+            if (!PermissionHelper.HasPermission("PhieuXuatKho", LoaiPhanQuyen.TuyChon)) return Json(new { success = false, message = "Không có quyền hủy" });
+
+            try
+            {
+                var user = GetCurrentUser();
+                int userId = user?.IDNhanSu ?? 0;
+
+                _repo.Cancel(id, userId, lyDo);
+                return Json(new { success = true, message = "Hủy phiếu xuất kho thành công" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public ActionResult HuyPhieu(int id, string lyDoHuy)
+        {
+            return Huy(id, lyDoHuy);
+        }
+
+        // Dropdowns endpoints
+        [HttpGet]
+        public ActionResult SearchKhoHang(string q)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                string kw = (q ?? "").Trim();
+                var data = conn.Query("SELECT ID, MaKhoHang, TenKhoHang FROM DM_KhoHang WHERE TenKhoHang LIKE N'%' + @KW + '%' OR MaKhoHang LIKE '%' + @KW + '%' ORDER BY TenKhoHang", new { KW = kw });
+                return Json(data.Select(x => new { id = (int)x.ID, text = (string)x.MaKhoHang + " - " + (string)x.TenKhoHang }), JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult SearchKhachHang(string q)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                string kw = (q ?? "").Trim();
+                var data = conn.Query("SELECT TOP 50 ID, MaKhachHang, TenKhachHang FROM NS_KhachHang WHERE TenKhachHang LIKE N'%' + @KW + '%' OR MaKhachHang LIKE '%' + @KW + '%' ORDER BY TenKhachHang", new { KW = kw });
+                return Json(data.Select(x => new { id = (int)x.ID, text = (string)x.MaKhachHang + " - " + (string)x.TenKhachHang }), JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult SearchNhaCungCap(string q)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                string kw = (q ?? "").Trim();
+                var data = conn.Query("SELECT TOP 50 ID, MaNhaCungCap, TenNhaCungCap FROM DM_NhaCungCap WHERE TenNhaCungCap LIKE N'%' + @KW + '%' OR MaNhaCungCap LIKE '%' + @KW + '%' ORDER BY TenNhaCungCap", new { KW = kw });
+                return Json(data.Select(x => new { id = (int)x.ID, text = (string)x.MaNhaCungCap + " - " + (string)x.TenNhaCungCap }), JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult SearchSanPham(string q)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                string kw = (q ?? "").Trim();
+                var data = conn.Query("SELECT TOP 50 ID, MaSanPham, TenSanPham, DVT FROM DM_SanPham WHERE TenSanPham LIKE N'%' + @KW + '%' OR MaSanPham LIKE '%' + @KW + '%' ORDER BY TenSanPham", new { KW = kw });
+                return Json(data.Select(x => new { id = (int)x.ID, text = (string)x.MaSanPham + " - " + (string)x.TenSanPham, dvt = (string)x.DVT }), JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult SearchPhuongTien(string q)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                string kw = (q ?? "").Trim();
+                var data = conn.Query("SELECT TOP 50 ID, MaPhuongTien, TenPhuongTien FROM DM_PhuongTien WHERE TenPhuongTien LIKE N'%' + @KW + '%' OR MaPhuongTien LIKE '%' + @KW + '%' ORDER BY STT, TenPhuongTien", new { KW = kw });
+                return Json(data.Select(x => new { id = (int)x.ID, text = (string)x.MaPhuongTien + " - " + (string)x.TenPhuongTien }), JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult CheckTonKho(int idKho, string chiTietsJson, string soChungTu = null)
+        {
+            try
+            {
+                using (var conn = _db.CreateConnection())
+                {
+                    var pTonKho = new DynamicParameters();
+                    pTonKho.Add("@IDKho", idKho);
+                    pTonKho.Add("@ListSanPham", chiTietsJson);
+                    pTonKho.Add("@ExcludeSoChungTu", string.IsNullOrEmpty(soChungTu) ? null : soChungTu);
+
+                    var checkTon = conn.Query<CheckTonKhoResponseViewModel>("sp_KHO_TonKho_CheckByKho", pTonKho, commandType: System.Data.CommandType.StoredProcedure).ToList();
+                    var missingItems = checkTon.Where(x => !x.IsDuTon).ToList();
+                    if (missingItems.Any())
+                    {
+                        var msg = string.Join("<br/>", missingItems.Select(x => $"Sản phẩm <b>[{x.MaSanPham}] - {x.TenSanPham}</b> vượt quá tồn kho hiện tại! (Tồn hiện tại: <b>{x.SoLuongTon:N0}</b>, Yêu cầu xuất: <b>{x.SoLuongCanXuat:N0}</b>)"));
+                        return Json(new { success = false, message = msg, data = checkTon });
+                    }
+                    return Json(new { success = true, data = checkTon });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
         public ActionResult Details(int id)

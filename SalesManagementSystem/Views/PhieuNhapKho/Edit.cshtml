@@ -57,6 +57,12 @@
 
 <form id="frmPhieuNhapKho" autocomplete="off">
     <input type="hidden" id="ID" value="@Model.ID" />
+    <input type="hidden" id="hdIDLoaiNhapKho" value="@(Model.IDLoaiNhapKho ?? 0)" />
+    <input type="hidden" id="hdIDKho" value="@(Model.IDKho ?? 0)" />
+    <input type="hidden" id="hdIDKhoNguon" value="@(Model.IDKhoNguon ?? 0)" />
+    <input type="hidden" id="hdIDKhachHang" value="@(Model.IDKhachHang ?? 0)" />
+    <input type="hidden" id="hdIDNhaCungCap" value="@(Model.IDNhaCungCap ?? 0)" />
+    <input type="hidden" id="hdIDPhuongTien" value="@(Model.IDPhuongTien ?? 0)" />
     
     <div class="row g-3">
         <!-- Nội dung chính -->
@@ -70,23 +76,68 @@
                     <div class="row g-2">
                         <div class="col-md-3">
                             <label class="form-label text-muted fw-semibold small">Loại nhập kho <span class="text-danger">*</span></label>
-                            <select id="IDLoaiNhapKho_@containerId" class="sel-IDLoaiNhapKho form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
+                            <select id="IDLoaiNhapKho_@containerId" class="sel-IDLoaiNhapKho form-control no-select2" style="width:100%;" @(isView ? "disabled" : "")>
+                                @if (Model.IDLoaiNhapKho.HasValue && Model.IDLoaiNhapKho.Value > 0)
+                                {
+                                    <option value="@Model.IDLoaiNhapKho.Value" selected>@Model.TenLoaiNhap</option>
+                                }
+                                else
+                                {
+                                    <option value=""></option>
+                                }
+                            </select>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label text-muted fw-semibold small">Kho nhập <span class="text-danger">*</span></label>
-                            <select id="IDKho_@containerId" class="sel-IDKho form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
+                            <select id="IDKho_@containerId" class="sel-IDKho form-control no-select2" style="width:100%;" @(isView ? "disabled" : "")>
+                                @if (Model.IDKho.HasValue && Model.IDKho.Value > 0)
+                                {
+                                    <option value="@Model.IDKho.Value" selected>@Model.TenKho</option>
+                                }
+                                else
+                                {
+                                    <option value=""></option>
+                                }
+                            </select>
                         </div>
                         <div class="col-md-3" id="colKhoNguon" style="display:none;">
                             <label class="form-label text-muted fw-semibold small">Kho xuất <span class="text-danger">*</span></label>
-                            <select id="IDKhoNguon_@containerId" class="sel-IDKhoNguon form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
+                            <select id="IDKhoNguon_@containerId" class="sel-IDKhoNguon form-control no-select2" style="width:100%;" @(isView ? "disabled" : "")>
+                                @if (Model.IDKhoNguon.HasValue && Model.IDKhoNguon.Value > 0)
+                                {
+                                    <option value="@Model.IDKhoNguon.Value" selected>@Model.TenKhoNguon</option>
+                                }
+                                else
+                                {
+                                    <option value=""></option>
+                                }
+                            </select>
                         </div>
                         <div class="col-md-3" id="colKhachHang" style="display:none;">
                             <label class="form-label text-muted fw-semibold small">Khách hàng <span class="text-danger">*</span></label>
-                            <select id="IDKhachHang_@containerId" class="sel-IDKhachHang form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
+                            <select id="IDKhachHang_@containerId" class="sel-IDKhachHang form-control no-select2" style="width:100%;" @(isView ? "disabled" : "")>
+                                @if (Model.IDKhachHang.HasValue && Model.IDKhachHang.Value > 0)
+                                {
+                                    <option value="@Model.IDKhachHang.Value" selected>@Model.TenKhachHang</option>
+                                }
+                                else
+                                {
+                                    <option value=""></option>
+                                }
+                            </select>
                         </div>
                         <div class="col-md-3" id="colNhaCungCap">
                             <label class="form-label text-muted fw-semibold small">Nhà cung cấp <span class="text-danger">*</span></label>
-                            <select id="IDNhaCungCap_@containerId" class="sel-IDNhaCungCap form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
+                            <select id="IDNhaCungCap_@containerId" class="sel-IDNhaCungCap form-control no-select2" style="width:100%;" @(isView ? "disabled" : "")>
+                                @if (Model.IDNhaCungCap.HasValue && Model.IDNhaCungCap.Value > 0)
+                                {
+                                    <option value="@Model.IDNhaCungCap.Value" selected>@Model.TenNhaCungCap</option>
+                                }
+                                else
+                                {
+                                    <option value=""></option>
+                                }
+                            </select>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label text-muted fw-semibold small">Người nhận</label>
@@ -109,7 +160,7 @@
                     <div class="row g-2">
                         <div class="col-md-3">
                             <label class="form-label text-muted fw-semibold small">Phương tiện</label>
-                            <select id="IDPhuongTien_@containerId" class="sel-IDPhuongTien form-control" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
+                            <select id="IDPhuongTien_@containerId" class="sel-IDPhuongTien form-control no-select2" style="width:100%;" @(isView ? "disabled" : "")><option value=""></option></select>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label text-muted fw-semibold small">Ngày giao hàng</label>
@@ -303,12 +354,10 @@
 }
 else
 {
-    @section Scripts {
-    <script src="@Url.Content("~/Scripts/phieu-nhap-kho.js?v=3.1")"></script>
     <script>
         var isViewMode = @(isView.ToString().ToLower());
 
-        $(document).ready(function () {
+        function initPNK() {
             var pnk = new window.PhieuNhapKhoClass({
                 containerSelector: '#@containerId',
                 searchLoaiNhapKhoUrl: '@Url.Action("SearchLoaiNhapKho")',
@@ -338,11 +387,11 @@ else
             $('#@containerId').data('pnkInstance', pnk);
 
             if (isViewMode) {
-                $('.sel-sanpham, .txt-soluong, .txt-dongia, .txt-thue, .txt-ghichu, .txt-ngaysanxuat, .txt-hansudung, .txt-dongiavanchuyen').prop('disabled', true).addClass('readonly-cell');
-                $('.btn-remove-row, #btnAddRow, #btnSavePhieu').hide();
+                $('#@containerId').find('.sel-sanpham, .txt-soluong, .txt-dongia, .txt-thue, .txt-ghichu, .txt-ngaysanxuat, .txt-hansudung, .txt-dongiavanchuyen').prop('disabled', true).addClass('readonly-cell');
+                $('#@containerId').find('.btn-remove-row, #btnAddRow, #btnSavePhieu').hide();
             }
 
-            $('#btnSaveDraft').on('click', function () {
+            $('#@containerId').find('#btnSaveDraft').off('click').on('click', function () {
                 var pnk = $('#@containerId').data('pnkInstance');
                 if (!pnk) { showToast('error', 'Lỗi khởi tạo đối tượng JavaScript'); return; }
                 var data = pnk.validateAndSerialize();
@@ -359,12 +408,12 @@ else
                             if (res.success) {
                                 showToast('success', res.message);
                                 if (data.ID == 0 && res.id) {
-                                    $('#ID').val(res.id);
-                                    $('#SoChungTu').val(res.soChungTu);
-                                    $('#btnGhiDuLieu').show();
-                                    $('#badgeTrangThai').text('Nháp');
+                                    $('#@containerId').find('#ID').val(res.id);
+                                    $('#@containerId').find('#SoChungTu').val(res.soChungTu);
+                                    $('#@containerId').find('#btnGhiDuLieu').show();
+                                    $('#@containerId').find('#badgeTrangThai').text('Nháp');
                                 } else {
-                                    $('#badgeTrangThai').text('Nháp');
+                                    $('#@containerId').find('#badgeTrangThai').text('Nháp');
                                 }
                             } else {
                                 showToast('error', res.message);
@@ -375,7 +424,7 @@ else
                 });
             });
 
-            $('#btnSavePhieu').on('click', function () {
+            $('#@containerId').find('#btnSavePhieu').off('click').on('click', function () {
                 var pnk = $('#@containerId').data('pnkInstance');
                 if (!pnk) { showToast('error', 'Lỗi khởi tạo đối tượng JavaScript'); return; }
                 var data = pnk.validateAndSerialize();
@@ -392,10 +441,10 @@ else
                             if (res.success) {
                                 showToast('success', res.message);
                                 if (data.ID == 0 && res.id) {
-                                    $('#ID').val(res.id);
-                                    $('#SoChungTu').val(res.soChungTu);
-                                    $('#btnGhiDuLieu').show();
-                                    $('#badgeTrangThai').text('Đề nghị ghi');
+                                    $('#@containerId').find('#ID').val(res.id);
+                                    $('#@containerId').find('#SoChungTu').val(res.soChungTu);
+                                    $('#@containerId').find('#btnGhiDuLieu').show();
+                                    $('#@containerId').find('#badgeTrangThai').text('Đề nghị ghi');
                                 }
                             } else {
                                 showToast('error', res.message);
@@ -405,7 +454,15 @@ else
                     });
                 });
             });
-        });
+        }
+
+        if (typeof window.PhieuNhapKhoClass === 'function') {
+            initPNK();
+        } else {
+            $.getScript('@Url.Content("~/Scripts/phieu-nhap-kho.js?v=3.3")', function () {
+                initPNK();
+            });
+        }
 
         function LuuVaGhiNow(btn) {
             var $container = $(btn).closest('[id^="pnk_edit_"]');
@@ -423,10 +480,10 @@ else
                     data: JSON.stringify(data),
                     success: function (saveRes) {
                         if (saveRes.success) {
-                            var currentId = saveRes.id || data.ID || $('#ID').val() || @Model.ID;
-                            $('#ID').val(currentId);
+                            var currentId = saveRes.id || data.ID || $container.find('#ID').val() || @Model.ID;
+                            $container.find('#ID').val(currentId);
                             if (saveRes.soChungTu) {
-                                $('#SoChungTu').val(saveRes.soChungTu);
+                                $container.find('#SoChungTu').val(saveRes.soChungTu);
                             }
 
                             $.post('@Url.Action("GhiSo")', { id: currentId }, function (ghiRes) {
@@ -457,5 +514,4 @@ else
     <style>
         .readonly-cell { background-color: #e9ecef !important; border: 1px solid #ced4da; }
     </style>
-    }
 }

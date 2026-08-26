@@ -1,6 +1,7 @@
 CREATE OR ALTER PROCEDURE sp_KHO_TonKho_CheckByKho
     @IDKho INT,
-    @ListSanPham NVARCHAR(MAX)
+    @ListSanPham NVARCHAR(MAX),
+    @ExcludeSoChungTu NVARCHAR(50) = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -12,13 +13,13 @@ BEGIN
     INTO #TempSanPham
     FROM OPENJSON(@ListSanPham);
 
-    -- Lấy tồn kho hiện tại cho các sản phẩm trong danh sách tại kho được chọn
+    -- Lấy tồn kho hiện tại cho các sản phẩm trong danh sách tại kho được chọn (bỏ qua giao dịch của chứng từ cũ nếu đang sửa, bỏ qua giao dịch bị hủy)
     SELECT 
         sp.IDSanPham,
-        SUM(ISNULL(k.SoLuongNhap, 0)) - SUM(ISNULL(k.SoLuongXuat, 0)) AS SoLuongTon
+        SUM(ISNULL(k.SoLuongNhap, 0)) - SUM(CASE WHEN @ExcludeSoChungTu IS NOT NULL AND k.SoChungTu = @ExcludeSoChungTu THEN 0 ELSE ISNULL(k.SoLuongXuat, 0) END) AS SoLuongTon
     INTO #TempTonKho
     FROM #TempSanPham sp
-    LEFT JOIN KHO_GiaoDichKho k ON sp.IDSanPham = k.IDSanPham AND k.IDKho = @IDKho
+    LEFT JOIN KHO_GiaoDichKho k ON sp.IDSanPham = k.IDSanPham AND k.IDKho = @IDKho AND k.IsHuy = 0
     GROUP BY sp.IDSanPham;
 
     -- Trả kết quả (Miễn trừ kiểm tra tồn kho nếu là Nợ đầu kỳ / Dịch vụ)

@@ -34,7 +34,7 @@ window.PhieuNhapKhoClass = function (options) {
         }
         return $(selector);
     }
-function _formatNumber(n) {
+    function _formatNumber(n) {
         if (n === '' || n == null) return '';
         if (n === 0 || n === '0') return '0';
         if (!n) return '0';
@@ -70,25 +70,25 @@ function _formatNumber(n) {
         if (config.isInlineDetail) return;
 
         // Load Loại Nhập Kho once and initialize Select2 locally
-        $.get(config.searchLoaiNhapKhoUrl, function(res) {
+        $.get(config.searchLoaiNhapKhoUrl, function (res) {
             var $loaiSelect = getEl('.sel-IDLoaiNhapKho');
             // Remove existing options except the empty one if any
             $loaiSelect.find('option[value!=""]').remove();
-            
+
             if (res && res.length > 0) {
-                $.each(res, function(i, item) {
+                $.each(res, function (i, item) {
                     var opt = new Option(item.text, item.id);
                     // Store 'ma' as a data attribute so change event can read it
                     $(opt).attr('data-ma', item.ma);
                     $loaiSelect.append(opt);
                 });
             }
-            
+
             $loaiSelect.select2({
                 placeholder: '-- Chọn loại nhập --',
                 minimumInputLength: 0
             });
-            
+
             // Re-apply selected value if it exists
             if (config.selectedLoaiNhapKhoId) {
                 $loaiSelect.val(config.selectedLoaiNhapKhoId).trigger('change');
@@ -106,7 +106,7 @@ function _formatNumber(n) {
                 dataType: 'json',
                 delay: 250,
                 data: function (params) { return { q: params.term || '' }; },
-                processResults: function (data) { return { results: data }; },
+                processResults: function (data) { return { results: data.results || data }; },
                 cache: true
             }
         });
@@ -119,7 +119,7 @@ function _formatNumber(n) {
                 dataType: 'json',
                 delay: 250,
                 data: function (params) { return { q: params.term || '' }; },
-                processResults: function (data) { return { results: data }; },
+                processResults: function (data) { return { results: data.results || data }; },
                 cache: true
             }
         });
@@ -132,7 +132,7 @@ function _formatNumber(n) {
                 dataType: 'json',
                 delay: 250,
                 data: function (params) { return { q: params.term || '' }; },
-                processResults: function (data) { return { results: data }; },
+                processResults: function (data) { return { results: data.results || data }; },
                 cache: true
             }
         });
@@ -145,7 +145,7 @@ function _formatNumber(n) {
                 dataType: 'json',
                 delay: 250,
                 data: function (params) { return { q: params.term || '' }; },
-                processResults: function (data) { return { results: data }; },
+                processResults: function (data) { return { results: data.results || data }; },
                 cache: true
             }
         });
@@ -159,41 +159,65 @@ function _formatNumber(n) {
                 dataType: 'json',
                 delay: 250,
                 data: function (params) { return { q: params.term || '' }; },
-                processResults: function (data) { return { results: data }; },
+                processResults: function (data) { return { results: data.results || data }; },
                 cache: true
             }
         });
 
+        getEl('.sel-IDLoaiNhapKho').on('change select2:select', function () { getEl('#hdIDLoaiNhapKho').val($(this).val() || ''); });
+        getEl('.sel-IDKho').on('change select2:select', function () { getEl('#hdIDKho').val($(this).val() || ''); });
+        getEl('.sel-IDKhoNguon').on('change select2:select', function () { getEl('#hdIDKhoNguon').val($(this).val() || ''); });
+        getEl('.sel-IDKhachHang').on('change select2:select', function () { getEl('#hdIDKhachHang').val($(this).val() || ''); });
+        getEl('.sel-IDNhaCungCap').on('change select2:select', function () { getEl('#hdIDNhaCungCap').val($(this).val() || ''); });
+        getEl('.sel-IDPhuongTien').on('change select2:select', function () { getEl('#hdIDPhuongTien').val($(this).val() || ''); });
+
         if (config.selectedKhoId) {
-            getEl('.sel-IDKho').append(new Option(config.selectedKhoText, config.selectedKhoId, true, true)).trigger('change');
+            getEl('#hdIDKho').val(config.selectedKhoId);
+            if (getEl('.sel-IDKho').find('option[value="' + config.selectedKhoId + '"]').length === 0) {
+                getEl('.sel-IDKho').append(new Option(config.selectedKhoText, config.selectedKhoId, true, true));
+            }
+            getEl('.sel-IDKho').val(config.selectedKhoId).trigger('change');
         }
         if (config.selectedNccId) {
-            getEl('.sel-IDNhaCungCap').append(new Option(config.selectedNccText, config.selectedNccId, true, true)).trigger('change');
+            getEl('#hdIDNhaCungCap').val(config.selectedNccId);
+            if (getEl('.sel-IDNhaCungCap').find('option[value="' + config.selectedNccId + '"]').length === 0) {
+                getEl('.sel-IDNhaCungCap').append(new Option(config.selectedNccText, config.selectedNccId, true, true));
+            }
+            getEl('.sel-IDNhaCungCap').val(config.selectedNccId).trigger('change');
         }
         if (config.selectedPhuongTienId) {
-            getEl('.sel-IDPhuongTien').append(new Option(config.selectedPhuongTienText, config.selectedPhuongTienId, true, true)).trigger('change');
+            getEl('#hdIDPhuongTien').val(config.selectedPhuongTienId);
+            if (getEl('.sel-IDPhuongTien').find('option[value="' + config.selectedPhuongTienId + '"]').length === 0) {
+                getEl('.sel-IDPhuongTien').append(new Option(config.selectedPhuongTienText, config.selectedPhuongTienId, true, true));
+            }
+            getEl('.sel-IDPhuongTien').val(config.selectedPhuongTienId).trigger('change');
         }
 
-        // IDLoaiNhapKho pre-fill is now handled inside the $.get callback above
         if (config.selectedKhoNguonId) {
-            getEl('.sel-IDKhoNguon').append(new Option(config.selectedKhoNguonText, config.selectedKhoNguonId, true, true)).trigger('change');
+            getEl('#hdIDKhoNguon').val(config.selectedKhoNguonId);
+            if (getEl('.sel-IDKhoNguon').find('option[value="' + config.selectedKhoNguonId + '"]').length === 0) {
+                getEl('.sel-IDKhoNguon').append(new Option(config.selectedKhoNguonText, config.selectedKhoNguonId, true, true));
+            }
+            getEl('.sel-IDKhoNguon').val(config.selectedKhoNguonId).trigger('change');
         }
         if (config.selectedKhachHangId) {
-            getEl('.sel-IDKhachHang').append(new Option(config.selectedKhachHangText, config.selectedKhachHangId, true, true)).trigger('change');
+            getEl('#hdIDKhachHang').val(config.selectedKhachHangId);
+            if (getEl('.sel-IDKhachHang').find('option[value="' + config.selectedKhachHangId + '"]').length === 0) {
+                getEl('.sel-IDKhachHang').append(new Option(config.selectedKhachHangText, config.selectedKhachHangId, true, true));
+            }
+            getEl('.sel-IDKhachHang').val(config.selectedKhachHangId).trigger('change');
         }
 
         getEl('.sel-IDLoaiNhapKho').on('change', function () {
             var $selectedOpt = $(this).find('option:selected');
             var maLoai = $selectedOpt.attr('data-ma') || '';
-            
-            // Only use selectedLoaiNhapKhoMa as fallback on initial load (same value as original)
-            // Do NOT keep using it after user selects a different option
+
             if (!maLoai && $(this).val() && config.selectedLoaiNhapKhoId && $(this).val() == config.selectedLoaiNhapKhoId) {
                 maLoai = config.selectedLoaiNhapKhoMa || '';
             }
-            
+
             getEl('#colKhoNguon, #colKhachHang, #colNhaCungCap').hide();
-            
+
             if (maLoai === 'CHUYEN_KHO') {
                 getEl('#colKhoNguon').show();
                 getEl('#colNhaCungCap').show();
@@ -215,7 +239,7 @@ function _formatNumber(n) {
                 dataType: 'json',
                 delay: 250,
                 data: function (params) { return { q: params.term || '' }; },
-                processResults: function (data) { return { results: data }; },
+                processResults: function (data) { return { results: data.results || data }; },
                 cache: true
             }
         });
@@ -260,8 +284,8 @@ function _formatNumber(n) {
             var actionTd = '';
             if (!config.isViewMode) {
                 actionTd = '  <td class="text-center align-middle">' +
-                           '    <button type="button" class="btn btn-sm btn-outline-danger btn-remove-row"><i class="bi bi-trash"></i></button>' +
-                           '  </td>';
+                    '    <button type="button" class="btn btn-sm btn-outline-danger btn-remove-row"><i class="bi bi-trash"></i></button>' +
+                    '  </td>';
             }
             var html = '<tr data-id="' + id + '">' +
                 '  <td class="text-center align-middle row-stt"></td>' +
@@ -291,13 +315,13 @@ function _formatNumber(n) {
         var actionTd = '';
         if (!config.isViewMode) {
             actionTd = '  <td class="text-center align-middle">' +
-                       '    <button type="button" class="btn btn-sm btn-outline-danger btn-remove-row"><i class="bi bi-trash"></i></button>' +
-                       '  </td>';
+                '    <button type="button" class="btn btn-sm btn-outline-danger btn-remove-row"><i class="bi bi-trash"></i></button>' +
+                '  </td>';
         }
 
         var html = '<tr data-id="' + id + '">' +
             '  <td class="text-center align-middle row-stt"></td>' +
-            '  <td><select class="form-control sel-sanpham" style="width:100%"></select></td>' +
+            '  <td><select class="form-control sel-sanpham no-select2" style="width:100%"></select></td>' +
             '  <td><input type="text" class="form-control readonly-cell txt-dvt" readonly value="' + dvt + '" /></td>' +
             '  <td><input type="text" class="form-control txt-soluong text-end" inputmode="numeric" value="' + _formatNumber(soLuong) + '" /></td>' +
             '  <td><input type="text" class="form-control txt-dongia text-end" inputmode="decimal" value="' + _formatNumber(donGia) + '" /></td>' +
@@ -447,13 +471,13 @@ function _formatNumber(n) {
         if (!getEl('#NgayNhap').val()) { errorMsg += 'Ngày nhập không được để trống.\n'; isValid = false; }
         if (!getEl('.sel-IDLoaiNhapKho').val()) { errorMsg += 'Vui lòng chọn Loại nhập kho.\n'; isValid = false; }
         if (!getEl('.sel-IDKho').val()) { errorMsg += 'Vui lòng chọn Kho.\n'; isValid = false; }
-        
+
         var maLoai = '';
         var $selectedLoai = getEl('.sel-IDLoaiNhapKho').find('option:selected');
         if ($selectedLoai.length > 0) {
             maLoai = $selectedLoai.attr('data-ma') || '';
-        } 
-        
+        }
+
         if (!maLoai && config.selectedLoaiNhapKhoMa) {
             maLoai = config.selectedLoaiNhapKhoMa;
         }
@@ -489,7 +513,7 @@ function _formatNumber(n) {
                 if (sl <= 0) { errorMsg += 'Dòng ' + stt + ': Số lượng phải > 0.\n'; rowValid = false; }
                 if (dg < 0) { errorMsg += 'Dòng ' + stt + ': Đơn giá không được âm.\n'; rowValid = false; }
                 if (thue < 0) { errorMsg += 'Dòng ' + stt + ': Thuế GTGT không được âm.\n'; rowValid = false; }
-                
+
                 if (dgvc < 0) { errorMsg += 'Dong ' + stt + ': Don gia van chuyen khong duoc am.\n'; rowValid = false; }
 
                 if (!rowValid) {
@@ -530,21 +554,21 @@ function _formatNumber(n) {
             ID: getEl('#ID').val(),
             SoChungTu: getEl('#SoChungTu').val(),
             NgayNhap: getEl('#NgayNhap').val(),
-            IDKho: getEl('.sel-IDKho').val(),
-            IDNhaCungCap: getEl('.sel-IDNhaCungCap').val(),
+            IDKho: getEl('#hdIDKho').val() || getEl('.sel-IDKho').val(),
+            IDNhaCungCap: getEl('#hdIDNhaCungCap').val() || getEl('.sel-IDNhaCungCap').val(),
             SoHoaDon: getEl('#SoHoaDon').val(),
             NgayHoaDon: getEl('#NgayHoaDon').val(),
             TenNguoiGiao: getEl('#TenNguoiGiao').val(),
             SoDienThoaiNguoiGiao: getEl('#SoDienThoaiNguoiGiao').val(),
             TenNguoiNhan: getEl('#TenNguoiNhan').val(),
             GhiChu: getEl('#GhiChu').val(),
-            IDPhuongTien: getEl('.sel-IDPhuongTien').val(),
+            IDPhuongTien: getEl('#hdIDPhuongTien').val() || getEl('.sel-IDPhuongTien').val(),
             NgayGiaoHang: getEl('#NgayGiaoHang').val(),
             HoTenTaiXe: getEl('#HoTenTaiXe').val(),
             SoDienThoaiTaiXe: getEl('#SoDienThoaiTaiXe').val(),
-            IDLoaiNhapKho: getEl('.sel-IDLoaiNhapKho').val(),
-            IDKhoNguon: getEl('.sel-IDKhoNguon').val(),
-            IDKhachHang: getEl('.sel-IDKhachHang').val(),
+            IDLoaiNhapKho: getEl('#hdIDLoaiNhapKho').val() || getEl('.sel-IDLoaiNhapKho').val(),
+            IDKhoNguon: getEl('#hdIDKhoNguon').val() || getEl('.sel-IDKhoNguon').val(),
+            IDKhachHang: getEl('#hdIDKhachHang').val() || getEl('.sel-IDKhachHang').val(),
             ChiTiets: chiTiets
         };
     }

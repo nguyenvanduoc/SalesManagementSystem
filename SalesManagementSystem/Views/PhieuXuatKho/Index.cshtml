@@ -10,7 +10,10 @@
             <i class="bi bi-box-seam me-2"></i>@ViewBag.Title
         </h4>
         <div class="d-flex gap-2">
-            <button type="button" class="btn btn-success btn-export-excel shadow-sm" style="background-color: #27ae60; border-color: #27ae60;" onclick="exportPhieuXuatExcel()">
+            <a href="@Url.Action("Create")" class="btn btn-sm text-white shadow-sm px-3" style="background-color: #2998e4; border: none;">
+                <i class="bi bi-plus-lg me-1"></i> Thêm mới
+            </a>
+            <button type="button" class="btn btn-sm btn-success btn-export-excel shadow-sm px-3" style="background-color: #27ae60; border-color: #27ae60;" onclick="exportPhieuXuatExcel()">
                 <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
             </button>
         </div>
@@ -116,6 +119,30 @@
 
     <div id="table-container">
         @Html.Partial("_PhieuXuatKhoList", Model)
+    </div>
+
+    <!-- Modal Hủy Phiếu Xuất Kho -->
+    <div class="modal fade pxk-huy-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header text-white" style="background-color: #dc3545;">
+                    <h5 class="modal-title fw-bold fs-6"><i class="bi bi-exclamation-triangle-fill me-2"></i>XÁC NHẬN HỦY PHIẾU XUẤT KHO</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" class="pxk-huy-id" />
+                    <p class="mb-2">Bạn có chắc chắn muốn hủy phiếu xuất kho <strong class="pxk-huy-sochungtu text-danger"></strong>?</p>
+                    <div class="mb-2">
+                        <label class="form-label small text-muted fw-semibold">Lý do hủy <span class="text-danger">*</span></label>
+                        <textarea class="form-control pxk-txt-lydohuy" rows="3" placeholder="Nhập lý do hủy phiếu xuất kho..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-sm btn-danger pxk-btn-confirm-huy"><i class="bi bi-x-circle me-1"></i>Đồng ý hủy</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -257,7 +284,53 @@
                 $form[0].reset();
                 $form.trigger('submit');
             });
+
+            $container.find('.pxk-btn-confirm-huy').on('click', function() {
+                var id = $container.find('.pxk-huy-id').val();
+                var lyDo = $container.find('.pxk-txt-lydohuy').val().trim();
+                if (!lyDo) { 
+                    showToast('warning', 'Vui lòng nhập lý do hủy!'); 
+                    return; 
+                }
+
+                $.post('@Url.Action("Huy")', { id: id, lyDo: lyDo }, function (res) {
+                    if (res.success) { 
+                        showToast('success', res.message || 'Hủy phiếu xuất kho thành công'); 
+                        $container.find('.pxk-huy-modal').modal('hide');
+                        if (typeof TabManager !== 'undefined') TabManager.reloadActiveTabGrid(false);
+                        else $form.trigger('submit');
+                    } else {
+                        showToast('error', res.message);
+                    }
+                });
+            });
         })();
 
+        function getPxkContainer(btn) {
+            return $(btn).closest('[id^="pxk-"]');
+        }
+
+        window.ghiSoPhieuXuat = function(btn, id) {
+            var $container = getPxkContainer(btn);
+            var $form = $container.find('#searchForm');
+            showConfirm('Bạn có chắc chắn muốn ghi sổ phiếu xuất kho này? Tồn kho sẽ được trừ.', function() {
+                $.post('@Url.Action("GhiSo")', { id: id }, function (res) {
+                    if (res.success) {
+                        if (typeof showToast === 'function') showToast('success', res.message);
+                        $form.trigger('submit');
+                    } else {
+                        if (typeof showToast === 'function') showToast('error', res.message);
+                    }
+                });
+            });
+        };
+
+        window.moHuyPhieuXuat = function(btn, id, soChungTu) {
+            var $container = getPxkContainer(btn);
+            $container.find('.pxk-huy-id').val(id);
+            $container.find('.pxk-huy-sochungtu').text(soChungTu || '');
+            $container.find('.pxk-txt-lydohuy').val('');
+            $container.find('.pxk-huy-modal').modal('show');
+        };
     </script>
 }

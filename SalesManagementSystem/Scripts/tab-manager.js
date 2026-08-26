@@ -899,10 +899,11 @@ var TabManager = (function () {
 
         if ($.fn.select2) {
             // Khởi tạo Select2 cho tất cả các combobox (.form-select) trừ dropdown phân trang, no-select2, và ddl-thoi-gian
-            var $comboboxes = container.find('select.form-select:not(.page-size-select):not(.no-select2):not(.ddl-thoi-gian), .select2:not(.ddl-thoi-gian)');
+            var $comboboxes = container.find('select.form-select:not(.page-size-select):not(.no-select2):not(.ddl-thoi-gian), select.select2:not(.no-select2):not(.ddl-thoi-gian)');
 
             $comboboxes.each(function () {
                 var $this = $(this);
+                if (!$this.is('select') || $this.hasClass('no-select2')) return;
                 var rawId = $this.attr('id');
 
                 // Đảm bảo ID thẻ duy nhất tuyệt đối trong toàn bộ SPA DOM để tránh xung đột giữa các Tab

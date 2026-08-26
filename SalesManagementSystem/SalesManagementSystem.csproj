@@ -600,6 +600,7 @@
     <Content Include="Views\BaoCaoDoiChieuCongNoKhachHang\Index.cshtml" />
     <Content Include="Views\BaoCaoDoiChieuCongNoKhachHang\_DanhSach.cshtml" />
     <Content Include="Views\BaoCaoDoiChieuCongNoKhachHang\_DetailsModal.cshtml" />
+    <Content Include="Views\PhieuXuatKho\Edit.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Login\Index.cshtml" />

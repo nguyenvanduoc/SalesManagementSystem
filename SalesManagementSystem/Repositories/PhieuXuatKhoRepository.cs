@@ -95,11 +95,21 @@ namespace SalesManagementSystem.Repositories
             }
         }
 
+        public List<PhieuXuatKhoChiTietViewModel> GetChiTiet(int idPhieuXuat)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                var p = new DynamicParameters();
+                p.Add("@IDPhieuXuat", idPhieuXuat);
+                return conn.Query<PhieuXuatKhoChiTietViewModel>("sp_KHO_PhieuXuat_ChiTiet_GetList", p, commandType: CommandType.StoredProcedure).ToList();
+            }
+        }
+
         public string GenerateSoChungTu()
         {
             using (var conn = _db.CreateConnection())
             {
-                string sql = "SELECT TOP 1 SoChungTu FROM KHO_PhieuXuat ORDER BY ID DESC";
+                string sql = "SELECT TOP 1 SoChungTu FROM KHO_PhieuXuat WHERE SoChungTu LIKE 'PX%' ORDER BY ID DESC";
                 var lastSo = conn.QueryFirstOrDefault<string>(sql);
 
                 if (string.IsNullOrEmpty(lastSo)) return "PX00001";
@@ -110,6 +120,135 @@ namespace SalesManagementSystem.Repositories
                     return "PX" + (num + 1).ToString("D5");
                 }
                 return "PX00001";
+            }
+        }
+
+        public int Save(PhieuXuatKhoViewModel model, int userId)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                conn.Open();
+                using (var tr = conn.BeginTransaction())
+                {
+                    try
+                    {
+                        // Kiểm tra tồn kho trước khi lưu
+                        if (model.ChiTiets != null && model.ChiTiets.Any())
+                        {
+                            var itemsCheck = model.ChiTiets.Select(x => new CheckTonKhoRequestItem 
+                            { 
+                                IDSanPham = x.IDSanPham, 
+                                SoLuongCanXuat = x.SoLuong 
+                            }).ToList();
+
+                            var pTonKho = new DynamicParameters();
+                            pTonKho.Add("@IDKho", model.IDKho);
+                            pTonKho.Add("@ListSanPham", Newtonsoft.Json.JsonConvert.SerializeObject(itemsCheck));
+                            pTonKho.Add("@ExcludeSoChungTu", string.IsNullOrEmpty(model.SoChungTu) ? null : model.SoChungTu);
+
+                            var checkTon = conn.Query<CheckTonKhoResponseViewModel>("sp_KHO_TonKho_CheckByKho", pTonKho, transaction: tr, commandType: CommandType.StoredProcedure).ToList();
+                            var missingItems = checkTon.Where(x => !x.IsDuTon).ToList();
+                            if (missingItems.Any())
+                            {
+                                var msg = string.Join("<br/>", missingItems.Select(x => $"Sản phẩm <b>[{x.MaSanPham}] - {x.TenSanPham}</b> vượt quá tồn kho hiện tại! (Tồn hiện tại: <b>{x.SoLuongTon:N0}</b>, Yêu cầu xuất: <b>{x.SoLuongCanXuat:N0}</b>)"));
+                                throw new Exception(msg);
+                            }
+                        }
+
+                        var p = new DynamicParameters();
+                        p.Add("@ID", model.ID);
+                        p.Add("@SoChungTu", model.SoChungTu, dbType: DbType.String, direction: ParameterDirection.InputOutput, size: 50);
+                        p.Add("@NgayXuat", model.NgayXuat);
+                        p.Add("@IDKho", model.IDKho);
+                        p.Add("@IDDonDatHang", model.IDDonDatHang);
+                        p.Add("@IDChungTuBanHang", model.IDChungTuBanHang);
+                        p.Add("@TenNguoiNhan", model.TenNguoiNhan);
+                        p.Add("@SoDienThoaiNguoiNhan", model.SoDienThoaiNguoiNhan);
+                        p.Add("@GhiChu", model.GhiChu);
+                        p.Add("@TongTienHang", model.TongTienHang);
+                        p.Add("@TongTienThue", model.TongTienThue);
+                        p.Add("@TongCong", model.TongCong);
+                        p.Add("@TrangThai", model.TrangThai);
+                        p.Add("@UserId", userId);
+
+                        int newId = conn.QuerySingle<int>("sp_KHO_PhieuXuat_Save", p, transaction: tr, commandType: CommandType.StoredProcedure);
+                        model.SoChungTu = p.Get<string>("@SoChungTu");
+
+                        conn.Execute("DELETE FROM KHO_PhieuXuat_ChiTiet WHERE IDPhieuXuat = @IDPhieuXuat", new { IDPhieuXuat = newId }, transaction: tr);
+
+                        if (model.ChiTiets != null && model.ChiTiets.Any())
+                        {
+                            foreach (var ct in model.ChiTiets)
+                            {
+                                var pCt = new DynamicParameters();
+                                pCt.Add("@IDPhieuXuat", newId);
+                                pCt.Add("@IDSanPham", ct.IDSanPham);
+                                pCt.Add("@SoLuong", ct.SoLuong);
+                                pCt.Add("@DonGia", ct.DonGia);
+                                pCt.Add("@ThanhTien", ct.ThanhTien);
+                                pCt.Add("@ThueGTGT", ct.ThueGTGT);
+                                pCt.Add("@TienThue", ct.TienThue);
+                                pCt.Add("@TongSauThue", ct.TongSauThue);
+                                pCt.Add("@GhiChu", ct.GhiChu);
+
+                                conn.Execute("sp_KHO_PhieuXuat_ChiTiet_Insert", pCt, transaction: tr, commandType: CommandType.StoredProcedure);
+                            }
+                        }
+
+                        if (model.TrangThai == 2)
+                        {
+                            var pGhi = new DynamicParameters();
+                            pGhi.Add("@ID", newId);
+                            pGhi.Add("@UserId", userId);
+                            conn.Execute("sp_KHO_PhieuXuat_GhiSo", pGhi, transaction: tr, commandType: CommandType.StoredProcedure);
+                        }
+
+                        tr.Commit();
+                        return newId;
+                    }
+                    catch
+                    {
+                        tr.Rollback();
+                        throw;
+                    }
+                }
+            }
+        }
+
+        public void GhiSo(int id, int userId)
+        {
+            using (var conn = _db.CreateConnection())
+            {
+                var px = GetById(id);
+                if (px == null) throw new Exception("Không tìm thấy phiếu xuất kho");
+
+                var chiTiets = GetChiTiet(id);
+                if (chiTiets != null && chiTiets.Any())
+                {
+                    var itemsCheck = chiTiets.Select(x => new CheckTonKhoRequestItem 
+                    { 
+                        IDSanPham = x.IDSanPham, 
+                        SoLuongCanXuat = x.SoLuong 
+                    }).ToList();
+
+                    var pTonKho = new DynamicParameters();
+                    pTonKho.Add("@IDKho", px.IDKho);
+                    pTonKho.Add("@ListSanPham", Newtonsoft.Json.JsonConvert.SerializeObject(itemsCheck));
+                    pTonKho.Add("@ExcludeSoChungTu", px.SoChungTu);
+
+                    var checkTon = conn.Query<CheckTonKhoResponseViewModel>("sp_KHO_TonKho_CheckByKho", pTonKho, commandType: CommandType.StoredProcedure).ToList();
+                    var missingItems = checkTon.Where(x => !x.IsDuTon).ToList();
+                    if (missingItems.Any())
+                    {
+                        var msg = string.Join("<br/>", missingItems.Select(x => $"Sản phẩm <b>[{x.MaSanPham}] - {x.TenSanPham}</b> vượt quá tồn kho hiện tại! (Tồn hiện tại: <b>{x.SoLuongTon:N0}</b>, Yêu cầu xuất: <b>{x.SoLuongCanXuat:N0}</b>)"));
+                        throw new Exception(msg);
+                    }
+                }
+
+                var p = new DynamicParameters();
+                p.Add("@ID", id);
+                p.Add("@UserId", userId);
+                conn.Execute("sp_KHO_PhieuXuat_GhiSo", p, commandType: CommandType.StoredProcedure);
             }
         }
 
@@ -182,11 +321,24 @@ namespace SalesManagementSystem.Repositories
         {
             using (var conn = _db.CreateConnection())
             {
+                var px = GetById(id);
+                if (px == null) throw new Exception("Không tìm thấy phiếu xuất kho");
+
+                if (px.IDDonDatHang.HasValue && px.IDDonDatHang.Value > 0)
+                {
+                    throw new Exception("Không thể hủy phiếu xuất kho được tạo từ đơn đặt hàng.");
+                }
+
                 var p = new DynamicParameters();
                 p.Add("@ID", id);
                 p.Add("@NguoiHuy", userId);
                 p.Add("@LyDoHuy", reason);
                 conn.Execute("sp_KHO_PhieuXuat_Cancel", p, commandType: CommandType.StoredProcedure);
+
+                if (!string.IsNullOrEmpty(px.SoChungTu))
+                {
+                    conn.Execute("DELETE FROM KHO_GiaoDichKho WHERE LoaiChungTu = 2 AND SoChungTu = @SoChungTu", new { SoChungTu = px.SoChungTu });
+                }
             }
         }
     }

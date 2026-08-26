@@ -25,6 +25,7 @@
                         int stt = (Model.CurrentPage - 1) * Model.PageSize + 1;
                         foreach (var item in Model.Items)
                         {
+                            bool isDirectCreate = string.IsNullOrEmpty(item.SoDonHang) && (!item.IDDonDatHang.HasValue || item.IDDonDatHang.Value == 0);
                             <tr class="pxk-row" data-id="@item.ID" style="cursor: pointer;">
                                 <td class="text-center align-middle">
                                     <i class="bi bi-caret-right-fill text-muted toggle-icon" style="font-size: 0.95rem;"></i>
@@ -38,10 +39,31 @@
                                             <li><h6 class="dropdown-header text-uppercase fw-bold text-dark">Thao tác</h6></li>
                                             <li><hr class="dropdown-divider"></li>
                                             <li>
-                                                <a href="@Url.Action("Details", "PhieuXuatKho", new { id = item.ID })" class="dropdown-item text-primary">
+                                                <a href="@Url.Action("Edit", "PhieuXuatKho", new { id = item.ID, isView = true })" class="dropdown-item text-primary">
                                                     <i class="bi bi-eye me-2 text-primary"></i> Xem chi tiết
                                                 </a>
                                             </li>
+                                            @if (item.TrangThai == 1)
+                                            {
+                                                <li>
+                                                    <a href="@Url.Action("Edit", "PhieuXuatKho", new { id = item.ID })" class="dropdown-item text-warning">
+                                                        <i class="bi bi-pencil me-2 text-warning"></i> Chỉnh sửa
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="javascript:void(0)" onclick="ghiSoPhieuXuat(this, @item.ID)" class="dropdown-item text-success">
+                                                        <i class="bi bi-check-circle me-2 text-success"></i> Ghi sổ (Trừ kho)
+                                                    </a>
+                                                </li>
+                                            }
+                                            @if (isDirectCreate && item.TrangThai != 3)
+                                            {
+                                                <li>
+                                                    <button type="button" class="dropdown-item text-danger" onclick="moHuyPhieuXuat(this, @item.ID, '@item.SoChungTu')">
+                                                        <i class="bi bi-x-circle me-2 text-danger"></i> Hủy phiếu
+                                                    </button>
+                                                </li>
+                                            }
                                         </ul>
                                     </div>
                                 </td>
