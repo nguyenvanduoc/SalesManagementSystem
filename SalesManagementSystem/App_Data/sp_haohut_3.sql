@@ -95,7 +95,7 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE sp_KHO_HaoHutHangHoa_GetDonHang
+CREATE OR ALTER PROCEDURE sp_KHO_HaoHutHangHoa_GetDonHang
     @Keyword NVARCHAR(100)
 AS
 BEGIN
@@ -104,10 +104,8 @@ BEGIN
            c.ID AS IDChungTuBanHang, c.SoChungTu AS SoChungTuBanHang
     FROM NS_DonDatHang d
     INNER JOIN NS_KhachHang k ON d.IDKhachHang = k.ID
-    INNER JOIN BAN_ChungTuBanHang c ON d.ID = c.IDDonDatHang
-    WHERE d.TrangThaiDon = 3 -- Đã giao
-      AND c.IsDeleted = 0 
-      AND c.TrangThai IN (1, 2) -- Đề nghị ghi và Đã ghi sổ
+    LEFT JOIN BAN_ChungTuBanHang c ON d.ID = c.IDDonDatHang AND c.IsDeleted = 0 AND c.TrangThai IN (1, 2)
+    WHERE d.TrangThaiDon NOT IN (0, 4) -- Tất cả trạng thái trừ Lưu nháp (0) và Hủy (4)
       AND (@Keyword IS NULL OR @Keyword = '' OR d.SoDonHang LIKE '%' + @Keyword + '%' OR k.TenKhachHang LIKE N'%' + @Keyword + '%')
     ORDER BY d.NgayTaoDon DESC, d.ID DESC;
 END

@@ -42,7 +42,7 @@
                             </select>
                         </div>
                         <div class="col-md-6 @(Model.LoaiHaoHut == 2 ? "d-none" : "")">
-                            <label class="form-label text-muted small mb-1">Đơn hàng đã giao <span class="text-danger">*</span></label>
+                            <label class="form-label text-muted small mb-1">Đơn hàng <span class="text-danger">*</span></label>
                             <input type="text" class="form-control fw-bold text-primary" value="@Model.SoDonHang - @Model.TenKhachHang" readonly />
                             <input type="hidden" id="eIDDonHang" name="IDDonHang" value="@Model.IDDonHang" />
                         </div>
@@ -194,16 +194,22 @@
                             if (res2.success) {
                                 showToast('success', 'Ghi nhận thành công!');
                                 bootstrap.Modal.getInstance(document.getElementById('modalEdit')).hide();
-                                loadData();
+                                if (typeof TabManager !== 'undefined') { TabManager.reloadActiveTabGrid(false); }
+                                else if ($('#searchForm').length) { $('#searchForm').trigger('submit'); }
+                                else if (typeof loadData === 'function') { loadData(); }
                             } else {
                                 showToast('error', res2.message);
-                                loadData();
+                                if (typeof TabManager !== 'undefined') { TabManager.reloadActiveTabGrid(false); }
+                                else if ($('#searchForm').length) { $('#searchForm').trigger('submit'); }
+                                else if (typeof loadData === 'function') { loadData(); }
                             }
                         });
                     } else {
                         showToast('success', res.message);
-                                bootstrap.Modal.getInstance(document.getElementById('modalEdit')).hide();
-                        loadData();
+                        bootstrap.Modal.getInstance(document.getElementById('modalEdit')).hide();
+                        if (typeof TabManager !== 'undefined') { TabManager.reloadActiveTabGrid(false); }
+                        else if ($('#searchForm').length) { $('#searchForm').trigger('submit'); }
+                        else if (typeof loadData === 'function') { loadData(); }
                     }
                 } else {
                     showToast('error', res.message);

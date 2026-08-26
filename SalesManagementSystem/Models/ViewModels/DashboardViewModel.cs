@@ -23,7 +23,11 @@ namespace SalesManagementSystem.Models.ViewModels
             }
         }
         
+        public decimal NoDauKyKH { get; set; }
+        public decimal TongTienBanKH { get; set; }
+        public decimal DaThuKH { get; set; }
         public decimal CongNoKhachHang { get; set; }
+        public decimal NoDauKyNCC { get; set; }
         public decimal TongTienHangNCC { get; set; }
         public decimal DaThanhToanNCC { get; set; }
         public decimal CongNoNhaCungCap { get; set; }

@@ -95,5 +95,7 @@
 </div>
 
 <script>
-    initTableResizer('tblHaoHut');
+    if (typeof initTableResizer === 'function') {
+        initTableResizer('tblHaoHut');
+    }
 </script>

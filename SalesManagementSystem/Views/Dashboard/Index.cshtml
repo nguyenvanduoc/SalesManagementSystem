@@ -367,14 +367,28 @@
                 </div>
             </div>
         </div>
-        <!-- Card 5: Công nợ khách hàng -->
+        <!-- Card 5: Công nợ KH -->
         <div class="col-stat">
             <div class="stat-card-new">
                 <div class="stat-icon-new indigo"><i class="bi bi-people"></i></div>
                 <div class="stat-info-new">
                     <div class="stat-label-new">Công nợ KH</div>
-                    <div class="stat-value-new text-primary" id="valCongNoKH_@uid">0₫</div>
-                    <div class="stat-trend-new text-muted"><i class="bi bi-info-circle"></i> Phải thu khách hàng</div>
+                    <div class="sodu-row mt-1">
+                        <span class="sodu-label text-muted" style="font-size:0.75rem"><i class="bi bi-clock-history me-1 text-primary"></i>Nợ đầu kỳ</span>
+                        <span class="sodu-value text-primary fw-bold" id="valNoDauKyKH_@uid" style="font-size:0.8rem">0₫</span>
+                    </div>
+                    <div class="sodu-row mt-1">
+                        <span class="sodu-label text-muted" style="font-size:0.75rem"><i class="bi bi-bag-check me-1"></i>Bán trong kỳ</span>
+                        <span class="sodu-value text-dark fw-bold" id="valTongTienBanKH_@uid" style="font-size:0.8rem">0₫</span>
+                    </div>
+                    <div class="sodu-row mt-1">
+                        <span class="sodu-label text-muted" style="font-size:0.75rem"><i class="bi bi-check2-circle me-1 text-success"></i>Đã thu</span>
+                        <span class="sodu-value text-success fw-bold" id="valDaThuKH_@uid" style="font-size:0.8rem">0₫</span>
+                    </div>
+                    <div class="sodu-row mt-1">
+                        <span class="sodu-label text-muted" style="font-size:0.75rem"><i class="bi bi-exclamation-circle me-1 text-danger"></i>Nợ cuối kỳ</span>
+                        <span class="sodu-value text-danger fw-bold" id="valCongNoKH_@uid" style="font-size:0.8rem">0₫</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -385,7 +399,11 @@
                 <div class="stat-info-new">
                     <div class="stat-label-new">Công nợ NCC</div>
                     <div class="sodu-row mt-1">
-                        <span class="sodu-label text-muted" style="font-size:0.75rem"><i class="bi bi-cart me-1"></i>Tổng nợ</span>
+                        <span class="sodu-label text-muted" style="font-size:0.75rem"><i class="bi bi-clock-history me-1 text-primary"></i>Nợ đầu kỳ</span>
+                        <span class="sodu-value text-primary fw-bold" id="valNoDauKyNCC_@uid" style="font-size:0.8rem">0₫</span>
+                    </div>
+                    <div class="sodu-row mt-1">
+                        <span class="sodu-label text-muted" style="font-size:0.75rem"><i class="bi bi-cart me-1"></i>Mua trong kỳ</span>
                         <span class="sodu-value text-dark fw-bold" id="valTongTienHangNCC_@uid" style="font-size:0.8rem">0₫</span>
                     </div>
                     <div class="sodu-row mt-1">
@@ -393,7 +411,7 @@
                         <span class="sodu-value text-success fw-bold" id="valDaThanhToanNCC_@uid" style="font-size:0.8rem">0₫</span>
                     </div>
                     <div class="sodu-row mt-1">
-                        <span class="sodu-label text-muted" style="font-size:0.75rem"><i class="bi bi-exclamation-circle me-1 text-danger"></i>Còn nợ</span>
+                        <span class="sodu-label text-muted" style="font-size:0.75rem"><i class="bi bi-exclamation-circle me-1 text-danger"></i>Nợ cuối kỳ</span>
                         <span class="sodu-value text-danger fw-bold" id="valCongNoNCC_@uid" style="font-size:0.8rem">0₫</span>
                     </div>
                 </div>
@@ -1004,7 +1022,11 @@
             var profitTrendIcon = data.Summary.TyLeTangGiamLoiNhuan >= 0 ? 'bi-arrow-up-right' : 'bi-arrow-down-right';
             $('#trendLoiNhuan_@uid').html(`<i class="bi ${profitTrendIcon}"></i> ${Math.abs(data.Summary.TyLeTangGiamLoiNhuan)}% so với kỳ trước`).attr('class', 'stat-trend-new ' + profitTrendClass);
             
+            $('#valNoDauKyKH_@uid').text(formatMoney(data.Summary.NoDauKyKH));
+            $('#valTongTienBanKH_@uid').text(formatMoney(data.Summary.TongTienBanKH));
+            $('#valDaThuKH_@uid').text(formatMoney(data.Summary.DaThuKH));
             $('#valCongNoKH_@uid').text(formatMoney(data.Summary.CongNoKhachHang));
+            $('#valNoDauKyNCC_@uid').text(formatMoney(data.Summary.NoDauKyNCC));
             $('#valTongTienHangNCC_@uid').text(formatMoney(data.Summary.TongTienHangNCC));
             $('#valDaThanhToanNCC_@uid').text(formatMoney(data.Summary.DaThanhToanNCC));
             $('#valCongNoNCC_@uid').text(formatMoney(data.Summary.CongNoNhaCungCap));

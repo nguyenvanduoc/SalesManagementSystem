@@ -84,44 +84,7 @@
     </div>
 </div>
 
-@{
-    decimal tongTienTraTruoc = ViewBag.TongTienTraTruoc ?? 0M;
-}
-<!-- Tổng hợp -->
-<div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm" style="border-left:4px solid #8e44ad!important;">
-            <div class="card-body py-3">
-                <div class="text-muted small fw-semibold mb-1">TỔNG PHẢI TRẢ</div>
-                <div class="fw-bold fs-5" style="color:#8e44ad;">@tongPhaiTra.ToString("N0") <small class="fs-6 fw-normal">VND</small></div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm" style="border-left:4px solid #27ae60!important;">
-            <div class="card-body py-3">
-                <div class="text-muted small fw-semibold mb-1">ĐÃ THANH TOÁN</div>
-                <div class="fw-bold fs-5 text-success">@tongDaTra.ToString("N0") <small class="fs-6 fw-normal">VND</small></div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm" style="border-left:4px solid #e74c3c!important;">
-            <div class="card-body py-3">
-                <div class="text-muted small fw-semibold mb-1">CÒN NỢ</div>
-                <div class="fw-bold fs-5 text-danger">@tongConLai.ToString("N0") <small class="fs-6 fw-normal">VND</small></div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm" style="border-left:4px solid #f39c12!important;">
-            <div class="card-body py-3">
-                <div class="text-muted small fw-semibold mb-1">TIỀN TRẢ TRƯỚC (NCC ĐƯỢC CHỌN)</div>
-                <div class="fw-bold fs-5 text-warning" style="color:#f39c12!important;">@tongTienTraTruoc.ToString("N0") <small class="fs-6 fw-normal">VND</small></div>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- Grid dữ liệu & Cards tổng hợp -->
 
 <!-- Grid dữ liệu -->
 <div id="table-container">
@@ -131,9 +94,67 @@
 @section Scripts {
     <script>
         (function () {
-            var $pane = $('.tab-pane.active');
+            var $script = $('script').last();
+            var $pane = $script.closest('.tab-pane');
             if ($pane.length === 0) $pane = $('body');
 
+            function fDate(y, m, d) {
+                var sm = m < 10 ? '0' + m : m;
+                var sd = d < 10 ? '0' + d : d;
+                return y + '-' + sm + '-' + sd;
+            }
+
+            function getDays(y, m) {
+                var days = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+                if (m === 2 && ((y % 4 === 0 && y % 100 !== 0) || y % 400 === 0)) return 29;
+                return days[m];
+            }
+
+            // Xử lý đổi Thời gian
+            $pane.find('.ddl-thoi-gian').off('change').on('change', function () {
+                var val = $(this).val();
+                if (!val) return;
+
+                var now = new Date();
+                var y = now.getFullYear();
+                var s = '', e = '';
+
+                if (val === 'current_year') {
+                    s = fDate(y, 1, 1);
+                    e = fDate(now.getFullYear(), now.getMonth() + 1, now.getDate());
+                } else if (val === 'current_month') {
+                    var cm = now.getMonth() + 1;
+                    s = fDate(y, cm, 1);
+                    e = fDate(now.getFullYear(), now.getMonth() + 1, now.getDate());
+                } else if (val.indexOf('month_') === 0) {
+                    var m = parseInt(val.replace('month_', ''), 10);
+                    s = fDate(y, m, 1);
+                    e = fDate(y, m, getDays(y, m));
+                } else if (val.indexOf('quarter_') === 0) {
+                    var q = parseInt(val.replace('quarter_', ''), 10);
+                    var startM = (q - 1) * 3 + 1;
+                    var endM = startM + 2;
+                    s = fDate(y, startM, 1);
+                    e = fDate(y, endM, getDays(y, endM));
+                }
+
+                if (s && e) {
+                    $pane.find('input[name="tuNgay"]').val(s);
+                    $pane.find('input[name="denNgay"]').val(e);
+                    $pane.find('#searchForm').trigger('submit');
+                }
+            });
+
+            // Nút Làm mới
+            $pane.find('.btn-reset').off('click').on('click', function (e) {
+                e.preventDefault();
+                var $form = $pane.find('#searchForm');
+                if ($form.length > 0) {
+                    $form[0].reset();
+                    $form.find('select').val('');
+                    $form.trigger('submit');
+                }
+            });
         })();
     </script>
 }

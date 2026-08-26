@@ -8,6 +8,11 @@ CREATE OR ALTER PROCEDURE sp_KHO_PhieuXuat_GetList
     @IDKho INT = NULL,
     @TrangThai INT = NULL,
     @IDNhanSuNhan INT = NULL,
+    @IDSanPham INT = NULL,
+    @IDNhaCungCap INT = NULL,
+    @TenNguoiGiao NVARCHAR(100) = NULL,
+    @IDPhuongTien INT = NULL,
+    @TenNguoiNhan NVARCHAR(100) = NULL,
     @TotalRecords INT OUTPUT
 AS
 BEGIN
@@ -15,7 +20,7 @@ BEGIN
     
     DECLARE @Offset INT = (@Page - 1) * @PageSize;
 
-    SELECT 
+    SELECT DISTINCT
         px.ID,
         px.SoChungTu,
         px.NgayXuat,
@@ -38,19 +43,21 @@ BEGIN
         kh.TenKhachHang
     INTO #TempList
     FROM KHO_PhieuXuat px
-    INNER JOIN BAN_ChungTuBanHang ctbh ON px.IDChungTuBanHang = ctbh.ID
+    LEFT JOIN BAN_ChungTuBanHang ctbh ON px.IDChungTuBanHang = ctbh.ID AND ctbh.IsDeleted = 0
     LEFT JOIN DM_KhoHang k ON px.IDKho = k.ID
     LEFT JOIN NS_DonDatHang dh ON px.IDDonDatHang = dh.ID
-    LEFT JOIN NS_KhachHang kh ON dh.IDKhachHang = kh.ID
+    LEFT JOIN NS_KhachHang kh ON dh.IDKhachHang = kh.ID OR ctbh.IDKhachHang = kh.ID
+    LEFT JOIN KHO_PhieuXuat_ChiTiet ct ON px.ID = ct.IDPhieuXuat
     WHERE px.IsDeleted = 0
-      AND ctbh.IsDeleted = 0
-      AND ctbh.TrangThai IN (1, 2)
-      AND (@TuNgay IS NULL OR px.NgayXuat >= @TuNgay)
-      AND (@DenNgay IS NULL OR px.NgayXuat <= @DenNgay)
-      AND (@SoChungTu IS NULL OR px.SoChungTu LIKE '%' + @SoChungTu + '%')
-      AND (@IDKho IS NULL OR px.IDKho = @IDKho)
+      AND (@TuNgay IS NULL OR @TuNgay = '' OR px.NgayXuat >= @TuNgay)
+      AND (@DenNgay IS NULL OR @DenNgay = '' OR px.NgayXuat <= @DenNgay)
+      AND (@SoChungTu IS NULL OR @SoChungTu = '' OR px.SoChungTu LIKE '%' + @SoChungTu + '%')
+      AND (@IDKho IS NULL OR @IDKho = 0 OR px.IDKho = @IDKho)
       AND (@TrangThai IS NULL OR px.TrangThai = @TrangThai)
-      AND (@IDNhanSuNhan IS NULL OR px.IDNhanSuNhan = @IDNhanSuNhan);
+      AND (@IDNhanSuNhan IS NULL OR @IDNhanSuNhan = 0 OR px.IDNhanSuNhan = @IDNhanSuNhan)
+      AND (@IDSanPham IS NULL OR @IDSanPham = 0 OR ct.IDSanPham = @IDSanPham)
+      AND (@IDNhaCungCap IS NULL OR @IDNhaCungCap = 0 OR kh.ID = @IDNhaCungCap OR dh.IDKhachHang = @IDNhaCungCap OR ctbh.IDKhachHang = @IDNhaCungCap)
+      AND (@TenNguoiNhan IS NULL OR @TenNguoiNhan = '' OR px.TenNguoiNhan LIKE N'%' + @TenNguoiNhan + '%');
 
     -- Lấy tổng số dòng
     SELECT @TotalRecords = COUNT(*) FROM #TempList;

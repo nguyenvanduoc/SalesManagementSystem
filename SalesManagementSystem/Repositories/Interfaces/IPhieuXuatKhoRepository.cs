@@ -1,11 +1,11 @@
-﻿using SalesManagementSystem.Models.ViewModels;
+using SalesManagementSystem.Models.ViewModels;
 using System.Collections.Generic;
 
 namespace SalesManagementSystem.Repositories.Interfaces
 {
     public interface IPhieuXuatKhoRepository
     {
-        List<PhieuXuatKhoListViewModel> GetList(int page, int pageSize, string tuNgay, string denNgay, string soChungTu, int? idKho, int? trangThai, int? idNhanSuNhan, out int totalRecords);
+        List<PhieuXuatKhoListViewModel> GetList(int page, int pageSize, string tuNgay, string denNgay, string soChungTu, int? idKho, int? trangThai, int? idNhanSuNhan, int? idSanPham, int? idNhaCungCap, string tenNguoiGiao, int? idPhuongTien, string tenNguoiNhan, out int totalRecords);
         PhieuXuatKhoViewModel GetById(int id);
         string GenerateSoChungTu();
         int Insert(PhieuXuatKhoViewModel model, int userId);

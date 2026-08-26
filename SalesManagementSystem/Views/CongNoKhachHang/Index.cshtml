@@ -2,10 +2,10 @@
 
 @{
     ViewBag.Title = "Công nợ khách hàng";
+    decimal tongTonDauKy  = ViewBag.TongTonDauKy  ?? 0M;
     decimal tongPhaiThu   = ViewBag.TongPhaiThu   ?? 0M;
     decimal daThu         = ViewBag.DaThu         ?? 0M;
     decimal conPhaiThu    = ViewBag.ConPhaiThu    ?? 0M;
-    decimal khachTraTruoc = ViewBag.KhachTraTruoc ?? 0M;
     decimal congNoQuaHan  = ViewBag.CongNoQuaHan  ?? 0M;
 }
 
@@ -108,10 +108,18 @@
 <!-- Dashboard 5 thẻ -->
 <div class="row g-2.5 mb-4 row-cols-1 row-cols-sm-2 row-cols-md-5">
     <div class="col">
-        <div class="card border-0 shadow-sm" style="border-bottom: 3.5px solid #1e3a8a!important;">
+        <div class="card border-0 shadow-sm" style="border-bottom: 3.5px solid #2998e4!important;">
+            <div class="card-body py-2.5 px-3">
+                <div class="text-muted small fw-semibold mb-1 text-uppercase">NỢ ĐẦU KỲ</div>
+                <div class="fw-bold fs-5 text-primary" id="lblTongDauKy">@tongTonDauKy.ToString("N0") <small class="fs-6 fw-normal text-muted">VND</small></div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card border-0 shadow-sm" style="border-bottom: 3.5px solid #8e44ad!important;">
             <div class="card-body py-2.5 px-3">
                 <div class="text-muted small fw-semibold mb-1 text-uppercase">TỔNG PHẢI THU</div>
-                <div class="fw-bold fs-5" style="color:#1e3a8a;" id="lblTongPhaiThu">@tongPhaiThu.ToString("N0") <small class="fs-6 fw-normal text-muted">VND</small></div>
+                <div class="fw-bold fs-5" style="color:#8e44ad;" id="lblTongPhaiThu">@tongPhaiThu.ToString("N0") <small class="fs-6 fw-normal text-muted">VND</small></div>
             </div>
         </div>
     </div>
@@ -127,15 +135,7 @@
         <div class="card border-0 shadow-sm" style="border-bottom: 3.5px solid #2563eb!important;">
             <div class="card-body py-2.5 px-3">
                 <div class="text-muted small fw-semibold mb-1 text-uppercase">CÒN PHẢI THU</div>
-                <div class="fw-bold fs-5 text-primary" id="lblConPhaiThu">@conPhaiThu.ToString("N0") <small class="fs-6 fw-normal text-muted">VND</small></div>
-            </div>
-        </div>
-    </div>
-    <div class="col">
-        <div class="card border-0 shadow-sm" style="border-bottom: 3.5px solid #059669!important;">
-            <div class="card-body py-2.5 px-3">
-                <div class="text-muted small fw-semibold mb-1 text-uppercase">KHÁCH TRẢ TRƯỚC</div>
-                <div class="fw-bold fs-5" style="color:#059669;" id="lblKhachTraTruoc">@khachTraTruoc.ToString("N0") <small class="fs-6 fw-normal text-muted">VND</small></div>
+                <div class="fw-bold fs-5 text-danger" id="lblConPhaiThu">@conPhaiThu.ToString("N0") <small class="fs-6 fw-normal text-muted">VND</small></div>
             </div>
         </div>
     </div>
@@ -216,22 +216,23 @@
             $(document).on('ajaxComplete.cnkh', function (e, xhr, settings) {
                 if (settings.url && settings.url.indexOf('/CongNoKhachHang/GetList') !== -1) {
                     var $pane = $('.tab-pane.active');
+                    if ($pane.length === 0) $pane = $('body');
                     var $card = $pane.find('#divCongNoKhachHangListCard');
                     if ($card.length > 0) {
+                        var tongDauKy = parseFloat($card.attr('data-tong-dau-ky') || 0);
                         var tongPhaiThu = parseFloat($card.attr('data-tong-phai-thu') || 0);
                         var daThu = parseFloat($card.attr('data-da-thu') || 0);
                         var conPhaiThu = parseFloat($card.attr('data-con-phai-thu') || 0);
-                        var khachTraTruoc = parseFloat($card.attr('data-khach-tra-truoc') || 0);
                         var congNoQuaHan = parseFloat($card.attr('data-cong-no-qua-han') || 0);
 
                         var formatMoney = function (num) {
                             return Math.round(num).toLocaleString('vi-VN');
                         };
 
+                        $pane.find('#lblTongDauKy').html(formatMoney(tongDauKy) + ' <small class="fs-6 fw-normal text-muted">VND</small>');
                         $pane.find('#lblTongPhaiThu').html(formatMoney(tongPhaiThu) + ' <small class="fs-6 fw-normal text-muted">VND</small>');
                         $pane.find('#lblDaThu').html(formatMoney(daThu) + ' <small class="fs-6 fw-normal text-muted">VND</small>');
                         $pane.find('#lblConPhaiThu').html(formatMoney(conPhaiThu) + ' <small class="fs-6 fw-normal text-muted">VND</small>');
-                        $pane.find('#lblKhachTraTruoc').html(formatMoney(khachTraTruoc) + ' <small class="fs-6 fw-normal text-muted">VND</small>');
                         $pane.find('#lblCongNoQuaHan').html(formatMoney(congNoQuaHan) + ' <small class="fs-6 fw-normal text-muted">VND</small>');
                     }
                 }

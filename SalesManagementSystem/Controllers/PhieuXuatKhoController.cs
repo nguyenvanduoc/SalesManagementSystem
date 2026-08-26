@@ -38,12 +38,12 @@ namespace SalesManagementSystem.Controllers
             _db = db;
         }
 
-        public ActionResult Index(int page = 1, int pageSize = 20, string tuNgay = "", string denNgay = "", string soChungTu = "", int? idKho = null, int? trangThai = null, int? idNhanSuNhan = null)
+        public ActionResult Index(int page = 1, int pageSize = 20, string tuNgay = "", string denNgay = "", string soChungTu = "", int? idKho = null, int? idSanPham = null, int? idNhaCungCap = null, string tenNguoiGiao = "", int? idPhuongTien = null, string tenNguoiNhan = "", int? trangThai = null, int? idNhanSuNhan = null)
         {
             if (!PermissionHelper.HasPermission("PhieuXuatKho", LoaiPhanQuyen.Xem)) return View("AccessDenied");
 
             int totalRecords;
-            var list = _repo.GetList(page, pageSize, tuNgay, denNgay, soChungTu, idKho, trangThai, idNhanSuNhan, out totalRecords);
+            var list = _repo.GetList(page, pageSize, tuNgay, denNgay, soChungTu, idKho, trangThai, idNhanSuNhan, idSanPham, idNhaCungCap, tenNguoiGiao, idPhuongTien, tenNguoiNhan, out totalRecords);
 
             var model = new PagedListViewModel<PhieuXuatKhoListViewModel>
             {
@@ -55,30 +55,50 @@ namespace SalesManagementSystem.Controllers
                 Keyword = soChungTu
             };
 
-            int totalKhos;
-            var khos = _khoHangRepo.GetPaged(1, 1000, "", out totalKhos).ToList();
-            ViewBag.Khos = new SelectList(khos, "ID", "TenKhoHang", idKho);
+            using (var conn = _db.CreateConnection())
+            {
+                var khos = conn.Query("SELECT ID, MaKhoHang + ' - ' + TenKhoHang AS Name FROM DM_KhoHang ORDER BY TenKhoHang")
+                               .Select(x => new { ID = (int)x.ID, Name = (string)x.Name }).ToList();
+                ViewBag.Khos = new SelectList(khos, "ID", "Name", idKho);
+
+                var sps = conn.Query("SELECT ID, MaSanPham + ' - ' + TenSanPham AS Name FROM DM_SanPham ORDER BY TenSanPham")
+                              .Select(x => new { ID = (int)x.ID, Name = (string)x.Name }).ToList();
+                ViewBag.SanPhams = new SelectList(sps, "ID", "Name", idSanPham);
+
+                var nccs = conn.Query("SELECT ID, MaKhachHang + ' - ' + TenKhachHang AS Name FROM NS_KhachHang ORDER BY TenKhachHang")
+                               .Select(x => new { ID = (int)x.ID, Name = (string)x.Name }).ToList();
+                ViewBag.NhaCungCaps = new SelectList(nccs, "ID", "Name", idNhaCungCap);
+
+                var pts = conn.Query("SELECT ID, MaPhuongTien + ' - ' + TenPhuongTien AS Name FROM DM_PhuongTien ORDER BY STT, TenPhuongTien")
+                              .Select(x => new { ID = (int)x.ID, Name = (string)x.Name }).ToList();
+                ViewBag.PhuongTiens = new SelectList(pts, "ID", "Name", idPhuongTien);
+            }
 
             ViewBag.TuNgay = tuNgay;
             ViewBag.DenNgay = denNgay;
             ViewBag.SoChungTu = soChungTu;
             ViewBag.IDKho = idKho;
+            ViewBag.IDSanPham = idSanPham;
+            ViewBag.IDNhaCungCap = idNhaCungCap;
+            ViewBag.TenNguoiGiao = tenNguoiGiao;
+            ViewBag.IDPhuongTien = idPhuongTien;
+            ViewBag.TenNguoiNhan = tenNguoiNhan;
             ViewBag.TrangThai = trangThai;
 
-            if (Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            if ((Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest") && Request.Headers["X-SPA-Load"] != "true")
                 return PartialView("_PhieuXuatKhoList", model);
 
             return View("Index", model);
         }
 
-        public ActionResult GetList(int page = 1, int pageSize = 20, string tuNgay = "", string denNgay = "", string soChungTu = "", int? idKho = null, int? trangThai = null, int? idNhanSuNhan = null)
+        public ActionResult GetList(int page = 1, int pageSize = 20, string tuNgay = "", string denNgay = "", string soChungTu = "", int? idKho = null, int? idSanPham = null, int? idNhaCungCap = null, string tenNguoiGiao = "", int? idPhuongTien = null, string tenNguoiNhan = "", int? trangThai = null, int? idNhanSuNhan = null)
         {
             if (!PermissionHelper.HasPermission("PhieuXuatKho", LoaiPhanQuyen.Xem)) return Content("<div class='alert alert-danger'>Không có quyền truy cập</div>");
 
             try
             {
                 int totalRecords;
-                var list = _repo.GetList(page, pageSize, tuNgay, denNgay, soChungTu, idKho, trangThai, idNhanSuNhan, out totalRecords);
+                var list = _repo.GetList(page, pageSize, tuNgay, denNgay, soChungTu, idKho, trangThai, idNhanSuNhan, idSanPham, idNhaCungCap, tenNguoiGiao, idPhuongTien, tenNguoiNhan, out totalRecords);
 
                 var model = new PagedListViewModel<PhieuXuatKhoListViewModel>
                 {
@@ -165,14 +185,14 @@ namespace SalesManagementSystem.Controllers
             }
         }
 
-        public ActionResult ExportExcel(string tuNgay = "", string denNgay = "", string soChungTu = "", int? idKho = null, int? trangThai = null, int? idNhanSuNhan = null)
+        public ActionResult ExportExcel(string tuNgay = "", string denNgay = "", string soChungTu = "", int? idKho = null, int? idSanPham = null, int? idNhaCungCap = null, string tenNguoiGiao = "", int? idPhuongTien = null, string tenNguoiNhan = "", int? trangThai = null, int? idNhanSuNhan = null)
         {
             if (!PermissionHelper.HasPermission("PhieuXuatKho", LoaiPhanQuyen.Xem)) return Content("Không có quyền truy cập");
 
             try
             {
                 int totalRecords;
-                var list = _repo.GetList(1, int.MaxValue, tuNgay, denNgay, soChungTu, idKho, trangThai, idNhanSuNhan, out totalRecords);
+                var list = _repo.GetList(1, int.MaxValue, tuNgay, denNgay, soChungTu, idKho, trangThai, idNhanSuNhan, idSanPham, idNhaCungCap, tenNguoiGiao, idPhuongTien, tenNguoiNhan, out totalRecords);
 
                 var ids = list.Select(x => x.ID).ToList();
                 List<PhieuXuatKhoChiTietViewModel> allDetails = new List<PhieuXuatKhoChiTietViewModel>();

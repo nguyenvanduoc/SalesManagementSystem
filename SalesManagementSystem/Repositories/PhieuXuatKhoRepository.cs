@@ -18,7 +18,7 @@ namespace SalesManagementSystem.Repositories
             _db = db;
         }
 
-        public List<PhieuXuatKhoListViewModel> GetList(int page, int pageSize, string tuNgay, string denNgay, string soChungTu, int? idKho, int? trangThai, int? idNhanSuNhan, out int totalRecords)
+        public List<PhieuXuatKhoListViewModel> GetList(int page, int pageSize, string tuNgay, string denNgay, string soChungTu, int? idKho, int? trangThai, int? idNhanSuNhan, int? idSanPham, int? idNhaCungCap, string tenNguoiGiao, int? idPhuongTien, string tenNguoiNhan, out int totalRecords)
         {
             using (var conn = _db.CreateConnection())
             {
@@ -31,6 +31,11 @@ namespace SalesManagementSystem.Repositories
                 p.Add("@IDKho", idKho);
                 p.Add("@TrangThai", trangThai);
                 p.Add("@IDNhanSuNhan", idNhanSuNhan);
+                p.Add("@IDSanPham", idSanPham);
+                p.Add("@IDNhaCungCap", idNhaCungCap);
+                p.Add("@TenNguoiGiao", string.IsNullOrEmpty(tenNguoiGiao) ? null : tenNguoiGiao);
+                p.Add("@IDPhuongTien", idPhuongTien);
+                p.Add("@TenNguoiNhan", string.IsNullOrEmpty(tenNguoiNhan) ? null : tenNguoiNhan);
                 p.Add("@TotalRecords", dbType: DbType.Int32, direction: ParameterDirection.Output);
 
                 var list = conn.Query<PhieuXuatKhoListViewModel>("sp_KHO_PhieuXuat_GetList", p, commandType: CommandType.StoredProcedure).ToList();

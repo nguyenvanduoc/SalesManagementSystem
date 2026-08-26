@@ -9,10 +9,10 @@
 }
 
 <div class="card shadow-sm" id="divCongNoKhachHangListCard"
+     data-tong-dau-ky="@(ViewBag.TongTonDauKy ?? 0)"
      data-tong-phai-thu="@(ViewBag.TongPhaiThu ?? 0)"
      data-da-thu="@(ViewBag.DaThu ?? 0)"
      data-con-phai-thu="@(ViewBag.ConPhaiThu ?? 0)"
-     data-khach-tra-truoc="@(ViewBag.KhachTraTruoc ?? 0)"
      data-cong-no-qua-han="@(ViewBag.CongNoQuaHan ?? 0)">
     <div class="card-body p-0">
         <div class="table-responsive" style="min-height:350px;">
@@ -23,7 +23,7 @@
                         <th width="45" class="text-center fw-bold">STT</th>
                         <th class="text-center fw-bold">Khách hàng</th>
                         <th width="100" class="text-center fw-bold">Điện thoại</th>
-                        <th width="125" class="text-center fw-bold">Dư đầu kỳ</th>
+                        <th width="125" class="text-center fw-bold">Nợ đầu kỳ</th>
                         <th width="125" class="text-center fw-bold">Doanh thu</th>
                         <th width="125" class="text-center fw-bold">Nợ cuối kỳ</th>
                         <th width="125" class="text-center fw-bold">Đã thu</th>

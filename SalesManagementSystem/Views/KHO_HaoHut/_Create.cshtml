@@ -37,7 +37,7 @@
                             </select>
                         </div>
                         <div class="col-md-3 box-donhang">
-                            <label class="form-label text-muted small mb-1">Đơn hàng đã giao <span class="text-danger">*</span></label>
+                            <label class="form-label text-muted small mb-1">Đơn hàng <span class="text-danger">*</span></label>
                             <select class="form-select" id="cIDDonHang" name="IDDonHang">
                                 <option value="">-- Tìm đơn hàng --</option>
                             </select>
@@ -382,17 +382,23 @@
                             if (res2.success) {
                                 showToast('success', 'Ghi nhận thành công!');
                                 bootstrap.Modal.getInstance(document.getElementById('modalCreate')).hide();
-                                loadData();
+                                if (typeof TabManager !== 'undefined') { TabManager.reloadActiveTabGrid(false); }
+                                else if ($('#searchForm').length) { $('#searchForm').trigger('submit'); }
+                                else if (typeof loadData === 'function') { loadData(); }
                             } else {
                                 showToast('error', 'Lưu nháp thành công nhưng ghi nhận lỗi: ' + res2.message);
                                 bootstrap.Modal.getInstance(document.getElementById('modalCreate')).hide();
-                                loadData();
+                                if (typeof TabManager !== 'undefined') { TabManager.reloadActiveTabGrid(false); }
+                                else if ($('#searchForm').length) { $('#searchForm').trigger('submit'); }
+                                else if (typeof loadData === 'function') { loadData(); }
                             }
                         });
                     } else {
                         showToast('success', res.message);
                         bootstrap.Modal.getInstance(document.getElementById('modalCreate')).hide();
-                        loadData();
+                        if (typeof TabManager !== 'undefined') { TabManager.reloadActiveTabGrid(false); }
+                        else if ($('#searchForm').length) { $('#searchForm').trigger('submit'); }
+                        else if (typeof loadData === 'function') { loadData(); }
                     }
                 } else {
                     showToast('error', res.message);

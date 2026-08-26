@@ -69,9 +69,6 @@ namespace SalesManagementSystem.Controllers
 
             PopulateKhachHangDropdown(idKhachHang);
 
-            if ((Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest") && Request.Headers["X-SPA-Load"] != "true")
-                return PartialView("_CongNoKhachHangList", model);
-
             return View("Index", model);
         }
 

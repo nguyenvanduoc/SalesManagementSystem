@@ -61,7 +61,11 @@ namespace SalesManagementSystem.Repositories
                     {
                         data.Summary.DoanhThu = (decimal)(summary.DoanhThu ?? 0m);
                         data.Summary.DoanhThuKyTruoc = (decimal)(summary.DoanhThuKyTruoc ?? 0m);
+                        data.Summary.NoDauKyKH = (decimal)(summary.NoDauKyKH ?? 0m);
+                        data.Summary.TongTienBanKH = (decimal)(summary.TongTienBanKH ?? 0m);
+                        data.Summary.DaThuKH = (decimal)(summary.DaThuKH ?? 0m);
                         data.Summary.CongNoKhachHang = (decimal)(summary.CongNoKhachHang ?? 0m);
+                        data.Summary.NoDauKyNCC = (decimal)(summary.NoDauKyNCC ?? 0m);
                         data.Summary.TongTienHangNCC = (decimal)(summary.TongTienHangNCC ?? 0m);
                         data.Summary.DaThanhToanNCC = (decimal)(summary.DaThanhToanNCC ?? 0m);
                         data.Summary.CongNoNhaCungCap = (decimal)(summary.CongNoNhaCungCap ?? 0m);

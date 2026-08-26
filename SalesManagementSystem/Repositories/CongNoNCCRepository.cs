@@ -53,5 +53,48 @@ namespace SalesManagementSystem.Repositories
                 ).ToList();
             }
         }
+
+        public decimal GetTongDauKy(string tuNgay, int? idNhaCungCap)
+        {
+            if (string.IsNullOrWhiteSpace(tuNgay)) return 0M;
+            if (!DateTime.TryParse(tuNgay, out DateTime dtTu)) return 0M;
+
+            using (var conn = _db.CreateConnection())
+            {
+                string sql = @"
+                    SELECT ISNULL(SUM(pn.TongCong - pd.DaThanhToan), 0)
+                    FROM KHO_PhieuNhap pn
+                    INNER JOIN (
+                        SELECT 
+                            pn.ID,
+                            ISNULL(
+                                (SELECT SUM(ct.SoTienPhanBo)
+                                 FROM KT_PhieuChiChiTiet ct
+                                 INNER JOIN KT_PhieuChi pc ON ct.IDPhieuChi = pc.ID
+                                 WHERE ct.IDPhieuNhap = pn.ID 
+                                   AND ct.LoaiChi = 1
+                                   AND pc.TrangThai = 2
+                                   AND pc.IsDeleted = 0),
+                                0
+                            ) + ISNULL(
+                                (SELECT SUM(pc2.SoTienChi)
+                                 FROM KT_PhieuChi pc2
+                                 WHERE pc2.IDPhieuNhap = pn.ID
+                                   AND pc2.TrangThai = 2
+                                   AND pc2.IsDeleted = 0
+                                   AND NOT EXISTS (SELECT 1 FROM KT_PhieuChiChiTiet ct WHERE ct.IDPhieuChi = pc2.ID)
+                                ),
+                                0
+                            ) AS DaThanhToan
+                        FROM KHO_PhieuNhap pn
+                        WHERE pn.IsDeleted = 0
+                    ) pd ON pn.ID = pd.ID
+                    WHERE pn.IsDeleted = 0 
+                      AND pn.NgayNhap < @TuNgay
+                      AND (@IDNhaCungCap IS NULL OR pn.IDNhaCungCap = @IDNhaCungCap)";
+
+                return conn.QueryFirstOrDefault<decimal>(sql, new { TuNgay = dtTu, IDNhaCungCap = idNhaCungCap });
+            }
+        }
     }
 }

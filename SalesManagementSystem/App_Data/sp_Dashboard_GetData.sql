@@ -55,48 +55,47 @@ BEGIN
     WHERE TrangThai = 2 AND IsDeleted = 0 
       AND NgayChungTu >= @TuNgayKyTruoc AND NgayChungTu <= @DenNgayKyTruoc;
 
-    -- Công nợ khách hàng (tính chuẩn theo Tổng bán hàng - Tổng phiếu thu đã ghi sổ)
+    -- Công nợ khách hàng
+    DECLARE @NoDauKyKH DECIMAL(18, 2) = 0;
+    DECLARE @TongTienBanKH DECIMAL(18, 2) = 0;
+    DECLARE @DaThuKH DECIMAL(18, 2) = 0;
     DECLARE @CongNoKhachHang DECIMAL(18, 2) = 0;
-    SELECT @CongNoKhachHang = 
-        ISNULL((SELECT SUM(bh.TongCong) FROM BAN_ChungTuBanHang bh WHERE bh.IsDeleted = 0 AND bh.TrangThai = 2 AND bh.NgayChungTu <= @DenNgay), 0)
-        - ISNULL((SELECT SUM(pt.SoTienThu) FROM KT_PhieuThu pt WHERE pt.TrangThai = 2 AND pt.NgayThu <= @DenNgay), 0);
+
+    SELECT @NoDauKyKH = 
+        ISNULL((SELECT SUM(bh.TongCong) FROM BAN_ChungTuBanHang bh WHERE bh.IsDeleted = 0 AND bh.TrangThai = 2 AND bh.NgayChungTu < @TuNgay), 0)
+        - ISNULL((SELECT SUM(pt.SoTienThu) FROM KT_PhieuThu pt WHERE pt.TrangThai = 2 AND pt.NgayThu < @TuNgay), 0);
+
+    SELECT @TongTienBanKH = ISNULL((SELECT SUM(bh.TongCong) FROM BAN_ChungTuBanHang bh WHERE bh.IsDeleted = 0 AND bh.TrangThai = 2 AND bh.NgayChungTu >= @TuNgay AND bh.NgayChungTu <= @DenNgay), 0);
+
+    SELECT @DaThuKH = ISNULL((SELECT SUM(pt.SoTienThu) FROM KT_PhieuThu pt WHERE pt.TrangThai = 2 AND pt.NgayThu >= @TuNgay AND pt.NgayThu <= @DenNgay), 0);
+
+    SET @CongNoKhachHang = @NoDauKyKH + @TongTienBanKH - @DaThuKH;
 
     -- Công nợ nhà cung cấp
+    DECLARE @NoDauKyNCC DECIMAL(18, 2) = 0;
     DECLARE @TongTienHangNCC DECIMAL(18, 2) = 0;
     DECLARE @DaThanhToanNCC DECIMAL(18, 2) = 0;
     DECLARE @CongNoNhaCungCap DECIMAL(18, 2) = 0;
     
+    SELECT @NoDauKyNCC = ISNULL(SUM(pn.TongCong - pd.DaThanhToan), 0)
+    FROM KHO_PhieuNhap pn
+    LEFT JOIN #PaidNCC pd ON pn.ID = pd.IDPhieuNhap
+    WHERE pn.IsDeleted = 0 AND pn.NgayNhap < @TuNgay;
+
     SELECT 
         @TongTienHangNCC = ISNULL(SUM(TongTienHang), 0),
         @DaThanhToanNCC = ISNULL(SUM(DaThanhToan), 0)
     FROM (
         SELECT 
             pn.TongCong AS TongTienHang,
-            ISNULL(
-                (SELECT SUM(ct.SoTienPhanBo)
-                 FROM KT_PhieuChiChiTiet ct
-                 INNER JOIN KT_PhieuChi pc ON ct.IDPhieuChi = pc.ID
-                 WHERE ct.IDPhieuNhap = pn.ID 
-                   AND ct.LoaiChi = 1
-                   AND pc.TrangThai = 2
-                   AND pc.IsDeleted = 0),
-                0
-            ) + ISNULL(
-                (SELECT SUM(pc2.SoTienChi)
-                 FROM KT_PhieuChi pc2
-                 WHERE pc2.IDPhieuNhap = pn.ID
-                   AND pc2.TrangThai = 2
-                   AND pc2.IsDeleted = 0
-                   AND NOT EXISTS (SELECT 1 FROM KT_PhieuChiChiTiet ct WHERE ct.IDPhieuChi = pc2.ID)
-                ),
-                0
-            ) AS DaThanhToan
+            ISNULL(pd.DaThanhToan, 0) AS DaThanhToan
         FROM KHO_PhieuNhap pn
         LEFT JOIN #PaidNCC pd ON pn.ID = pd.IDPhieuNhap
-        WHERE pn.IsDeleted = 0 AND pn.NgayNhap <= @DenNgay
+        WHERE pn.IsDeleted = 0 
+          AND pn.NgayNhap >= @TuNgay AND pn.NgayNhap <= @DenNgay
     ) t;
     
-    SET @CongNoNhaCungCap = @TongTienHangNCC - @DaThanhToanNCC;
+    SET @CongNoNhaCungCap = @NoDauKyNCC + @TongTienHangNCC - @DaThanhToanNCC;
 
     -- Tiền hiện có
     DECLARE @TienHienCo DECIMAL(18, 2) = 0;
@@ -211,7 +210,11 @@ BEGIN
     SELECT 
         @DoanhThu AS DoanhThu,
         @DoanhThuKyTruoc AS DoanhThuKyTruoc,
+        @NoDauKyKH AS NoDauKyKH,
+        @TongTienBanKH AS TongTienBanKH,
+        @DaThuKH AS DaThuKH,
         @CongNoKhachHang AS CongNoKhachHang,
+        @NoDauKyNCC AS NoDauKyNCC,
         @TongTienHangNCC AS TongTienHangNCC,
         @DaThanhToanNCC AS DaThanhToanNCC,
         @CongNoNhaCungCap AS CongNoNhaCungCap,
@@ -554,7 +557,8 @@ BEGIN
     FROM KHO_PhieuNhap pn
     JOIN DM_NhaCungCap ncc ON pn.IDNhaCungCap = ncc.ID
     LEFT JOIN #PaidNCC pd ON pn.ID = pd.IDPhieuNhap
-    WHERE pn.IsDeleted = 0
+    WHERE pn.IsDeleted = 0 
+      AND pn.NgayNhap >= @TuNgay AND pn.NgayNhap <= @DenNgay
     GROUP BY ncc.TenNhaCungCap
     ORDER BY DoanhThuHoacGiaTriNhap DESC;
 

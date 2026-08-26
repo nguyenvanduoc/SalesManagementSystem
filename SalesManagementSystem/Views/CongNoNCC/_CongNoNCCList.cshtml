@@ -4,7 +4,54 @@
     decimal tongPhaiTra = ViewBag.TongPhaiTra ?? 0M;
     decimal tongDaTra   = ViewBag.TongDaTra   ?? 0M;
     decimal tongConLai  = ViewBag.TongConLai  ?? 0M;
+    decimal tongDauKy   = ViewBag.TongDauKy   ?? 0M;
+    decimal tongTienTraTruoc = ViewBag.TongTienTraTruoc ?? 0M;
+    decimal noCuoiKy = tongDauKy + tongPhaiTra - tongDaTra;
 }
+
+<!-- Tổng hợp Chạy Động Theo Bộ Lọc -->
+<div class="row g-3 mb-4">
+    <div class="col-md-2" style="width: 20%;">
+        <div class="card border-0 shadow-sm" style="border-left:4px solid #2998e4!important;">
+            <div class="card-body py-3 px-2">
+                <div class="text-muted small fw-semibold mb-1 text-truncate">NỢ ĐẦU KỲ</div>
+                <div class="fw-bold fs-6 text-primary text-truncate">@tongDauKy.ToString("N0") <small class="fw-normal">VND</small></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2" style="width: 20%;">
+        <div class="card border-0 shadow-sm" style="border-left:4px solid #8e44ad!important;">
+            <div class="card-body py-3 px-2">
+                <div class="text-muted small fw-semibold mb-1 text-truncate">MUA TRONG KỲ</div>
+                <div class="fw-bold fs-6" style="color:#8e44ad;" text-truncate">@tongPhaiTra.ToString("N0") <small class="fw-normal">VND</small></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2" style="width: 20%;">
+        <div class="card border-0 shadow-sm" style="border-left:4px solid #27ae60!important;">
+            <div class="card-body py-3 px-2">
+                <div class="text-muted small fw-semibold mb-1 text-truncate">ĐÃ THANH TOÁN</div>
+                <div class="fw-bold fs-6 text-success text-truncate">@tongDaTra.ToString("N0") <small class="fw-normal">VND</small></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2" style="width: 20%;">
+        <div class="card border-0 shadow-sm" style="border-left:4px solid #e74c3c!important;">
+            <div class="card-body py-3 px-2">
+                <div class="text-muted small fw-semibold mb-1 text-truncate">NỢ CUỐI KỲ</div>
+                <div class="fw-bold fs-6 text-danger text-truncate">@noCuoiKy.ToString("N0") <small class="fw-normal">VND</small></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2" style="width: 20%;">
+        <div class="card border-0 shadow-sm" style="border-left:4px solid #f39c12!important;">
+            <div class="card-body py-3 px-2">
+                <div class="text-muted small fw-semibold mb-1 text-truncate" title="TIỀN TRẢ TRƯỚC (NCC ĐƯỢC CHỌN)">TRẢ TRƯỚC (NCC)</div>
+                <div class="fw-bold fs-6 text-warning text-truncate" style="color:#f39c12!important;">@tongTienTraTruoc.ToString("N0") <small class="fw-normal">VND</small></div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="card shadow-sm">
     <div class="card-body p-0">
@@ -17,7 +64,7 @@
                         <th width="105" class="text-center fw-bold">Ngày nhập</th>
                         <th class="text-center fw-bold">Nhà cung cấp</th>
                         <th width="100" class="text-center fw-bold">Điện thoại</th>
-                        <th width="140" class="text-center fw-bold">Dư đầu kỳ</th>
+                        <th width="140" class="text-center fw-bold">Nợ đầu kỳ</th>
                         <th width="140" class="text-center fw-bold">Tổng tiền hàng</th>
                         <th width="140" class="text-center fw-bold">Đã thanh toán</th>
                         <th width="140" class="text-center fw-bold">Lũy kế</th>
@@ -48,10 +95,11 @@
 
                         <!-- Dòng tổng -->
                         <tr class="fw-bold" style="background:#f4f6f9;">
-                            <td colspan="6" class="text-end align-middle">Tổng cộng:</td>
-                            <td class="text-end align-middle">@tongPhaiTra.ToString("N0")</td>
+                            <td colspan="5" class="text-end align-middle">Tổng cộng trong kỳ:</td>
+                            <td class="text-end align-middle text-primary">@tongDauKy.ToString("N0")</td>
+                            <td class="text-end align-middle text-dark">@tongPhaiTra.ToString("N0")</td>
                             <td class="text-end align-middle text-success">@tongDaTra.ToString("N0")</td>
-                            <td class="text-end align-middle"></td>
+                            <td class="text-end align-middle text-danger">@noCuoiKy.ToString("N0")</td>
                             <td></td>
                         </tr>
                     }

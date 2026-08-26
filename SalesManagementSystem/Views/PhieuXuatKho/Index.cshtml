@@ -7,19 +7,25 @@
 <div id="pxk-@uid">
     <div class="d-flex justify-content-between align-items-center mb-3 mt-2">
         <h4 class="mb-0 fw-bold text-uppercase" style="color: #0b5b84; font-size: 1.25rem;">
-            @ViewBag.Title
+            <i class="bi bi-box-seam me-2"></i>@ViewBag.Title
         </h4>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-success btn-export-excel shadow-sm" style="background-color: #27ae60; border-color: #27ae60;" onclick="exportPhieuXuatExcel()">
+                <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
+            </button>
+        </div>
     </div>
 
     <div class="card shadow-sm mb-3">
         <div class="card-body py-2">
             <form id="searchForm" action="@Url.Action("GetList")" method="get">
-                <div class="row g-2 align-items-end">
+                <div class="row gx-2 gy-2 align-items-end">
                     
-                    <div class="col-md-2">
+                    <div class="col-md-2 col-sm-6">
                         <label class="form-label text-muted small mb-1">Thời gian</label>
                         <select class="form-select form-select-sm ddl-thoi-gian">
-                                <option value="current_month">Đầu tháng đến hiện tại</option>
+                            <option value="current_year">Từ đầu năm đến hiện tại</option>
+                            <option value="current_month">Đầu tháng đến hiện tại</option>
                             <option value="month_1">Tháng 1</option>
                             <option value="month_2">Tháng 2</option>
                             <option value="month_3">Tháng 3</option>
@@ -36,26 +42,55 @@
                             <option value="quarter_2">Quý 2</option>
                             <option value="quarter_3">Quý 3</option>
                             <option value="quarter_4">Quý 4</option>
-                            <option value="current_year">Từ đầu năm đến hiện tại</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    
+                    <div class="col-md-2 col-sm-6">
                         <label class="form-label text-muted small mb-1">Từ ngày</label>
                         <input type="date" name="tuNgay" class="form-control form-control-sm" value="@ViewBag.TuNgay" />
                     </div>
-                    <div class="col-md-2">
+                    
+                    <div class="col-md-2 col-sm-6">
                         <label class="form-label text-muted small mb-1">Đến ngày</label>
                         <input type="date" name="denNgay" class="form-control form-control-sm" value="@ViewBag.DenNgay" />
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label text-muted small mb-1">Số phiếu xuất</label>
-                        <input type="text" name="soChungTu" class="form-control form-control-sm" placeholder="Nhập số phiếu xuất..." value="@ViewBag.SoChungTu" />
+                    
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label text-muted small mb-1">Số chứng từ</label>
+                        <input type="text" name="soChungTu" class="form-control form-control-sm" placeholder="Nhập số phiếu..." value="@ViewBag.SoChungTu" />
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label text-muted small mb-1">Kho hàng</label>
-                        @Html.DropDownList("idKho", (SelectList)ViewBag.Khos, "-- Tất cả --", new { @class = "form-select form-select-sm" })
+                    
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label text-muted small mb-1">Kho xuất</label>
+                        @Html.DropDownList("idKho", (SelectList)ViewBag.Khos, "-- Tất cả --", new { @class = "form-select form-select-sm ddlKho" })
                     </div>
-                    <div class="col-md-2">
+                    
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label text-muted small mb-1">Sản phẩm</label>
+                        @Html.DropDownList("idSanPham", (SelectList)ViewBag.SanPhams, "-- Tất cả --", new { @class = "form-select form-select-sm ddlSanPham" })
+                    </div>
+                    
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label text-muted small mb-1">Nhà cung cấp / KH</label>
+                        @Html.DropDownList("idNhaCungCap", (SelectList)ViewBag.NhaCungCaps, "-- Tất cả --", new { @class = "form-select form-select-sm ddlNhaCungCap" })
+                    </div>
+                    
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label text-muted small mb-1">Người giao hàng</label>
+                        <input type="text" name="tenNguoiGiao" class="form-control form-control-sm" placeholder="Nhập người giao..." value="@ViewBag.TenNguoiGiao" />
+                    </div>
+                    
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label text-muted small mb-1">Phương tiện</label>
+                        @Html.DropDownList("idPhuongTien", (SelectList)ViewBag.PhuongTiens, "-- Tất cả --", new { @class = "form-select form-select-sm ddlPhuongTien" })
+                    </div>
+                    
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label text-muted small mb-1">Người nhận</label>
+                        <input type="text" name="tenNguoiNhan" class="form-control form-control-sm" placeholder="Nhập người nhận..." value="@ViewBag.TenNguoiNhan" />
+                    </div>
+                    
+                    <div class="col-md-2 col-sm-6">
                         <label class="form-label text-muted small mb-1">Trạng thái</label>
                         <select name="trangThai" class="form-select form-select-sm">
                             <option value="">-- Tất cả --</option>
@@ -64,17 +99,16 @@
                             <option value="3" @(ViewBag.TrangThai == 3 ? "selected" : "")>Đã hủy</option>
                         </select>
                     </div>
-                    <div class="col-12 d-flex gap-2 mt-3 justify-content-end">
-                        <button type="button" onclick="exportPhieuXuatExcel()" class="btn btn-sm text-white px-3" style="background-color: #27ae60; border: none;">
-                            <i class="bi bi-file-earmark-excel"></i> Xuất Excel
+                    
+                    <div class="col-md-2 col-sm-6 d-flex gap-2">
+                        <button type="submit" class="btn btn-sm text-white px-3 shadow-sm" style="background-color: #2998e4; border: none; height: 31px;">
+                            <i class="bi bi-search me-1"></i> Tìm kiếm
                         </button>
-                        <button type="submit" class="btn btn-sm text-white px-3" style="background-color: #2998e4; border: none;">
-                            <i class="bi bi-search"></i> Tìm kiếm
-                        </button>
-                        <button type="button" class="btn btn-sm text-white px-3 btn-reset" style="background-color: #f1c40f; border: none;">
-                            Làm mới
+                        <button type="button" class="btn btn-sm text-white px-3 btn-reset shadow-sm" style="background-color: #f1c40f; border: none; height: 31px;">
+                            <i class="bi bi-arrow-clockwise me-1"></i> Làm mới
                         </button>
                     </div>
+                    
                 </div>
             </form>
         </div>
@@ -95,9 +129,69 @@
             var $form = $container.find('#searchForm');
 
             $(document).ready(function() {
-                $form.on('submit', function (e) {
-                    // Bubble up to tab-manager.js for standard search & loading overlay
-                });
+                // Filter: Thời gian
+                var ddlThoiGian = $container.find('.ddl-thoi-gian')[0];
+                var txtTuNgay = $container.find('input[name="tuNgay"]')[0];
+                var txtDenNgay = $container.find('input[name="denNgay"]')[0];
+                var frmSearch = $container.find('#searchForm')[0];
+
+                function fDate(y, m, d) {
+                    var sm = m < 10 ? '0' + m : m;
+                    var sd = d < 10 ? '0' + d : d;
+                    return y + '-' + sm + '-' + sd;
+                }
+
+                function getDays(y, m) {
+                    var days = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+                    if (m === 2 && ((y % 4 === 0 && y % 100 !== 0) || y % 400 === 0)) return 29;
+                    return days[m];
+                }
+
+                if (ddlThoiGian && txtTuNgay && txtDenNgay) {
+                    $(ddlThoiGian).on('change', function() {
+                        try {
+                            var val = this.value;
+                            if (!val) return;
+                            
+                            var now = new Date();
+                            var y = now.getFullYear();
+                            var s = '', e = '';
+                            
+                            if (val === 'current_year') {
+                                s = fDate(y, 1, 1);
+                                e = fDate(now.getFullYear(), now.getMonth() + 1, now.getDate());
+                            } else if (val === 'current_month') {
+                                var cm = now.getMonth() + 1;
+                                s = fDate(y, cm, 1);
+                                e = fDate(now.getFullYear(), now.getMonth() + 1, now.getDate());
+                            } else if (val.indexOf('month_') === 0) {
+                                var m = parseInt(val.replace('month_', ''), 10);
+                                s = fDate(y, m, 1);
+                                e = fDate(y, m, getDays(y, m));
+                            } else if (val.indexOf('quarter_') === 0) {
+                                var q = parseInt(val.replace('quarter_', ''), 10);
+                                var startM = (q - 1) * 3 + 1;
+                                var endM = startM + 2;
+                                s = fDate(y, startM, 1);
+                                e = fDate(y, endM, getDays(y, endM));
+                            }
+
+                            if (s && e) {
+                                if (txtTuNgay._flatpickr) txtTuNgay._flatpickr.setDate(s);
+                                else { $(txtTuNgay).val(s).trigger('change'); }
+                                
+                                if (txtDenNgay._flatpickr) txtDenNgay._flatpickr.setDate(e);
+                                else { $(txtDenNgay).val(e).trigger('change'); }
+                                
+                                setTimeout(function() {
+                                    $(frmSearch).trigger('submit');
+                                }, 50);
+                            }
+                        } catch(err) {
+                            console.error("Lỗi xử lý thời gian: ", err);
+                        }
+                    });
+                }
 
                 window.exportPhieuXuatExcel = function() {
                     var params = $form.serialize();
@@ -132,7 +226,7 @@
 
                     // Create placeholder detail row
                     var $detailRow = $('<tr class="pxk-detail-row" data-parent-id="' + id + '">' +
-                        '<td colspan="11" class="p-3" style="background-color: #fcfdfd; border-left: 4px solid #2998e4;">' +
+                        '<td colspan="17" class="p-3" style="background-color: #fcfdfd; border-left: 4px solid #2998e4;">' +
                         '   <div class="text-center p-4 text-muted">' +
                         '       <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>' +
                         '       Đang tải chi tiết...' +

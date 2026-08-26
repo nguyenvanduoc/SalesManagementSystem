@@ -67,7 +67,7 @@ namespace SalesManagementSystem.Controllers
                 ActionName = "GetList"
             };
 
-            if (Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            if ((Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest") && Request.Headers["X-SPA-Load"] != "true")
                 return PartialView("_HaoHutList", model);
 
             return View(model);

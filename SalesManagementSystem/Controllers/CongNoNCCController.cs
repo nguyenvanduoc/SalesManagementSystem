@@ -55,6 +55,7 @@ namespace SalesManagementSystem.Controllers
             ViewBag.TongPhaiTra     = list.Sum(x => x.TongTienHang);
             ViewBag.TongDaTra       = list.Sum(x => x.DaThanhToan);
             ViewBag.TongConLai      = list.Sum(x => x.ConLai);
+            ViewBag.TongDauKy       = _repo.GetTongDauKy(tuNgay, idNhaCungCap);
             
             decimal tongTienTraTruoc = 0;
             if (idNhaCungCap.HasValue && idNhaCungCap.Value > 0)
@@ -64,9 +65,6 @@ namespace SalesManagementSystem.Controllers
             ViewBag.TongTienTraTruoc = tongTienTraTruoc;
 
             PopulateNhaCungCapDropdown(idNhaCungCap);
-
-            if ((Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest") && Request.Headers["X-SPA-Load"] != "true")
-                return PartialView("_CongNoNCCList", model);
 
             return View("Index", model);
         }
@@ -100,6 +98,7 @@ namespace SalesManagementSystem.Controllers
                 ViewBag.TongPhaiTra = list.Sum(x => x.TongTienHang);
                 ViewBag.TongDaTra   = list.Sum(x => x.DaThanhToan);
                 ViewBag.TongConLai  = list.Sum(x => x.ConLai);
+                ViewBag.TongDauKy   = _repo.GetTongDauKy(tuNgay, idNhaCungCap);
                 
                 decimal tongTienTraTruoc = 0;
                 if (idNhaCungCap.HasValue && idNhaCungCap.Value > 0)

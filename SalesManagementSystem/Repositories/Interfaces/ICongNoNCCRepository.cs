@@ -10,5 +10,7 @@ namespace SalesManagementSystem.Repositories.Interfaces
             string denNgay,
             int? idNhaCungCap,
             int? trangThaiCongNo);
+
+        decimal GetTongDauKy(string tuNgay, int? idNhaCungCap);
     }
 }
