@@ -122,8 +122,8 @@ BEGIN
 
     SELECT @GiaVon = ISNULL(SUM(
         CASE 
-            WHEN ISNULL(ct.ThanhTienVon, 0) > 0 THEN ct.ThanhTienVon
-            WHEN ISNULL(ct.DonGiaVon, 0) > 0 THEN ct.SoLuong * ct.DonGiaVon
+            WHEN ISNULL(ct.ThanhTienVon, 0) > 0 AND (ct.DonGia = 0 OR ct.DonGiaVon <= ct.DonGia * 2.5 OR ap.AvgDonGia IS NULL) THEN ct.ThanhTienVon
+            WHEN ISNULL(ct.DonGiaVon, 0) > 0 AND (ct.DonGia = 0 OR ct.DonGiaVon <= ct.DonGia * 2.5 OR ap.AvgDonGia IS NULL) THEN ct.SoLuong * ct.DonGiaVon
             ELSE ct.SoLuong * ISNULL(ap.AvgDonGia, 0)
         END
     ), 0) 
@@ -143,8 +143,8 @@ BEGIN
 
     SELECT @GiaVonKyTruoc = ISNULL(SUM(
         CASE 
-            WHEN ISNULL(ct.ThanhTienVon, 0) > 0 THEN ct.ThanhTienVon
-            WHEN ISNULL(ct.DonGiaVon, 0) > 0 THEN ct.SoLuong * ct.DonGiaVon
+            WHEN ISNULL(ct.ThanhTienVon, 0) > 0 AND (ct.DonGia = 0 OR ct.DonGiaVon <= ct.DonGia * 2.5 OR ap.AvgDonGia IS NULL) THEN ct.ThanhTienVon
+            WHEN ISNULL(ct.DonGiaVon, 0) > 0 AND (ct.DonGia = 0 OR ct.DonGiaVon <= ct.DonGia * 2.5 OR ap.AvgDonGia IS NULL) THEN ct.SoLuong * ct.DonGiaVon
             ELSE ct.SoLuong * ISNULL(ap.AvgDonGia, 0)
         END
     ), 0) 
