@@ -46,8 +46,10 @@ BEGIN
     ORDER BY 
         CASE 
             WHEN (CASE WHEN d.TrangThaiDon = 4 THEN 3 ELSE ISNULL(c.TrangThai, 0) END) = 0 THEN 1
-            WHEN (CASE WHEN d.TrangThaiDon = 4 THEN 3 ELSE ISNULL(c.TrangThai, 0) END) = 3 THEN 3
-            ELSE 2
+            WHEN (CASE WHEN d.TrangThaiDon = 4 THEN 3 ELSE ISNULL(c.TrangThai, 0) END) = 4 THEN 2
+            WHEN (CASE WHEN d.TrangThaiDon = 4 THEN 3 ELSE ISNULL(c.TrangThai, 0) END) = 1 THEN 3
+            WHEN (CASE WHEN d.TrangThaiDon = 4 THEN 3 ELSE ISNULL(c.TrangThai, 0) END) = 2 THEN 4
+            ELSE 5
         END ASC,
         d.SoDonHang DESC,
         d.ID DESC,

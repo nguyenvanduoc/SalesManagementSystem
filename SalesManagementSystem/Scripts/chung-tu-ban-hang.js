@@ -60,7 +60,7 @@ var ChungTuBanHang = (function () {
         }
     };
 
-    var save = function (isGhiSo) {
+    var save = function (trangThaiParam) {
         if (window.tonKhoHasError) {
             if (typeof showToast !== 'undefined') showToast('warning', 'Không thể lưu: Kho xuất không đủ tồn kho cho các sản phẩm đã chọn!');
             return;
@@ -91,7 +91,25 @@ var ChungTuBanHang = (function () {
             }
         }
 
-        var actionText = isGhiSo ? "lưu và ghi" : "lưu dữ liệu";
+        var targetTrangThai = 1;
+        var isGhiSo = false;
+        var actionText = "";
+
+        var val = parseInt(trangThaiParam, 10);
+        if (trangThaiParam === true || val === 2) {
+            targetTrangThai = 2;
+            isGhiSo = true;
+            actionText = "lưu và ghi dữ liệu (đã trừ kho & hạch toán kế toán)";
+        } else if (val === 4) {
+            targetTrangThai = 4;
+            isGhiSo = false;
+            actionText = "lưu nháp (chưa trừ kho)";
+        } else {
+            targetTrangThai = 1;
+            isGhiSo = false;
+            actionText = "lưu & đề nghị ghi (đã trừ kho)";
+        }
+
         var confirmHtml = '<div class="modal fade" id="confirmSaveModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">' +
             '<div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">' +
                 '<div class="modal-content shadow-lg" style="background-color: #ffffff; color: #333; border: none; border-top: 5px solid #ffc107; border-radius: 6px;">' +
@@ -125,7 +143,7 @@ var ChungTuBanHang = (function () {
             if (form.length === 0) form = $('#frmSaveCTBH');
 
             var data = form.serialize();
-            data += '&ghiSo=' + (isGhiSo ? 'true' : 'false');
+            data += '&trangThai=' + targetTrangThai + '&ghiSo=' + (isGhiSo ? 'true' : 'false');
                 
                 $.ajax({
                     url: '/ChungTuBanHang/Save',

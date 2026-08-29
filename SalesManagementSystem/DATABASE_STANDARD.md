@@ -90,7 +90,7 @@ Ví dụ:
 DM_KhoHang
 DM_NhanVien
 DM_PhongBan
-DM_KhachHang
+NS_KhachHang
 DM_HangHoa
 ```
 

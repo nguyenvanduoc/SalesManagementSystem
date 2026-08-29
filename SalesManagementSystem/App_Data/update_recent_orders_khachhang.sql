@@ -27,5 +27,5 @@ SELECT TOP 5
     kh.TenKhachHang
 FROM NS_DonDatHang d
 LEFT JOIN ACL_Login l ON d.NguoiTao = l.ID
-LEFT JOIN DM_KhachHang kh ON d.IDKhachHang = kh.ID
+LEFT JOIN NS_KhachHang kh ON d.IDKhachHang = kh.ID
 ORDER BY d.NgayTaoDon DESC, d.ID DESC;

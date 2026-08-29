@@ -224,8 +224,9 @@ namespace SalesManagementSystem.Controllers
             model.SoDonHang = donHang.SoDonHang;
             model.IDKhachHang = donHang.IDKhachHang ?? 0;
             model.TenKhachHang = khachHang?.TenKhachHang ?? "";
-            model.IDKho = 0;
-            model.TenKhoHang = "";
+            var khoDefault = khos.FirstOrDefault(x => x.IsKhoChinh == true) ?? khos.FirstOrDefault(x => x.ID == 1) ?? khos.FirstOrDefault();
+            model.IDKho = khoDefault?.ID ?? 1;
+            model.TenKhoHang = khoDefault?.TenKhoHang ?? "Kho thành phẩm Ngã 5";
             model.NgayChungTu = donHang.NgayTaoDon ?? DateTime.Now;
             
             var chiTietsDon = _donDatHangRepo.GetChiTietByDonId(idDonDatHang);
@@ -421,7 +422,7 @@ namespace SalesManagementSystem.Controllers
         }
 
         [HttpPost]
-        public ActionResult Save(ChungTuBanHangViewModel model, bool ghiSo = false)
+        public ActionResult Save(ChungTuBanHangViewModel model, int trangThai = 1, bool ghiSo = false)
         {
             if (!PermissionHelper.HasPermission("ChungTuBanHang", LoaiPhanQuyen.Them)) return Json(new { success = false, message = "Không có quyền thêm mới" });
 
@@ -430,10 +431,14 @@ namespace SalesManagementSystem.Controllers
                 var user = GetCurrentUser();
                 int userId = user?.IDNhanSu ?? 0;
 
+                if (ghiSo) trangThai = 2;
+
+                bool canOption = PermissionHelper.HasPermission("ChungTuBanHang", LoaiPhanQuyen.TuyChon);
+
                 if (model.ID > 0)
                 {
                     model.ConLai = model.TongCong - model.DaThanhToan;
-                    _repo.Update(model, userId, ghiSo && PermissionHelper.HasPermission("ChungTuBanHang", LoaiPhanQuyen.TuyChon));
+                    _repo.Update(model, userId, ghiSo && canOption, trangThai);
                     return Json(new { success = true, id = model.ID });
                 }
                 else
@@ -444,10 +449,10 @@ namespace SalesManagementSystem.Controllers
                     }
                     model.ConLai = model.TongCong - model.DaThanhToan;
 
-                    int newId = _repo.Insert(model, userId, ghiSo && PermissionHelper.HasPermission("ChungTuBanHang", LoaiPhanQuyen.TuyChon));
+                    int newId = _repo.Insert(model, userId, ghiSo && canOption, trangThai);
 
                     // Cập nhật trạng thái đơn đặt hàng: 2 (Đang lập chứng từ), 3 (Đã lập chứng từ)
-                    int trangThaiDonHang = ghiSo ? 3 : 2;
+                    int trangThaiDonHang = (trangThai == 2) ? 3 : 2;
                     if (model.IDDonDatHang.HasValue && model.IDDonDatHang.Value > 0)
                     {
                         _donDatHangRepo.UpdateStatus(model.IDDonDatHang.Value, trangThaiDonHang, userId);

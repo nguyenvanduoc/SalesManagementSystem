@@ -135,7 +135,7 @@ namespace SalesManagementSystem.Repositories
             }
         }
 
-        public int Insert(ChungTuBanHangViewModel model, int nguoiTao, bool ghiSo = false)
+        public int Insert(ChungTuBanHangViewModel model, int nguoiTao, bool ghiSo = false, int trangThai = 1)
         {
             using (var conn = _db.CreateConnection())
             {
@@ -149,8 +149,15 @@ namespace SalesManagementSystem.Repositories
                             model.IDKho = 1;
                         }
 
-                        // 1. Kiểm tra tồn kho nếu ghi
                         if (ghiSo)
+                        {
+                            trangThai = 2;
+                        }
+
+                        bool isTruKho = (trangThai == 1 || trangThai == 2);
+
+                        // 1. Kiểm tra tồn kho nếu là Đề nghị ghi (1) hoặc Đã ghi (2)
+                        if (isTruKho)
                         {
                             var itemsCheck = model.ChiTiets.Select(x => new CheckTonKhoRequestItem { IDSanPham = x.IDSanPham, SoLuongCanXuat = x.SoLuong }).ToList();
                             var pTonKho = new DynamicParameters();
@@ -164,8 +171,6 @@ namespace SalesManagementSystem.Repositories
                                 throw new Exception(msg);
                             }
                         }
-
-                        int trangThai = ghiSo ? 2 : 1;
 
                         var p = new DynamicParameters();
                         p.Add("@SoChungTu", model.SoChungTu);
@@ -194,7 +199,7 @@ namespace SalesManagementSystem.Repositories
                         foreach (var ct in model.ChiTiets)
                         {
                             decimal donGiaVon = 0;
-                            if (ghiSo)
+                            if (trangThai == 2)
                             {
                                 string sqlAvg = @"
                                     DECLARE @TongSoLuong DECIMAL(18,2) = 0;
@@ -214,7 +219,7 @@ namespace SalesManagementSystem.Repositories
                                 donGiaVon = conn.ExecuteScalar<decimal>(sqlAvg, new { IDSanPham = ct.IDSanPham, NgayChungTu = model.NgayChungTu }, transaction: tr);
                             }
                             decimal thanhTienVon = ct.SoLuong * donGiaVon;
-                            if (ghiSo) tongGiaVonThucTe += thanhTienVon;
+                            if (trangThai == 2) tongGiaVonThucTe += thanhTienVon;
 
                             var pCt = new DynamicParameters();
                             pCt.Add("@IDChungTuBanHang", newId);
@@ -227,8 +232,8 @@ namespace SalesManagementSystem.Repositories
                             pCt.Add("@SoTienKhac", ct.SoTienKhac);
                             pCt.Add("@SoTienChietKhau", ct.SoTienChietKhau);
                             pCt.Add("@ChuongTrinhTichLuySale", ct.ChuongTrinhTichLuySale);
-                            pCt.Add("@DonGiaVon", ghiSo ? (decimal?)donGiaVon : null);
-                            pCt.Add("@ThanhTienVon", ghiSo ? (decimal?)thanhTienVon : null);
+                            pCt.Add("@DonGiaVon", (trangThai == 2) ? (decimal?)donGiaVon : null);
+                            pCt.Add("@ThanhTienVon", (trangThai == 2) ? (decimal?)thanhTienVon : null);
                             pCt.Add("@ThanhTienHang", ct.ThanhTienHang);
                             pCt.Add("@ThanhTien", ct.ThanhTien);
                             pCt.Add("@ThueGTGT", ct.ThueGTGT);
@@ -288,7 +293,7 @@ namespace SalesManagementSystem.Repositories
                             pPxCt.Add("@DonGia", ct.DonGia);
                             pPxCt.Add("@ThanhTien", ct.ThanhTien);
                             decimal donGiaVonPx = 0;
-                            if (ghiSo)
+                            if (trangThai == 2)
                             {
                                 string sqlAvg = @"
                                     DECLARE @TongSoLuong DECIMAL(18,2) = 0;
@@ -309,8 +314,8 @@ namespace SalesManagementSystem.Repositories
                             }
                             decimal thanhTienVonPx = ct.SoLuong * donGiaVonPx;
 
-                            pPxCt.Add("@DonGiaVon", ghiSo ? (decimal?)donGiaVonPx : null);
-                            pPxCt.Add("@ThanhTienVon", ghiSo ? (decimal?)thanhTienVonPx : null);
+                            pPxCt.Add("@DonGiaVon", (trangThai == 2) ? (decimal?)donGiaVonPx : null);
+                            pPxCt.Add("@ThanhTienVon", (trangThai == 2) ? (decimal?)thanhTienVonPx : null);
                             pPxCt.Add("@ThueGTGT", ct.ThueGTGT);
                             pPxCt.Add("@TienThue", ct.TienThue);
                             pPxCt.Add("@TongSauThue", ct.TongSauThue);
@@ -319,7 +324,8 @@ namespace SalesManagementSystem.Repositories
                             conn.Execute("INSERT INTO KHO_PhieuXuat_ChiTiet (IDPhieuXuat, IDSanPham, STT, SoLuong, DonGia, ThanhTien, DonGiaVon, ThanhTienVon, ThueGTGT, TienThue, TongSauThue) VALUES (@IDPhieuXuat, @IDSanPham, @STT, @SoLuong, @DonGia, @ThanhTien, @DonGiaVon, @ThanhTienVon, @ThueGTGT, @TienThue, @TongSauThue); SELECT @NewID = SCOPE_IDENTITY();", pPxCt, transaction: tr);
                             int idChiTietKho = pPxCt.Get<int>("@NewID");
 
-                            if (ghiSo)
+                            // Trừ kho khi ở trạng thái Đề nghị ghi (1) hoặc Đã ghi (2)
+                            if (isTruKho)
                             {
                                 var pGd = new DynamicParameters();
                                 pGd.Add("@NgayChungTu", model.NgayChungTu);
@@ -341,8 +347,8 @@ namespace SalesManagementSystem.Repositories
                             }
                         }
 
-                        // 5. KT_NhatKyChung
-                        if (ghiSo)
+                        // 5. KT_NhatKyChung (Chỉ sinh bút toán kế toán khi Đã ghi = 2)
+                        if (trangThai == 2)
                         {
                             string taiKhoanNo = "131";
                             if (model.IDTaiKhoanThanhToan.HasValue)
@@ -381,7 +387,7 @@ namespace SalesManagementSystem.Repositories
             }
         }
 
-        public void Update(ChungTuBanHangViewModel model, int nguoiCapNhat, bool ghiSo = false)
+        public void Update(ChungTuBanHangViewModel model, int nguoiCapNhat, bool ghiSo = false, int trangThai = 1)
         {
             using (var conn = _db.CreateConnection())
             {
@@ -395,13 +401,22 @@ namespace SalesManagementSystem.Repositories
                             model.IDKho = 1;
                         }
 
-                        // 1. Kiểm tra tồn kho nếu ghi
                         if (ghiSo)
                         {
+                            trangThai = 2;
+                        }
+
+                        bool isTruKho = (trangThai == 1 || trangThai == 2);
+
+                        // 1. Kiểm tra tồn kho nếu là Đề nghị ghi (1) hoặc Đã ghi (2)
+                        if (isTruKho)
+                        {
+                            string existingSoPx = conn.ExecuteScalar<string>("SELECT SoChungTu FROM KHO_PhieuXuat WHERE IDChungTuBanHang = @ID", new { ID = model.ID }, transaction: tr);
                             var itemsCheck = model.ChiTiets.Select(x => new CheckTonKhoRequestItem { IDSanPham = x.IDSanPham, SoLuongCanXuat = x.SoLuong }).ToList();
                             var pTonKho = new DynamicParameters();
                             pTonKho.Add("@IDKho", model.IDKho);
                             pTonKho.Add("@ListSanPham", Newtonsoft.Json.JsonConvert.SerializeObject(itemsCheck));
+                            pTonKho.Add("@ExcludeSoChungTu", existingSoPx);
                             var checkTon = conn.Query<CheckTonKhoResponseViewModel>("sp_KHO_TonKho_CheckByKho", pTonKho, transaction: tr, commandType: System.Data.CommandType.StoredProcedure).ToList();
                             var missingItems = checkTon.Where(x => !x.IsDuTon).ToList();
                             if (missingItems.Any())
@@ -410,8 +425,6 @@ namespace SalesManagementSystem.Repositories
                                 throw new Exception(msg);
                             }
                         }
-
-                        int trangThai = ghiSo ? 2 : 1;
 
                         // 2. Cập nhật BAN_ChungTuBanHang
                         conn.Execute(@"
@@ -448,36 +461,73 @@ namespace SalesManagementSystem.Repositories
                                 ID = model.ID 
                             }, transaction: tr);
 
-                        // 3. Cập nhật KHO_PhieuXuat
-                        conn.Execute(@"
-                            UPDATE KHO_PhieuXuat 
-                            SET NgayXuat = @NgayChungTu,
-                                IDKho = @IDKho,
-                                TrangThai = @TrangThai
-                            WHERE IDChungTuBanHang = @IDChungTu",
-                            new {
-                                NgayChungTu = model.NgayChungTu,
-                                IDKho = model.IDKho,
-                                TrangThai = trangThai,
-                                IDChungTu = model.ID
-                            }, transaction: tr);
-
-                        // 4. Nếu ghi, sinh giao dịch kho và nhật ký chung
-                        if (ghiSo)
+                        // 3. Cập nhật hoặc tạo mới KHO_PhieuXuat
+                        int idPhieuXuat = conn.ExecuteScalar<int>("SELECT ISNULL(ID, 0) FROM KHO_PhieuXuat WHERE IDChungTuBanHang = @ID", new { ID = model.ID }, transaction: tr);
+                        
+                        if (idPhieuXuat == 0)
                         {
-                            int idPhieuXuat = conn.ExecuteScalar<int>("SELECT ID FROM KHO_PhieuXuat WHERE IDChungTuBanHang = @ID", new { ID = model.ID }, transaction: tr);
-                            string soPx = conn.ExecuteScalar<string>("SELECT SoChungTu FROM KHO_PhieuXuat WHERE ID = @ID", new { ID = idPhieuXuat }, transaction: tr);
-                            var pxChiTiets = conn.Query("SELECT ID, IDSanPham FROM KHO_PhieuXuat_ChiTiet WHERE IDPhieuXuat = @IDPhieuXuat", new { IDPhieuXuat = idPhieuXuat }, transaction: tr);
-
-                            // Xóa giao dịch cũ nếu có (để an toàn, tránh trùng)
-                            conn.Execute("DELETE FROM KHO_GiaoDichKho WHERE LoaiChungTu = 2 AND SoChungTu = @SoPx", new { SoPx = soPx }, transaction: tr);
-                            decimal tongGiaVonThucTe = 0;
-
-                            foreach (var ct in model.ChiTiets)
+                            var lastSo = conn.ExecuteScalar<string>("SELECT TOP 1 SoChungTu FROM KHO_PhieuXuat ORDER BY ID DESC", transaction: tr);
+                            string newSoPx = "PX00001";
+                            if (!string.IsNullOrEmpty(lastSo))
                             {
-                                var pxCt = pxChiTiets.FirstOrDefault(x => x.IDSanPham == ct.IDSanPham);
-                                int idChiTietKho = pxCt != null ? (int)pxCt.ID : 0;
+                                var numStr = lastSo.Replace("PX", "");
+                                if (int.TryParse(numStr, out int num))
+                                    newSoPx = "PX" + (num + 1).ToString("D5");
+                            }
 
+                            string tenKhachHang = conn.ExecuteScalar<string>("SELECT TenKhachHang FROM NS_KhachHang WHERE ID = @ID", new { ID = model.IDKhachHang }, transaction: tr) ?? "";
+
+                            var pPx = new DynamicParameters();
+                            pPx.Add("@SoChungTu", newSoPx);
+                            pPx.Add("@NgayXuat", model.NgayChungTu);
+                            pPx.Add("@IDKho", model.IDKho);
+                            pPx.Add("@IDNhanSuNhan", null, System.Data.DbType.Int32);
+                            pPx.Add("@TenNguoiNhan", tenKhachHang);
+                            pPx.Add("@IDChungTuBanHang", model.ID);
+                            pPx.Add("@IDDonDatHang", model.IDDonDatHang);
+                            pPx.Add("@GhiChu", "Xuất kho tự động từ CTBH " + model.SoChungTu);
+                            pPx.Add("@TongTienHang", model.TongTienHang);
+                            pPx.Add("@TongTienThue", model.TongTienThue);
+                            pPx.Add("@TongCong", model.TongCong);
+                            pPx.Add("@NguoiTao", nguoiCapNhat);
+                            pPx.Add("@TrangThai", trangThai);
+                            pPx.Add("@NewID", dbType: System.Data.DbType.Int32, direction: System.Data.ParameterDirection.Output);
+
+                            conn.Execute("INSERT INTO KHO_PhieuXuat (SoChungTu, NgayXuat, IDChungTuBanHang, IDDonDatHang, IDKho, IDNhanSuNhan, TenNguoiNhan, GhiChu, TongTienHang, TongTienThue, TongCong, NguoiTao, NgayTao, TrangThai) VALUES (@SoChungTu, @NgayXuat, @IDChungTuBanHang, @IDDonDatHang, @IDKho, @IDNhanSuNhan, @TenNguoiNhan, @GhiChu, @TongTienHang, @TongTienThue, @TongCong, @NguoiTao, GETDATE(), @TrangThai); SELECT @NewID = SCOPE_IDENTITY();", pPx, transaction: tr);
+                            idPhieuXuat = pPx.Get<int>("@NewID");
+                        }
+                        else
+                        {
+                            conn.Execute(@"
+                                UPDATE KHO_PhieuXuat 
+                                SET NgayXuat = @NgayChungTu,
+                                    IDKho = @IDKho,
+                                    TrangThai = @TrangThai
+                                WHERE IDChungTuBanHang = @IDChungTu",
+                                new {
+                                    NgayChungTu = model.NgayChungTu,
+                                    IDKho = model.IDKho,
+                                    TrangThai = trangThai,
+                                    IDChungTu = model.ID
+                                }, transaction: tr);
+                        }
+
+                        string soPx = conn.ExecuteScalar<string>("SELECT SoChungTu FROM KHO_PhieuXuat WHERE ID = @ID", new { ID = idPhieuXuat }, transaction: tr);
+
+                        // Tái tạo chi tiết chứng từ bán hàng và chi tiết phiếu xuất để đảm bảo khớp dữ liệu sản phẩm
+                        conn.Execute("DELETE FROM BAN_ChungTuBanHang_ChiTiet WHERE IDChungTuBanHang = @ID", new { ID = model.ID }, transaction: tr);
+                        conn.Execute("DELETE FROM KHO_PhieuXuat_ChiTiet WHERE IDPhieuXuat = @IDPhieuXuat", new { IDPhieuXuat = idPhieuXuat }, transaction: tr);
+
+                        // Xóa giao dịch kho cũ để tái tạo
+                        conn.Execute("DELETE FROM KHO_GiaoDichKho WHERE LoaiChungTu = 2 AND SoChungTu = @SoPx", new { SoPx = soPx }, transaction: tr);
+                        decimal tongGiaVonThucTe = 0;
+
+                        int sttDetail = 1;
+                        foreach (var ct in model.ChiTiets)
+                        {
+                            decimal donGiaVon = 0;
+                            if (trangThai == 2)
+                            {
                                 string sqlAvg = @"
                                     DECLARE @TongSoLuong DECIMAL(18,2) = 0;
                                     DECLARE @TongGiaTri DECIMAL(18,2) = 0;
@@ -486,17 +536,67 @@ namespace SalesManagementSystem.Repositories
                                         @TongGiaTri = ISNULL(SUM(SoLuongNhap * DonGia),0) - ISNULL(SUM(SoLuongXuat * ISNULL(DonGiaVon, 0)),0)
                                     FROM KHO_GiaoDichKho
                                     WHERE IDSanPham = @IDSanPham AND NgayChungTu <= @NgayChungTu
-                                      AND IDKho IN (SELECT ID FROM DM_KhoHang WHERE ISNULL(IsKhoChinh, 0) = 1); -- Chỉ tính giá vốn từ kho chính
+                                      AND IDKho IN (SELECT ID FROM DM_KhoHang WHERE ISNULL(IsKhoChinh, 0) = 1);
                                     
                                     IF @TongSoLuong > 0
                                         SELECT CAST(@TongGiaTri / @TongSoLuong AS DECIMAL(18,2));
                                     ELSE
                                         SELECT CAST(0 AS DECIMAL(18,2));
                                 ";
-                                decimal donGiaVon = conn.ExecuteScalar<decimal>(sqlAvg, new { IDSanPham = ct.IDSanPham, NgayChungTu = model.NgayChungTu }, transaction: tr);
-                                decimal thanhTienVon = ct.SoLuong * donGiaVon;
-                                tongGiaVonThucTe += thanhTienVon;
+                                donGiaVon = conn.ExecuteScalar<decimal>(sqlAvg, new { IDSanPham = ct.IDSanPham, NgayChungTu = model.NgayChungTu }, transaction: tr);
+                            }
+                            decimal thanhTienVon = ct.SoLuong * donGiaVon;
+                            if (trangThai == 2) tongGiaVonThucTe += thanhTienVon;
 
+                            // Chèn lại BAN_ChungTuBanHang_ChiTiet
+                            var pCt = new DynamicParameters();
+                            pCt.Add("@IDChungTuBanHang", model.ID);
+                            pCt.Add("@IDSanPham", ct.IDSanPham);
+                            pCt.Add("@STT", sttDetail);
+                            pCt.Add("@SoLuong", ct.SoLuong);
+                            pCt.Add("@DonGia", ct.DonGia);
+                            pCt.Add("@DonGiaBocXep", ct.DonGiaBocXep);
+                            pCt.Add("@ThanhTienBocXep", ct.ThanhTienBocXep);
+                            pCt.Add("@SoTienKhac", ct.SoTienKhac);
+                            pCt.Add("@SoTienChietKhau", ct.SoTienChietKhau);
+                            pCt.Add("@ChuongTrinhTichLuySale", ct.ChuongTrinhTichLuySale);
+                            pCt.Add("@DonGiaVon", (trangThai == 2) ? (decimal?)donGiaVon : null);
+                            pCt.Add("@ThanhTienVon", (trangThai == 2) ? (decimal?)thanhTienVon : null);
+                            pCt.Add("@ThanhTienHang", ct.ThanhTienHang);
+                            pCt.Add("@ThanhTien", ct.ThanhTien);
+                            pCt.Add("@ThueGTGT", ct.ThueGTGT);
+                            pCt.Add("@TienThue", ct.TienThue);
+                            pCt.Add("@TongSauThue", ct.TongSauThue);
+                            pCt.Add("@GhiChu", ct.GhiChu);
+
+                            string sqlInsertCt = @"
+                                INSERT INTO BAN_ChungTuBanHang_ChiTiet 
+                                (IDChungTuBanHang, IDSanPham, STT, SoLuong, DonGia, DonGiaBocXep, ThanhTienBocXep, SoTienKhac, SoTienChietKhau, ChuongTrinhTichLuySale, DonGiaVon, ThanhTienVon, ThanhTienHang, ThanhTien, ThueGTGT, TienThue, TongSauThue, GhiChu)
+                                VALUES 
+                                (@IDChungTuBanHang, @IDSanPham, @STT, @SoLuong, @DonGia, @DonGiaBocXep, @ThanhTienBocXep, @SoTienKhac, @SoTienChietKhau, @ChuongTrinhTichLuySale, @DonGiaVon, @ThanhTienVon, @ThanhTienHang, @ThanhTien, @ThueGTGT, @TienThue, @TongSauThue, @GhiChu);
+                            ";
+                            conn.Execute(sqlInsertCt, pCt, transaction: tr);
+
+                            // Chèn lại KHO_PhieuXuat_ChiTiet
+                            var pPxCt = new DynamicParameters();
+                            pPxCt.Add("@IDPhieuXuat", idPhieuXuat);
+                            pPxCt.Add("@IDSanPham", ct.IDSanPham);
+                            pPxCt.Add("@STT", sttDetail++);
+                            pPxCt.Add("@SoLuong", ct.SoLuong);
+                            pPxCt.Add("@DonGia", ct.DonGia);
+                            pPxCt.Add("@ThanhTien", ct.ThanhTien);
+                            pPxCt.Add("@DonGiaVon", (trangThai == 2) ? (decimal?)donGiaVon : null);
+                            pPxCt.Add("@ThanhTienVon", (trangThai == 2) ? (decimal?)thanhTienVon : null);
+                            pPxCt.Add("@ThueGTGT", ct.ThueGTGT);
+                            pPxCt.Add("@TienThue", ct.TienThue);
+                            pPxCt.Add("@TongSauThue", ct.TongSauThue);
+                            pPxCt.Add("@NewID", dbType: System.Data.DbType.Int32, direction: System.Data.ParameterDirection.Output);
+
+                            conn.Execute("INSERT INTO KHO_PhieuXuat_ChiTiet (IDPhieuXuat, IDSanPham, STT, SoLuong, DonGia, ThanhTien, DonGiaVon, ThanhTienVon, ThueGTGT, TienThue, TongSauThue) VALUES (@IDPhieuXuat, @IDSanPham, @STT, @SoLuong, @DonGia, @ThanhTien, @DonGiaVon, @ThanhTienVon, @ThueGTGT, @TienThue, @TongSauThue); SELECT @NewID = SCOPE_IDENTITY();", pPxCt, transaction: tr);
+                            int idChiTietKho = pPxCt.Get<int>("@NewID");
+
+                            if (isTruKho)
+                            {
                                 var pGd = new DynamicParameters();
                                 pGd.Add("@NgayChungTu", model.NgayChungTu);
                                 pGd.Add("@SoChungTu", soPx);
@@ -508,27 +608,20 @@ namespace SalesManagementSystem.Repositories
                                 pGd.Add("@SoLuongXuat", ct.SoLuong);
                                 pGd.Add("@DonGia", ct.DonGia);
                                 pGd.Add("@ThanhTien", ct.ThanhTien);
-                                pGd.Add("@DonGiaVon", donGiaVon);
-                                pGd.Add("@ThanhTienVon", thanhTienVon);
+                                pGd.Add("@DonGiaVon", (trangThai == 2) ? donGiaVon : 0);
+                                pGd.Add("@ThanhTienVon", (trangThai == 2) ? thanhTienVon : 0);
                                 pGd.Add("@DienGiai", "Xuất kho tự động từ CTBH " + model.SoChungTu);
                                 pGd.Add("@NguoiTao", nguoiCapNhat);
 
                                 conn.Execute("INSERT INTO KHO_GiaoDichKho (NgayChungTu, SoChungTu, LoaiChungTu, IDChiTietKho, IDKho, IDSanPham, SoLuongNhap, SoLuongXuat, DonGia, ThanhTien, DonGiaVon, ThanhTienVon, DienGiai, NgayTao, NguoiTao) VALUES (@NgayChungTu, @SoChungTu, @LoaiChungTu, @IDChiTietKho, @IDKho, @IDSanPham, @SoLuongNhap, @SoLuongXuat, @DonGia, @ThanhTien, @DonGiaVon, @ThanhTienVon, @DienGiai, GETDATE(), @NguoiTao)", pGd, transaction: tr);
-
-                                // Cập nhật lại giá vốn vào chứng từ chi tiết
-                                conn.Execute("UPDATE BAN_ChungTuBanHang_ChiTiet SET DonGiaVon = @DonGiaVon, ThanhTienVon = @ThanhTienVon WHERE IDChungTuBanHang = @IDChungTu AND IDSanPham = @IDSanPham", 
-                                    new { DonGiaVon = donGiaVon, ThanhTienVon = thanhTienVon, IDChungTu = model.ID, IDSanPham = ct.IDSanPham }, transaction: tr);
-
-                                if (idChiTietKho > 0)
-                                {
-                                    conn.Execute("UPDATE KHO_PhieuXuat_ChiTiet SET DonGiaVon = @DonGiaVon, ThanhTienVon = @ThanhTienVon WHERE ID = @IDChiTietKho",
-                                        new { DonGiaVon = donGiaVon, ThanhTienVon = thanhTienVon, IDChiTietKho = idChiTietKho }, transaction: tr);
-                                }
                             }
+                        }
 
-                            // 5. KT_NhatKyChung (Xóa cũ nếu có để tránh ghi trùng)
-                            conn.Execute("DELETE FROM KT_NhatKyChung WHERE LoaiChungTu = 'BAN' AND IDChungTu = @ID", new { ID = model.ID }, transaction: tr);
+                        // 5. KT_NhatKyChung (Xóa cũ nếu có)
+                        conn.Execute("DELETE FROM KT_NhatKyChung WHERE LoaiChungTu = 'BAN' AND IDChungTu = @ID", new { ID = model.ID }, transaction: tr);
 
+                        if (trangThai == 2)
+                        {
                             string taiKhoanNo = "131";
                             if (model.IDTaiKhoanThanhToan.HasValue)
                             {
@@ -553,10 +646,16 @@ namespace SalesManagementSystem.Repositories
                                     new { NgayChungTu = model.NgayChungTu, SoChungTu = model.SoChungTu, LoaiChungTu = "BAN", IDChungTu = model.ID, TaiKhoanNo = "632", TaiKhoanCo = "156", SoTien = tongGiaVonThucTe, DienGiai = "Giá vốn hàng bán CT " + model.SoChungTu, NguoiTao = nguoiCapNhat }, transaction: tr);
                             }
 
-                            // Cập nhật trạng thái đơn đặt hàng
                             if (model.IDDonDatHang.HasValue && model.IDDonDatHang.Value > 0)
                             {
                                 conn.Execute("UPDATE NS_DonDatHang SET TrangThaiDon = 3, NguoiCapNhat = @NguoiGhi, NgayCapNhat = GETDATE() WHERE ID = @ID", new { NguoiGhi = nguoiCapNhat, ID = model.IDDonDatHang.Value }, transaction: tr);
+                            }
+                        }
+                        else
+                        {
+                            if (model.IDDonDatHang.HasValue && model.IDDonDatHang.Value > 0)
+                            {
+                                conn.Execute("UPDATE NS_DonDatHang SET TrangThaiDon = 2, NguoiCapNhat = @NguoiGhi, NgayCapNhat = GETDATE() WHERE ID = @ID", new { NguoiGhi = nguoiCapNhat, ID = model.IDDonDatHang.Value }, transaction: tr);
                             }
                         }
 
@@ -597,7 +696,7 @@ namespace SalesManagementSystem.Repositories
                         p.Add("@ID", id);
                         var master = conn.QueryFirstOrDefault<BAN_ChungTuBanHang>("sp_BAN_ChungTuBanHang_GetById", p, transaction: tr, commandType: System.Data.CommandType.StoredProcedure);
                         if (master == null) throw new Exception("Chứng từ không tồn tại.");
-                        if (master.TrangThai != 1) throw new Exception("Chứng từ đã ghi hoặc đã hủy.");
+                        if (master.TrangThai != 1 && master.TrangThai != 4) throw new Exception("Chứng từ đã ghi hoặc đã hủy.");
 
                         var details = conn.Query<ChungTuBanHangChiTietViewModel>("sp_BAN_ChungTuBanHang_ChiTiet_GetList", new { IDChungTuBanHang = id }, transaction: tr, commandType: System.Data.CommandType.StoredProcedure).ToList();
 
@@ -624,9 +723,12 @@ namespace SalesManagementSystem.Repositories
                         {
                             conn.Execute("UPDATE KHO_PhieuXuat SET TrangThai = 2, NguoiCapNhat = @NguoiGhi, NgayCapNhat = GETDATE() WHERE ID = @IDPhieuXuat", new { NguoiGhi = nguoiGhi, IDPhieuXuat = idPhieuXuat.Value }, transaction: tr);
 
-                            // 4. Sinh KHO_GiaoDichKho
+                            // 4. Sinh / Cập nhật KHO_GiaoDichKho
                             string soPx = conn.ExecuteScalar<string>("SELECT SoChungTu FROM KHO_PhieuXuat WHERE ID = @ID", new { ID = idPhieuXuat.Value }, transaction: tr);
                             var pxChiTiets = conn.Query("SELECT ID, IDSanPham FROM KHO_PhieuXuat_ChiTiet WHERE IDPhieuXuat = @IDPhieuXuat", new { IDPhieuXuat = idPhieuXuat.Value }, transaction: tr);
+
+                            // Xóa giao dịch cũ nếu có để sinh lại chuẩn xác
+                            conn.Execute("DELETE FROM KHO_GiaoDichKho WHERE LoaiChungTu = 2 AND SoChungTu = @SoPx", new { SoPx = soPx }, transaction: tr);
                             
                             foreach (var ct in details)
                             {
@@ -680,12 +782,10 @@ namespace SalesManagementSystem.Repositories
                                 }
                             }
                         }
-                        else
-                        {
-                            // In case idPhieuXuat is null, which shouldn't happen but just in case, tongGiaVon is 0 or we calculate it.
-                        }
 
                         // 5. KT_NhatKyChung
+                        conn.Execute("DELETE FROM KT_NhatKyChung WHERE LoaiChungTu = 'BAN' AND IDChungTu = @ID", new { ID = id }, transaction: tr);
+
                         string taiKhoanNo = "131";
                         if (master.IDTaiKhoanThanhToan.HasValue)
                         {
@@ -710,7 +810,7 @@ namespace SalesManagementSystem.Repositories
                                 new { NgayChungTu = master.NgayChungTu, SoChungTu = master.SoChungTu, LoaiChungTu = "BAN", IDChungTu = id, TaiKhoanNo = "632", TaiKhoanCo = "156", SoTien = tongGiaVon, DienGiai = "Giá vốn hàng bán CT " + master.SoChungTu, NguoiTao = nguoiGhi }, transaction: tr);
                         }
 
-                        // Cập nhật trạng thái đơn đặt hàng
+                        // Cập nhật trạng thái đơn đặt hàng thành 3 (Đã lập chứng từ)
                         if (master.IDDonDatHang.HasValue && master.IDDonDatHang.Value > 0)
                         {
                             conn.Execute("UPDATE NS_DonDatHang SET TrangThaiDon = 3, NguoiCapNhat = @NguoiGhi, NgayCapNhat = GETDATE() WHERE ID = @ID", new { NguoiGhi = nguoiGhi, ID = master.IDDonDatHang.Value }, transaction: tr);
@@ -790,37 +890,23 @@ namespace SalesManagementSystem.Repositories
                         p.Add("@ID", id);
                         var master = conn.QueryFirstOrDefault<BAN_ChungTuBanHang>("sp_BAN_ChungTuBanHang_GetById", p, transaction: tr, commandType: System.Data.CommandType.StoredProcedure);
                         if (master == null) throw new Exception("Chứng từ không tồn tại.");
-                        if (master.TrangThai != 2 && master.TrangThai != 3) throw new Exception("Chứng từ phải ở trạng thái đã ghi hoặc đã hủy mới có thể bỏ ghi.");
+                        if (master.TrangThai != 1 && master.TrangThai != 2 && master.TrangThai != 3) throw new Exception("Chứng từ không hợp lệ để bỏ ghi.");
 
-                        // 1. Cập nhật trạng thái chứng từ thành 1 (Đề nghị ghi)
-                        conn.Execute("UPDATE BAN_ChungTuBanHang SET TrangThai = 1, NguoiCapNhat = @NguoiBoGhi, NgayCapNhat = GETDATE() WHERE ID = @ID", new { NguoiBoGhi = nguoiBoGhi, ID = id }, transaction: tr);
+                        // 1. Cập nhật trạng thái chứng từ thành 4 (Lưu nháp) theo yêu cầu
+                        conn.Execute("UPDATE BAN_ChungTuBanHang SET TrangThai = 4, NguoiCapNhat = @NguoiBoGhi, NgayCapNhat = GETDATE() WHERE ID = @ID", new { NguoiBoGhi = nguoiBoGhi, ID = id }, transaction: tr);
 
-                        // 2. Cập nhật trạng thái phiếu xuất tương ứng thành 1 (Đề nghị ghi)
+                        // 2. Cập nhật trạng thái phiếu xuất tương ứng thành 4 (Lưu nháp)
                         int? idPhieuXuat = conn.ExecuteScalar<int?>("SELECT ID FROM KHO_PhieuXuat WHERE IDChungTuBanHang = @ID", new { ID = id }, transaction: tr);
                         if (idPhieuXuat.HasValue)
                         {
-                            conn.Execute("UPDATE KHO_PhieuXuat SET TrangThai = 1, NguoiCapNhat = @NguoiBoGhi, NgayCapNhat = GETDATE() WHERE ID = @IDPhieuXuat", new { NguoiBoGhi = nguoiBoGhi, IDPhieuXuat = idPhieuXuat.Value }, transaction: tr);
+                            conn.Execute("UPDATE KHO_PhieuXuat SET TrangThai = 4, NguoiCapNhat = @NguoiBoGhi, NgayCapNhat = GETDATE() WHERE ID = @IDPhieuXuat", new { NguoiBoGhi = nguoiBoGhi, IDPhieuXuat = idPhieuXuat.Value }, transaction: tr);
 
-                            // 3. Xử lý giao dịch kho (KHO_GiaoDichKho)
-                            // Trường hợp đã ghi và thanh toán (DaThanhToan > 0)
-                            if (master.DaThanhToan > 0)
-                            {
-                                conn.Execute(@"
-                                    UPDATE KHO_GiaoDichKho 
-                                    SET IsHuy = 1, NgayHuy = GETDATE(), NguoiHuy = @NguoiBoGhi 
-                                    WHERE LoaiChungTu = 2 
-                                      AND SoChungTu = (SELECT SoChungTu FROM KHO_PhieuXuat WHERE ID = @IDPhieuXuat)", 
-                                    new { NguoiBoGhi = nguoiBoGhi, IDPhieuXuat = idPhieuXuat.Value }, transaction: tr);
-                            }
-                            else
-                            {
-                                // Chưa thanh toán: xóa hẳn giao dịch kho
-                                conn.Execute(@"
-                                    DELETE FROM KHO_GiaoDichKho 
-                                    WHERE LoaiChungTu = 2 
-                                      AND SoChungTu = (SELECT SoChungTu FROM KHO_PhieuXuat WHERE ID = @IDPhieuXuat)", 
-                                    new { IDPhieuXuat = idPhieuXuat.Value }, transaction: tr);
-                            }
+                            // 3. Xóa giao dịch kho (bỏ trừ kho khi về Lưu nháp)
+                            conn.Execute(@"
+                                DELETE FROM KHO_GiaoDichKho 
+                                WHERE LoaiChungTu = 2 
+                                  AND SoChungTu = (SELECT SoChungTu FROM KHO_PhieuXuat WHERE ID = @IDPhieuXuat)", 
+                                new { IDPhieuXuat = idPhieuXuat.Value }, transaction: tr);
                         }
 
                         // 4. Xóa bút toán nhật ký chung (KT_NhatKyChung)

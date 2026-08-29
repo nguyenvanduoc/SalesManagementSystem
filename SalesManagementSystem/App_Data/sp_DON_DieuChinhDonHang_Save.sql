@@ -1,4 +1,4 @@
-﻿-- =======================================================
+-- =======================================================
 -- Author:      Antigravity
 -- Create date: 2026-08-10
 -- Description: Lưu điều chỉnh đơn đặt hàng:
@@ -320,9 +320,10 @@ BEGIN
             END
         END
 
-        -- 11. Cập nhật KHO_PhieuXuat & KHO_PhieuXuat_ChiTiet (nếu có)
+        -- 11. Cập nhật KHO_PhieuXuat & KHO_PhieuXuat_ChiTiet & TÁI TẠO KHO_GiaoDichKho
         DECLARE @shipId INT;
-        SELECT @shipId = ID FROM KHO_PhieuXuat
+        DECLARE @shipSoChungTu NVARCHAR(50);
+        SELECT @shipId = ID, @shipSoChungTu = SoChungTu FROM KHO_PhieuXuat
         WHERE IDDonDatHang = @IDDonHang AND IsDeleted = 0;
 
         IF @shipId IS NOT NULL
@@ -337,8 +338,15 @@ BEGIN
                 NguoiCapNhat  = @NguoiTao
             WHERE ID = @shipId;
 
+            -- Xóa các dòng giao dịch kho cũ thuộc phiếu xuất này để chống trùng / sai IDChiTietKho
+            DELETE FROM KHO_GiaoDichKho 
+            WHERE LoaiChungTu = 2 
+              AND (SoChungTu = @shipSoChungTu OR IDChiTietKho IN (SELECT ID FROM KHO_PhieuXuat_ChiTiet WHERE IDPhieuXuat = @shipId));
+
+            -- Xóa các chi tiết phiếu xuất cũ
             DELETE FROM KHO_PhieuXuat_ChiTiet WHERE IDPhieuXuat = @shipId;
 
+            -- Chèn lại chi tiết phiếu xuất mới
             INSERT INTO KHO_PhieuXuat_ChiTiet
                 (IDPhieuXuat, IDSanPham, STT, SoLuong, DonGia,
                  ThanhTien, ThueGTGT, TienThue, TongSauThue)
@@ -348,13 +356,32 @@ BEGIN
                 ThanhTien, ThueGTGT, ThanhTienThue, ThanhTienSauThue
             FROM @ChiTietMoi;
 
-            UPDATE KHO_GiaoDichKho
-            SET IDKho = @IDKho,
-                NgayChungTu = ISNULL(CAST(@NgayGiaoHang AS DATE), NgayChungTu)
-            WHERE IDChiTietKho IN (
-                SELECT pxct.ID FROM KHO_PhieuXuat_ChiTiet pxct
-                WHERE pxct.IDPhieuXuat = @shipId
-            ) AND LoaiChungTu = 2;
+            -- Tái tạo giao dịch kho mới chuẩn xác 100% nếu phiếu xuất ở trạng thái Đã ghi = 2
+            IF EXISTS (SELECT 1 FROM KHO_PhieuXuat WHERE ID = @shipId AND TrangThai = 2)
+            BEGIN
+                INSERT INTO KHO_GiaoDichKho (
+                    NgayChungTu, SoChungTu, LoaiChungTu, IDChiTietKho, IDKho, IDSanPham, 
+                    SoLuongNhap, SoLuongXuat, DonGia, ThanhTien, DienGiai, NgayTao, NguoiTao, IsHuy
+                )
+                SELECT 
+                    px.NgayXuat, 
+                    px.SoChungTu, 
+                    2 AS LoaiChungTu, 
+                    pxct.ID AS IDChiTietKho, 
+                    px.IDKho, 
+                    pxct.IDSanPham, 
+                    0 AS SoLuongNhap, 
+                    pxct.SoLuong AS SoLuongXuat, 
+                    pxct.DonGia, 
+                    pxct.ThanhTien, 
+                    ISNULL(px.GhiChu, N'Xuất kho tự động (Điều chỉnh đơn hàng)'), 
+                    GETDATE(), 
+                    @NguoiTao, 
+                    0 AS IsHuy
+                FROM KHO_PhieuXuat_ChiTiet pxct
+                INNER JOIN KHO_PhieuXuat px ON pxct.IDPhieuXuat = px.ID
+                WHERE px.ID = @shipId;
+            END
         END
 
         COMMIT TRANSACTION;

@@ -10,8 +10,8 @@ namespace SalesManagementSystem.Repositories.Interfaces
         IEnumerable<DonHangChungTuViewModel> GetDonHangList(string tuNgay, string denNgay, string soDonHang, int? idKhachHang, int? trangThaiChungTu, int? idSanPham = null, int? idPhuongTien = null, string hoTenTaiXe = null);
         ChungTuBanHangViewModel GetById(int id);
         string GenerateSoChungTu();
-        int Insert(ChungTuBanHangViewModel model, int nguoiTao, bool ghiSo = false);
-        void Update(ChungTuBanHangViewModel model, int nguoiCapNhat, bool ghiSo = false);
+        int Insert(ChungTuBanHangViewModel model, int nguoiTao, bool ghiSo = false, int trangThai = 1);
+        void Update(ChungTuBanHangViewModel model, int nguoiCapNhat, bool ghiSo = false, int trangThai = 1);
         void UpdateStatus(int id, int trangThai, int nguoiCapNhat);
         void GhiSo(int id, int nguoiGhi);
         void Cancel(int id, int? idDonDatHang, int nguoiHuy, string lyDo);

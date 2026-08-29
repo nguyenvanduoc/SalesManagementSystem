@@ -52,9 +52,9 @@
                                                 </li>
                                             }
 
-                                            @if ((item.TrangThaiChungTu == 1 || item.TrangThaiChungTu == null || item.TrangThaiChungTu == 0) && SalesManagementSystem.Helpers.PermissionHelper.HasPermission("ChungTuBanHang", SalesManagementSystem.Helpers.LoaiPhanQuyen.TuyChon))
+                                            @if (item.IDChungTuBanHang.HasValue && SalesManagementSystem.Helpers.PermissionHelper.HasPermission("ChungTuBanHang", SalesManagementSystem.Helpers.LoaiPhanQuyen.TuyChon))
                                             {
-                                                if (item.TrangThaiChungTu == 1)
+                                                if (item.TrangThaiChungTu == 1 || item.TrangThaiChungTu == 4)
                                                 {
                                                     <li>
                                                         <button type="button" class="dropdown-item text-success" onclick="ghiSoChungTu(this, @item.IDChungTuBanHang)">
@@ -62,24 +62,27 @@
                                                         </button>
                                                     </li>
                                                 }
-                                                <li>
-                                                    <button type="button" class="dropdown-item text-danger" onclick="huyChungTu(this, @(item.IDChungTuBanHang ?? 0), @item.IDDonDatHang)">
-                                                        <i class="bi bi-x-circle me-2 text-danger"></i> Hủy
-                                                    </button>
-                                                </li>
-                                            }
-                                            @if (item.IDChungTuBanHang.HasValue && (item.TrangThaiChungTu == 2 || item.TrangThaiChungTu == 3) && SalesManagementSystem.Helpers.PermissionHelper.HasPermission("ChungTuBanHang", SalesManagementSystem.Helpers.LoaiPhanQuyen.TuyChon))
-                                            {
-                                                <li>
-                                                    <button type="button" class="dropdown-item text-warning" onclick="boGhiChungTu(this, @item.IDChungTuBanHang)">
-                                                        <i class="bi bi-arrow-counterclockwise me-2 text-warning"></i> Bỏ ghi
-                                                    </button>
-                                                </li>
-                                            }
-                                                @if (!item.IDChungTuBanHang.HasValue)
+                                                if (item.TrangThaiChungTu == 1 || item.TrangThaiChungTu == 2)
                                                 {
-                                                    <li><span class="dropdown-item text-muted small">Không có thao tác</span></li>
+                                                    <li>
+                                                        <button type="button" class="dropdown-item text-warning" onclick="boGhiChungTu(this, @item.IDChungTuBanHang)">
+                                                            <i class="bi bi-arrow-counterclockwise me-2 text-warning"></i> Bỏ ghi (Về lưu nháp)
+                                                        </button>
+                                                    </li>
                                                 }
+                                                if (item.TrangThaiChungTu != 3)
+                                                {
+                                                    <li>
+                                                        <button type="button" class="dropdown-item text-danger" onclick="huyChungTu(this, @(item.IDChungTuBanHang ?? 0), @item.IDDonDatHang)">
+                                                            <i class="bi bi-x-circle me-2 text-danger"></i> Hủy
+                                                        </button>
+                                                    </li>
+                                                }
+                                            }
+                                            @if (!item.IDChungTuBanHang.HasValue)
+                                            {
+                                                <li><span class="dropdown-item text-muted small">Không có thao tác</span></li>
+                                            }
                                         </ul>
                                     </div>
                                 </td>
@@ -113,7 +116,11 @@
                                 <td class="align-middle">@item.SoChungTu</td>
                                 <td class="text-center align-middle">@(item.NgayChungTu?.ToString("dd/MM/yyyy"))</td>
                                 <td class="text-center align-middle">
-                                    @if (item.TrangThaiChungTu == 1)
+                                    @if (item.TrangThaiChungTu == 4)
+                                    {
+                                        <span class="badge bg-secondary">Lưu nháp</span>
+                                    }
+                                    else if (item.TrangThaiChungTu == 1)
                                     {
                                         <span class="badge bg-warning text-dark">Đề nghị ghi</span>
                                     }
