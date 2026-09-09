@@ -64,17 +64,29 @@ BEGIN
           AND (@SoPhieuNhap IS NULL OR pn.SoChungTu LIKE '%' + @SoPhieuNhap + '%')
           AND (@TuNgay IS NULL OR CAST(pn.NgayNhap AS DATE) >= CAST(@TuNgay AS DATE))
           AND (@DenNgay IS NULL OR CAST(pn.NgayNhap AS DATE) <= CAST(@DenNgay AS DATE))
+    ),
+    Filtered AS (
+        SELECT *, 
+               (TongTienVanChuyen - DaThanhToanVanChuyen) AS ConLaiVanChuyen
+        FROM CTE
+        WHERE TongTienVanChuyen > 0 
+          AND (@TrangThaiThanhToan IS NULL OR 
+               (@TrangThaiThanhToan = 0 AND DaThanhToanVanChuyen = 0) OR
+               (@TrangThaiThanhToan = 1 AND DaThanhToanVanChuyen > 0 AND (TongTienVanChuyen - DaThanhToanVanChuyen) > 0) OR
+               (@TrangThaiThanhToan = 2 AND (TongTienVanChuyen - DaThanhToanVanChuyen) <= 0))
+    ),
+    WithLuyKe AS (
+        SELECT *,
+               SUM(ConLaiVanChuyen) OVER (
+                   ORDER BY NgayNhap ASC, SoPhieuNhap ASC, IDPhieuNhap ASC
+                   ROWS UNBOUNDED PRECEDING
+               ) AS ConNoLuyKe,
+               COUNT(1) OVER() AS TotalRow
+        FROM Filtered
     )
-    SELECT *, 
-           (TongTienVanChuyen - DaThanhToanVanChuyen) AS ConLaiVanChuyen, 
-           COUNT(1) OVER() AS TotalRow
-    FROM CTE
-    WHERE TongTienVanChuyen > 0 
-      AND (@TrangThaiThanhToan IS NULL OR 
-           (@TrangThaiThanhToan = 0 AND DaThanhToanVanChuyen = 0) OR
-           (@TrangThaiThanhToan = 1 AND DaThanhToanVanChuyen > 0 AND (TongTienVanChuyen - DaThanhToanVanChuyen) > 0) OR
-           (@TrangThaiThanhToan = 2 AND (TongTienVanChuyen - DaThanhToanVanChuyen) <= 0))
-    ORDER BY NgayNhap ASC, SoPhieuNhap ASC
+    SELECT *
+    FROM WithLuyKe
+    ORDER BY NgayNhap ASC, SoPhieuNhap ASC, IDPhieuNhap ASC
     OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;
 END
 GO

@@ -233,6 +233,7 @@ namespace SalesManagementSystem.Controllers
                     decimal tongTien = Convert.ToDecimal(x.TongTienVanChuyen);
                     decimal daThanhToan = Convert.ToDecimal(x.DaThanhToanVanChuyen);
                     decimal conLai = Convert.ToDecimal(x.ConLaiVanChuyen);
+                    decimal conNoLuyKe = Convert.ToDecimal(x.ConNoLuyKe);
 
                     string trangThaiText = "Chưa thanh toán";
                     if (daThanhToan >= tongTien && tongTien > 0)
@@ -267,6 +268,8 @@ namespace SalesManagementSystem.Controllers
                         DaThanhToanVanChuyen = daThanhToan,
                         ConLai = conLai,
                         ConLaiVanChuyen = conLai,
+                        ConNoLuyKe = conNoLuyKe,
+                        NoLuyKe = conNoLuyKe,
                         TenTrangThai = trangThaiText,
                         TrangThai = trangThaiText
                     };

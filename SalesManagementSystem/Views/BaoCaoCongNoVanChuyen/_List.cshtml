@@ -4,9 +4,10 @@
     decimal sumTongTien = 0;
     decimal sumDaThanhToan = 0;
     decimal sumConLai = 0;
+    decimal conNoLuyKeCuoiTrang = 0;
 }
 <div class="table-responsive">
-    <table id="tblBaoCaoCongNoVanChuyen_@uid" class="table table-bordered table-hover table-custom" style="width: 100%; min-width: 1000px; white-space: nowrap;">
+    <table id="tblBaoCaoCongNoVanChuyen_@uid" class="table table-bordered table-hover table-custom" style="width: 100%; min-width: 1150px; white-space: nowrap;">
         <thead>
             <tr style="background-color: #f4f6f9; color: #333;">
                 <th class="text-center" style="width: 50px;">STT</th>
@@ -20,6 +21,7 @@
                 <th class="text-end">Tổng tiền vận chuyển</th>
                 <th class="text-end">Đã thanh toán</th>
                 <th class="text-end">Còn lại</th>
+                <th class="text-end">Còn nợ lũy kế</th>
                 <th class="text-center">Trạng thái</th>
                 <th class="text-center" style="width: 65px;">Thao tác</th>
             </tr>
@@ -35,10 +37,13 @@
                 {
                     decimal currentTongTien = Convert.ToDecimal(item.TongTienVanChuyen);
                     decimal currentDaThanhToan = Convert.ToDecimal(item.DaThanhToanVanChuyen);
+                    decimal currentConLai = Convert.ToDecimal(item.ConLaiVanChuyen);
+                    decimal currentConNoLuyKe = Convert.ToDecimal(item.ConNoLuyKe);
                     
                     sumTongTien += currentTongTien;
                     sumDaThanhToan += currentDaThanhToan;
-                    sumConLai += Convert.ToDecimal(item.ConLaiVanChuyen);
+                    sumConLai += currentConLai;
+                    conNoLuyKeCuoiTrang = currentConNoLuyKe;
                     
                     int trangThaiThanhToan = 0;
                     if (currentDaThanhToan >= currentTongTien && currentTongTien > 0)
@@ -74,9 +79,10 @@
                                 <span>-</span>
                             }
                         </td>
-                        <td class="text-end">@(Convert.ToDecimal(item.TongTienVanChuyen).ToString("N0"))</td>
-                        <td class="text-end">@(Convert.ToDecimal(item.DaThanhToanVanChuyen).ToString("N0"))</td>
-                        <td class="text-end text-danger fw-bold">@(Convert.ToDecimal(item.ConLaiVanChuyen).ToString("N0"))</td>
+                        <td class="text-end">@(currentTongTien.ToString("N0"))</td>
+                        <td class="text-end">@(currentDaThanhToan.ToString("N0"))</td>
+                        <td class="text-end">@(currentConLai.ToString("N0"))</td>
+                        <td class="text-end text-danger fw-bold">@(currentConNoLuyKe.ToString("N0"))</td>
                         <td class="text-center">
                             <span class="badge @badgeClass rounded-pill fw-normal px-2 py-1">@badgeText</span>
                         </td>
@@ -95,7 +101,7 @@
             else
             {
                 <tr>
-                    <td colspan="13" class="text-center text-muted py-4">Không tìm thấy dữ liệu báo cáo</td>
+                    <td colspan="14" class="text-center text-muted py-4">Không tìm thấy dữ liệu báo cáo</td>
                 </tr>
             }
         </tbody>
@@ -106,7 +112,8 @@
                     <td colspan="8" class="text-end">TỔNG CỘNG TRANG:</td>
                     <td class="text-end">@sumTongTien.ToString("N0")</td>
                     <td class="text-end">@sumDaThanhToan.ToString("N0")</td>
-                    <td class="text-end text-danger">@sumConLai.ToString("N0")</td>
+                    <td class="text-end">@sumConLai.ToString("N0")</td>
+                    <td class="text-end text-danger">@conNoLuyKeCuoiTrang.ToString("N0")</td>
                     <td></td>
                     <td></td>
                 </tr>

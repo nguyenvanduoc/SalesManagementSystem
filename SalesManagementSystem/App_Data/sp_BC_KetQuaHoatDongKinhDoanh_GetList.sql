@@ -1,4 +1,3 @@
-
 IF OBJECT_ID('sp_BC_KetQuaHoatDongKinhDoanh_GetList', 'P') IS NOT NULL
     DROP PROCEDURE sp_BC_KetQuaHoatDongKinhDoanh_GetList
 GO
@@ -26,7 +25,8 @@ BEGIN
         SUM(ct.SoLuong) AS SoLuongGiaVon,
         SUM(
             CASE 
-                WHEN ISNULL(ct.ThanhTienVon, 0) > 0 THEN ct.ThanhTienVon
+                WHEN ISNULL(ct.ThanhTienVon, 0) > 0 AND (ct.DonGia = 0 OR ct.DonGiaVon <= ct.DonGia * 2.5 OR ap.AvgDonGia IS NULL) THEN ct.ThanhTienVon
+                WHEN ISNULL(ct.DonGiaVon, 0) > 0 AND (ct.DonGia = 0 OR ct.DonGiaVon <= ct.DonGia * 2.5 OR ap.AvgDonGia IS NULL) THEN ct.SoLuong * ct.DonGiaVon
                 ELSE ct.SoLuong * ISNULL(ap.AvgDonGia, 0)
             END
         ) AS ThanhTienGiaVon,
@@ -49,9 +49,9 @@ BEGIN
       AND hd.TrangThai = 2 -- Đã ghi sổ
       AND hd.NgayChungTu >= @TuNgay AND hd.NgayChungTu <= @DenNgay
       AND (@IDKho IS NULL OR hd.IDKho = @IDKho)
-    GROUP BY ct.IDSanPham, ap.AvgDonGia, ap.AvgDonGiaVanChuyen
+    GROUP BY ct.IDSanPham
 
-    -- 3. Tổng hợp dữ liệu
+    -- 2. Tổng hợp dữ liệu
     SELECT 
         sp.ID AS IDSanPham,
         sp.MaSanPham,
