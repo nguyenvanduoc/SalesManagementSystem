@@ -213,6 +213,22 @@ namespace SalesManagementSystem.Controllers
             var donHang = _donDatHangRepo.GetById(idDonDatHang);
             if (donHang == null || donHang.TrangThaiDon == 4) return HttpNotFound("Không tìm thấy đơn hàng hợp lệ");
 
+            // Kiểm tra nếu đơn hàng đã có chứng từ bán hàng hợp lệ (chưa bị hủy, chưa bị xóa)
+            using (var conn = (new Data.DbConnectionFactory()).CreateConnection())
+            {
+                var existing = conn.QueryFirstOrDefault<dynamic>(
+                    "SELECT TOP 1 ID, SoChungTu, TrangThai FROM BAN_ChungTuBanHang WHERE IDDonDatHang = @IDDonDatHang AND IsDeleted = 0 AND TrangThai != 3",
+                    new { IDDonDatHang = idDonDatHang });
+                if (existing != null)
+                {
+                    TempData["ToastMessage"] = $"Đơn hàng {donHang.SoDonHang} đã được lập chứng từ bán hàng ({existing.SoChungTu}).";
+                    TempData["ToastType"] = "warning";
+                    if (existing.TrangThai == 2)
+                        return RedirectToAction("Detail", new { id = (int)existing.ID });
+                    return RedirectToAction("Edit", new { id = (int)existing.ID });
+                }
+            }
+
             var khachHang = donHang.IDKhachHang.HasValue ? (new SalesManagementSystem.Repositories.KhachHangRepository(new Data.DbConnectionFactory())).GetById(donHang.IDKhachHang.Value) : null;
 
             int totalKhos;
@@ -443,6 +459,21 @@ namespace SalesManagementSystem.Controllers
                 }
                 else
                 {
+                    // Chặn tạo trùng chứng từ bán hàng cho cùng một đơn hàng
+                    if (model.IDDonDatHang.HasValue && model.IDDonDatHang.Value > 0)
+                    {
+                        using (var conn = (new Data.DbConnectionFactory()).CreateConnection())
+                        {
+                            var existing = conn.QueryFirstOrDefault<dynamic>(
+                                "SELECT TOP 1 ID, SoChungTu FROM BAN_ChungTuBanHang WHERE IDDonDatHang = @IDDonDatHang AND IsDeleted = 0 AND TrangThai != 3",
+                                new { IDDonDatHang = model.IDDonDatHang.Value });
+                            if (existing != null)
+                            {
+                                return Json(new { success = false, message = $"Đơn hàng này đã được lập chứng từ bán hàng ({existing.SoChungTu}). Không thể tạo thêm chứng từ mới!" });
+                            }
+                        }
+                    }
+
                     if (string.IsNullOrEmpty(model.SoChungTu))
                     {
                         model.SoChungTu = _repo.GenerateSoChungTu();

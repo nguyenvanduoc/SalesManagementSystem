@@ -380,20 +380,6 @@
             window.location.href = '@Url.Action("ExportExcel")?' + params;
         });
 
-        // Publish functions to global scope but tied to this container (for onclick handlers like ghiSoPhieu)
-        // A better approach is to use event delegation inside container.
-        window.ghiSoPhieu = function(id) {
-            showConfirm('Bạn có chắc chắn muốn ghi phiếu nhập kho này?', function() {
-                $.post('@Url.Action("GhiSo")', { id: id }, function (res) {
-                    if (res.success) {
-                        if (typeof showToast === 'function') showToast('success', res.message);
-                        $form.trigger('submit');
-                    } else {
-                        if (typeof showToast === 'function') showToast('error', res.message);
-                    }
-                });
-            });
-        };
         $container.find('.pnk-btn-confirm-huy').on('click', function() {
             var id = $container.find('.pnk-huy-id').val();
             var lyDo = $container.find('.pnk-txt-lydohuy').val().trim();
@@ -421,12 +407,36 @@
     }
 
     window.ghiSoPhieu = function(btn, id) {
-        var $form = getPnkContainer(btn).find('#searchForm');
+        var targetId = (id !== undefined) ? id : btn;
+        var $form = (id !== undefined) ? getPnkContainer(btn).find('#searchForm') : $('#searchForm');
         showConfirm('Bạn có chắc chắn muốn ghi dữ liệu phiếu nhập kho này?', function() {
-            $.post('@Url.Action("GhiSo")', { id: id }, function (res) {
+            $.post('@Url.Action("GhiSo")', { id: targetId }, function (res) {
                 if (res.success) {
                     if (typeof showToast === 'function') showToast('success', res.message);
-                    $form.trigger('submit');
+                    if ($form.length) {
+                        $form.trigger('submit');
+                    } else if (typeof TabManager !== 'undefined') {
+                        TabManager.reloadActiveTabGrid(false);
+                    }
+                } else {
+                    if (typeof showToast === 'function') showToast('error', res.message);
+                }
+            });
+        });
+    };
+
+    window.boGhiSoPhieu = function(btn, id) {
+        var targetId = (id !== undefined) ? id : btn;
+        var $form = (id !== undefined) ? getPnkContainer(btn).find('#searchForm') : $('#searchForm');
+        showConfirm('Bạn có chắc chắn muốn bỏ ghi dữ liệu phiếu nhập kho này?', function() {
+            $.post('@Url.Action("BoGhiSo")', { id: targetId }, function (res) {
+                if (res.success) {
+                    if (typeof showToast === 'function') showToast('success', res.message);
+                    if ($form.length) {
+                        $form.trigger('submit');
+                    } else if (typeof TabManager !== 'undefined') {
+                        TabManager.reloadActiveTabGrid(false);
+                    }
                 } else {
                     if (typeof showToast === 'function') showToast('error', res.message);
                 }

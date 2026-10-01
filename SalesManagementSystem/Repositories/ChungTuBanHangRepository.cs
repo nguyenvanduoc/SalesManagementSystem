@@ -149,6 +149,18 @@ namespace SalesManagementSystem.Repositories
                             model.IDKho = 1;
                         }
 
+                        // Chặn tạo trùng chứng từ bán hàng cho cùng một đơn hàng
+                        if (model.IDDonDatHang.HasValue && model.IDDonDatHang.Value > 0)
+                        {
+                            var existingSo = conn.ExecuteScalar<string>(
+                                "SELECT TOP 1 SoChungTu FROM BAN_ChungTuBanHang WHERE IDDonDatHang = @IDDonDatHang AND IsDeleted = 0 AND TrangThai != 3",
+                                new { IDDonDatHang = model.IDDonDatHang.Value }, transaction: tr);
+                            if (!string.IsNullOrEmpty(existingSo))
+                            {
+                                throw new Exception($"Đơn hàng này đã được lập chứng từ bán hàng ({existingSo}). Không thể lập thêm chứng từ trùng lặp!");
+                            }
+                        }
+
                         if (ghiSo)
                         {
                             trangThai = 2;
