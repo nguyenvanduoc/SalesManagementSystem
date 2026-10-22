@@ -154,6 +154,11 @@
                 }
             }).done(function (res) {
                 setBusy(false);
+                if (res && res.denied) {
+                    // Quyền đã bị thu hồi sau khi trang được tải (layout chỉ render một lần) → ẩn hẳn widget
+                    removeWidget(res.message);
+                    return;
+                }
                 if (res && res.success) {
                     appendBot(res.data);
                     renderSuggestions(res.data.Suggestions);
@@ -183,6 +188,14 @@
             if (history.length === 0 && $messages.children().length === 0) ask('xin chào', true);
             setTimeout(function () { $input.trigger('focus'); }, 150);
             scrollToBottom();
+        }
+
+        function removeWidget(message) {
+            history = [];
+            try { sessionStorage.removeItem(storageKey); } catch (e) { /* bỏ qua */ }
+            $panel.remove();
+            $toggle.remove();
+            if (message && typeof showToast === 'function') showToast('warning', message);
         }
 
         function closePanel() {
