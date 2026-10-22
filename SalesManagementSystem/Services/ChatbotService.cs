@@ -231,6 +231,7 @@ namespace SalesManagementSystem.Services
             {
                 var kh = matches[0];
                 var row = _congNoKhachHangRepo.GetList(null, homNay, kh.ID, null).FirstOrDefault();
+                if (row != null) GioiHanQuaHan(row);
                 if (row == null || row.ConPhaiThu == 0)
                 {
                     res.Text = string.Format("Khách hàng {0} hiện không còn công nợ.", kh.Ten);
@@ -267,6 +268,7 @@ namespace SalesManagementSystem.Services
 
             bool chiQuaHan = HasAny(q, "qua han", "tre han", "no xau", "lau");
             var list = _congNoKhachHangRepo.GetList(null, homNay, null, null).Where(x => x.ConPhaiThu > 0).ToList();
+            list.ForEach(GioiHanQuaHan);
             decimal tongNo = list.Sum(x => x.ConPhaiThu);
             decimal tongQuaHan = list.Sum(x => x.TienQuaHan);
 
@@ -318,6 +320,7 @@ namespace SalesManagementSystem.Services
             {
                 var ncc = matches[0];
                 var row = _chatbotRepo.GetCongNoNhaCungCap(ncc.ID).FirstOrDefault();
+                if (row != null) GioiHanQuaHan(row);
                 if (row == null || row.ConNo <= 0)
                 {
                     res.Text = string.Format("Hiện không còn nợ nhà cung cấp {0}.", ncc.Ten);
@@ -345,6 +348,7 @@ namespace SalesManagementSystem.Services
 
             bool chiQuaHan = HasAny(q, "qua han", "tre han", "lau");
             var list = _chatbotRepo.GetCongNoNhaCungCap(null).Where(x => x.ConNo > 0).ToList();
+            list.ForEach(GioiHanQuaHan);
             var hienThi = chiQuaHan
                 ? list.Where(x => x.QuaHan > 0).OrderByDescending(x => x.QuaHan).ToList()
                 : list.OrderByDescending(x => x.ConNo).ToList();
@@ -879,6 +883,17 @@ namespace SalesManagementSystem.Services
         {
             var list = notes.Where(n => !string.IsNullOrWhiteSpace(n)).ToList();
             return list.Count == 0 ? null : string.Join(" ", list);
+        }
+
+        // Chứng từ trả dư (còn nợ âm) làm tổng còn nợ nhỏ hơn tổng quá hạn → quá hạn không được vượt số còn nợ
+        private static void GioiHanQuaHan(CongNoKhachHangViewModel x)
+        {
+            if (x.TienQuaHan > x.ConPhaiThu) x.TienQuaHan = Math.Max(x.ConPhaiThu, 0);
+        }
+
+        private static void GioiHanQuaHan(ChatbotCongNoNccItem x)
+        {
+            if (x.QuaHan > x.ConNo) x.QuaHan = Math.Max(x.ConNo, 0);
         }
 
         private static ChatbotLinkViewModel Link(string url, string key, string title)
