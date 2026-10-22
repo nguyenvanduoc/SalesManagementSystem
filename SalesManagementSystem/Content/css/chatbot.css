@@ -1,68 +1,47 @@
 /* ─── Trợ lý ảo (Chatbot widget) ─────────────────────────── */
 .chatbot-toggle {
     position: fixed;
-    right: 24px;
-    bottom: 24px;
-    width: 56px;
-    height: 56px;
-    padding: 0;
+    right: 20px;
+    bottom: 20px;
+    height: 44px;
+    padding: 0 16px 0 12px;
     border: none;
-    border-radius: 50%;
+    border-radius: 22px;
     background: linear-gradient(135deg, #0b5b84 0%, #2e86c1 55%, #7b5cff 100%);
     color: #fff;
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    box-shadow: 0 6px 20px rgba(46, 90, 200, 0.38);
+    gap: 7px;
+    box-shadow: 0 6px 18px rgba(46, 90, 200, 0.35);
     z-index: 1045;
     cursor: pointer;
+    animation: chatbot-pulse 2.8s ease-out 3;
     transition: transform .15s ease, box-shadow .15s ease;
 }
 
-/* Vòng sáng lan tỏa nhẹ để người dùng chú ý tới trợ lý */
-.chatbot-toggle::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    background: inherit;
-    z-index: -1;
-    animation: chatbot-pulse 2.8s ease-out 3;
-}
-
-.chatbot-toggle:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 10px 26px rgba(46, 90, 200, 0.45); }
+.chatbot-toggle:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(46, 90, 200, 0.45); }
 .chatbot-toggle:hover .chatbot-ai-icon { transform: rotate(-12deg) scale(1.08); }
 .chatbot-toggle.is-open { transform: scale(0); pointer-events: none; }
 
 .chatbot-ai-icon {
-    width: 28px;
-    height: 28px;
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
     fill: currentColor;
     transition: transform .25s ease;
 }
 
 .chatbot-toggle-label {
-    position: absolute;
-    right: calc(100% + 10px);
-    top: 50%;
-    transform: translateY(-50%) translateX(6px);
-    background: #17202a;
-    color: #fff;
-    font-size: 12px;
-    font-weight: 500;
+    font-size: 13px;
+    font-weight: 600;
     white-space: nowrap;
-    padding: 5px 10px;
-    border-radius: 6px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .15s ease, transform .15s ease;
+    letter-spacing: .2px;
 }
 
-.chatbot-toggle:hover .chatbot-toggle-label { opacity: 1; transform: translateY(-50%); }
-
+/* Vòng sáng lan tỏa nhẹ 3 lần khi tải trang để người dùng chú ý tới trợ lý */
 @keyframes chatbot-pulse {
-    0% { transform: scale(1); opacity: .55; }
-    100% { transform: scale(1.6); opacity: 0; }
+    0% { box-shadow: 0 6px 18px rgba(46, 90, 200, 0.35), 0 0 0 0 rgba(123, 92, 255, .45); }
+    100% { box-shadow: 0 6px 18px rgba(46, 90, 200, 0.35), 0 0 0 14px rgba(123, 92, 255, 0); }
 }
 
 .chatbot-panel {
@@ -238,9 +217,35 @@
 
 .chatbot-input button:disabled { opacity: .5; }
 
+/* Mobile: khung chat gọn, không phủ kín màn hình */
 @media (max-width: 576px) {
-    .chatbot-panel { right: 8px; bottom: 8px; height: calc(100vh - 70px); }
-    .chatbot-toggle { right: 16px; bottom: 16px; }
+    .chatbot-panel {
+        right: 10px;
+        left: 10px;
+        bottom: 12px;
+        width: auto;
+        max-width: none;
+        height: 68vh;
+        height: 68dvh;
+        max-height: 540px;
+        border-radius: 14px;
+        font-size: 12.5px;
+    }
+
+    .chatbot-header { padding: 8px 10px; }
+    .chatbot-avatar { width: 30px; height: 30px; }
+    .chatbot-title { font-size: 13px; }
+    .chatbot-subtitle { font-size: 10.5px; }
+    .chatbot-messages { padding: 10px; }
+    .chatbot-table { font-size: 11.5px; }
+    .chatbot-chip { font-size: 11.5px; padding: 3px 9px; }
+    .chatbot-input { padding: 8px; }
+    .chatbot-input input { font-size: 16px; padding: 6px 12px; } /* >= 16px để iOS không tự phóng to khi gõ */
+    .chatbot-input button { width: 34px; height: 34px; }
+
+    .chatbot-toggle { right: 14px; bottom: 14px; height: 40px; padding: 0 14px 0 10px; gap: 6px; }
+    .chatbot-ai-icon { width: 20px; height: 20px; }
+    .chatbot-toggle-label { font-size: 12.5px; }
 }
 
 @media print {
