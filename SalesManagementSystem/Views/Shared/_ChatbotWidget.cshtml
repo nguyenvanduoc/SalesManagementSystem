@@ -1,0 +1,47 @@
+@{
+    var chatbotUser = Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION] as SalesManagementSystem.Models.ViewModels.UserLoginViewModel;
+}
+@helper AiSparkleIcon(string cssClass)
+{
+    <svg class="@cssClass" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M10 2 Q10.9 8.1 17 9 Q10.9 9.9 10 16 Q9.1 9.9 3 9 Q9.1 8.1 10 2Z" />
+        <path d="M18 13 Q18.45 16.05 21.5 16.5 Q18.45 16.95 18 20 Q17.55 16.95 14.5 16.5 Q17.55 16.05 18 13Z" />
+        <path d="M5.5 16.5 Q5.8 18.2 7.5 18.5 Q5.8 18.8 5.5 20.5 Q5.2 18.8 3.5 18.5 Q5.2 18.2 5.5 16.5Z" />
+    </svg>
+}
+@if (chatbotUser != null)
+{
+    <link rel="stylesheet" href="@Url.Content("~/Content/css/chatbot.css?v=1.1")" />
+
+    <button type="button" id="chatbotToggle" class="chatbot-toggle" aria-label="Mở trợ lý AI">
+        @AiSparkleIcon("chatbot-ai-icon")
+        <span class="chatbot-toggle-label">Trợ lý AI</span>
+    </button>
+
+    <div id="chatbotPanel" class="chatbot-panel" role="dialog" aria-label="Trợ lý AI" aria-hidden="true"
+         data-ask-url="@Url.Action("Ask", "Chatbot")"
+         data-user="@chatbotUser.UserID">
+        <div class="chatbot-header">
+            <div class="d-flex align-items-center gap-2">
+                <span class="chatbot-avatar">@AiSparkleIcon("chatbot-ai-icon")</span>
+                <div>
+                    <div class="chatbot-title">Trợ lý AI</div>
+                    <div class="chatbot-subtitle">Công nợ · Tồn kho · Hàng đi đường</div>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <button type="button" class="chatbot-icon-btn" id="chatbotClear" title="Xóa hội thoại"><i class="bi bi-arrow-counterclockwise"></i></button>
+                <button type="button" class="chatbot-icon-btn" id="chatbotClose" title="Đóng"><i class="bi bi-x-lg"></i></button>
+            </div>
+        </div>
+
+        <div class="chatbot-messages" id="chatbotMessages" aria-live="polite"></div>
+
+        <form class="chatbot-input" id="chatbotForm" autocomplete="off">
+            <input type="text" id="chatbotInput" maxlength="500" placeholder="Hỏi về công nợ, tồn kho, hàng đi đường..." />
+            <button type="submit" id="chatbotSend" title="Gửi"><i class="bi bi-send-fill"></i></button>
+        </form>
+    </div>
+
+    <script src="@Url.Content("~/Scripts/chatbot.js?v=1.1")"></script>
+}
