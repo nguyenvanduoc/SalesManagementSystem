@@ -286,6 +286,12 @@
     <Compile Include="Models\ViewModels\ExportResult.cs" />
     <Compile Include="Services\Interfaces\IWordExportService.cs" />
     <Compile Include="Services\WordExportService.cs" />
+    <Compile Include="Services\Interfaces\IChatbotService.cs" />
+    <Compile Include="Services\ChatbotService.cs" />
+    <Compile Include="Models\ViewModels\ChatbotViewModels.cs" />
+    <Compile Include="Repositories\Interfaces\IChatbotRepository.cs" />
+    <Compile Include="Repositories\ChatbotRepository.cs" />
+    <Compile Include="Controllers\ChatbotController.cs" />
     <Compile Include="Helpers\BieuMauConstants.cs" />
     <Compile Include="Models\ViewModels\TonKhoViewModel.cs" />
     <Compile Include="Repositories\Interfaces\ITonKhoRepository.cs" />
@@ -386,6 +392,7 @@
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="Content\css\global-search.css" />
     <Content Include="Content\css\tab-manager.css" />
+    <Content Include="Content\css\chatbot.css" />
     <Content Include="Content\IMG\bg-login.png" />
     <Content Include="Content\IMG\default-avatar.svg" />
     <Content Include="Content\IMG\logo-login.png" />
@@ -458,6 +465,7 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Scripts\global-search.js" />
+    <Content Include="Scripts\chatbot.js" />
     <Content Include="Scripts\tab-manager.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
@@ -530,6 +538,7 @@
     <Content Include="Views\ChungTuBanHang\_ChonDonDatHangModal.cshtml" />
     <Content Include="Views\DonDatHang\Detail.cshtml" />
     <Content Include="Views\Shared\_SpaLayout.cshtml" />
+    <Content Include="Views\Shared\_ChatbotWidget.cshtml" />
     <Content Include="Views\PhieuXuatKho\Details.cshtml" />
     <Content Include="Views\PhieuXuatKho\_PhieuXuatKhoList.cshtml" />
     <Content Include="Views\PhieuNhapKho\_EditModal.cshtml" />

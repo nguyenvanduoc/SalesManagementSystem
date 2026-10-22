@@ -64,10 +64,12 @@ namespace SalesManagementSystem.App_Start
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IBaoCaoDoiChieuCongNoKhachHangRepository, BaoCaoDoiChieuCongNoKhachHangRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<IKhoHaoHutRepository, KhoHaoHutRepository>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Repositories.Interfaces.ILoaiChiTienRepository, LoaiChiTienRepository>(new HierarchicalLifetimeManager());
+            container.RegisterType<SalesManagementSystem.Repositories.Interfaces.IChatbotRepository, ChatbotRepository>(new HierarchicalLifetimeManager());
             // ── Services (logic nghiệp vụ) ────────────────────────────────────
             container.RegisterType<InventoryService>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Services.Interfaces.IExcelExportService, ExcelExportService>(new HierarchicalLifetimeManager());
             container.RegisterType<SalesManagementSystem.Services.Interfaces.IWordExportService, WordExportService>(new HierarchicalLifetimeManager());
+            container.RegisterType<SalesManagementSystem.Services.Interfaces.IChatbotService, ChatbotService>(new HierarchicalLifetimeManager());
             //container.RegisterType<OrderService>(new HierarchicalLifetimeManager());
 
             DependencyResolver.SetResolver(new UnityDependencyResolver(container));

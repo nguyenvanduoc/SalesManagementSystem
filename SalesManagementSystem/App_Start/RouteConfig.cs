@@ -131,6 +131,9 @@ namespace SalesManagementSystem
             routes.MapRoute(name: "DmKhoanMucChi_Update", url: "danh-muc-khoan-muc-chi/cap-nhat", defaults: new { controller = "DmKhoanMucChi", action = "Edit" });
             routes.MapRoute(name: "DmKhoanMucChi_Delete", url: "danh-muc-khoan-muc-chi/xoa", defaults: new { controller = "DmKhoanMucChi", action = "Delete" });
 
+            // Trợ lý ảo (Chatbot)
+            routes.MapRoute(name: "Chatbot_Ask", url: "tro-ly-ao/hoi", defaults: new { controller = "Chatbot", action = "Ask" });
+
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",

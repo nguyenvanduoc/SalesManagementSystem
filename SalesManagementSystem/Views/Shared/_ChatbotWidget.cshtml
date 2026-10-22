@@ -1,0 +1,38 @@
+@{
+    var chatbotUser = Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION] as SalesManagementSystem.Models.ViewModels.UserLoginViewModel;
+}
+@if (chatbotUser != null)
+{
+    <link rel="stylesheet" href="@Url.Content("~/Content/css/chatbot.css?v=1.0")" />
+
+    <button type="button" id="chatbotToggle" class="chatbot-toggle" title="Trợ lý ảo" aria-label="Mở trợ lý ảo">
+        <i class="bi bi-chat-dots-fill"></i>
+    </button>
+
+    <div id="chatbotPanel" class="chatbot-panel" role="dialog" aria-label="Trợ lý ảo" aria-hidden="true"
+         data-ask-url="@Url.RouteUrl("Chatbot_Ask")"
+         data-user="@chatbotUser.UserID">
+        <div class="chatbot-header">
+            <div class="d-flex align-items-center gap-2">
+                <span class="chatbot-avatar"><i class="bi bi-robot"></i></span>
+                <div>
+                    <div class="chatbot-title">Trợ lý ảo</div>
+                    <div class="chatbot-subtitle">Công nợ · Tồn kho · Hàng đi đường</div>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <button type="button" class="chatbot-icon-btn" id="chatbotClear" title="Xóa hội thoại"><i class="bi bi-arrow-counterclockwise"></i></button>
+                <button type="button" class="chatbot-icon-btn" id="chatbotClose" title="Đóng"><i class="bi bi-x-lg"></i></button>
+            </div>
+        </div>
+
+        <div class="chatbot-messages" id="chatbotMessages" aria-live="polite"></div>
+
+        <form class="chatbot-input" id="chatbotForm" autocomplete="off">
+            <input type="text" id="chatbotInput" maxlength="500" placeholder="Hỏi về công nợ, tồn kho, hàng đi đường..." />
+            <button type="submit" id="chatbotSend" title="Gửi"><i class="bi bi-send-fill"></i></button>
+        </form>
+    </div>
+
+    <script src="@Url.Content("~/Scripts/chatbot.js?v=1.0")"></script>
+}
