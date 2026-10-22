@@ -28,7 +28,7 @@ namespace SalesManagementSystem.Controllers
         public JsonResult Ask(string message, string intent = "")
         {
             if (!ChatbotService.CoQuyenSuDung())
-                return Json(new { success = false, message = "Bạn chưa được phân quyền sử dụng Trợ lý AI." });
+                return Json(new { success = false, denied = true, message = "Bạn chưa được phân quyền sử dụng Trợ lý AI." });
 
             if (string.IsNullOrWhiteSpace(message))
                 return Json(new { success = false, message = "Vui lòng nhập câu hỏi." });
