@@ -70,6 +70,14 @@ namespace SalesManagementSystem.Services
             _dashboardRepo = dashboardRepo;
         }
 
+        /// <summary>
+        /// Chỉ người có quyền xem Dashboard mới được dùng Trợ lý AI (cùng điều kiện với DashboardController).
+        /// </summary>
+        public static bool CoQuyenSuDung()
+        {
+            return PermissionHelper.HasActionPermission("Dashboard", "Index") || PermissionHelper.HasPermission("Dashboard", LoaiPhanQuyen.Xem);
+        }
+
         public ChatbotResponseViewModel Ask(string message, string previousIntent)
         {
             string q = ExpandVietTat(Normalize(message));
@@ -624,8 +632,6 @@ namespace SalesManagementSystem.Services
         private ChatbotResponseViewModel DoanhThu(string q)
         {
             var res = new ChatbotResponseViewModel { Intent = INTENT_DOANH_THU };
-            if (!PermissionHelper.HasPermission("Dashboard", LoaiPhanQuyen.Xem))
-                return KhongCoQuyen(res, "doanh thu (Dashboard)");
 
             DateTime tuNgay, denNgay;
             string tenKy;
@@ -658,8 +664,6 @@ namespace SalesManagementSystem.Services
         private ChatbotResponseViewModel QuyTien()
         {
             var res = new ChatbotResponseViewModel { Intent = INTENT_QUY_TIEN };
-            if (!PermissionHelper.HasPermission("SoQuy", LoaiPhanQuyen.Xem) && !PermissionHelper.HasPermission("Dashboard", LoaiPhanQuyen.Xem))
-                return KhongCoQuyen(res, "sổ quỹ");
 
             var data = _dashboardRepo.GetDashboardData(null, null);
             res.Text = string.Format("Tiền mặt hiện có: {0}.\nTổng số dư các tài khoản thanh toán: {1}.",
@@ -798,7 +802,7 @@ namespace SalesManagementSystem.Services
                 goiY.Add("Hàng đi đường còn bao nhiêu?");
             if (PermissionHelper.HasPermission("TonKho", LoaiPhanQuyen.Xem)) goiY.Add("Sản phẩm nào sắp hết hàng?");
             if (PermissionHelper.HasPermission("CongNoNCC", LoaiPhanQuyen.Xem)) goiY.Add("Công nợ phải trả nhà cung cấp");
-            if (PermissionHelper.HasPermission("Dashboard", LoaiPhanQuyen.Xem)) goiY.Add("Doanh thu tháng này");
+            goiY.Add("Doanh thu tháng này");
             return goiY;
         }
 
