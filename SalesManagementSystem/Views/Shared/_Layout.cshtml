@@ -1024,6 +1024,29 @@
 <script src="@Url.Content("~/Scripts/phieu-xuat-kho.js?v=4.0")"></script>
 <script>
     if ($.fn.select2) {
+        // Select2 dùng DOM id làm khóa cache mặc định. Các tab có thể có cùng
+        // id field; dùng khóa riêng cho từng element trước mọi lần khởi tạo,
+        // kể cả Select2 AJAX do View tự cấu hình, để không đọc/xóa cache của tab khác.
+        var originalSelect2 = $.fn.select2;
+        var select2ElementSequence = 0;
+        var select2CachePrefix = 'spa-select2-' + Date.now() + '-';
+        $.fn.select2 = function (options) {
+            if (typeof options === 'string') {
+                return originalSelect2.apply(this, arguments);
+            }
+            var args = arguments;
+            return this.each(function () {
+                var $element = $(this);
+                // View có thể chủ động cấu hình lại. Destroy xóa data-select2-id,
+                // nên phải cấp khóa mới SAU destroy, trước khi tạo instance mới.
+                if ($element.data('select2')) {
+                    originalSelect2.call($element, 'destroy');
+                }
+                $element.attr('data-select2-id', select2CachePrefix + (++select2ElementSequence));
+                originalSelect2.apply($element, args);
+            });
+        };
+        $.extend($.fn.select2, originalSelect2);
         $.fn.select2.defaults.set("allowClear", true);
         $.fn.select2.defaults.set("placeholder", "Chọn...");
 

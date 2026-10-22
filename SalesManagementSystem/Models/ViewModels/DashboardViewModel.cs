@@ -44,6 +44,7 @@ namespace SalesManagementSystem.Models.ViewModels
         }
         // Số dư tiền
         public decimal TienMat { get; set; }
+        public decimal TienGuiNH { get; set; }
         public decimal TongSoDuTaiKhoan { get; set; }
     }
 

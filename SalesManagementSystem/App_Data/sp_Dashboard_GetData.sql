@@ -1,4 +1,4 @@
--- =============================================
+﻿-- =============================================
 -- Author:      Antigravity
 -- Create date: 2026-06-21
 -- Description: Retrieve all dashboard statistics, charts, warnings, and recent orders in a single database call.
@@ -97,24 +97,37 @@ BEGIN
     
     SET @CongNoNhaCungCap = @NoDauKyNCC + @TongTienHangNCC - @DaThanhToanNCC;
 
-    -- Tiền hiện có
-    DECLARE @TienHienCo DECIMAL(18, 2) = 0;
-    SELECT @TienHienCo = ISNULL((SELECT SUM(SoTienThu) - SUM(SoTienChi) FROM QUY_GiaoDichTien WHERE IsHuy = 0 AND NgayGiaoDich <= @DenNgay), 0) +
-                         ISNULL((SELECT SUM(SoTienThu) FROM BAN_PhieuThuKhachHang WHERE TrangThai = 2 AND IsDeleted = 0 AND NgayThu <= @DenNgay), 0) -
-                         ISNULL((SELECT SUM(SoTienChi) FROM KT_PhieuChi WHERE TrangThai = 2 AND IsDeleted = 0 AND NgayChi <= @DenNgay), 0);
-
-    -- Số dư tiền mặt (tài khoản ket toan 1111)
+    -- Số dư tiền mặt (tài khoản kế toán 111 - IDTaiKhoanKeToan = 1)
     DECLARE @TienMat DECIMAL(18, 2) = 0;
     SELECT @TienMat = ISNULL(SUM(g.SoTienThu) - SUM(g.SoTienChi), 0)
     FROM QUY_GiaoDichTien g
     INNER JOIN DM_TaiKhoanThanhToan tk ON g.IDTaiKhoanThanhToan = tk.ID
-    WHERE g.IsHuy = 0 AND tk.IDTaiKhoanKeToan = 2; -- 1111 Tiền mặt Việt Nam
+    WHERE g.IsHuy = 0 
+      AND tk.IsHoatDong = 1 
+      AND tk.IDTaiKhoanKeToan = 1 
+      AND g.NgayGiaoDich <= @DenNgay;
 
-    -- Tổng số dư tất cả tài khoản
+    -- Số dư tiền gửi ngân hàng (tài khoản kế toán 112 - IDTaiKhoanKeToan = 2)
+    DECLARE @TienGuiNH DECIMAL(18, 2) = 0;
+    SELECT @TienGuiNH = ISNULL(SUM(g.SoTienThu) - SUM(g.SoTienChi), 0)
+    FROM QUY_GiaoDichTien g
+    INNER JOIN DM_TaiKhoanThanhToan tk ON g.IDTaiKhoanThanhToan = tk.ID
+    WHERE g.IsHuy = 0 
+      AND tk.IsHoatDong = 1 
+      AND tk.IDTaiKhoanKeToan = 2 
+      AND g.NgayGiaoDich <= @DenNgay;
+
+    -- Tổng số dư tất cả tài khoản thanh toán đang hoạt động tính đến @DenNgay
     DECLARE @TongSoDuTaiKhoan DECIMAL(18, 2) = 0;
     SELECT @TongSoDuTaiKhoan = ISNULL(SUM(g.SoTienThu) - SUM(g.SoTienChi), 0)
     FROM QUY_GiaoDichTien g
-    WHERE g.IsHuy = 0;
+    INNER JOIN DM_TaiKhoanThanhToan tk ON g.IDTaiKhoanThanhToan = tk.ID
+    WHERE g.IsHuy = 0 
+      AND tk.IsHoatDong = 1 
+      AND g.NgayGiaoDich <= @DenNgay;
+
+    -- Tiền hiện có
+    DECLARE @TienHienCo DECIMAL(18, 2) = @TongSoDuTaiKhoan;
 
     -- Giá vốn & Lợi nhuận
     DECLARE @GiaVon DECIMAL(18, 2) = 0;
@@ -193,10 +206,14 @@ BEGIN
     -- Thu chi summary
     DECLARE @TongThu DECIMAL(18, 2) = 0;
     DECLARE @TongChi DECIMAL(18, 2) = 0;
-    SELECT @TongThu = ISNULL((SELECT SUM(SoTienThu) FROM QUY_GiaoDichTien WHERE IsHuy = 0 AND NgayGiaoDich >= @TuNgay AND NgayGiaoDich <= @DenNgay), 0) +
-                      ISNULL((SELECT SUM(SoTienThu) FROM BAN_PhieuThuKhachHang WHERE TrangThai = 2 AND IsDeleted = 0 AND NgayThu >= @TuNgay AND NgayThu <= @DenNgay), 0);
-    SELECT @TongChi = ISNULL((SELECT SUM(SoTienChi) FROM KT_PhieuChi WHERE TrangThai = 2 AND IsDeleted = 0 AND NgayChi >= @TuNgay AND NgayChi <= @DenNgay), 0) +
-                      ISNULL((SELECT SUM(SoTienChi) FROM QUY_GiaoDichTien WHERE IsHuy = 0 AND NgayGiaoDich >= @TuNgay AND NgayGiaoDich <= @DenNgay), 0);
+    SELECT @TongThu = ISNULL(SUM(g.SoTienThu), 0),
+           @TongChi = ISNULL(SUM(g.SoTienChi), 0)
+    FROM QUY_GiaoDichTien g
+    INNER JOIN DM_TaiKhoanThanhToan tk ON g.IDTaiKhoanThanhToan = tk.ID
+    WHERE g.IsHuy = 0 
+      AND tk.IsHoatDong = 1 
+      AND g.NgayGiaoDich >= @TuNgay 
+      AND g.NgayGiaoDich <= @DenNgay;
 
     -- Cảnh báo
     DECLARE @DonHangQuaHanGiao INT = 0;
@@ -226,6 +243,7 @@ BEGIN
         @SoSanPhamSapHet AS SoSanPhamSapHet,
         @TongSoLuongTon AS TongSoLuongTon,
         @TienMat AS TienMat,
+        @TienGuiNH AS TienGuiNH,
         @TongSoDuTaiKhoan AS TongSoDuTaiKhoan,
         @TongThu AS TongThu,
         @TongChi AS TongChi,
@@ -334,25 +352,17 @@ BEGIN
     DROP TABLE #CustSales;
 
     -- 7. ThuChiTheoNgay
-    WITH DailyFlow AS (
-        SELECT CAST(NgayGiaoDich AS DATE) AS Ngay, SoTienThu AS Thu, SoTienChi AS Chi
-        FROM QUY_GiaoDichTien
-        WHERE IsHuy = 0 AND NgayGiaoDich >= @TuNgay AND NgayGiaoDich <= @DenNgay
-        UNION ALL
-        SELECT CAST(NgayThu AS DATE) AS Ngay, SoTienThu AS Thu, 0 AS Chi
-        FROM BAN_PhieuThuKhachHang
-        WHERE TrangThai = 2 AND IsDeleted = 0 AND NgayThu >= @TuNgay AND NgayThu <= @DenNgay
-        UNION ALL
-        SELECT CAST(NgayChi AS DATE) AS Ngay, 0 AS Thu, SoTienChi AS Chi
-        FROM KT_PhieuChi
-        WHERE TrangThai = 2 AND IsDeleted = 0 AND NgayChi >= @TuNgay AND NgayChi <= @DenNgay
-    )
     SELECT 
-        FORMAT(Ngay, 'dd/MM/yyyy') AS Label,
-        SUM(Thu - Chi) AS Value
-    FROM DailyFlow
-    GROUP BY FORMAT(Ngay, 'dd/MM/yyyy'), CAST(Ngay AS DATE)
-    ORDER BY CAST(Ngay AS DATE);
+        FORMAT(CAST(g.NgayGiaoDich AS DATE), 'dd/MM/yyyy') AS Label,
+        SUM(g.SoTienThu - g.SoTienChi) AS Value
+    FROM QUY_GiaoDichTien g
+    INNER JOIN DM_TaiKhoanThanhToan tk ON g.IDTaiKhoanThanhToan = tk.ID
+    WHERE g.IsHuy = 0 
+      AND tk.IsHoatDong = 1 
+      AND g.NgayGiaoDich >= @TuNgay 
+      AND g.NgayGiaoDich <= @DenNgay
+    GROUP BY FORMAT(CAST(g.NgayGiaoDich AS DATE), 'dd/MM/yyyy'), CAST(g.NgayGiaoDich AS DATE)
+    ORDER BY CAST(g.NgayGiaoDich AS DATE);
 
     -- 8. TaiKhoanThanhToan
     SELECT tk.ID, tk.TenTaiKhoan,

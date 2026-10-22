@@ -428,8 +428,12 @@
                         <span class="sodu-value" id="valTienMat_@uid">0₫</span>
                     </div>
                     <div class="sodu-row mt-1">
-                        <span class="sodu-label"><i class="bi bi-bank me-1"></i>Tổng TK</span>
-                        <span class="sodu-value text-primary" id="valTongSoDu_@uid">0₫</span>
+                        <span class="sodu-label"><i class="bi bi-bank me-1"></i>Tiền gửi NH</span>
+                        <span class="sodu-value text-primary" id="valTienGuiNH_@uid">0₫</span>
+                    </div>
+                    <div class="sodu-row mt-1">
+                        <span class="sodu-label"><i class="bi bi-wallet2 me-1"></i>Tổng số dư</span>
+                        <span class="sodu-value text-success" id="valTongSoDu_@uid">0₫</span>
                     </div>
                 </div>
             </div>
@@ -1033,6 +1037,7 @@
 
             // Card 7: Số dư
             $('#valTienMat_@uid').text(formatMoney(data.Summary.TienMat));
+            $('#valTienGuiNH_@uid').text(formatMoney(data.Summary.TienGuiNH));
             $('#valTongSoDu_@uid').text(formatMoney(data.Summary.TongSoDuTaiKhoan));
 
             // KHỐI 2: ĐƠN HÀNG GẦN ĐÂY

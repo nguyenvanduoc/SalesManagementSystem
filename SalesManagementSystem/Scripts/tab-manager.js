@@ -546,7 +546,7 @@ var TabManager = (function () {
                         syncThoiGianFilter($pane);
                     }
                     try { $('select.select2-hidden-accessible').select2('close'); } catch (e) { }
-                    reInitPlugins(paneId.replace('#', ''));
+                    reInitPlugins(paneId.replace('#', ''), false);
                     $pane.find('.select2-container').css('width', '100%');
                 }
 
@@ -889,7 +889,7 @@ var TabManager = (function () {
 
     // ─── reInitPlugins() ────────────────────────────────────────────────────
 
-    function reInitPlugins(paneId) {
+    function reInitPlugins(paneId, notifyContentLoaded) {
         var container = $('#' + paneId);
         if (container.length === 0) return;
 
@@ -904,23 +904,9 @@ var TabManager = (function () {
             $comboboxes.each(function () {
                 var $this = $(this);
                 if (!$this.is('select') || $this.hasClass('no-select2')) return;
-                var rawId = $this.attr('id');
-
-                // Đảm bảo ID thẻ duy nhất tuyệt đối trong toàn bộ SPA DOM để tránh xung đột giữa các Tab
-                if (rawId && rawId.indexOf(paneId) === -1) {
-                    var scopedId = paneId + '_' + rawId;
-                    $this.attr('id', scopedId);
-                    var $label = container.find('label[for="' + rawId + '"]');
-                    if ($label.length > 0) {
-                        $label.attr('for', scopedId);
-                    }
-                }
-
-                // Hủy sạch instance Select2 cũ (nếu có) để dựng lại 100% chuẩn dữ liệu từ HTML
-                if ($this.hasClass('select2-hidden-accessible') || $this.next('.select2-container').length > 0) {
-                    try { $this.select2('destroy'); } catch (e) { }
-                    $this.next('.select2-container').remove();
-                }
+                // Giữ instance do View khởi tạo: dựng lại sẽ mất AJAX, adapters và
+                // dữ liệu đã chọn. Không đổi DOM id vì scripts/validation vẫn dùng id gốc.
+                if ($this.data('select2')) return;
 
                 // Chỉ prepend option rỗng nếu thẻ chưa có option giá trị rỗng nào và không phải multiple
                 if ($this.find('option[value=""]').length === 0 && !$this.prop('multiple')) {
@@ -936,20 +922,26 @@ var TabManager = (function () {
                     placeholderText = emptyOpt.text().trim();
                 }
 
-                $this.select2({
+                var options = {
                     width: '100%',
                     allowClear: true,
                     placeholder: placeholderText
-                });
+                };
+                var $modal = $this.closest('.modal');
+                if ($modal.length) options.dropdownParent = $modal;
+                $this.select2(options);
             });
         }
 
         var tooltipTriggerList = [].slice.call(container[0].querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
+            return bootstrap.Tooltip.getOrCreateInstance(tooltipTriggerEl);
         });
 
-        $(document).trigger('tabContentLoaded', [paneId]);
+        // Chuyển sang tab đã tải không phải là một lần nạp nội dung mới.
+        if (notifyContentLoaded !== false) {
+            $(document).trigger('tabContentLoaded', [paneId]);
+        }
     }
 
     // ─── reloadActiveTabGrid() ──────────────────────────────────────────────

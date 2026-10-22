@@ -78,6 +78,7 @@ namespace SalesManagementSystem.Repositories
                         data.TonKho.SoLuongSanPhamTon = (int)(summary.SoLuongSanPhamTon ?? 0);
                         data.TonKho.TongSoLuongTon = (decimal)(summary.TongSoLuongTon ?? 0m);
                         data.Summary.TienMat = (decimal)(summary.TienMat ?? 0m);
+                        data.Summary.TienGuiNH = (decimal)(summary.TienGuiNH ?? 0m);
                         data.Summary.TongSoDuTaiKhoan = (decimal)(summary.TongSoDuTaiKhoan ?? 0m);
                         
                         data.ThuChi.TongThu = (decimal)(summary.TongThu ?? 0m);
