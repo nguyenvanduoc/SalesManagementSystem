@@ -55,6 +55,26 @@ namespace SalesManagementSystem.Models.ViewModels
     }
 
     /// <summary>
+    /// Một dòng hàng trên phiếu nhập / phiếu xuất kho đã ghi sổ (tra cứu nhập - xuất theo khoảng ngày).
+    /// </summary>
+    public class ChatbotChungTuKhoItem
+    {
+        public int IDChungTu { get; set; }
+        public string SoChungTu { get; set; }
+        public DateTime? Ngay { get; set; }
+        public int? IDKho { get; set; }
+        public string TenKho { get; set; }
+        public string DoiTac { get; set; }
+        public string Loai { get; set; }
+        public int? IDSanPham { get; set; }
+        public string MaSanPham { get; set; }
+        public string TenSanPham { get; set; }
+        public string DVT { get; set; }
+        public decimal SoLuong { get; set; }
+        public decimal ThanhTien { get; set; }
+    }
+
+    /// <summary>
     /// Một dòng hàng hóa đang đi đường (phiếu nhập chưa ghi sổ hoặc đơn hàng đang giao).
     /// </summary>
     public class ChatbotHangDiDuongItem
