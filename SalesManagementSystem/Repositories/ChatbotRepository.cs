@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dapper;
@@ -37,6 +38,13 @@ namespace SalesManagementSystem.Repositories
         public IEnumerable<ChatbotDanhMucItem> GetDanhMucNhaCungCap()
         {
             const string sql = "SELECT ID, ISNULL(MaNhaCungCap, '') AS Ma, ISNULL(TenNhaCungCap, '') AS Ten FROM DM_NhaCungCap";
+            using (var conn = _db.CreateConnection())
+                return conn.Query<ChatbotDanhMucItem>(sql).ToList();
+        }
+
+        public IEnumerable<ChatbotDanhMucItem> GetDanhMucKho()
+        {
+            const string sql = "SELECT ID, ISNULL(MaKhoHang, '') AS Ma, ISNULL(TenKhoHang, '') AS Ten FROM DM_KhoHang";
             using (var conn = _db.CreateConnection())
                 return conn.Query<ChatbotDanhMucItem>(sql).ToList();
         }
@@ -143,6 +151,90 @@ namespace SalesManagementSystem.Repositories
 
             using (var conn = _db.CreateConnection())
                 return conn.Query<ChatbotHangDiDuongItem>(sql, new { IDSanPham = idSanPham }).ToList();
+        }
+
+        public IEnumerable<ChatbotChungTuKhoItem> GetNhapKho(DateTime tuNgay, DateTime denNgay, int? idSanPham, int? idKho)
+        {
+            // Phiếu nhập kho đã ghi sổ trong khoảng ngày (mọi loại nhập: mua hàng, chuyển kho, trả hàng...)
+            const string sql = @"
+                SELECT
+                    pn.ID AS IDChungTu,
+                    pn.SoChungTu,
+                    pn.NgayNhap AS Ngay,
+                    pn.IDKho,
+                    ISNULL(kho.TenKhoHang, '') AS TenKho,
+                    ISNULL(ncc.TenNhaCungCap, '') AS DoiTac,
+                    ISNULL(ln.TenLoaiNhap, '') AS Loai,
+                    ct.IDSanPham,
+                    ISNULL(sp.MaSanPham, '') AS MaSanPham,
+                    ISNULL(sp.TenSanPham, '') AS TenSanPham,
+                    ISNULL(sp.DVT, '') AS DVT,
+                    ISNULL(ct.SoLuong, 0) AS SoLuong,
+                    CASE WHEN ct.ThanhTien > 0 THEN ct.ThanhTien
+                         WHEN ct.TongSauThue > 0 THEN ct.TongSauThue
+                         ELSE ISNULL(ct.SoLuong * ct.DonGia, 0) END AS ThanhTien
+                FROM KHO_PhieuNhap pn
+                INNER JOIN KHO_PhieuNhap_ChiTiet ct ON ct.IDPhieuNhap = pn.ID
+                LEFT JOIN DM_SanPham sp ON ct.IDSanPham = sp.ID
+                LEFT JOIN DM_KhoHang kho ON pn.IDKho = kho.ID
+                LEFT JOIN DM_NhaCungCap ncc ON pn.IDNhaCungCap = ncc.ID
+                LEFT JOIN DM_LoaiNhapKho ln ON pn.IDLoaiNhapKho = ln.ID
+                WHERE pn.IsDeleted = 0 AND pn.TrangThai = 2
+                  AND pn.NgayNhap >= @TuNgay AND pn.NgayNhap < @DenNgay
+                  AND (@IDSanPham IS NULL OR ct.IDSanPham = @IDSanPham)
+                  AND (@IDKho IS NULL OR pn.IDKho = @IDKho)
+                ORDER BY pn.NgayNhap, pn.ID";
+
+            using (var conn = _db.CreateConnection())
+                return conn.Query<ChatbotChungTuKhoItem>(sql, new
+                {
+                    TuNgay = tuNgay.Date,
+                    DenNgay = denNgay.Date.AddDays(1),
+                    IDSanPham = idSanPham,
+                    IDKho = idKho
+                }).ToList();
+        }
+
+        public IEnumerable<ChatbotChungTuKhoItem> GetXuatKho(DateTime tuNgay, DateTime denNgay, int? idSanPham, int? idKho)
+        {
+            // Phiếu xuất kho đã ghi sổ trong khoảng ngày; khách hàng lấy từ chứng từ bán hàng / đơn đặt hàng, không có thì lấy người nhận
+            const string sql = @"
+                SELECT
+                    px.ID AS IDChungTu,
+                    px.SoChungTu,
+                    px.NgayXuat AS Ngay,
+                    px.IDKho,
+                    ISNULL(kho.TenKhoHang, '') AS TenKho,
+                    COALESCE(kh1.TenKhachHang, kh2.TenKhachHang, px.TenNguoiNhan, '') AS DoiTac,
+                    CASE WHEN px.IDChungTuBanHang IS NOT NULL OR px.IDDonDatHang IS NOT NULL THEN N'Xuất bán' ELSE N'Xuất khác' END AS Loai,
+                    ct.IDSanPham,
+                    ISNULL(sp.MaSanPham, '') AS MaSanPham,
+                    ISNULL(sp.TenSanPham, '') AS TenSanPham,
+                    ISNULL(sp.DVT, '') AS DVT,
+                    ISNULL(ct.SoLuong, 0) AS SoLuong,
+                    ISNULL(ct.ThanhTien, 0) AS ThanhTien
+                FROM KHO_PhieuXuat px
+                INNER JOIN KHO_PhieuXuat_ChiTiet ct ON ct.IDPhieuXuat = px.ID
+                LEFT JOIN DM_SanPham sp ON ct.IDSanPham = sp.ID
+                LEFT JOIN DM_KhoHang kho ON px.IDKho = kho.ID
+                LEFT JOIN BAN_ChungTuBanHang ctbh ON px.IDChungTuBanHang = ctbh.ID
+                LEFT JOIN NS_DonDatHang dh ON px.IDDonDatHang = dh.ID
+                LEFT JOIN NS_KhachHang kh1 ON ctbh.IDKhachHang = kh1.ID
+                LEFT JOIN NS_KhachHang kh2 ON dh.IDKhachHang = kh2.ID
+                WHERE px.IsDeleted = 0 AND px.TrangThai = 2
+                  AND px.NgayXuat >= @TuNgay AND px.NgayXuat < @DenNgay
+                  AND (@IDSanPham IS NULL OR ct.IDSanPham = @IDSanPham)
+                  AND (@IDKho IS NULL OR px.IDKho = @IDKho)
+                ORDER BY px.NgayXuat, px.ID";
+
+            using (var conn = _db.CreateConnection())
+                return conn.Query<ChatbotChungTuKhoItem>(sql, new
+                {
+                    TuNgay = tuNgay.Date,
+                    DenNgay = denNgay.Date.AddDays(1),
+                    IDSanPham = idSanPham,
+                    IDKho = idKho
+                }).ToList();
         }
     }
 }

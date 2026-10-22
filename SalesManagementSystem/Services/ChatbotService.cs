@@ -25,6 +25,8 @@ namespace SalesManagementSystem.Services
         public const string INTENT_HANG_DI_DUONG = "HANG_DI_DUONG";
         public const string INTENT_DOANH_THU = "DOANH_THU";
         public const string INTENT_QUY_TIEN = "QUY_TIEN";
+        public const string INTENT_NHAP_KHO = "NHAP_KHO";
+        public const string INTENT_XUAT_KHO = "XUAT_KHO";
 
         private const int DEFAULT_ROWS = 15;
         private const int MAX_ROWS = 50;
@@ -80,8 +82,12 @@ namespace SalesManagementSystem.Services
 
         public ChatbotResponseViewModel Ask(string message, string previousIntent)
         {
-            string q = ExpandVietTat(Normalize(message));
-            if (q.Length == 0) return Help();
+            // Tách khoảng ngày (10/10/2026 - 20/10/2026, từ 10/10 đến 20/10, ngày 10 tháng 10...) ra khỏi câu hỏi
+            // để các con số ngày tháng không bị nhầm thành mã / tên sản phẩm
+            string conLai;
+            KhoangNgay chiDinh = TachKhoangNgay(message, out conLai);
+            string q = ExpandVietTat(Normalize(conLai));
+            if (q.Length == 0 && chiDinh == null) return Help();
 
             if (HasAny(q, "cam on", "thank", "thanks", "tks"))
                 return new ChatbotResponseViewModel { Intent = IsDataIntent(previousIntent) ? previousIntent : null, Text = "Không có gì ạ! Bạn cần tra cứu thêm gì cứ hỏi mình nhé." };
@@ -102,9 +108,11 @@ namespace SalesManagementSystem.Services
             {
                 case INTENT_CONG_NO_KH: return CongNoKhachHang(q);
                 case INTENT_CONG_NO_NCC: return CongNoNhaCungCap(q);
-                case INTENT_TON_KHO: return TonKho(q);
+                case INTENT_TON_KHO: return TonKho(q, chiDinh);
                 case INTENT_HANG_DI_DUONG: return HangDiDuong(q);
-                case INTENT_DOANH_THU: return DoanhThu(q);
+                case INTENT_NHAP_KHO: return NhapXuatKho(q, chiDinh, true);
+                case INTENT_XUAT_KHO: return NhapXuatKho(q, chiDinh, false);
+                case INTENT_DOANH_THU: return DoanhThu(q, chiDinh);
                 case INTENT_QUY_TIEN: return QuyTien();
                 case INTENT_HELP: return Help();
                 default: return KhongHieu();
@@ -125,6 +133,13 @@ namespace SalesManagementSystem.Services
             // Cụm từ chắc chắn về kho, kiểm tra trước để "thiếu hàng" không bị hiểu là công nợ
             if (HasAny(q, "ton kho", "thieu hang", "het hang", "sap het", "am kho", "con hang"))
                 return INTENT_TON_KHO;
+
+            if (HasAny(q, "xuat", "xuat hang", "xuat kho", "da xuat")
+                || (HasAny(q, "ban") && HasAny(q, "thung", "so luong", "san luong", "bao nhieu thung")))
+                return INTENT_XUAT_KHO;
+
+            if (HasAny(q, "nhap", "nhap hang", "nhap kho", "da nhap", "mua hang", "mua vao") && !HasAny(q, "can nhap", "chua nhap"))
+                return INTENT_NHAP_KHO;
 
             if (HasAny(q, "cong no", "no", "thieu", "con thieu", "phai thu", "chua tra", "chua thanh toan", "qua han", "no xau", "thu tien"))
                 return INTENT_CONG_NO_KH;
@@ -151,7 +166,9 @@ namespace SalesManagementSystem.Services
                 case INTENT_CONG_NO_KH: return _chatbotRepo.GetDanhMucKhachHang();
                 case INTENT_CONG_NO_NCC: return _chatbotRepo.GetDanhMucNhaCungCap();
                 case INTENT_TON_KHO:
-                case INTENT_HANG_DI_DUONG: return _chatbotRepo.GetDanhMucSanPham();
+                case INTENT_HANG_DI_DUONG:
+                case INTENT_NHAP_KHO:
+                case INTENT_XUAT_KHO: return _chatbotRepo.GetDanhMucSanPham();
                 default: return Enumerable.Empty<ChatbotDanhMucItem>();
             }
         }
@@ -165,7 +182,8 @@ namespace SalesManagementSystem.Services
         private static bool IsDataIntent(string intent)
         {
             return intent == INTENT_CONG_NO_KH || intent == INTENT_CONG_NO_NCC || intent == INTENT_TON_KHO
-                || intent == INTENT_HANG_DI_DUONG || intent == INTENT_DOANH_THU || intent == INTENT_QUY_TIEN;
+                || intent == INTENT_HANG_DI_DUONG || intent == INTENT_DOANH_THU || intent == INTENT_QUY_TIEN
+                || intent == INTENT_NHAP_KHO || intent == INTENT_XUAT_KHO;
         }
 
         /// <summary>
@@ -404,7 +422,7 @@ namespace SalesManagementSystem.Services
             }).ToList();
         }
 
-        private ChatbotResponseViewModel TonKho(string q)
+        private ChatbotResponseViewModel TonKho(string q, KhoangNgay chiDinh)
         {
             var res = new ChatbotResponseViewModel { Intent = INTENT_TON_KHO };
             if (!PermissionHelper.HasPermission("TonKho", LoaiPhanQuyen.Xem))
@@ -412,8 +430,10 @@ namespace SalesManagementSystem.Services
 
             // Nhân viên kho (không có quyền Tùy chọn) không được xem giá trị tồn — giống màn hình Tồn kho
             bool xemGiaTri = PermissionHelper.HasPermission("TonKho", LoaiPhanQuyen.TuyChon);
-            string homNay = DateTime.Today.ToString("yyyy-MM-dd");
+            // Có ghi ngày trong câu hỏi → tồn kho tính đến hết ngày cuối của khoảng ngày đó
+            string homNay = (chiDinh != null ? chiDinh.DenNgay : DateTime.Today).ToString("yyyy-MM-dd");
             res.Links.Add(Link("~/TonKho", "TonKho", "Tồn kho"));
+            if (chiDinh != null) res.Note = string.Format("Số tồn tính đến hết ngày {0:dd/MM/yyyy}.", chiDinh.DenNgay);
 
             var matches = MatchEntities(q, _chatbotRepo.GetDanhMucSanPham());
             if (matches.Count > 1) return ChuaRo(res, "sản phẩm", matches, "Tồn kho {0}");
@@ -452,10 +472,10 @@ namespace SalesManagementSystem.Services
                     var diDuong = _chatbotRepo.GetHangDangVeKho(sp.ID).ToList();
                     if (diDuong.Count > 0)
                     {
-                        res.Note = string.Format("Đang có thêm {0} {1} đi đường về kho ({2} phiếu nhập chưa ghi sổ: {3}).",
+                        res.Note = JoinNote(res.Note, string.Format("Đang có thêm {0} {1} đi đường về kho ({2} phiếu nhập chưa ghi sổ: {3}).",
                             SoLuong(diDuong.Sum(x => x.SoLuong)), dvt,
                             diDuong.Select(x => x.IDChungTu).Distinct().Count(),
-                            string.Join(", ", diDuong.Select(x => x.SoChungTu).Distinct().Take(5)));
+                            string.Join(", ", diDuong.Select(x => x.SoChungTu).Distinct().Take(5))));
                     }
                 }
 
@@ -490,7 +510,7 @@ namespace SalesManagementSystem.Services
                 foreach (var x in hienThi.Take(soDongSapHet))
                     tbl.Rows.Add(new List<string> { (++stt).ToString(), x.TenSanPham, SoLuong(x.TonKho), x.DVT ?? "", x.MucTonToiThieu > 0 ? SoLuong(x.MucTonToiThieu) : "" });
                 res.Tables.Add(tbl);
-                res.Note = GhiChuSoDong(hienThi.Count, soDongSapHet, "sản phẩm");
+                res.Note = JoinNote(res.Note, GhiChuSoDong(hienThi.Count, soDongSapHet, "sản phẩm"));
                 res.Suggestions.Add("Hàng đang đi đường");
                 res.Suggestions.Add("Tồn kho tổng quan");
                 return res;
@@ -520,7 +540,7 @@ namespace SalesManagementSystem.Services
                 tblTon.Rows.Add(cells);
             }
             res.Tables.Add(tblTon);
-            res.Note = GhiChuSoDong(sapXep.Count, soDongTon, "sản phẩm");
+            res.Note = JoinNote(res.Note, GhiChuSoDong(sapXep.Count, soDongTon, "sản phẩm"));
 
             res.Suggestions.Add("Sản phẩm nào sắp hết hàng?");
             res.Suggestions.Add("Tồn kho " + sapXep[0].TenSanPham);
@@ -631,20 +651,153 @@ namespace SalesManagementSystem.Services
 
         #endregion
 
+        #region Nhập / xuất kho theo khoảng ngày
+
+        private ChatbotResponseViewModel NhapXuatKho(string q, KhoangNgay chiDinh, bool laNhap)
+        {
+            var res = new ChatbotResponseViewModel { Intent = laNhap ? INTENT_NHAP_KHO : INTENT_XUAT_KHO };
+            string manHinh = laNhap ? "PhieuNhapKho" : "PhieuXuatKho";
+            string nghiepVu = laNhap ? "nhập" : "xuất";
+            if (!PermissionHelper.HasPermission(manHinh, LoaiPhanQuyen.Xem))
+                return KhongCoQuyen(res, "phiếu " + nghiepVu + " kho");
+
+            var ky = XacDinhKy(q, chiDinh);
+            var matches = MatchEntities(q, _chatbotRepo.GetDanhMucSanPham());
+            if (matches.Count > 1)
+                return ChuaRo(res, "sản phẩm", matches, (laNhap ? "Nhập hàng {0} " : "Xuất hàng {0} ") + ky.CauHoi);
+
+            var sp = matches.Count == 1 ? matches[0] : null;
+            var kho = TimKho(q);
+            var items = (laNhap
+                ? _chatbotRepo.GetNhapKho(ky.TuNgay, ky.DenNgay, sp != null ? sp.ID : (int?)null, kho != null ? kho.ID : (int?)null)
+                : _chatbotRepo.GetXuatKho(ky.TuNgay, ky.DenNgay, sp != null ? sp.ID : (int?)null, kho != null ? kho.ID : (int?)null)).ToList();
+
+            // Giống màn hình Tồn kho: nhân viên kho không xem giá trị
+            bool xemGiaTri = PermissionHelper.HasPermission("TonKho", LoaiPhanQuyen.TuyChon);
+            res.Links.Add(laNhap ? Link("~/PhieuNhapKho", "PhieuNhapKho", "Phiếu nhập kho") : Link("~/PhieuXuatKho", "PhieuXuatKho", "Phiếu xuất kho"));
+
+            string doiTuong = (sp != null ? "Sản phẩm " + sp.Ten : "Hàng hóa") + (kho != null ? " tại " + kho.Ten : "");
+            string cauHoiSp = sp != null ? " " + sp.Ten : "";
+            res.Suggestions.Add((laNhap ? "Xuất hàng" : "Nhập hàng") + cauHoiSp + " " + ky.CauHoi);
+            if (sp != null) res.Suggestions.Add("Tồn kho " + sp.Ten);
+
+            if (items.Count == 0)
+            {
+                res.Text = string.Format("{0} không có phiếu {1} kho nào (đã ghi sổ) {2}.", doiTuong, nghiepVu, ky.Ten);
+                return res;
+            }
+
+            int soPhieu = items.Select(x => x.IDChungTu).Distinct().Count();
+            decimal tongSoLuong = items.Sum(x => x.SoLuong);
+            string giaTri = xemGiaTri ? string.Format(", trị giá {0}", Tien(items.Sum(x => x.ThanhTien))) : "";
+            var theoKho = items.GroupBy(x => x.TenKho)
+                .Select(g => new { Kho = g.Key, SoLuong = g.Sum(x => x.SoLuong), SoPhieu = g.Select(x => x.IDChungTu).Distinct().Count(), GiaTri = g.Sum(x => x.ThanhTien) })
+                .OrderByDescending(x => x.SoLuong).ToList();
+            string vaoKho = laNhap ? "vào" : "từ";
+
+            if (sp != null)
+            {
+                string dvt = items.Select(x => x.DVT).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x)) ?? "";
+                res.Text = string.Format("{0} {1} đã {2} {3} {4} ({5} phiếu{6}), {7} {8}.",
+                    doiTuong, ky.Ten, nghiepVu, SoLuong(tongSoLuong), dvt, soPhieu, giaTri, vaoKho,
+                    theoKho.Count == 1 ? theoKho[0].Kho : theoKho.Count + " kho: " + string.Join(", ", theoKho.Select(x => x.Kho)));
+            }
+            else
+            {
+                res.Text = string.Format("{0} {1} có {2} phiếu {3} kho, {4} sản phẩm, tổng số lượng {5}{6}.",
+                    doiTuong, ky.Ten, soPhieu, nghiepVu, items.Select(x => x.IDSanPham).Distinct().Count(), SoLuong(tongSoLuong), giaTri);
+            }
+
+            int soDong = SoDong(q);
+
+            var tblKho = xemGiaTri
+                ? NewTable("Theo kho", new[] { "Kho", "Số lượng", "Số phiếu", "Giá trị" }, new[] { false, true, true, true })
+                : NewTable("Theo kho", new[] { "Kho", "Số lượng", "Số phiếu" }, new[] { false, true, true });
+            foreach (var x in theoKho)
+            {
+                var cells = new List<string> { x.Kho, SoLuong(x.SoLuong), x.SoPhieu.ToString() };
+                if (xemGiaTri) cells.Add(Tien(x.GiaTri));
+                tblKho.Rows.Add(cells);
+            }
+            res.Tables.Add(tblKho);
+
+            if (sp == null)
+            {
+                var theoSp = items.GroupBy(x => x.IDSanPham)
+                    .Select(g => new { Ten = g.First().TenSanPham, DVT = g.First().DVT, SoLuong = g.Sum(x => x.SoLuong), GiaTri = g.Sum(x => x.ThanhTien) })
+                    .OrderByDescending(x => x.SoLuong).ToList();
+                var tblSp = xemGiaTri
+                    ? NewTable("Theo sản phẩm", new[] { "#", "Sản phẩm", "Số lượng", "ĐVT", "Giá trị" }, new[] { true, false, true, false, true })
+                    : NewTable("Theo sản phẩm", new[] { "#", "Sản phẩm", "Số lượng", "ĐVT" }, new[] { true, false, true, false });
+                int stt = 0;
+                foreach (var x in theoSp.Take(soDong))
+                {
+                    var cells = new List<string> { (++stt).ToString(), x.Ten, SoLuong(x.SoLuong), x.DVT ?? "" };
+                    if (xemGiaTri) cells.Add(Tien(x.GiaTri));
+                    tblSp.Rows.Add(cells);
+                }
+                res.Tables.Add(tblSp);
+                res.Note = GhiChuSoDong(theoSp.Count, soDong, "sản phẩm");
+                if (theoSp.Count > 0) res.Suggestions.Insert(0, (laNhap ? "Nhập hàng " : "Xuất hàng ") + theoSp[0].Ten + " " + ky.CauHoi);
+            }
+
+            var theoPhieu = items.GroupBy(x => x.IDChungTu)
+                .Select(g => new
+                {
+                    g.First().SoChungTu,
+                    g.First().Ngay,
+                    g.First().TenKho,
+                    DoiTac = !string.IsNullOrWhiteSpace(g.First().DoiTac) ? g.First().DoiTac : g.First().Loai,
+                    SoLuong = g.Sum(x => x.SoLuong)
+                }).ToList();
+            var tblPhieu = NewTable(laNhap ? "Chi tiết phiếu nhập" : "Chi tiết phiếu xuất",
+                new[] { "Số CT", "Ngày", "Kho", laNhap ? "Nhà cung cấp / Loại" : "Khách hàng", "Số lượng" },
+                new[] { false, false, false, false, true });
+            foreach (var x in theoPhieu.Take(soDong))
+                tblPhieu.Rows.Add(new List<string> { x.SoChungTu, x.Ngay.HasValue ? x.Ngay.Value.ToString("dd/MM/yyyy") : "", x.TenKho, x.DoiTac, SoLuong(x.SoLuong) });
+            res.Tables.Add(tblPhieu);
+
+            // Nhập gồm nhiều loại (mua hàng, chuyển kho, trả hàng...) → tóm tắt để không hiểu nhầm toàn bộ là mua từ NCC
+            var theoLoai = items.Where(x => !string.IsNullOrWhiteSpace(x.Loai)).GroupBy(x => x.Loai).ToList();
+            if (theoLoai.Count > 1)
+                res.Note = JoinNote(res.Note, "Theo loại: " + string.Join(" · ", theoLoai.Select(g => g.Key + " " + SoLuong(g.Sum(x => x.SoLuong)))) + ".");
+            res.Note = JoinNote(res.Note, GhiChuSoDong(theoPhieu.Count, soDong, "phiếu"), "Chỉ tính phiếu đã ghi sổ.");
+            return res;
+        }
+
+        /// <summary>
+        /// Tìm kho được nhắc tên trong câu hỏi ("kho Cần Thơ", "kho chính"). Chỉ khớp nguyên tên để tránh nhầm với tên hàng.
+        /// </summary>
+        private ChatbotDanhMucItem TimKho(string q)
+        {
+            string padded = " " + q + " ";
+            ChatbotDanhMucItem ketQua = null;
+            int doDaiKhop = 0;
+            foreach (var kho in _chatbotRepo.GetDanhMucKho())
+            {
+                string ten = Normalize(kho.Ten);
+                if (ten.Length >= 3 && ten.Length > doDaiKhop && padded.Contains(" " + ten + " "))
+                {
+                    ketQua = kho;
+                    doDaiKhop = ten.Length;
+                }
+            }
+            return ketQua;
+        }
+
+        #endregion
+
         #region Doanh thu & Quỹ tiền
 
-        private ChatbotResponseViewModel DoanhThu(string q)
+        private ChatbotResponseViewModel DoanhThu(string q, KhoangNgay chiDinh)
         {
             var res = new ChatbotResponseViewModel { Intent = INTENT_DOANH_THU };
 
-            DateTime tuNgay, denNgay;
-            string tenKy;
-            XacDinhKy(q, out tuNgay, out denNgay, out tenKy);
-
-            var data = _dashboardRepo.GetDashboardData(tuNgay, denNgay);
+            var ky = XacDinhKy(q, chiDinh);
+            var data = _dashboardRepo.GetDashboardData(ky.TuNgay, ky.DenNgay);
             var s = data.Summary;
 
-            res.Text = string.Format("Doanh thu {0}: {1}", tenKy, Tien(s.DoanhThu));
+            res.Text = string.Format("Doanh thu {0}: {1}", ky.Ten, Tien(s.DoanhThu));
             if (s.DoanhThuKyTruoc != 0)
                 res.Text += string.Format(" ({0}{1}% so với kỳ trước liền kề)", s.TyLeTangGiamDoanhThu >= 0 ? "+" : "", s.TyLeTangGiamDoanhThu.ToString("0.#", VN));
             res.Text += string.Format(".\nLợi nhuận gộp (doanh thu - giá vốn): {0}.", Tien(s.LoiNhuan));
@@ -687,12 +840,99 @@ namespace SalesManagementSystem.Services
             return res;
         }
 
-        /// <summary>
-        /// Đọc kỳ báo cáo trong câu hỏi: hôm nay, hôm qua, tuần này/trước, tháng này/trước, tháng 5 (năm 2026), quý 2, năm nay/trước.
-        /// Mặc định: từ đầu tháng tới hôm nay.
-        /// </summary>
-        private static void XacDinhKy(string q, out DateTime tuNgay, out DateTime denNgay, out string tenKy)
+        private class KhoangNgay
         {
+            public DateTime TuNgay { get; set; }
+            public DateTime DenNgay { get; set; }
+        }
+
+        private class KyHoi
+        {
+            public DateTime TuNgay { get; set; }
+            public DateTime DenNgay { get; set; }
+            // Tên kỳ để hiển thị: "tháng này (01/10 - 22/10/2026)", "từ 10/10/2026 đến 20/10/2026"
+            public string Ten { get; set; }
+            // Cụm ngày dạng số, ghép vào câu hỏi gợi ý để lần hỏi sau đọc lại đúng kỳ
+            public string CauHoi { get; set; }
+        }
+
+        // dd/MM/yyyy, dd-MM-yyyy, dd.MM.yyyy
+        private static readonly Regex NgayDayDu = new Regex(@"(?<!\d)(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{4})(?!\d)");
+        // dd/MM (năm hiện tại) — chỉ nhận dấu "/" để không nhầm với tên hàng như "Pepsi 1.5L"
+        private static readonly Regex NgayThieuNam = new Regex(@"(?<![\d/])(\d{1,2})/(\d{1,2})(?![\d/])");
+        // "ngày 10 tháng 10 (năm 2026)" sau khi đã bỏ dấu
+        private static readonly Regex NgayBangChu = new Regex(@"\bngay (\d{1,2}) thang (\d{1,2})(?: nam (\d{4}))?\b");
+
+        /// <summary>
+        /// Đọc khoảng ngày ghi cụ thể trong câu hỏi và trả về phần câu hỏi còn lại (đã bỏ các ngày).
+        /// Hai ngày trở lên → từ ngày nhỏ nhất đến ngày lớn nhất; một ngày → "từ X" (đến hôm nay), "đến X" (từ đầu tháng) hoặc đúng ngày X.
+        /// </summary>
+        private static KhoangNgay TachKhoangNgay(string message, out string conLai)
+        {
+            var ngay = new List<DateTime>();
+            string tienToNgayDau = null;
+            string text = message ?? "";
+
+            foreach (var regex in new[] { NgayDayDu, NgayThieuNam })
+            {
+                text = regex.Replace(text, m =>
+                {
+                    int nam = m.Groups.Count > 3 && m.Groups[3].Success ? int.Parse(m.Groups[3].Value) : DateTime.Today.Year;
+                    DateTime d;
+                    if (!TaoNgay(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), nam, out d)) return m.Value;
+                    if (ngay.Count == 0) tienToNgayDau = Normalize(text.Substring(0, m.Index));
+                    ngay.Add(d);
+                    return " ";
+                });
+            }
+
+            string daBoDau = Normalize(text);
+            conLai = NgayBangChu.Replace(daBoDau, m =>
+            {
+                int nam = m.Groups[3].Success ? int.Parse(m.Groups[3].Value) : DateTime.Today.Year;
+                DateTime d;
+                if (!TaoNgay(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), nam, out d)) return m.Value;
+                if (ngay.Count == 0) tienToNgayDau = daBoDau.Substring(0, m.Index).Trim();
+                ngay.Add(d);
+                return " ";
+            });
+
+            if (ngay.Count == 0) return null;
+            if (ngay.Count >= 2) return new KhoangNgay { TuNgay = ngay.Min(), DenNgay = ngay.Max() };
+
+            DateTime mot = ngay[0];
+            string truoc = " " + (tienToNgayDau ?? "") + " ";
+            if (truoc.EndsWith(" tu ") || truoc.EndsWith(" tu ngay ") || truoc.EndsWith(" ke tu ") || truoc.EndsWith(" sau ngay "))
+                return new KhoangNgay { TuNgay = mot, DenNgay = mot > DateTime.Today ? mot : DateTime.Today };
+            if (truoc.EndsWith(" den ") || truoc.EndsWith(" den ngay ") || truoc.EndsWith(" toi ") || truoc.EndsWith(" toi ngay "))
+                return new KhoangNgay { TuNgay = new DateTime(mot.Year, mot.Month, 1), DenNgay = mot };
+            return new KhoangNgay { TuNgay = mot, DenNgay = mot };
+        }
+
+        private static bool TaoNgay(int ngay, int thang, int nam, out DateTime ketQua)
+        {
+            ketQua = DateTime.MinValue;
+            if (thang < 1 || thang > 12 || nam < 2000 || nam > 2100 || ngay < 1 || ngay > DateTime.DaysInMonth(nam, thang)) return false;
+            ketQua = new DateTime(nam, thang, ngay);
+            return true;
+        }
+
+        /// <summary>
+        /// Kỳ báo cáo: ưu tiên khoảng ngày ghi cụ thể; nếu không có thì đọc hôm nay, hôm qua, tuần này/trước,
+        /// tháng này/trước, tháng 5 (năm 2026), quý 2, năm nay/trước. Mặc định: từ đầu tháng tới hôm nay.
+        /// </summary>
+        private static KyHoi XacDinhKy(string q, KhoangNgay chiDinh)
+        {
+            DateTime tuNgay, denNgay;
+            string tenKy;
+            if (chiDinh != null)
+            {
+                tuNgay = chiDinh.TuNgay;
+                denNgay = chiDinh.DenNgay;
+                tenKy = KhoangNgayDangChu(tuNgay, denNgay);
+                return new KyHoi { TuNgay = tuNgay, DenNgay = denNgay, Ten = tenKy, CauHoi = tenKy };
+            }
+
             DateTime homNay = DateTime.Today;
             int namHoi = homNay.Year;
             var mNam = Regex.Match(q, @"\bnam (\d{4})\b");
@@ -765,6 +1005,15 @@ namespace SalesManagementSystem.Services
                 tenKy += string.Format(" ({0:dd/MM} - {1:dd/MM/yyyy})", tuNgay, denNgay);
             else
                 tenKy += string.Format(" ({0:dd/MM/yyyy})", tuNgay);
+
+            return new KyHoi { TuNgay = tuNgay, DenNgay = denNgay, Ten = tenKy, CauHoi = KhoangNgayDangChu(tuNgay, denNgay) };
+        }
+
+        private static string KhoangNgayDangChu(DateTime tuNgay, DateTime denNgay)
+        {
+            return tuNgay == denNgay
+                ? string.Format("ngày {0:dd/MM/yyyy}", tuNgay)
+                : string.Format("từ {0:dd/MM/yyyy} đến {1:dd/MM/yyyy}", tuNgay, denNgay);
         }
 
         #endregion
@@ -780,6 +1029,7 @@ namespace SalesManagementSystem.Services
                        "• Công nợ: khách hàng nào còn nợ, nợ quá hạn, công nợ của một khách hàng / nhà cung cấp\n" +
                        "• Tồn kho: tổng quan, tồn của từng sản phẩm, sản phẩm sắp hết / âm kho\n" +
                        "• Hàng đi đường: hàng đang về kho, đơn hàng đang giao\n" +
+                       "• Nhập / xuất kho theo khoảng ngày: \"Bia 123 Zô từ 10/10/2026 đến 20/10/2026 nhập bao nhiêu thùng, kho nào\"\n" +
                        "• Doanh thu, lợi nhuận theo kỳ và số dư quỹ tiền\n" +
                        "Gõ tự nhiên, có dấu hoặc không dấu đều được."
             };
@@ -791,7 +1041,7 @@ namespace SalesManagementSystem.Services
         {
             var res = new ChatbotResponseViewModel
             {
-                Text = "Xin lỗi, mình chưa hiểu câu hỏi. Mình đang trả lời được về công nợ, tồn kho, hàng đi đường, doanh thu và quỹ tiền. Bạn thử hỏi theo các gợi ý dưới đây nhé."
+                Text = "Xin lỗi, mình chưa hiểu câu hỏi. Mình đang trả lời được về công nợ, tồn kho, nhập / xuất kho, hàng đi đường, doanh thu và quỹ tiền. Bạn thử hỏi theo các gợi ý dưới đây nhé."
             };
             res.Suggestions.AddRange(GoiYMau());
             return res;
@@ -805,6 +1055,8 @@ namespace SalesManagementSystem.Services
             if (PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.Xem) || PermissionHelper.HasPermission("DonDatHang", LoaiPhanQuyen.Xem))
                 goiY.Add("Hàng đi đường còn bao nhiêu?");
             if (PermissionHelper.HasPermission("TonKho", LoaiPhanQuyen.Xem)) goiY.Add("Sản phẩm nào sắp hết hàng?");
+            if (PermissionHelper.HasPermission("PhieuNhapKho", LoaiPhanQuyen.Xem)) goiY.Add("Nhập hàng tuần này");
+            if (PermissionHelper.HasPermission("PhieuXuatKho", LoaiPhanQuyen.Xem)) goiY.Add("Xuất hàng tháng này");
             if (PermissionHelper.HasPermission("CongNoNCC", LoaiPhanQuyen.Xem)) goiY.Add("Công nợ phải trả nhà cung cấp");
             goiY.Add("Doanh thu tháng này");
             return goiY;
