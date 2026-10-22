@@ -1,13 +1,15 @@
 using System;
 using System.Web.Mvc;
 using SalesManagementSystem.Helpers;
+using SalesManagementSystem.Services;
 using SalesManagementSystem.Services.Interfaces;
 
 namespace SalesManagementSystem.Controllers
 {
     /// <summary>
     /// Trợ lý ảo: nhận câu hỏi từ widget chat trên layout và trả lời dạng JSON.
-    /// Quyền dữ liệu được kiểm tra theo từng loại câu hỏi trong ChatbotService.
+    /// Chỉ người có quyền xem Dashboard mới dùng được; quyền dữ liệu chi tiết
+    /// được kiểm tra theo từng loại câu hỏi trong ChatbotService.
     /// </summary>
     [CustomAuthorize(AuthorizeTypes.AuthorizedUsers)]
     public class ChatbotController : BaseController
@@ -25,6 +27,9 @@ namespace SalesManagementSystem.Controllers
         [ValidateAntiForgeryToken]
         public JsonResult Ask(string message, string intent = "")
         {
+            if (!ChatbotService.CoQuyenSuDung())
+                return Json(new { success = false, message = "Bạn chưa được phân quyền sử dụng Trợ lý AI." });
+
             if (string.IsNullOrWhiteSpace(message))
                 return Json(new { success = false, message = "Vui lòng nhập câu hỏi." });
 
