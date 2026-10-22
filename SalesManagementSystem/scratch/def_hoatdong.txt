@@ -1,0 +1,33 @@
+﻿HoatDongGanDay (Top 10)
+    SELECT TOP 10 *
+    FROM (
+        SELECT N'Bán hàng' AS LoaiHoatDong, SoChungTu AS MaChungTu, NgayChungTu AS ThoiGian, TongCong AS SoTien, N'Đã tạo chứng từ bán hàng' AS MoTa
+        FROM BAN_ChungTuBanHang WHERE IsDeleted = 0
+        UNION ALL
+        SELECT N'Thu tiền' AS LoaiHoatDong, SoPhieuThu AS MaChungTu, NgayThu AS ThoiGian, SoTienThu AS SoTien, N'Thu tiền khách hàng' AS MoTa
+        FROM BAN_PhieuThuKhachHang WHERE IsDeleted = 0
+        UNION ALL
+        SELECT N'Chi tiền' AS LoaiHoatDong, SoPhieuChi AS MaChungTu, NgayChi AS ThoiGian, SoTienChi AS SoTien, N'Chi tiền thanh toán' AS MoTa
+        FROM KT_PhieuChi WHERE IsDeleted = 0
+        UNION ALL
+        SELECT N'Nhập kho' AS LoaiHoatDong, SoChungTu AS MaChungTu, NgayNhap AS ThoiGian, TongCong AS SoTien, N'Tạo phiếu nhập kho' AS MoTa
+        FROM KHO_PhieuNhap WHERE IsDeleted = 0
+    ) h
+    ORDER BY h.ThoiGian DESC;
+
+    -- 14. TopKhachHang (Top 5 theo Doanh Thu)
+    SELECT TOP 5
+        kh.TenKhachHang AS TenDoiTuong,
+        SUM(bh.TongCong) AS TongGiaTri
+    FROM BAN_ChungTuBanHang bh
+    INNER JOIN DM_KhachHang kh ON bh.IDKhachHang = kh.ID
+    WHERE bh.IsDeleted = 0 AND bh.TrangThai = 2
+      AND bh.NgayChungTu >= @TuNgay AND bh.NgayChungTu <= @DenNgay
+    GROUP BY kh.ID, kh.TenKhachHang
+    ORDER BY TongGiaTri DESC;
+
+    -- 15. TopNhaCungCap (Top 5 theo Giá Trị Nhập)
+    SELECT TOP 5
+        ncc.TenNhaCungCap AS TenDoiTuong,
+        SUM(pn.TongCong) AS TongGiaTri
+    FROM KHO_Phieu
