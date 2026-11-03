@@ -147,6 +147,11 @@
                                 <input type="text" id="PhiBocXepDisplay" class="form-control form-control-sm text-end fw-bold" style="width: 120px;" value="0" oninput="formatAndCalc()" />
                                 <input type="hidden" id="PhiBocXep" name="PhiBocXep" value="0" />
                             </div>
+                            <div class="d-flex align-items-center">
+                                <span class="text-muted small me-2" title="Công ty chịu - cộng vào số tiền hoàn khách">Phí vận chuyển:</span>
+                                <input type="text" id="PhiVanChuyenDisplay" class="form-control form-control-sm text-end fw-bold" style="width: 120px;" value="0" oninput="formatAndCalcVanChuyen()" />
+                                <input type="hidden" id="PhiVanChuyen" name="PhiVanChuyen" value="0" />
+                            </div>
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             <span class="text-muted text-uppercase">Cần phải hoàn khách:</span>
@@ -343,7 +348,8 @@
             });
             
             var phiBocXep = parseFloat($('#PhiBocXep').val()) || 0;
-            var tongCong = tongTien + phiBocXep;
+            var phiVanChuyen = parseFloat($('#PhiVanChuyen').val()) || 0; // Công ty chịu => cộng vào tiền hoàn khách
+            var tongCong = tongTien + phiBocXep + phiVanChuyen;
             
             $('#dispTongSoLuong').text(formatNumber(tongSl));
             $('#hdTongSoLuong').val(tongSl);
@@ -362,6 +368,14 @@
             var val = parseFloat(valStr) || 0;
             $('#PhiBocXepDisplay').val(formatNumber(val));
             $('#PhiBocXep').val(val);
+            calcTotal();
+        }
+
+        function formatAndCalcVanChuyen() {
+            var valStr = $('#PhiVanChuyenDisplay').val().replace(/[^0-9]/g, '');
+            var val = parseFloat(valStr) || 0;
+            $('#PhiVanChuyenDisplay').val(formatNumber(val));
+            $('#PhiVanChuyen').val(val);
             calcTotal();
         }
         
@@ -442,6 +456,7 @@
                 TongTienDaHoan: 0,
                 ConPhaiHoan: $('#hdConPhaiHoan').val(),
                 PhiBocXep: $('#PhiBocXep').val(),
+                PhiVanChuyen: $('#PhiVanChuyen').val(),
                 ChiTiets: chiTiets
             };
         }

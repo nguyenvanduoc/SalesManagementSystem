@@ -106,6 +106,11 @@ namespace SalesManagementSystem.Repositories
             }
         }
 
+        // Cập nhật Phí vận chuyển (công ty chịu) cho phiếu trả hàng.
+        // Yêu cầu đã chạy SQL_Scripts/Add_PhiVanChuyen_TraHangBan.sql.
+        private const string UpdatePhiVanChuyenSql =
+            "UPDATE BAN_TraHangBan SET PhiVanChuyen = @PhiVanChuyen WHERE ID = @ID";
+
         public int Insert(TraHangBan traHang, List<TraHangBanChiTiet> chiTiets)
         {
             using (var conn = _db.CreateConnection())
@@ -134,6 +139,9 @@ namespace SalesManagementSystem.Repositories
                         conn.Execute("sp_BAN_TraHangBan_Insert", p, transaction: tr, commandType: CommandType.StoredProcedure);
                         
                         int newId = p.Get<int>("@NewID");
+
+                        // Phí vận chuyển: ghi riêng, không sửa sp_BAN_TraHangBan_Insert
+                        conn.Execute(UpdatePhiVanChuyenSql, new { ID = newId, PhiVanChuyen = traHang.PhiVanChuyen ?? 0 }, transaction: tr);
 
                         if (chiTiets != null && chiTiets.Any())
                         {
@@ -208,6 +216,11 @@ namespace SalesManagementSystem.Repositories
                             traHang.NguoiCapNhat,
                             traHang.PhiBocXep
                         }, transaction: tr, commandType: CommandType.StoredProcedure);
+
+                        // Phí vận chuyển: ghi riêng, không sửa sp_BAN_TraHangBan_Update
+                        // (cùng điều kiện TrangThai IN (1, 2) như SP => phiếu đã hủy không bị đổi)
+                        conn.Execute(UpdatePhiVanChuyenSql + " AND TrangThai IN (1, 2)",
+                            new { ID = traHang.ID, PhiVanChuyen = traHang.PhiVanChuyen ?? 0 }, transaction: tr);
                         
                         conn.Execute("sp_BAN_TraHangBanChiTiet_DeleteByTraHangId", new { IDTraHang = traHang.ID }, transaction: tr, commandType: CommandType.StoredProcedure);
 

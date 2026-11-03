@@ -37,6 +37,7 @@ namespace SalesManagementSystem.Models.ViewModels
         
         public int? TrangThai { get; set; }
         public decimal? PhiBocXep { get; set; }
+        public decimal? PhiVanChuyen { get; set; }
         
         public string NguoiTaoName { get; set; }
         
