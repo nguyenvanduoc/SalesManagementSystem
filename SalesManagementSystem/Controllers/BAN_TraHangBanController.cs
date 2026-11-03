@@ -147,7 +147,8 @@ namespace SalesManagementSystem.Controllers
                     ConPhaiHoan = model.ConPhaiHoan ?? 0,
                     TrangThai = 1, // Luon la 1 (Luu nhap) khi moi tao
                     NguoiTao = GetCurrentUser()?.UserID ?? 0,
-                    PhiBocXep = model.PhiBocXep ?? 0
+                    PhiBocXep = model.PhiBocXep ?? 0,
+                    PhiVanChuyen = model.PhiVanChuyen ?? 0
                 };
 
                 var chiTiets = model.ChiTiets.Select(x => new TraHangBanChiTiet
@@ -207,6 +208,7 @@ namespace SalesManagementSystem.Controllers
                 DaThanhToan = traHang.DaThanhToan,
                 TongTienDonHang = traHang.TongTienDonHang,
                 PhiBocXep = traHang.PhiBocXep,
+                PhiVanChuyen = traHang.PhiVanChuyen,
                 ChiTiets = chiTiets.ToList()
             };
             
@@ -236,7 +238,8 @@ namespace SalesManagementSystem.Controllers
                     TongTienDaHoan = model.TongTienDaHoan ?? 0,
                     ConPhaiHoan = model.ConPhaiHoan ?? 0,
                     NguoiCapNhat = GetCurrentUser()?.UserID ?? 0,
-                    PhiBocXep = model.PhiBocXep ?? 0
+                    PhiBocXep = model.PhiBocXep ?? 0,
+                    PhiVanChuyen = model.PhiVanChuyen ?? 0
                 };
 
                 var chiTiets = model.ChiTiets.Select(x => new TraHangBanChiTiet

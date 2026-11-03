@@ -21,5 +21,6 @@ namespace SalesManagementSystem.Models.Entities
         public DateTime? NgayCapNhat { get; set; }
         public int? NguoiCapNhat { get; set; }
         public decimal? PhiBocXep { get; set; }
+        public decimal? PhiVanChuyen { get; set; }
     }
 }

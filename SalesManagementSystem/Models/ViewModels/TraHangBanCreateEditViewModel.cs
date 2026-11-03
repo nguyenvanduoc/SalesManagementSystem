@@ -36,6 +36,7 @@ namespace SalesManagementSystem.Models.ViewModels
         
         public int? TrangThai { get; set; }
         public decimal? PhiBocXep { get; set; }
+        public decimal? PhiVanChuyen { get; set; } // Công ty chịu, cộng vào Cần phải hoàn khách
         
         // Thong tin tu don hang de tinh toan
         public decimal DaThanhToan { get; set; }
