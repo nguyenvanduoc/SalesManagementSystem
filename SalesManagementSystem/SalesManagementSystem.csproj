@@ -429,11 +429,6 @@
     <Content Include="Logs\2026-06-05.log" />
     <Content Include="App_Config\system.dat" />
     <Content Include="AGENTS.md" />
-    <Content Include="obj\Release\Package\PackageTmp\Views\ChungTuBanHang\_DetailInline.cshtml" />
-    <Content Include="obj\Release\Package\PackageTmp\Views\DonDatHang\_DetailInline.cshtml" />
-    <Content Include="obj\Release\Package\PackageTmp\Views\PhieuNhapKho\_DetailInline.cshtml" />
-    <Content Include="obj\Release\Package\PackageTmp\Views\PhieuXuatKho\_DetailInline.cshtml" />
-    <Content Include="obj\Release\Package\PackageTmp\Views\CongNoNCC\_CongNoNCCList.cshtml" />
     <Content Include="node_modules\.package-lock.json" />
     <Content Include="node_modules\iconv-lite\encodings\tables\big5-added.json" />
     <Content Include="node_modules\iconv-lite\encodings\tables\cp936.json" />
@@ -450,8 +445,6 @@
     <Content Include="node_modules\safer-buffer\package.json" />
     <Content Include="node_modules\safer-buffer\Porting-Buffer.md" />
     <Content Include="node_modules\safer-buffer\Readme.md" />
-    <Content Include="obj\Release\Package\PackageTmp\Views\PhieuNhapKho\_PhieuNhapKhoList.cshtml" />
-    <Content Include="obj\Release\Package\PackageTmp\Views\CongNoKhachHang\_CongNoKhachHangList.cshtml" />
     <Content Include="App_Config\systemPublic.dat" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
@@ -617,7 +610,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\Enums\" />
-    <Folder Include="obj\Release\Package\PackageTmp\obj\Release\Package\PackageTmp\Views\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />
