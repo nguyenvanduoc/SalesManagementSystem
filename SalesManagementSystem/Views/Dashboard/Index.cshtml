@@ -10,6 +10,12 @@
         padding: 15px;
         background-color: #f8f9fa;
     }
+    /* Bootstrap gán sticky-top/sticky-bottom z-index 1020, cao hơn .modal (1015) trong _Layout
+       => tiêu đề/tổng cộng bảng đè lên popup. Hạ xuống, chỉ cần nổi trên các dòng khi cuộn. */
+    .dashboard-container .sticky-top,
+    .dashboard-container .sticky-bottom {
+        z-index: 3;
+    }
     .filter-bar {
         background: #fff;
         padding: 12px 18px;
