@@ -445,7 +445,7 @@
         <!-- KHỐI BÁN HÀNG -->
         <div class="col-md-6">
             <div class="panel-card h-100 mb-0 p-3">
-                <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mb-2 pb-1 border-bottom">
                     <ul class="nav nav-pills card-header-pills gap-1" id="tabBanHang_@uid" role="tablist" style="font-size: 0.85rem;">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active py-1 px-2.5 fw-semibold d-flex align-items-center gap-1" id="tab-don-diduong-@uid" data-bs-toggle="pill" data-bs-target="#content-don-diduong-@uid" type="button" role="tab">
@@ -458,7 +458,12 @@
                             </button>
                         </li>
                     </ul>
-                    <a href="#" onclick="TabManager.openTab('DonDatHang', 'Đơn đặt hàng', '@Url.Action("Index", "DonDatHang")')" class="text-success text-decoration-none small fw-bold ms-2">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+                    <div class="d-flex align-items-center gap-2 ms-2 flex-shrink-0">
+                        <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 fw-semibold btn-xem-chi-tiet-diduong" onclick="xemChiTietDiDuong_@(uid)('don')" title="Xem chi tiết toàn bộ đơn hàng đi đường">
+                            <i class="bi bi-arrows-fullscreen"></i> Chi tiết
+                        </button>
+                        <a href="#" onclick="TabManager.openTab('DonDatHang', 'Đơn đặt hàng', '@Url.Action("Index", "DonDatHang")')" class="text-success text-decoration-none small fw-bold">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+                    </div>
                 </div>
                 <div class="tab-content" id="tabBanHangContent_@uid">
                     <!-- Tab 1: Đơn đang đi đường -->
@@ -519,7 +524,7 @@
         <!-- KHỐI NHẬP HÀNG -->
         <div class="col-md-6">
             <div class="panel-card h-100 mb-0 p-3">
-                <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mb-2 pb-1 border-bottom">
                     <ul class="nav nav-pills card-header-pills gap-1" id="tabNhapHang_@uid" role="tablist" style="font-size: 0.85rem;">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active py-1 px-2.5 fw-semibold d-flex align-items-center gap-1" id="tab-nhap-diduong-@uid" data-bs-toggle="pill" data-bs-target="#content-nhap-diduong-@uid" type="button" role="tab">
@@ -532,7 +537,12 @@
                             </button>
                         </li>
                     </ul>
-                    <a href="#" onclick="TabManager.openTab('PhieuNhapKho', 'Phiếu nhập kho', '@Url.Action("Index", "PhieuNhapKho")')" class="text-warning text-decoration-none small fw-bold ms-2">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+                    <div class="d-flex align-items-center gap-2 ms-2 flex-shrink-0">
+                        <button type="button" class="btn btn-sm btn-outline-warning py-0 px-2 fw-semibold btn-xem-chi-tiet-diduong" onclick="xemChiTietDiDuong_@(uid)('nhap')" title="Xem chi tiết toàn bộ phiếu nhập kho đi đường">
+                            <i class="bi bi-arrows-fullscreen"></i> Chi tiết
+                        </button>
+                        <a href="#" onclick="TabManager.openTab('PhieuNhapKho', 'Phiếu nhập kho', '@Url.Action("Index", "PhieuNhapKho")')" class="text-warning text-decoration-none small fw-bold">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+                    </div>
                 </div>
                 <div class="tab-content" id="tabNhapHangContent_@uid">
                     <!-- Tab 1: Nhập kho đang đi đường (Đề nghị ghi) -->
@@ -1008,6 +1018,146 @@
             });
         }
 
+        // ===== POPUP XEM CHI TIẾT ĐƠN HÀNG / NHẬP KHO ĐI ĐƯỜNG =====
+        var dsDiDuong_@(uid) = { don: [], nhap: [] };
+
+        function escHtml(v) {
+            if (v === null || v === undefined) return '';
+            var d = document.createElement('div');
+            d.textContent = String(v);
+            return d.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        function tinhTienPhieuNhapDiDuong(n) {
+            if (n.TongCong && n.TongCong > 0) return n.TongCong;
+            if (n.TongTienHang && n.TongTienHang > 0) return n.TongTienHang;
+            return n.TienVanChuyen || 0;
+        }
+
+        // Cấu hình cột cho từng loại popup: tiêu đề, cách lấy giá trị, chuỗi tìm kiếm, SL, tiền
+        var cauHinhPopupDiDuong = {
+            don: {
+                tieuDe: '<i class="bi bi-truck text-primary me-1"></i> Đơn hàng đi đường',
+                mauTien: 'text-success',
+                cot: [
+                    { ten: 'MÃ ĐH', lop: 'fw-bold text-nowrap', lay: function (o) { return escHtml(o.SoDonHang); } },
+                    { ten: 'NGÀY LÊN ĐƠN', lop: 'text-nowrap', lay: function (o) { return escHtml(formatDate(o.NgayTaoDon)); } },
+                    { ten: 'KHÁCH HÀNG', lay: function (o) { return o.TenKhachHang ? escHtml(o.TenKhachHang) : '<span class="text-muted">—</span>'; } },
+                    { ten: 'PHƯƠNG TIỆN', lay: function (o) { return o.TenPhuongTien ? escHtml(o.TenPhuongTien) : '<span class="text-muted">—</span>'; } }
+                ],
+                timKiem: function (o) { return [o.SoDonHang, o.TenKhachHang, o.TenPhuongTien].join(' '); },
+                soLuong: function (o) { return o.TongSoLuong || 0; },
+                tien: function (o) { return o.TongTien || 0; }
+            },
+            nhap: {
+                tieuDe: '<i class="bi bi-box-seam-fill text-warning me-1"></i> Nhập kho đi đường',
+                mauTien: 'text-warning',
+                cot: [
+                    { ten: 'MÃ PHIẾU', lop: 'fw-bold text-primary text-nowrap', lay: function (n) { return escHtml(n.SoChungTu); } },
+                    { ten: 'NGÀY NHẬP', lop: 'text-nowrap', lay: function (n) { return escHtml(formatDate(n.NgayNhap)); } },
+                    { ten: 'NGƯỜI GIAO HÀNG', lay: function (n) { var v = n.TenNguoiGiao || n.HoTenTaiXe || n.TenPhuongTien; return v ? escHtml(v) : '<span class="text-muted">—</span>'; } },
+                    { ten: 'NGƯỜI NHẬN', lay: function (n) { return n.TenNguoiNhan ? escHtml(n.TenNguoiNhan) : '<span class="text-muted">—</span>'; } },
+                    { ten: 'NHÀ CUNG CẤP', lay: function (n) { return n.TenNhaCungCap ? escHtml(n.TenNhaCungCap) : '<span class="text-muted">—</span>'; } }
+                ],
+                timKiem: function (n) { return [n.SoChungTu, n.TenNguoiGiao, n.HoTenTaiXe, n.TenPhuongTien, n.TenNguoiNhan, n.TenNhaCungCap].join(' '); },
+                soLuong: function (n) { return n.TongSoLuong || 0; },
+                tien: function (n) { return tinhTienPhieuNhapDiDuong(n); }
+            }
+        };
+
+        // Mở popup lớn hiển thị TOÀN BỘ danh sách đi đường (loai = 'don' | 'nhap')
+        function xemChiTietDiDuong_@(uid)(loai) {
+            var ch = cauHinhPopupDiDuong[loai];
+            var ds = dsDiDuong_@(uid)[loai] || [];
+            var modalId = 'modalChiTietDiDuong_@(uid)';
+
+            // Modal được gắn vào <body> để không bị khung tab/panel cắt hoặc che
+            $('#' + modalId).remove();
+
+            var thead = '<th class="text-center" style="width:48px">STT</th>' +
+                ch.cot.map(function (c) { return '<th>' + c.ten + '</th>'; }).join('') +
+                '<th class="text-end">TỔNG SL</th><th class="text-end">TỔNG TIỀN</th>';
+
+            var tbody = '';
+            ds.forEach(function (item, i) {
+                tbody += '<tr data-tim-kiem="' + escHtml(String(ch.timKiem(item)).toLowerCase()) + '" data-sl="' + ch.soLuong(item) + '" data-tien="' + ch.tien(item) + '">' +
+                    '<td class="text-center text-muted stt">' + (i + 1) + '</td>' +
+                    ch.cot.map(function (c) { return '<td class="' + (c.lop || '') + '">' + c.lay(item) + '</td>'; }).join('') +
+                    '<td class="text-end fw-bold text-nowrap">' + formatNumber(ch.soLuong(item)) + '</td>' +
+                    '<td class="text-end fw-bold text-nowrap ' + ch.mauTien + '">' + formatMoney(ch.tien(item)) + '</td>' +
+                    '</tr>';
+            });
+            var soCot = ch.cot.length + 3;
+            if (!tbody) tbody = '<tr><td colspan="' + soCot + '" class="text-center text-muted py-4">Không có dữ liệu đi đường.</td></tr>';
+
+            var html =
+                '<div class="modal fade" id="' + modalId + '" tabindex="-1" aria-hidden="true">' +
+                '  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable modal-fullscreen-lg-down">' +
+                '    <div class="modal-content">' +
+                '      <div class="modal-header py-2">' +
+                '        <h6 class="modal-title fw-bold d-flex align-items-center">' + ch.tieuDe +
+                '          <span class="badge bg-warning text-dark rounded-pill ms-2">' + ds.length + '</span></h6>' +
+                '        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>' +
+                '      </div>' +
+                '      <div class="px-3 pt-2 pb-2 border-bottom">' +
+                '        <div class="input-group input-group-sm">' +
+                '          <span class="input-group-text"><i class="bi bi-search"></i></span>' +
+                '          <input type="text" class="form-control txt-tim-diduong" placeholder="Tìm theo mã, khách hàng / người giao, người nhận, nhà cung cấp...">' +
+                '        </div>' +
+                '      </div>' +
+                '      <div class="modal-body p-0">' +
+                '        <table class="table table-hover table-bordered align-middle mb-0" style="font-size:0.85rem">' +
+                '          <thead class="table-light sticky-top"><tr>' + thead + '</tr></thead>' +
+                '          <tbody>' + tbody + '</tbody>' +
+                '        </table>' +
+                '      </div>' +
+                '      <div class="modal-footer py-2 justify-content-between">' +
+                '        <div class="small text-muted">Hiển thị <b class="lbl-so-dong">' + ds.length + '</b> / ' + ds.length + ' dòng</div>' +
+                '        <div class="fw-bold">TỔNG CỘNG: SL <span class="text-primary lbl-tong-sl">0</span>' +
+                '          &nbsp;|&nbsp; Tiền <span class="' + ch.mauTien + ' lbl-tong-tien">0₫</span></div>' +
+                '      </div>' +
+                '    </div>' +
+                '  </div>' +
+                '</div>';
+
+            var $modal = $(html).appendTo('body');
+
+            // Tính lại tổng theo các dòng đang hiển thị (sau khi lọc)
+            function capNhatTong() {
+                var sl = 0, tien = 0, dem = 0;
+                $modal.find('tbody tr[data-tim-kiem]:visible').each(function () {
+                    dem++;
+                    $(this).find('.stt').text(dem);
+                    sl += Number($(this).data('sl')) || 0;
+                    tien += Number($(this).data('tien')) || 0;
+                });
+                $modal.find('.lbl-so-dong').text(dem);
+                $modal.find('.lbl-tong-sl').text(formatNumber(sl));
+                $modal.find('.lbl-tong-tien').text(formatMoney(tien));
+            }
+
+            $modal.find('.txt-tim-diduong').on('input', function () {
+                var tuKhoa = $(this).val().trim().toLowerCase();
+                $modal.find('tbody tr[data-tim-kiem]').each(function () {
+                    $(this).toggle(!tuKhoa || $(this).attr('data-tim-kiem').indexOf(tuKhoa) !== -1);
+                });
+                capNhatTong();
+            });
+
+            $modal.on('shown.bs.modal', function () {
+                capNhatTong();
+                $modal.find('.txt-tim-diduong').trigger('focus');
+            });
+            // Đóng xong thì xoá khỏi DOM, tránh tồn đọng modal khi mở nhiều lần
+            $modal.on('hidden.bs.modal', function () {
+                var inst = bootstrap.Modal.getInstance(this);
+                if (inst) inst.dispose();
+                $modal.remove();
+            });
+
+            new bootstrap.Modal($modal[0]).show();
+        }
+
         function renderDashboard(data) {
             // KHỐI 1: 5 METRIC CARDS REDESIGN
             $('#valDonHang_@uid').text(data.TongSoDonHang);
@@ -1072,6 +1222,10 @@
             }
             $('#tbRecentOrders_@uid').html(ordHtml);
 
+            // Lưu lại danh sách đi đường để popup "Chi tiết" hiển thị đầy đủ (không gọi lại server)
+            dsDiDuong_@(uid).don = data.DonHangDangDiDuong || [];
+            dsDiDuong_@(uid).nhap = data.PhieuNhapDangDiDuong || [];
+
             var countDonDiDuong = data.DonHangDangDiDuong ? data.DonHangDangDiDuong.length : 0;
             $('#badgeDonDiDuong_@uid').text(countDonDiDuong);
 
@@ -1117,7 +1271,7 @@
                     var nguoiGiaoHang = n.TenNguoiGiao || n.HoTenTaiXe || n.TenPhuongTien || '<span class="text-muted">—</span>';
                     var nguoiNhan = n.TenNguoiNhan || '<span class="text-muted">—</span>';
                     var sl = n.TongSoLuong || 0;
-                    var tongTienPhieu = (n.TongCong && n.TongCong > 0) ? n.TongCong : ((n.TongTienHang && n.TongTienHang > 0) ? n.TongTienHang : (n.TienVanChuyen || 0));
+                    var tongTienPhieu = tinhTienPhieuNhapDiDuong(n);
                     totalNhapDiDuongSL += sl;
                     totalNhapDiDuongTien += tongTienPhieu;
 
