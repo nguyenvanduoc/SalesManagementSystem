@@ -1,0 +1,162 @@
+/* =====================================================================
+   CHỦ ĐỀ MÀU MENU (sidebar + topbar)
+   - Mỗi chủ đề chỉ ghi đè các biến CSS khai báo trong :root ở _Layout.cshtml.
+   - Chủ đề được gắn bằng thuộc tính <html data-menu-theme="...">.
+   - Danh sách chủ đề hiển thị trong hộp chọn nằm ở Scripts/menu-theme.js
+     (khi thêm chủ đề mới phải khai báo ở CẢ HAI nơi, cùng một mã).
+   ===================================================================== */
+
+/* Mặc định: Xanh biển (giữ nguyên màu cũ của hệ thống) -> không cần ghi đè */
+
+/* Xanh đêm */
+html[data-menu-theme="navy"] {
+    --sidebar-bg:            #0f2341;
+    --sidebar-hover:         #1b3560;
+    --sidebar-active:        #2f6fde;
+    --sidebar-border:        #34558b;
+    --sidebar-text:          #c9d6ea;
+    --sidebar-heading:       #7f95b8;
+    --topbar-bg:             #0a1628;
+    --accent:                #4f8ff7;
+}
+
+/* Xanh lá */
+html[data-menu-theme="green"] {
+    --sidebar-bg:            #14532d;
+    --sidebar-hover:         #166534;
+    --sidebar-active:        #15803d;
+    --sidebar-border:        #2f855a;
+    --sidebar-text:          #d1fae5;
+    --sidebar-heading:       #86efac;
+    --topbar-bg:             #0b2e1b;
+    --accent:                #34d399;
+}
+
+/* Tím */
+html[data-menu-theme="purple"] {
+    --sidebar-bg:            #3b1f5e;
+    --sidebar-hover:         #4c2a78;
+    --sidebar-active:        #6d3fc0;
+    --sidebar-border:        #6b46c1;
+    --sidebar-text:          #e9ddff;
+    --sidebar-heading:       #b9a3e3;
+    --topbar-bg:             #22113a;
+    --accent:                #a78bfa;
+}
+
+/* Đỏ đô */
+html[data-menu-theme="maroon"] {
+    --sidebar-bg:            #6b1d2a;
+    --sidebar-hover:         #842636;
+    --sidebar-active:        #b91c1c;
+    --sidebar-border:        #a93a4a;
+    --sidebar-text:          #fde2e4;
+    --sidebar-heading:       #e8a1aa;
+    --topbar-bg:             #3d0f17;
+    --accent:                #ff8a8a;
+}
+
+/* Cam đất */
+html[data-menu-theme="amber"] {
+    --sidebar-bg:            #7c2d12;
+    --sidebar-hover:         #9a3412;
+    --sidebar-active:        #c2410c;
+    --sidebar-border:        #b45309;
+    --sidebar-text:          #ffedd5;
+    --sidebar-heading:       #fdba74;
+    --topbar-bg:             #431407;
+    --accent:                #fbbf24;
+}
+
+/* Than chì */
+html[data-menu-theme="graphite"] {
+    --sidebar-bg:            #1f2933;
+    --sidebar-hover:         #2d3a46;
+    --sidebar-active:        #2f6f9f;
+    --sidebar-border:        #3d4b59;
+    --sidebar-text:          #d3dae1;
+    --sidebar-heading:       #8795a3;
+    --topbar-bg:             #12181f;
+    --accent:                #4fb3d9;
+}
+
+/* Sáng: nền trắng, chữ tối -> phải đổi cả nhóm biến chữ/đường kẻ */
+html[data-menu-theme="light"] {
+    --sidebar-bg:             #ffffff;
+    --sidebar-hover:          #eaf2fb;
+    --sidebar-active:         #1a73e8;
+    --sidebar-border:         #c9d3dd;
+    --sidebar-text:           #2c3e50;
+    --sidebar-heading:        #7b8a99;
+    --sidebar-text-hover:     #0b5b84;
+    --sidebar-text-active:    #ffffff;
+    --sidebar-sub-active-text:#1a73e8;
+    --sidebar-sub-active-bg:  rgba(26, 115, 232, 0.10);
+    --sidebar-text-faded:     rgba(44, 62, 80, 0.55);
+    --sidebar-tree-line:      rgba(44, 62, 80, 0.30);
+    --sidebar-tree-dash:      rgba(44, 62, 80, 0.25);
+    --sidebar-dot:            #1a73e8;
+    --sidebar-divider:        rgba(0, 0, 0, 0.08);
+    --sidebar-shadow:         1px 0 0 #dde3e9;
+    --topbar-bg:              #0b5b84;
+    --accent:                 #7fd3ff;
+}
+
+/* ─── Hộp chọn chủ đề ───────────────────────────────────────────── */
+.menu-theme-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+}
+.menu-theme-card {
+    border: 2px solid #e3e7eb;
+    border-radius: 10px;
+    padding: 8px;
+    background: #fff;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color .15s, box-shadow .15s;
+    width: 100%;
+}
+.menu-theme-card:hover { border-color: #9fc3e7; }
+.menu-theme-card:focus-visible { outline: 2px solid #1a73e8; outline-offset: 2px; }
+.menu-theme-card.selected {
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, .15);
+}
+/* Bản xem trước thu nhỏ: thanh topbar + cột menu + vùng nội dung */
+.menu-theme-preview {
+    display: grid;
+    grid-template-columns: 38% 1fr;
+    grid-template-rows: 12px 1fr;
+    height: 74px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #e3e7eb;
+}
+.menu-theme-preview .p-top { grid-column: 1 / 3; }
+.menu-theme-preview .p-side {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 6px 5px;
+}
+.menu-theme-preview .p-side i {
+    display: block;
+    height: 5px;
+    border-radius: 3px;
+    opacity: .85;
+}
+.menu-theme-preview .p-side i.on { height: 8px; opacity: 1; }
+.menu-theme-preview .p-main { background: #f6f7f8; }
+.menu-theme-name {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 7px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #34495e;
+}
+.menu-theme-name .bi-check-circle-fill { color: #1a73e8; display: none; }
+.menu-theme-card.selected .menu-theme-name .bi-check-circle-fill { display: inline; }

@@ -391,6 +391,7 @@
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="Content\css\global-search.css" />
+    <Content Include="Content\css\menu-theme.css" />
     <Content Include="Content\css\tab-manager.css" />
     <Content Include="Content\css\chatbot.css" />
     <Content Include="Content\IMG\bg-login.png" />
@@ -466,6 +467,7 @@
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Scripts\global-search.js" />
     <Content Include="Scripts\chatbot.js" />
+    <Content Include="Scripts\menu-theme.js" />
     <Content Include="Scripts\tab-manager.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">

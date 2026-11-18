@@ -17,6 +17,23 @@
     <link rel="stylesheet" href="@Url.Content("~/Content/bootstrap-icons.min.css")" />
     <!-- Global Search CSS -->
     <link rel="stylesheet" href="@Url.Content("~/Content/css/global-search.css")" />
+    <!-- Chủ đề màu menu -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/css/menu-theme.css?v=1.0")" />
+    @{
+        var themeUser = Session[SalesManagementSystem.Helpers.CommonConstants.USER_SESSION] as SalesManagementSystem.Models.ViewModels.UserLoginViewModel;
+        // Lưu riêng theo từng tài khoản trên trình duyệt này
+        string menuThemeKey = "menuTheme_" + (themeUser != null ? themeUser.UserID.ToString() : "guest");
+    }
+    <script>
+        // Áp chủ đề đã lưu NGAY trong <head> (trước khi vẽ trang) để không bị nháy màu mặc định.
+        window.MENU_THEME_KEY = '@menuThemeKey';
+        try {
+            var savedMenuTheme = localStorage.getItem(window.MENU_THEME_KEY);
+            if (savedMenuTheme && /^[a-z0-9-]+$/.test(savedMenuTheme) && savedMenuTheme !== 'default') {
+                document.documentElement.setAttribute('data-menu-theme', savedMenuTheme);
+            }
+        } catch (e) { }
+    </script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
 
@@ -34,6 +51,18 @@
             --topbar-bg:        #17202a;
             --accent:           #1abc9c;
             --body-bg:          #f6f7f8; /* ASC body background */
+
+            /* Màu chữ / đường kẻ của menu: chủ đề sáng (Content/css/menu-theme.css) sẽ ghi đè */
+            --sidebar-text-hover:      #fff;
+            --sidebar-text-active:     #fff;
+            --sidebar-sub-active-text: #fff;
+            --sidebar-sub-active-bg:   rgba(255,255,255,0.1);
+            --sidebar-text-faded:      rgba(255,255,255,0.45);
+            --sidebar-tree-line:       rgba(255,255,255,0.5);
+            --sidebar-tree-dash:       rgba(255,255,255,0.4);
+            --sidebar-dot:             #fff;
+            --sidebar-divider:         rgba(255,255,255,.1);
+            --sidebar-shadow:          none;
         }
 
         /* ─── Reset & Base ───────────────────────────────── */
@@ -187,11 +216,14 @@
             bottom: 0;
             width: var(--sidebar-width);
             background: var(--sidebar-bg);
+            box-shadow: var(--sidebar-shadow);
             overflow-y: auto;
             overflow-x: hidden;
             z-index: 1040;
-            transition: width .28s ease, transform .28s ease;
+            transition: width .28s ease, transform .28s ease, background-color .2s;
         }
+        /* Nút thu/mở menu dùng class text-white của Bootstrap -> theo màu chủ đề */
+        .sidebar .btn-toggle.text-white { color: var(--sidebar-text-hover) !important; }
         .sidebar::-webkit-scrollbar { width: 4px; }
         .sidebar::-webkit-scrollbar-thumb { background: var(--sidebar-border); border-radius: 4px; }
 
@@ -229,11 +261,11 @@
         }
         .sidebar > ul > .nav-item > .nav-link:hover {
             background: var(--sidebar-hover);
-            color: #fff;
+            color: var(--sidebar-text-hover);
         }
         .sidebar > ul > .nav-item > .nav-link.active {
             background: var(--sidebar-active);
-            color: #fff;
+            color: var(--sidebar-text-active);
         }
 
         /* Nav group (Accordion) */
@@ -251,7 +283,7 @@
         }
         .sidebar .nav-group-toggle:hover {
             background: var(--sidebar-hover);
-            color: #fff;
+            color: var(--sidebar-text-hover);
         }
         .sidebar .nav-group-toggle .chevron {
             margin-left: auto;
@@ -267,7 +299,7 @@
             padding: 0;
             list-style: none;
             /* Vertical line */
-            border-left: 1px solid rgba(255, 255, 255, 0.5);
+            border-left: 1px solid var(--sidebar-tree-line);
             margin-left: 26px; /* align with the icon above */
             padding-top: 5px;
             padding-bottom: 5px;
@@ -285,7 +317,7 @@
             left: 0;
             width: 12px;
             height: 1px;
-            background-color: rgba(255, 255, 255, 0.4);
+            background-color: var(--sidebar-tree-dash);
         }
 
         /* Dấu chấm trắng cho item active */
@@ -296,7 +328,7 @@
             left: -3px; /* Đặt đè lên đường kẻ dọc */
             width: 7px;
             height: 7px;
-            background-color: #fff;
+            background-color: var(--sidebar-dot);
             border-radius: 50%;
             z-index: 2;
         }
@@ -314,15 +346,15 @@
             position: relative;
         }
         .sidebar .nav-group-collapse .nav-link.text-faded {
-            color: rgba(255, 255, 255, 0.45); /* Chỉ mờ khi cùng nhóm với item active */
+            color: var(--sidebar-text-faded); /* Chỉ mờ khi cùng nhóm với item active */
         }
         .sidebar .nav-group-collapse .nav-link:hover {
             background: transparent;
-            color: #fff;
+            color: var(--sidebar-text-hover);
         }
         .sidebar .nav-group-collapse .nav-link.active {
-            background: rgba(255,255,255,0.1);
-            color: #fff;
+            background: var(--sidebar-sub-active-bg);
+            color: var(--sidebar-sub-active-text);
             border-radius: 0 4px 4px 0;
             border-left: none;
             font-weight: 600;
@@ -330,7 +362,7 @@
 
         /* Separator */
         .sidebar hr.nav-divider {
-            border-color: rgba(255,255,255,.1);
+            border-color: var(--sidebar-divider);
             margin: 6px 14px;
         }
 
@@ -834,6 +866,11 @@
                 <li>
                     <a class="dropdown-item d-flex align-items-center py-2" href="#" onclick="openFormModal('@Url.Action("ChangePassword", "NguoiDung")')">
                         <i class="bi bi-key me-3 text-muted"></i> Đổi mật khẩu
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center py-2" href="#" onclick="MenuTheme.openPicker(); return false;">
+                        <i class="bi bi-palette me-3 text-muted"></i> Màu menu
                     </a>
                 </li>
                 <li><hr class="dropdown-divider"></li>
@@ -1479,6 +1516,7 @@
     });
 </script>
 @Scripts.Render("~/bundles/appscripts")
+<script src="@Url.Content("~/Scripts/menu-theme.js?v=1.0")"></script>
 @RenderSection("scripts", required: false)
 
 <script>
