@@ -91,6 +91,25 @@ var TabManager = (function () {
         $container.find('.tab-loading-overlay').remove();
     }
 
+    /**
+     * Hủy các instance Select2 bên trong một vùng DOM TRƯỚC khi vùng đó bị thay nội dung
+     * hoặc bị xóa (đóng tab, nạp lại tab, tải lại lưới).
+     * Select2 4.1 lưu dữ liệu của mỗi <select>/<option> trong bộ nhớ đệm toàn cục
+     * (Utils.__cache); jQuery .html()/.remove() KHÔNG dọn bộ nhớ này, nên dùng lâu,
+     * chuyển nhiều màn hình sẽ tích tụ rác và dropdown mồ côi còn bám ở <body>.
+     */
+    function destroyPlugins($root) {
+        if (!$root || $root.length === 0 || !$.fn.select2) return;
+        $root.find('select').each(function () {
+            var $select = $(this);
+            if (!$select.data('select2')) return;
+            try {
+                $select.select2('close');
+                $select.select2('destroy');
+            } catch (e) { }
+        });
+    }
+
     function ajaxLoadGrid(url, $container) {
         var containerId = $container.attr('id') || 'grid-' + Math.random().toString(36).substr(2, 9);
         $container.attr('id', containerId);
@@ -117,6 +136,7 @@ var TabManager = (function () {
                     }
                     return;
                 }
+                destroyPlugins($container);
                 $container.html(result);
             },
             error: function (xhr, status) {
@@ -413,6 +433,7 @@ var TabManager = (function () {
                             }
                         }
                     } else {
+                        destroyPlugins($pane);
                         $pane.html(res);
                         reInitPlugins(paneId);
                         hideLoadingLocal($pane);
@@ -812,6 +833,7 @@ var TabManager = (function () {
             }
         }
 
+        destroyPlugins($('#' + paneId));
         $('#' + tabId).parent().remove();
         $('#' + paneId).remove();
         saveTabsState();
@@ -849,6 +871,8 @@ var TabManager = (function () {
                 }
 
                 // 1. Nạp HTML vào tab-pane trước khi tắt loading overlay
+                //    (hủy Select2 cũ trước để không rò rỉ bộ nhớ đệm toàn cục của Select2)
+                destroyPlugins($pane);
                 $pane.html(res);
 
                 // 2. Khởi tạo toàn bộ Select2, Flatpickr và Plugins khi overlay VẪN ĐANG CHE PHỦ

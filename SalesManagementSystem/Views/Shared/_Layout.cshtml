@@ -1035,7 +1035,16 @@
                 return originalSelect2.apply(this, arguments);
             }
             var args = arguments;
-            return this.each(function () {
+            // CHỈ khởi tạo trên thẻ <select>. Select2 gắn class "select2" lên chính
+            // <span class="select2 select2-container"> nó sinh ra, nên lệnh kiểu
+            // $('.select2').select2() ở một View sẽ khởi tạo Select2 lồng lên container
+            // của MỌI tab đang mở -> combobox hiện "Chọn..." + "No results found" cho tới khi F5.
+            this.not('select').each(function () {
+                if (window.console && console.warn) {
+                    console.warn('[Select2] Bỏ qua khởi tạo trên phần tử không phải <select>:', this);
+                }
+            });
+            this.filter('select').each(function () {
                 var $element = $(this);
                 // View có thể chủ động cấu hình lại. Destroy xóa data-select2-id,
                 // nên phải cấp khóa mới SAU destroy, trước khi tạo instance mới.
@@ -1045,6 +1054,7 @@
                 $element.attr('data-select2-id', select2CachePrefix + (++select2ElementSequence));
                 originalSelect2.apply($element, args);
             });
+            return this;
         };
         $.extend($.fn.select2, originalSelect2);
         $.fn.select2.defaults.set("allowClear", true);

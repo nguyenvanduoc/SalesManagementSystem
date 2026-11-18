@@ -40,7 +40,7 @@
 
 <div class="card shadow-sm mb-3">
     <div class="card-body py-2">
-        <form id="searchForm" action="@Url.Action("GetList")" method="get">
+        <form id="searchForm" data-haohut-uid="@uid" action="@Url.Action("GetList")" method="get">
             <div class="row gx-2 gy-2 align-items-end">
                 <div class="col-md-2">
                     <label class="form-label text-muted small mb-1">Thời gian</label>
@@ -140,15 +140,31 @@
 </div>
 
 <!-- Modal container -->
-<div id="modalContainer"></div>
+<div id="modalContainer" data-haohut-modal="@uid"></div>
 
 @section Scripts {
     <script>
-        $(document).ready(function () {
-            $('.select2').select2({ theme: 'bootstrap-5' });
+        // Mọi selector phải giới hạn trong tab-pane của màn hình này.
+        // Selector toàn cục ($('.select2'), $('#searchForm'), $('.btn-reset'), ...)
+        // sẽ trúng phần tử của các tab khác đang mở và làm hỏng combobox / bộ lọc của chúng.
+        function getHaoHutForm() {
+            return $('form[data-haohut-uid="@uid"]');
+        }
+        function getHaoHutPane() {
+            var $pane = getHaoHutForm().closest('.tab-pane');
+            return $pane.length ? $pane : getHaoHutForm().closest('body');
+        }
+        function getHaoHutModalContainer() {
+            return $('[data-haohut-modal="@uid"]');
+        }
 
-            var $form = $('#searchForm');
-            $('.btn-reset').on('click', function() {
+        $(document).ready(function () {
+            var $pane = getHaoHutPane();
+            var $form = getHaoHutForm();
+
+            $pane.find('select.select2').select2({ theme: 'bootstrap-5', width: '100%' });
+
+            $pane.find('.btn-reset').on('click', function() {
                 $form[0].reset();
                 $form.find('select').val('0').trigger('change');
                 $form.find('.ddl-thoi-gian').val('current_month');
@@ -158,9 +174,9 @@
             });
             
             // Xử lý thay đổi thời gian tương tự PhieuNhapKho
-            var ddlThoiGian = $('.ddl-thoi-gian')[0];
-            var txtTuNgay = $('input[name="tuNgay"]')[0];
-            var txtDenNgay = $('input[name="denNgay"]')[0];
+            var ddlThoiGian = $form.find('.ddl-thoi-gian')[0];
+            var txtTuNgay = $form.find('input[name="tuNgay"]')[0];
+            var txtDenNgay = $form.find('input[name="denNgay"]')[0];
             
             function fDate(y, m, d) {
                 var sm = m < 10 ? '0' + m : m;
@@ -228,7 +244,7 @@
             isOpeningModal = true;
             disposeOldModal('modalCreate');
             $.get('@Url.Action("_Create", "KHO_HaoHut")', function (html) {
-                $('#modalContainer').html(html);
+                getHaoHutModalContainer().html(html);
                 var modal = new bootstrap.Modal(document.getElementById('modalCreate'));
                 modal.show();
                 isOpeningModal = false;
@@ -243,7 +259,7 @@
             isOpeningModal = true;
             disposeOldModal('modalEdit');
             $.get('@Url.Action("_Edit", "KHO_HaoHut")?id=' + id, function (html) {
-                $('#modalContainer').html(html);
+                getHaoHutModalContainer().html(html);
                 var modal = new bootstrap.Modal(document.getElementById('modalEdit'));
                 modal.show();
                 isOpeningModal = false;
@@ -258,7 +274,7 @@
             isOpeningModal = true;
             disposeOldModal('modalDetail');
             $.get('@Url.Action("_Detail", "KHO_HaoHut")?id=' + id, function (html) {
-                $('#modalContainer').html(html);
+                getHaoHutModalContainer().html(html);
                 var modal = new bootstrap.Modal(document.getElementById('modalDetail'));
                 modal.show();
                 isOpeningModal = false;
@@ -273,7 +289,7 @@
                 $.post('@Url.Action("Delete", "KHO_HaoHut")', { id: id }, function (res) {
                     if (res.success) {
                         showToast('success', 'Xóa thành công!');
-                        $('#searchForm').trigger('submit');
+                        getHaoHutForm().trigger('submit');
                     } else {
                         showToast('error', res.message);
                     }
@@ -286,7 +302,7 @@
                 $.post('@Url.Action("Huy", "KHO_HaoHut")', { id: id }, function (res) {
                     if (res.success) {
                         showToast('success', 'Hủy thành công!');
-                        $('#searchForm').trigger('submit');
+                        getHaoHutForm().trigger('submit');
                     } else {
                         showToast('error', res.message);
                     }
