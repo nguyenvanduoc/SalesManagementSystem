@@ -18,5 +18,8 @@ namespace SalesManagementSystem.Helpers
         public const string CNKH = "CNKH";
         public const string CNKH_SP02 = "CNKH02";
         public const string DCKH01 = "DCKH01";
+
+        // Báo cáo đối chiếu nhập NCC: Bảng tổng hợp công nợ phải trả theo từng nhà cung cấp
+        public const string TH_CONG_NO_PHAI_TRA_NCC = "THCNPT";
     }
 }

@@ -591,6 +591,7 @@
     <Content Include="Views\BaoCaoDoiChieuNhapNhaCungCap\Index.cshtml" />
     <Content Include="Views\BaoCaoDoiChieuNhapNhaCungCap\_DanhSach.cshtml" />
     <Content Include="App_Data\insert_acl_BaoCaoDoiChieuNhapNhaCungCap.sql" />
+    <Content Include="App_Data\BieuMau\THCNPT.xlsx" />
     <Content Include="Views\BaoCaoDoiChieuNhapNhaCungCap\_DetailsModal.cshtml" />
     <Content Include="Views\BaoCaoKetQuaHoatDongKinhDoanh\_DetailsModal.cshtml" />
     <Content Include="Views\PhieuThuKhachHang\_DetailInline.cshtml" />

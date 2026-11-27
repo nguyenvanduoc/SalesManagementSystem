@@ -14,11 +14,13 @@ namespace SalesManagementSystem.Controllers
     {
         private readonly IBaoCaoDoiChieuNhapNhaCungCapRepository _repo;
         private readonly IExcelExportService _excelExportService;
+        private readonly IDMBieuMauRepository _bieuMauRepo;
 
-        public BaoCaoDoiChieuNhapNhaCungCapController(IBaoCaoDoiChieuNhapNhaCungCapRepository repo, IExcelExportService excelExportService)
+        public BaoCaoDoiChieuNhapNhaCungCapController(IBaoCaoDoiChieuNhapNhaCungCapRepository repo, IExcelExportService excelExportService, IDMBieuMauRepository bieuMauRepo)
         {
             _repo = repo;
             _excelExportService = excelExportService;
+            _bieuMauRepo = bieuMauRepo;
         }
 
         public ActionResult Index()
@@ -290,6 +292,88 @@ namespace SalesManagementSystem.Controllers
             {
                 return Content($"Lỗi xuất Excel: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// Xuất "Bảng tổng hợp công nợ phải trả" (biểu mẫu THCNPT): mỗi dòng là 1 nhà cung cấp
+        /// gồm Số dư đầu kỳ, Phát sinh Nợ (nhập hàng), Phát sinh Có (thanh toán), Số dư cuối kỳ.
+        /// </summary>
+        [HttpGet]
+        public ActionResult ExportTongHopExcel(int? idNhaCungCap, string tuNgay, string denNgay)
+        {
+            DateTime dTu, dDen;
+            if (!DateTime.TryParse(tuNgay, out dTu) || !DateTime.TryParse(denNgay, out dDen))
+                return Content("Vui lòng chọn từ ngày và đến ngày");
+            if (dTu > dDen)
+                return Content("Từ ngày không được lớn hơn đến ngày");
+
+            try
+            {
+                EnsureBieuMauTongHop();
+
+                var data = _repo.GetTongHopCongNoPhaiTra(idNhaCungCap, dTu, dDen).ToList();
+
+                var exportData = data.Select((x, i) => new
+                {
+                    STT = i + 1,
+                    DienGiai = x.TenNhaCungCap ?? "",
+                    SoDuDauKy = x.SoDuDauKy,
+                    PhatSinhNo = x.PhatSinhNo,
+                    PhatSinhCo = x.PhatSinhCo,
+                    SoDuCK = x.SoDuCuoiKy,
+                    GhiChu = ""
+                }).ToList();
+
+                var variables = new Dictionary<string, object>
+                {
+                    { "TuNgay", dTu.ToString("dd/MM/yyyy") },
+                    { "DenNgay", dDen.ToString("dd/MM/yyyy") },
+                    { "NgayDen", dDen.Day.ToString("00") },
+                    { "ThangDen", dDen.Month.ToString("00") },
+                    { "NamDen", dDen.Year.ToString() },
+                    { "TongSoDuDauKy", data.Sum(x => x.SoDuDauKy) },
+                    { "TongPhatSinhNo", data.Sum(x => x.PhatSinhNo) },
+                    { "TongPhatSinhCo", data.Sum(x => x.PhatSinhCo) },
+                    { "TongSoDuCK", data.Sum(x => x.SoDuCuoiKy) },
+                    { "Ngay", DateTime.Now.Day.ToString("00") },
+                    { "Thang", DateTime.Now.Month.ToString("00") },
+                    { "Nam", DateTime.Now.Year.ToString() }
+                };
+
+                string fileExtension;
+                var bytes = _excelExportService.Export(BieuMauConstants.TH_CONG_NO_PHAI_TRA_NCC, exportData, out fileExtension, variables);
+                string contentType = fileExtension == "xls" ? "application/vnd.ms-excel" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                return File(bytes, contentType, $"TongHopCongNoPhaiTra_{DateTime.Now:yyyyMMddHHmmss}.{fileExtension}");
+            }
+            catch (Exception ex)
+            {
+                return Content($"Lỗi xuất Excel: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Nếu Danh mục biểu mẫu chưa có mã THCNPT thì tự thêm từ file mẫu App_Data/BieuMau/THCNPT.xlsx.
+        /// Sau đó người dùng có thể tải về chỉnh sửa và upload lại trong màn hình Danh mục biểu mẫu.
+        /// </summary>
+        private void EnsureBieuMauTongHop()
+        {
+            string ma = BieuMauConstants.TH_CONG_NO_PHAI_TRA_NCC;
+            if (_bieuMauRepo.GetByMa(ma) != null) return;
+
+            string path = Server.MapPath("~/App_Data/BieuMau/" + ma + ".xlsx");
+            if (!System.IO.File.Exists(path)) return; // Export sẽ báo "Không tìm thấy biểu mẫu"
+
+            var user = GetCurrentUser();
+            _bieuMauRepo.Insert(new SalesManagementSystem.Models.Entities.DM_BieuMau
+            {
+                MaBieuMau = ma,
+                TenBieuMau = "Bảng tổng hợp công nợ phải trả (NCC)",
+                TenFile = ma + ".xlsx",
+                DuoiFile = "XLSX",
+                NoiDung = System.IO.File.ReadAllBytes(path),
+                NgayTao = DateTime.Now,
+                NguoiTao = user?.UserID
+            });
         }
     }
 }

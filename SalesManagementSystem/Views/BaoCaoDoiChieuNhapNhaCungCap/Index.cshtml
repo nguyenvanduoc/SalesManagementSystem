@@ -83,9 +83,23 @@
                         <button type="button" class="btn btn-warning btn-sm px-3 ms-2 shadow-sm" id="btnReset_@uid">
                             <i class="bi bi-arrow-clockwise me-1"></i> Làm mới
                         </button>
-                        <button type="button" class="btn btn-success btn-sm px-3 ms-2 shadow-sm" id="btnExportExcel_@uid">
-                            <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
-                        </button>
+                        <div class="btn-group ms-2">
+                            <button type="button" class="btn btn-success btn-sm px-3 shadow-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item" href="#" id="btnExportExcel_@uid">
+                                        <i class="bi bi-file-earmark-spreadsheet me-2"></i>Chi tiết đối chiếu nhập NCC
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" id="btnExportTongHop_@uid">
+                                        <i class="bi bi-file-earmark-spreadsheet me-2"></i>Bảng tổng hợp công nợ phải trả (THCNPT)
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </form>
@@ -171,7 +185,8 @@
             });
 
             // Sự kiện Xuất Excel
-            $container.find('#btnExportExcel_@uid').on('click', function () {
+            $container.find('#btnExportExcel_@uid').on('click', function (e) {
+                e.preventDefault();
                 var tuNgay = $container.find('[name="tuNgay"]').val();
                 var denNgay = $container.find('[name="denNgay"]').val();
                 if (!tuNgay || !denNgay) {
@@ -182,6 +197,23 @@
                 var soChungTu = $container.find('[name="soChungTu"]').val() || '';
                 var url = '@Url.Action("ExportExcel", "BaoCaoDoiChieuNhapNhaCungCap")' + '?tuNgay=' + tuNgay + '&denNgay=' + denNgay + '&idNhaCungCap=' + idNhaCungCap + '&soChungTu=' + encodeURIComponent(soChungTu);
                 window.location.href = url;
+            });
+
+            // Xuất Bảng tổng hợp công nợ phải trả theo từng NCC (biểu mẫu THCNPT)
+            $container.find('#btnExportTongHop_@uid').on('click', function (e) {
+                e.preventDefault();
+                var tuNgay = $container.find('[name="tuNgay"]').val();
+                var denNgay = $container.find('[name="denNgay"]').val();
+                if (!tuNgay || !denNgay) {
+                    if (typeof showToast === 'function') showToast('warning', 'Vui lòng chọn từ ngày và đến ngày');
+                    return;
+                }
+                if (tuNgay > denNgay) {
+                    if (typeof showToast === 'function') showToast('warning', 'Từ ngày không được lớn hơn đến ngày');
+                    return;
+                }
+                var idNhaCungCap = $container.find('[name="idNhaCungCap"]').val() || '';
+                window.location.href = '@Url.Action("ExportTongHopExcel", "BaoCaoDoiChieuNhapNhaCungCap")' + '?tuNgay=' + tuNgay + '&denNgay=' + denNgay + '&idNhaCungCap=' + idNhaCungCap;
             });
 
             // Tự động load dữ liệu khi mở màn hình
