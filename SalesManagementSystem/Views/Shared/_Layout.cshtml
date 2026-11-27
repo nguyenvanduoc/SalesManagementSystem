@@ -1513,6 +1513,16 @@
                 });
             }
         }
+
+        @if (ViewBag.PhaiDoiMatKhau == true)
+        {
+            <text>
+        // 3. Người dùng chưa từng đổi mật khẩu => tự mở popup bắt buộc đổi mật khẩu (chỉ 1 lần, đổi xong không hiện nữa)
+        setTimeout(function () {
+            openFormModal('@Url.Action("ChangePassword", "NguoiDung")');
+        }, 300);
+            </text>
+        }
     });
 </script>
 @Scripts.Render("~/bundles/appscripts")

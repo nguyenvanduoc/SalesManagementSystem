@@ -21,7 +21,10 @@ namespace SalesManagementSystem.Models.Entities
         public bool IsActive { get; set; } = true;
         
         public int? IDThamChieu { get; set; }
-        
+
+        // Cờ đánh dấu người dùng đã đổi mật khẩu lần đầu (NULL/false = chưa đổi => hiện popup bắt buộc đổi)
+        public bool? DaDoiMatKhau { get; set; }
+
         public DateTime? NgayTao { get; set; }
         public int? NguoiTao { get; set; }
         public DateTime? NgayCapNhat { get; set; }

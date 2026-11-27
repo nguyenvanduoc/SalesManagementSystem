@@ -234,7 +234,14 @@ namespace SalesManagementSystem.Controllers
         // GET: NguoiDung/ChangePassword
         public ActionResult ChangePassword()
         {
-            return PartialView(new ChangePasswordViewModel());
+            return PartialView(new ChangePasswordViewModel { BatBuoc = IsCurrentUserPasswordChangeRequired() });
+        }
+
+        // Người dùng hiện tại chưa từng đổi mật khẩu => popup ở chế độ bắt buộc
+        private bool IsCurrentUserPasswordChangeRequired()
+        {
+            var session = Session[CommonConstants.USER_SESSION] as UserLoginViewModel;
+            return session != null && _aclLoginRepo.IsPasswordChangeRequired(session.UserID);
         }
 
         // POST: NguoiDung/ChangePassword
@@ -242,6 +249,9 @@ namespace SalesManagementSystem.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult ChangePassword(ChangePasswordViewModel model)
         {
+            // Không tin giá trị BatBuoc gửi lên từ form, luôn tính lại từ CSDL
+            model.BatBuoc = IsCurrentUserPasswordChangeRequired();
+
             if (ModelState.IsValid)
             {
                 var session = (UserLoginViewModel)Session[CommonConstants.USER_SESSION];
@@ -263,11 +273,17 @@ namespace SalesManagementSystem.Controllers
                     return PartialView(model);
                 }
 
-                user.MatKhau = SecurityHelper.GetMd5Hash(model.NewPassword);
-                
-                var oldUser = _aclLoginRepo.GetById(user.ID);
-                _aclLoginRepo.Update(user);
-                AuditLog.AddUpdate("ACL_Login", user.ID.ToString(), oldUser, user);
+                string hashedNewPassword = SecurityHelper.GetMd5Hash(model.NewPassword);
+                if (hashedNewPassword == user.MatKhau)
+                {
+                    ModelState.AddModelError("NewPassword", "Mật khẩu mới không được trùng với mật khẩu cũ.");
+                    return PartialView(model);
+                }
+
+                // Lưu mật khẩu mới + đánh dấu DaDoiMatKhau = 1 => lần sau đăng nhập không hiện popup nữa
+                _aclLoginRepo.ChangePassword(user.ID, hashedNewPassword, session.UserID);
+                var newUser = _aclLoginRepo.GetById(user.ID);
+                AuditLog.AddUpdate("ACL_Login", user.ID.ToString(), user, newUser);
 
                 return Json(new { success = true, message = "Đổi mật khẩu thành công!" });
             }

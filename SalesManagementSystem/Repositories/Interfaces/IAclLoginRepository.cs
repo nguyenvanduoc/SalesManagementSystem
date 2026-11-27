@@ -18,5 +18,16 @@ namespace SalesManagementSystem.Repositories.Interfaces
         AclLogin GetByEmployeeId(int empId);
         IEnumerable<AclLoginViewModel> GetManagers();
         AclLogin Login(string userName, string passWord);
+
+        /// <summary>
+        /// Kiểm tra tài khoản có cần hiển thị popup bắt buộc đổi mật khẩu hay không
+        /// (true = chưa từng đổi mật khẩu).
+        /// </summary>
+        bool IsPasswordChangeRequired(int id);
+
+        /// <summary>
+        /// Cập nhật mật khẩu mới (đã mã hóa) và đánh dấu đã đổi mật khẩu để không thông báo lại.
+        /// </summary>
+        void ChangePassword(int id, string hashedPassword, int updateBy);
     }
 }

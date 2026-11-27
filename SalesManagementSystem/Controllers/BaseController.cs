@@ -123,6 +123,37 @@ namespace SalesManagementSystem.Controllers
             base.OnActionExecuted(filterContext);
         }
 
+        /// <summary>
+        /// Khi trả về trang đầy đủ (có _Layout), kiểm tra người dùng đã đổi mật khẩu lần đầu chưa.
+        /// Nếu chưa => ViewBag.PhaiDoiMatKhau = true để _Layout tự mở popup bắt buộc đổi mật khẩu.
+        /// Không áp dụng cho PartialView / AJAX nên không phát sinh truy vấn khi chuyển tab.
+        /// </summary>
+        protected override void OnResultExecuting(ResultExecutingContext filterContext)
+        {
+            if (filterContext.Result is ViewResult && !filterContext.IsChildAction && !Request.IsAjaxRequest()
+                && Request.Headers["X-SPA-Load"] != "true")
+            {
+                var userSession = Session[CommonConstants.USER_SESSION] as UserLoginViewModel;
+                if (userSession != null && userSession.UserID > 0)
+                {
+                    try
+                    {
+                        var loginRepo = System.Web.Mvc.DependencyResolver.Current.GetService(typeof(SalesManagementSystem.Repositories.Interfaces.IAclLoginRepository)) as SalesManagementSystem.Repositories.Interfaces.IAclLoginRepository;
+                        if (loginRepo != null)
+                        {
+                            ViewBag.PhaiDoiMatKhau = loginRepo.IsPasswordChangeRequired(userSession.UserID);
+                        }
+                    }
+                    catch (System.Exception ex)
+                    {
+                        LogHelper.WriteErrorLog(ex, System.Web.HttpContext.Current);
+                    }
+                }
+            }
+
+            base.OnResultExecuting(filterContext);
+        }
+
         protected void ForceSaveAudit()
         {
             if (AuditLog != null && AuditLog.HasChanges())
