@@ -185,6 +185,11 @@ namespace SalesManagementSystem.Controllers
                 && string.Equals(action, "ChangePassword", StringComparison.OrdinalIgnoreCase))
                 return true;
 
+            // Ping giữ phiên đăng nhập trong lúc người dùng đang ở popup đổi mật khẩu
+            if (string.Equals(controller, "Home", StringComparison.OrdinalIgnoreCase)
+                && string.Equals(action, "KeepAlive", StringComparison.OrdinalIgnoreCase))
+                return true;
+
             bool isShellPage = string.Equals(action, "Index", StringComparison.OrdinalIgnoreCase)
                 && (string.Equals(controller, "Home", StringComparison.OrdinalIgnoreCase)
                     || string.Equals(controller, "Dashboard", StringComparison.OrdinalIgnoreCase));

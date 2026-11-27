@@ -1012,14 +1012,16 @@
                         if (res.success) {
                             renderDashboard(res.data);
                         } else {
-                            alert("Lỗi tải dữ liệu: " + res.message);
+                            showToast('error', 'Lỗi tải dữ liệu: ' + res.message);
                         }
                         $area.css('opacity', '1');
                     }, 100);
                 },
                 error: function(err) {
                     $area.css('opacity', '1');
-                    alert("Lỗi kết nối máy chủ Dashboard.");
+                    // 428 = chưa đổi mật khẩu lần đầu: popup bắt buộc đã hiện, không báo lỗi
+                    if (err.status === 428) return;
+                    showToast('error', 'Lỗi kết nối máy chủ Dashboard.');
                 }
             });
         }
