@@ -143,6 +143,7 @@ var TabManager = (function () {
                 if (status === 'abort') return;
                 hideLoadingLocal($container);
                 delete activeRequests[containerId];
+                if (xhr.status === 428) return; // Chưa đổi mật khẩu: _Layout đã mở popup bắt buộc
                 var msg = 'Lỗi tải dữ liệu (HTTP ' + xhr.status + ')';
                 if (xhr.status === 403) msg = 'Bạn không có quyền xem dữ liệu này.';
                 else if (xhr.status === 401) msg = 'Phiên đăng nhập đã hết hạn.';
@@ -891,6 +892,16 @@ var TabManager = (function () {
                 if (err.status === 401 || err.status === 403) {
                     try { localStorage.removeItem('tabManagerState'); } catch (e) { }
                     window.top.location.href = '/Login/Index';
+                    return;
+                }
+
+                if (err.status === 428) {
+                    // Chưa đổi mật khẩu lần đầu: khóa nội dung tab, _Layout đã mở popup bắt buộc
+                    $pane.html(
+                        '<div class="alert alert-warning m-3 d-flex align-items-center shadow-sm" style="border-radius:8px;">' +
+                        '<i class="bi bi-shield-lock-fill me-2"></i>Bạn cần đổi mật khẩu trước khi sử dụng chức năng này.' +
+                        '</div>'
+                    );
                     return;
                 }
 

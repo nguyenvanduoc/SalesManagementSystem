@@ -1286,9 +1286,10 @@
     });
 
     // Hàm hiển thị Form Modal qua AJAX (Tạo modal riêng cho từng tab)
-    function openFormModal(url) {
-        var ownerTabId = null;
-        if (lastClickedElement) {
+    // forceOwnerTabId (tùy chọn): 'global' = modal không thuộc tab nào, không bị ẩn khi chuyển tab
+    function openFormModal(url, forceOwnerTabId) {
+        var ownerTabId = forceOwnerTabId || null;
+        if (!ownerTabId && lastClickedElement) {
             var $pane = $(lastClickedElement).closest('.tab-pane');
             if ($pane.length > 0) {
                 ownerTabId = $pane.attr('id');
@@ -1340,6 +1341,12 @@
         });
     }
 
+    // Popup BẮT BUỘC đổi mật khẩu: gắn 'global' để TabManager không ẩn khi chuyển / khôi phục tab
+    function openForcedChangePassword() {
+        if ($('#formModal_global').hasClass('show')) return;
+        openFormModal('@Url.Action("ChangePassword", "NguoiDung")', 'global');
+    }
+
     // Bắt sự kiện submit form bên trong form-modal
     $(document).on('submit', '.form-modal-content form', function(e) {
         e.preventDefault();
@@ -1357,7 +1364,10 @@
                 if (res.success === true) {
                     $modal.modal('hide');
                     showToast('success', res.message);
-                    if (typeof TabManager !== 'undefined') {
+                    if (res.reload === true) {
+                        // Ví dụ: vừa đổi mật khẩu bắt buộc => tải lại để mở khóa menu / tab
+                        setTimeout(function () { location.reload(); }, 800);
+                    } else if (typeof TabManager !== 'undefined') {
                         TabManager.reloadActiveTabGrid(false);
                     } else if (typeof loadData === 'function') {
                         loadData('');
@@ -1412,7 +1422,10 @@
 
     // Global Ajax Error Handler
     $(document).ajaxError(function(event, jqxhr, settings, thrownError) {
-        if (jqxhr.status === 403) {
+        if (jqxhr.status === 428) {
+            // Server chặn vì chưa đổi mật khẩu lần đầu => mở (lại) popup bắt buộc đổi mật khẩu
+            openForcedChangePassword();
+        } else if (jqxhr.status === 403) {
             showToast('error', 'Từ chối truy cập: Bạn không có quyền thực hiện chức năng này.');
         } else if (jqxhr.status === 401) {
             showToast('error', 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
@@ -1518,9 +1531,7 @@
         {
             <text>
         // 3. Người dùng chưa từng đổi mật khẩu => tự mở popup bắt buộc đổi mật khẩu (chỉ 1 lần, đổi xong không hiện nữa)
-        setTimeout(function () {
-            openFormModal('@Url.Action("ChangePassword", "NguoiDung")');
-        }, 300);
+        setTimeout(openForcedChangePassword, 300);
             </text>
         }
     });

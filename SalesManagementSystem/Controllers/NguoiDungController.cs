@@ -285,7 +285,8 @@ namespace SalesManagementSystem.Controllers
                 var newUser = _aclLoginRepo.GetById(user.ID);
                 AuditLog.AddUpdate("ACL_Login", user.ID.ToString(), user, newUser);
 
-                return Json(new { success = true, message = "Đổi mật khẩu thành công!" });
+                // reload = true khi là lần đổi bắt buộc: tải lại trang để mở khóa các menu / tab bị chặn trước đó
+                return Json(new { success = true, message = "Đổi mật khẩu thành công!", reload = model.BatBuoc });
             }
 
             return PartialView(model);

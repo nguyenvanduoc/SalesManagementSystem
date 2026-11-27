@@ -219,14 +219,25 @@ namespace SalesManagementSystem.Repositories
                 return conn.QueryFirstOrDefault<AclLogin>(sql, new { userName, passWord });
         }
 
+        // Cache các tài khoản ĐÃ đổi mật khẩu (trạng thái này không bao giờ quay lại "chưa đổi")
+        // => sau lần kiểm tra đầu tiên không cần truy vấn CSDL ở mỗi request nữa.
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<int, bool> _daDoiMatKhauCache
+            = new System.Collections.Concurrent.ConcurrentDictionary<int, bool>();
+
         public bool IsPasswordChangeRequired(int id)
         {
+            if (_daDoiMatKhauCache.ContainsKey(id)) return false;
+
             const string sql = @"
                 SELECT CASE WHEN ISNULL(DaDoiMatKhau, 0) = 1 THEN 0 ELSE 1 END
                 FROM ACL_Login
                 WHERE ID = @ID AND NgayXoa IS NULL";
+            bool required;
             using (var conn = _db.CreateConnection())
-                return conn.ExecuteScalar<int?>(sql, new { ID = id }) == 1;
+                required = conn.ExecuteScalar<int?>(sql, new { ID = id }) == 1;
+
+            if (!required) _daDoiMatKhauCache[id] = true;
+            return required;
         }
 
         public void ChangePassword(int id, string hashedPassword, int updateBy)
@@ -238,6 +249,8 @@ namespace SalesManagementSystem.Repositories
                 WHERE ID = @ID";
             using (var conn = _db.CreateConnection())
                 conn.Execute(sql, new { ID = id, MatKhau = hashedPassword, NgayCapNhat = DateTime.Now, NguoiCapNhat = updateBy });
+
+            _daDoiMatKhauCache[id] = true;
         }
     }
 }

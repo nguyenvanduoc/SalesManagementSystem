@@ -56,6 +56,31 @@ namespace SalesManagementSystem.Controllers
                 }
             }
 
+            // BẢO MẬT: Chưa đổi mật khẩu lần đầu => chặn toàn bộ menu / chức năng,
+            // chỉ cho phép trang khung (Home/Dashboard để hiện popup) và chức năng Đổi mật khẩu.
+            if (userSession != null && userSession.UserID > 0 && !filterContext.IsChildAction
+                && !IsAllowedBeforePasswordChange(filterContext)
+                && IsPasswordChangeRequired(userSession.UserID))
+            {
+                if (IsAjaxOrSpaRequest())
+                {
+                    // 428 Precondition Required: _Layout bắt mã này để mở lại popup đổi mật khẩu
+                    filterContext.HttpContext.Response.StatusCode = 428;
+                    filterContext.HttpContext.Response.TrySkipIisCustomErrors = true;
+                    filterContext.Result = new JsonResult
+                    {
+                        Data = new { success = false, mustChangePassword = true, message = "Bạn cần đổi mật khẩu trước khi sử dụng hệ thống." },
+                        JsonRequestBehavior = JsonRequestBehavior.AllowGet
+                    };
+                }
+                else
+                {
+                    // Mở trực tiếp URL của màn hình bất kỳ => quay về trang chủ (trang chủ sẽ hiện popup)
+                    filterContext.Result = new RedirectResult(Url.Action("Index", "Home"));
+                }
+                return;
+            }
+
             AuditLog = new AuditHelper();
             
             // Auto-default tuNgay and denNgay to current month on initial screen load
@@ -130,28 +155,58 @@ namespace SalesManagementSystem.Controllers
         /// </summary>
         protected override void OnResultExecuting(ResultExecutingContext filterContext)
         {
-            if (filterContext.Result is ViewResult && !filterContext.IsChildAction && !Request.IsAjaxRequest()
-                && Request.Headers["X-SPA-Load"] != "true")
+            if (filterContext.Result is ViewResult && !filterContext.IsChildAction && !IsAjaxOrSpaRequest())
             {
                 var userSession = Session[CommonConstants.USER_SESSION] as UserLoginViewModel;
                 if (userSession != null && userSession.UserID > 0)
                 {
-                    try
-                    {
-                        var loginRepo = System.Web.Mvc.DependencyResolver.Current.GetService(typeof(SalesManagementSystem.Repositories.Interfaces.IAclLoginRepository)) as SalesManagementSystem.Repositories.Interfaces.IAclLoginRepository;
-                        if (loginRepo != null)
-                        {
-                            ViewBag.PhaiDoiMatKhau = loginRepo.IsPasswordChangeRequired(userSession.UserID);
-                        }
-                    }
-                    catch (System.Exception ex)
-                    {
-                        LogHelper.WriteErrorLog(ex, System.Web.HttpContext.Current);
-                    }
+                    ViewBag.PhaiDoiMatKhau = IsPasswordChangeRequired(userSession.UserID);
                 }
             }
 
             base.OnResultExecuting(filterContext);
+        }
+
+        private bool IsAjaxOrSpaRequest()
+            => Request.IsAjaxRequest() || Request.Headers["X-SPA-Load"] == "true";
+
+        /// <summary>
+        /// Các action vẫn được phép gọi khi người dùng chưa đổi mật khẩu lần đầu:
+        /// - NguoiDung/ChangePassword (GET mở popup + POST lưu mật khẩu)
+        /// - Trang khung Home/Index, Dashboard/Index khi tải toàn trang (để _Layout hiện popup)
+        /// (Đăng xuất nằm ở LoginController, không kế thừa BaseController nên luôn dùng được.)
+        /// </summary>
+        private bool IsAllowedBeforePasswordChange(ActionExecutingContext filterContext)
+        {
+            string controller = filterContext.ActionDescriptor.ControllerDescriptor.ControllerName;
+            string action = filterContext.ActionDescriptor.ActionName;
+
+            if (string.Equals(controller, "NguoiDung", StringComparison.OrdinalIgnoreCase)
+                && string.Equals(action, "ChangePassword", StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            bool isShellPage = string.Equals(action, "Index", StringComparison.OrdinalIgnoreCase)
+                && (string.Equals(controller, "Home", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(controller, "Dashboard", StringComparison.OrdinalIgnoreCase));
+
+            return isShellPage && !IsAjaxOrSpaRequest();
+        }
+
+        /// <summary>
+        /// Người dùng chưa từng đổi mật khẩu? Nếu lỗi CSDL thì trả false (không khóa toàn hệ thống) và ghi log.
+        /// </summary>
+        private bool IsPasswordChangeRequired(int userId)
+        {
+            try
+            {
+                var loginRepo = System.Web.Mvc.DependencyResolver.Current.GetService(typeof(SalesManagementSystem.Repositories.Interfaces.IAclLoginRepository)) as SalesManagementSystem.Repositories.Interfaces.IAclLoginRepository;
+                return loginRepo != null && loginRepo.IsPasswordChangeRequired(userId);
+            }
+            catch (System.Exception ex)
+            {
+                LogHelper.WriteErrorLog(ex, System.Web.HttpContext.Current);
+                return false;
+            }
         }
 
         protected void ForceSaveAudit()
