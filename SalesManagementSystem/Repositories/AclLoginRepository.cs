@@ -13,9 +13,36 @@ namespace SalesManagementSystem.Repositories
     {
         private readonly DbConnectionFactory _db;
 
+        // Chỉ kiểm tra / bổ sung cột DaDoiMatKhau 1 lần cho mỗi lần khởi động ứng dụng
+        private static volatile bool _schemaChecked;
+        private static readonly object _schemaLock = new object();
+
         public AclLoginRepository(DbConnectionFactory db)
         {
             _db = db;
+            EnsureSchema();
+        }
+
+        private void EnsureSchema()
+        {
+            if (_schemaChecked) return;
+            lock (_schemaLock)
+            {
+                if (_schemaChecked) return;
+                try
+                {
+                    using (var conn = _db.CreateConnection())
+                    {
+                        // NULL = chưa đổi mật khẩu (tài khoản cũ + tài khoản mới tạo) => sẽ hiện popup bắt buộc đổi
+                        conn.Execute("IF COL_LENGTH('ACL_Login', 'DaDoiMatKhau') IS NULL ALTER TABLE ACL_Login ADD DaDoiMatKhau BIT NULL");
+                    }
+                    _schemaChecked = true;
+                }
+                catch
+                {
+                    // Không chặn ứng dụng nếu không ALTER được, lần khởi tạo sau sẽ thử lại
+                }
+            }
         }
 
         public IEnumerable<AclLoginViewModel> GetPaged(int page, int pageSize, string keyword, out int totalRecords)
@@ -190,6 +217,27 @@ namespace SalesManagementSystem.Repositories
             const string sql = "SELECT * FROM ACL_Login WHERE TenDangNhap = @userName AND MatKhau = @passWord AND IsActive = 1 AND NgayXoa IS NULL";
             using (var conn = _db.CreateConnection())
                 return conn.QueryFirstOrDefault<AclLogin>(sql, new { userName, passWord });
+        }
+
+        public bool IsPasswordChangeRequired(int id)
+        {
+            const string sql = @"
+                SELECT CASE WHEN ISNULL(DaDoiMatKhau, 0) = 1 THEN 0 ELSE 1 END
+                FROM ACL_Login
+                WHERE ID = @ID AND NgayXoa IS NULL";
+            using (var conn = _db.CreateConnection())
+                return conn.ExecuteScalar<int?>(sql, new { ID = id }) == 1;
+        }
+
+        public void ChangePassword(int id, string hashedPassword, int updateBy)
+        {
+            const string sql = @"
+                UPDATE ACL_Login
+                SET MatKhau = @MatKhau, DaDoiMatKhau = 1,
+                    NgayCapNhat = @NgayCapNhat, NguoiCapNhat = @NguoiCapNhat
+                WHERE ID = @ID";
+            using (var conn = _db.CreateConnection())
+                conn.Execute(sql, new { ID = id, MatKhau = hashedPassword, NgayCapNhat = DateTime.Now, NguoiCapNhat = updateBy });
         }
     }
 }

@@ -18,5 +18,11 @@ namespace SalesManagementSystem.Models.ViewModels
         [DataType(DataType.Password)]
         [Compare("NewPassword", ErrorMessage = "Mật khẩu nhập lại không khớp.")]
         public string ConfirmPassword { get; set; }
+
+        /// <summary>
+        /// true = popup bắt buộc đổi mật khẩu (người dùng chưa từng đổi):
+        /// hiện thông báo mật khẩu đã dùng lâu, ẩn nút Đóng. Giá trị do server tính, không lấy từ form.
+        /// </summary>
+        public bool BatBuoc { get; set; }
     }
 }
